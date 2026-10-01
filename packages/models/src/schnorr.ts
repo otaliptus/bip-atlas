@@ -167,8 +167,3 @@ export function parseBip340Csv(text: string): Bip340Vector[] {
 export function publicKeyOf(secretKeyHex: string): string {
   return bytesToHex(schnorr.getPublicKey(hexToBytes(secretKeyHex)));
 }
-
-/** Sign with noble using the vector's own aux_rand (test-vector reproduction only). */
-export function signForVector(secretKeyHex: string, messageHex: string, auxRandHex: string): string {
-  return bytesToHex(schnorr.sign(hexToBytes(messageHex), hexToBytes(secretKeyHex), hexToBytes(auxRandHex)));
-}

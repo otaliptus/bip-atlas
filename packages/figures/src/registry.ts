@@ -176,6 +176,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "schnorr-vector",
   },
+  {
+    id: "taproot-tweak.v1",
+    description: "Internal key, Merkle root and TapTweak giving the output key, for published vectors.",
+    minFixtures: 1,
+    maxFixtures: 2,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-tree",
+  },
+  {
+    id: "taproot-commitment.v1",
+    description: "One published script tree: key-path and script-path spends, and what each reveals.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: true,
+    controls: ["Switch key/script path", "Select a leaf", "Reveal only the proof material"],
+    fixtureKind: "taproot-tree",
+  },
+  {
+    id: "taproot-sigmsg.v1",
+    description: "The BIP 341 signature message of one published key-path spend, item by item.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-keyspend",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

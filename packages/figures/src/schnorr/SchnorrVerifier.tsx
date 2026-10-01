@@ -13,7 +13,7 @@ export const SCHNORR_STAGES: ReadonlyArray<{ id: SchnorrStageId; label: string; 
   { id: "s-range", label: "Read s", question: "s = last 32 bytes. Is s below the group order n?" },
   { id: "challenge", label: "Hash the challenge", question: "e = hash tagged “BIP0340/challenge” of r ‖ P ‖ m, reduced mod n." },
   { id: "compute-r", label: "Compute R", question: "R = s⋅G − e⋅P, using secp256k1 point arithmetic." },
-  { id: "infinity", label: "R is a point", question: "Fail if R is the point at infinity." },
+  { id: "infinity", label: "R is not infinity", question: "Fail if R is the point at infinity." },
   { id: "even-y", label: "R has even y", question: "Fail if the y coordinate of R is odd." },
   { id: "x-match", label: "x(R) equals r", question: "Fail unless the x coordinate of R equals r." },
 ];
@@ -189,7 +189,7 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
         )}
       </p>
       <p class="atlas-lab__source">
-        Source: BIP 340 test-vectors.csv line {fixture.source.line}. Arithmetic: @noble/curves, cross-checked against its own verifier. Hex is shown most significant byte first.
+        Source: BIP 340 test-vectors.csv line {fixture.source.line}. Arithmetic: @noble/curves; every result shown is cross-checked against noble’s own verifier. Hex is shown most significant byte first.
       </p>
     </div>
   );

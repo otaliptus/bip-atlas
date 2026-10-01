@@ -24,6 +24,11 @@ import {
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
+  TaprootTweak,
+  TaprootCommitment,
+  SigMsgLayout,
+  type DerivedTaprootTreeFixture,
+  type DerivedTaprootKeyspendFixture,
   type DerivedSchnorrFixture,
   type AddressFixture,
   type BaseFixture,
@@ -54,6 +59,8 @@ const tx = picked as DerivedTransactionFixture[];
 const trace = picked as DerivedPsbtTraceFixture[];
 const pair = picked as DerivedPsbtCombineFixture[];
 const sig = picked as DerivedSchnorrFixture[];
+const tap = picked as DerivedTaprootTreeFixture[];
+const keyspend = picked as DerivedTaprootKeyspendFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -74,4 +81,7 @@ const sig = picked as DerivedSchnorrFixture[];
   {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
   {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
   {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
+  {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
+  {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
+  {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
 </Plate>

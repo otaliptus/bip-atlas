@@ -120,7 +120,7 @@
     {
       "id": "bip340-v11",
       "kind": "schnorr-vector",
-      "label": "r not on the curve",
+      "label": "r is no point’s x",
       "shortLabel": "vector 11",
       "source": {
         "bip": 340,

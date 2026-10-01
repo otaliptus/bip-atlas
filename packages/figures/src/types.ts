@@ -207,3 +207,74 @@ export interface SchnorrDerived {
 }
 
 export type DerivedSchnorrFixture = SchnorrVectorFixture & { derived: SchnorrDerived };
+
+export type TaprootScriptTree = null | { id: number; script: string; leafVersion: number } | [TaprootScriptTree, TaprootScriptTree];
+
+export interface TaprootTreeFixture extends BaseFixture {
+  kind: "taproot-tree";
+  vectorIndex: number;
+  given: { internalPubkey: string; scriptTree: TaprootScriptTree };
+  intermediary: { leafHashes?: string[]; merkleRoot: string | null; tweak: string; tweakedPubkey: string };
+  expected: { scriptPubKey: string; bip350Address: string; scriptPathControlBlocks?: string[] };
+  /** A published key-path spend of this same output, if the vectors include one. */
+  keySpend?: { pointer: string; txinIndex: number; hashType: number; sigHash: string; witness: string[] };
+}
+
+export interface TaprootNodeView {
+  hash: string;
+  leaf: number | null;
+  children: TaprootNodeView[];
+}
+
+export interface TaprootLeafView {
+  id: number;
+  leafVersion: number;
+  scriptHex: string;
+  /** Short reading of the script, e.g. "<32-byte key> OP_CHECKSIG". */
+  scriptReading: string;
+  leafHash: string;
+  path: string[];
+  controlBlockHex: string;
+  /** The verifier's recomputation from the control block, step by step. */
+  check: Array<{ id: string; ok: boolean; values: Record<string, string> }>;
+}
+
+export interface TaprootTreeDerived {
+  internalKeyHex: string;
+  merkleRootHex: string | null;
+  tweakHex: string;
+  outputKeyHex: string;
+  parity: 0 | 1;
+  scriptPubKeyHex: string;
+  address: string;
+  root: TaprootNodeView | null;
+  leaves: TaprootLeafView[];
+  keySpend: { signatureHex: string; hashType: number; sighashHex: string; verified: boolean } | null;
+}
+
+export type DerivedTaprootTreeFixture = TaprootTreeFixture & { derived: TaprootTreeDerived };
+
+export interface TaprootKeyspendFixture extends BaseFixture {
+  kind: "taproot-keyspend";
+  rawUnsignedTx: string;
+  utxosSpent: Array<{ scriptPubKey: string; amountSats: number }>;
+  inputSpending: {
+    given: { txinIndex: number; merkleRoot: string | null; hashType: number };
+    intermediary: { internalPubkey: string; tweak: string; sigMsg: string; precomputedUsed: string[]; sigHash: string };
+    expected: { witness: string[] };
+  };
+}
+
+export interface TaprootKeyspendDerived {
+  inputs: number;
+  outputs: number;
+  txinIndex: number;
+  hashType: number;
+  items: Array<{ id: string; label: string; hex: string; bytes: number; note: string }>;
+  sigMsgBytes: number;
+  sighashHex: string;
+  totalSpentSats: string;
+  totalOutSats: string;
+}
+
+export type DerivedTaprootKeyspendFixture = TaprootKeyspendFixture & { derived: TaprootKeyspendDerived };

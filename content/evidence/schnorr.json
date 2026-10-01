@@ -39,7 +39,7 @@
     },
     {
       "id": "abstract",
-      "statement": "BIP 340 proposes a standard for 64-byte Schnorr signatures over the curve secp256k1.",
+      "statement": "BIP 340 proposes a standard for 64-byte Schnorr signatures over the curve secp256k1. It reuses the curve and hash function Bitcoin already uses for ECDSA.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -50,6 +50,14 @@
             21
           ],
           "quote": "This document proposes a standard for 64-byte Schnorr signatures over the elliptic curve ''secp256k1''."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "By reusing the same curve and hash function as Bitcoin uses for ECDSA"
         }
       ]
     },
@@ -122,6 +130,14 @@
             46
           ],
           "quote": "the lack of exact specification for the DER parsing of ECDSA signatures has caused problems for Bitcoin"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "This is traditionally not a requirement for digital signature schemes"
         }
       ]
     },
@@ -231,7 +247,7 @@
     },
     {
       "id": "implicit-y",
-      "statement": "BIP 340 implicitly takes the even y coordinate for both P and R, so an x-only key is equivalent to a compressed key with the prefix byte 0x02.",
+      "statement": "Every valid x coordinate has two possible y coordinates, one even and one odd; BIP 340 implicitly takes the even one for both P and R, so an x-only key is equivalent to a compressed key with the prefix byte 0x02.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -242,12 +258,28 @@
             82
           ],
           "quote": "we pick that option for ''P'', and thus our X-only public keys become equivalent to a compressed public key that is the X-only key prefixed by the byte 0x02. For consistency, the same is done for ''R''"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            77,
+            77
+          ],
+          "quote": "(every valid X coordinate has two possible Y coordinates)"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "This means that for a valid X coordinate, one of the corresponding Y coordinates will be even, and the other will be odd."
         }
       ]
     },
     {
       "id": "no-security-loss",
-      "statement": "The authors argue that implicit y coordinates do not reduce security, although they halve the set of valid public keys.",
+      "statement": "The authors argue that implicit y coordinates are not a reduction in security, although they halve the set of valid public keys: breaking an x-only key can be at most a small constant term faster than breaking a full one.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -258,6 +290,14 @@
             84
           ],
           "quote": "Despite halving the size of the set of valid public keys, implicit Y coordinates are not a reduction in security."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            84,
+            84
+          ],
+          "quote": "This shows that breaking an X-only public key can be at most a small constant term faster than breaking a full one."
         }
       ]
     },
@@ -343,10 +383,18 @@
     },
     {
       "id": "r-variant",
-      "statement": "BIP 340 signatures reveal R (as r) rather than e, which the authors chose because it supports batch verification.",
+      "statement": "BIP 340 signatures reveal R (as r) rather than e; the authors chose this because it supports batch verification, as no elliptic-curve operations sit inside the hashes.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            60,
+            60
+          ],
+          "quote": "This supports batch verification, as there are no elliptic curve operations inside the hashes."
+        },
         {
           "bip": 340,
           "lines": [
@@ -375,7 +423,7 @@
     },
     {
       "id": "arbitrary-size",
-      "statement": "BIP 340 accepts messages of arbitrary size; earlier revisions required exactly 32 bytes, and the changelog records the change in 2023-04. Pre-hashing is still recommended for performance with large messages.",
+      "statement": "BIP 340 accepts messages of arbitrary size; earlier revisions required exactly 32 bytes, and the changelog records the change in 2023-04. Pre-hashing is still recommended for performance with large messages. Implementations may reject messages too large for their environment.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -410,12 +458,20 @@
             234
           ],
           "quote": "We note that pre-hashing is recommended for performance reasons in applications that deal with large messages."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            222,
+            222
+          ],
+          "quote": "It is understood that implementations may reject messages which are too large in their environment or application context,"
         }
       ]
     },
     {
       "id": "bip341-prehash",
-      "statement": "BIP 341 is given as an example of pre-hashing the actual input to a 32-byte digest before signing.",
+      "statement": "BIP 340 gives BIP 341 as an example of pre-hashing to a 32-byte digest; BIP 341's key-path rule verifies a signature over hash_TapSighash(0x00 || SigMsg(...)), a 32-byte tagged hash.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -426,6 +482,14 @@
             229
           ],
           "quote": "to create a 32-byte digest which can be passed to signing or verification (as for example done in [[bip-0341.mediawiki|BIP341]].)"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "return ''Verify(q, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 0)), sig)''"
         }
       ]
     },
@@ -455,7 +519,7 @@
     },
     {
       "id": "non-malleable",
-      "statement": "The authors state that Schnorr signatures' security implies non-malleability: a third party cannot turn a valid signature into another valid one for the same key and message, unlike ECDSA.",
+      "statement": "The authors state that the SUF-CMA security of Schnorr signatures implies they are non-malleable, whereas ECDSA signatures are inherently malleable.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -471,7 +535,7 @@
     },
     {
       "id": "multisig-scope",
-      "statement": "Multiparty signing is left to interactive schemes such as MuSig2 (BIP 327); BIP 340 warns that multisignature schemes are generally insecure with its default deterministic nonce generation.",
+      "statement": "Multiparty signing is left to interactive schemes such as MuSig2 (BIP 327); BIP 340 warns that multisignature schemes are generally insecure with the rand generation of its default signing algorithm or any other deterministic method.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -511,7 +575,7 @@
     },
     {
       "id": "not-unique",
-      "statement": "Signing is not unique: other ways of generating the nonce produce different but equally valid signatures, and the nonce value must be fresh and unpredictable.",
+      "statement": "Signing is not unique: other ways of generating the rand value produce different but equally valid signatures; however rand is generated, it must be a fresh uniformly random 32-byte string not even partially predictable to an attacker.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -567,7 +631,7 @@
     },
     {
       "id": "vectors-reproduced",
-      "statement": "All 19 published vectors (9 valid, 10 invalid) give the published result when run through this site's step-by-step verifier, which uses @noble/curves arithmetic and is cross-checked against noble's own verifier; the four vectors with secret keys also reproduce their signatures.",
+      "statement": "All 19 published vectors (9 valid, 10 invalid) give the published result when run through this site's step-by-step verifier, which uses @noble/curves arithmetic and is cross-checked against noble's own verifier; the eight vectors with secret keys also reproduce their signatures.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -584,7 +648,7 @@
     },
     {
       "id": "comment-vs-stage",
-      "statement": "The CSV comment says how an invalid vector was made, not which check rejects it: vector 7 ('negated message') is rejected because the recomputed R has odd y, before any x comparison.",
+      "statement": "The CSV comment says how an invalid vector was made, not necessarily which check rejects it: vector 7 ('negated message') is rejected because the recomputed R has odd y, before any x comparison; vectors 8 and 11 fail at the x(R) comparison.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -604,12 +668,21 @@
             188
           ],
           "quote": "* Fail if ''not has_even_y(R)''."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "FALSE,negated s value",
+          "file": "bip-0340/test-vectors.csv"
         }
       ]
     },
     {
       "id": "message-swap",
-      "statement": "Checking a valid vector's key and signature against another published vector's message fails at the even-y or x(R) step, because the message changes e and therefore R.",
+      "statement": "Checking each valid hero vector's key and signature against another fixture's message fails, in every such pairing, at the even-y or x(R) step, because the message changes e and therefore R.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

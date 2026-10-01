@@ -6,10 +6,10 @@ import {
   nobleVerify,
   parseBip340Csv,
   publicKeyOf,
-  signForVector,
   taggedHash,
   verifyTrace,
 } from "../src/schnorr";
+import { signForVector } from "./sign-for-vectors";
 import { bytesToHex } from "../src/hex";
 import { sha256 } from "@noble/hashes/sha2.js";
 

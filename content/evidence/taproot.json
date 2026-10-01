@@ -1,0 +1,829 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "taproot",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files. Claims citing bip-0341/wallet-test-vectors.json use its line numbers.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 341 is a consensus soft-fork proposal assigned in 2020; its preamble records the status Deployed and that it requires BIP 340.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            3,
+            3
+          ],
+          "quote": "Layer: Consensus (soft fork)"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            12,
+            12
+          ],
+          "quote": "Assigned: 2020-01-19"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "Requires: 340"
+        }
+      ]
+    },
+    {
+      "id": "activation",
+      "statement": "The BIP records that the deployment activated at height 709632 on Bitcoin mainnet, alongside BIP 342.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            347,
+            347
+          ],
+          "quote": "The deployment did activate at height 709632 on Bitcoin mainnet."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            312,
+            312
+          ],
+          "quote": "This BIP is deployed concurrently with [[bip-0342.mediawiki|BIP342]]."
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 341 proposes a SegWit version 1 output type whose spending rules are based on Taproot, Schnorr signatures and Merkle branches.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "This document proposes a new SegWit version 1 output type, with spending rules based on Taproot, Schnorr signatures, and Merkle branches."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "The authors aim to minimize how much information about an output's spending conditions is revealed on chain, when it is created or spent.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            31,
+            31
+          ],
+          "quote": "Specifically, it seeks to minimize how much information about the spendability conditions of a transaction output is revealed on chain at creation or spending time"
+        }
+      ]
+    },
+    {
+      "id": "merkle-branches",
+      "statement": "In the authors' design, Merkle branches let a spend reveal only the executed part of the script rather than every way it could have been executed.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            40,
+            40
+          ],
+          "quote": "let us only reveal the actually executed part of the script to the blockchain, as opposed to all possible ways a script can be executed."
+        }
+      ]
+    },
+    {
+      "id": "key-or-script",
+      "statement": "Taproot makes outputs spendable by a key or, optionally, a script, indistinguishable from each other; as long as the key path is used, it is not revealed whether a script path was permitted.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "making all outputs spendable by either a key or (optionally) a script, and indistinguishable from each other. As long as the key-based spending path is used for spending, it is not revealed whether a script path was permitted as well"
+        }
+      ]
+    },
+    {
+      "id": "aggregation",
+      "statement": "The authors expect most applications to use the key path because Schnorr signatures permit key aggregation: a key built from several participants' keys, which needs all of them to sign, and looks like a single-party key.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "Taproot's advantages become apparent under the assumption that most applications involve outputs that could be spent by all parties agreeing."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "a public key can be constructed from multiple participant public keys, and which requires cooperation between all participants to sign for. Such multi-party public keys and signatures are indistinguishable from their single-party equivalents."
+        }
+      ]
+    },
+    {
+      "id": "informal-design",
+      "statement": "Informally, the output is a point Q = P + hash(P||m)G for a public key P and the root m of a Merkle tree of (version, script) leaves; it is spent with a signature for Q, or by revealing P, the script and leaf version, inputs that satisfy the script, and a Merkle path proving Q committed to that leaf. All hashes are tagged.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "''Q'' is computed as ''P + hash(P||m)G'' for a public key ''P'', and the root ''m'' of a Merkle tree whose leaves consist of a version number and a script. These outputs can be spent directly by providing a signature for ''Q'', or indirectly by revealing ''P'', the script and leaf version, inputs that satisfy the script, and a Merkle path that proves ''Q'' committed to that leaf."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "are tagged to guarantee domain separation."
+        }
+      ]
+    },
+    {
+      "id": "output-type",
+      "statement": "A Taproot output is a native SegWit version 1 output with a 32-byte witness program; other version 1 outputs, including other lengths and P2SH-wrapped ones, remain unencumbered by these rules.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "A Taproot output is a native SegWit output (see [[bip-0141.mediawiki|BIP141]]) with version number 1, and a 32-byte witness program."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "Any other outputs, including version 1 outputs with lengths other than 32 bytes, or P2SH-wrapped version 1 outputs"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "remain unencumbered."
+        }
+      ]
+    },
+    {
+      "id": "names",
+      "statement": "The witness program q is called the taproot output key and p the taproot internal key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            83,
+            83
+          ],
+          "quote": "''q'' is referred to as ''taproot output key'' and ''p'' as ''taproot internal key''."
+        }
+      ]
+    },
+    {
+      "id": "path-choice",
+      "statement": "A spend with no witness elements fails; after removing an annex, one remaining element means key path spending, two or more mean script path spending.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "* Fail if the witness stack has 0 elements."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "If there is exactly one element left in the witness stack, key path spending is used:"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "If there are at least two witness elements left, script path spending is used:"
+        }
+      ]
+    },
+    {
+      "id": "annex",
+      "statement": "If there are at least two witness elements and the last begins with 0x50, it is the annex, which the authors reserved for future extensions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "If there are at least two witness elements, and the first byte of the last element is 0x50"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "this last element is called ''annex'' ''a''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "The annex is a reserved space for future extensions"
+        }
+      ]
+    },
+    {
+      "id": "key-path-rule",
+      "statement": "In a key path spend the single witness element is a signature that must be valid for the output key q.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "The single witness stack element is interpreted as the signature and must be valid (see the next section) for the public key ''q''"
+        }
+      ]
+    },
+    {
+      "id": "script-and-control",
+      "statement": "In a script path spend the second-to-last element is the script s and the last is the control block c, which must be 33 + 32m bytes long for an integer m from 0 to 128.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            67,
+            68
+          ],
+          "quote": "** Call the second-to-last stack element ''s'', the script. ** The last stack element is called the control block ''c'', and must have length ''33 + 32m'', for a value of ''m'' that is an integer between 0 and 128"
+        }
+      ]
+    },
+    {
+      "id": "control-contents",
+      "statement": "The control block holds the internal key p in bytes 1–32 and the leaf version in the first byte (c[0] & 0xfe); the leaf hash is hash_TapLeaf(v || compact_size(size of s) || s).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            69,
+            69
+          ],
+          "quote": "Let ''p = c[1:33]'' and let ''P = lift_x(int(p))''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            70,
+            70
+          ],
+          "quote": "Let ''v = c[0] & 0xfe'' and call it the ''leaf version''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            71,
+            71
+          ],
+          "quote": "Let ''k<sub>0</sub> = hash<sub>TapLeaf</sub>(v || compact_size(size of s) || s)''; also call it the ''tapleaf hash''."
+        }
+      ]
+    },
+    {
+      "id": "branch-order",
+      "statement": "Each path step hashes the running hash k with the next control-block hash e using hash_TapBranch, putting the lexicographically smaller first; the authors sort so that spends need not reveal left/right directions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            75,
+            76
+          ],
+          "quote": "If ''k<sub>j</sub> < e<sub>j</sub>'': ''k<sub>j+1</sub> = hash<sub>TapBranch</sub>(k<sub>j</sub> || e<sub>j</sub>)''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            76,
+            76
+          ],
+          "quote": "If ''k<sub>j</sub> &ge; e<sub>j</sub>'': ''k<sub>j+1</sub> = hash<sub>TapBranch</sub>(e<sub>j</sub> || k<sub>j</sub>)''."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            74,
+            74
+          ],
+          "quote": "By doing so, it is not necessary to reveal the left/right directions along with the hashes in revealed Merkle branches."
+        }
+      ]
+    },
+    {
+      "id": "tweak-check",
+      "statement": "The verifier computes t = hash_TapTweak(p || k_m), fails if t is not below the curve order, computes Q = P + int(t)G, and fails unless q equals x(Q) and the control block's low bit equals the parity of Q's y coordinate.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            77,
+            77
+          ],
+          "quote": "Let ''t = hash<sub>TapTweak</sub>(p || k<sub>m</sub>)''."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            79,
+            80
+          ],
+          "quote": "Let ''Q = P + int(t)G''. ** If ''q &ne; x(Q)'' or ''c[0] & 1 &ne; y(Q) mod 2'', fail"
+        }
+      ]
+    },
+    {
+      "id": "parity-why",
+      "statement": "The authors include the parity bit because lifting q to a unique point is needed for batch verification.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "The parity of the Y coordinate is necessary to lift the X coordinate ''q'' to a unique point. While this is not strictly necessary for verifying the taproot commitment as described above, it is necessary to allow batch verification."
+        }
+      ]
+    },
+    {
+      "id": "execute",
+      "statement": "After the commitment check the script is executed under the rules for its leaf version, which BIP 342 specifies for leaf version 0xc0; script inputs are the remaining witness elements.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "Execute the script, according to the applicable script rules"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "[[bip-0342.mediawiki|BIP342]] specifies validity rules that apply for leaf version 0xc0"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "using the witness stack elements excluding the script ''s'', the control block ''c'', and the annex ''a'' if present, as initial stack."
+        }
+      ]
+    },
+    {
+      "id": "signature-form",
+      "statement": "A Taproot signature is a 64-byte BIP 340 signature, optionally followed by a sighash byte; without it, SIGHASH_DEFAULT (0x00), which signs the whole transaction like SIGHASH_ALL, is implied.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            139,
+            139
+          ],
+          "quote": "A Taproot signature is a 64-byte Schnorr signature, as defined in [[bip-0340.mediawiki|BIP340]], with the sighash byte appended in the usual Bitcoin fashion. This sighash byte is optional. If omitted, the resulting signatures are 64 bytes, and a SIGHASH_DEFAULT mode is implied."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            93,
+            93
+          ],
+          "quote": "We define a new ''hashtype'' <code>SIGHASH_DEFAULT</code> (value ''0x00'') which results in signing over the whole transaction just as for <code>SIGHASH_ALL</code>."
+        }
+      ]
+    },
+    {
+      "id": "key-path-verify",
+      "statement": "A 64-byte key-path signature is checked with BIP 340 Verify against q and the message hash_TapSighash(0x00 || SigMsg(0x00, 0)).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "If the ''sig'' is 64 bytes long, return ''Verify(q, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 0)), sig)''"
+        }
+      ]
+    },
+    {
+      "id": "sigmsg-commits",
+      "statement": "Unless ANYONECANPAY is set, the signature message commits to the amounts and scriptPubKeys of all outputs the transaction spends; the authors say this stops lying to offline signers about the fee and about the outputs being spent.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "If the <code>SIGHASH_ANYONECANPAY</code> flag is not set, the message commits to the amounts of ''all'' transaction inputs."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "This eliminates the possibility to lie to offline signing devices about the fee of a transaction."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "if the <code>SIGHASH_ANYONECANPAY</code> flag is not set, the message commits to the ''scriptPubKey''s of ''all'' outputs spent by the transaction."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "This prevents lying to offline signing devices about output being spent"
+        }
+      ]
+    },
+    {
+      "id": "sigmsg-length",
+      "statement": "SigMsg is at most 206 bytes, not counting sub-hashes that can be cached across signatures.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            128,
+            128
+          ],
+          "quote": "The total length of ''SigMsg()'' is at most ''206'' bytes"
+        }
+      ]
+    },
+    {
+      "id": "wallet-section",
+      "statement": "The construction and spending guidance is for wallets and is not consensus critical; every Taproot output combines one key condition (the internal key) with zero or more scripts in a tree, and satisfying any one suffices.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            148,
+            149
+          ],
+          "quote": "This section discusses how to construct and spend Taproot outputs. It only affects wallet software that chooses to implement receiving and spending, and is not consensus critical in any way."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            151,
+            152
+          ],
+          "quote": "Conceptually, every Taproot output corresponds to a combination of a single public key condition (the internal key), and zero or more general conditions encoded in scripts organized in a tree. Satisfying any of these conditions is sufficient to spend the output."
+        }
+      ]
+    },
+    {
+      "id": "internal-key-choice",
+      "statement": "For several required signers the BIP points to aggregation techniques such as MuSig, whose details it leaves out of scope; it recommends making the most likely single-key condition the internal key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            156,
+            156
+          ],
+          "quote": "When a single condition requires signatures with multiple keys, key aggregation techniques like MuSig can be used to combine them into a single key. The details are out of scope for this document"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            157,
+            157
+          ],
+          "quote": "If one or more of the spending conditions consist of just a single key (after aggregation), the most likely one should be made the internal key."
+        }
+      ]
+    },
+    {
+      "id": "no-script-commit",
+      "statement": "If no script path is needed, the BIP says the output key should still commit to an unspendable script path, Q = P + int(hash_TapTweak(bytes(P)))G, instead of having none; the authors explain that otherwise a party in an aggregate key could hide a script path.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            158,
+            158
+          ],
+          "quote": "If the spending conditions do not require a script path, the output key should commit to an unspendable script path instead of having no script path. This can be achieved by computing the output key point as ''Q = P + int(hash<sub>TapTweak</sub>(bytes(P)))G''."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            159,
+            159
+          ],
+          "quote": "If the taproot output key is an aggregate of keys, there is the possibility for a malicious party to add a script path without being noticed by the other parties."
+        }
+      ]
+    },
+    {
+      "id": "tree-shape",
+      "statement": "Scripts go in the leaves of a binary tree, which can be balanced if conditions are equally likely or built as a Huffman tree if their probabilities are known.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            170,
+            170
+          ],
+          "quote": "The remaining scripts should be organized into the leaves of a binary tree. This can be a balanced tree if each of the conditions these scripts correspond to are equally likely. If probabilities for each condition are known, consider constructing the tree as a Huffman tree."
+        }
+      ]
+    },
+    {
+      "id": "key-spend-signing",
+      "statement": "A key path spend is a BIP 340 signature made with the internal secret key tweaked by the same hash as the output key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            250,
+            250
+          ],
+          "quote": "a [[bip-0340.mediawiki|BIP340]] signature on the signature hash as defined above, with the secret key tweaked by the same <code>h</code> as in the above snippet."
+        }
+      ]
+    },
+    {
+      "id": "privacy",
+      "statement": "Only the satisfied condition is published. Key path spends prevent observers from learning the spending conditions; a script path spend leaks that a script path exists and that the key path was not used, and the leaf's depth leaks information about the tree and suggests which wallet software created the output.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            280,
+            280
+          ],
+          "quote": "only the satisfied spending condition has to be published."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            281,
+            281
+          ],
+          "quote": "Ideally, outputs are spent using the key path which prevents observers from learning the spending conditions of a coin."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            284,
+            285
+          ],
+          "quote": "A script path spend leaks that there is a script path and that the key path was not applicable - for example because the involved parties failed to reach agreement. Moreover, the depth of a script in the Merkle root leaks information including the minimum depth of the tree, which suggests specific wallet software that created the output and helps clustering."
+        }
+      ]
+    },
+    {
+      "id": "no-reuse",
+      "statement": "The BIP says taproot outputs should never reuse keys, for privacy, including in every leaf.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            288,
+            289
+          ],
+          "quote": "Just like other existing output types, taproot outputs should never reuse keys, for privacy reasons. This does not only apply to the particular leaf that was used to spend an output but to all leaves committed to in the output."
+        }
+      ]
+    },
+    {
+      "id": "byte-order",
+      "statement": "In the wallet vectors, hex values are byte arrays written first byte first, unlike the reversed convention for txids.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            302,
+            302
+          ],
+          "quote": "In all cases, hexadecimal values represent byte arrays, not numbers. In particular, that means that provided hash values have the hex digits corresponding to the first bytes first."
+        }
+      ]
+    },
+    {
+      "id": "old-nodes",
+      "statement": "Non-upgraded nodes treat every SegWit version 1 program as anyone-can-spend.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            354,
+            354
+          ],
+          "quote": "Non-upgraded nodes, however, will consider all SegWit version 1 witness programs as anyone-can-spend scripts."
+        }
+      ]
+    },
+    {
+      "id": "vectors-reproduced",
+      "statement": "This site's model reproduces every published value in BIP 341's wallet vectors: for all 7 scriptPubKey vectors the leaf hashes, Merkle root, tweak, output key, scriptPubKey and control blocks, and for all 7 key-path inputs the SigMsg, sighash and witness signature; every control block passes the BIP's commitment check.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            298,
+            298
+          ],
+          "quote": "Test vectors for wallet operation (scriptPubKey computation, key path spending, control block construction) can be found [[bip-0341/wallet-test-vectors.json|here]]."
+        }
+      ]
+    },
+    {
+      "id": "vector5",
+      "statement": "In scriptPubKey vector 5, leaf A sits one level below the root and leaves B and C two levels down, so their control blocks are 65, 97 and 97 bytes; input 4 of the key-path vector spends this same output with a 64-byte SIGHASH_DEFAULT signature that verifies against its output key.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            139,
+            139
+          ],
+          "quote": "\"internalPubkey\": \"e0dfe2300b0dd746a3f8674dfd4525623639042569d829c7f0eed9602d263e6f\"",
+          "file": "bip-0341/wallet-test-vectors.json"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            351,
+            354
+          ],
+          "quote": "\"txinIndex\": 4",
+          "file": "bip-0341/wallet-test-vectors.json"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            354,
+            354
+          ],
+          "quote": "\"hashType\": 0",
+          "file": "bip-0341/wallet-test-vectors.json"
+        }
+      ]
+    },
+    {
+      "id": "vector0",
+      "statement": "Vector 0 has no script tree; its tweak hashes the internal key alone, as the BIP's no-script recommendation describes, and its output key still differs from the internal key.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            7,
+            7
+          ],
+          "quote": "\"scriptTree\": null",
+          "file": "bip-0341/wallet-test-vectors.json"
+        }
+      ]
+    },
+    {
+      "id": "comparison-fails",
+      "statement": "With vector 5's published control block for one leaf, the commitment check fails for any other leaf's script, for a flipped parity bit, and against another vector's output key.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "If ''q &ne; x(Q)'' or ''c[0] & 1 &ne; y(Q) mod 2'', fail"
+        }
+      ]
+    }
+  ]
+}
