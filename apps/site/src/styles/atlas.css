@@ -1351,3 +1351,4 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
   .atlas-bf-gr { grid-template-columns: minmax(0, 1fr); }
   .atlas-bf-chain__row dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
 }
+.atlas-bf-lab .atlas-panel > p, .atlas-bf-gr__example p { font-size: 0.875rem; }

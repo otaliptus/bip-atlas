@@ -1226,15 +1226,19 @@ function deriveBfBlock(f: BfBlockFixture): DerivedBfBlockFixture {
   if (lead !== bits) throw new Error(`${f.id}: drawn Golomb-Rice codes differ from the filter's bits`);
   const bitsTotal = b.deltas.reduce((n, d) => n + Number(d >> BigInt(BASIC_P)) + 1 + BASIC_P, 0);
   const own = b.elements.slice(0, 3).map((s) => ({ script: s, from: "this block" }));
+  // One script from each of the three largest other vector blocks.
   const others = bfRows()
     .filter((x) => x[0] !== f.height)
-    .flatMap((x) => buildBasicFilter(x[1], x[2], x[3], x[4]).elements.map((s: string) => ({ script: s, from: `block ${x[0]}` })))
-    .filter((p) => !b.elements.includes(p.script))
-    .filter((p, i, a) => a.findIndex((q) => q.script === p.script) === i)
+    .map((x) => ({ height: x[0] as number, elements: buildBasicFilter(x[1], x[2], x[3], x[4]).elements }))
+    .sort((a, b) => b.elements.length - a.elements.length)
+    .map((x) => ({ script: x.elements.find((e: string) => !b.elements.includes(e)), from: `block ${x.height}` }))
+    .filter((p): p is { script: string; from: string } => !!p.script)
     .slice(0, 3);
   const probes = [...own, ...others].map((p) => {
     const m = matchFilter(b.filter, hx(p.script), b.key);
     if (p.from === "this block" && !m.matched) throw new Error(`${f.id}: an element does not match its own filter`);
+    // The chapter says none of the foreign test scripts match; fail if a false positive ever appears.
+    if (p.from !== "this block" && m.matched) throw new Error(`${f.id}: a script from ${p.from} matches (false positive); update the prose`);
     return { ...p, matched: m.matched, target: m.target.toString(), steps: m.steps.map((s) => ({ value: s.value.toString(), outcome: s.outcome })) };
   });
   return {

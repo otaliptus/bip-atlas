@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { bytesToHex, hexToBytes } from "../src/hex";
 import {
   BASIC_M, BASIC_P, BitReader, BitWriter, blockHash, buildBasicFilter, decodeFilter, filterHeader, filterKey,
-  golombBits, golombDecode, golombEncode, matchFilter, siphash24,
+  expectedFalsePositives, golombBits, golombDecode, golombEncode, matchFilter, siphash24,
 } from "../src/blockfilter";
 
 const root = new URL("../../../", import.meta.url);
@@ -89,5 +89,56 @@ describe("hashing and parameters", () => {
     const m = matchFilter(f.filter, hexToBytes(probe), f.key);
     expect(m.matched).toBe(false);
     expect(m.steps.length).toBeLessThanOrEqual(f.N);
+  });
+});
+
+describe("block-filters chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/block-filters.json", root), "utf8");
+  const b157 = readFileSync(new URL(raw + "bip-0157.mediawiki", root), "utf8").split("\n");
+  const build = (h: number) => { const r = rows.find((x) => x[0] === h)!; return buildBasicFilter(r[1], r[2], r[3], r[4]); };
+
+  it("dates and protocol constants", () => {
+    expect(b157[9]).toContain("Assigned: 2017-05-24");
+    expect(b158[8]).toContain("Assigned: 2017-05-24");
+    expect(text).toContain("both assigned in 2017 and recorded as Deployed");
+    expect(b157[43]).toContain("80-bytes");
+    expect(text).toContain("the block headers, 80 bytes each");
+    expect(text).toContain("P MUST be 19 and M MUST be 784931");
+    expect(b158[292]).toContain("M=1.497137 * 2^P");
+    expect(text).toContain("M ≈ 1.497137·2^P");
+    expect(b157[169]).toContain("strictly less than 1000");
+    expect(b157[233]).toContain("strictly less than 2,000");
+    expect(text).toContain("fewer than 1,000 blocks of filters, or 2,000 filter headers");
+    expect(b157[377]).toContain("intervals of 1,000");
+    expect(text).toContain("checkpoints every 1,000 blocks");
+    expect(text).toContain("the first 16 bytes of the block’s hash");
+  });
+
+  it("false-positive arithmetic", () => {
+    const p = 1 / Number(BASIC_M);
+    expect(Math.round(p * 1e7) / 10).toBe(1.3);
+    expect(text).toContain("probability 1/784931, about 1.3 in a million");
+    expect(Math.round(expectedFalsePositives(100 * 10_000) * 10) / 10).toBe(1.3);
+    expect(text).toContain("100 scripts checked against 10,000 blocks give an expected 1.3 false matches");
+  });
+
+  it("sizes from the vectors", () => {
+    expect(BASIC_P + 1).toBe(20);
+    expect(text).toContain("20 per item for the basic filter");
+    const a = build(180480), b = build(926485);
+    expect([a.N, a.filter.length, b.N, b.filter.length]).toEqual([13, 35, 9, 25]);
+    expect(text).toContain("block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25");
+    expect(Math.round(((a.filter.length - 1) * 8) / a.N)).toBe(21);
+    expect(Math.round(((b.filter.length - 1) * 8) / b.N)).toBe(21);
+    expect(text).toContain("about 21 bits per item, against 64");
+    expect(rows.find((r) => r[7] === "Empty data")![5]).toBe("00");
+    expect(text).toContain("whose filter is the single byte 00");
+  });
+
+  it("figure facts", () => {
+    const fx = JSON.parse(readFileSync(new URL("fixtures/block-filters.json", root), "utf8")).fixtures;
+    expect(fx.filter((f: { kind: string }) => f.kind === "bf-block").length).toBe(6);
+    expect(text).toContain("Six of BIP 158’s testnet blocks");
+    expect(build(0).header).toBe(rows[0][6]);
   });
 });
