@@ -763,6 +763,8 @@ export interface V2Derived {
     ciphertextTail: string;
     tag: string;
     totalLen: number;
+    /** How many bytes of the packet the vector publishes (all, or only the tail). */
+    checkedBytes: number;
   };
 }
 export type DerivedV2Fixture = V2VectorFixture & { derived: V2Derived };
@@ -789,3 +791,36 @@ export interface V2RekeyDerived {
   rows: Array<{ packet: number; nonce: string; epoch: number; key: string }>;
 }
 export type DerivedV2RekeyFixture = V2RekeyFixture & { derived: V2RekeyDerived };
+
+/* ---------- BIP 322 ---------- */
+export interface Bip322VectorFixture extends BaseFixture {
+  kind: "bip322-vector";
+  set: "basic" | "gen";
+  group: "simple" | "full" | "error";
+  index: number;
+  expect: "valid" | "invalid" | "inconclusive";
+}
+export interface Bip322Derived {
+  message: string;
+  messageHash: string;
+  address: string;
+  spk: string;
+  scriptKind: string;
+  variant: string;
+  prefixed: boolean;
+  signatureHead: string;
+  signatureChars: number;
+  toSpend: { txid: string; scriptSig: string; challenge: string };
+  toSign: { txid: string; version: number; lockTime: number; sequence: number; scriptSig: string; witness: string[] };
+  verdict: { state: "valid" | "invalid" | "inconclusive"; time?: number; age?: number; reason?: string };
+  checked: string;
+}
+export type DerivedBip322Fixture = Bip322VectorFixture & { derived: Bip322Derived };
+
+export interface Bip322FormatsFixture extends BaseFixture { kind: "bip322-formats" }
+export interface Bip322FormatsDerived { rows: Array<{ name: string; scripts: string; prefix: string; format: string }> }
+export type DerivedBip322FormatsFixture = Bip322FormatsFixture & { derived: Bip322FormatsDerived };
+
+export interface Bip322VerdictsFixture extends BaseFixture { kind: "bip322-verdicts"; cases: string[] }
+export interface Bip322VerdictsDerived { rows: Array<{ label: string; message: string; address: string; state: string; detail: string }> }
+export type DerivedBip322VerdictsFixture = Bip322VerdictsFixture & { derived: Bip322VerdictsDerived };

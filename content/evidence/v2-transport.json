@@ -122,6 +122,14 @@
             34
           ],
           "quote": "even very basic checks, e.g., operators manually comparing protocol versions and session IDs (as supported by the proposed protocol), will expose the attacker."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            34,
+            34
+          ],
+          "quote": "Active attacks at scale are more resource intensive in general, but in the case of manual, deliberate connections (as opposed to automatic, random ones), they are also in principle detectable"
         }
       ]
     },
@@ -152,7 +160,7 @@
     {
       "id": "session-id",
       "statement": "A session ID derived from the Diffie-Hellman negotiation identifies the channel; operators can compare it out of band, so an active MitM risks detection.",
-      "scope": "normative-rule",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -210,6 +218,14 @@
             87
           ],
           "quote": "* Compatibility: v2 clients will allow inbound v1 connections to minimize risk of network partitions."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            84,
+            84
+          ],
+          "quote": "* Shapable bytestream: It should be possible to shape the bytestream to increase resistance to traffic analysis (for example, to conceal block propagation)"
         }
       ]
     },
@@ -378,6 +394,14 @@
             126
           ],
           "quote": "Encrypted packets have an '''ignore bit''', which makes them '''decoy packets''' if set. Decoy packets are to be ignored by the receiver apart from verifying they decrypt correctly. Either peer may send such decoy packets at any point from here on. These form the primary shapability mechanism in the protocol."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            126,
+            126
+          ],
+          "quote": "How and when to use them is out of scope for this document."
         }
       ]
     },
@@ -394,6 +418,22 @@
             130
           ],
           "quote": "Sends a '''version packet''' with empty content, to indicate support for the v2 P2P protocol proposed by this document. Any other value for content is reserved for future versions."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "Sends a '''version packet''' with empty content as well, to indicate support for the v2 P2P protocol."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            149,
+            149
+          ],
+          "quote": "Note that the version negotiation phase does not need to wait for the key exchange phase to complete; version packets can be sent immediately after sending the garbage terminator."
         }
       ]
     },
@@ -463,7 +503,7 @@
     },
     {
       "id": "rekey",
-      "statement": "Both ciphers rekey every 224 messages; the AEAD's nonce is the packet number within the epoch and the epoch number, and its new key is an encryption of 32 zero bytes under the old one.",
+      "statement": "Both ciphers rekey every 224 messages. The AEAD's nonce is the packet number within the epoch and the epoch number; its new key is the first 32 bytes of encrypting 32 zero bytes under the old key with the nonce's packet field set to 0xffffffff. The length cipher takes the next 32 bytes of its own keystream as its new key.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -490,6 +530,14 @@
             437
           ],
           "quote": "if (self.packet_counter + 1) % REKEY_INTERVAL == 0: rekey_nonce = b\"\\xFF\\xFF\\xFF\\xFF\" + nonce[4:] self.key = aead_chacha20_poly1305_encrypt(self.key, rekey_nonce, b\"\", b\"\\x00\" * 32)[:32]"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            448,
+            448
+          ],
+          "quote": "rekeying every 224 chunks using the next 32 bytes of the block function output as new key"
         }
       ]
     },
@@ -506,6 +554,14 @@
             174
           ],
           "quote": "Re-keying ensures [https://eprint.iacr.org/2001/035.pdf forward secrecy within a session], i.e., an attacker compromising the current session secrets cannot derive past encryption keys in the same session."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            174,
+            174
+          ],
+          "quote": "We do not believe protecting against that is a priority"
         }
       ]
     },
@@ -594,12 +650,20 @@
             581
           ],
           "quote": "Peers supporting the v2 transport protocol signal support by advertising the <code>NODE_P2P_V2 = (1 << 11)</code> service flag in addr relay. If met with immediate disconnection when establishing a v2 connection, clients implementing this proposal are encouraged to retry connecting using the v1 protocol."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            581,
+            581
+          ],
+          "quote": "An untrusted intermediary could falsely advertise a potential peer as supportive of v2 connections."
         }
       ]
     },
     {
       "id": "vectors",
-      "statement": "This site's model reproduces all seven BIP 324 packet-encoding vectors: x(ours), X-only ECDH, shared secret, all HKDF outputs, session ID and the packet bytes, including packets after two, three and four rekeys and one of the largest size allowed (2^24 - 1 bytes of contents). ElligatorSwift decoding is not implemented: the model takes the decoded X coordinates from the vectors.",
+      "statement": "This site's model reproduces all seven BIP 324 packet-encoding vectors: x(ours), X-only ECDH, shared secret, all HKDF outputs, session ID, the full packet for the three vectors that publish one and the published last 128 bytes for the other four, including packets after two, three and four rekeys and one of the largest size allowed (2^24 - 1 bytes of contents). ElligatorSwift decoding is not implemented: the model takes the decoded X coordinates from the vectors.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -666,6 +730,30 @@
             73
           ],
           "quote": "* Neither offers a pseudorandom bytestream. * Neither offers native support for elliptic curve cryptography on the curve secp256k1 as otherwise used in Bitcoin."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "* Neither offers shapability of the bytestream."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            73,
+            73
+          ],
+          "quote": "* Both provide a stream-based interface to the application layer, whereas Bitcoin requires a packet-based interface"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            75,
+            75
+          ],
+          "quote": "this would negate the benefits of using them as off-the-shelf solution"
         }
       ]
     },

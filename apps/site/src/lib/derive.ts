@@ -46,12 +46,15 @@ import {
   createOutputs,
   scan as spScan,
   buildBasicFilter,
+  verify as bip322Verify,
+  decodeSignature as bip322Decode,
+  messageHash as bip322MessageHash,
+  addressScript as bip322AddressScript,
   v2Ecdh,
   xOf as v2XOf,
   deriveKeys as v2DeriveKeys,
   senderFor as v2SenderFor,
   encPacket as v2EncPacket,
-  V1_HEADER,
   REKEY_INTERVAL,
   blockHash as bfBlockHash,
   blockOutputScripts,
@@ -179,6 +182,12 @@ import type {
   DerivedV2FramingFixture,
   V2RekeyFixture,
   DerivedV2RekeyFixture,
+  Bip322VectorFixture,
+  DerivedBip322Fixture,
+  Bip322FormatsFixture,
+  DerivedBip322FormatsFixture,
+  Bip322VerdictsFixture,
+  DerivedBip322VerdictsFixture,
 } from "@bip-atlas/figures";
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
@@ -1298,7 +1307,7 @@ function deriveBfGolomb(f: BfGolombFixture): DerivedBfGolombFixture {
 let v2RowsCache: Record<string, string>[] | null = null;
 const v2Rows = () => {
   if (v2RowsCache) return v2RowsCache;
-  const [head, ...lines] = pinnedText("bip-0324/packet_encoding_test_vectors.csv", SNAPSHOT_PHASE3).trim().split("\n");
+  const [head, ...lines] = pinnedText("bip-0324/packet_encoding_test_vectors.csv", SNAPSHOT_PHASE3).trim().split(/\r?\n/);
   const keys = head.split(",");
   return (v2RowsCache = lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [keys[i], v]))));
 };
@@ -1344,6 +1353,7 @@ function deriveV2(f: V2VectorFixture): DerivedV2Fixture {
         index: p.index, nonce: p.nonce, rekeysSoFar: p.rekeysSoFar, lengthPlain: p.lengthPlain, lengthEnc: p.lengthEnc, ignore: p.header === 0x80,
         contentsLen: contents.length, contentsHead: HX(contents.slice(0, 24)), aadLen: v.in_aad.length / 2,
         ciphertextHead: HX(p.aeadCiphertext.slice(0, 24)), ciphertextTail: HX(p.aeadCiphertext.slice(-24, -16)), tag: p.tag, totalLen: p.packet.length,
+        checkedBytes: v.out_ciphertext ? p.packet.length : (v.out_ciphertext_endswith ?? "").length / 2,
       },
     },
   };
@@ -1384,13 +1394,76 @@ function deriveV2Rekey(f: V2RekeyFixture): DerivedV2RekeyFixture {
     if (f.show.includes(i)) rows.push({ packet: i, nonce: HX(s.P.nonce()), epoch: Math.floor(i / REKEY_INTERVAL), key: HX(s.P.key) });
     v2EncPacket(s, new Uint8Array(0));
   }
-  if (V1_HEADER !== 24) throw new Error("v1 header size");
   return { ...f, derived: { initiating, rows } };
+}
+
+/* ---------- BIP 322 ---------- */
+const b322Sets: Record<string, any> = {};
+const b322Set = (set: "basic" | "gen") => (b322Sets[set] ??= JSON.parse(pinnedText(`bip-0322/${set === "basic" ? "basic" : "generated"}-test-vectors.json`, SNAPSHOT_PHASE3)));
+const b322Cache = new Map<string, DerivedBip322Fixture>();
+
+function deriveBip322(f: Bip322VectorFixture): DerivedBip322Fixture {
+  if (b322Cache.has(f.id)) return b322Cache.get(f.id)!;
+  checkMusigSource(f);
+  const v = b322Set(f.set)[f.group][f.index];
+  if (!v) throw new Error(`${f.id}: no such vector`);
+  const sig: string = f.group === "error" ? v.signature : v.bip322_signatures[0];
+  if (f.group === "error" ? v.description !== f.source.quote : !sig.startsWith(f.source.quote!)) throw new Error(`${f.id}: vector is not the cited one`);
+  const r = bip322Verify(v.address, v.message, sig);
+  if (r.state !== f.expect) throw new Error(`${f.id}: model says ${r.state}, fixture expects ${f.expect}`);
+  if (f.group === "full" && r.state === "valid" && (r.time !== Number(v.lock_time) || r.age !== Number(v.sequence))) throw new Error(`${f.id}: T and S differ from the vector`);
+  const dec = bip322Decode(sig);
+  const tx = parseTransaction(r.toSign.hex);
+  const le = (h: string) => parseInt(h.match(/../g)!.reverse().join(""), 16);
+  const hash = bip322MessageHash(v.message);
+  const { spk, kind } = bip322AddressScript(v.address);
+  const out: DerivedBip322Fixture = {
+    ...f,
+    derived: {
+      message: v.message, messageHash: hash, address: v.address, spk, scriptKind: kind, variant: dec.variant, prefixed: dec.prefixed,
+      signatureHead: sig.slice(0, 24), signatureChars: sig.length,
+      toSpend: { txid: r.toSpend.txid, scriptSig: "0020" + hash, challenge: spk },
+      toSign: { txid: r.toSign.txid, version: le(tx.versionHex), lockTime: le(tx.locktimeHex), sequence: le(tx.inputs[0].sequenceHex), scriptSig: tx.inputs[0].scriptSigHex, witness: dec.witness },
+      verdict: r.state === "valid" ? { state: "valid", time: r.time, age: r.age } : { state: r.state, reason: r.reason },
+      checked: r.checked,
+    },
+  };
+  b322Cache.set(f.id, out);
+  return out;
+}
+
+function deriveBip322Formats(f: Bip322FormatsFixture): DerivedBip322FormatsFixture {
+  checkMusigSource(f);
+  const lines = pinnedText("bip-0322.mediawiki", SNAPSHOT_PHASE3).split("\n");
+  const start = lines.findIndex((l) => l.startsWith("{| class=\"wikitable\""));
+  const rows: DerivedBip322FormatsFixture["derived"]["rows"] = [];
+  const strip = (s: string) => s.replace(/<sup>\d<\/sup>/g, "").replace(/<br\/>/g, "").replace(/<\/?code>/g, "").replace(/^\|\s*/, "").trim();
+  for (let i = start; i < lines.length && !lines[i].startsWith("|}"); i++) {
+    if (lines[i] === "|-" && lines[i + 1]?.startsWith("| ") && !lines[i + 1].includes("style")) {
+      const [name, scripts, prefix, format] = lines.slice(i + 1, i + 5).map(strip);
+      rows.push({ name, scripts, prefix, format });
+    }
+  }
+  if (rows.length !== 4 || rows[1].prefix !== "smp" || rows[2].prefix !== "ful" || rows[3].prefix !== "pof") throw new Error(`${f.id}: could not read BIP 322's format table`);
+  return { ...f, derived: { rows } };
 }
 
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
   const schnorrGroup = fixtures.filter((f) => f.kind === "schnorr-vector") as unknown as SchnorrVectorFixture[];
   return fixtures.map((f) => {
+    if (f.kind === "bip322-vector") return deriveBip322(f as unknown as Bip322VectorFixture) as unknown as T;
+    if (f.kind === "bip322-formats") return deriveBip322Formats(f as unknown as Bip322FormatsFixture) as unknown as T;
+    if (f.kind === "bip322-verdicts") {
+      const vf = f as unknown as Bip322VerdictsFixture;
+      checkMusigSource(vf);
+      const all = JSON.parse(readFileSync(`${ROOT}fixtures/message-signing.json`, "utf8")).fixtures as Bip322VectorFixture[];
+      const rows = vf.cases.map((id) => {
+        const d = deriveBip322(all.find((x) => x.id === id)!).derived;
+        const detail = d.verdict.state === "valid" ? `valid at time T = ${d.verdict.time} and age S = ${d.verdict.age}` : d.verdict.reason!;
+        return { label: all.find((x) => x.id === id)!.label, message: d.message, address: d.address, state: d.verdict.state, detail };
+      });
+      return { ...vf, derived: { rows } } as unknown as T;
+    }
     if (f.kind === "v2-vector") return deriveV2(f as unknown as V2VectorFixture) as unknown as T;
     if (f.kind === "v2-framing") return deriveV2Framing(f as unknown as V2FramingFixture) as unknown as T;
     if (f.kind === "v2-rekey") return deriveV2Rekey(f as unknown as V2RekeyFixture) as unknown as T;

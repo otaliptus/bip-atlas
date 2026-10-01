@@ -571,7 +571,7 @@ export function V2Worked({ fixtures }: { fixtures: DerivedV2Fixture[] }) {
       intro={<>BIP 324’s packet vector for packet {p.index}, seen from the {d.initiating ? "initiator" : "responder"}: from two public keys to one encrypted packet.</>}
       steps={steps}
       label="Public keys, shared secret, key schedule, terminator and packet, drawn as stacked layers."
-      source={<>Source: BIP 324 packet_encoding_test_vectors.csv (line {f.source.line}); recomputed by the tested model and checked against the vector.</>}
+      source={<>Source: BIP 324 packet_encoding_test_vectors.csv (line {f.source.line}); recomputed by the tested model and checked against the vector. ElligatorSwift decodings are taken from the vector; this site does not implement ElligatorSwift.</>}
     />
   );
 }

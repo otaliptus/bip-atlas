@@ -8,7 +8,7 @@ import {
 const root = new URL("../../../", import.meta.url);
 const raw = "sources/research-2026-10-01-phase3/raw/";
 const csv = (name: string) => {
-  const [head, ...lines] = readFileSync(new URL(raw + "bip-0324/" + name, root), "utf8").trim().split("\n");
+  const [head, ...lines] = readFileSync(new URL(raw + "bip-0324/" + name, root), "utf8").trim().split(/\r?\n/);
   const keys = head.split(",");
   return lines.map((l) => Object.fromEntries(l.split(",").map((v, i) => [keys[i], v])));
 };
@@ -103,7 +103,7 @@ describe("v2-transport chapter prose numbers", () => {
     expect(b324[111]).toContain("64-byte ElligatorSwift");
     has("as 64 bytes of ElligatorSwift encoding");
     expect(b324[111]).toContain("about 50% chance of being a valid X coordinate");
-    has("which a random string matches only about half the time");
+    has("a random 32-byte string is a valid one only about half the time");
     expect(b324[112]).toContain("May send up to 4095");
     has("up to 4095 bytes of garbage");
     expect(b324[123]).toContain("Receive up to 4111 bytes");
@@ -121,10 +121,11 @@ describe("v2-transport chapter prose numbers", () => {
   it("framing and rekeying arithmetic", () => {
     expect(v1Header("ping", new Uint8Array(0)).length).toBe(24);
     expect(V2_OVERHEAD + 1).toBe(21);
-    has("Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead.");
+    has("Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead; one without a short ID carries 33.");
+    expect(V2_OVERHEAD + 13).toBe(33);
     expect(REKEY_INTERVAL).toBe(224);
     has("Both ciphers change their keys every 224 packets.");
-    has("the encryption of 32 zero bytes under the old one");
+    has("the first 32 bytes of encrypting 32 zero bytes under the old key");
     has("the next 32 bytes of its own stream");
     // The rekey figure: keys change after packets 223 and 447.
     const s = senderFor(deriveKeys(new Uint8Array(32).fill(3)), false);
@@ -141,5 +142,12 @@ describe("v2-transport chapter prose numbers", () => {
     const fx = JSON.parse(readFileSync(new URL("fixtures/v2-transport.json", root), "utf8")).fixtures;
     expect(fx.filter((f: { kind: string }) => f.kind === "v2-vector").length).toBe(5);
     has("Five of BIP 324’s packet-encoding vectors");
+  });
+});
+
+describe("vector parsing", () => {
+  it("reads every column, including the last (the CSV has CRLF line endings)", () => {
+    expect(packets.filter((v) => v.out_ciphertext_endswith).length).toBe(4);
+    expect(packets.filter((v) => v.out_ciphertext).length).toBe(3);
   });
 });

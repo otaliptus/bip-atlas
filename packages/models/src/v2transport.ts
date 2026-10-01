@@ -155,7 +155,7 @@ export function encPacket(s: Sender, contents: Uint8Array, aad: Uint8Array = new
   return { index, lengthPlain: bytesToHex(lenPlain), lengthEnc: bytesToHex(lengthEnc), header, aeadCiphertext, tag: bytesToHex(aeadCiphertext.slice(-TAG_LEN)), packet: concat(lengthEnc, aeadCiphertext), nonce, rekeysSoFar };
 }
 
-/** v2_receive_packet for one packet: null if authentication fails. */
+/** v2_receive_packet for one packet (the caller supplies exactly one packet): null if authentication fails. */
 export function decPacket(r: Sender, packet: Uint8Array, aad: Uint8Array = new Uint8Array(0)): { length: number; header: number; contents: Uint8Array } | null {
   const length = Array.from(r.L.crypt(packet.slice(0, LENGTH_FIELD_LEN))).reduceRight((a, b) => a * 256 + b, 0);
   if (packet.length !== LENGTH_FIELD_LEN + HEADER_LEN + length + TAG_LEN) throw new V2Error("Packet length does not match its length field.");

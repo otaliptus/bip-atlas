@@ -14,7 +14,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Everything Bitcoin nodes relay is public: blocks, transactions, addresses. Until BIP 324, nodes also relayed it in the clear, over connections that were neither encrypted nor authenticated. The authors point out what that costs. A global passive eavesdropper can trivially identify the source and timing of a transaction; bytes can be altered on the fly at low cost; and every connection begins with the same magic bytes, so deep packet inspection can spot and block it.",
+        "text": "Everything Bitcoin nodes relay is public: blocks, transactions, addresses. Before BIP 324, every connection carried it in the clear (v1 connections still do), over connections that were neither encrypted nor authenticated. The authors point out what that costs. A global passive eavesdropper can trivially identify the source and timing of a transaction; bytes can be altered on the fly at low cost; and every connection begins with the same magic bytes, so deep packet inspection can spot and block it.",
         "claims": [
           "v1-plaintext",
           "v1-tamper-reveal"
@@ -62,7 +62,7 @@
         },
         {
           "type": "paragraph",
-          "text": "What unauthenticated encryption buys, in the authors’ account, is cost. A passive eavesdropper learns nothing from the bytes; to read traffic it has to become active, by sitting in the middle of the connection for its whole life, downgrading it to v1, or running its own nodes and getting honest ones to connect. Active attacks at scale are more expensive, and for connections an operator sets up by hand they can be caught.",
+          "text": "What unauthenticated encryption buys, in the authors’ account, is cost. A passive eavesdropper can no longer read the messages; to read traffic it has to become active, by sitting in the middle of the connection for its whole life, downgrading it to v1, or running its own nodes and getting honest ones to connect. Active attacks at scale are more expensive, and for connections an operator sets up by hand they are in principle detectable.",
           "claims": [
             "forces-active",
             "goals"
@@ -70,7 +70,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The tool for catching them is the session ID. Both ends derive it from the key exchange, so it is identical on both sides of an honest connection and differs if someone has spliced themselves into the middle. A node may show it to its operator to compare with the peer’s operator out of band.",
+          "text": "The tools for catching them are the protocol version and the session ID. Both ends derive the session ID from the key exchange, so it is identical on both sides of an honest connection and differs if someone has spliced themselves into the middle. A node may show it to its operator to compare with the peer’s operator out of band.",
           "claims": [
             "session-id"
           ]
@@ -85,7 +85,7 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "Encryption is not authentication. A v2 connection can still be to an attacker’s node, and an attacker in the middle is detected only if someone compares session IDs. Traffic analysis of packet sizes and timing can also still reveal that v2 is in use.",
+          "text": "Encryption is not authentication. A v2 connection can still be to an attacker’s node, and an attacker in the middle is detected only if someone compares protocol versions and session IDs. Traffic analysis of packet sizes and timing can also still reveal that v2 is in use.",
           "claims": [
             "no-auth",
             "session-id",
@@ -100,7 +100,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Each side starts by generating a fresh ephemeral key and sending its public key as 64 bytes of ElligatorSwift encoding. Every 64-byte string is a valid encoding of some curve point, so encodings sampled uniformly look like random bytes: unlike a plain 32-byte X coordinate, which a random string matches only about half the time, they give an observer nothing to test. Each side may follow its key with up to 4095 bytes of garbage, so the first message need not be exactly 64 bytes long.",
+          "text": "Each side starts by generating a fresh ephemeral key and sending its public key as 64 bytes of ElligatorSwift encoding. Every 64-byte string is a valid encoding of some curve point, so encodings sampled uniformly look like random bytes: unlike a plain 32-byte X coordinate (a random 32-byte string is a valid one only about half the time), they give an observer nothing to test. Each side may follow its key with up to 4095 bytes of garbage, so the first message need not be exactly 64 bytes long.",
           "claims": [
             "ellswift",
             "garbage"
@@ -116,7 +116,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Both sides then decode the other’s 64 bytes to an X coordinate and compute X-only ECDH. The result is hashed together with both 64-byte encodings exactly as sent, initiator’s first, so an attacker cannot alter an encoding without breaking the rest of the stream. HKDF-SHA256, salted with the network magic, expands that secret into the session ID, four cipher keys (a length key and a payload key in each direction) and two 16-byte garbage terminators.",
+          "text": "Both sides then decode the other’s 64 bytes to an X coordinate and compute X-only ECDH. The result is hashed together with both 64-byte encodings exactly as sent, initiator’s first, so an attacker cannot alter an encoding without breaking the rest of the stream. HKDF-SHA256, salted with the label “bitcoin_v2_shared_secret” and the network magic, expands that secret into the session ID, four cipher keys (a length key and a payload key in each direction) and two 16-byte garbage terminators.",
           "claims": [
             "ecdh",
             "hkdf"
@@ -134,7 +134,7 @@
             "v2-packet-448",
             "v2-packet-999"
           ],
-          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The model recomputes the ECDH, secret, keys, session ID and packet bytes, and each equals the vector; the ElligatorSwift decodings are the vector’s own.",
+          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The model recomputes the ECDH, secret, keys and session ID, each equal to the vector’s, and the packet: in full where the vector publishes it, and its last 128 bytes for packets 223 and 448, where that is all the vector gives. The ElligatorSwift decodings are the vector’s own.",
           "claims": [
             "vectors",
             "ecdh",
@@ -146,7 +146,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Each side sends its garbage terminator, then encrypted packets. The first packet in each direction carries the garbage that side sent as associated data, so the garbage is authenticated and cannot be changed in transit without the connection failing. The responder sends a version packet with empty contents to say it speaks v2; the initiator answers with its own.",
+          "text": "Each side sends its garbage terminator, then encrypted packets. The first packet in each direction carries the garbage that side sent as associated data, so the garbage is authenticated and cannot be changed in transit without the connection failing. Each side then sends a version packet with empty contents, possibly after decoys, to say it speaks v2; the responder’s goes out in its first flight, without waiting.",
           "claims": [
             "terminator-aad",
             "version-packet"
@@ -154,7 +154,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The terminator exists because the receiver has to find where the garbage ends. Scanning for a fixed 16-byte sequence is cheap, whereas trying to authenticate a packet at every offset would mean recomputing a Poly1305 tag for every byte received. A receiver reads at most 4111 bytes, 4095 of garbage and the terminator, before giving up.",
+          "text": "The authors explain that the terminator exists because the receiver has to find where the garbage ends. Scanning for a fixed 16-byte sequence is cheap, whereas trying to authenticate a packet at every offset would mean recomputing a Poly1305 tag for every byte received. A receiver reads at most 4111 bytes, 4095 of garbage and the terminator, before giving up.",
           "claims": [
             "terminator-why",
             "garbage"
@@ -182,7 +182,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The header holds one defined flag, the ignore bit. A packet with it set is a decoy: the receiver checks that it decrypts and throws it away. Decoys are the protocol’s main way to shape traffic, for instance to hide when blocks propagate.",
+          "text": "BIP 324 defines one header flag, the highest bit, called the ignore bit; the other bits are ignored for now. A packet with it set is a decoy: the receiver checks that it decrypts and throws it away. Decoys are the protocol’s main means of shaping traffic, which the authors want to make it possible to conceal block propagation; how and when to send them is left out of scope.",
           "claims": [
             "decoys",
             "goals"
@@ -190,7 +190,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Inside a packet, an application message starts with its type, either a one-byte ID from the BIP’s table or a zero byte and the same 12-byte ASCII name v1 uses, followed by the payload. Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead. The authors estimate that encrypting and authenticating costs about as much as the truncated double SHA-256 checksum it replaces.",
+          "text": "Inside a packet, an application message starts with its type, either a one-byte ID from the BIP’s table or a zero byte and the same 12-byte ASCII name v1 uses, followed by the payload. Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead; one without a short ID carries 33. The authors estimate that encrypting and authenticating costs about as much as the truncated double SHA-256 checksum it replaces.",
           "claims": [
             "message-type",
             "framing-computed",
@@ -205,7 +205,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch; after the 224th packet its new key is the encryption of 32 zero bytes under the old one. The length cipher replaces its key with the next 32 bytes of its own stream.",
+          "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch; after the 224th packet its new key is the first 32 bytes of encrypting 32 zero bytes under the old key, with the nonce’s packet field set to 0xffffffff. The length cipher replaces its key with the next 32 bytes of its own stream and moves to the next nonce.",
           "claims": [
             "rekey"
           ]
@@ -235,7 +235,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Nodes advertise v2 with the NODE_P2P_V2 service flag. Because flags spread through untrusted relays, a node that is cut off as soon as it tries v2 is encouraged to retry over v1. v2 nodes keep accepting inbound v1 connections, so the network does not split. Blocks, transactions, scripts and consensus rules are untouched: v2 changes how messages travel between two nodes, not what they say.",
+          "text": "Nodes advertise v2 with the NODE_P2P_V2 service flag. Because flags spread through untrusted relays, a node that is cut off as soon as it tries v2 is encouraged to retry over v1. v2 nodes keep accepting inbound v1 connections, to minimize the risk of splitting the network. Blocks, transactions, scripts and consensus rules are untouched: v2 changes how messages travel between two nodes, not what they say.",
           "claims": [
             "signaling",
             "goals",

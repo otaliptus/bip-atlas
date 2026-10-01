@@ -15,7 +15,7 @@ export function V2Framing({ fixture }: { fixture: DerivedV2FramingFixture }) {
   );
   return (
     <div class="atlas-v2-framing">
-      {row("v1", d.v1, "Sent in the clear. Every connection starts with the same 4 magic bytes and the command “version”.")}
+      {row("v1", d.v1, "Sent in the clear. Every v1 message begins with the network’s 4 magic bytes, and every connection opens with the command “version”.")}
       {row("v2", d.v2, `Everything is encrypted or random-looking. A ${d.messageType} message uses the 1-byte ID ${d.shortId}; types without an ID take 13 bytes (0x00 and the 12-byte name).`)}
       <p class="atlas-lab__source">Field sizes from BIP 324’s packet and message structure; the ID for {d.messageType} read from its message-type table (line {fixture.source.line}).</p>
     </div>

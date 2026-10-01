@@ -10,8 +10,8 @@ const short = (hex: string) => (hex.length > 24 ? `${hex.slice(0, 12)}…${hex.s
 const STAGES = [
   { id: "keys", title: "Public keys out", note: "Each side sends a fresh ephemeral public key as 64 ElligatorSwift bytes, which look uniformly random, optionally followed by up to 4095 bytes of garbage." },
   { id: "secret", title: "Shared secret", note: "Each side decodes the other’s 64 bytes to an X coordinate and computes X-only ECDH, then hashes it together with both 64-byte encodings exactly as sent." },
-  { id: "schedule", title: "Keys and session ID", note: "HKDF-SHA256 expands the secret, salted with the network magic, into four cipher keys (length and payload, each direction), two garbage terminators and a session ID." },
-  { id: "terminator", title: "Garbage terminator, version packet", note: "Each side sends its 16-byte garbage terminator, then an encrypted version packet. The first packet authenticates the garbage it sent as associated data." },
+  { id: "schedule", title: "Keys and session ID", note: "HKDF-SHA256 expands the secret, salted with the label “bitcoin_v2_shared_secret” and the network magic, into four cipher keys (length and payload, each direction), two garbage terminators and a session ID." },
+  { id: "terminator", title: "Garbage terminator, version packet", note: "Each side sends its 16-byte garbage terminator, then optional decoys and an encrypted version packet. The first packet authenticates the garbage it sent as associated data." },
   { id: "packet", title: "Encrypted packets", note: "From here on everything is encrypted packets: a 3-byte encrypted length, then ChaCha20-Poly1305 over a header byte and the contents, ending in a 16-byte tag." },
 ] as const;
 
@@ -84,7 +84,7 @@ export function V2Handshake({ fixtures, figureId }: Props) {
           <h3 class="atlas-panel__title">This side: the {me}</h3>
           <dl class="atlas-v2-dl">
             <div><dt>sends 64 bytes (u ‖ t)</dt><dd><code>{short(d.ellOurs.slice(0, 64))}</code> ‖ <code>{short(d.ellOurs.slice(64))}</code></dd></div>
-            <div><dt>which decode to x</dt><dd><code>{short(d.xOurs)}</code><small> = x(priv · G)</small></dd></div>
+            <div><dt>which decode to x</dt><dd><code>{short(d.xOurs)}</code><small> = x(priv · G), computed; that these 64 bytes decode to it is the vector’s claim</small></dd></div>
             {reached("terminator") ? <div><dt>its garbage terminator</dt><dd><code>{d.sendTerminator}</code></dd></div> : null}
           </dl>
         </section>
@@ -92,7 +92,7 @@ export function V2Handshake({ fixtures, figureId }: Props) {
           <h3 class="atlas-panel__title">The peer: the {them}</h3>
           <dl class="atlas-v2-dl">
             <div><dt>sends 64 bytes (u ‖ t)</dt><dd><code>{short(d.ellTheirs.slice(0, 64))}</code> ‖ <code>{short(d.ellTheirs.slice(64))}</code></dd></div>
-            <div><dt>which decode to x</dt><dd><code>{short(d.xTheirs)}</code><small> (decoding from the vector)</small></dd></div>
+            {reached("secret") ? <div><dt>which decode to x</dt><dd><code>{short(d.xTheirs)}</code><small> (decoding from the vector)</small></dd></div> : null}
             {reached("terminator") ? <div><dt>its garbage terminator</dt><dd><code>{d.recvTerminator}</code></dd></div> : null}
           </dl>
         </section>
@@ -129,16 +129,18 @@ export function V2Handshake({ fixtures, figureId }: Props) {
               <div><dt>associated data</dt><dd>{p.aadLen ? `${p.aadLen} bytes: the garbage this side sent, authenticated by its first packet` : "none"}</dd></div>
               <div><dt>total</dt><dd>{p.totalLen.toLocaleString("en-US")} bytes = 3 + 1 + {p.contentsLen.toLocaleString("en-US")} + 16</dd></div>
             </dl>
-            {showCompare ? (
+            {showCompare && !p.ignore && p.index > 0 ? (
               <p class="atlas-v2-cmp">
-                Framing the same {p.contentsLen.toLocaleString("en-US")}-byte contents as a v1 message with a 1-byte type ID would carry a {24}-byte cleartext header (magic, command, length, checksum) instead of the type byte: {(24 + Math.max(0, p.contentsLen - 1)).toLocaleString("en-US")} bytes against {p.totalLen.toLocaleString("en-US")}, and every v1 byte readable on the wire.
+                If these {p.contentsLen.toLocaleString("en-US")} bytes were an application message beginning with a 1-byte type ID, v1 would send the same message as a 24-byte cleartext header (magic, command, length, checksum) plus the remaining {Math.max(0, p.contentsLen - 1).toLocaleString("en-US")} payload bytes: {(24 + Math.max(0, p.contentsLen - 1)).toLocaleString("en-US")} bytes against {p.totalLen.toLocaleString("en-US")}, all readable on the wire.
               </p>
+            ) : showCompare ? (
+              <p class="atlas-v2-cmp">{p.ignore ? "A decoy has no v1 equivalent: v1 cannot send padding that the receiver silently drops." : "Packet 0 in each direction is the version packet (or a decoy before it), part of the handshake; v1 has no equivalent."}</p>
             ) : null}
           </>
         )}
       </section>
       <p class="atlas-lab__source">
-        Source: BIP 324 packet_encoding_test_vectors.csv, row for packet {p.index} (line {f.source.line}). Recomputed at build time by the tested model; ECDH, secret, keys, session ID, terminators and packet equal the vector’s. ElligatorSwift decodings are the vector’s own.
+        Source: BIP 324 packet_encoding_test_vectors.csv, row for packet {p.index} (line {f.source.line}). Recomputed at build time by the tested model; ECDH, secret, keys, session ID and terminators equal the vector’s, and {p.checkedBytes === p.totalLen ? "so does the whole packet" : `so do the packet’s last ${p.checkedBytes} bytes, all the vector publishes`}. ElligatorSwift decodings are the vector’s own.
       </p>
     </div>
   );

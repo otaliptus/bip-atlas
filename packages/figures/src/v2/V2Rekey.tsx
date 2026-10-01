@@ -20,7 +20,7 @@ export function V2Rekey({ fixture }: { fixture: DerivedV2RekeyFixture }) {
           ))}
         </tbody>
       </table>
-      <p class="atlas-lab__source">Keys from BIP 324’s packet vector for packet 223 (line {fixture.source.line}), run forward by the tested model. After every 224th packet the key is replaced by an encryption of 32 zero bytes under the old key.</p>
+      <p class="atlas-lab__source">Keys from BIP 324’s packet vector for packet 223 (line {fixture.source.line}), run forward by the tested model. After every 224th packet the key is replaced by the first 32 bytes of encrypting 32 zero bytes under the old key. Keys after packet 223 are the model’s; the vectors check rekeying through the packets that follow.</p>
     </div>
   );
 }

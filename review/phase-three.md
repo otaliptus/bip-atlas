@@ -231,3 +231,49 @@ Not changed: `raw()` with an empty argument, a threshold written `01`, mainnet-o
 - no-JS.
 
 There is no overflow. axe-core is clean at 1440, 375, no-JS, the worked tab and two interactive states.
+
+## Chapter 17 — v2 transport (BIP 324)
+
+**Model:** `packages/models/src/v2transport.ts`:
+- X-only ECDH and the tagged shared secret;
+- the HKDF-SHA256 key schedule;
+- FSChaCha20 (one continuing length keystream that rekeys from itself) and FSChaCha20Poly1305 (nonce = packet-in-epoch ‖ epoch, rekey every 224);
+- packet encryption and decryption;
+- v1 header framing, for comparison.
+
+It is built on `@noble/curves`, `@noble/hashes` (HKDF) and `@noble/ciphers` (ChaCha20, ChaCha20-Poly1305).
+
+ElligatorSwift is deliberately out of scope: no audited JS library implements it, and the project forbids hand-rolled curve code. The model takes the decoded X coordinates from the vectors. This is stated in the model doc, the ledger, the hero caption, the hero's per-value notes and the worked example.
+
+**Sources:** `packet_encoding_test_vectors.csv`. All seven rows pass:
+- x(ours), the shared x, the secret, all four keys, the terminators and the session ID;
+- the full packet for the three rows that publish it;
+- the published last 128 bytes for the four rows that publish only a tail.
+
+The test and the build first parsed this CRLF file with `split("\n")`. That left a "\r" in the last column's name, so the tail comparisons were silently skipped. The review's question about tails exposed it. Both now split on `\r?\n`, and a test asserts that four tails and three full ciphertexts are read.
+
+**Deliberate breakage** (tests that fail):
+
+| Breakage | Tests failing |
+|---|---|
+| Fixed key order in the ECDH hash | 4 |
+| No block-counter reset on length rekey | 1 |
+| No AEAD rekey | 2 |
+| No network magic in the HKDF salt | 8 |
+
+**Independent review: 0 must-fix, 9 should-fix, 10 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | "Packet equals the vector" was overstated where only a 128-byte tail is published | Caption, ledger and hero source line now say which: the whole packet, or the last N bytes. Tail checks were made real (see above). |
+| 2 | Hero v1/v2 comparison was wrong for decoys and packet 0, and implied v1 has type IDs | The comparison appears only for application packets and is reworded. Decoy and packet-0 states explain that v1 has no equivalent. |
+| 3 | Session ID alone does not catch a downgrade | Now "protocol version and session ID" (prose and caveat). |
+| 4 | "learns nothing from the bytes" and "can be caught" | Now "can no longer read the messages" and "in principle detectable". |
+| 5 | "so the network does not split" | Now "to minimize the risk of splitting the network". |
+| 6 | "Until BIP 324 … in the clear" | Now "Before BIP 324, every connection carried it in the clear (v1 connections still do)". |
+| 7 | Unquoted parts of seven ledger statements | Quotes added: length rekey L448, "not a priority" L174, initiator version packet L133, L149 timing, TLS/Noise L72–75, shaping goal L84, detectability L34, untrusted flags L581, decoy scope L126. |
+| 8 | "Decode to x" implied our side's decoding was checked | Now: "computed; that these 64 bytes decode to it is the vector's claim". The worked example carries the ElligatorSwift caveat. The peer's x is hidden until the secret stage. |
+| 9 | Unreadable tag on the decoy shot | Fixed (the CSS override landed before the re-shoot); verified. |
+| 10–19 (nits) | HKDF label in the salt. Header-flag tense and decoy scope. Exact payload rekey (0xffffffff nonce field) and the length cipher's next nonce. Version packets sent without waiting, possibly after decoys. Terminator rationale attributed. ElligatorSwift wording. Framing note per message. Rekey table says keys after 223 are the model's. `decPacket` doc. Stray `V1_HEADER` check removed. `session-id` scope set to author-rationale. 33-byte overhead without a short ID added to the prose (tested). | All applied. |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 cover the framing figure, the hero (start, stage 3 on mobile, application packet with comparison, decoy, no-JS), the rekey table and the worked tab. There is no overflow. axe-core is clean at 1440, 375, no-JS, the worked tab and three interactive states.
