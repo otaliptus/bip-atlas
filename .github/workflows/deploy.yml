@@ -52,6 +52,9 @@ jobs:
         if: ${{ env.HAS_CF_TOKEN == 'true' }}
         uses: cloudflare/wrangler-action@v3
         with:
+          # Use the wrangler pinned in package.json; the action's own install
+          # (`pnpm add`) fails at a workspace root.
+          wranglerVersion: "3.114.17"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy apps/site/dist --project-name=bip-atlas --branch=${{ github.head_ref || github.ref_name }}
