@@ -230,7 +230,7 @@ function ResiduePanel({ analysis }: { analysis: AddressAnalysis }) {
   ];
   return (
     <section class="atlas-panel" aria-label="Checksum comparison">
-      <h4 class="atlas-panel__title">Compare checksum families</h4>
+      <h3 class="atlas-panel__title">Compare checksum families</h3>
       {analysis.residue === null ? (
         <p class="atlas-panel__empty">
           Not computed: the string was stopped at the {stageLabel(analysis.failedStage!).toLowerCase()} stage,
@@ -273,7 +273,7 @@ function ResultPanel({ analysis }: { analysis: AddressAnalysis }) {
   if (!analysis.valid) {
     return (
       <section class="atlas-panel" aria-label="Decoder result">
-        <h4 class="atlas-panel__title">Decoder result</h4>
+        <h3 class="atlas-panel__title">Decoder result</h3>
         <p class="atlas-panel__refusal">
           <strong>Refused.</strong> A decoder must reject this string. This one offers no corrected version: BIP 173
           advises leaving correction to the user, who can check the original.
@@ -286,7 +286,7 @@ function ResultPanel({ analysis }: { analysis: AddressAnalysis }) {
   const program = analysis.programHex!;
   return (
     <section class="atlas-panel" aria-label="Decoder result">
-      <h4 class="atlas-panel__title">Decoder result: scriptPubKey</h4>
+      <h3 class="atlas-panel__title">Decoder result: scriptPubKey</h3>
       <p class="atlas-script">
         <span class="atlas-script__part" data-part="opcode">
           <code>{script.slice(0, 2)}</code>

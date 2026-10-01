@@ -20,7 +20,7 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 |---|---|
 | `packages/models` | Tested teaching models: `bech32`, `bip39`, `bip32`, `tx` (141/143), `psbt`, `schnorr` (340, step-by-step Verify), `taproot` (341: trees, tweak, control blocks, SigMsg), `tapscript` (342: a narrow trace *recorder*, not an interpreter; it throws `TraceScopeError` for any opcode outside its reviewed set). Hashing and curves come from audited `@noble/*`; never hand-roll crypto. Test-only signing helpers live in `packages/models/test/`, never in `src/`. |
 | `packages/publication` | `bip-atlas.publication.v1` schema + validator; `test/chapters.test.ts` applies every content contract to every chapter. |
-| `packages/figures` | Recipe registry (`registry.ts`) and Preact figure components. Components only draw; exact values arrive precomputed. |
+| `packages/figures` | Recipe registry (`registry.ts`) and Preact figure components. Components only draw; exact values arrive precomputed. `worked/` holds the static "Worked example" tab for every interactive recipe (`IsoStack` exploded isometric drawing + numbered legend); a contract test requires one per interactive recipe. |
 | `apps/site` | Astro pages, `lib/content.ts` (load + validate), `lib/derive.ts` (build-time values from models; throws if a value differs from a published vector), `components/Figure.astro` (recipe dispatcher), `styles/atlas.css`. |
 | `content/chapters/<id>.json` | Hand-authored chapter: paragraphs with claim IDs, figures naming recipes + fixture IDs. |
 | `content/evidence/<id>.json` | Evidence ledger: each claim has scope, support, and verbatim quotes with line numbers in the pinned sources. |
@@ -45,6 +45,11 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 - Only public test vectors; no input fields for addresses, keys, phrases, PSBTs; nothing signs or broadcasts.
 - Figures must not leak values a viewer in that state could not know (e.g. xpub view showing hardened data, even in `title` tooltips).
 - After writing a chapter, run an independent technical review (a fresh subagent with the ledger, model and pinned text) and apply what holds up; record it in `review/`.
+
+## Figures and references
+
+- Interactive figures render as two tabs in `Plate.astro`: A, the island; B, a static worked example (no-JS: both shown, stacked). Chapter accent colours live in `atlas.css` under `[data-chapter=…]`; they are used by worked examples and tabs, not by prose.
+- Citation markers carry anchors from their `walkBlocks` path (`citeAnchor`); evidence entries link back (↩ a, b, …). Any new block type that cites claims must render `ClaimRefs` with its `at` path.
 
 ## Visual checks
 

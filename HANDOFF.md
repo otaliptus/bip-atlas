@@ -11,12 +11,14 @@ Last updated: 1 October 2026, end of the cloud session that built phase two. If 
 - **Live:** https://bip-atlas.pages.dev (Cloudflare Pages project `bip-atlas`). `_headers` sends `X-Robots-Tag: noindex` until a chapter is signed off.
 - **CI:** `.github/workflows/deploy.yml` runs check, test and build on every push and PR. The deploy step is still skipped: the `CLOUDFLARE_API_TOKEN` repo secret has not been added (see below). `main` goes to production, other branches to preview URLs once it exists.
 
+- **Reader features (this session, after phase two):** (a) every evidence entry links back to each place that cites it, opening a closed Details block if needed; (b) every interactive figure is a two-tab plate, A Interactive and B Worked example (an exploded isometric walk through one published case), with per-chapter accent colours. Recorded in `review/reader-features.md`. The design brief referenced makingsoftware.com, which the cloud container could not reach (egress blocked); the style was built from the user's description. A human look at the visual direction is the next useful step.
+
 ## Next steps
 
 1. **Check CI** on the latest push. If the deploy step was skipped because the token is missing, tell the user and carry on.
-2. **Human review of phase two.** The user should read `review/phase-two.md` and the three chapters (preview or local `pnpm dev`). Merge `main-q0i8zv` into `main` only when the user asks.
+2. **Human review of phase two and the new tabs/back-links.** The user should read `review/phase-two.md` and the three chapters (preview or local `pnpm dev`). Merge `main-q0i8zv` into `main` only when the user asks.
 3. **Open items, in rough priority:**
-   - Accessibility: an axe-core run (WCAG 2.1 A/AA + best practice) is clean on the three phase-two chapters at 1440 and 375 px after fixes. On phase one it reports only `heading-order` (panel titles are `h4` under `h2` sections) in hd-wallets, segwit, addresses and psbt: change those panel titles to `h3`, as done in phase two. Still not done: a screen-reader session for each hero.
+   - Accessibility: an axe-core run (WCAG 2.1 A/AA + best practice) is clean on all eight chapters, with both figure tabs, at 1440 px (and 375 px for phase two). Still not done: a screen-reader session for each hero.
    - Tablet-width (768–1024 px) screenshots; `tools/screenshots.mjs` takes a JSON list of states (`PLAYWRIGHT_MODULE` can point at a global Playwright install).
    - Tapscript: the BIP 342 signature-message extension has no vector of its own; if a pinned source with script-path sighash vectors appears, add it. Widening the recorder (OP_CODESEPARATOR, annex, CLTV/CSV) needs new reviewed cases and tests first.
    - Milestone 3 of the spec (automated generation from the evidence ledger), only after the user signs off the hand-authored chapters.
