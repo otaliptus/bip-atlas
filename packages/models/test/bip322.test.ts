@@ -80,3 +80,37 @@ describe("required rules", () => {
     expect(verify(v.address, v.message, forged).state).toBe("invalid");
   });
 });
+
+describe("message-signing chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/message-signing.json", root), "utf8");
+  const b322 = readFileSync(new URL(raw + "bip-0322.mediawiki", root), "utf8").split("\n");
+  const has = (s: string) => expect(text).toContain(s);
+
+  it("history and constants", () => {
+    expect(b322[8]).toContain("Assigned: 2018-09-10");
+    expect(b322[17]).toContain("Version: 2.0.0");
+    has("BIP 322, assigned in 2018 and recorded as Complete at version 2.0.0");
+    expect(["smp", "ful", "pof"].every((p) => p.length === 3)).toBe(true);
+    has("each marked by a three-letter prefix");
+    expect(b322[140]).toContain("vin[0].prevout.n = 0xFFFFFFFF");
+    has("spends output 0xFFFFFFFF of a transaction whose ID is all zeros");
+    expect(b322[331]).toContain("PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE = 0x09");
+    has("one global PSBT field, number 0x09");
+    expect(addressScript("13vU5PUSuArDXJdCWZvUFEbgJ2wcmtSJWn").kind).toBe("p2pkh");
+    has("P2PKH addresses, the ones starting with 1");
+  });
+
+  it("vector facts", () => {
+    const ms = basic.simple.find((v: { type: string }) => v.type === "p2wsh-multisig-3of3");
+    const w = decodeSignature(ms.bip322_signatures[0]).witness;
+    expect(w.length).toBe(5);
+    expect(w[0]).toBe("");
+    expect(w[w.length - 1]).toBe(ms.witness_script);
+    has("a 3-of-3 multisig address, whose “signature” is three ECDSA signatures and the witness script");
+    expect(basic.simple.some((v: { bip322_signatures: string[] }) => v.bip322_signatures.some((s) => !/^(smp|ful|pof)/.test(s)))).toBe(true);
+    has("one of the published vectors tests exactly that");
+    const fx = JSON.parse(readFileSync(new URL("fixtures/message-signing.json", root), "utf8")).fixtures;
+    expect(fx.filter((f: { kind: string }) => f.kind === "bip322-vector").length).toBe(6);
+    has("Six of BIP 322’s published vectors");
+  });
+});

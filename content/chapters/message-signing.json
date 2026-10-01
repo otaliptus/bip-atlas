@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "message-signing",
+  "primaryBips": [
+    322
+  ],
+  "specimenLabel": "BIP 0322",
+  "title": "How do you prove you control an address?",
+  "dek": "BIP 322 signs a message by building a transaction that spends a pretend coin locked to the address, and checking it like any other spend. What it proves is narrower than it sounds.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01-phase3",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Exchanges, auditors and counterparties sometimes ask: can you show that this address is yours? The old answer, Bitcoin Core’s signmessage, only works for P2PKH addresses, the ones starting with 1. Its signatures also have a flaw the BIP’s authors spell out: they are ECDSA signatures that do not commit to the public key, so they do not actually prove knowledge of a secret key, and third parties can tweak a valid one into a valid signature for certain related keys.",
+        "claims": [
+          "legacy-limits",
+          "ecdsa-no-commit"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 322, assigned in 2018 and recorded as Complete at version 2.0.0, replaces the special-purpose signature with Bitcoin Script itself. A message signature becomes whatever would satisfy the address’s script in a transaction built around the message, so any address, whatever script controls it, can in principle be signed for. The signature comes in several formats, each marked by a three-letter prefix.",
+        "claims": [
+          "preamble",
+          "abstract",
+          "legacy-limits",
+          "formats"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A18.1",
+      "recipe": "bip322-formats.v1",
+      "title": "Signature formats",
+      "fixtures": [
+        "b322-formats"
+      ],
+      "caption": "BIP 322’s formats as its table lists them: legacy for P2PKH only, simple for native SegWit, full for anything, and full proof of funds.",
+      "claims": [
+        "formats",
+        "legacy-rules",
+        "simple",
+        "full",
+        "pof"
+      ],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "virtual",
+      "heading": "Two transactions that never leave",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The construction uses two virtual transactions. The first, to_spend, commits to the message and the address. Its single input spends output 0xFFFFFFFF of a transaction whose ID is all zeros, an output that does not exist, and its scriptSig pushes the message hash. Its single output pays 0 satoshis to the address’s script, which the BIP calls the message challenge.",
+          "claims": [
+            "to-spend"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The message hash is a BIP 340 tagged hash with the tag BIP0322-signed-message, taken over the message exactly as given, with no length prefix and no terminator. Change one character of the message and the hash changes, and so does to_spend’s ID.",
+          "claims": [
+            "to-spend"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or for some formats its scriptSig and other fields, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
+          "claims": [
+            "to-sign"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.2",
+          "recipe": "bip322-virtual-tx.v1",
+          "title": "to_spend and to_sign",
+          "fixtures": [
+            "b322-p2wpkh-hello",
+            "b322-p2tr-simple",
+            "b322-p2wsh-3of3",
+            "b322-p2wpkh-full",
+            "b322-p2pkh-full",
+            "b322-wrong-message"
+          ],
+          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from what the vector implies.",
+          "claims": [
+            "vectors",
+            "to-spend",
+            "to-sign",
+            "verdicts"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Neither transaction is ever broadcast. to_spend spends an output that cannot exist, so it can never be valid on chain, and to_sign spends to_spend. The BIP gives this shape a practical purpose: it resembles a Bitcoin transaction closely enough that existing signing hardware can sign it, while containing an invalid input so it cannot be spent on any real network.",
+          "claims": [
+            "never-broadcast",
+            "tx-shaped"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Apart from that missing coin, both transactions must be valid: they must pass all consensus checks. A signature is therefore not limited to one key. The published vectors include a 3-of-3 multisig address, whose “signature” is three ECDSA signatures and the witness script, and in BIP 322’s terms a signature need not contain a cryptographic signature at all, only whatever satisfies the script.",
+          "claims": [
+            "consensus-valid",
+            "signature-def"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "formats",
+      "heading": "Simple, full, proof of funds",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The simple format, prefixed smp, carries only the witness stack. It applies when to_sign keeps all its defaults, nothing added and version, sequence and lock time left at 0, and the address is native SegWit: P2WPKH, P2WSH or P2TR. The verifier rebuilds both transactions itself.",
+          "claims": [
+            "simple",
+            "encode-choice"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The full format, prefixed ful, carries the whole signed to_sign transaction. It covers every script type, including P2PKH and P2SH, which need a scriptSig, and scripts with time locks, which need to_sign’s version, lock time or sequence set. The proof-of-funds variant, prefixed pof, adds further inputs for any UTXOs the signer wants to show control of, and travels as a finalized PSBT.",
+          "claims": [
+            "full",
+            "to-sign",
+            "pof"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Signers MUST put the prefix on. A verifier may still read an unprefixed signature as simple, for compatibility with implementations written before the BIP was finalized; one of the published vectors tests exactly that. The legacy format MAY still be used, but only for P2PKH addresses, and new proofs SHOULD use the new formats for every address type, P2PKH included.",
+          "claims": [
+            "formats",
+            "legacy-rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Signing for a multisig address works the way spending from one does. Each signer produces a partial signature on to_sign, coordinated through a PSBT, and BIP 322 adds one global PSBT field, number 0x09, that carries the message itself so every signer can see what they are signing. The BIP recommends keeping messages to a few kilobytes and committing to anything larger by its hash.",
+          "claims": [
+            "psbt",
+            "message-size"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verify",
+      "heading": "Valid, invalid, inconclusive",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A verifier is given an address, a message and a signature. It computes to_spend from the message and address, decodes to_sign from the signature, checks that to_sign’s first input spends to_spend’s output and that it has exactly one output, and then checks that the pair satisfies the consensus rules.",
+          "claims": [
+            "basic-validation"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR is forbidden; ECDSA signatures must be strictly encoded with a low S value; pushes must be minimal; and exactly one stack element may remain. Breaking any of these makes the signature invalid.",
+          "claims": [
+            "required-rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The outcome is one of three states, not two. Invalid means some check failed. Inconclusive means the verifier could not check the scripts: a verifier without a full script interpreter should stop there for any script it does not understand, and the BIP’s upgradeable rules also end in inconclusive. Valid comes with two numbers, “valid at time T and age S”, where T is to_sign’s lock time and S is its first input’s sequence, so a signature that relies on a time lock says so.",
+          "claims": [
+            "verdicts",
+            "interpreter",
+            "upgradeable-rules",
+            "time-age"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.3",
+          "recipe": "bip322-verdicts.v1",
+          "title": "Three verdicts",
+          "fixtures": [
+            "b322-verdicts"
+          ],
+          "caption": "One published vector for each state. The inconclusive one is a P2PKH signature: this site’s model has no script interpreter for it, which is the case the state exists for.",
+          "claims": [
+            "verdicts",
+            "time-age",
+            "interpreter",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "This site’s model is such a partial verifier. It checks P2WPKH, P2TR key-path and P2WSH multisig signatures itself, and answers inconclusive for the rest. Even so, it rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
+          "claims": [
+            "vectors",
+            "basic-validation"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "What a signature does not prove",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 322 is careful about its own limits, and they matter more than the mechanics. The authors write that no message signing protocol can actually prove control of funds. A signature is obsolete as soon as it is created: the coins may have moved a minute later. And whoever holds a key may be willing to sign messages on someone else’s behalf even if they would never sign a real transaction for them.",
+          "claims": [
+            "no-proof"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "What a valid signature does show is narrower: that the signer will be able to control funds sent to the address, as of the moment of signing. It cannot show that the signer sent some earlier transaction. A proof of funds can list UTXOs, but it does not show they are all the address holds, nor that they are still unspent; a verifier needs the current UTXO set for that.",
+          "claims": [
+            "not-sender",
+            "pof"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "So treat a BIP 322 signature as evidence about one moment and one script. It says that at signing time someone could produce what the address’s script demands for this exact message. It says nothing about who that someone is, whether they still can, or whether the coins are still there.",
+          "claims": [
+            "no-proof",
+            "not-sender"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Because to_sign looks like a transaction, signing devices need care. When a signer recognises a BIP 322 request it must show the user the message and the address, and the BIP asks that the screens resemble signing a message, not spending 0 satoshis.",
+          "claims": [
+            "signer-display"
+          ]
+        }
+      ]
+    }
+  ]
+}

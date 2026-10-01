@@ -65,6 +65,13 @@ import {
   V2Framing,
   V2Rekey,
   V2Worked,
+  Bip322VirtualTx,
+  Bip322Formats,
+  Bip322Verdicts,
+  Bip322Worked,
+  type DerivedBip322Fixture,
+  type DerivedBip322FormatsFixture,
+  type DerivedBip322VerdictsFixture,
   type DerivedV2Fixture,
   type DerivedV2FramingFixture,
   type DerivedV2RekeyFixture,
@@ -152,6 +159,9 @@ const bfGolomb = picked as DerivedBfGolombFixture[];
 const v2 = picked as DerivedV2Fixture[];
 const v2Framing = picked as DerivedV2FramingFixture[];
 const v2Rekey = picked as DerivedV2RekeyFixture[];
+const b322 = picked as DerivedBip322Fixture[];
+const b322Formats = picked as DerivedBip322FormatsFixture[];
+const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -205,6 +215,9 @@ const v2Rekey = picked as DerivedV2RekeyFixture[];
   {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
   {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
   {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
+  {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
+  {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
+  {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -224,6 +237,7 @@ const v2Rekey = picked as DerivedV2RekeyFixture[];
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
       {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
       {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
+      {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
   )}
 </Plate>

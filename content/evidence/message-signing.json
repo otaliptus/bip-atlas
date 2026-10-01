@@ -1,0 +1,537 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "message-signing",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 322 (Karl-Johan Alm, Oliver Gugger), assigned in 2018, is recorded as Complete at version 2.0.0; it was marked Complete in 2026.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            4,
+            9
+          ],
+          "quote": "Title: Generic Signed Message Format Authors: Karl-Johan Alm <karljohan-alm@garage.co.jp> Oliver Gugger <gugger@gmail.com> Status: Complete Type: Specification Assigned: 2018-09-10"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            18,
+            18
+          ],
+          "quote": "Version: 2.0.0"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            496,
+            497
+          ],
+          "quote": "* '''1.0.0''' (2026-04-15): ** Mark Complete"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 322 is a standard for signed messages based on Bitcoin Script, for proving availability of funds or committing to a message as the intended recipient of funds sent to an address.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            24,
+            26
+          ],
+          "quote": "A standard for interoperable signed messages based on the Bitcoin Script format, either for proving availability of funds, or for committing to a message as the intended recipient of funds sent to the invoice address."
+        }
+      ]
+    },
+    {
+      "id": "legacy-limits",
+      "statement": "The authors note the current (legacy) message signing standard only works for P2PKH addresses; basing signatures on Script means any coins can in principle be signed for.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            30,
+            32
+          ],
+          "quote": "The current message signing standard only works for P2PKH (1...) invoice addresses. We propose to extend and generalize the standard by using an approach based on Bitcoin Script. This ensures that any coins, no matter what script they are controlled by, can in principle be signed for."
+        }
+      ]
+    },
+    {
+      "id": "tx-shaped",
+      "statement": "The signature format resembles a Bitcoin transaction, for compatibility with signing hardware, but contains an invalid input so it cannot be spent on any real network.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            32,
+            35
+          ],
+          "quote": "For easy interoperability with existing signing hardware, we also define a signature message format that resembles a Bitcoin transaction (except that it contains an invalid input, so it cannot be spent on any real network)."
+        }
+      ]
+    },
+    {
+      "id": "ecdsa-no-commit",
+      "statement": "Legacy signatures are ECDSA signatures that do not commit to the public key, so they do not prove knowledge of a secret key; third parties can tweak them into valid signatures for related keys.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            37,
+            39
+          ],
+          "quote": "Additionally, the current message signature format uses ECDSA signatures that do not commit to the public key, meaning that they do not actually prove knowledge of any secret keys. (Indeed, valid signatures can be tweaked by third parties to become valid signatures on certain related keys.)"
+        }
+      ]
+    },
+    {
+      "id": "no-proof",
+      "statement": "No message signing protocol can prove control of funds: a signature is obsolete once created, and a key holder may sign messages for others without signing transactions.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            41,
+            44
+          ],
+          "quote": "Ultimately, no message signing protocol can actually prove control of funds, both because a signature is obsolete as soon as it is created, and because the possessor of a secret key may be willing to sign messages on others' behalf even if it would not sign actual transactions. No message signing protocol can fix these limitations."
+        }
+      ]
+    },
+    {
+      "id": "not-sender",
+      "statement": "BIP 322 shows a signer will be able to control funds sent to the address; it cannot prove that the signer sent a prior transaction.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            46,
+            48
+          ],
+          "quote": "Finally, this BIP only addresses the use case where a signer shows they will be able to control funds sent to the invoice address. Proving that a signer sent a prior transaction is not possible using this BIP."
+        }
+      ]
+    },
+    {
+      "id": "signature-def",
+      "statement": "In BIP 322 a \"signature\" is a witness stack, a full transaction or a PSBT that satisfies the address's script, and may not contain a cryptographic signature at all.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            52,
+            57
+          ],
+          "quote": "whenever the word \"signature\" or similar is used, it refers to the output of the signing process described below, and, depending on the script type of the <code>message_challenge</code>, is either a full transaction input witness stack, a full transaction, or a PSBT packet that can be validated against a Bitcoin Script Interpreter. Such a \"signature\" may or may not contain an actual cryptographic (ECDSA or Schnorr) signature, depending on what is required to satisfy the script corresponding to the <code>message_challenge</code>."
+        }
+      ]
+    },
+    {
+      "id": "formats",
+      "statement": "BIP 322 specifies three formats, legacy, simple and full, plus a full variant for proving control of a set of UTXOs; signers MUST prefix the signature with its variant (smp, ful, pof), and a verifier might assume simple when no prefix is present.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            61,
+            63
+          ],
+          "quote": "This BIP specifies three formats for signing messages: ''legacy'', ''simple'' and ''full''. Additionally, a variant of the ''full'' format can be used to demonstrate control over a set of UTXOs."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            97,
+            99
+          ],
+          "quote": "Signers MUST prefix the signature with the variant that was used to create the signature. To support backward compatibility with implementations of this BIP before it was finalized, a verifier might assume the ''simple'' variant in the absence of a prefix."
+        }
+      ]
+    },
+    {
+      "id": "legacy-rules",
+      "statement": "New proofs SHOULD use the new format for all addresses including P2PKH; the legacy format MAY be used but MUST be restricted to P2PKH.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            103,
+            105
+          ],
+          "quote": "New proofs SHOULD use the new format for all invoice address formats, including P2PKH. The legacy format MAY be used, but MUST be restricted to the legacy P2PKH invoice address format."
+        }
+      ]
+    },
+    {
+      "id": "simple",
+      "statement": "A simple signature is a witness stack, consensus-encoded and base64-encoded with prefix smp; validators rebuild to_spend and to_sign with default values and proceed as for a full signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            109,
+            112
+          ],
+          "quote": "A ''simple'' signature consists of a witness stack, consensus encoded as a vector of vectors of bytes, and base64-encoded, prefixed by the variant (<code>smp</code>). Validators should construct <code>to_spend</code> and <code>to_sign</code> as defined below, with default values for all fields"
+        }
+      ]
+    },
+    {
+      "id": "to-spend",
+      "statement": "to_spend has version 0, lock time 0, one input spending 000…000:0xFFFFFFFF with sequence 0 and scriptSig OP_0 PUSH32[message_hash], and one 0-value output to message_challenge; message_hash is the BIP 340 tagged hash with tag BIP0322-signed-message of the message as-is.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            138,
+            146
+          ],
+          "quote": "nVersion = 0 nLockTime = 0 vin[0].prevout.hash = 0000...000 vin[0].prevout.n = 0xFFFFFFFF vin[0].nSequence = 0 vin[0].scriptSig = OP_0 PUSH32[ message_hash ] vin[0].scriptWitness = [] vout[0].nValue = 0 vout[0].scriptPubKey = message_challenge"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            148,
+            151
+          ],
+          "quote": "where <code>message_hash</code> is a BIP340-tagged hash of the message, i.e., sha256_tag(m), where tag = <code>BIP0322-signed-message</code> and <code>m</code> is the message as-is without length prefix or null terminator, and <code>message_challenge</code> is the (public) key script to be proven."
+        }
+      ]
+    },
+    {
+      "id": "to-sign",
+      "statement": "to_sign spends to_spend's output 0, carries message_signature as its witness, and has one 0-value OP_RETURN output; version, lock time and sequence are 0 unless the full format sets them (e.g. for time locks).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            155,
+            163
+          ],
+          "quote": "nVersion = 0 or (FULL format only) as appropriate (e.g., 2 for time locks) nLockTime = 0 or (FULL format only) as appropriate (for time locks) vin[0].prevout.hash = to_spend.txid vin[0].prevout.n = 0 vin[0].nSequence = 0 or (FULL format only) as appropriate (for time locks) vin[0].scriptSig = [] or (FULL format only) as appropriate (for non segwit-native transactions) vin[0].scriptWitness = message_signature vout[0].nValue = 0 vout[0].scriptPubKey = OP_RETURN"
+        }
+      ]
+    },
+    {
+      "id": "full",
+      "statement": "A full signature is the ful-prefixed base64 encoding of the signed to_sign transaction.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            165,
+            166
+          ],
+          "quote": "A ''full'' signature consists of the variant-prefixed (<code>ful</code>) base64-encoding of the <code>to_sign</code> transaction in standard network serialisation once it has been signed."
+        }
+      ]
+    },
+    {
+      "id": "pof",
+      "statement": "Proof of Funds adds inputs for any UTXOs the signer wants to show control of, encoded as a pof-prefixed finalized PSBT; it does not prove completeness or that the UTXOs are unspent, which needs the current UTXO set.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            170,
+            171
+          ],
+          "quote": "The Proof of Funds variant extends the basic scheme: in addition to signing a message under a single address's key, the signer proves control over an arbitrary set of UTXOs."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            175,
+            177
+          ],
+          "quote": "In any case, however, the UTXO list does not aim to prove completeness (e.g., it does NOT mean: \"these are all UTXOs that exist for an address\"), nor that they are unspent (e.g., a validator must consult the blockchain to verify that)."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            207,
+            208
+          ],
+          "quote": "Unlike an ordinary signature, validators of a proof of funds need access to the current UTXO set, to learn that the claimed inputs exist on the blockchain and remain unspent."
+        }
+      ]
+    },
+    {
+      "id": "consensus-valid",
+      "statement": "Except for legacy, to_spend and to_sign must pass all consensus checks, except that the output 000…000:FFFFFFFF does not exist.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            216,
+            218
+          ],
+          "quote": "For all signature types, except legacy, the <code>to_spend</code> and <code>to_sign</code> transactions must be valid transactions which pass all consensus checks, except of course that the output with prevout <code>000...000:FFFFFFFF</code> does not exist."
+        }
+      ]
+    },
+    {
+      "id": "verdicts",
+      "statement": "A validator outputs one of three states: valid at time T and age S, inconclusive (unable to check the scripts), or invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            222,
+            234
+          ],
+          "quote": "A validator is given as input an address ''A'', signature ''s'' and message ''m'', and outputs one of three states: <ul> <li> ''valid at time T and age S'' indicates that the signature has set timelocks but is otherwise valid </li> <li> ''inconclusive'' means the validator was unable to check the scripts </li> <li> ''invalid'' means that some check failed"
+        }
+      ]
+    },
+    {
+      "id": "basic-validation",
+      "statement": "Validation recomputes to_spend from the message and address, decodes to_sign, and for full signatures checks that to_sign's first input spends to_spend's output and that it has exactly one output.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            243,
+            246
+          ],
+          "quote": "## Compute the transaction <code>to_spend</code> from ''m'' and ''A'' ## Decode ''s'' as the transaction <code>to_sign</code> ## If ''s'' was a full transaction or PSBT, confirm all fields are set as specified above; in particular that ##* <code>to_sign</code> has at least one input and its first input spends the output of <code>to_spend</code>"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            249,
+            249
+          ],
+          "quote": "##* <code>to_sign</code> has exactly one output, as specified above"
+        }
+      ]
+    },
+    {
+      "id": "interpreter",
+      "statement": "A validator without a full script interpreter should check it understands all scripts being satisfied, and otherwise output inconclusive.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            251,
+            251
+          ],
+          "quote": "# (Optional) If the validator does not have a full script interpreter, it should check that it understands all scripts being satisfied. If not, it should stop here and output ''inconclusive''."
+        }
+      ]
+    },
+    {
+      "id": "required-rules",
+      "statement": "Required rules: signatures MUST use SIGHASH_ALL (or SIGHASH_DEFAULT where supported); CODESEPARATOR and FindAndDelete are forbidden; LOW_S, STRICTENC, NULLFAIL, MINIMALDATA, CLEANSTACK and MINIMALIF apply; failure means invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            253,
+            254
+          ],
+          "quote": "## All signatures MUST use the <code>SIGHASH_ALL</code> flag, unless the output type supports <code>SIGHASH_DEFAULT</code>, which then MAY be used alternatively (e.g., [[bip-0341.mediawiki|BIP341 P2TR]]). ## The use of <code>CODESEPARATOR</code> or <code>FindAndDelete</code> is forbidden."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            259,
+            259
+          ],
+          "quote": "## If any of the above steps failed, the validator should stop and output the ''invalid'' state."
+        }
+      ]
+    },
+    {
+      "id": "upgradeable-rules",
+      "statement": "Upgradeable rules: to_sign's version must be 0 or 2, upgrade NOPs and SegWit versions above 1 are forbidden; failure means inconclusive.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            261,
+            264
+          ],
+          "quote": "## The version of <code>to_sign</code> must be 0 or 2. ## The use of NOPs reserved for upgrades is forbidden. ## The use of Segwit versions greater than 1 is forbidden. ## If any of the above steps failed, the validator should stop and output the ''inconclusive'' state."
+        }
+      ]
+    },
+    {
+      "id": "time-age",
+      "statement": "T is to_sign's nLockTime and S the nSequence of its first input; the output is valid at time T and age S.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            265,
+            265
+          ],
+          "quote": "# Let ''T'' be the nLockTime of <code>to_sign</code> and ''S'' be the nSequence of the first input of <code>to_sign</code>. Output the state ''valid at time T and age S''."
+        }
+      ]
+    },
+    {
+      "id": "encode-choice",
+      "statement": "A signer may use simple if they added no inputs, left version, sequence and lock time at 0, and the address is native SegWit; full if they added no inputs; otherwise they must use proof of funds.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            296,
+            306
+          ],
+          "quote": "If they added no inputs to <code>to_sign</code>, left nVersion, nSequence and nLockTime at 0, and ''A'' is a \"native\" Segwit address (P2WPKH, P2WSH, P2TR), then they may base64-encode <code>message_signature</code> with <code>smp</code> as prefix."
+        }
+      ]
+    },
+    {
+      "id": "signer-display",
+      "statement": "A PSBT signer must tell the user the message and address being signed for, and should present it like signing a message, not a transaction.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            423,
+            430
+          ],
+          "quote": "If all of the above steps are true, the signer must inform the user about the message they are signing and the address they are signing for. <ol> <li> Even though the message being signed is a transaction, the user interaction (e.g., the steps and messages shown on a hardware signing device's screen) should resemble the steps to sign a legacy message, not the steps for signing a transaction."
+        }
+      ]
+    },
+    {
+      "id": "never-broadcast",
+      "statement": "to_spend spends an output that cannot exist, so neither virtual transaction can be valid on chain; they are built only to be checked.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            34,
+            35
+          ],
+          "quote": "except that it contains an invalid input, so it cannot be spent on any real network"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            218,
+            218
+          ],
+          "quote": "output with prevout <code>000...000:FFFFFFFF</code> does not exist."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's BIP 322 model reproduces the published message hashes and both transaction IDs, and verifies every simple and full vector whose script it can check (P2WPKH, P2TR key path, P2WSH multisig); for P2PKH, P2SH and time-lock scripts, which need a script interpreter, it reports inconclusive. It rejects every published error vector, and the build fails if a figure's verdict differs from the vector's.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            510,
+            514
+          ],
+          "quote": "Basic test vectors for message hashing, transaction hashes and \"simple\" variant test cases can be found in [[bip-0322/basic-test-vectors.json|<code>basic-test-vectors.json</code>]]. Generated test vectors for more \"simple\" and \"full\" variant test cases can be found in [[bip-0322/generated-test-vectors.json|<code>generated-test-vectors.json</code>]]."
+        }
+      ]
+    },
+    {
+      "id": "psbt",
+      "statement": "Multisig signatures are produced by coordinating signers through a PSBT, as for a real multisig spend; BIP 322 adds the global field PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE (0x09) carrying the UTF-8 message.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            312,
+            315
+          ],
+          "quote": "A valid witness stack for a multisig address must be constructed by coordinating different signers to produce a partial signature each. The coordination procedure is not specified by this BIP, but due to the use of PSBTs it should closely resemble the coordination of signing a multisig transaction for publishing to the network."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            332,
+            336
+          ],
+          "quote": "| <tt>PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE = 0x09</tt> | None | No key data | <tt><bytes message></tt> | The UTF-8 encoded message to be signed."
+        }
+      ]
+    },
+    {
+      "id": "message-size",
+      "statement": "The BIP recommends keeping messages to a few kilobytes for compatibility and committing to very large messages by hash.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            378,
+            381
+          ],
+          "quote": "There is no specified maximum length of an input's <code>valuedata</code> or a PSBT as a whole in [[bip-0174.mediawiki|BIP174]], but different signers might impose safety limits. It is recommended to use a maximum length of a few kilobytes to maximize compatibility. Very large messages should be committed to by hash instead."
+        }
+      ]
+    }
+  ]
+}

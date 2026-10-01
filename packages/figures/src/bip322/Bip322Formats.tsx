@@ -4,6 +4,7 @@ import type { DerivedBip322FormatsFixture } from "../types";
 export function Bip322Formats({ fixture }: { fixture: DerivedBip322FormatsFixture }) {
   return (
     <div class="atlas-b322-formats">
+      <div class="atlas-table-wrap" tabIndex={0} role="region" aria-label="BIP 322 signature formats">
       <table class="atlas-bf-gr__table">
         <thead><tr><th scope="col">format</th><th scope="col">script types</th><th scope="col">prefix</th><th scope="col">what the signature is</th></tr></thead>
         <tbody>
@@ -12,6 +13,7 @@ export function Bip322Formats({ fixture }: { fixture: DerivedBip322FormatsFixtur
           ))}
         </tbody>
       </table>
+      </div>
       <p class="atlas-lab__source">Read from BIP 322’s “Types of Signatures” table (from line {fixture.source.line}). Legacy is the old signmessage format, allowed only for P2PKH; P2WSH and P2TR in the simple format exclude time-lock scripts.</p>
     </div>
   );

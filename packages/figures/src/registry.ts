@@ -474,6 +474,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "v2-rekey",
   },
+  {
+    id: "bip322-virtual-tx.v1",
+    description: "BIP 322 vectors: the message hash, the to_spend and to_sign virtual transactions, and the verdict.",
+    minFixtures: 1,
+    maxFixtures: 8,
+    interactive: true,
+    controls: ["Choose a published vector", "Switch to_spend/to_sign view", "Reveal the message hash"],
+    fixtureKind: "bip322-vector",
+  },
+  {
+    id: "bip322-formats.v1",
+    description: "BIP 322's signature formats, read from the BIP's table.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bip322-formats",
+  },
+  {
+    id: "bip322-verdicts.v1",
+    description: "The three verification outcomes, one published vector each.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bip322-verdicts",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
