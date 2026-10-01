@@ -11,7 +11,7 @@ export function getStaticPaths() {
 }
 
 const { chapter } = Astro.params as { chapter: string };
-const { publication: pub, fixtures, lock, citedClaims, claimNumbers } = loadChapter(chapter);
+const { publication: pub, fixtures, lock, citedClaims, claimNumbers, citations } = loadChapter(chapter);
 const order = listChapterIds();
 const titles = new Map(loadCatalog().chapters.map((c) => [c.id, c.questionTitle]));
 const here = order.indexOf(chapter);
@@ -45,8 +45,8 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
         <h1>{pub.title}</h1>
         <p class="atlas-dek">{pub.dek}</p>
         <div class="atlas-opening">
-          {pub.opening.blocks.map((b) => (
-            <p><Inline text={b.text} /><ClaimRefs claims={b.claims} numbers={claimNumbers} /></p>
+          {pub.opening.blocks.map((b, i) => (
+            <p><Inline text={b.text} /><ClaimRefs claims={b.claims} numbers={claimNumbers} at={`opening.blocks[${i}]`} /></p>
           ))}
         </div>
         <dl class="manual-meta atlas-meta">
@@ -81,7 +81,7 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
         </details>
       </div>
       <div class="atlas-chapter-hero">
-        <Figure figure={pub.opening.figure} numbers={claimNumbers} fixtures={fixtures} />
+        <Figure figure={pub.opening.figure} numbers={claimNumbers} fixtures={fixtures} path="opening.figure" />
       </div>
     </header>
 
@@ -99,14 +99,14 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
         {pub.sections.map((section) => (
           <section id={section.id} class="atlas-flow" aria-labelledby={`${section.id}-h`}>
             <h2 id={`${section.id}-h`}>{section.heading}</h2>
-            <Blocks blocks={section.blocks} numbers={claimNumbers} fixtures={fixtures} />
+            <Blocks blocks={section.blocks} numbers={claimNumbers} fixtures={fixtures} path={`sections.${section.id}`} />
           </section>
         ))}
 
         <section id="evidence" class="atlas-flow atlas-evidence" aria-labelledby="evidence-h">
           <h2 id="evidence-h">Evidence</h2>
           <p class="atlas-small">
-            Each numbered marker in the text points here. Quotes are verbatim from the BIP files at commit
+            Each numbered marker in the text points here, and the ↩ links lead back to every place that cites an entry. Quotes are verbatim from the BIP files at commit
             <a href={commitUrl}><code>{shortCommit(lock.commit)}</code></a>, including their wiki markup; links open
             the exact lines; the quoted text sits under each entry. Labels say what kind of statement each is: a rule, the author’s rationale, history,
             a test vector, or our own inference.
@@ -115,6 +115,13 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
             {citedClaims.map((claim) => (
               <li id={`claim-${claim.id}`} value={claim.number}>
                 <p>
+                  <span class="atlas-backrefs">
+                    {(citations.get(claim.id) ?? []).map((c, k, all) => (
+                      <a href={`#${c.anchor}`} aria-label={`Back to the text: ${c.where}${all.length > 1 ? `, citation ${k + 1} of ${all.length}` : ""}`} title={c.where}>
+                        {all.length === 1 ? "↩" : k === 0 ? `↩ ${String.fromCharCode(97 + k)}` : String.fromCharCode(97 + k)}
+                      </a>
+                    ))}
+                  </span>
                   <span class="atlas-tag" data-scope={claim.scope}>{scopeLabel[claim.scope]}</span>
                   {claim.statement}
                 </p>
@@ -150,4 +157,19 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
       </div>
     </div>
   </article>
+  <script>
+    // A citation or evidence entry can sit inside a closed disclosure; open it before the browser scrolls.
+    const reveal = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      if (!target) return;
+      let opened = false;
+      for (let d = target.closest("details"); d; d = d.parentElement?.closest("details") ?? null) {
+        if (!d.open) (d.open = true), (opened = true);
+      }
+      if (opened) target.scrollIntoView();
+    };
+    window.addEventListener("hashchange", reveal);
+    reveal();
+  </script>
 </Base>

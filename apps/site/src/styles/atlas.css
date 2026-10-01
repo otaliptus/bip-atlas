@@ -855,3 +855,12 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
   .atlas-ts-stacks, .atlas-ts-witness__split { grid-template-columns: minmax(0, 1fr); }
 }
 .atlas-tweak__flow li[data-part="output"] .atlas-tweak__label { color: var(--manual-ink); }
+
+/* ---------- citation back-links ---------- */
+.atlas-refs { scroll-margin-block: 6rem; }
+.atlas-refs:target { background: var(--manual-blue-fill); outline: 2px solid var(--manual-blue); outline-offset: 2px; border-radius: 2px; }
+.atlas-evidence__list li { scroll-margin-block: 2rem; }
+.atlas-evidence__list li:target { background: var(--manual-blue-wash); box-shadow: -0.75rem 0 0 var(--manual-blue-wash), 0.75rem 0 0 var(--manual-blue-wash); }
+.atlas-backrefs { display: inline-flex; gap: 0.3rem; margin-inline-end: 0.5rem; font-family: var(--manual-code); font-size: 0.8125rem; }
+.atlas-backrefs a { text-decoration: none; color: var(--manual-blue-dark); padding: 0 0.15rem; border-bottom: 1px solid currentColor; }
+.atlas-backrefs a:hover, .atlas-backrefs a:focus-visible { background: var(--manual-blue-wash); }

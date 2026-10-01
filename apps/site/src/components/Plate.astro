@@ -7,8 +7,9 @@ interface Props {
   figure: Figure;
   numbers: Map<string, number>;
   interactive?: boolean;
+  path: string;
 }
-const { figure, numbers, interactive = false } = Astro.props;
+const { figure, numbers, interactive = false, path } = Astro.props;
 const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
 ---
 <figure class:list={["manual-plate", "atlas-plate", `atlas-plate--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`}>
@@ -22,6 +23,6 @@ const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
     <slot />
   </div>
   <figcaption class="manual-plate-caption">
-    <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} />
+    <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
   </figcaption>
 </figure>

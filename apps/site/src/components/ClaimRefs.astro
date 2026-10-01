@@ -1,13 +1,16 @@
 ---
+import { citeAnchor } from "../lib/content";
 interface Props {
   claims: string[];
   numbers: Map<string, number>;
+  /** Block path from walkBlocks; becomes this marker's anchor so the evidence list can link back. */
+  at?: string;
 }
-const { claims, numbers } = Astro.props;
+const { claims, numbers, at } = Astro.props;
 const refs = claims.map((id) => ({ id, n: numbers.get(id)! })).sort((a, b) => a.n - b.n);
 ---
 {refs.length > 0 && (
-  <sup class="atlas-refs">
+  <sup class="atlas-refs" id={at ? citeAnchor(at) : undefined}>
     {refs.map((r, i) => (
       <>{i > 0 && <span aria-hidden="true">,</span>}<a href={`#claim-${r.id}`} aria-label={`Evidence ${r.n}`}>{r.n}</a></>
     ))}
