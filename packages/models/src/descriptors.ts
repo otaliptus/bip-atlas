@@ -348,8 +348,11 @@ function addrScript(a: string): string {
       const v = d.words[0];
       if ((v === 0) !== (codec === bech32)) continue;
       const prog = codec.fromWords(d.words.slice(1));
+      // BIP 173/350: version 0–16, program 2–40 bytes, and v0 programs are 20 or 32 bytes.
+      if (v > 16 || prog.length < 2 || prog.length > 40 || (v === 0 && prog.length !== 20 && prog.length !== 32)) throw new DescriptorError("invalid address");
       return (v === 0 ? "00" : (0x50 + v).toString(16)) + push(prog);
-    } catch {
+    } catch (e) {
+      if (e instanceof DescriptorError) throw e;
       /* try next */
     }
   }

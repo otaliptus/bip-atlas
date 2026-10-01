@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { bech32, bech32m } from "@scure/base";
 import { describe, expect, it } from "vitest";
 import { descsumCheck, descsumCreate, descsumExpand } from "../src/descsum";
 import { DescriptorDerivationError, DescriptorError, DescriptorScopeError, expand, keyAt, parseDescriptor, parseKey } from "../src/descriptors";
@@ -199,5 +200,22 @@ describe("descriptors chapter prose numbers", () => {
     const ranged = validVectors(382).find((v) => v.desc.startsWith("wpkh([ffffffff/13']xpub"))!;
     expect(ranged.scripts[0].length).toBe(3);
     expect(text).toContain("lists its first three");
+  });
+});
+
+describe("addr() validates witness programs (BIP 173/350)", () => {
+  const enc = (v: number, prog: number[]) => (v === 0 ? bech32 : bech32m).encode("bc", [v, ...(v === 0 ? bech32 : bech32m).toWords(Uint8Array.from(prog))]);
+  const run = (a: string) => expand(parseDescriptor(`addr(${a})`));
+
+  it("accepts a 20-byte v0 and a 32-byte v1 program", () => {
+    expect(run(enc(0, Array(20).fill(1)))[0]).toBe("0014" + "01".repeat(20));
+    expect(run(enc(1, Array(32).fill(2)))[0]).toBe("5120" + "02".repeat(32));
+  });
+
+  it("rejects a v0 program that is not 20 or 32 bytes, and programs outside 2–40 bytes", () => {
+    expect(() => run(enc(0, [1, 2]))).toThrow(DescriptorError);
+    expect(() => run(enc(0, Array(25).fill(3)))).toThrow(DescriptorError);
+    expect(() => run(enc(1, [4]))).toThrow(DescriptorError);
+    expect(() => run(enc(1, Array(41).fill(5)))).toThrow(DescriptorError);
   });
 });

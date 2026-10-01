@@ -143,3 +143,13 @@ describe("transaction-level scanning rules", () => {
     expect(() => decodeAddress(encodeAddressWithPrefix("bc", Bscan, Bm))).toThrow("sp or tsp");
   });
 });
+
+describe("address validation", () => {
+  it("rejects a v0 address whose keys are not valid compressed points", () => {
+    const good = vectors[0].receiving[0].expected.addresses[0];
+    const { Bscan } = decodeAddress(good);
+    const notAPoint = "02" + "ff".repeat(32); // x >= p
+    expect(() => decodeAddress(encodeAddressWithPrefix("sp", Bscan, notAPoint))).toThrow("two valid compressed public keys");
+    expect(() => decodeAddress(encodeAddressWithPrefix("sp", "05" + Bscan.slice(2), Bscan))).toThrow("two valid compressed public keys");
+  });
+});

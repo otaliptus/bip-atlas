@@ -198,6 +198,9 @@ export function decodeAddress(address: string): { hrp: string; version: number; 
   if (version === 31) throw new SilentPaymentError("version 31 is reserved");
   if (version === 0 && data.length !== 66) throw new SilentPaymentError("v0 data part must be exactly 66 bytes");
   if (data.length < 66) throw new SilentPaymentError("data part shorter than 66 bytes");
+  for (const k of [data.slice(0, 33), data.slice(33, 66)]) {
+    try { Point.fromHex(bytesToHex(k)); } catch { throw new SilentPaymentError("address does not contain two valid compressed public keys"); }
+  }
   return { hrp: d.prefix, version, Bscan: bytesToHex(data.slice(0, 33)), Bm: bytesToHex(data.slice(33, 66)) };
 }
 
