@@ -1,40 +1,65 @@
-# Handoff — where things stand and what to do next
+# Handoff: where things stand and what to do next
 
-Last updated: 1 October 2026, end of the cloud session that built phase two. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 1 October 2026, at the end of the cloud session that built phase three. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
-- **Phases one and two are drafted:** eight chapters covering all ten primary BIPs (39, 32, 141, 143, 173, 350, 174, 340, 341, 342). Each chapter has had one independent technical review, applied and recorded in `review/` (`addresses-milestone-1-2.md`, `phase-one.md`, `phase-two.md`). Every chapter's `reviewState` is `in-review`: no human sign-off yet.
-- **Phase two (this session, branch `main-q0i8zv`):** `schnorr` (BIP 340), `taproot` (BIP 341), `tapscript` (BIP 342). See `review/phase-two.md` for what is tested, the deliberate-breakage table, the review findings and what was not verified.
-- **Tapscript sources:** BIP 342 has no executable vectors in the snapshot, so its traces come from six cases of Bitcoin Core's `script_assets_test.json` (linked from BIP 341 L304), pinned by commit and hash as an excerpt in `sources/external/`. The recorder in `packages/models/src/tapscript.ts` is deliberately narrow and throws for unsupported opcodes; the build fails unless each recorded verdict matches Core's label.
-- **Tests:** vitest (models + content contracts) plus 36 kit Python tests, all green; one optional sweep test runs only with `SCRIPT_ASSETS_FULL=<path to the full pinned script_assets_test.json>`. `pnpm check` and `pnpm build` are clean.
-- **Live:** https://bip-atlas.pages.dev (Cloudflare Pages project `bip-atlas`). `_headers` sends `X-Robots-Tag: noindex` until a chapter is signed off.
-- **CI:** `.github/workflows/deploy.yml` runs check, test and build on every push and PR. The deploy step is still skipped: the `CLOUDFLARE_API_TOKEN` repo secret has not been added (see below). `main` goes to production, other branches to preview URLs once it exists.
+- **Eighteen chapters are drafted.**
+  - Phases one and two (eight chapters: BIPs 39, 32, 141, 143, 173, 350, 174, 340, 341, 342) are merged to `main` and live.
+  - Phase three (ten chapters, branch `main-q0i8zv`) follows `catalog-phase3.json`. Chapters, with figure prefixes A9–A18:
 
-- **Reader features (this session, after phase two):** (a) every evidence entry links back to each place that cites it, opening a closed Details block if needed; (b) every interactive figure is a two-tab plate, A Interactive and B Worked example (an exploded isometric walk through one published case), with per-chapter accent colours. Recorded in `review/reader-features.md`. The design brief referenced makingsoftware.com, which the cloud container could not reach (egress blocked); the style was built from the user's description. A human look at the visual direction is the next useful step.
+    | Chapter | BIPs |
+    |---|---|
+    | `p2sh` | 16 |
+    | `timelocks` | 65/68/112/113 |
+    | `version-bits` | 9/8 |
+    | `wallet-paths` | 44/84/86 |
+    | `descriptors` | 380–386 |
+    | `musig2` | 327 |
+    | `silent-payments` | 352 |
+    | `block-filters` | 157/158 |
+    | `v2-transport` | 324 |
+    | `message-signing` | 322 |
+
+  - Each chapter has had one independent technical review. The fixes were applied and recorded in `review/` (`phase-three.md` covers the new ten). Every `reviewState` is `in-review`: no human has signed off any chapter yet.
+- **Phase-three sources:**
+  - Snapshot: `sources/research-2026-10-01-phase3`, the same `bitcoin/bips` commit, including each BIP's auxiliary vector files.
+  - External pinned files: `sources/external/` holds Bitcoin Core v29.0 locktime cases (an excerpt; `tools/extract-locktime-cases.mjs` rebuilds it).
+  - Fixtures cite their source line; the build re-checks each quote.
+- **Scope limits worth knowing:**
+  - **ElligatorSwift** (BIP 324) is not implemented, because no audited JS library has it and the crypto rule forbids hand-rolling. The v2 model takes decoded X coordinates from the vectors and says so everywhere.
+  - **SipHash-2-4** (BIP 158) comes from the `siphash` npm package (Frank Denis). It is not `@noble`, but it is not hand-rolled either; it passes the SipHash paper vector, and SipHash is not security-critical here.
+  - **BIP 322 verification** covers P2WPKH, P2TR key path and P2WSH multisig. Other scripts report `inconclusive`, which is the BIP's own state for a verifier without a script interpreter.
+  - **Recorders** (`p2sh.ts`, `tapscript.ts`) and other narrow models throw a scope error for anything outside their reviewed set.
+- **Tests:** vitest covers models, content contracts and prose-number tests (about 760), plus the kit's Python suite, all green. `pnpm check` and `pnpm build` are clean. Each model has a deliberate-breakage table in the review record.
+- **Visual checks:**
+  - Desktop 1440 and mobile 375 screenshots of every phase-three chapter and its key figure states are in `review/screenshots/phase3/`, with no horizontal overflow.
+  - axe-core (WCAG 2.1 A/AA + best practice) is clean at 1440, 375, no-JS, the worked tab and interactive states.
+  - Client JS is about 49 KB gzipped across all island bundles, under the 60 KB budget.
+- **Live:** https://bip-atlas.pages.dev serves `main`, which is phases one and two. `_headers` sends `X-Robots-Tag: noindex` until a chapter is signed off.
 
 ## Next steps
 
-1. **Check CI** on the latest push. If the deploy step was skipped because the token is missing, tell the user and carry on.
-2. **Human review of phase two and the new tabs/back-links.** The user should read `review/phase-two.md` and the three chapters (preview or local `pnpm dev`). Merge `main-q0i8zv` into `main` only when the user asks.
+1. **Open (or update) the phase-three PR** from `main-q0i8zv` to `main`, check CI, and merge only when the user asks.
+2. **Human review of phase three.** The user should read `review/phase-three.md` and the ten chapters on the preview URL or with `pnpm dev`.
 3. **Open items, in rough priority:**
-   - Accessibility: an axe-core run (WCAG 2.1 A/AA + best practice) is clean on all eight chapters, with both figure tabs, at 1440 px (and 375 px for phase two). Still not done: a screen-reader session for each hero.
-   - Tablet-width (768–1024 px) screenshots; `tools/screenshots.mjs` takes a JSON list of states (`PLAYWRIGHT_MODULE` can point at a global Playwright install).
-   - Tapscript: the BIP 342 signature-message extension has no vector of its own; if a pinned source with script-path sighash vectors appears, add it. Widening the recorder (OP_CODESEPARATOR, annex, CLTV/CSV) needs new reviewed cases and tests first.
-   - Milestone 3 of the spec (automated generation from the evidence ledger), only after the user signs off the hand-authored chapters.
-   - Font items from earlier sessions: Departure Mono vs Silkscreen; body-font subsetting.
+   - **Screen readers:** a screen-reader pass on each hero.
+   - **Tablet screenshots:** 768–1024 px.
+   - **BIP 322:** a script interpreter would turn the `inconclusive` cases (P2PKH, P2SH, time-lock scripts) into checked ones. That needs the same reviewed-opcode discipline as `tapscript.ts`.
+   - **BIP 324:** if an audited ElligatorSwift implementation appears (e.g. in `@noble/curves`), add decoding and check `ellswift_decode_test_vectors.csv`.
+   - **Milestone 3** of the spec (generation from the ledger), only after sign-off.
 
 ## Things a cloud session should know
 
-- **Setup:** `pnpm install` (pnpm 9 via corepack, Node ≥ 20), plus Python 3 for `pnpm test`. No other services are needed.
-- **Sources:** `vendor/` (the full `bitcoin/bips` clone) is not in git and is not needed; `sources/research-2026-10-01` holds the pinned snapshot. To refresh sources, follow `README.md` and pin a new commit deliberately.
-- **Visual checks:** `tools/screenshots.mjs` (Playwright) screenshots chapter states and reports overflow, page errors and third-party requests; serve the build with `pnpm preview` first. Cloud containers have Chromium preinstalled (`/opt/pw-browsers`; do not run `playwright install`). If no browser is available, state plainly which visual checks were not done. Never claim them.
-- **Publishing:** pushing to `main` deploys to production once the token secret exists. Prefer a branch plus PR (preview URL) for new chapters, and keep `noindex` until the user signs off.
-- **Out of scope unless the user asks:** don't remove `noindex`, mark chapters `approved`, edit the kit originals, or add input fields for real keys, phrases, addresses or PSBTs.
+- **Setup:** `pnpm install` (pnpm 9 via corepack, Node ≥ 20), plus Python 3 for `pnpm test`.
+- **`pnpm check` coverage:** it typechecks the packages, not `apps/site/src/lib/derive.ts`. The build catches errors there, so run `pnpm build` too.
+- **Visual checks:**
+  - Serve the build first, then run `tools/screenshots.mjs`. Use `PLAYWRIGHT_MODULE=$(npm root -g)/playwright/index.mjs`; Chromium is preinstalled, so do not run `playwright install`.
+  - `{"label": …}` actions match accessible names by substring. Pick unique text, because a `<section aria-label>` can match too.
+- **CSV sources:** some pinned CSVs have CRLF line endings. Split on `/\r?\n/`, or the last column's name keeps a `\r` and its checks are silently skipped. This happened once with BIP 324.
+- **Out of scope unless the user asks:** don't remove `noindex`, mark chapters `approved`, edit the kit originals, or add input fields for real keys, phrases, addresses, PSBTs or messages to sign.
 
 ## User actions pending
 
-- Create a Cloudflare API token with **Account → Cloudflare Pages → Edit** and store it as a repo secret:
-  `gh secret set CLOUDFLARE_API_TOKEN --repo otaliptus/bip-atlas`
-  (`CLOUDFLARE_ACCOUNT_ID` is already set.)
-- Human sign-off of the five chapters when ready (then set `reviewState: "approved"` and drop `noindex`).
+- If deploys are still skipped, add a Cloudflare API token with **Account → Cloudflare Pages → Edit** as the repo secret `CLOUDFLARE_API_TOKEN`. `CLOUDFLARE_ACCOUNT_ID` is already set.
+- Sign off chapters when ready: set `reviewState: "approved"` and drop `noindex`.
