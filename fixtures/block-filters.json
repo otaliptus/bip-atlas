@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "block-filters",
+  "warning": "BIP 158 testnet test vectors: public block data.",
+  "fixtures": [
+    {
+      "id": "bf-golomb",
+      "kind": "bf-golomb",
+      "label": "Golomb-Rice codes",
+      "shortLabel": "P = 2 table and a P = 19 code",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158.mediawiki",
+        "line": 138,
+        "section": "Golomb-Rice Coding",
+        "quote": "! n !! (q, r) !! c"
+      },
+      "exampleHeight": 1263442
+    },
+    {
+      "id": "bf-block-926485",
+      "kind": "bf-block",
+      "label": "Block 926,485",
+      "shortLabel": "duplicate pushdata",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 9,
+        "section": "Appendix C: Test Vectors",
+        "quote": "000000000000015d6077a411a8f5cc95caf775ccf11c54e27df75ce58d187313"
+      },
+      "height": 926485
+    },
+    {
+      "id": "bf-block-1263442",
+      "kind": "bf-block",
+      "label": "Block 1,263,442",
+      "shortLabel": "witness data",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 11,
+        "section": "Appendix C: Test Vectors",
+        "quote": "000000006f27ddfe1dd680044a34548f41bed47eba9e6f0b310da21423bc5f33"
+      },
+      "height": 1263442
+    },
+    {
+      "id": "bf-block-180480",
+      "kind": "bf-block",
+      "label": "Block 180,480",
+      "shortLabel": "spends an empty script",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 8,
+        "section": "Appendix C: Test Vectors",
+        "quote": "00000000fd3ceb2404ff07a785c7fdcc76619edc8ed61bd25134eaa22084366a"
+      },
+      "height": 180480
+    },
+    {
+      "id": "bf-block-49291",
+      "kind": "bf-block",
+      "label": "Block 49,291",
+      "shortLabel": "pays an empty script",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 7,
+        "section": "Appendix C: Test Vectors",
+        "quote": "0000000018b07dca1b28b4b5a119f6d6e71698ce1ed96f143f54179ce177a19c"
+      },
+      "height": 49291
+    },
+    {
+      "id": "bf-block-15007",
+      "kind": "bf-block",
+      "label": "Block 15,007",
+      "shortLabel": "OP_RETURN output",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 6,
+        "section": "Appendix C: Test Vectors",
+        "quote": "0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad"
+      },
+      "height": 15007
+    },
+    {
+      "id": "bf-block-1414221",
+      "kind": "bf-block",
+      "label": "Block 1,414,221",
+      "shortLabel": "empty filter",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 12,
+        "section": "Appendix C: Test Vectors",
+        "quote": "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1"
+      },
+      "height": 1414221
+    },
+    {
+      "id": "bf-chain",
+      "kind": "bf-chain",
+      "label": "Filter headers, blocks 0, 2 and 3",
+      "shortLabel": "header chain",
+      "source": {
+        "bip": 158,
+        "file": "bip-0158/testnet-19.json",
+        "line": 3,
+        "section": "Appendix C: Test Vectors",
+        "quote": "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"
+      },
+      "heights": [
+        0,
+        2,
+        3
+      ]
+    }
+  ]
+}

@@ -49,7 +49,7 @@
       "id": "sp-case-12",
       "kind": "sp-vector",
       "label": "A labeled address",
-      "shortLabel": "label m = 2",
+      "shortLabel": "found via a label",
       "source": {
         "bip": 352,
         "file": "bip-0352/send_and_receive_test_vectors.json",
@@ -91,7 +91,7 @@
       "id": "sp-eligibility",
       "kind": "sp-eligibility",
       "label": "Which inputs count",
-      "shortLabel": "four vectors",
+      "shortLabel": "five vectors",
       "source": {
         "bip": 352,
         "file": "bip-0352/send_and_receive_test_vectors.json",

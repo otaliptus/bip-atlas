@@ -45,6 +45,15 @@ import {
   evaluateCoreLockCase,
   createOutputs,
   scan as spScan,
+  buildBasicFilter,
+  blockHash as bfBlockHash,
+  blockOutputScripts,
+  filterHeader as bfFilterHeader,
+  golombBits,
+  matchFilter,
+  BitReader,
+  golombDecode,
+  BASIC_P,
   readInput as spReadInput,
   receiverAddresses,
   parseWitness,
@@ -150,6 +159,13 @@ import type {
   DerivedP2shFixture,
   P2shSpendFixture,
   SchnorrVectorFixture,
+  BfBlockFixture,
+  DerivedBfBlockFixture,
+  BfChainFixture,
+  DerivedBfChainFixture,
+  BfGolombFixture,
+  DerivedBfGolombFixture,
+  BfCode,
 } from "@bip-atlas/figures";
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
@@ -1127,6 +1143,7 @@ const spInputs = (vins: any[]) =>
 function deriveSp(f: SpVectorFixture): DerivedSpFixture {
   checkMusigSource(f);
   const c = spVectors()[f.caseIndex];
+  if (c.comment !== f.source.quote) throw new Error(`${f.id}: caseIndex ${f.caseIndex} is not the cited vector`);
   const s = c.sending[0], r = c.receiving[0];
   const send = createOutputs(s.given.vin.map((v: any) => ({ ...spVin(v), privateKey: v.private_key })), s.given.recipients.flatMap((x: any) => Array(x.count ?? 1).fill(x.address)));
   if (!s.expected.outputs.some((set: string[]) => set.length === send.outputs.length && set.every((o) => send.outputs.includes(o)))) throw new Error(`${f.id}: sender outputs differ from the vector`);
@@ -1140,25 +1157,24 @@ function deriveSp(f: SpVectorFixture): DerivedSpFixture {
   if (JSON.stringify(res.found.map((x) => x.pubKey).sort()) !== JSON.stringify(want)) throw new Error(`${f.id}: found outputs differ from the vector`);
   const dec = spDecodeAddress(addrs[0]);
   const senderSecret = send.sharedSecrets.find((x) => x.Bscan === dec.Bscan)?.secret ?? null;
+  const paidScan = spDecodeAddress(s.given.recipients[0].address).Bscan;
   return {
     ...f,
     derived: {
       comment: c.comment,
       inputs: spInputs(g.vin),
-      smallestOutpoint: send.failure ? "" : (() => {
-        const ser = g.vin.map((v: any) => v.txid.match(/../g)!.reverse().join("") + [0, 8, 16, 24].map((sh) => ((v.vout >>> sh) & 0xff).toString(16).padStart(2, "0")).join("")).sort()[0];
-        return ser;
-      })(),
+      smallestOutpoint: res.smallestOutpoint!,
       A: res.A!,
       inputHash: res.inputHash!,
       tweak: res.tweak!,
       sharedSecret: res.sharedSecret!,
       secretsAgree: senderSecret === res.sharedSecret,
-      senderSecret: send.sharedSecrets[0]?.secret ?? "",
+      senderSecret: send.sharedSecrets.find((x) => x.Bscan === paidScan)?.secret ?? "",
       receiver: { address: addrs[0], Bscan: dec.Bscan, Bspend: dec.Bm, labels: g.labels, labeledAddresses: addrs.slice(1) },
       paidTo: [...new Set<string>(s.given.recipients.map((x: any) => x.address))].map((a) => {
         const i = addrs.indexOf(a);
-        return { address: a, ours: i >= 0, label: i > 0 ? g.labels[i - 1] : null };
+        const k = spDecodeAddress(a);
+        return { address: a, Bscan: k.Bscan, Bm: k.Bm, ours: i >= 0, label: i > 0 ? g.labels[i - 1] : null };
       }),
       senderOutputs: send.outputs,
       txOutputs: g.outputs.map((o: string) => {
@@ -1176,9 +1192,97 @@ function deriveSpEligibility(f: SpEligibilityFixture): DerivedSpEligibilityFixtu
   return { ...f, derived: { rows: f.caseIndices.map((i) => ({ comment: spVectors()[i].comment, inputs: spInputs(spVectors()[i].receiving[0].given.vin) })) } };
 }
 
+/* ---------- BIPs 157/158 ---------- */
+let bfRowsCache: any[][] | null = null;
+/** testnet-19.json rows: [height, block hash, block, prev output scripts, previous basic header, basic filter, basic header, notes]. */
+const bfRows = () => (bfRowsCache ??= JSON.parse(pinnedText("bip-0158/testnet-19.json", SNAPSHOT_PHASE3)).slice(1));
+const bfRow = (height: number) => {
+  const r = bfRows().find((x) => x[0] === height);
+  if (!r) throw new Error(`no BIP 158 vector for block ${height}`);
+  return r;
+};
+/** Build a vector's filter with the model; throw unless filter, block hash and header equal the published ones. */
+function bfBuild(height: number) {
+  const [, hash, block, prev, prevHeader, filter, header, notes] = bfRow(height);
+  if (bfBlockHash(block) !== hash) throw new Error(`block ${height}: block hash differs from the vector`);
+  const f = buildBasicFilter(hash, block, prev, prevHeader);
+  if (HX(f.filter) !== filter) throw new Error(`block ${height}: filter differs from the vector`);
+  if (f.header !== header) throw new Error(`block ${height}: filter header differs from the vector`);
+  return { f, hash, block, prevHeader, notes: notes as string };
+}
+const bfCode = (delta: bigint): BfCode => {
+  const g = golombBits(delta, BASIC_P);
+  return { delta: delta.toString(), q: Number(g.q), r: g.r.toString(), unary: g.unary, remainder: g.remainder };
+};
+
+function deriveBfBlock(f: BfBlockFixture): DerivedBfBlockFixture {
+  checkMusigSource(f);
+  const { f: b, hash, block, prevHeader, notes } = bfBuild(f.height);
+  // The drawn codes must be the filter's own leading bits.
+  const shown = b.deltas.slice(0, 6).map(bfCode);
+  const bits = shown.map((c) => c.unary + c.remainder).join("");
+  const r = new BitReader(b.compressed);
+  const lead = Array.from({ length: bits.length }, () => r.read()).join("");
+  if (lead !== bits) throw new Error(`${f.id}: drawn Golomb-Rice codes differ from the filter's bits`);
+  const bitsTotal = b.deltas.reduce((n, d) => n + Number(d >> BigInt(BASIC_P)) + 1 + BASIC_P, 0);
+  const own = b.elements.slice(0, 3).map((s) => ({ script: s, from: "this block" }));
+  const others = bfRows()
+    .filter((x) => x[0] !== f.height)
+    .flatMap((x) => buildBasicFilter(x[1], x[2], x[3], x[4]).elements.map((s: string) => ({ script: s, from: `block ${x[0]}` })))
+    .filter((p) => !b.elements.includes(p.script))
+    .filter((p, i, a) => a.findIndex((q) => q.script === p.script) === i)
+    .slice(0, 3);
+  const probes = [...own, ...others].map((p) => {
+    const m = matchFilter(b.filter, hx(p.script), b.key);
+    if (p.from === "this block" && !m.matched) throw new Error(`${f.id}: an element does not match its own filter`);
+    return { ...p, matched: m.matched, target: m.target.toString(), steps: m.steps.map((s) => ({ value: s.value.toString(), outcome: s.outcome })) };
+  });
+  return {
+    ...f,
+    derived: {
+      height: f.height, hash, notes, txCount: blockOutputScripts(block).txCount, N: b.N, F: b.F.toString(),
+      filterHex: HX(b.filter), filterBytes: b.filter.length, elements: b.views,
+      values: b.values.map(String), codes: shown, bitsTotal, paddingBits: b.compressed.length * 8 - bitsTotal,
+      probes, filterHash: b.filterHash, prevHeader, header: b.header,
+    },
+  };
+}
+
+function deriveBfChain(f: BfChainFixture): DerivedBfChainFixture {
+  checkMusigSource(f);
+  const rows = f.heights.map((h, i) => {
+    const { f: b, hash, prevHeader } = bfBuild(h);
+    const prevH = i > 0 ? f.heights[i - 1] : null;
+    const linksToPrevious = prevH === null ? (prevHeader === "0".repeat(64) ? true : null) : prevH === h - 1 ? prevHeader === bfBuild(prevH).f.header : null;
+    if (linksToPrevious === false) throw new Error(`${f.id}: block ${h} does not chain to block ${prevH}`);
+    if (bfFilterHeader(b.filter, prevHeader).header !== b.header) throw new Error(`${f.id}: header recomputation differs`);
+    return { height: h, hash, filterHex: HX(b.filter), filterHash: b.filterHash, prevHeader, header: b.header, linksToPrevious };
+  });
+  return { ...f, derived: { rows } };
+}
+
+function deriveBfGolomb(f: BfGolombFixture): DerivedBfGolombFixture {
+  checkMusigSource(f);
+  const lines = pinnedText("bip-0158.mediawiki", SNAPSHOT_PHASE3).split("\n");
+  const table = lines.filter((l) => /^\| \d+ \|\| \(/.test(l)).map((l) => {
+    const m = l.match(/^\| (\d+) \|\| \((\d+), (\d+)\) \|\| <code>([01]+) ([01]+)<\/code>/)!;
+    const g = golombBits(BigInt(m[1]), 2);
+    if (`${g.unary} ${g.remainder}` !== `${m[4]} ${m[5]}` || Number(g.q) !== Number(m[2]) || Number(g.r) !== Number(m[3])) throw new Error(`${f.id}: model differs from BIP 158's table at n = ${m[1]}`);
+    return { n: Number(m[1]), q: Number(m[2]), r: Number(m[3]), code: `${m[4]} ${m[5]}` };
+  });
+  if (table.length !== 10) throw new Error(`${f.id}: expected ten table rows`);
+  const { f: b } = bfBuild(f.exampleHeight);
+  const r = new BitReader(b.compressed);
+  if (golombDecode(r, BASIC_P) !== b.deltas[0]) throw new Error(`${f.id}: example delta differs`);
+  return { ...f, derived: { table, example: { height: f.exampleHeight, value: b.values[0].toString(), code: bfCode(b.deltas[0]) } } };
+}
+
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
   const schnorrGroup = fixtures.filter((f) => f.kind === "schnorr-vector") as unknown as SchnorrVectorFixture[];
   return fixtures.map((f) => {
+    if (f.kind === "bf-block") return deriveBfBlock(f as unknown as BfBlockFixture) as unknown as T;
+    if (f.kind === "bf-chain") return deriveBfChain(f as unknown as BfChainFixture) as unknown as T;
+    if (f.kind === "bf-golomb") return deriveBfGolomb(f as unknown as BfGolombFixture) as unknown as T;
     if (f.kind === "sp-vector") return deriveSp(f as unknown as SpVectorFixture) as unknown as T;
     if (f.kind === "sp-eligibility") return deriveSpEligibility(f as unknown as SpEligibilityFixture) as unknown as T;
     if (f.kind === "musig2-session") return deriveMusig2Session(f as unknown as Musig2SessionFixture) as unknown as T;

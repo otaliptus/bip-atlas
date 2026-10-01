@@ -167,3 +167,29 @@ Not changed: `raw()` with an empty argument, a threshold written `01`, mainnet-o
 | 10–15 (nits) | Key-path scoping of "nothing on chain shows"; "allows" not "suggests"; "make it possible to extract"; "a requirement"; ECDSA tense; caption "a valid one"; derive now fails on any non-verifying partial signature; clearer parity wording | All applied |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (start, three-tweak case at the end, hidden aggregates, mobile mid-session, key-aggregation and partial-signature figures, worked tab, no-JS); no overflow. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.
+
+## Chapter 15 — Silent payments (BIP 352)
+
+**Model:** `packages/models/src/silentpayments.ts`, a transcription of BIP 352's `reference.py` onto `@noble/curves`, `@noble/hashes` and `@scure/base` (bech32m): input reading for the four listed types (P2PKH sliding-window key search with hash160 match, P2SH-P2WPKH, P2WPKH, P2TR with annex pop and NUMS-H skip), outpoint serialization and sort, input hash, sender output creation (taproot negation, a = 0 failure, grouping by scan key, K_max), receiver scan (labels, negated-output label check, K_max stop), address encoding and decoding. `scanEligible()` states the transaction-level rules that, like the reference, `scan()` leaves to the caller.
+
+**Sources:** the pinned `send_and_receive_test_vectors.json`; all 28 cases pass on both sides (outputs, shared secrets, addresses, tweaks, found outputs and spending tweaks). The hero shows six; the build fails unless sender outputs, receiver addresses, A, tweak, shared secret and found outputs equal the vector's, and unless each fixture's case is the one its cited line names.
+
+**Deliberate breakage:** no outpoint sort (20 tests fail), no taproot private-key negation (2), no NUMS skip (2), no label negation (5).
+
+**Independent review: 2 must-fix, 8 should-fix, 10 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | Sender view showed the label integer and the receiver's B_spend, which a sender cannot know | Sender view shows only the paid address and its decoded B_scan · B_m; label and B_spend appear only in the receiver view; picker label "found via a label" |
+| 2 | K_max prose said "outputs"; the BIP limits addresses per scan-key group | Prose and test now say "any group of recipient addresses sharing one scan key is larger than K_max = 2323" |
+| 3 | "Any UTXO can fund" | "Any UTXO with a known output script…", plus the SegWit v > 1 exclusion (new claim, L292) |
+| 4 | Unlinkability and "no larger" stated as fact | Attributed as the authors' goals; DH step qualified "under the usual Diffie–Hellman assumption" |
+| 5 | Script-path sender obligation missing | Added the MUST (L254, L293) |
+| 6 | Model did not state the transaction-level scan rules | `scanEligible()` with synthetic tests (needs a taproot output; rejects a v2 prevout); module doc states the scope |
+| 7 | Worked example: "only someone with b_scan can recognise it" | "only the sender and whoever holds b_scan" |
+| 8 | Case 23 notes relied on knowledge the viewer lacks | Sender: "address paid (not the scanning wallet below)"; receiver: "no P_k matches any output" |
+| 9 | Sender secret taken from the first group; outpoint serialization duplicated; case index unchecked | Secret taken from the paid scan key's group; smallest outpoint from the model's scan result; build checks the vector comment equals the cited quote |
+| 10 | `excluded-multi` statement exceeded its quote | Quote extended through the collaborative-protocol sentence |
+| 11–20 (nits) | Spend key with label tweak mod n; change-label recovery scan (new claim); "(possibly labeled) spend key"; abstract wording; ledger line range; overview vs specification citations (new `scan-loop` claim on L345–362, "negligible" split into an author-rationale claim); "five vectors"; "P2SH" kind label; "x-only, read as even y" note; HRP check in `decodeAddress` | All applied. Not changed: `scan()` still checks only the labels passed in, as the reference does; the module doc says a wallet must pass m = 0 itself. Sender private keys are not range-checked; only published vectors reach the model. |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (sender and receiver views, labeled and unrelated-output vectors, eligibility figure, address figure, worked tab, no-JS); no overflow. Panel titles keep their case so the math stays readable. axe-core clean at 1440, 375, no-JS, worked tab and four interactive states.

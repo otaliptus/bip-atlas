@@ -74,6 +74,9 @@ importers:
       '@scure/base':
         specifier: ^2.4.0
         version: 2.4.0
+      siphash:
+        specifier: 1.2.0
+        version: 1.2.0
 
   packages/publication: {}
 
@@ -2282,6 +2285,9 @@ packages:
 
   simple-swizzle@0.2.4:
     resolution: {integrity: sha512-nAu1WFPQSMNr2Zn9PGSZK9AGn4t/y97lEm+MXTtUDwfP0ksAIX4nO+6ruD9Jwut4C49SB1Ws+fbXsm/yScWOHw==}
+
+  siphash@1.2.0:
+    resolution: {integrity: sha512-zGo/O5A0Nr4oSteEAMlhemqQpCBbVTRaTjUQdO+QFUqe1iofq/NNPe2W1RxJreh89fIk6NhQcNi41UeTGCvr+g==}
 
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -5095,6 +5101,8 @@ snapshots:
     dependencies:
       is-arrayish: 0.3.4
     optional: true
+
+  siphash@1.2.0: {}
 
   sisteransi@1.0.5: {}
 

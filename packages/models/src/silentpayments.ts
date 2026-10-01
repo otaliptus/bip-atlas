@@ -6,6 +6,12 @@
  * A transcription of the BIP's reference.py onto @noble/curves and
  * @noble/hashes, with @scure/base for bech32m. It never signs anything; the
  * private keys it accepts are the published test vectors'.
+ *
+ * Scope: like reference.py, scan() assumes the caller already applied the
+ * transaction-level rules (at least one taproot output, no spent output with
+ * SegWit version > 1); scanEligible() states them separately. scan() checks
+ * only the labels it is given, so a wallet must pass the change label m = 0
+ * itself.
  */
 import { secp256k1 } from "@noble/curves/secp256k1.js";
 import { sha256 } from "@noble/hashes/sha2.js";
@@ -186,10 +192,12 @@ export function encodeAddress(Bscan: Uint8Array, Bm: Uint8Array, hrp: "sp" | "ts
 
 export function decodeAddress(address: string): { hrp: string; version: number; Bscan: string; Bm: string } {
   const d = bech32m.decode(address as `${string}1${string}`, 1023);
+  if (d.prefix !== "sp" && d.prefix !== "tsp") throw new SilentPaymentError("human-readable part must be sp or tsp");
   const version = d.words[0];
   const data = bech32m.fromWords(d.words.slice(1));
   if (version === 31) throw new SilentPaymentError("version 31 is reserved");
   if (version === 0 && data.length !== 66) throw new SilentPaymentError("v0 data part must be exactly 66 bytes");
+  if (data.length < 66) throw new SilentPaymentError("data part shorter than 66 bytes");
   return { hrp: d.prefix, version, Bscan: bytesToHex(data.slice(0, 33)), Bm: bytesToHex(data.slice(33, 66)) };
 }
 
@@ -259,6 +267,8 @@ export interface ScanResult {
   /** A = sum of eligible input keys; null if none, or if they sum to infinity (the transaction is skipped). */
   A: string | null;
   inputHash: string | null;
+  /** The lexicographically smallest serialized outpoint, as hashed. */
+  smallestOutpoint: string | null;
   /** input_hash·A, the per-transaction value light clients can be served. */
   tweak: string | null;
   sharedSecret: string | null;
@@ -267,14 +277,32 @@ export interface ScanResult {
   skipped: string | null;
 }
 
+/**
+ * The transaction-level rules for v0 (BIP 352, "Scanning silent payment
+ * eligible transactions"): scan iff there is a taproot output, at least one
+ * input from the list, and no spent output with SegWit version > 1.
+ */
+export function scanEligible(vins: Vin[], outputScripts: string[]): { eligible: boolean; reason: string | null } {
+  if (!outputScripts.some((s) => /^5120[0-9a-f]{64}$/.test(s))) return { eligible: false, reason: "no taproot output" };
+  const witnessVersion = (spk: string) => {
+    const b = hexToBytes(spk);
+    if (b.length < 4 || b.length > 42 || b[1] !== b.length - 2) return null;
+    if (b[0] === 0) return 0;
+    return b[0] >= 0x51 && b[0] <= 0x60 ? b[0] - 0x50 : null;
+  };
+  if (vins.some((v) => (witnessVersion(v.prevoutSpkHex) ?? 0) > 1)) return { eligible: false, reason: "spends an output with SegWit version > 1" };
+  if (!vins.some((v) => readInput(v).pubkey !== null)) return { eligible: false, reason: "no input from the list" };
+  return { eligible: true, reason: null };
+}
+
 /** scanning(): find this wallet's outputs among a transaction's taproot output keys. */
 export function scan(vins: Vin[], outputs: string[], bScan: Uint8Array, bSpend: Uint8Array, labels: number[]): ScanResult {
   const pubs = vins.map(readInput).filter((r) => r.pubkey !== null).map((r) => r.pubkey!);
-  const empty = { inputPubKeys: pubs, A: null, inputHash: null, tweak: null, sharedSecret: null, steps: [], found: [] };
+  const empty = { inputPubKeys: pubs, A: null, inputHash: null, smallestOutpoint: null, tweak: null, sharedSecret: null, steps: [], found: [] };
   if (!pubs.length) return { ...empty, skipped: "no eligible inputs" };
   const A = pubs.map((h) => Point.fromHex(h)).reduce((s, P) => s.add(P), ZERO);
   if (isInf(A)) return { ...empty, skipped: "input keys sum to the point at infinity" };
-  const { hash } = inputHash(vins, A);
+  const { hash, smallest } = inputHash(vins, A);
   const ih = checkedScalar(hash, "input_hash");
   const tweakPt = A.multiply(ih);
   const secret = tweakPt.multiply(int(bScan));
@@ -327,6 +355,7 @@ export function scan(vins: Vin[], outputs: string[], bScan: Uint8Array, bSpend: 
     inputPubKeys: pubs,
     A: bytesToHex(compressed(A)),
     inputHash: bytesToHex(hash),
+    smallestOutpoint: smallest,
     tweak: bytesToHex(compressed(tweakPt)),
     sharedSecret: bytesToHex(compressed(secret)),
     steps,

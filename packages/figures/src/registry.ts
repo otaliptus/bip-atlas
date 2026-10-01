@@ -420,6 +420,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "sp-eligibility",
   },
+  {
+    id: "gcs-filter.v1",
+    description: "BIP 158 basic filters of published testnet blocks: elements, hashed values, Golomb-Rice coding and membership queries.",
+    minFixtures: 1,
+    maxFixtures: 8,
+    interactive: true,
+    controls: ["Choose a published block", "Test a fixture script against the filter", "Reveal Golomb-Rice coding"],
+    fixtureKind: "bf-block",
+  },
+  {
+    id: "golomb-rice-code.v1",
+    description: "BIP 158's Golomb-Rice table for P = 2, recomputed, and one P = 19 code from a published filter.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bf-golomb",
+  },
+  {
+    id: "filter-header-chain.v1",
+    description: "BIP 157 filter hashes and headers of published blocks, each header committing to the previous one.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bf-chain",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

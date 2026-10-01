@@ -67,7 +67,7 @@ export function SpDerivation({ fixtures, figureId }: Props) {
             <li data-counts={i.pubkey ? "true" : "false"}>
               <span class="atlas-sp-list__kind">{KIND[i.kind]}</span>
               <code>{i.outpoint}</code>
-              <span>{i.pubkey ? <>key <code>{short(i.pubkey)}</code></> : <em>skipped: {i.skipped}</em>}</span>
+              <span>{i.pubkey ? <>key <code>{short(i.pubkey)}</code>{i.kind === "p2tr" ? <small> (x-only, read as even y)</small> : null}</> : <em>skipped: {i.skipped}</em>}</span>
             </li>
           ))}
         </ol>
@@ -79,10 +79,17 @@ export function SpDerivation({ fixtures, figureId }: Props) {
           <dl class="atlas-sp-dl">
             {v === "sender"
               ? d.paidTo.map((p) => (
-                  <div><dt>{p.ours ? "address paid" : "address paid (a different receiver)"}{p.label !== null ? `, label m = ${p.label}` : ""}</dt><dd><code class="atlas-break">{p.address}</code></dd></div>
+                  <>
+                    <div><dt>{p.ours ? "address paid" : "address paid (not the scanning wallet below)"}</dt><dd><code class="atlas-break">{p.address}</code></dd></div>
+                    <div><dt>its B_scan · B_m</dt><dd><code>{short(p.Bscan)}</code> · <code>{short(p.Bm)}</code></dd></div>
+                  </>
                 ))
-              : <div><dt>receiver’s own address</dt><dd><code class="atlas-break">{d.receiver.address}</code>{d.receiver.labels.length ? <small class="atlas-sp-differ"> (this vector also scans for labels {d.receiver.labels.join(", ")})</small> : null}</dd></div>}
-            <div><dt>receiver’s B_scan · B_spend</dt><dd><code>{short(d.receiver.Bscan)}</code> · <code>{short(d.receiver.Bspend)}</code>{v === "sender" && d.paidTo.some((p) => p.label !== null) ? <small class="atlas-sp-differ"> (unlabeled spend key; the labeled address carries B_m instead)</small> : null}</dd></div>
+              : (
+                <>
+                  <div><dt>wallet’s own address</dt><dd><code class="atlas-break">{d.receiver.address}</code>{d.receiver.labels.length ? <small class="atlas-sp-differ"> (this vector also scans for labels {d.receiver.labels.join(", ")})</small> : null}</dd></div>
+                  <div><dt>wallet’s B_scan · B_spend</dt><dd><code>{short(d.receiver.Bscan)}</code> · <code>{short(d.receiver.Bspend)}</code></dd></div>
+                </>
+              )}
             {showSteps ? (
               <>
                 <div><dt>{v === "sender" ? "A = a·G (sum of input keys)" : "A (sum of input keys)"}</dt><dd><code>{short(d.A)}</code></dd></div>
@@ -91,7 +98,7 @@ export function SpDerivation({ fixtures, figureId }: Props) {
                 {v === "receiver" ? <div><dt>tweak = input_hash · A</dt><dd><code>{short(d.tweak)}</code></dd></div> : null}
               </>
             ) : null}
-            <div><dt>shared secret</dt><dd><code>{short(v === "sender" ? d.senderSecret : d.sharedSecret)}</code>{d.secretsAgree ? <small> (sender and receiver compute the same point)</small> : <small class="atlas-sp-differ"> ({v === "sender" ? "with the other receiver’s scan key" : "not the sender’s secret: this payment was not to us"})</small>}</dd></div>
+            <div><dt>shared secret</dt><dd><code>{short(v === "sender" ? d.senderSecret : d.sharedSecret)}</code>{d.secretsAgree ? <small> (sender and receiver compute the same point)</small> : <small class="atlas-sp-differ"> ({v === "sender" ? "with the paid address’s scan key" : "no P_k matches any output: nothing here is for this wallet"})</small>}</dd></div>
           </dl>
         </section>
 

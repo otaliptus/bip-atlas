@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { hexToBytes } from "../src/hex";
-import { createOutputs, decodeAddress, K_MAX, parseWitness, readInput, receiverAddresses, scan, spendKeyMatches, type Vin } from "../src/silentpayments";
+import { bech32m } from "@scure/base";
+import { createOutputs, decodeAddress, K_MAX, parseWitness, readInput, receiverAddresses, scan, scanEligible, spendKeyMatches, type Vin } from "../src/silentpayments";
+
+const encodeAddressWithPrefix = (hrp: string, Bscan: string, Bm: string) => bech32m.encode(hrp, [0, ...bech32m.toWords(hexToBytes(Bscan + Bm))], 1023);
 
 const root = new URL("../../../", import.meta.url);
 const vectors = JSON.parse(readFileSync(new URL("sources/research-2026-10-01-phase3/raw/bip-0352/send_and_receive_test_vectors.json", root), "utf8"));
@@ -105,7 +108,7 @@ describe("silent-payments chapter prose numbers", () => {
     expect(b352[509]).toContain("'''1.1.0'''");
     expect(b352[510]).toContain("K<sub>max</sub>");
     expect(text).toContain("Since version 1.1.0 the search is also capped");
-    expect(text).toContain("K_max = 2323 outputs, and a receiver stops at k = 2323");
+    expect(text).toContain("larger than K_max = 2323, and a receiver stops at k = 2323");
     expect(b352[194]).toContain("SegWit version > 1");
     expect(text).toContain("SegWit version above 1");
   });
@@ -116,5 +119,27 @@ describe("silent-payments chapter prose numbers", () => {
     expect(text).toContain("Six of BIP 352’s send-and-receive vectors");
     expect(fx.find((f: { kind: string }) => f.kind === "sp-eligibility").caseIndices.length).toBe(5);
     expect(text).toContain("The inputs of five published vectors");
+  });
+});
+
+describe("transaction-level scanning rules", () => {
+  const c = vectors[0].receiving[0].given;
+  const vins = c.vin.map(toVin);
+  const outs = c.outputs.map((x: string) => `5120${x}`);
+
+  it("a vector transaction is eligible", () => expect(scanEligible(vins, outs)).toEqual({ eligible: true, reason: null }));
+
+  it("needs a taproot output", () => expect(scanEligible(vins, ["0014" + "00".repeat(20)]).eligible).toBe(false));
+
+  it("must not spend an output with SegWit version > 1", () => {
+    // Synthetic: the same inputs, plus one spending a version 2 output.
+    const v2 = { ...vins[0], txid: "11".repeat(32), prevoutSpkHex: `5220${"22".repeat(32)}` };
+    expect(scanEligible([...vins, v2], outs)).toEqual({ eligible: false, reason: "spends an output with SegWit version > 1" });
+  });
+
+  it("decodeAddress rejects a foreign prefix", () => {
+    const a = vectors[0].receiving[0].expected.addresses[0];
+    const { Bscan, Bm } = decodeAddress(a);
+    expect(() => decodeAddress(encodeAddressWithPrefix("bc", Bscan, Bm))).toThrow("sp or tsp");
   });
 });

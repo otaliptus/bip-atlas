@@ -135,7 +135,7 @@
     },
     {
       "id": "multi-output",
-      "statement": "Further outputs to the same receiver use k = 1, 2, …; the receiver checks P_1 after finding P_0 and stops at the first one not found; the authors call the added scanning cost negligible.",
+      "statement": "Further outputs to the same receiver use k = 1, 2, …; after finding P_0 the receiver checks P_1 and stops at the first one not found.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -146,14 +146,6 @@
             84
           ],
           "quote": "Once he detects the first output, he must: * Check for ''P<sub>1</sub> = B + hash(b·A || 1)·G'' * If ''P<sub>1</sub>'' is not found, stop"
-        },
-        {
-          "bip": 352,
-          "lines": [
-            86,
-            86
-          ],
-          "quote": "Since Bob will only perform these subsequent checks after a transaction with at least one output paying him is found, the increase to his overall scanning requirement is negligible."
         }
       ]
     },
@@ -223,7 +215,7 @@
           "bip": 352,
           "lines": [
             309,
-            314
+            310
           ],
           "quote": "** Let ''ecdh_shared_secret = input_hash·a·B<sub>scan</sub>'' ** Let ''k = 0''"
         },
@@ -455,7 +447,7 @@
     },
     {
       "id": "input-list",
-      "statement": "Any UTXO can fund the transaction, but sender and receiver MUST derive the secret from P2TR, P2WPKH, P2SH-P2WPKH and P2PKH inputs only.",
+      "statement": "Any UTXO with known output scripts can fund the transaction, but sender and receiver MUST derive the secret from P2TR, P2WPKH, P2SH-P2WPKH and P2PKH inputs only.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -481,7 +473,7 @@
             232,
             232
           ],
-          "quote": "Inputs with conditional branches or multiple public keys (e.g. ''CHECKMULTISIG'') are excluded from shared secret derivation as this introduces malleability and would allow a sender to re-sign with a different set of public keys after the silent payment output has been derived."
+          "quote": "Inputs with conditional branches or multiple public keys (e.g. ''CHECKMULTISIG'') are excluded from shared secret derivation as this introduces malleability and would allow a sender to re-sign with a different set of public keys after the silent payment output has been derived. This is not a concern when the sender controls all of the inputs, but is an issue for CoinJoins and other collaborative protocols, where a malicious participant can participate in deriving the silent payment address with one set of keys and then re-broadcast the transaction with signatures for a different set of public keys."
         }
       ]
     },
@@ -762,6 +754,118 @@
             209
           ],
           "quote": "The 66-byte concatenation of the receiver's public keys"
+        }
+      ]
+    },
+    {
+      "id": "negligible",
+      "statement": "Because the follow-up checks run only after a match, the authors call the added scanning cost negligible.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            86,
+            86
+          ],
+          "quote": "Since Bob will only perform these subsequent checks after a transaction with at least one output paying him is found, the increase to his overall scanning requirement is negligible."
+        }
+      ]
+    },
+    {
+      "id": "scan-loop",
+      "statement": "The receiver computes P_k = B_spend + t_k·G starting at k = 0, checks the transaction's taproot output keys, rescans with k++ after each match, and stops when no match is found.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            345,
+            350
+          ],
+          "quote": "** Let ''outputs_to_check'' be the taproot output keys from all taproot outputs in the transaction (spent and unspent). ** Starting with ''k = 0'':"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            350,
+            350
+          ],
+          "quote": "*** Compute ''P<sub>k</sub> = B<sub>spend</sub> + t<sub>k</sub>·G''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            354,
+            354
+          ],
+          "quote": "Remove ''output'' from ''outputs_to_check'' and rescan ''outputs_to_check'' with ''k++''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            362,
+            362
+          ],
+          "quote": "*** If no matches are found, stop"
+        }
+      ]
+    },
+    {
+      "id": "exclude-v2",
+      "statement": "In coin selection the sender excludes inputs with SegWit version > 1.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            292,
+            292
+          ],
+          "quote": "* Exclude inputs with SegWit version > 1"
+        }
+      ]
+    },
+    {
+      "id": "taproot-key-required",
+      "statement": "For a taproot input, including a script-path spend, the sender MUST use the private key of the taproot output key; if it is not available the output cannot be an input, unless H is the internal key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            254,
+            254
+          ],
+          "quote": "Same as a keypath spend, the sender MUST use the private key corresponding to the taproot output key. If this key is not available, the output cannot be included as an input to the transaction."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            293,
+            293
+          ],
+          "quote": "* For each taproot output spent the sending wallet MUST have access to the private key corresponding to the taproot output key, unless ''H'' is used as the internal public key"
+        }
+      ]
+    },
+    {
+      "id": "change-scan",
+      "statement": "Every receiving silent payments wallet should at least scan for the change label when recovering from backup.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            134,
+            134
+          ],
+          "quote": "every receiving silent payments wallet should at least scan for the change label when recovering from backup in order to ensure maximum cross-compatibility."
         }
       ]
     }

@@ -659,7 +659,7 @@ export interface SpDerived {
   senderSecret: string;
   receiver: { address: string; Bscan: string; Bspend: string; labels: number[]; labeledAddresses: string[] };
   /** The addresses the sender pays; ours = in the receiving case's address list, label null = its unlabeled address. */
-  paidTo: Array<{ address: string; ours: boolean; label: number | null }>;
+  paidTo: Array<{ address: string; Bscan: string; Bm: string; ours: boolean; label: number | null }>;
   senderOutputs: string[];
   txOutputs: Array<{ key: string; mine: boolean; label: number | null; k: number | null }>;
   steps: Array<{ k: number; tk: string; Pk: string; matched: boolean; via: string | null }>;
@@ -675,3 +675,58 @@ export interface SpEligibilityDerived {
   rows: Array<{ comment: string; inputs: SpInputView[] }>;
 }
 export type DerivedSpEligibilityFixture = SpEligibilityFixture & { derived: SpEligibilityDerived };
+
+/* ---------- BIPs 157/158 ---------- */
+export interface BfBlockFixture extends BaseFixture {
+  kind: "bf-block";
+  height: number;
+}
+export interface BfCode { delta: string; q: number; r: string; unary: string; remainder: string }
+export interface BfProbe {
+  script: string;
+  /** "this block" or "block <height>": where the script was taken from. */
+  from: string;
+  matched: boolean;
+  target: string;
+  steps: Array<{ value: string; outcome: "less" | "equal" | "greater" }>;
+}
+export interface BfBlockDerived {
+  height: number;
+  hash: string;
+  notes: string;
+  txCount: number;
+  N: number;
+  F: string;
+  filterHex: string;
+  filterBytes: number;
+  elements: Array<{ script: string; from: "output" | "spent"; included: boolean; reason?: string }>;
+  values: string[];
+  codes: BfCode[];
+  bitsTotal: number;
+  paddingBits: number;
+  probes: BfProbe[];
+  filterHash: string;
+  prevHeader: string;
+  header: string;
+}
+export type DerivedBfBlockFixture = BfBlockFixture & { derived: BfBlockDerived };
+
+export interface BfChainFixture extends BaseFixture {
+  kind: "bf-chain";
+  heights: number[];
+}
+export interface BfChainDerived {
+  rows: Array<{ height: number; hash: string; filterHex: string; filterHash: string; prevHeader: string; header: string; linksToPrevious: boolean | null }>;
+}
+export type DerivedBfChainFixture = BfChainFixture & { derived: BfChainDerived };
+
+export interface BfGolombFixture extends BaseFixture {
+  kind: "bf-golomb";
+  /** A published block whose first delta illustrates P = 19. */
+  exampleHeight: number;
+}
+export interface BfGolombDerived {
+  table: Array<{ n: number; q: number; r: number; code: string }>;
+  example: { height: number; value: string; code: BfCode };
+}
+export type DerivedBfGolombFixture = BfGolombFixture & { derived: BfGolombDerived };

@@ -57,6 +57,13 @@ import {
   SpAddress,
   SpEligibility,
   SpWorked,
+  GcsFilter,
+  BfGolomb,
+  BfChain,
+  BfWorked,
+  type DerivedBfBlockFixture,
+  type DerivedBfChainFixture,
+  type DerivedBfGolombFixture,
   type DerivedSpFixture,
   type DerivedSpEligibilityFixture,
   type DerivedMusig2SessionFixture,
@@ -132,6 +139,9 @@ const musigKa = picked as DerivedMusig2KeyaggFixture[];
 const musigChecks = picked as DerivedMusig2PsigChecksFixture[];
 const sp = picked as DerivedSpFixture[];
 const spElig = picked as DerivedSpEligibilityFixture[];
+const bfBlocks = picked as DerivedBfBlockFixture[];
+const bfChain = picked as DerivedBfChainFixture[];
+const bfGolomb = picked as DerivedBfGolombFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -179,6 +189,9 @@ const spElig = picked as DerivedSpEligibilityFixture[];
   {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
   {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
   {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
+  {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
+  {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
+  {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -196,6 +209,7 @@ const spElig = picked as DerivedSpEligibilityFixture[];
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
+      {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
     </Fragment>
   )}
 </Plate>
