@@ -6,7 +6,11 @@
  "observedResearchCommitDate": "2026-09-28T15:24:34Z",
  "researchedAt": "2026-10-01",
  "researchNote": "Phase three extension to the kit catalog, kept in a separate file because catalog.json is a kit original. Same contract and fields; briefs are proposed, not reviewed publications.",
- "supportingBips": [],
+ "supportingBips": [
+  141,
+  143,
+  174
+ ],
  "chapters": [
   {
    "id": "p2sh",
@@ -484,5 +488,6 @@
     "https://bips.dev/322/"
    ]
   }
- ]
+ ],
+ "supportingNote": "Supporting BIPs whose published transactions and test material serve as fixtures for phase-three chapters (e.g. P2SH spends inside BIP 143 and BIP 174 examples)."
 }

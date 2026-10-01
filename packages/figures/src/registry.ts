@@ -230,6 +230,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "tapscript-case",
   },
+  {
+    id: "p2sh-commitment.v1",
+    description: "A P2SH output's 20-byte hash beside the redeem script its spend reveals.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "p2sh-spend",
+  },
+  {
+    id: "p2sh-two-stage.v1",
+    description: "BIP 16's checks on pinned spends: push-only scriptSig, hash match, then the redeem script or witness.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: true,
+    controls: ["Choose a pinned spend", "Step through both evaluations", "Reveal the redeem script"],
+    fixtureKind: "p2sh-spend",
+  },
+  {
+    id: "p2sh-wrapped.v1",
+    description: "Where pinned P2SH spends carry their signatures: scriptSig or witness.",
+    minFixtures: 2,
+    maxFixtures: 4,
+    interactive: false,
+    controls: [],
+    fixtureKind: "p2sh-spend",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

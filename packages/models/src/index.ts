@@ -7,3 +7,4 @@ export * from "./psbt";
 export * from "./schnorr";
 export * from "./taproot";
 export * from "./tapscript";
+export * from "./p2sh";

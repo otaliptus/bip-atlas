@@ -29,6 +29,11 @@ import {
   SchnorrWorked,
   TaprootWorked,
   TapscriptWorked,
+  P2shWorked,
+  P2shTwoStage,
+  P2shCommitment,
+  P2shWrapped,
+  type DerivedP2shFixture,
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
@@ -76,6 +81,7 @@ const sig = picked as DerivedSchnorrFixture[];
 const tap = picked as DerivedTaprootTreeFixture[];
 const keyspend = picked as DerivedTaprootKeyspendFixture[];
 const ts = picked as DerivedTapscriptFixture[];
+const p2sh = picked as DerivedP2shFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -102,6 +108,9 @@ const ts = picked as DerivedTapscriptFixture[];
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
+  {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
+  {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -112,6 +121,7 @@ const ts = picked as DerivedTapscriptFixture[];
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
+      {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
     </Fragment>
   )}
 </Plate>

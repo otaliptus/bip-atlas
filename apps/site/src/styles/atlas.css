@@ -946,3 +946,30 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 }
 .atlas-worked__spaced { overflow-wrap: anywhere; word-break: normal; }
 .atlas-tabs__panel:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 4px; }
+
+/* ---------- p2sh (BIP 16) ---------- */
+.atlas-chapter[data-chapter="p2sh"] { --atlas-accent: #6d4c9f; }
+.atlas-p2sh-lab__scripts { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--manual-space-3); }
+.atlas-p2sh-lab__box { display: grid; gap: 0.3rem; padding: 0.5rem 0.6rem; border: 1px solid var(--manual-ink); background: var(--manual-surface); font-size: 0.8125rem; min-inline-size: 0; }
+.atlas-p2sh-lab__box[data-part="redeem"][data-revealed="true"] { border: 2px solid var(--atlas-accent); background: var(--atlas-accent-wash); }
+.atlas-p2sh-lab__box[data-part="redeem"][data-revealed="false"] { border-style: dashed; background: var(--atlas-hatch), var(--manual-surface); }
+.atlas-p2sh-lab__tag { font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--manual-muted); }
+.atlas-p2sh-lab__hidden { font-style: italic; color: var(--manual-muted); }
+.atlas-p2sh-lab__stages { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--manual-space-3); }
+.atlas-p2sh-lab__asm { font-size: 0.75rem !important; }
+.atlas-p2sh-lab__stack { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: baseline; font-size: 0.8125rem; color: var(--manual-muted); }
+.atlas-p2sh-lab__stack code { font-size: 0.75rem !important; }
+.atlas-p2sh-lab__steps { margin: 0; padding-inline-start: 1.2rem; display: grid; gap: 0.2rem; font-size: 0.8125rem; }
+.atlas-p2sh-lab__steps li[data-failed="true"] { color: var(--atlas-edit); }
+.atlas-p2sh-commit { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--manual-space-2); }
+.atlas-p2sh-commit__col { display: grid; gap: 0.35rem; padding: 0.6rem; border: 1px solid var(--manual-ink); background: var(--manual-surface); min-inline-size: 0; font-size: 0.8125rem; }
+.atlas-p2sh-commit__col[data-part="redeem"] { background: var(--manual-blue-wash); }
+.atlas-p2sh-commit__head { margin: 0; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.atlas-p2sh-commit__note { margin: 0; font-size: 0.8125rem; color: var(--manual-muted); }
+.atlas-p2sh-commit__hex { font-size: 0.6875rem !important; color: var(--manual-muted); }
+.atlas-p2sh-commit__arrow { margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; color: var(--manual-blue-dark); text-align: center; }
+.atlas-p2sh-commit code { overflow-wrap: anywhere; word-break: break-all; }
+.atlas-p2sh-commit .atlas-lab__source { grid-column: 1 / -1; }
+@media (max-width: 47.99rem) {
+  .atlas-p2sh-lab__scripts, .atlas-p2sh-commit { grid-template-columns: minmax(0, 1fr); }
+}

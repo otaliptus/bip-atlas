@@ -327,3 +327,42 @@ export interface TapscriptDerived {
 }
 
 export type DerivedTapscriptFixture = TapscriptCaseFixture & { derived: TapscriptDerived };
+
+export interface P2shSpendFixture extends BaseFixture {
+  kind: "p2sh-spend";
+  txHex: string;
+  inputIndex: number;
+  /** Where the spent output comes from: a record in the BIP 174 updater PSBT, or a BIP line. */
+  prevout:
+    | { from: "psbt-non-witness-utxo" | "psbt-witness-utxo"; line: number; inputIndex: number }
+    | { from: "bip-line"; line: number; scriptPubKeyHex: string; amountQuote: string };
+  /** Satoshis spent, needed only for wrapped SegWit (BIP 143 commits to it). */
+  amountSats: string | null;
+}
+
+export interface P2shStageView {
+  id: string;
+  title: string;
+  ok: boolean;
+  scriptAsm: string | null;
+  scriptBytes: number | null;
+  stackBefore: string[];
+  steps: Array<{ name: string; note: string; stackAfter: string[]; failed: boolean; checks: Array<{ sigIndex: number; keyIndex: number | null; ok: boolean }> | null }>;
+  note: string;
+}
+
+export interface P2shDerived {
+  kind: "legacy" | "p2sh-p2wpkh" | "p2sh-p2wsh";
+  valid: boolean;
+  scriptPubKeyHex: string;
+  committedHashHex: string;
+  redeemScriptHex: string;
+  redeemAsm: string;
+  redeemHash160Hex: string;
+  redeemSigops: number;
+  scriptSigBytes: number;
+  witnessBytes: number;
+  stages: P2shStageView[];
+}
+
+export type DerivedP2shFixture = P2shSpendFixture & { derived: P2shDerived };

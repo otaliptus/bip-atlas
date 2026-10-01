@@ -39,6 +39,9 @@ import {
   verifyKeyPath,
   decodeNum,
   traceTapscript,
+  traceP2sh,
+  decodeScript,
+  hash160,
 } from "@bip-atlas/models";
 import { sha256 } from "@noble/hashes/sha2.js";
 import type {
@@ -64,6 +67,8 @@ import type {
   DerivedTapscriptFixture,
   TapscriptCaseFixture,
   TapscriptTraceView,
+  DerivedP2shFixture,
+  P2shSpendFixture,
   SchnorrVectorFixture,
 } from "@bip-atlas/figures";
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
@@ -544,9 +549,71 @@ function deriveTapscript(f: TapscriptCaseFixture): DerivedTapscriptFixture {
   return { ...f, derived: { success: traceView(c, "success"), failure: traceView(c, "failure") } };
 }
 
+/** Short reading of a script: data pushes by size, opcodes by name. */
+export function scriptAsm(hex: string): string {
+  return decodeScript(hex).map((o) => (o.dataHex === null ? o.name : o.dataHex === "" ? "OP_0" : `<${o.dataHex.length / 2} bytes>`)).join(" ");
+}
+
+function deriveP2sh(f: P2shSpendFixture): DerivedP2shFixture {
+  const lines = (bip: number) => pinnedText(`bip-${String(bip).padStart(4, "0")}.mediawiki`, SNAPSHOT_PHASE3).split("\n");
+  if (!lines(f.source.bip!)[f.source.line! - 1].includes(f.txHex)) throw new Error(`${f.id}: transaction is not on BIP ${f.source.bip} line ${f.source.line}`);
+  let spk: string;
+  let amount: bigint | null = f.amountSats === null ? null : BigInt(f.amountSats);
+  const pv = f.prevout;
+  if (pv.from === "bip-line") {
+    const l = lines(f.source.bip!)[pv.line - 1];
+    if (!l.includes(pv.scriptPubKeyHex) || !l.includes(pv.amountQuote)) throw new Error(`${f.id}: spent output differs from line ${pv.line}`);
+    spk = pv.scriptPubKeyHex;
+  } else {
+    const hex = /<pre>([0-9a-f]+)<\/pre>/.exec(lines(174)[pv.line - 1])?.[1];
+    if (!hex) throw new Error(`${f.id}: no PSBT on BIP 174 line ${pv.line}`);
+    const rec = parsePsbt(hex).inputs[pv.inputIndex].find((r) => r.keyType === (pv.from === "psbt-witness-utxo" ? 0x01 : 0x00));
+    if (!rec) throw new Error(`${f.id}: PSBT input ${pv.inputIndex} has no UTXO record`);
+    if (pv.from === "psbt-witness-utxo") {
+      spk = rec.valueHex.slice(18);
+      const value = BigInt(`0x${rec.valueHex.slice(0, 16).match(/../g)!.reverse().join("")}`);
+      if (amount !== value) throw new Error(`${f.id}: amount differs from the PSBT's witness UTXO`);
+    } else {
+      const prev = parseTransaction(rec.valueHex);
+      const vout = parseInt(parseTransaction(f.txHex).inputs[f.inputIndex].prevoutHex.slice(64).match(/../g)!.reverse().join(""), 16);
+      spk = prev.outputs[vout].scriptPubKeyHex;
+    }
+  }
+  const t = traceP2sh(f.txHex, f.inputIndex, spk, amount);
+  if (!t.valid) throw new Error(`${f.id}: the recorded spend does not validate`);
+  const tx = parseTransaction(f.txHex);
+  const wit = tx.witnesses[f.inputIndex] ?? [];
+  return {
+    ...f,
+    derived: {
+      kind: t.kind,
+      valid: t.valid,
+      scriptPubKeyHex: spk,
+      committedHashHex: spk.slice(4, 44),
+      redeemScriptHex: t.redeemScriptHex,
+      redeemAsm: scriptAsm(t.redeemScriptHex),
+      redeemHash160Hex: bytesToHex(hash160(hexToBytes(t.redeemScriptHex))),
+      redeemSigops: t.redeemSigops,
+      scriptSigBytes: tx.inputs[f.inputIndex].scriptSigHex.length / 2,
+      witnessBytes: wit.reduce((n, e) => n + e.length / 2, 0),
+      stages: t.stages.map((s) => ({
+        id: s.id,
+        title: s.title,
+        ok: s.ok,
+        scriptAsm: s.scriptHex ? scriptAsm(s.scriptHex) : null,
+        scriptBytes: s.scriptHex ? s.scriptHex.length / 2 : null,
+        stackBefore: s.stackBefore,
+        steps: s.steps.map((x) => ({ name: x.name, note: x.note, stackAfter: x.stackAfter, failed: !!x.failed, checks: x.checks ?? null })),
+        note: s.note,
+      })),
+    },
+  };
+}
+
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
   const schnorrGroup = fixtures.filter((f) => f.kind === "schnorr-vector") as unknown as SchnorrVectorFixture[];
   return fixtures.map((f) => {
+    if (f.kind === "p2sh-spend") return deriveP2sh(f as unknown as P2shSpendFixture) as unknown as T;
     if (f.kind === "tapscript-case") return deriveTapscript(f as unknown as TapscriptCaseFixture) as unknown as T;
     if (f.kind === "taproot-tree") return deriveTaprootTree(f as unknown as TaprootTreeFixture) as unknown as T;
     if (f.kind === "taproot-keyspend") return deriveTaprootKeyspend(f as unknown as TaprootKeyspendFixture) as unknown as T;
