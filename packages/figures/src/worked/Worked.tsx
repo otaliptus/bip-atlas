@@ -18,6 +18,7 @@ import type {
   DerivedTimelockCaseFixture,
   DerivedVersionbitsDeploymentFixture,
   DerivedVersionbitsGuidelineFixture,
+  DerivedWalletPathFixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -412,6 +413,47 @@ export function VersionbitsWorked({ fixtures }: { fixtures: Array<DerivedVersion
       steps={steps}
       label="A deployment's parameters, a signalling version, a counted period, lock-in and activation, drawn as stacked layers."
       source={<>Source: BIP 9 assignments, line {f.source.line}; dates cross-checked against the deployment section of BIP {f.crossCheck.bip}. Implied periods computed by the tested model.</>}
+    />
+  );
+}
+
+/* ---------- BIPs 44, 84, 86 ---------- */
+export function WalletPathWorked({ fixtures }: { fixtures: DerivedWalletPathFixture[] }) {
+  const f = fixtures.find((x) => x.derived.scheme === 86) ?? fixtures[0];
+  const a = f.derived.addresses[0];
+  const o = a.output;
+  const nodes = a.nodes;
+  const steps: WorkedStep[] = [
+    {
+      title: "Three hardened steps from the master key: purpose, coin type, account",
+      values: [{ label: "path", value: nodes.slice(1, 4).map((n) => n.segment).join(" / ") }, { label: "account public key", value: nodes[3].publicKeyHex }],
+      note: "Hardened: each needs its parent's private key.",
+      layer: { size: 0.6, tone: "hatch", cells: 3 },
+    },
+    {
+      title: "Two public steps: the receiving chain, then the first address",
+      values: [{ label: "path", value: nodes.slice(4).map((n) => n.segment).join(" / ") }, { label: "derived public key", value: a.publicKeyHex }],
+      note: "Anyone with the account's extended public key can take these two steps.",
+      layer: { size: 0.8, tone: "wash", cells: 2 },
+    },
+    ...(o && o.kind === "p2tr"
+      ? [
+          { title: "Drop the parity byte: the internal key is the x coordinate", values: [{ label: "internal key", value: o.internalKeyHex }], layer: { size: 0.7, tone: "plain" as const, cells: 1 } },
+          {
+            title: "Tweak it with no script tree: Q = P + int(hashTapTweak(P))·G",
+            values: [{ label: "tweak", value: o.tweakHex }, { label: "output key", value: o.outputKeyHex }],
+            layer: { size: 0.7, tone: "plain" as const, cells: 1 },
+          },
+          { title: "Version 1 witness program, bech32m", values: [{ label: "scriptPubKey", value: o.scriptPubKeyHex }, { label: "address", value: o.address }], layer: { size: 0.9, tone: "accent" as const, cells: 2 } },
+        ]
+      : []),
+  ];
+  return (
+    <WorkedExample
+      intro={<>BIP {f.derived.scheme}’s <strong>{a.label}</strong> address, <code>{a.path}</code>, from the published test mnemonic. Every value matches the BIP’s test vectors.</>}
+      steps={steps}
+      label="Three hardened levels, two public levels, then the key-path Taproot tweak and the address, drawn as stacked layers."
+      source={<>Source: BIP {f.derived.scheme} test vectors (lines {a.checkedLines.join(", ")}); derived by the tested BIP 32 and wallet-path models.</>}
     />
   );
 }

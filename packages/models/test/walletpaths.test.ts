@@ -109,3 +109,42 @@ describe("address derivation round trips", () => {
     expect(p2trKeyPath(leaf.publicKey).address.startsWith("bc1p")).toBe(true);
   });
 });
+
+describe("wallet-paths chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/wallet-paths.json", root), "utf8");
+  const prime = (p: string) => p.replace(/'/g, "′");
+
+  it("years, levels and constants", () => {
+    expect(b44[10]).toContain("Assigned: 2014-04-24");
+    expect(b84[9]).toContain("Assigned: 2017-12-28");
+    expect(b86[7]).toContain("Assigned: 2021-06-22");
+    expect(text).toContain("BIP 44, assigned in 2014");
+    expect(text).toContain("BIP 84 (2017) and BIP 86 (2021)");
+    expect(text).toContain("BIP 44 fixes five levels below the master key");
+    expect(text).toContain("0′ for Bitcoin and 1′ for Bitcoin testnet");
+    expect(b44[123]).toContain("Address gap limit is currently set to 20");
+    expect(text).toContain("BIP 44 gave the gap limit as 20");
+  });
+
+  it("the examples table", () => {
+    const paths = b44.filter((l) => l.startsWith("|m / 44'")).map((l) => l.slice(1).replace(/ /g, ""));
+    expect(paths.length).toBe(16);
+    expect(text).toContain("Its table lists 16 paths");
+    expect(text).toContain(`first Bitcoin receiving address of the first account is ${prime(paths[0])}`);
+    expect(text).toContain(`its first change address is ${prime(paths[2])}`);
+    expect(parseWalletPath(paths[2])).toMatchObject({ account: 0, change: 1, index: 0 });
+  });
+
+  it("output layouts and vector counts", () => {
+    const leaf = walkPath(master, "m/84'/0'/0'/0/0")[5].key;
+    const w = p2wpkh(leaf.publicKey);
+    expect([w.scriptPubKeyHex.slice(0, 4), w.keyHashHex.length / 2]).toEqual(["0014", 20]);
+    expect(text).toContain("0x0014 followed by the key’s 20-byte hash");
+    const t = p2trKeyPath(walkPath(master, "m/86'/0'/0'/0/0")[5].key.publicKey);
+    expect([t.scriptPubKeyHex.slice(0, 4), t.outputKeyHex.length / 2]).toEqual(["5120", 32]);
+    expect(text).toContain("0x5120 followed by the 32-byte output key");
+    expect(text).toContain("three addresses, two receiving and one change");
+    expect(serializeWithVersion(master, "public", BIP84_VERSIONS.mainnet.public).startsWith("zpub")).toBe(true);
+    expect(serializeWithVersion(master, "private", BIP84_VERSIONS.mainnet.private).startsWith("zprv")).toBe(true);
+  });
+});

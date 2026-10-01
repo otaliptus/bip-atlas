@@ -1,0 +1,251 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "wallet-paths",
+  "primaryBips": [
+    44,
+    84,
+    86
+  ],
+  "specimenLabel": "BIPs 0044 · 0084 · 0086",
+  "title": "Where in the tree do wallet keys live?",
+  "dek": "BIP 32 can derive an endless tree of keys from one seed. BIP 44 says which branches a wallet should use, and BIPs 84 and 86 say what each branch pays to.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01-phase3",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A seed gives a wallet one master key, and BIP 32 can derive children from it without end. That raises a practical question: if two wallets restore the same seed, where do they look for coins? Without an agreement, each could derive keys in a different corner of the tree and never find the other’s.",
+        "claims": [
+          "on-bip32",
+          "motivation"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 44, assigned in 2014, is that agreement. It is an application-layer convention on top of BIP 32 and BIP 43, not a change to the derivation itself. BIP 84 (2017) and BIP 86 (2021) reuse its structure for SegWit and Taproot. All three are recorded as deployed.",
+        "claims": [
+          "preambles",
+          "on-bip32"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A12.1",
+      "recipe": "wallet-path-levels.v1",
+      "title": "Five levels below the master key",
+      "fixtures": [
+        "bip44-paths"
+      ],
+      "caption": "BIP 44’s path: three hardened levels that pick a convention, a coin and an account, then two public levels that number the addresses.",
+      "claims": [
+        "levels",
+        "purpose",
+        "coin-type",
+        "account",
+        "change",
+        "index"
+      ],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "levels",
+      "heading": "Five levels, each with a job",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 44 fixes five levels below the master key: purpose, coin type, account, change and address index. An apostrophe after a number marks hardened derivation, and the first three levels are hardened. The author’s aim was a hierarchy that handles many coins, many accounts, separate receiving and change chains, and millions of addresses per chain.",
+          "claims": [
+            "levels",
+            "motivation"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The purpose is a constant, 44′, which tells software that everything below follows this specification. The coin type gives each coin its own subtree, so addresses are never reused across coins: 0′ for Bitcoin and 1′ for Bitcoin testnet, with a longer list kept outside the BIP in SLIP-0044.",
+          "claims": [
+            "purpose",
+            "coin-type"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Accounts split the keys into independent identities, numbered from 0, so a wallet never mixes coins between them; BIP 44 compares them to bank accounts, one for donations whose addresses are public, one for savings, one for shared expenses. The change level has two values: 0 for the external chain, addresses meant to be seen outside the wallet such as receiving addresses, and 1 for the internal chain that collects change. Below it, addresses are simply numbered from 0.",
+          "claims": [
+            "account",
+            "change",
+            "index"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Restoring a wallet means finding where coins went. BIP 44 describes how: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. Only external chains are scanned, since change only ever comes from coins that arrived on them.",
+          "claims": [
+            "discovery",
+            "account",
+            "gap-limit"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 44’s own examples make the pattern concrete. Its table lists 16 paths: the first and second address on the external and change chains, for the first and second account, on Bitcoin and on testnet. The first Bitcoin receiving address of the first account is m/44′/0′/0′/0/0; its first change address is m/44′/0′/0′/1/0.",
+          "claims": [
+            "examples",
+            "change"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "walk",
+      "heading": "Walking a published path",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code and checked against the published vectors when the site is built.",
+          "claims": [
+            "vectors"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A12.2",
+          "recipe": "wallet-path-walk.v1",
+          "title": "One level at a time",
+          "fixtures": [
+            "bip84-vectors",
+            "bip86-vectors",
+            "bip44-paths"
+          ],
+          "caption": "Published paths from BIPs 84, 86 and 44, stepped from the master key down to the address. Hatched levels are hardened.",
+          "claims": [
+            "vectors",
+            "levels",
+            "xpub-exposure",
+            "script-by-purpose"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "The line between the third and fourth levels matters most. Above it, each step is hardened and needs the parent’s private key. Below it, change and index use public derivation, which anyone holding the parent’s extended public key can do.",
+          "claims": [
+            "levels",
+            "change",
+            "index"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "So an account’s extended public key reaches every address the account will ever use, receiving and change alike. The build demonstrates it: from the published account public keys alone, the model re-derives all of the published addresses below them. Sharing an account xpub with a watch-only wallet or a server reveals the account’s whole history and future addresses, though not the keys to spend them.",
+          "claims": [
+            "xpub-exposure"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The published values make each step checkable. For BIP 84’s first receiving address, the walk ends at a compressed public key; hashing it gives the 20 bytes that go into the output, and the address is those bytes in bech32. For BIP 86, the same position yields a key whose x coordinate becomes the internal key, and the tweak turns it into the output key the address encodes. Either way the spend is short: BIP 84 expects a signature and the public key in the witness, BIP 86 a signature alone, and both leave the scriptSig empty.",
+          "claims": [
+            "vectors",
+            "b84",
+            "b86",
+            "spend-layouts"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "An account extended public key is not a single address. It exposes every receiving and change address of that account, which is why sharing it is a privacy decision.",
+          "claims": [
+            "xpub-exposure",
+            "change",
+            "index"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schemes",
+      "heading": "What the purpose decides",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 44 stops at the key. It defines the path and nothing about the script that key should be used in, nor the address format. Two wallets could follow BIP 44 exactly and still pay to different kinds of output.",
+          "claims": [
+            "levels",
+            "script-by-purpose"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 84 fills that gap for SegWit version 0. It keeps BIP 44’s structure and changes only the purpose, 84′, which it says indicates the transaction serialization: each key becomes a pay-to-witness-public-key-hash output, 0x0014 followed by the key’s 20-byte hash, encoded as a bech32 address. It also gives extended keys different version bytes, so they print as zpub and zprv instead of xpub and xprv.",
+          "claims": [
+            "b84",
+            "b84-versions"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The author’s reason was compatibility in one direction: dedicated SegWit accounts mean only wallets that implement the scheme will find them. BIP 84 is deliberately not backwards compatible, and a wallet that does not know it will not discover the accounts at all.",
+          "claims": [
+            "b84-why",
+            "not-compatible"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A12.3",
+          "recipe": "wallet-path-schemes.v1",
+          "title": "Same shape, three purposes",
+          "fixtures": [
+            "bip44-paths",
+            "bip84-vectors",
+            "bip86-vectors"
+          ],
+          "caption": "The first receiving path under each purpose, and what each BIP fixes beyond the path.",
+          "claims": [
+            "script-by-purpose",
+            "b84",
+            "b86",
+            "vectors"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 86 does the same for Taproot. Purpose 86′ marks keys used as the internal key of a single-key P2TR output. The derived key becomes the internal key, is tweaked so the output commits to no script path, and the result goes into a version 1 output, 0x5120 followed by the 32-byte output key. Its extended keys keep the ordinary xpub prefix.",
+          "claims": [
+            "b86"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Its motivation is candid about why fixed paths still matter. Many wallets and hardware signers keep only a seed backup, without the derivation path or script type, so a fixed path makes single-key Taproot outputs likely to be recovered. The author notes that there are now solutions that avoid fixed paths, and kept the approach of BIPs 49 and 84 anyway.",
+          "claims": [
+            "b86-why"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The purpose also keeps the schemes apart. The same mnemonic produces unrelated keys under 44′, 84′ and 86′, so the three never share an address. What ties a key to a script is the BIP that defines the purpose, not anything in the key itself.",
+          "claims": [
+            "same-seed",
+            "script-by-purpose"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "None of this needed new cryptography. BIP 86 points out that it uses the same method as BIPs 44, 49 and 84, so it should not be difficult to implement, and BIP 84 leaves further version bytes to SLIP-0132. A wallet that already walks BIP 44’s tree only has to change one number at the top and one encoding at the bottom.",
+          "claims": [
+            "easy",
+            "script-by-purpose"
+          ]
+        }
+      ]
+    }
+  ]
+}

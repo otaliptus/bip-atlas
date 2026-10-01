@@ -312,6 +312,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "versionbits-deployment",
   },
+  {
+    id: "wallet-path-walk.v1",
+    description: "Steps down a published BIP 44-shaped path level by level to the key and address, from BIP 84 and BIP 86 vectors.",
+    minFixtures: 1,
+    maxFixtures: 3,
+    interactive: true,
+    controls: ["Choose a published path scheme", "Step through path levels", "Switch receive/change"],
+    fixtureKind: "wallet-path-vector",
+  },
+  {
+    id: "wallet-path-levels.v1",
+    description: "BIP 44's five path levels, their meaning, and where hardened derivation stops.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "wallet-path-vector",
+  },
+  {
+    id: "wallet-path-schemes.v1",
+    description: "Purposes 44, 84 and 86 side by side: the same path shape, and what each BIP fixes beyond it.",
+    minFixtures: 2,
+    maxFixtures: 3,
+    interactive: false,
+    controls: [],
+    fixtureKind: "wallet-path-vector",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
