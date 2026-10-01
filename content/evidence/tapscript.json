@@ -86,6 +86,14 @@
         {
           "bip": 342,
           "lines": [
+            29,
+            29
+          ],
+          "quote": "their impact is not guaranteed unless they are addressed simultaneously with [[bip-0341.mediawiki|BIP341]] itself."
+        },
+        {
+          "bip": 342,
+          "lines": [
             31,
             31
           ],
@@ -95,10 +103,18 @@
     },
     {
       "id": "scope",
-      "statement": "The rules apply only to a witness version 1, 32-byte, non-P2SH Taproot script path spend whose leaf version is 0xc0.",
+      "statement": "The rules apply only to a witness version 1, 32-byte, non-P2SH Taproot script path spend whose leaf version is 0xc0; under BIP 341, spends with other leaf versions succeed, leaving them for future rules.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "This implies that for the future leaf versions (non-''0xC0'') the execution must succeed."
+        },
         {
           "bip": 342,
           "lines": [
@@ -143,7 +159,7 @@
     },
     {
       "id": "op-success",
-      "statement": "While decoding, any OP_SUCCESSx opcode makes validation succeed at once, even if later bytes would not decode; a push that runs past the end fails. The authors warn that using an OP_SUCCESSx before a soft fork defines it is insecure and leads to fund loss.",
+      "statement": "After the BIP 141 and BIP 341 checks, any OP_SUCCESSx opcode met while decoding the script makes validation succeed, before the remaining tapscript rules and even if later bytes would not decode; a push that runs past the end fails.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -162,20 +178,12 @@
             62
           ],
           "quote": "If any push opcode fails to decode because it would extend past the end of the tapscript, fail."
-        },
-        {
-          "bip": 342,
-          "lines": [
-            57,
-            57
-          ],
-          "quote": "Using an <code>OP_SUCCESSx</code> before its meaning is defined by a softfork is insecure and leads to fund loss."
         }
       ]
     },
     {
       "id": "op-success-upgrade",
-      "statement": "The authors describe OP_SUCCESSx as an upgrade mechanism: a soft fork can give one a meaning, and they allow new opcodes more cleanly than OP_NOP.",
+      "statement": "The authors describe OP_SUCCESSx as an upgrade mechanism: a soft fork can give one a meaning, only ever turning valid scripts invalid, and they allow new opcodes more cleanly than OP_NOP. In a rationale footnote they warn that using one before it is defined is insecure and leads to fund loss.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -202,6 +210,14 @@
             58
           ],
           "quote": "Any rule changes to an <code>OP_SUCCESSx</code>-containing script may only turn a valid script into an invalid one, and this is always achievable with softforks."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "Using an <code>OP_SUCCESSx</code> before its meaning is defined by a softfork is insecure and leads to fund loss."
         }
       ]
     },
@@ -271,7 +287,7 @@
     },
     {
       "id": "checksigadd",
-      "statement": "OP_CHECKSIGADD (opcode 186) replaces CHECKMULTISIG-like opcodes, which the authors say are incompatible with batch verification; it behaves like OP_ROT OP_SWAP OP_CHECKSIG OP_ADD in one byte.",
+      "statement": "Opcode 186 is OP_CHECKSIGADD, a new signature opcode added by BIP 342.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -286,6 +302,22 @@
         {
           "bip": 342,
           "lines": [
+            75,
+            75
+          ],
+          "quote": "and a new opcode <code>OP_CHECKSIGADD</code> is added."
+        }
+      ]
+    },
+    {
+      "id": "checksigadd-why",
+      "statement": "In a rationale footnote, the authors say OP_CHECKSIGADD compensates for CHECKMULTISIG-like opcodes, which are incompatible with batch verification, and that it is equivalent to OP_ROT OP_SWAP OP_CHECKSIG OP_ADD in one byte.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
             76,
             76
           ],
@@ -295,8 +327,8 @@
     },
     {
       "id": "multisig-rewrite",
-      "statement": "A CHECKMULTISIG policy can be rewritten as <pubkey_1> CHECKSIG <pubkey_2> CHECKSIGADD … m NUMEQUAL, with one witness element per key that is either a signature or empty.",
-      "scope": "normative-rule",
+      "statement": "In a rationale footnote, the authors show that a CHECKMULTISIG policy can be rewritten as <pubkey_1> CHECKSIG <pubkey_2> CHECKSIGADD … m NUMEQUAL, with one witness element per key that is either a signature or empty.",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -330,6 +362,14 @@
             79
           ],
           "quote": "This approach is far more efficient, but does require a 3-round interactive signing protocol to jointly produce the (single) signature."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "Multisig policies can also be realized with [http://cacr.uwaterloo.ca/techreports/2001/corr2001-13.ps threshold signatures] using verifiable secret sharing."
         }
       ]
     },
@@ -543,7 +583,7 @@
     },
     {
       "id": "limits",
-      "statement": "The 10,000-byte script size limit and the 201 non-push opcode limit do not apply; the 1,000-element stack limit and 520-byte element limit remain, and also apply to the initial stack.",
+      "statement": "The 10,000-byte script size limit and the 201 non-push opcode limit do not apply; the 1,000-element stack limit remains and is extended to the initial stack, and the 520-byte element limit remains for the initial stack and pushes.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -575,7 +615,7 @@
     },
     {
       "id": "examples-note",
-      "statement": "BIP 342 says the BIP 341 test vectors also contain tapscript examples; BIP 341 links Bitcoin Core's validation test vectors, used in its unit test framework.",
+      "statement": "BIP 342 says the BIP 341 test vectors also contain tapscript examples; BIP 341 links Bitcoin Core's validation test vectors, used in its unit test framework, on that repository's main branch.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -593,7 +633,7 @@
             304,
             304
           ],
-          "quote": "Validation test vectors used in the [https://github.com/bitcoin/bitcoin/blob/3820090bd619ac85ab35eff376c03136fe4a9f04/src/test/script_tests.cpp#L1718 Bitcoin Core unit test framework] can be found"
+          "quote": "Validation test vectors used in the [https://github.com/bitcoin/bitcoin/blob/3820090bd619ac85ab35eff376c03136fe4a9f04/src/test/script_tests.cpp#L1718 Bitcoin Core unit test framework] can be found [https://github.com/bitcoin-core/qa-assets/blob/main/unit_test_data/script_assets_test.json?raw=true here]."
         }
       ]
     },

@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { taprootOutput } from "../src/taproot";
 import {
   TraceScopeError,
   castToBool,
@@ -138,6 +139,33 @@ describe("out-of-scope input rejection", () => {
   });
 });
 
+describe("rules found in review", () => {
+  /** Case 804's transaction, re-pointed at an output that commits to `scriptHex` alone. */
+  const committed = (scriptHex: string, stack: string[] = [], scriptSig = "") => {
+    const c = structuredClone(get(804));
+    const internal = "dff1d77f2a671c5f36183726db2341be58feae1da2deced843240f7b502ba659"; // BIP 340 vector 1's public key
+    const out = taprootOutput(internal, { id: 0, script: scriptHex, leafVersion: 0xc0 });
+    const amount = c.prevouts[c.index].slice(0, 16);
+    c.prevouts[c.index] = amount + "22" + out.scriptPubKeyHex;
+    c.success = { scriptSig, witness: [...stack, scriptHex, out.controlBlocks[0]] };
+    return c;
+  };
+
+  it("checks the 520-byte push limit even in an unexecuted branch", () => {
+    const big = "4d0902" + "00".repeat(521); // PUSHDATA2 of 521 bytes
+    const t = traceTapscript(committed("0063" + big + "6851"), "success");
+    expect([t.valid, t.reason]).toEqual([false, "push larger than 520 bytes"]);
+    const ok = traceTapscript(committed("0063" + "4d0802" + "00".repeat(520) + "6851"), "success");
+    expect(ok.valid).toBe(true);
+  });
+
+  it("fails a spend with a non-empty scriptSig", () => {
+    const t = traceTapscript(committed("51", [], "00"), "success");
+    expect([t.valid, t.failStage]).toEqual([false, "bip141"]);
+    expect(traceTapscript(committed("51"), "success").valid).toBe(true);
+  });
+});
+
 describe("script numbers and truth", () => {
   it("round-trips minimal encodings and applies CastToBool", () => {
     for (const n of [0n, 1n, -1n, 23n, 24n, 127n, 128n, -128n, 255n, 256n, 2147483647n]) expect(decodeNum(encodeNum(n))).toBe(n);
@@ -207,7 +235,8 @@ describe("tapscript chapter fixtures and prose numbers", () => {
     expect(bip342[128]).toContain("201");
     expect(bip342[130]).toContain("1000 elements");
     expect(bip342[131]).toContain("520 bytes");
-    expect(text).toContain("The 10,000-byte script size limit and the 201-opcode limit do not apply");
-    expect(text).toContain("The limits of 1,000 stack elements and 520 bytes per element remain");
+    expect(text).toContain("The 10,000-byte script size limit and the 201 non-push opcode limit do not apply");
+    expect(text).toContain("The limit of 1,000 stack elements remains");
+    expect(text).toContain("elements still may not exceed 520 bytes");
   });
 });

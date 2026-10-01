@@ -29,7 +29,10 @@ export function SigopsBudget({ fixtures }: { fixtures: DerivedTapscriptFixture[]
         <span><span class="atlas-ser__key" data-group="budget-spent" />spent by non-empty signatures</span>
         <span><span class="atlas-ser__key" data-group="budget-left" />remaining budget</span>
       </p>
-      <p class="atlas-lab__source">Success witnesses of the recorded Core test cases. Witness sizes include every item’s length prefix.</p>
+      <p class="atlas-lab__source">
+        Success witnesses of the recorded Core test cases. Witness sizes are serialized sizes: the item count plus every item with its length prefix.
+        The OP_SUCCESS spend never reaches the budget: it is valid before any opcode runs.
+      </p>
     </div>
   );
 }

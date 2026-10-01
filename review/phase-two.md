@@ -4,9 +4,9 @@ Date: 1 October 2026. Status: **three draft chapters, awaiting human sign-off.**
 
 | Chapter | BIP | Hero figure | Default-path words | Independent review |
 |---|---|---|---|---|
-| Schnorr | 340 | `schnorr-verification.v1` | WORDS_SCHNORR | 6 should-fix + 5 nits, all applied |
-| Taproot | 341 | `taproot-commitment.v1` | WORDS_TAPROOT | 1 blocking (figure leak) + 8 should-fix + 8 nits, all applied |
-| Tapscript | 342 | `tapscript-trace.v1` | WORDS_TAPSCRIPT | TAPSCRIPT_SUMMARY |
+| Schnorr | 340 | `schnorr-verification.v1` | 1,276 | 6 should-fix + 5 nits, all applied |
+| Taproot | 341 | `taproot-commitment.v1` | 1,278 | 1 blocking (figure leak) + 8 should-fix + 8 nits, all applied |
+| Tapscript | 342 | `tapscript-trace.v1` | 1,257 | 1 blocking (recorder rule) + 9 should-fix + 4 nits, all applied |
 
 ## Sources
 
@@ -18,7 +18,7 @@ Date: 1 October 2026. Status: **three draft chapters, awaiting human sign-off.**
 
 - **BIP 340:** all 19 CSV vectors through a step-by-step `Verify` built on `@noble/curves` (lift_x, point arithmetic, tagged hash), each cross-checked against noble's own `schnorr.verify`; the failing stage of each invalid vector; the 8 vectors with secret keys reproduce their signatures (test-only helper); p and n match the BIP text; x ≥ p, r = p − 1, s = n − 1 edge cases; messages of 0, 1, 17, 32 and 100 bytes; every message swap in the hero fails at even-y or x-match.
 - **BIP 341:** all 7 scriptPubKey vectors (leaf hashes, Merkle root, tweak, output key, scriptPubKey, BIP 350 address, control blocks); every control block passes the BIP's commitment check for its own leaf and fails for other leaves, a flipped parity bit and another output key; all 7 key-path inputs (internal key, tweak, tweaked secret key, SigMsg, sighash and the published witness signature, byte for byte); SigMsg length formula for every hash type; undefined hash types, SINGLE without an output and an explicit 0x00 sighash byte rejected.
-- **BIP 342:** for each of the 6 reviewed Core cases, the recorder's verdict on both the success and the failure witness matches Core's label, every control block verifies, and the failure stops where the prose says; sigops budget arithmetic; OP_SUCCESSx ranges equal the BIP's list; unsupported opcodes (OP_ADD, OP_CODESEPARATOR, OP_CHECKLOCKTIMEVERIFY), key-path spends and non-0xc0 leaves throw `TraceScopeError`; a one-byte change to the transaction makes a valid signature fail.
+- **BIP 342:** the 520-byte push limit applies in unexecuted branches and a non-empty scriptSig fails (both regression tests from review); for each of the 6 reviewed Core cases, the recorder's verdict on both the success and the failure witness matches Core's label, every control block verifies, and the failure stops where the prose says; sigops budget arithmetic; OP_SUCCESSx ranges equal the BIP's list; unsupported opcodes (OP_ADD, OP_CODESEPARATOR, OP_CHECKLOCKTIMEVERIFY), key-path spends and non-0xc0 leaves throw `TraceScopeError`; a one-byte change to the transaction makes a valid signature fail.
 - **Optional sweep (not run in CI):** with `SCRIPT_ASSETS_FULL` pointing at the full pinned file, the recorder is run on every TAPROOT case. In this session it accepted 761 witnesses and agreed with Core's label on all 761; the other 1,960 were refused as out of scope; nothing crashed.
 - **Every chapter:** the shared content contracts (schema, catalog agreement including the exact allowed controls, word range, every claim cited, every quote verbatim, every fixture tied to a pinned line or external file, fixture kinds) and prose-number tests.
 - **Build fails closed** when a Schnorr fixture differs from its CSV line, a Taproot fixture differs from the wallet vectors, a Tapscript fixture differs from the pinned excerpt, or the excerpt's hash differs from the lock (each checked by deliberately corrupting it in this session).
@@ -81,4 +81,17 @@ Nits: negation of the secret key when P has odd y; "Among several changes"; aggr
 Deliberate breakage: unsorted branch hashing → 5 tests fail; dropping the parity comparison → 1; omitting compact_size in TapLeaf → 6; including sha_outputs under SIGHASH_SINGLE → 3.
 Note: the vectors' "sigMsg" field includes the 0x00 epoch byte in front of SigMsg as BIP 341 defines it; the tests account for this.
 
-TAPSCRIPT_REVIEW_NOTES
+### Tapscript (BIP 342) — independent review
+Reviewer: fresh subagent with the chapter, ledger, recorder, taproot model, figures, derive checks, the pinned excerpt and lock. It fetched the upstream file at the pinned commit itself (hash matches; all six excerpt cases byte-identical), re-ran the full sweep (761 traced and agreeing, 0 disagreeing, 1,960 refused), and probed the recorder with its own committed leaves. 1 blocking, 9 should-fix, 4 nits — all applied:
+1. **Blocking — recorder rule.** The 520-byte push limit was checked only for executed pushes; Core checks every push. A committed `OP_0 OP_IF <521-byte push> OP_ENDIF OP_1` was accepted. Fixed (checked before the branch test) with a regression test that builds such a leaf; 520 bytes still passes.
+2. A non-empty scriptSig was ignored (Core: WITNESS_MALLEATED) → now fails at a new `bip141` stage, with a test.
+3. "warn, in bold" was false (only the footnote heading is bold) → "in a footnote".
+4. OP_SUCCESSx order overstated → "once the BIP 141 and BIP 341 checks have passed … before the remaining tapscript rules"; the recorded case (opcode 126) is now named in that paragraph.
+5. "every edge in MUST language" → "each case; the failure cases use MUST".
+6. Caveat said the recorder supports only the cases' opcodes → "a small reviewed set of opcodes".
+7. Limits sentence over-applied the change → only the 1,000-element limit is extended to the initial stack; the 520-byte limit remains.
+8. Scope labels: `multisig-rewrite` → author-rationale; `checksigadd` and `op-success` split so footnote rationale sits in author-rationale claims.
+9. Missing quotes added: BIP 342 L29 (simultaneously), L80 (threshold signatures), BIP 341 L81 (other leaf versions succeed).
+10. Fig. A08.1 credited BIP 341 with the 0xc0 check → BIP 342 applies because the leaf version is 0xc0.
+Nits: witness byte counts now consistently include length prefixes and the item count, and sum to the total; the budget figure notes that the OP_SUCCESS spend never reaches the budget; "201 non-push opcode limit"; a model comment notes that Core charges the budget before the empty-key and BIP 340 checks (same verdicts); a new paragraph says the OP_SUCCESS and unknown-key cases are upgrade hooks that consensus accepts but are not safe to use, and that the qa-assets commit is this site's choice (BIP 341 links `main`).
+

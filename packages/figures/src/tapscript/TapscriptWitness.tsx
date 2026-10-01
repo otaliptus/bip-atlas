@@ -23,17 +23,17 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
           );
         })}
         <li data-part="script">
-          <span class="atlas-ts-witness__tag">item {v.initialStack.length} · script · {v.witness.scriptBytes} B</span>
+          <span class="atlas-ts-witness__tag">item {v.initialStack.length} · script · {v.witness.scriptBytes} B with prefix</span>
           <code class="atlas-break">{v.ops.map((o) => o.name).join(" ")}</code>
         </li>
         <li data-part="control">
-          <span class="atlas-ts-witness__tag">item {v.initialStack.length + 1} · control block · {v.witness.controlBytes} B</span>
-          <span>leaf version 0xc0, internal key, {(v.witness.controlBytes - 33) / 32} sibling hashes</span>
+          <span class="atlas-ts-witness__tag">item {v.initialStack.length + 1} · control block · {v.witness.controlBytes} B with prefix</span>
+          <span>control byte (leaf version 0xc0), internal key, {v.witness.siblings} sibling hashes</span>
         </li>
       </ol>
       <div class="atlas-ts-witness__split">
-        <p data-part="bip341"><strong>BIP 341</strong> uses the last two items: it checks that the output key commits to this script (Fig. A07.2), and that the leaf version is 0xc0.</p>
-        <p data-part="bip342"><strong>BIP 342</strong> then runs the script, starting from the items before it as the stack.</p>
+        <p data-part="bip341"><strong>BIP 341</strong> uses the last two items: it checks that the output key commits to this script and its leaf version (Fig. A07.2).</p>
+        <p data-part="bip342"><strong>BIP 342</strong> applies because the leaf version is 0xc0: it runs the script, starting from the items before it as the stack.</p>
       </div>
       <p class="atlas-lab__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), success witness.</p>
     </div>

@@ -305,7 +305,8 @@ export interface TapscriptTraceView {
   elements: TapscriptElement[];
   /** Indices into `elements`, bottom of stack first. */
   initialStack: number[];
-  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number };
+  /** Serialized sizes, each including its length prefix; totalBytes adds the item-count prefix. */
+  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number; siblings: number };
   budgetStart: number;
   sigOpsCounted: number;
   steps: Array<{

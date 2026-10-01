@@ -174,8 +174,8 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
             Remaining: <strong>{budgetNow}</strong> · non-empty signatures counted: {sigSoFar.filter((s) => s.sig!.check !== "empty" && s.sig!.check !== "invalid").length}
           </p>
           <p class="atlas-panel__scope">
-            Witness: {view.witness.items} items — initial stack {view.witness.stackBytes} B, script {view.witness.scriptBytes} B, control block {view.witness.controlBytes} B
-            {view.witness.annexBytes ? `, annex ${view.witness.annexBytes} B` : ""}. The control block was checked against the output key, as in Fig. A07.2.
+            Witness: {view.witness.totalBytes} bytes serialized = 1 (item count) + initial stack {view.witness.stackBytes} + script {view.witness.scriptBytes} + control block {view.witness.controlBytes}
+            {view.witness.annexBytes ? ` + annex ${view.witness.annexBytes}` : ""}, each part with its length prefix. The control block was checked against the output key, as in Fig. A07.2.
           </p>
         </section>
       </div>

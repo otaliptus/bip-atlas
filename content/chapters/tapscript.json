@@ -54,7 +54,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "BIP 342 applies only in one situation: a version 1, 32-byte Taproot output, spent by its script path, with leaf version 0xc0. Other leaf versions are left for future rules. The checks happen in a fixed order. First, anything BIP 141 or BIP 341 rejects is rejected. Then the script is decoded, the starting stack is checked against resource limits, the script runs, and it must finish with exactly one element on the stack, and that element must be true.",
+     "text": "BIP 342 applies only in one situation: a version 1, 32-byte Taproot output, spent by its script path, with leaf version 0xc0. Spends with other leaf versions simply succeed under BIP 341, leaving them for future rules. The checks happen in a fixed order. First, anything BIP 141 or BIP 341 rejects is rejected. Then the script is decoded, the starting stack is checked against resource limits, the script runs, and it must finish with exactly one element on the stack, and that element must be true.",
      "claims": [
       "scope",
       "order"
@@ -83,7 +83,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The opcodes pop a public key and a signature, and the BIP spells out every edge in MUST language. Too few stack elements, or an empty public key, make the script fail immediately. A 32-byte key with a non-empty signature means a real BIP 340 check, and a failed check ends the script at once rather than pushing false.",
+     "text": "The opcodes pop a public key and a signature, and the BIP spells out each case; the failure cases use MUST. Too few stack elements, or an empty public key, make the script fail immediately. A 32-byte key with a non-empty signature means a real BIP 340 check, and a failed check ends the script at once rather than pushing false.",
      "claims": [
       "sig-pops",
       "sig-known"
@@ -112,9 +112,10 @@
     },
     {
      "type": "paragraph",
-     "text": "Its replacement is OP_CHECKSIGADD. It pops a key, a number n and a signature; a valid signature pushes n + 1 and an empty one pushes n unchanged. The authors note that the old multisignature opcodes cannot be batch verified, and that the new one does the work of four existing opcodes in one byte. A k-of-n policy becomes a chain: check the first key with OP_CHECKSIG, add each further key with OP_CHECKSIGADD, and compare the total with k. Each signer’s slot in the witness holds either a signature or an empty vector.",
+     "text": "Its replacement is OP_CHECKSIGADD. It pops a key, a number n and a signature; a valid signature pushes n + 1 and an empty one pushes n unchanged. The authors note that the old multisignature opcodes cannot be batch verified, and that the new one does the work of four existing opcodes in one byte. Their suggested rewrite of a k-of-n policy is a chain: check the first key with OP_CHECKSIG, add each further key with OP_CHECKSIGADD, and compare the total with k. Each signer’s slot in the witness holds either a signature or an empty vector.",
      "claims": [
       "checksigadd",
+      "checksigadd-why",
       "sig-nonempty",
       "sig-empty",
       "multisig-rewrite"
@@ -122,7 +123,7 @@
     },
     {
      "type": "paragraph",
-     "text": "That is not the only design. The authors also describe putting each k-of-k combination in its own leaf, aggregating each combination into one key, or using threshold signatures, each trading privacy, cost and interaction differently.",
+     "text": "That is not the only design. They also describe putting each k-of-k combination in its own leaf, aggregating each combination into one key, or using threshold signatures, each trading privacy, cost and interaction differently.",
      "claims": [
       "multisig-alternatives"
      ]
@@ -216,7 +217,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Other limits move too. The 10,000-byte script size limit and the 201-opcode limit do not apply to tapscript. The limits of 1,000 stack elements and 520 bytes per element remain, and now also apply to the starting stack taken from the witness.",
+     "text": "Other limits move too. The 10,000-byte script size limit and the 201 non-push opcode limit do not apply to tapscript. The limit of 1,000 stack elements remains and now also covers the starting stack taken from the witness, and elements still may not exceed 520 bytes.",
      "claims": [
       "limits"
      ]
@@ -229,7 +230,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Some opcode numbers are reserved as OP_SUCCESSx. If the decoder meets one anywhere in a script, the spend is valid at once, before any other rule, even if bytes after it would not decode. The authors present this as an upgrade mechanism: a later soft fork can give such an opcode a meaning, which only ever makes fewer spends valid. They also warn, in bold, that using one before it is defined is insecure and leads to fund loss.",
+     "text": "Some opcode numbers are reserved as OP_SUCCESSx. Once the BIP 141 and BIP 341 checks have passed, if the decoder meets one of these opcodes anywhere in the script, the spend is valid at once, before the remaining tapscript rules, even if bytes after it would not decode. In the recorded case the whole script is opcode 126, OP_SUCCESS126, and nothing runs. The authors present this as an upgrade mechanism: a later soft fork can give such an opcode a meaning, which only ever makes fewer spends valid. In a footnote they also warn that using one before it is defined is insecure and leads to fund loss.",
      "claims": [
       "op-success",
       "op-success-upgrade",
@@ -247,7 +248,7 @@
     {
      "type": "callout",
      "label": "Caveat",
-     "text": "The figure is a player for recorded runs, not a script interpreter. The recorder behind it supports only the opcodes these cases use and refuses anything else, so it cannot quietly accept a script it does not understand. A trace reaching true here says nothing about scripts outside these six cases.",
+     "text": "The figure is a player for recorded runs, not a script interpreter. The recorder behind it supports a small reviewed set of opcodes and refuses anything else, so it cannot quietly accept a script it does not understand. A trace reaching true here says nothing about scripts outside these six cases.",
      "claims": [
       "traces-agree"
      ]
@@ -260,10 +261,20 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "BIP 342 says that BIP 341’s test vectors contain tapscript examples. The wallet vector file pinned for this site contains tapscript leaves but no script path spends, so there is nothing there to execute. BIP 341 also links Bitcoin Core’s validation test vectors; this chapter uses six cases from that file, copied at a fixed commit and checked by hash.",
+     "text": "BIP 342 says that BIP 341’s test vectors contain tapscript examples. The wallet vector file pinned for this site contains tapscript leaves but no script path spends, so there is nothing there to execute. BIP 341 also links Bitcoin Core’s validation test vectors, on the main branch of Core’s test-asset repository; this site chose one commit of that file, and this chapter uses six cases from it, copied and checked by hash.",
      "claims": [
       "examples-note",
       "wallet-vectors-no-spends"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Two of the cases are upgrade hooks: an OP_SUCCESS opcode and an unknown key type. Core’s tests show what consensus accepts, not what is safe; the BIP warns against using OP_SUCCESS opcodes before a soft fork defines them, and unknown key types exist only so that one can.",
+     "claims": [
+      "op-success-upgrade",
+      "sig-unknown",
+      "case-success",
+      "case-unknown"
      ]
     },
     {

@@ -129,7 +129,7 @@ export interface TraceStep {
   failed?: boolean;
 }
 
-export type FailStage = "commitment" | "decode" | "initial-stack" | "execute" | "final-stack";
+export type FailStage = "bip141" | "commitment" | "decode" | "initial-stack" | "execute" | "final-stack";
 
 export interface Trace {
   scriptHex: string;
@@ -190,6 +190,7 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
   const leafVersion = parseInt(control.slice(0, 2), 16) & 0xfe;
   if (leafVersion !== 0xc0) throw new TraceScopeError("leaf version is not 0xc0");
   const commitmentOk = checkControlBlock(spk.slice(4), scriptHex, control).ok;
+  const scriptSigEmpty = (c[which]!.scriptSig ?? "") === "";
   const budgetStart = 50 + witnessSize(w);
   const base = { scriptHex, leafVersion, initialStack: stack0, annexHex, witnessBytes: witnessSize(w), budgetStart, commitmentOk };
   const steps: TraceStep[] = [];
@@ -202,6 +203,7 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
   if (decoded.kind === "ok") {
     for (const o of decoded.ops) if (o.dataHex === null && !SUPPORTED.has(o.op)) throw new TraceScopeError(`${o.name} is outside this recorder's reviewed opcode set`);
   }
+  if (!scriptSigEmpty) return end([], false, "bip141", "a native SegWit spend must have an empty scriptSig");
   if (!commitmentOk) return end([], false, "commitment", "the control block does not commit to this script");
 
   if (decoded.kind === "op-success") return end(decoded.ops, true, null, `${decoded.at.name} found while decoding: validation succeeds without executing anything`);
@@ -240,12 +242,13 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
       step.stackAfter = before;
       return end(ops, false, "execute", why);
     };
+    // Core checks every push against the 520-byte limit, executed or not.
+    if (o.dataHex !== null && o.dataHex.length / 2 > 520) return fail("push larger than 520 bytes");
     if (!executed) {
       step.note = "in an unexecuted branch: skipped";
       continue;
     }
     if (o.dataHex !== null) {
-      if (o.dataHex.length / 2 > 520) return fail("push larger than 520 bytes");
       stack.push(o.dataHex);
       step.note = o.dataHex.length ? `push ${o.dataHex.length / 2} byte${o.dataHex.length === 2 ? "" : "s"}` : "push the empty vector";
     } else if (o.op === OP.OP_0) {
@@ -333,6 +336,8 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
         n = dn;
       }
       const sig = stack.pop()!;
+      // Order follows BIP 342's text. Core charges the budget before the empty-key and BIP 340
+      // checks; verdicts agree, but a failing step's reason or budget display could differ.
       if (key.length === 0) return fail(`${o.name}: public key is empty`);
       let check: SigCheck = sig === "" ? "empty" : key.length === 64 ? (verifySig(sig, key) ? "valid" : "invalid") : "unknown-key-type";
       if (check === "invalid") {
