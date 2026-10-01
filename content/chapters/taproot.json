@@ -22,7 +22,7 @@
    },
    {
     "type": "paragraph",
-    "text": "BIP 341, assigned in 2020, requires BIP 340 and records its activation on mainnet at block 709632, defines a SegWit version 1 output whose spending rules combine Schnorr signatures, Merkle trees and a trick called Taproot. Its authors set out to minimize how much an output reveals about its spending conditions, both when it is created and when it is spent.",
+    "text": "BIP 341, assigned in 2020 and building on BIP 340, defines a SegWit version 1 output whose spending rules combine Schnorr signatures, Merkle trees and a trick called Taproot. The BIP records that it activated on mainnet at block 709632. Its authors set out to minimize how much an output reveals about its spending conditions, both when it is created and when it is spent.",
     "claims": [
      "preamble",
      "activation",
@@ -40,7 +40,7 @@
     "bip341-spk0",
     "bip341-spk5"
    ],
-   "caption": "Two published vectors. With or without scripts, the key that appears in the output is not the internal key: it has been tweaked by a hash.",
+   "caption": "Two published vectors. In both, the key that appears in the output is not the internal key: it has been tweaked by a hash. With no scripts, that tweak is the BIP’s recommendation for wallets, not a consensus rule.",
    "claims": [
     "informal-design",
     "names",
@@ -75,7 +75,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Because t depends on the tree, Q commits to the whole tree without showing any of it. Anyone holding the secret key for P can still sign for Q: they add t to their secret key, and a key path spend is simply a BIP 340 signature with that tweaked key. When no scripts are wanted, the BIP still asks wallets to tweak, hashing P alone, as vector 0 does. The authors explain why: in a key shared by several parties, an untweaked output would let one of them slip in a hidden script.",
+     "text": "Because t depends on the tree, Q commits to the whole tree without showing any of it. Anyone holding the secret key for P can still sign for Q: they add t to their secret key (negated first if P’s y coordinate is odd), and a key path spend is simply a BIP 340 signature with that tweaked key. When no scripts are wanted, the BIP still asks wallets to tweak, hashing P alone, as vector 0 does. The authors explain why: with some ways of sharing one key among several parties, an untweaked output would let one of them slip in a hidden script; MuSig’s aggregation does not have this problem.",
      "claims": [
       "key-spend-signing",
       "no-script-commit",
@@ -121,7 +121,7 @@
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "BIP 341 vector 5 and the published key-path spend of the same output. In script-path mode, only the chosen leaf’s script, the internal key and sibling hashes appear; the verifier recomputes the rest and compares it with the output key.",
+     "caption": "BIP 341 vector 5 and the published key-path spend of the same output. A script-path witness carries the script’s inputs, the chosen script and a control block (leaf version and parity, internal key, sibling hashes); the verifier recomputes the rest and compares it with the output key.",
      "claims": [
       "informal-design",
       "control-contents",
@@ -141,7 +141,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex, a field the authors reserved for future extensions. One remaining element means a key path spend; two or more mean a script path spend.",
+     "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex, a field reserved for future extensions that users SHOULD NOT include until a soft fork defines it. One remaining element means a key path spend; two or more mean a script path spend.",
      "claims": [
       "path-choice",
       "annex"
@@ -149,7 +149,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The key path is a single signature that must be valid for the output key q. The signature commits to the transaction, not to the tree, and the figure’s key-path view shows the published one: 64 bytes, with nothing else in the witness.",
+     "text": "The key path is a single signature that must be valid for the output key q. The signature names no leaf and reveals nothing about the tree, and the figure’s key-path view shows the published one: 64 bytes, with nothing else in the witness.",
      "claims": [
       "key-path-rule",
       "key-path-verify",
@@ -162,6 +162,7 @@
      "claims": [
       "script-and-control",
       "control-contents",
+      "tweak-check",
       "vector5"
      ]
     },
@@ -201,7 +202,7 @@
       },
       {
        "type": "paragraph",
-       "text": "This page’s model reproduces every value the vectors publish: leaf hashes, roots, tweaks, output keys, scriptPubKeys and control blocks for all 7 trees, and the signature message, signature hash and signature for all 7 key-path inputs.",
+       "text": "This page’s model reproduces every value the vectors publish: leaf hashes, roots, tweaks, output keys, scriptPubKeys and control blocks for all 7 trees, and the keys, tweaks, signature message, signature hash and signature for all 7 key-path inputs.",
        "claims": [
         "vectors-reproduced"
        ]
@@ -216,7 +217,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Only the condition actually used is published. A key path spend shows a key and a signature and nothing else, so an observer cannot tell whether a script tree existed at all. The BIP calls this the ideal case, and the authors expect it to be common, because Schnorr key aggregation lets several people control one key that looks like anyone else’s.",
+     "text": "Only the condition actually used is published. A key path spend shows a key and a signature and nothing else, so an observer cannot tell whether a script tree existed at all. The BIP calls this the ideal case. The authors argue it can be the usual one: assuming most outputs could be spent by everyone involved agreeing, Schnorr key aggregation lets several people control one key that looks like anyone else’s.",
      "claims": [
       "privacy",
       "key-or-script",
@@ -225,9 +226,10 @@
     },
     {
      "type": "paragraph",
-     "text": "Aggregation is not a matter of adding public keys together by hand. BIP 341 points to protocols such as MuSig and leaves their details out of scope, and recommends making the most likely single-key condition the internal key.",
+     "text": "Aggregation is not a matter of adding public keys together by hand: a plain sum is open to key cancellation and related attacks unless something like a proof of possession guards it. BIP 341 points to protocols such as MuSig and leaves their details out of scope, and recommends making the most likely single-key condition the internal key.",
      "claims": [
-      "internal-key-choice"
+      "internal-key-choice",
+      "naive-sum"
      ]
     },
     {
@@ -255,7 +257,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "A Taproot signature is a BIP 340 signature over a tagged hash, TapSighash, of a signature message. It is 64 bytes, or 65 with an explicit sighash byte; leaving the byte off means SIGHASH_DEFAULT, which signs the whole transaction like SIGHASH_ALL.",
+     "text": "A Taproot signature is a BIP 340 signature over a tagged hash, TapSighash, of a signature message. It is 64 bytes, or 65 with an explicit sighash byte; leaving the byte off means SIGHASH_DEFAULT, which signs the whole transaction like SIGHASH_ALL. Spelling out 0x00 as a 65th byte is invalid.",
      "claims": [
       "signature-form",
       "key-path-verify"
@@ -263,7 +265,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The message changed in one important way. Unless the signer opts out with ANYONECANPAY, it commits to the amount and scriptPubKey of every output being spent, not just its own. The authors give the reason: an offline signing device can no longer be lied to about the fee or about what it is spending. The message is at most 206 bytes; for the published input below it is 174.",
+     "text": "Among several changes to the message, one stands out. Unless the signer opts out with ANYONECANPAY, it commits to the amount and scriptPubKey of every output being spent, not just its own. The authors give the reason: an offline signing device can no longer be lied to about the fee or about what it is spending. The message is at most 206 bytes; for the published input below it is 174.",
      "claims": [
       "sigmsg-commits",
       "sigmsg-length"

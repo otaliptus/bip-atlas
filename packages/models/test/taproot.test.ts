@@ -9,6 +9,7 @@ import {
   taprootSighash,
   tapBranchHash,
   tweakSeckey,
+  tweakPubkey,
   verifyKeyPath,
   type ScriptTree,
 } from "../src/taproot";
@@ -108,6 +109,9 @@ describe("BIP341 keyPathSpending vector", () => {
       const q = spent[g.txinIndex].scriptPubKeyHex.slice(4);
       expect(publicKeyOf(tweakedKey)).toBe(q);
       if (g.merkleRoot === null) expect(out.tweak.outputKeyHex).toBe(q);
+      const tw = tweakPubkey(input.intermediary.internalPubkey, g.merkleRoot ?? "");
+      expect(tw.tweakHex).toBe(input.intermediary.tweak);
+      expect(tw.outputKeyHex).toBe(q);
       const items = sigMsg(tx, spent, g.txinIndex, g.hashType);
       // The vectors list the epoch byte 0x00 together with SigMsg.
       expect("00" + items.map((i) => i.hex).join("")).toBe(input.intermediary.sigMsg);
@@ -129,6 +133,9 @@ describe("BIP341 keyPathSpending vector", () => {
     expect(verifyKeyPath(q, sig.slice(0, -2), sighashFor)).toBe(false);
     expect(() => sigMsg(tx, spent, 0, 0x04)).toThrow(SigMsgError);
     expect(() => sigMsg(tx, spent, 8, 0x03)).toThrow(SigMsgError);
+    expect(() => sigMsg(tx, spent, 0, 0, 128)).toThrow(SigMsgError);
+    // A 65-byte signature with an undefined hash_type is simply invalid.
+    expect(verifyKeyPath(q, sig + "04", sighashFor)).toBe(false);
   });
 
   it("commits to every spent amount and scriptPubKey unless ANYONECANPAY", () => {

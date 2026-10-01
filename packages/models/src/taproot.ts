@@ -41,6 +41,7 @@ export function tapLeafHash(leafVersion: number, scriptHex: string): string {
 
 /** hash_TapBranch of two child hashes, smaller (lexicographically) first. */
 export function tapBranchHash(aHex: string, bHex: string): string {
+  if (!/^[0-9a-f]{64}$/.test(aHex) || !/^[0-9a-f]{64}$/.test(bHex)) throw new Error("branch hashes must be 32 bytes of lowercase hex");
   const [lo, hi] = aHex < bHex ? [aHex, bHex] : [bHex, aHex];
   return bytesToHex(tagged("TapBranch", hexToBytes(lo), hexToBytes(hi)));
 }
@@ -157,6 +158,7 @@ export interface ControlCheckStep {
  * Q and compare. Stops at the first failure. Script execution is out of scope.
  */
 export function checkControlBlock(qHex: string, scriptHex: string, controlHex: string): { ok: boolean; steps: ControlCheckStep[] } {
+  if (!/^[0-9a-f]{64}$/.test(qHex)) throw new Error("q must be 32 bytes of lowercase hex");
   const c = hexToBytes(controlHex);
   const steps: ControlCheckStep[] = [];
   const done = () => ({ ok: steps.every((s) => s.ok), steps });
@@ -242,6 +244,7 @@ export function precomputed(tx: Transaction, spent: SpentOutput[]) {
  * for SIGHASH_SINGLE without a corresponding output, as the BIP requires.
  */
 export function sigMsg(tx: Transaction, spent: SpentOutput[], index: number, hashType: number, extFlag = 0, annexHex: string | null = null): SigMsgItem[] {
+  if (!Number.isInteger(extFlag) || extFlag < 0 || extFlag > 127) throw new SigMsgError("ext_flag must be 0–127");
   if (!(VALID_HASH_TYPES as readonly number[]).includes(hashType)) throw new SigMsgError(`undefined hash_type 0x${hashType.toString(16)}`);
   if (spent.length !== tx.inputs.length) throw new SigMsgError("need one spent output per input");
   const anyoneCanPay = (hashType & 0x80) === 0x80;
@@ -290,7 +293,12 @@ export function verifyKeyPath(qHex: string, sigHex: string, sighashFor: (hashTyp
   if (sig.length === 64) return schnorr.verify(sig, hexToBytes(sighashFor(0)), hexToBytes(qHex));
   if (sig.length === 65) {
     if (sig[64] === 0) return false;
-    return schnorr.verify(sig.slice(0, 64), hexToBytes(sighashFor(sig[64])), hexToBytes(qHex));
+    try {
+      return schnorr.verify(sig.slice(0, 64), hexToBytes(sighashFor(sig[64])), hexToBytes(qHex));
+    } catch (e) {
+      if (e instanceof SigMsgError) return false;
+      throw e;
+    }
   }
   return false;
 }

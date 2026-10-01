@@ -769,6 +769,8 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 .atlas-tap-exact dt { font-family: var(--manual-code); color: var(--manual-muted); }
 .atlas-tap-exact dd { margin: 0; min-inline-size: 0; }
 .atlas-tap-lab fieldset:disabled { opacity: 0.5; }
+.atlas-tap-none { margin: 0; font-size: 0.875rem; color: var(--manual-muted); padding: 0.5rem; border: 1px dashed var(--manual-rule); }
+.atlas-tap-node[data-kind="sibling"] { border-style: solid; }
 
 .atlas-sigmsg { display: grid; gap: var(--manual-space-3); }
 .atlas-sigmsg__head { margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; color: var(--manual-muted); }

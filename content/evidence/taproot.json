@@ -135,7 +135,7 @@
     },
     {
       "id": "aggregation",
-      "statement": "The authors expect most applications to use the key path because Schnorr signatures permit key aggregation: a key built from several participants' keys, which needs all of them to sign, and looks like a single-party key.",
+      "statement": "The authors argue, assuming most applications involve outputs all parties could agree to spend, that most can use the key path because Schnorr signatures permit key aggregation: a key built from several participants' keys, which needs all of them to sign, and looks like a single-party key.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -146,6 +146,14 @@
             42
           ],
           "quote": "Taproot's advantages become apparent under the assumption that most applications involve outputs that could be spent by all parties agreeing."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "This means that with taproot most applications can use the key-based spending path, which is both efficient and private."
         },
         {
           "bip": 341,
@@ -263,7 +271,7 @@
     },
     {
       "id": "annex",
-      "statement": "If there are at least two witness elements and the last begins with 0x50, it is the annex, which the authors reserved for future extensions.",
+      "statement": "If there are at least two witness elements and the last begins with 0x50, it is the annex, reserved for future extensions; until a soft fork defines it, users SHOULD NOT include one, or risk permanent fund loss.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -290,6 +298,14 @@
             63
           ],
           "quote": "The annex is a reserved space for future extensions"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "Until the meaning of this field is defined by another softfork, users SHOULD NOT include <code>annex</code> in transactions, or it may lead to PERMANENT FUND LOSS."
         }
       ]
     },
@@ -487,7 +503,7 @@
     },
     {
       "id": "key-path-verify",
-      "statement": "A 64-byte key-path signature is checked with BIP 340 Verify against q and the message hash_TapSighash(0x00 || SigMsg(0x00, 0)).",
+      "statement": "A 64-byte key-path signature is checked with BIP 340 Verify against q and the message hash_TapSighash(0x00 || SigMsg(0x00, 0)); a 65-byte signature whose last byte is 0x00 is invalid.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -498,6 +514,14 @@
             142
           ],
           "quote": "If the ''sig'' is 64 bytes long, return ''Verify(q, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 0)), sig)''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            143,
+            143
+          ],
+          "quote": "If the ''sig'' is 65 bytes long, return ''sig[64] &ne; 0x00"
         }
       ]
     },
@@ -606,8 +630,32 @@
       ]
     },
     {
+      "id": "naive-sum",
+      "statement": "Simply summing participants' keys is open to key cancellation and related attacks; the BIP's own example uses MSDL-pop, where a plain sum is made safe by proofs of possession, and points to MuSig, whose aggregation randomizes the key.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            164,
+            165
+          ],
+          "quote": "In order to prevent key cancellation and related attacks they use [https://eprint.iacr.org/2018/483.pdf MSDL-pop] instead of MuSig. The MSDL-pop protocol requires all parties to provide a proof of possession of their corresponding secret key and the aggregated key is just the sum of the individual keys."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            161,
+            161
+          ],
+          "quote": "MuSig key aggregation does not have this issue because it already causes the internal key to be randomized."
+        }
+      ]
+    },
+    {
       "id": "no-script-commit",
-      "statement": "If no script path is needed, the BIP says the output key should still commit to an unspendable script path, Q = P + int(hash_TapTweak(bytes(P)))G, instead of having none; the authors explain that otherwise a party in an aggregate key could hide a script path.",
+      "statement": "If no script path is needed, the BIP says the output key should still commit to an unspendable script path, Q = P + int(hash_TapTweak(bytes(P)))G, instead of having none; the authors explain that with some key-aggregation schemes a party could otherwise hide a script path, though MuSig's randomized aggregation does not have this issue.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -626,6 +674,14 @@
             159
           ],
           "quote": "If the taproot output key is an aggregate of keys, there is the possibility for a malicious party to add a script path without being noticed by the other parties."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            161,
+            161
+          ],
+          "quote": "MuSig key aggregation does not have this issue because it already causes the internal key to be randomized."
         }
       ]
     },
@@ -663,8 +719,8 @@
     },
     {
       "id": "privacy",
-      "statement": "Only the satisfied condition is published. Key path spends prevent observers from learning the spending conditions; a script path spend leaks that a script path exists and that the key path was not used, and the leaf's depth leaks information about the tree and suggests which wallet software created the output.",
-      "scope": "normative-rule",
+      "statement": "In the BIP's Security section, only the satisfied condition is published. Key path spends prevent observers from learning the spending conditions; a script path spend leaks that a script path exists and that the key path was not used, and the leaf's depth leaks information about the tree and suggests which wallet software created the output.",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -743,7 +799,7 @@
     },
     {
       "id": "vectors-reproduced",
-      "statement": "This site's model reproduces every published value in BIP 341's wallet vectors: for all 7 scriptPubKey vectors the leaf hashes, Merkle root, tweak, output key, scriptPubKey and control blocks, and for all 7 key-path inputs the SigMsg, sighash and witness signature; every control block passes the BIP's commitment check.",
+      "statement": "This site's model reproduces every published value in BIP 341's wallet vectors: for all 7 scriptPubKey vectors the leaf hashes, Merkle root, tweak, output key, scriptPubKey and control blocks, and for all 7 key-path inputs the internal key, tweak, tweaked secret key, SigMsg, sighash and witness signature; every control block passes the BIP's commitment check.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

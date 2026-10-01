@@ -54,20 +54,31 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
     return proof ? "hidden" : "known";
   };
 
+  /**
+   * In the wallet's view the whole tree is drawn. In the proof view only what a
+   * verifier can know is drawn: the chosen leaf, the nodes it recomputes, and
+   * each sibling as one opaque hash, which could be a leaf or a whole subtree.
+   */
   const renderNode = (n: TaprootNodeView) => {
     const seen = seenOf(n);
     const l = n.leaf !== null ? d.leaves.find((x) => x.id === n.leaf)! : null;
-    const showContent = !proof || seen === "revealed" || seen === "recomputed" || seen === "hash-only";
+    if (proof && seen === "hash-only") {
+      return (
+        <li class="atlas-tap-tree__item">
+          <div class="atlas-tap-node" data-seen={seen} data-kind="sibling">
+            <span class="atlas-tap-node__name">Sibling hash</span>
+            <code class="atlas-tap-node__hash">{short(n.hash)}</code>
+            <span class="atlas-tap-node__seen">a leaf or a subtree: the spend does not say</span>
+          </div>
+        </li>
+      );
+    }
     return (
       <li class="atlas-tap-tree__item">
         <div class="atlas-tap-node" data-seen={seen} data-kind={l ? "leaf" : "branch"}>
           <span class="atlas-tap-node__name">{l ? leafName(l.id) : "TapBranch"}</span>
-          {l && (!proof || seen === "revealed") ? (
-            <code class="atlas-tap-node__script">{l.scriptReading}</code>
-          ) : l ? (
-            <span class="atlas-tap-node__script" data-concealed="true">script concealed</span>
-          ) : null}
-          {showContent ? <code class="atlas-tap-node__hash">{short(n.hash)}</code> : <span class="atlas-tap-node__hash" data-concealed="true">—</span>}
+          {l ? <code class="atlas-tap-node__script">{l.scriptReading}</code> : null}
+          <code class="atlas-tap-node__hash">{short(n.hash)}</code>
           <span class="atlas-tap-node__seen">{l && seen === "revealed" ? "script in the witness; hash recomputed" : SEEN_TEXT[seen]}</span>
         </div>
         {n.children.length ? <ol class="atlas-tap-tree__kids">{n.children.map(renderNode)}</ol> : null}
@@ -126,8 +137,10 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
             <code class="atlas-break">{d.outputKeyHex}</code>
             <small>Output key Q (x only). This is all the output itself shows.</small>
           </div>
+          {proof && path === "key" ? null : (
+            <>
           <p class="atlas-tap-eq">
-            Q = P + t⋅G, &nbsp;t = hash<sub>TapTweak</sub>(P ‖ root)
+            Q = P + t⋅G, &nbsp;t = hash<sub>TapTweak</sub>(p ‖ root)
             <span class="atlas-tap-eq__seen">{path === "key" ? (proof ? "tweak not revealed" : "known to the wallet") : "recomputed by the verifier"}</span>
           </p>
           <div class="atlas-tap-inputs">
@@ -142,12 +155,15 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
               <span class="atlas-tap-node__seen">{SEEN_TEXT[rootSeen]}</span>
             </div>
           </div>
-          {d.root ? <ol class="atlas-tap-tree" aria-label="Script tree">{renderNode(d.root)}</ol> : null}
+            </>
+          )}
+          {d.root && !(proof && path === "key") ? <ol class="atlas-tap-tree" aria-label={proof ? "What the proof shows of the script tree" : "Script tree"}>{renderNode(d.root)}</ol> : null}
+          {proof && path === "key" ? <p class="atlas-tap-none">Nothing else is drawn: from a key-path spend, Q could be a plain key or hide an internal key and any number of scripts.</p> : null}
           <p class="atlas-tap-legend">
             <span data-seen="revealed">in the witness</span>
             <span data-seen="hash-only">hash only</span>
             <span data-seen="recomputed">recomputed</span>
-            <span data-seen={proof ? "hidden" : "known"}>{proof ? "not revealed" : "known to the wallet"}</span>
+            {proof ? null : <span data-seen="known">known to the wallet</span>}
           </p>
         </div>
 
@@ -170,7 +186,7 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
               )}
               <p class="atlas-panel__scope">
                 The spend shows Q and one signature. Nothing in it says whether a script tree exists: the internal key, the tweak and every script stay
-                off chain. Signing needs the secret key for Q, which is the internal secret key adjusted by the tweak.
+                off chain. Signing needs the secret key for Q: the internal secret key (negated if needed) plus the tweak.
               </p>
             </>
           ) : leaf ? (
@@ -210,14 +226,15 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
                         <small> smaller hash first</small>
                       </>
                     ) : null}
-                    {s.id === "tweak" ? <>t = hash<sub>TapTweak</sub>(P ‖ k) = <code>{short(s.values.t)}</code></> : null}
+                    {s.id === "tweak" ? <>t = hash<sub>TapTweak</sub>(p ‖ k) = <code>{short(s.values.t)}</code></> : null}
                     {s.id === "output-key" ? <>Q = P + t⋅G; y(Q) is {s.values.parity === "0" ? "even" : "odd"}, matching the parity bit</> : null}
                     {s.id === "compare" ? <>x(Q) = q {s.ok ? "✓" : "✕"}: the output committed to this script</> : null}
                   </li>
                 ))}
               </ol>
               <p class="atlas-panel__scope">
-                The spend reveals that a script path exists, this leaf’s script, and its depth ({leaf.path.length}). Other leaves appear, if at all, only as hashes.
+                The spend reveals that a script path exists, the internal key P, the leaf version and parity bit, this leaf’s script and its inputs, and its depth ({leaf.path.length}).
+                The rest of the tree appears, if at all, only as sibling hashes.
                 Running the script itself is BIP 342’s job and is not shown here.
               </p>
             </>
@@ -226,16 +243,21 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
       </div>
 
       <details class="atlas-tap-exact">
-        <summary>Exact values</summary>
+        <summary>Exact values{proof ? " (only those this spend reveals or lets a verifier recompute)" : " (the wallet’s view)"}</summary>
         <dl>
-          <div><dt>internal key P</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd></div>
-          <div><dt>Merkle root</dt><dd><code class="atlas-break">{d.merkleRootHex ?? "none"}</code></dd></div>
-          <div><dt>tweak t</dt><dd><code class="atlas-break">{d.tweakHex}</code></dd></div>
-          <div><dt>output key Q</dt><dd><code class="atlas-break">{d.outputKeyHex}</code> (y {d.parity ? "odd" : "even"})</dd></div>
+          {!(proof && path === "key") ? <div><dt>internal key P</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd></div> : null}
+          {!(proof && path === "key") ? <div><dt>Merkle root</dt><dd><code class="atlas-break">{d.merkleRootHex ?? "none"}</code></dd></div> : null}
+          {!(proof && path === "key") ? <div><dt>tweak t</dt><dd><code class="atlas-break">{d.tweakHex}</code></dd></div> : null}
+          <div><dt>output key Q</dt><dd><code class="atlas-break">{d.outputKeyHex}</code>{proof && path === "key" ? null : <> (y {d.parity ? "odd" : "even"})</>}</dd></div>
           <div><dt>address</dt><dd><code class="atlas-break">{d.address}</code></dd></div>
-          {d.leaves.map((l) => (
-            <div><dt>{leafName(l.id)} hash</dt><dd><code class="atlas-break">{l.leafHash}</code></dd></div>
-          ))}
+          {proof && path === "script" && leaf ? (
+            <>
+              <div><dt>{leafName(leaf.id)} hash</dt><dd><code class="atlas-break">{leaf.leafHash}</code></dd></div>
+              {leaf.path.map((h, k) => <div><dt>sibling hash {k + 1}</dt><dd><code class="atlas-break">{h}</code></dd></div>)}
+            </>
+          ) : !proof ? (
+            d.leaves.map((l) => <div><dt>{leafName(l.id)} hash</dt><dd><code class="atlas-break">{l.leafHash}</code></dd></div>)
+          ) : null}
         </dl>
       </details>
       <p class="atlas-lab__source">
