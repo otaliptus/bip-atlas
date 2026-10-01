@@ -13,9 +13,9 @@ const STATE: Record<string, string> = { valid: "Valid", invalid: "Invalid", inco
  * bip322-virtual-tx.v1 — the Message signing chapter's hero figure.
  *
  * Published BIP 322 vectors. At build time the tested model rebuilds
- * to_spend and to_sign, decodes the signature and verifies it where it can
- * (P2WPKH, P2TR key path, P2WSH multisig); the build fails unless its verdict
- * is the one the vector implies. Nothing here signs.
+ * to_spend and to_sign, decodes the signature and verifies it with the
+ * reviewed-opcode interpreter; the build fails unless its verdict is the one
+ * recorded for the vector. Nothing here signs.
  */
 export function Bip322VirtualTx({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
