@@ -215,7 +215,7 @@ const KEY_FNS = new Set(["pk", "pkh", "wpkh", "combo"]);
 const SCRIPT_FNS = new Set(["sh", "wsh"]);
 const KNOWN = new Set(["pk", "pkh", "sh", "wpkh", "wsh", "multi", "sortedmulti", "combo", "raw", "addr", "tr"]);
 /** Where each expression may appear (BIPs 381–386). */
-const ALLOWED: Record<string, Context[]> = {
+export const ALLOWED: Record<string, Context[]> = {
   pk: ["top", "sh", "wsh", "tr"],
   pkh: ["top", "sh", "wsh"],
   sh: ["top"],

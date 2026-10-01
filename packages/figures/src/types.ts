@@ -520,3 +520,55 @@ export interface WalletPathDerived {
   addresses: WalletAddressView[];
 }
 export type DerivedWalletPathFixture = WalletPathVectorFixture & { derived: WalletPathDerived };
+
+/* ---------- descriptors (BIPs 380–386) ---------- */
+
+export interface DescriptorVectorFixture extends BaseFixture {
+  kind: "descriptor-vector";
+  descriptor: string;
+  /** Lines of the published scripts (one per child, or combo's four). */
+  scriptLines: number[];
+}
+
+export type DescriptorTokenRole = "fn" | "punct" | "num" | "text" | "origin" | "key" | "path" | "range" | "checksum" | "hash";
+
+export interface DescriptorKeyView {
+  text: string;
+  kind: string;
+  isPrivate: boolean;
+  origin: string | null;
+  derivation: string | null;
+  range: string | null;
+  /** Public key (hex) at child 0, 1, 2 for ranged keys; one entry otherwise. */
+  publicKeys: string[];
+}
+
+export interface DescriptorDerived {
+  body: string;
+  checksumGiven: string | null;
+  checksumComputed: string;
+  checksumVerdict: string;
+  symbolCount: number;
+  symbols: Array<{ char: number | null; value: number }>;
+  tokens: Array<{ text: string; role: DescriptorTokenRole; key: number | null }>;
+  /** null when the descriptor fails to parse (e.g. a checksum mismatch). */
+  error: string | null;
+  outline: string;
+  keys: DescriptorKeyView[];
+  ranged: boolean;
+  hasPrivateKeys: boolean;
+  /** Scripts per child index (combo: all four for the one child). */
+  scripts: string[][];
+}
+export type DerivedDescriptorFixture = DescriptorVectorFixture & { derived: DescriptorDerived };
+
+export interface DescriptorIndexFixture extends BaseFixture {
+  kind: "descriptor-index";
+  tableFrom: number;
+  tableTo: number;
+}
+
+export interface DescriptorIndexDerived {
+  rows: Array<{ expression: string; bip: number; contexts: string[] | null; template: string | null }>;
+}
+export type DerivedDescriptorIndexFixture = DescriptorIndexFixture & { derived: DescriptorIndexDerived };

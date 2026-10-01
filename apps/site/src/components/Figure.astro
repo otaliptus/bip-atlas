@@ -45,6 +45,12 @@ import {
   WalletPathLevels,
   WalletPathSchemes,
   WalletPathWorked,
+  DescriptorAnatomy,
+  DescriptorChecksum,
+  DescriptorIndex,
+  DescriptorWorked,
+  type DerivedDescriptorFixture,
+  type DerivedDescriptorIndexFixture,
   type DerivedWalletPathFixture,
   type DerivedVersionbitsDeploymentFixture,
   type DerivedVersionbitsGuidelineFixture,
@@ -106,6 +112,8 @@ const timelockEnc = picked as DerivedTimelockEncodingFixture[];
 const vbAny = picked as Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture>;
 const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
 const wallet = picked as DerivedWalletPathFixture[];
+const desc = picked as DerivedDescriptorFixture[];
+const descIndex = picked as DerivedDescriptorIndexFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -144,6 +152,9 @@ const wallet = picked as DerivedWalletPathFixture[];
   {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
   {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
   {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
+  {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
+  {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
+  {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -158,6 +169,7 @@ const wallet = picked as DerivedWalletPathFixture[];
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
+      {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
     </Fragment>
   )}
 </Plate>

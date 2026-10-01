@@ -22,9 +22,9 @@ const primarySources = pub.primaryBips.map((n) => {
   const file = lock.files.find((f) => f.path === entry.path)!;
   return { entry, file };
 });
-/** Quotes are verbatim wikitext; render its <sup> markup (e.g. 2<sup>80</sup>) instead of showing the tags. */
-const quoteParts = (q: string) => q.split(/(<sup>[^<]*<\/sup>)/).filter(Boolean).map((t) => {
-  const m = /^<sup>([^<]*)<\/sup>$/.exec(t);
+/** Quotes are verbatim wikitext; render its <sup>/<super> markup (e.g. 2<sup>80</sup>) instead of showing the tags. */
+const quoteParts = (q: string) => q.split(/(<sup(?:er)?>[^<]*<\/sup(?:er)?>)/).filter(Boolean).map((t) => {
+  const m = /^<sup(?:er)?>([^<]*)<\/sup(?:er)?>$/.exec(t);
   return m ? { sup: true, text: m[1] } : { sup: false, text: t };
 });
 const reviewLabel = {

@@ -140,3 +140,46 @@ describe("key derivation inside descriptors", () => {
     expect(() => keyAt(k, 0)).toThrow(/hardened derivation needs a private/);
   });
 });
+
+describe("descriptors chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/descriptors.json", root), "utf8");
+  const b380 = raw(380);
+  const b383 = raw(383);
+
+  it("dates, sizes and the character set", async () => {
+    const { INPUT_CHARSET } = await import("../src/descsum");
+    for (const n of [380, 381, 382, 383, 384, 385, 386]) expect(raw(n).slice(0, 12).join("\n")).toContain("Assigned: 2021-06-27");
+    expect(text).toContain("assigned in 2021 as BIPs 380 to 386");
+    expect(b380[48]).toContain("8 character alphanumeric descriptor checksum");
+    expect(text).toContain("an eight-character checksum");
+    // BIP 380 says "3 groups of 32", but its own INPUT_CHARSET has 32 + 32 + 31 characters.
+    expect(b380[110]).toContain("3 groups of 32 characters");
+    expect(INPUT_CHARSET.length).toBe(95);
+    expect(INPUT_CHARSET.slice(64).length).toBe(31);
+    expect(b380[139]).toContain(`INPUT_CHARSET = "${INPUT_CHARSET.slice(0, 20)}`);
+    expect(text).toContain("a fixed set of 95, which BIP 380 describes as three groups of 32 (the last group is one short)");
+  });
+
+  it("the checksum guarantees", () => {
+    expect(b380[127]).toContain("49154 characters");
+    expect(b380[128]).toContain("507 characters");
+    expect(b380[129]).toContain("77 characters");
+    expect(b380[131]).toContain("1 in 2<super>40</super>");
+    expect(text).toContain("any two or three in a descriptor up to 49,154 characters; any four up to 507; any five up to 77");
+    expect(text).toContain("a chance of 1 in 2^40");
+    expect(text).toContain("raw(deadbeef)#89f8spxm");
+  });
+
+  it("multisig limits, versions and the ranged example", () => {
+    expect(b383[40]).toContain("at most 3 keys");
+    expect(b383[44]).toContain("at most 15 compressed public keys");
+    expect(b383[46]).toContain("the maximum number of keys is 20");
+    expect(text).toContain("3 at the top level, 15 compressed keys inside sh() because of the 520-byte push limit, 20 otherwise");
+    expect(b380[267]).toContain("since version 0.17");
+    expect(raw(386)[121]).toContain("since version 22.0");
+    expect(text).toContain("in Bitcoin Core since version 0.17, and tr() since 22.0");
+    const ranged = validVectors(382).find((v) => v.desc.startsWith("wpkh([ffffffff/13']xpub"))!;
+    expect(ranged.scripts[0].length).toBe(3);
+    expect(text).toContain("lists its first three");
+  });
+});

@@ -19,6 +19,7 @@ import type {
   DerivedVersionbitsDeploymentFixture,
   DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
+  DerivedDescriptorFixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -454,6 +455,29 @@ export function WalletPathWorked({ fixtures }: { fixtures: DerivedWalletPathFixt
       steps={steps}
       label="Three hardened levels, two public levels, then the key-path Taproot tweak and the address, drawn as stacked layers."
       source={<>Source: BIP {f.derived.scheme} test vectors (lines {a.checkedLines.join(", ")}); derived by the tested BIP 32 and wallet-path models.</>}
+    />
+  );
+}
+
+/* ---------- BIPs 380–386 ---------- */
+export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixture[] }) {
+  const f = fixtures.find((x) => x.id === "bip382-wpkh-ranged") ?? fixtures.find((x) => x.derived.ranged) ?? fixtures[0];
+  const d = f.derived;
+  const k = d.keys[0];
+  const part = (role: string) => d.tokens.filter((t) => t.role === role).map((t) => t.text).join("");
+  const steps: WorkedStep[] = [
+    { title: "The script expression says what kind of output", values: [{ label: "outline", value: d.outline }], note: "wpkh(KEY): pay to the hash of one compressed key, SegWit v0.", layer: { size: 0.5, tone: "plain", cells: 1 } },
+    { title: "Key origin: where this key sits in someone's tree", values: [{ label: "origin", value: `[${k.origin}]` }], note: "A fingerprint and the hardened steps already taken. Information for signers; it changes no script.", layer: { size: 0.6, tone: "hatch", cells: 2 } },
+    { title: "The key itself: an extended public key", values: [{ label: "key", value: part("key") }], note: "Public only, so the descriptor reveals scripts but cannot spend.", layer: { tone: "wash", cells: 4 } },
+    { title: "Derivation after the key, ending in a range", values: [{ label: "steps", value: k.derivation ?? "" }, ...k.publicKeys.map((p, i) => ({ label: `child ${i} key`, value: p }))], note: "/* stands for every unhardened child: one descriptor, many keys.", layer: { size: 0.8, tone: "plain", cells: 3, highlight: [2] } },
+    { title: "Each child key fills the template", values: d.scripts.map((s, i) => ({ label: `child ${i} script`, value: s[0] })), note: "OP_0 <HASH160(key)>, matching the scripts BIP 382 lists.", layer: { size: 0.9, tone: "accent", cells: 3 } },
+  ];
+  return (
+    <WorkedExample
+      intro={<>BIP 382’s ranged descriptor <code>{d.body.slice(0, 22)}…</code>, read part by part and expanded for its first three children.</>}
+      steps={steps}
+      label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
+      source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
     />
   );
 }

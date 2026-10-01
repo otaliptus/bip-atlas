@@ -339,6 +339,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "wallet-path-vector",
   },
+  {
+    id: "descriptor-anatomy.v1",
+    description: "Published descriptors from BIPs 380–386 split into their expressions, with keys, expanded scripts and the checksum check.",
+    minFixtures: 1,
+    maxFixtures: 10,
+    interactive: true,
+    controls: ["Choose a published descriptor", "Highlight a key expression", "Check the descriptor checksum"],
+    fixtureKind: "descriptor-vector",
+  },
+  {
+    id: "descriptor-checksum.v1",
+    description: "BIP 380's character-to-symbol expansion and checksum for one published descriptor.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "descriptor-vector",
+  },
+  {
+    id: "descriptor-expressions.v1",
+    description: "BIP 380's index of script expressions, with where each may appear and what it produces.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "descriptor-index",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
