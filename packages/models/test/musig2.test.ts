@@ -180,3 +180,37 @@ describe("nonce reuse", () => {
     expect(() => sign(secnonce, sk, s)).toThrow("first secnonce value is out of range.");
   });
 });
+
+describe("musig2 chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/musig2.json", root), "utf8");
+  const b327 = readFileSync(new URL("sources/research-2026-10-01-phase3/raw/bip-0327.mediawiki", root), "utf8").split("\n");
+
+  it("dates, sizes and counts", () => {
+    expect(b327[8]).toContain("Assigned: 2022-03-22");
+    expect(text).toContain("BIP 327, assigned in 2022");
+    expect(text).toContain("ordinary 33-byte compressed keys; the output is a 32-byte BIP 340 key");
+    const d = vec("key_agg_vectors");
+    expect(d.pubkeys[0].length / 2).toBe(33);
+    expect(xonlyPk(keyAgg([h(d.pubkeys[0]), h(d.pubkeys[1]), h(d.pubkeys[2])])).length).toBe(32);
+    expect(text).toContain("BIP 327’s own three-key example");
+    expect(d.valid_test_cases[0].key_indices.length).toBe(3);
+    expect(text).toContain("which in MuSig2 is two points rather than one");
+    expect(vec("sig_agg_vectors").pnonces[0].length / 2).toBe(66);
+    expect(text).toContain("the signature: 64 bytes");
+    expect(vec("sig_agg_vectors").valid_test_cases[0].expected.length / 2).toBe(64);
+  });
+
+  it("vector facts the prose relies on", () => {
+    const s = vec("sig_agg_vectors");
+    expect(s.valid_test_cases.length).toBe(4);
+    expect(text).toContain("The four signature-aggregation vectors published with BIP 327");
+    expect(s.valid_test_cases.filter((c: { tweak_indices: number[] }) => c.tweak_indices.length > 0).length).toBe(2);
+    expect(text).toContain("Two of the figure’s vectors carry tweaks");
+    const v = vec("sign_verify_vectors");
+    expect(v.verify_fail_test_cases.length).toBe(3);
+    expect(v.verify_error_test_cases.length).toBe(2);
+    expect(text).toContain("one valid, three that fail the check, and two that point at a bad public nonce or key");
+    expect(v.valid_test_cases.some((c: { comment?: string }) => c.comment?.includes("point at infinity"))).toBe(true);
+    expect(text).toContain("one of its signing vectors exercises exactly that case");
+  });
+});

@@ -20,6 +20,7 @@ import type {
   DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
   DerivedDescriptorFixture,
+  DerivedMusig2SessionFixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -478,6 +479,28 @@ export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixt
       steps={steps}
       label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
       source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
+    />
+  );
+}
+
+/* ---------- BIP 327 ---------- */
+export function Musig2Worked({ fixtures }: { fixtures: DerivedMusig2SessionFixture[] }) {
+  const f = fixtures[0];
+  const d = f.derived;
+  const steps: WorkedStep[] = [
+    { title: `${d.signers.length} plain public keys, each with a coefficient`, values: d.signers.map((s, i) => ({ label: `signer ${i + 1} key · a`, value: `${s.pubkey} · ${s.secondKey ? "1" : s.coefficient}` })), note: "a = H(L ‖ key) mod n, except the second distinct key, which gets 1.", layer: { size: 0.7, tone: "plain", cells: d.signers.length } },
+    { title: "Aggregate key Q = Σ aᵢ·Pᵢ", values: [{ label: "Q (x-only)", value: d.aggXonly }], note: "One BIP 340 public key; nothing in it shows how many signers there are.", layer: { size: 0.55, tone: "accent", cells: 1 } },
+    { title: "Round 1: two-point nonces, summed", values: [...d.signers.map((s, i) => ({ label: `signer ${i + 1} nonce`, value: `${s.pubnonce[0]} ${s.pubnonce[1]}` })), { label: "aggregate nonce", value: `${d.aggnonce[0]} ${d.aggnonce[1]}` }], layer: { tone: "wash", cells: 2 * d.signers.length } },
+    { title: "Session: b, R = R₁ + b·R₂, challenge e", values: [{ label: "b", value: d.b }, { label: "R", value: d.R }, { label: "e", value: d.e }], layer: { size: 0.6, tone: "hatch", cells: 3 } },
+    { title: "Round 2: partial signatures, each verified", values: d.signers.map((s, i) => ({ label: `signer ${i + 1} s`, value: `${s.psig} ${s.psigVerifies ? "✓" : "✕"}` })), layer: { size: 0.8, tone: "plain", cells: d.signers.length } },
+    { title: "Sum them: an ordinary BIP 340 signature", values: [{ label: "signature", value: d.signature }], note: d.signatureVerifies ? "BIP 340 verification accepts it for Q and the message." : "Verification fails.", layer: { size: 0.9, tone: d.signatureVerifies ? "accent" : "fail", cells: 2 } },
+  ];
+  return (
+    <WorkedExample
+      intro={<>BIP 327’s first signature-aggregation vector: {d.signers.length} signers, one message, from public keys to a single signature.</>}
+      steps={steps}
+      label="Key aggregation, nonce round, session values, partial signatures and the final signature, drawn as stacked layers."
+      source={<>Source: BIP 327 sig_agg_vectors.json, case {f.caseIndex}; recomputed by the tested MuSig2 model and verified with noble.</>}
     />
   );
 }

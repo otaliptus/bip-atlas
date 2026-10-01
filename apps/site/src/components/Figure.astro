@@ -49,6 +49,13 @@ import {
   DescriptorChecksum,
   DescriptorIndex,
   DescriptorWorked,
+  Musig2Rounds,
+  Musig2KeyAgg,
+  Musig2PsigChecks,
+  Musig2Worked,
+  type DerivedMusig2SessionFixture,
+  type DerivedMusig2KeyaggFixture,
+  type DerivedMusig2PsigChecksFixture,
   type DerivedDescriptorFixture,
   type DerivedDescriptorIndexFixture,
   type DerivedWalletPathFixture,
@@ -114,6 +121,9 @@ const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
 const wallet = picked as DerivedWalletPathFixture[];
 const desc = picked as DerivedDescriptorFixture[];
 const descIndex = picked as DerivedDescriptorIndexFixture[];
+const musig = picked as DerivedMusig2SessionFixture[];
+const musigKa = picked as DerivedMusig2KeyaggFixture[];
+const musigChecks = picked as DerivedMusig2PsigChecksFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -155,6 +165,9 @@ const descIndex = picked as DerivedDescriptorIndexFixture[];
   {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
   {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
   {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
+  {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
+  {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
+  {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -170,6 +183,7 @@ const descIndex = picked as DerivedDescriptorIndexFixture[];
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
+      {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
     </Fragment>
   )}
 </Plate>

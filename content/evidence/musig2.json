@@ -1,0 +1,585 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "musig2",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 327 (Jonas Nick, Tim Ruffing, Elliott Jin) was assigned in 2022 and is recorded as Deployed; it is Informational.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            3,
+            9
+          ],
+          "quote": "Title: MuSig2 for BIP340-compatible Multi-Signatures Authors: Jonas Nick <jonasd.nick@gmail.com> Tim Ruffing <crypto@timruffing.de> Elliott Jin <elliott.jin@gmail.com> Status: Deployed Type: Informational Assigned: 2022-03-22"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 327 standardizes the MuSig2 multi-signature scheme, compatible with BIP 340 public keys and signatures, with tweaking for BIP 32 child keys and BIP 341 Taproot outputs.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            20,
+            22
+          ],
+          "quote": "This document proposes a standard for the [https://eprint.iacr.org/2020/1261.pdf MuSig2] multi-signature scheme. The standard is compatible with [https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki BIP340] public keys and signatures."
+        }
+      ]
+    },
+    {
+      "id": "n-of-n",
+      "statement": "MuSig2 lets several signers create one aggregate public key and cooperatively produce ordinary Schnorr signatures under it; signing needs all of them: it is n-of-n, not a t-of-n threshold scheme.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            30,
+            32
+          ],
+          "quote": "MuSig2 is a multi-signature scheme that allows multiple signers to create a single aggregate public key and cooperatively create ordinary Schnorr signatures valid under the aggregate public key. Signing requires interaction between ''all'' signers involved in key aggregation. (MuSig2 is a ''n-of-n'' multi-signature scheme and not a ''t-of-n'' threshold-signature scheme.)"
+        }
+      ]
+    },
+    {
+      "id": "why-taproot",
+      "statement": "The authors' primary motivation is letting users of different software jointly control Taproot outputs, spent through the key path with a MuSig2 signature.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            34,
+            36
+          ],
+          "quote": "The primary motivation is to create a standard that allows users of different software projects to jointly control Taproot outputs ([https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP341]). Such an output contains a public key which, in this case, would be the aggregate of all users' individual public keys. It can be spent using MuSig2 to produce a signature for the key-based spending path."
+        }
+      ]
+    },
+    {
+      "id": "compact-private",
+      "statement": "The authors argue a MuSig2 output is essentially one key and one signature, more compact and cheaper to verify than an n-of-n OP_CHECKSIGADD policy, with no consensus limit on n, and indistinguishable on chain from a single-signer Taproot output.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            38,
+            39
+          ],
+          "quote": "The on-chain footprint of a MuSig2 Taproot output is essentially a single BIP340 public key, and a transaction spending the output only requires a single signature cooperatively produced by all signers. This is '''more compact''' and has '''lower verification cost''' than each signer providing an individual public key and signature"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            39,
+            39
+          ],
+          "quote": "As a side effect, the number ''n'' of signers is not limited by any consensus rules when using MuSig2."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "MuSig2 Taproot outputs are indistinguishable for a blockchain observer from regular, single-signer Taproot outputs even though they are actually controlled by multiple signers."
+        }
+      ]
+    },
+    {
+      "id": "features",
+      "statement": "The authors list its features: non-interactive key aggregation, two communication rounds, a security proof under the AOMDL assumption, and low complexity, at the cost of no deterministic nonces and the need to handle signing state securely.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            45,
+            46
+          ],
+          "quote": "* '''Simple Key Setup''': Key aggregation is non-interactive and fully compatible with BIP340 public keys. * '''Two Communication Rounds''': MuSig2 is faster in practice than previous three-round multi-signature schemes such as [https://eprint.iacr.org/2018/068.pdf MuSig1]"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            47,
+            47
+          ],
+          "quote": "MuSig2 has been [https://eprint.iacr.org/2020/1261.pdf proven existentially unforgeable] under the algebraic one-more discrete logarithm (AOMDL) assumption (instead of the discrete logarithm assumption required for single-signer Schnorr signatures)."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "However, this comes at the cost of having no ability to generate nonces deterministically and the requirement to securely handle signing state."
+        }
+      ]
+    },
+    {
+      "id": "bip340-compat",
+      "statement": "The aggregate key is a BIP 340 x-only key and the final signature passes BIP 340 verification for it; the individual keys fed to aggregation are plain 33-byte compressed keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            52,
+            52
+          ],
+          "quote": "In this proposal, the aggregate public key is a BIP340 X-only public key, and the signature output at the end of the signing protocol is a BIP340 signature that passes BIP340 verification for the aggregate public key and a message. The individual public keys that are input to the key aggregation algorithm are ''plain'' public keys in compressed format."
+        }
+      ]
+    },
+    {
+      "id": "keyagg",
+      "statement": "KeyAgg computes Q = a₁·P₁ + … + aᵤ·Pᵤ, where each coefficient aᵢ is a tagged hash of the hash of the whole key list and the key itself, except that the second distinct key gets coefficient 1 (the MuSig2* optimization, saving a point multiplication).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            305,
+            306
+          ],
+          "quote": "** Let ''a<sub>i</sub> = KeyAggCoeffInternal(pk<sub>1..u</sub>, pk<sub>i</sub>, pk2)''. * Let ''Q = a<sub>1</sub>⋅P<sub>1</sub> + a<sub>2</sub>⋅P<sub>2</sub> + ... + a<sub>u</sub>⋅P<sub>u</sub>''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            334,
+            337
+          ],
+          "quote": "* Let ''L = HashKeys(pk<sub>1..u</sub>)'' * If ''pk' = pk2'': ** Return 1 * Return ''int(hash<sub>KeyAgg coefficient</sub>(L || pk')) mod n''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "The optimization consists of assigning the constant key aggregation coefficient ''1'' to the second distinct key in the list of individual public keys to be aggregated (as well as to any key identical to this key)."
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "statement": "The aggregate key depends on the order of the keys; KeySort can sort them when the application has no canonical order.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            118,
+            119
+          ],
+          "quote": "The aggregate public key produced by ''KeyAgg'' (regardless of the type) depends on the order of the individual public keys. If the application does not have a canonical order of the signers, the individual public keys can be sorted with the ''KeySort'' algorithm to ensure that the aggregate public key is independent of the order of signers."
+        }
+      ]
+    },
+    {
+      "id": "duplicates",
+      "statement": "The same key may appear more than once; the algorithms handle it, and applications are recommended not to check for duplicates, since the blame cannot be assigned at key aggregation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            121,
+            125
+          ],
+          "quote": "The same individual public key is allowed to occur more than once in the input of ''KeyAgg'' and ''KeySort''. This is by design: All algorithms in this proposal handle multiple signers who (claim to) have identical individual public keys properly, and applications are not required to check for duplicate individual public keys. In fact, applications are recommended to omit checks for duplicate individual public keys in order to simplify error handling."
+        }
+      ]
+    },
+    {
+      "id": "flow",
+      "statement": "Signing takes two broadcast rounds: each signer runs NonceGen and broadcasts a public nonce, which are aggregated with NonceAgg; then each runs Sign and broadcasts a partial signature, and PartialSigAgg combines them into a signature that passes BIP 340 verification if all were honest.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            83,
+            85
+          ],
+          "quote": "'''First broadcast round:''' The signers start the signing session by running ''NonceGen'' to compute ''secnonce'' and ''pubnonce''."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            85,
+            85
+          ],
+          "quote": "Then, the signers broadcast their ''pubnonce'' to each other and run ''NonceAgg'' to compute an aggregate nonce."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            87,
+            91
+          ],
+          "quote": "'''Second broadcast round:''' At this point, every signer has the required data to sign, which, in the algorithms specified below, is stored in a data structure called [[#session-context|Session Context]]. Every signer computes a partial signature by running ''Sign'' with the secret signing key, the ''secnonce'' and the session context. Then, the signers broadcast their partial signatures to each other and run ''PartialSigAgg'' to obtain the final signature. If all signers behaved honestly, the result passes [https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki BIP340] verification."
+        }
+      ]
+    },
+    {
+      "id": "preprocessing",
+      "statement": "The first round, exchanging nonces, can happen before the message or the exact set of signers is known.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            54,
+            54
+          ],
+          "quote": "The first communication round, exchanging the nonces, can happen before the message or the exact set of signers is determined."
+        }
+      ]
+    },
+    {
+      "id": "aggregator",
+      "statement": "An untrusted aggregator can collect and combine nonces and partial signatures; a malicious one can make the session fail but cannot forge a signature, even colluding with all but one signer.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            93,
+            93
+          ],
+          "quote": "A malicious aggregator can force the signing session to fail to produce a valid Schnorr signature but cannot negatively affect the unforgeability of the scheme, i.e., even a malicious aggregator colluding with all but one signer cannot forge a signature."
+        }
+      ]
+    },
+    {
+      "id": "nonce-reuse",
+      "statement": "Sign must not be executed twice with the same secret nonce, since the secret key can then be extracted from the two partial signatures; implementations may erase the secret nonce after use, and an all-zero one is invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            95,
+            98
+          ],
+          "quote": "'''IMPORTANT''': The ''Sign'' algorithm must '''not''' be executed twice with the same ''secnonce''. Otherwise, it is possible to extract the secret signing key from the two partial signatures output by the two executions of ''Sign''. To avoid accidental reuse of ''secnonce'', an implementation may securely erase the ''secnonce'' argument by overwriting it with 64 zero bytes after it has been read by ''Sign''. A ''secnonce'' consisting of only zero bytes is invalid for ''Sign'' and will cause it to fail."
+        }
+      ]
+    },
+    {
+      "id": "nonce-random",
+      "statement": "NonceGen must have a high-quality random generator; unlike BIP 340 signing, the nonces must not be derived deterministically from the session parameters, or active adversaries can trick a signer into reusing one.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            135,
+            136
+          ],
+          "quote": "'''IMPORTANT''': ''NonceGen'' must have access to a high-quality random generator to draw an unbiased, uniformly random value ''rand' ''. In contrast to BIP340 signing, the values ''k<sub>1</sub>'' and ''k<sub>2</sub>'' '''must not be derived deterministically''' from the session parameters because otherwise active adversaries can [https://medium.com/blockstream/musig-dn-schnorr-multisignatures-with-verifiably-deterministic-nonces-27424b5df9d6#e3b6 trick the victim into reusing a nonce]."
+        }
+      ]
+    },
+    {
+      "id": "defense-in-depth",
+      "statement": "Passing the secret key, aggregate key and message to NonceGen when known is recommended as defense in depth, but only as a last resort against a bad random value.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "Therefore, it is recommended to provide the optional arguments ''sk'', ''aggpk'', and ''m'' if these session parameters are already determined during nonce generation."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            143,
+            143
+          ],
+          "quote": "However, the protection provided by the optional arguments should only be viewed as a last resort."
+        }
+      ]
+    },
+    {
+      "id": "two-points",
+      "statement": "Each signer's nonce is two elliptic curve points; the authors chose the two-point variant, whose proof uses the random oracle plus algebraic group model.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "In this proposal, each signer's nonce consists of two elliptic curve points."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            757,
+            759
+          ],
+          "quote": "and applies to an optimized scheme variant where the signers' nonces consist of only two points. This proposal uses the latter, optimized scheme variant."
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "statement": "Session values: the nonce coefficient b is a tagged hash of the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂ (or G if that is infinity); and e is the BIP 340 challenge for R, Q and the message.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            427,
+            434
+          ],
+          "quote": "* Let ''b = int(hash<sub>MuSig/noncecoef</sub>(aggnonce || xbytes(Q) || m)) mod n''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            429,
+            431
+          ],
+          "quote": "* Let ''R' = R<sub>1</sub> + b⋅R<sub>2</sub>'' * If ''is_infinite(R'): ** Let final nonce ''R = G''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            434,
+            434
+          ],
+          "quote": "* Let ''e = int(hash<sub>BIP0340/challenge</sub>(xbytes(R) || xbytes(Q) || m)) mod n''"
+        }
+      ]
+    },
+    {
+      "id": "sign",
+      "statement": "Each partial signature is s = k₁ + b·k₂ + e·a·d mod n, with the nonces negated if R has odd y and the key negated as Q and the tweaks require; the signer verifies its own partial signature before releasing it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            457,
+            457
+          ],
+          "quote": "* Let ''k<sub>1</sub> = k<sub>1</sub>', k<sub>2</sub> = k<sub>2</sub>' '' if ''has_even_y(R)'', otherwise let ''k<sub>1</sub> = n - k<sub>1</sub>', k<sub>2</sub> = n - k<sub>2</sub>' ''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            466,
+            466
+          ],
+          "quote": "* Let ''s = (k<sub>1</sub> + b⋅k<sub>2</sub> + e⋅a⋅d) mod n''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            469,
+            469
+          ],
+          "quote": "* If ''PartialSigVerifyInternal(psig, pubnonce, pk, session_ctx)'' (see below) returns failure, fail"
+        }
+      ]
+    },
+    {
+      "id": "psig-verify",
+      "statement": "PartialSigVerify checks s·G = Re + e·a·g′·P for one signer, using that signer's own public nonce; its only purpose is identifiable aborts. Partial signatures are not signatures and can be forged, but if all verify, the aggregate is a valid Schnorr signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            504,
+            504
+          ],
+          "quote": "* Fail if ''s⋅G &ne; Re<sub>⁎</sub> + e⋅a⋅g'⋅P''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            182,
+            185
+          ],
+          "quote": "The only purpose of the algorithm ''PartialSigVerify'' is to ensure identifiable aborts, and it is not necessary to use it when identifiable aborts are not desired. In particular, partial signatures are ''not'' signatures. An adversary can forge a partial signature, i.e., create a partial signature without knowing the secret key for the claimed individual public key."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            185,
+            185
+          ],
+          "quote": "However, if ''PartialSigVerify'' succeeds for all partial signatures then ''PartialSigAgg'' will return a valid Schnorr signature."
+        }
+      ]
+    },
+    {
+      "id": "aggregate",
+      "statement": "PartialSigAgg adds the partial signatures and e·g·tacc, the tweak term, and returns xbytes(R) followed by the 32-byte sum: a 64-byte signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            520,
+            521
+          ],
+          "quote": "* Let ''s = s<sub>1</sub> + ... + s<sub>u</sub> + e⋅g⋅tacc mod n'' * Return ''sig = ''xbytes(R) || bytes(32, s)''"
+        }
+      ]
+    },
+    {
+      "id": "tweaks",
+      "statement": "Plain tweaking derives child aggregate keys as in BIP 32; x-only tweaking adds a BIP 341 Taproot commitment, so an output can be spent with a MuSig2 signature or through a script path.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            201,
+            203
+          ],
+          "quote": "Plain tweaking can be used to derive child public keys from an aggregate public key using [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP32]. On the other hand, X-only tweaking is required for Taproot tweaking per [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP341]. A Taproot-tweaked public key commits to a ''script path'', allowing users to create transaction outputs that are spendable either with a MuSig2 multi-signature or by providing inputs that satisfy the script path."
+        }
+      ]
+    },
+    {
+      "id": "ecdsa",
+      "statement": "MuSig2 is compatible with BIP 340, not with the ECDSA signatures traditionally used in Bitcoin.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            774,
+            775
+          ],
+          "quote": "This document proposes a standard for the MuSig2 multi-signature scheme that is compatible with [https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki BIP340]. MuSig2 is ''not'' compatible with ECDSA signatures traditionally used in Bitcoin."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's MuSig2 model, a transcription of BIP 327's reference code on audited curve arithmetic, reproduces every case in the BIP's eight JSON vector files, including the error cases with the same blamed signer or message; the four published signature-aggregation sessions aggregate to the published signatures, which noble's BIP 340 verifier accepts.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            524,
+            526
+          ],
+          "quote": "=== Test Vectors and Reference Code ==="
+        }
+      ]
+    },
+    {
+      "id": "not-plain-sum",
+      "statement": "For BIP 327's three-key vector, the aggregate key differs when the same keys are given in reverse order, and neither equals the plain sum of the keys.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            118,
+            118
+          ],
+          "quote": "The aggregate public key produced by ''KeyAgg'' (regardless of the type) depends on the order of the individual public keys."
+        }
+      ]
+    },
+    {
+      "id": "abort-conditions",
+      "statement": "Aborts are identifiable when contributions are not tampered with, nonce aggregation is honest, and every partial signature is verified; then an honest party's failing algorithm names exactly one malicious signer.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            168,
+            173
+          ],
+          "quote": "Aborts are identifiable for an honest party if the following conditions hold in a signing session: * The contributions received from all signers have not been tampered with (e.g., because they were sent over authenticated connections). * Nonce aggregation is performed honestly (e.g., because the honest signer performs nonce aggregation on its own or because the aggregator is trusted). * The partial signatures received from all signers are verified using the algorithm ''PartialSigVerify''."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            173,
+            173
+          ],
+          "quote": "then the algorithm run by the honest party will output the index of exactly one malicious signer."
+        }
+      ]
+    },
+    {
+      "id": "stateless",
+      "statement": "Signers are normally stateful, keeping the secret nonce between rounds, but one signer can be stateless: it waits for everyone else's nonces and the session parameters, then generates its nonce and signs at once, and may sign deterministically.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 327,
+          "lines": [
+            157,
+            161
+          ],
+          "quote": "In general, MuSig2 signers are stateful in the sense that they first generate ''secnonce'' and then need to store it until they receive the other signers' ''pubnonces'' or the ''aggnonce''. However, it is possible for one of the signers to be stateless."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            161,
+            161
+          ],
+          "quote": "Stateless signers may want to consider signing deterministically (see [[#modifications-to-nonce-generation|Modifications to Nonce Generation]]) to remove the reliance on the random number generator in the ''NonceGen'' algorithm."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "musig2",
+  "primaryBips": [
+    327
+  ],
+  "specimenLabel": "BIP 0327",
+  "title": "How can many signers share one key?",
+  "dek": "MuSig2 turns several public keys into one, and two rounds of messages into one ordinary BIP 340 signature. Nothing on chain shows there was more than one signer.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01-phase3",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A coin that needs three people to agree can be locked with a script that checks three signatures. That works, but it puts three keys and three signatures on chain, and tells everyone that three people were involved. BIP 327, assigned in 2022 and recorded as deployed, offers another way: a multi-signature scheme called MuSig2, in which the signers combine their keys into one and produce one signature together.",
+        "claims": [
+          "preamble",
+          "n-of-n",
+          "compact-private"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "The result is an ordinary BIP 340 key and an ordinary BIP 340 signature. The authors’ main aim was letting people using different software jointly control a Taproot output and spend it through its key path, more compactly and privately than a script that checks every signer. The standard also supports tweaking the aggregate key, for BIP 32 child keys and for BIP 341 Taproot commitments.",
+        "claims": [
+          "why-taproot",
+          "bip340-compat",
+          "compact-private",
+          "abstract"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A14.1",
+      "recipe": "musig2-keyagg.v1",
+      "title": "Not a plain sum",
+      "fixtures": [
+        "key-agg-order"
+      ],
+      "caption": "Three published keys aggregated in two orders, each key weighted by its coefficient, beside what simply adding the keys would give.",
+      "claims": [
+        "keyagg",
+        "order",
+        "not-plain-sum"
+      ],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "keys",
+      "heading": "One key from many",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Key aggregation needs no interaction. Given the list of everyone’s public keys, anyone can compute the aggregate: Q = a₁·P₁ + a₂·P₂ + … + aᵤ·Pᵤ. Each coefficient aᵢ is a tagged hash of a hash of the whole key list together with that signer’s own key. The input keys are ordinary 33-byte compressed keys; the output is a 32-byte BIP 340 key.",
+          "claims": [
+            "keyagg",
+            "features",
+            "bip340-compat"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The coefficients are what make this different from adding keys together: each one depends on the entire list as well as on the key it multiplies. The figure above shows the effect on BIP 327’s own three-key example: the plain sum of the keys matches neither aggregate.",
+          "claims": [
+            "keyagg",
+            "not-plain-sum"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "It also shows that order matters. The same three keys in reverse order give a different aggregate key, because the list hash changes. Applications without a natural order for their signers can sort the keys first with KeySort.",
+          "claims": [
+            "order",
+            "not-plain-sum"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "One coefficient is fixed. The second distinct key in the list always gets coefficient 1, an optimization the BIP calls MuSig2*, which saves one point multiplication. The same key may even appear twice; the algorithms handle it, and the BIP recommends that applications not check for duplicates, since at that stage nobody can tell which signer copied whom.",
+          "claims": [
+            "keyagg",
+            "duplicates"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rounds",
+      "heading": "Two rounds",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Signing takes two rounds of messages. In the first, each signer generates a secret nonce and sends the public part, which in MuSig2 is two points rather than one. The public nonces are added up, point by point, into an aggregate nonce. This round can even happen before anyone knows the message or the final set of signers.",
+          "claims": [
+            "flow",
+            "two-points",
+            "preprocessing"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂; and e is the usual BIP 340 challenge for R, the key and the message. In the rare case that R₁ + b·R₂ is the point at infinity, the BIP uses the generator G as the final nonce instead, so the result is still a valid signature format; one of its signing vectors exercises exactly that case.",
+          "claims": [
+            "session",
+            "vectors"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A14.2",
+          "recipe": "musig2-rounds.v1",
+          "title": "A signing session, round by round",
+          "fixtures": [
+            "sig-agg-0",
+            "sig-agg-1",
+            "sig-agg-2",
+            "sig-agg-3"
+          ],
+          "caption": "The four signature-aggregation vectors published with BIP 327, recomputed stage by stage. Every partial signature is checked, and the final signature passes BIP 340 verification.",
+          "claims": [
+            "vectors",
+            "flow",
+            "session",
+            "psig-verify",
+            "aggregate",
+            "tweaks"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "In the second round each signer sends a partial signature: a single number, s = k₁ + b·k₂ + e·a·d, built from its two secret nonces, its coefficient and its secret key, with signs adjusted so the final nonce and key have even y. Before sending, a signer checks its own result.",
+          "claims": [
+            "sign"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Adding the partial signatures, plus a term for any tweaks, gives s, and the pair of R’s x coordinate and s is the signature: 64 bytes, verified exactly like any single-signer BIP 340 signature. The verifier never learns there was more than one signer.",
+          "claims": [
+            "aggregate",
+            "bip340-compat",
+            "compact-private"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The aggregate key can be tweaked along the way. A plain tweak derives child keys in the manner of BIP 32; an x-only tweak adds a Taproot commitment, so the same output can be spent either with the group’s signature or through a script path. Two of the figure’s vectors carry tweaks.",
+          "claims": [
+            "tweaks"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nonces",
+      "heading": "The rule that cannot bend",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "MuSig2 has one requirement that single-signer BIP 340 signing does not. The secret nonces must come from a good random generator, and they must not be derived deterministically from the session, because an active adversary could then trick a signer into reusing one.",
+          "claims": [
+            "nonce-random"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "Never run Sign twice with the same secret nonce. BIP 327 states that two partial signatures from one nonce let anyone extract the signer’s secret key.",
+          "claims": [
+            "nonce-reuse"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Reuse is the catastrophic case. The BIP says Sign must not be executed twice with the same secret nonce, because the secret key can be extracted from the two partial signatures. It suggests overwriting the secret nonce with zeros once Sign has read it, and an all-zero nonce is rejected; this site’s model does exactly that, and its tests confirm a second signing attempt fails.",
+          "claims": [
+            "nonce-reuse"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Giving NonceGen the secret key, the aggregate key and the message when they are already known is recommended as defense in depth. It makes an accidental repeat of the random value much less harmful. The BIP is clear that this is only a last resort.",
+          "claims": [
+            "defense-in-depth"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Keeping a secret nonce between rounds is state, and state is where mistakes happen. The BIP allows one exception: a single signer may be stateless, waiting until it has everyone else’s nonces and the full session before generating its own and signing at once, and that signer may sign deterministically. The published deterministic-signing vectors are among those this site’s model reproduces.",
+          "claims": [
+            "stateless",
+            "vectors"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The authors list what this costs: MuSig2 cannot generate nonces deterministically, and implementations have to handle signing state securely. In exchange it needs only two rounds and is simpler than the alternatives they compare it with.",
+          "claims": [
+            "features"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faults",
+      "heading": "When someone misbehaves",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A disruptive signer can always make a session fail by sending garbage. MuSig2 makes such aborts identifiable. Each partial signature can be checked against that signer’s own key and nonce with PartialSigVerify, and the one that fails names the culprit. That guarantee holds under conditions the BIP spells out: messages arrive untampered, nonce aggregation is done honestly, and every partial signature is verified. Then an honest party’s failing check names exactly one malicious signer.",
+          "claims": [
+            "psig-verify",
+            "abort-conditions"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A14.3",
+          "recipe": "musig2-psig-checks.v1",
+          "title": "Checking partial signatures",
+          "fixtures": [
+            "psig-checks"
+          ],
+          "caption": "BIP 327’s partial-signature cases: one valid, three that fail the check, and two that point at a bad public nonce or key.",
+          "claims": [
+            "psig-verify",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "Partial signatures are not signatures in their own right. The BIP points out that an adversary can forge one without the matching secret key; the check exists only to assign blame. What it does guarantee is the useful part: if every partial signature passes, their sum is a valid Schnorr signature.",
+          "claims": [
+            "psig-verify"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The rounds can also run through an untrusted aggregator that collects and combines everyone’s messages. A malicious aggregator can make the session fail, but cannot forge a signature, even working with all but one of the signers.",
+          "claims": [
+            "aggregator"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The scheme’s limits are part of its definition. It is n-of-n: every signer who contributed a key must take part in signing, so it is not a threshold scheme. And it produces BIP 340 signatures only; it is not compatible with the ECDSA signatures Bitcoin used before Taproot.",
+          "claims": [
+            "n-of-n",
+            "ecdsa"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -366,6 +366,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "descriptor-index",
   },
+  {
+    id: "musig2-rounds.v1",
+    description: "BIP 327 signing sessions from the published sig_agg vectors: key aggregation, nonce round, session values, partial signatures, final BIP 340 signature.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: true,
+    controls: ["Step through signing rounds", "Choose a published vector", "Reveal aggregated values"],
+    fixtureKind: "musig2-session",
+  },
+  {
+    id: "musig2-keyagg.v1",
+    description: "MuSig2 key aggregation with coefficients in two key orders, against the plain sum of the keys.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "musig2-keyagg",
+  },
+  {
+    id: "musig2-psig-checks.v1",
+    description: "BIP 327's partial-signature verification cases and their outcomes.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "musig2-psig-checks",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
