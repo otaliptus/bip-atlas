@@ -16,7 +16,7 @@ const WINDOW = 26;
 const num = (n: number) => n.toLocaleString("en-US");
 const BIP9_STATES: Bip8State[] = ["DEFINED", "STARTED", "LOCKED_IN", "ACTIVE", "FAILED"];
 const BIP8_STATES: Bip8State[] = ["DEFINED", "STARTED", "MUST_SIGNAL", "LOCKED_IN", "ACTIVE", "FAILED"];
-const SHORT: Record<Bip8State, string> = { DEFINED: "DEF", STARTED: "STA", MUST_SIGNAL: "MUST", LOCKED_IN: "LOCK", ACTIVE: "ACT", FAILED: "FAIL" };
+const SHORT: Record<Bip8State, string> = { DEFINED: "DEF", STARTED: "STA", MUST_SIGNAL: "MSG", LOCKED_IN: "LCK", ACTIVE: "ACT", FAILED: "FLD" };
 
 /**
  * versionbits-state-machine.v1 — the Version bits chapter's hero figure.
@@ -56,7 +56,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
         return sim.map((s) => ({ state: s.state, rule: s.via?.rule ?? null }));
       })()
     : simulateBip8(
-        { bit: 0, startheight: START * PERIOD, timeoutheight: (START + WINDOW) * PERIOD, threshold, minimumActivationHeight: START * PERIOD, lockinontimeout: opt.lot },
+        { bit: 0, startheight: START * PERIOD, timeoutheight: (START + WINDOW) * PERIOD, threshold, minimumActivationHeight: 0, lockinontimeout: opt.lot },
         0,
         counts.slice(0, PERIODS - 1),
       ).map((s) => ({ state: s.state, rule: s.via?.rule ?? null }));
@@ -118,6 +118,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
           );
         })}
       </div>
+      <p class="atlas-vb-key">{states.map((s) => `${SHORT[s]} ${s}`).join(" · ")} · ≥ / &lt; reaches / misses the threshold</p>
       <p class="atlas-vb-axis">
         <span>window opens: period {START}</span>
         <span>{isBip9 ? "timeout passes" : "timeoutheight"}: period {START + WINDOW}</span>
@@ -155,13 +156,13 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
           return d.mainnet.implied ? (
             <p class="atlas-vb-record">
               <strong>What actually happened (mainnet, as BIP 9’s table records it):</strong> {d.name} on bit {d.bit}, active since block {num(d.mainnet.activeHeight!)}.
-              By the rules above, that means LOCKED_IN from block {num(d.mainnet.implied.lockedInFrom)}, after blocks {num(d.mainnet.implied.tallyFrom)}–{num(d.mainnet.implied.tallyTo)} reached
-              {" "}{num(d.mainnet.threshold)} signalling blocks.
+              By the rules above, that means LOCKED_IN from block {num(d.mainnet.implied.lockedInFrom)}, after blocks {num(d.mainnet.implied.tallyFrom)}–{num(d.mainnet.implied.tallyTo)} included
+              at least {num(d.mainnet.threshold)} signalling blocks.
             </p>
           ) : null;
         })()
       ) : (
-        <p class="atlas-vb-record">BIP 8 lists no deployments in its pinned assignments file. These are its suggested parameters; minimum_activation_height is set to the start, so it never delays activation here.</p>
+        <p class="atlas-vb-record">BIP 8 lists no deployments in its pinned assignments file. These are its suggested parameters; minimum_activation_height is 0, which the BIP allows, so LOCKED_IN lasts a single period.</p>
       )}
       <p class="atlas-lab__source">
         Schematic clock: the window is drawn as {WINDOW} periods, the span BIP 8 equates with about a year (52,416 blocks); for BIP 9 deployments the median time past is

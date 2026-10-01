@@ -16,6 +16,8 @@ import type {
   DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
+  DerivedVersionbitsDeploymentFixture,
+  DerivedVersionbitsGuidelineFixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -359,6 +361,57 @@ export function TimelockWorked({ fixtures }: { fixtures: DerivedTimelockCaseFixt
       steps={steps}
       label="A CHECKSEQUENCEVERIFY argument and an input's nSequence, masked to the same 16 value bits and compared, drawn as stacked layers."
       source={<>Source: Bitcoin Core v29.0 transaction tests (pinned excerpt); evaluated at build time by the tested timelock model.</>}
+    />
+  );
+}
+
+/* ---------- BIPs 9, 8 ---------- */
+export function VersionbitsWorked({ fixtures }: { fixtures: Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture> }) {
+  const f = fixtures.find((x): x is DerivedVersionbitsDeploymentFixture => x.kind === "versionbits-deployment")!;
+  const d = f.derived;
+  const m = d.mainnet;
+  const i = m.implied!;
+  const num = (n: number) => n.toLocaleString("en-US");
+  const steps: WorkedStep[] = [
+    {
+      title: `The deployment's parameters: bit ${d.bit}, a start, a timeout, a threshold`,
+      values: [
+        { label: "starttime", value: `${m.start} UTC = ${m.startEpoch}` },
+        { label: "timeout", value: `${m.expire} UTC = ${m.expireEpoch}` },
+        { label: "threshold", value: `${num(m.threshold)} of 2016 blocks` },
+      ],
+      layer: { size: 0.55, tone: "plain", cells: 3 },
+    },
+    {
+      title: `Once the median time past passes starttime, a block signals by setting bit ${d.bit}`,
+      values: [{ label: "signalling version", value: `0x${d.signalVersion.toString(16).padStart(8, "0")}` }],
+      note: "Top bits 001 and the deployment bit set. Signalling changes no rule by itself.",
+      layer: { tone: "wash", cells: 32, highlight: [2, 31 - d.bit] },
+    },
+    {
+      title: `Blocks ${num(i.tallyFrom)}–${num(i.tallyTo)}: at least ${num(m.threshold)} of the period's 2016 signal`,
+      values: [{ label: "period", value: `${num(i.activePeriod - 2)} (heights ÷ 2016)` }],
+      note: "Inferred: the table records only the activation height, and BIP 9's rules put the successful count two periods before it.",
+      layer: { tone: "hatch", cells: 12, highlight: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
+    },
+    {
+      title: `From block ${num(i.lockedInFrom)}: LOCKED_IN for one period`,
+      values: [{ label: "state", value: "LOCKED_IN — nothing counted, rules not yet enforced" }],
+      layer: { size: 0.75, tone: "plain", cells: 1 },
+    },
+    {
+      title: `From block ${num(m.activeHeight!)}: ACTIVE`,
+      values: [{ label: "recorded", value: m.state }],
+      note: `From this block on, the rules of BIPs ${d.bips.join(", ")} are enforced.`,
+      layer: { size: 0.85, tone: "accent", cells: 1 },
+    },
+  ];
+  return (
+    <WorkedExample
+      intro={<>The <strong>{d.name}</strong> deployment on mainnet, as BIP 9’s assignment table records it, read backwards from its activation height with BIP 9’s rules.</>}
+      steps={steps}
+      label="A deployment's parameters, a signalling version, a counted period, lock-in and activation, drawn as stacked layers."
+      source={<>Source: BIP 9 assignments, line {f.source.line}; dates cross-checked against the deployment section of BIP {f.crossCheck.bip}. Implied periods computed by the tested model.</>}
     />
   );
 }

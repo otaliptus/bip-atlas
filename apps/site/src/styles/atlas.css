@@ -1046,3 +1046,50 @@ button.atlas-tl-bit:focus-visible { outline: 2px solid var(--manual-focus); outl
 @media (max-width: 47.99rem) {
   .atlas-tl-bit { font-size: 0.6875rem; min-block-size: 1.7rem; }
 }
+
+/* ---------- Version bits (BIPs 9, 8) ---------- */
+.atlas-chapter[data-chapter="version-bits"] { --atlas-accent: #7b4a2d; }
+.atlas-vb-lab, .atlas-vb-lab > * { min-inline-size: 0; }
+.atlas-vb-lab .atlas-choice small { overflow-wrap: anywhere; }
+.atlas-vb-badge { margin: 0; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--manual-muted); }
+.atlas-vb-states { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.atlas-vb-states li { padding: 0.3rem 0.55rem; border: 1px dashed var(--manual-rule); font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
+.atlas-vb-states li[data-current="true"] { border: 2px solid var(--atlas-accent); background: var(--atlas-accent-wash); color: var(--manual-ink); font-weight: 600; }
+.atlas-vb-states li[data-current="true"][data-state="FAILED"] { border-color: var(--atlas-edit); background: var(--atlas-edit-wash); }
+.atlas-vb-periods { display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); gap: 3px; }
+.atlas-vb-period { display: grid; gap: 1px; justify-items: center; padding: 0.25rem 0; border: 1px solid var(--manual-rule); background: var(--manual-surface); font-family: var(--manual-code); color: var(--manual-ink); min-inline-size: 0; }
+button.atlas-vb-period { cursor: pointer; }
+button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 1px; }
+.atlas-vb-period__n { font-size: 0.625rem; color: var(--manual-muted); }
+.atlas-vb-period__s { font-size: 0.6875rem; font-weight: 600; }
+.atlas-vb-period__c { font-size: 0.75rem; min-block-size: 1em; }
+.atlas-vb-period[data-state="pending"] { background: transparent; border-style: dashed; color: var(--manual-muted); }
+.atlas-vb-period[data-state="STARTED"], .atlas-vb-period[data-state="MUST_SIGNAL"] { background: var(--atlas-accent-wash); border-color: var(--atlas-accent); }
+.atlas-vb-period[data-state="MUST_SIGNAL"] { border-width: 2px; }
+.atlas-vb-period[data-state="LOCKED_IN"] { background: var(--atlas-hatch), var(--manual-surface); border-color: var(--atlas-accent); }
+.atlas-vb-period[data-state="ACTIVE"] { background: var(--atlas-accent); color: #ffffff; border-color: var(--atlas-accent); }
+.atlas-vb-period[data-state="ACTIVE"] .atlas-vb-period__n { color: #ffffff; }
+.atlas-vb-period[data-state="FAILED"] { background: var(--atlas-edit-wash); border-color: var(--atlas-edit); color: var(--atlas-edit); }
+.atlas-vb-period[data-current="true"] { box-shadow: 0 0 0 2px var(--manual-ink); }
+.atlas-vb-key { margin: 0; font-family: var(--manual-code); font-size: 0.6875rem; color: var(--manual-muted); }
+.atlas-vb-axis { display: flex; justify-content: space-between; gap: 1rem; margin: 0; font-family: var(--manual-code); font-size: 0.6875rem; color: var(--manual-muted); }
+.atlas-vb-now p { margin: 0.3rem 0 0; font-size: 0.875rem; }
+.atlas-vb-record { margin: 0; padding: 0.5rem 0.6rem; border-inline-start: 3px solid var(--atlas-accent); background: var(--atlas-accent-wash); font-size: 0.875rem; }
+.atlas-vb-field { display: grid; gap: var(--manual-space-3); }
+.atlas-vb-field__bits { display: grid; grid-template-columns: repeat(32, minmax(0, 1fr)); gap: 2px; }
+.atlas-vb-field__bit { display: grid; justify-items: center; gap: 1px; padding-block: 0.2rem; border: 1px solid var(--manual-rule); background: var(--manual-surface); font-family: var(--manual-code); min-inline-size: 0; }
+.atlas-vb-field__bit[data-kind="top"] { border: 2px solid var(--manual-ink); }
+.atlas-vb-field__bit[data-kind="used"] { background: var(--atlas-accent); color: #ffffff; border-color: var(--atlas-accent); }
+.atlas-vb-field__bit[data-kind="free"] { background: var(--atlas-hatch), var(--manual-surface); }
+.atlas-vb-field__v { font-size: 0.75rem; min-block-size: 1em; }
+.atlas-vb-field__n { font-size: 0.5625rem; color: inherit; opacity: 0.8; }
+.atlas-vb-field__notes { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: 0.25rem; font-size: 0.875rem; }
+.atlas-vb-record-fig { display: grid; gap: var(--manual-space-4); }
+.atlas-vb-record-fig > * { min-inline-size: 0; }
+.atlas-vb-record-fig__head { margin: 0 0 0.3rem; font-family: var(--manual-code); font-size: 0.8125rem; }
+.atlas-vb-record-fig__table { font-size: 0.875rem; min-inline-size: 38rem; }
+.atlas-vb-record-fig__table small { display: block; color: var(--manual-muted); font-size: 0.75rem; }
+@media (max-width: 47.99rem) {
+  .atlas-vb-periods { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  .atlas-vb-field__bits { grid-template-columns: repeat(16, minmax(0, 1fr)); }
+}

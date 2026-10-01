@@ -91,9 +91,9 @@ export function bip9Next(prev: Bip9State, b: Bip9Boundary, p: Bip9Params): Trans
     case "LOCKED_IN":
       return t("ACTIVE", "one period after lock-in, always");
     case "ACTIVE":
-      return t("ACTIVE", "terminal");
+      return t("ACTIVE", "ACTIVE is terminal");
     case "FAILED":
-      return t("FAILED", "terminal");
+      return t("FAILED", "FAILED is terminal");
   }
 }
 
@@ -150,9 +150,9 @@ export function bip8Next(prev: Bip8State, b: { height: number; count: number }, 
     case "LOCKED_IN":
       return b.height >= p.minimumActivationHeight ? t("ACTIVE", "height ≥ minimum_activation_height") : t("LOCKED_IN", "height < minimum_activation_height");
     case "ACTIVE":
-      return t("ACTIVE", "terminal");
+      return t("ACTIVE", "ACTIVE is terminal");
     case "FAILED":
-      return t("FAILED", "terminal");
+      return t("FAILED", "FAILED is terminal");
   }
 }
 

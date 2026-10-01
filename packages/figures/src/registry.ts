@@ -10,6 +10,7 @@ export interface RecipeDefinition {
   interactive: boolean;
   controls: string[];
   /** Fixture kind every fixture passed to this recipe must have. */
+  /** Fixture kind the recipe draws; several allowed kinds are written "a|b". */
   fixtureKind: string;
 }
 
@@ -283,6 +284,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "timelock-encoding",
+  },
+  {
+    id: "versionbits-state-machine.v1",
+    description: "BIP 9 and BIP 8 deployment states over a schematic run of retarget periods, with pinned parameters and hypothetical signalling.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: true,
+    controls: ["Step through retarget periods", "Choose a published deployment", "Toggle signalling count"],
+    fixtureKind: "versionbits-deployment|versionbits-guideline",
+  },
+  {
+    id: "versionbits-field.v1",
+    description: "A block's nVersion as BIP 9 reads it: top bits 001 and the deployment bits.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: false,
+    controls: [],
+    fixtureKind: "versionbits-deployment",
+  },
+  {
+    id: "versionbits-record.v1",
+    description: "BIP 9's recorded deployments, cross-checked dates, and the lock-in periods their activation heights imply.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: false,
+    controls: [],
+    fixtureKind: "versionbits-deployment",
   },
 ];
 

@@ -85,7 +85,8 @@ for (const id of chapterIds) {
       const byId = new Map(fixtures.map((f) => [f.id, f]));
       for (const f of figures) {
         const kind = RECIPE_MAP.get(f.recipe)!.fixtureKind;
-        for (const fid of f.fixtures) expect(byId.get(fid)!.kind, `${f.figure} ${fid}`).toBe(kind);
+        // A recipe may accept several kinds, written "a|b".
+        for (const fid of f.fixtures) expect(kind.split("|"), `${f.figure} ${fid}`).toContain(byId.get(fid)!.kind);
       }
     });
 

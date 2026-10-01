@@ -8,6 +8,7 @@ import {
   bip8ParamProblems,
   bip9Implied,
   bip9Next,
+  MAX_BIT,
   mustSignalInvalid,
   parseAssignments,
   PERIOD,
@@ -30,6 +31,7 @@ const b68 = raw("bip-0068.mediawiki").split("\n");
 const b141 = raw("bip-0141.mediawiki").split("\n");
 const assignments = parseAssignments(raw("bip-0009/assignments.mediawiki"));
 
+const MAX_BIT_COUNT = MAX_BIT + 1;
 const P9: Bip9Params = { bit: 0, starttime: 1000, timeout: 2000, threshold: 1916 };
 
 describe("signalling bits", () => {
@@ -142,5 +144,49 @@ describe("pinned deployment parameters", () => {
 
   it("finds no BIP 8 deployments listed", () => {
     expect(parseAssignments(raw("bip-0008/assignments.mediawiki"))).toEqual([]);
+  });
+});
+
+describe("version-bits chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/version-bits.json", root), "utf8");
+  const [csv, segwit] = assignments;
+
+  it("dates and statuses", () => {
+    expect(b9[9]).toContain("Assigned: 2015-10-04");
+    expect(b8[7]).toContain("Assigned: 2017-02-01");
+    expect(text).toContain("BIP 9, assigned in 2015 and recorded as deployed");
+    expect(text).toContain("BIP 8, assigned in 2017 and now recorded as complete");
+    expect(b8[279]).toContain("'''1.0.0''' (2026-08-03)");
+    expect(b8[303]).toContain("'''0.0.2''' (2020-02-26)");
+    expect(text).toContain("rejected after a three-year timeout in 2020, revised with MUST_SIGNAL and a minimum activation height, and advanced to complete in 2026");
+  });
+
+  it("bits and versions", () => {
+    expect(text).toContain("which gives versions from 0x20000000 to 0x3FFFFFFF");
+    expect(text).toContain("That leaves 29 bits for deployments");
+    expect(MAX_BIT_COUNT).toBe(29);
+    expect(text).toContain("names its bit, from 0 to 28");
+    expect(text).toContain("csv used bit 0 and segwit bit 1");
+    expect([csv.bit, segwit.bit]).toEqual([0, 1]);
+  });
+
+  it("thresholds and windows", () => {
+    expect(text).toContain("At least 1,916 of them, 95 percent");
+    expect(text).toContain("on testnet the threshold was 1,512");
+    expect(text).toContain("fixed windows of 2,016 blocks");
+    expect(text).toContain("at least 4,032 blocks apart");
+    expect(text).toContain("1,815 blocks or 90 percent");
+    expect(text).toContain("at least a year, 52,416 blocks");
+    expect(text).toContain("about a month after a release that includes the change, and a timeout one year later");
+  });
+
+  it("the recorded deployments and what they imply", () => {
+    expect(text).toContain("on bit 0 with a mainnet window from 1 May 2016 to 1 May 2017, and segwit on bit 1 from 15 November 2016 to 15 November 2017");
+    expect([csv.mainnet.start, csv.mainnet.expire, segwit.mainnet.start, segwit.mainnet.expire].map((s) => s.slice(0, 10))).toEqual(["2016-05-01", "2017-05-01", "2016-11-15", "2017-11-15"]);
+    expect(text).toContain("block 419,328 for csv and 481,824 for segwit, both multiples of 2,016");
+    const c = bip9Implied(activationHeight(csv.mainnet.state)!);
+    const s = bip9Implied(activationHeight(segwit.mainnet.state)!);
+    expect(text).toContain(`LOCKED_IN from block ${c.lockedInFrom.toLocaleString("en-US")}, which means blocks ${c.tallyFrom.toLocaleString("en-US")} to ${c.tallyTo.toLocaleString("en-US")}`);
+    expect(text).toContain(`segwit was LOCKED_IN from ${s.lockedInFrom.toLocaleString("en-US")}`);
   });
 });
