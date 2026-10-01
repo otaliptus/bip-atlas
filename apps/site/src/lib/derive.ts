@@ -70,10 +70,13 @@ import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
 import { ROOT } from "./root";
 const SNAPSHOT = "sources/research-2026-10-01";
+/** Phase-three BIPs, snapshotted separately at the same bitcoin/bips commit. */
+export const SNAPSHOT_PHASE3 = "sources/research-2026-10-01-phase3";
 
-function pinnedText(path: string): string {
-  const bytes = readFileSync(`${ROOT}${SNAPSHOT}/raw/${path}`);
-  const lock = JSON.parse(readFileSync(`${ROOT}${SNAPSHOT}/sources.lock.json`, "utf8"));
+/** A raw file from a pinned snapshot, checked against that snapshot's lock. */
+export function pinnedText(path: string, snapshot: string = SNAPSHOT): string {
+  const bytes = readFileSync(`${ROOT}${snapshot}/raw/${path}`);
+  const lock = JSON.parse(readFileSync(`${ROOT}${snapshot}/sources.lock.json`, "utf8"));
   const expected = lock.files.find((f: { path: string }) => f.path === path)?.sha256;
   if (createHash("sha256").update(bytes).digest("hex") !== expected) throw new Error(`${path} does not match the source lock`);
   return bytes.toString("utf8");

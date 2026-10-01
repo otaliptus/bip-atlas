@@ -17,7 +17,7 @@ import {
 
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
-const catalog = read("catalog.json");
+const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
 const externalLock = read("sources/external/external.lock.json");
 const chapterIds = readdirSync(new URL("content/chapters/", root)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
 

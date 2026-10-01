@@ -1,0 +1,3443 @@
+{
+  "schemaVersion": "bip-atlas.sources.v1",
+  "repository": "https://github.com/bitcoin/bips",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "retrievedAt": "2026-10-01T19:42:16.834679+00:00",
+  "sources": [
+    {
+      "number": 8,
+      "path": "bip-0008.mediawiki",
+      "headersRaw": {
+        "BIP": "8",
+        "Title": "Version bits with lock-in by height",
+        "Authors": "Shaolin Fry <shaolinfry@protonmail.ch>\nLuke Dashjr <luke+bip@dashjr.org>",
+        "Status": "Complete",
+        "Type": "Informational",
+        "Assigned": "2017-02-01",
+        "License": "BSD-3-Clause OR CC0-1.0",
+        "Version": "1.0.0"
+      },
+      "title": "Version bits with lock-in by height",
+      "authorsRaw": "Shaolin Fry <shaolinfry@protonmail.ch>\nLuke Dashjr <luke+bip@dashjr.org>",
+      "statusRaw": "Complete",
+      "typeRaw": "Informational",
+      "assignedOrCreatedRaw": "2017-02-01",
+      "licenseRaw": "BSD-3-Clause OR CC0-1.0",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        10
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 13
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 21
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 29
+        },
+        {
+          "level": 3,
+          "title": "Parameters",
+          "line": 31
+        },
+        {
+          "level": 1,
+          "title": "The '''name''' specifies a very brief description of the soft fork, reasonable for use as an identifier.",
+          "line": 35
+        },
+        {
+          "level": 1,
+          "title": "The '''bit''' determines which bit in the nVersion field of the block is to be used to signal the soft fork lock-in and activation. It is chosen from the set {0,1,2,...,28}.",
+          "line": 36
+        },
+        {
+          "level": 1,
+          "title": "The '''startheight''' specifies the height of the first block at which the bit gains its meaning.",
+          "line": 37
+        },
+        {
+          "level": 1,
+          "title": "The '''timeoutheight''' specifies a block height at which the miner signalling ends. Once this height has been reached, if the soft fork has not yet locked in (excluding this block's bit state), the deployment is considered failed on all descendants of the block.",
+          "line": 38
+        },
+        {
+          "level": 1,
+          "title": "The '''threshold''' specifies the minimum number of block per retarget period which indicate lock-in of the soft fork during the subsequent period.",
+          "line": 39
+        },
+        {
+          "level": 1,
+          "title": "The '''minimum_activation_height''' specifies the height of the first block at which the soft fork is allowed to become active.",
+          "line": 40
+        },
+        {
+          "level": 1,
+          "title": "The '''lockinontimeout''' boolean if set to true, blocks are required to signal in the final period, ensuring the soft fork has locked in by timeoutheight.",
+          "line": 41
+        },
+        {
+          "level": 3,
+          "title": "Selection guidelines",
+          "line": 43
+        },
+        {
+          "level": 1,
+          "title": "'''name''' should be selected such that no two softforks, concurrent or otherwise, ever use the same name. For deployments described in a single BIP, it is recommended to use the name \"bipN\" where N is the appropriate BIP number.",
+          "line": 47
+        },
+        {
+          "level": 1,
+          "title": "'''bit''' should be selected such that no two concurrent softforks use the same bit. The bit chosen should not overlap with active usage (legitimately or otherwise) for other purposes.",
+          "line": 48
+        },
+        {
+          "level": 1,
+          "title": "'''startheight''' should be set to some block height in the future. If '''minimum_activation_height''' is not going to be set, then '''startheight''' should be set to a height when a majority of economic activity is expected to have upgraded to software including the activation parameters. Some allowance should be made for potential release delays. If '''minimum_activation_height''' is going to be set, then '''startheight''' can be set to be soon after software with parameters is expected to be released. This shifts the time for upgrading from before signaling begins to during the LOCKED_IN state.",
+          "line": 49
+        },
+        {
+          "level": 1,
+          "title": "'''timeoutheight''' should be set to a block height when it is considered reasonable to expect the entire economy to have upgraded by, probably at least 1 year, or 52416 blocks (26 retarget intervals) after '''startheight'''.",
+          "line": 50
+        },
+        {
+          "level": 1,
+          "title": "'''threshold''' should be 1815 blocks (90% of 2016), or 1512 (75%) for testnet.",
+          "line": 51
+        },
+        {
+          "level": 1,
+          "title": "'''minimum_activation_height''' should be set to several retarget periods in the future if the '''startheight''' is to be very soon after software with parameters is expected to be released. '''minimum_activation_height''' should be set to a height when a majority of economic activity is expected to have upgraded to software including the activation parameters. This allows more time to be spent in the LOCKED_IN state so that nodes can upgrade. This may be set to 0 to have the LOCKED_IN state be a single retarget period.",
+          "line": 52
+        },
+        {
+          "level": 1,
+          "title": "'''lockinontimeout''' should be set to true for any softfork that is expected or found to have political opposition from a non-negligible percent of miners. (It can be set after the initial deployment, but cannot be cleared once set.)",
+          "line": 53
+        },
+        {
+          "level": 3,
+          "title": "States",
+          "line": 60
+        },
+        {
+          "level": 1,
+          "title": "'''DEFINED''' is the first state that each soft fork starts out as. The genesis block is by definition in this state for each deployment.",
+          "line": 64
+        },
+        {
+          "level": 1,
+          "title": "'''STARTED''' for blocks at or beyond the startheight.",
+          "line": 65
+        },
+        {
+          "level": 1,
+          "title": "'''MUST_SIGNAL''' for one retarget period prior to the timeout, if LOCKED_IN was not reached and '''lockinontimeout''' is true.",
+          "line": 66
+        },
+        {
+          "level": 1,
+          "title": "'''LOCKED_IN''' for at least one retarget period after the first retarget period with STARTED (or MUST_SIGNAL) blocks of which at least threshold have the associated bit set in nVersion. A soft fork remains in LOCKED_IN until at least '''minimum_activation_height''' is reached.",
+          "line": 67
+        },
+        {
+          "level": 1,
+          "title": "'''ACTIVE''' for all blocks after the LOCKED_IN state.",
+          "line": 68
+        },
+        {
+          "level": 1,
+          "title": "'''FAILED''' for all blocks after the timeoutheight if LOCKED_IN is not reached.",
+          "line": 69
+        },
+        {
+          "level": 3,
+          "title": "Bit flags",
+          "line": 71
+        },
+        {
+          "level": 3,
+          "title": "New consensus rules",
+          "line": 86
+        },
+        {
+          "level": 3,
+          "title": "State transitions",
+          "line": 92
+        },
+        {
+          "level": 3,
+          "title": "Mandatory signalling",
+          "line": 185
+        },
+        {
+          "level": 3,
+          "title": "Warning mechanism",
+          "line": 211
+        },
+        {
+          "level": 3,
+          "title": "getblocktemplate changes",
+          "line": 215
+        },
+        {
+          "level": 3,
+          "title": "Reference implementation",
+          "line": 252
+        },
+        {
+          "level": 2,
+          "title": "Contrasted with BIP 9",
+          "line": 256
+        },
+        {
+          "level": 2,
+          "title": "Backwards compatibility",
+          "line": 261
+        },
+        {
+          "level": 2,
+          "title": "Deployments",
+          "line": 265
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 269
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 275
+        },
+        {
+          "level": 2,
+          "title": "Changelog",
+          "line": 279
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/8/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0008.mediawiki"
+    },
+    {
+      "number": 9,
+      "path": "bip-0009.mediawiki",
+      "headersRaw": {
+        "BIP": "9",
+        "Title": "Version bits with timeout and delay",
+        "Authors": "Pieter Wuille <pieter.wuille@gmail.com>\nPeter Todd <pete@petertodd.org>\nGreg Maxwell <greg@xiph.org>\nRusty Russell <rusty@rustcorp.com.au>",
+        "Status": "Deployed",
+        "Type": "Informational",
+        "Assigned": "2015-10-04",
+        "License": "PD"
+      },
+      "title": "Version bits with timeout and delay",
+      "authorsRaw": "Pieter Wuille <pieter.wuille@gmail.com>\nPeter Todd <pete@petertodd.org>\nGreg Maxwell <greg@xiph.org>\nRusty Russell <rusty@rustcorp.com.au>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Informational",
+      "assignedOrCreatedRaw": "2015-10-04",
+      "licenseRaw": "PD",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 18
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 24
+        },
+        {
+          "level": 1,
+          "title": "The '''name''' specifies a very brief description of the soft fork, reasonable for use as an identifier. For deployments described in a single BIP, it is recommended to use the name \"bipN\" where N is the appropriate BIP number.",
+          "line": 28
+        },
+        {
+          "level": 1,
+          "title": "The '''bit''' determines which bit in the nVersion field of the block is to be used to signal the soft fork lock-in and activation. It is chosen from the set {0,1,2,...,28}.",
+          "line": 29
+        },
+        {
+          "level": 1,
+          "title": "The '''starttime''' specifies a minimum median time past of a block at which the bit gains its meaning.",
+          "line": 30
+        },
+        {
+          "level": 1,
+          "title": "The '''timeout''' specifies a time at which the deployment is considered failed. If the median time past of a block >= timeout and the soft fork has not yet locked in (including this block's bit state), the deployment is considered failed on all descendants of the block.",
+          "line": 31
+        },
+        {
+          "level": 3,
+          "title": "Selection guidelines",
+          "line": 33
+        },
+        {
+          "level": 1,
+          "title": "'''name''' should be selected such that no two softforks, concurrent or otherwise, ever use the same name.",
+          "line": 37
+        },
+        {
+          "level": 1,
+          "title": "'''bit''' should be selected such that no two concurrent softforks use the same bit.",
+          "line": 38
+        },
+        {
+          "level": 1,
+          "title": "'''starttime''' should be set to some date in the future, approximately one month after a software release date including the soft fork.  This allows for some release delays, while preventing triggers as a result of parties running pre-release software.",
+          "line": 39
+        },
+        {
+          "level": 1,
+          "title": "'''timeout''' should be 1 year (31536000 seconds) after starttime.",
+          "line": 40
+        },
+        {
+          "level": 3,
+          "title": "States",
+          "line": 45
+        },
+        {
+          "level": 1,
+          "title": "'''DEFINED''' is the first state that each soft fork starts out as. The genesis block is by definition in this state for each deployment.",
+          "line": 49
+        },
+        {
+          "level": 1,
+          "title": "'''STARTED''' for blocks past the starttime.",
+          "line": 50
+        },
+        {
+          "level": 1,
+          "title": "'''LOCKED_IN''' for one retarget period after the first retarget period with STARTED blocks of which at least threshold have the associated bit set in nVersion.",
+          "line": 51
+        },
+        {
+          "level": 1,
+          "title": "'''ACTIVE''' for all blocks after the LOCKED_IN retarget period.",
+          "line": 52
+        },
+        {
+          "level": 1,
+          "title": "'''FAILED''' for one retarget period past the timeout time, if LOCKED_IN was not reached.",
+          "line": 53
+        },
+        {
+          "level": 3,
+          "title": "Bit flags",
+          "line": 55
+        },
+        {
+          "level": 3,
+          "title": "New consensus rules",
+          "line": 71
+        },
+        {
+          "level": 3,
+          "title": "State transitions",
+          "line": 75
+        },
+        {
+          "level": 3,
+          "title": "Warning mechanism",
+          "line": 161
+        },
+        {
+          "level": 3,
+          "title": "getblocktemplate changes",
+          "line": 165
+        },
+        {
+          "level": 2,
+          "title": "Support for future changes",
+          "line": 201
+        },
+        {
+          "level": 2,
+          "title": "Rationale",
+          "line": 214
+        },
+        {
+          "level": 2,
+          "title": "Deployments",
+          "line": 226
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 230
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/9/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0009.mediawiki"
+    },
+    {
+      "number": 16,
+      "path": "bip-0016.mediawiki",
+      "headersRaw": {
+        "BIP": "16",
+        "Layer": "Consensus (soft fork)",
+        "Title": "Pay to Script Hash",
+        "Authors": "Gavin Andresen <gavinandresen@gmail.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2012-01-03"
+      },
+      "title": "Pay to Script Hash",
+      "authorsRaw": "Gavin Andresen <gavinandresen@gmail.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2012-01-03",
+      "licenseRaw": null,
+      "licenseReviewRequired": true,
+      "preambleLines": [
+        2,
+        8
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 11
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 15
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 21
+        },
+        {
+          "level": 1,
+          "title": "Validation fails if there are any operations other than \"push data\" operations in the scriptSig.",
+          "line": 37
+        },
+        {
+          "level": 1,
+          "title": "Normal validation is done: an initial stack is created from the signatures and {serialized script}, and the hash of the script is computed and validation fails immediately if it does not match the hash in the outpoint.",
+          "line": 38
+        },
+        {
+          "level": 1,
+          "title": "{serialized script} is popped off the initial stack, and the transaction is validated again using the popped stack and the deserialized script as the scriptPubKey.",
+          "line": 39
+        },
+        {
+          "level": 1,
+          "title": "OP_CHECKSIG and OP_CHECKSIGVERIFY count as 1 signature operation, whether or not they are evaluated.",
+          "line": 50
+        },
+        {
+          "level": 1,
+          "title": "OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY immediately preceded by OP_1 through OP_16 are counted as 1 to 16 signature operation, whether or not they are evaluated.",
+          "line": 51
+        },
+        {
+          "level": 1,
+          "title": "All other OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY are counted as 20 signature operations.",
+          "line": 52
+        },
+        {
+          "level": 2,
+          "title": "Rationale",
+          "line": 62
+        },
+        {
+          "level": 1,
+          "title": "Attacker creates a pay-to-script-hash transaction that is valid as seen by old software, but invalid for new implementation, and sends themselves some coins using it.",
+          "line": 74
+        },
+        {
+          "level": 1,
+          "title": "Attacker also creates a standard transaction that spends the pay-to-script-hash transaction, and pays the victim who is running old software.",
+          "line": 75
+        },
+        {
+          "level": 1,
+          "title": "Attacker mines a block that contains both transactions.",
+          "line": 76
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 82
+        },
+        {
+          "level": 3,
+          "title": "520-byte limitation on serialized script size",
+          "line": 100
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 105
+        },
+        {
+          "level": 2,
+          "title": "See Also",
+          "line": 109
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 116
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/16/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0016.mediawiki"
+    },
+    {
+      "number": 44,
+      "path": "bip-0044.mediawiki",
+      "headersRaw": {
+        "BIP": "44",
+        "Layer": "Applications",
+        "Title": "Multi-Account Hierarchy for Deterministic Wallets",
+        "Authors": "Marek Palatinus <slush@satoshilabs.com>\nPavol Rusnak <stick@satoshilabs.com>",
+        "Comments-Summary": "Mixed review (one person)",
+        "Comments-URI": "https://github.com/bitcoin/bips/wiki/Comments:BIP-0044",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2014-04-24",
+        "Requires": "32, 43"
+      },
+      "title": "Multi-Account Hierarchy for Deterministic Wallets",
+      "authorsRaw": "Marek Palatinus <slush@satoshilabs.com>\nPavol Rusnak <stick@satoshilabs.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2014-04-24",
+      "licenseRaw": null,
+      "licenseReviewRequired": true,
+      "preambleLines": [
+        2,
+        12
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 15
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 23
+        },
+        {
+          "level": 2,
+          "title": "Path levels",
+          "line": 29
+        },
+        {
+          "level": 3,
+          "title": "Purpose",
+          "line": 41
+        },
+        {
+          "level": 3,
+          "title": "Coin type",
+          "line": 48
+        },
+        {
+          "level": 3,
+          "title": "Account",
+          "line": 65
+        },
+        {
+          "level": 3,
+          "title": "Change",
+          "line": 86
+        },
+        {
+          "level": 3,
+          "title": "Index",
+          "line": 96
+        },
+        {
+          "level": 2,
+          "title": "Account discovery",
+          "line": 103
+        },
+        {
+          "level": 1,
+          "title": "derive the first account's node (index = 0)",
+          "line": 108
+        },
+        {
+          "level": 1,
+          "title": "derive the external chain node of this account",
+          "line": 109
+        },
+        {
+          "level": 1,
+          "title": "scan addresses of the external chain; respect the gap limit described below",
+          "line": 110
+        },
+        {
+          "level": 1,
+          "title": "if no transactions are found on the external chain, stop discovery",
+          "line": 111
+        },
+        {
+          "level": 1,
+          "title": "if there are some transactions, increase the account index and go to step 1",
+          "line": 112
+        },
+        {
+          "level": 3,
+          "title": "Address gap limit",
+          "line": 122
+        },
+        {
+          "level": 2,
+          "title": "Registered coin types",
+          "line": 132
+        },
+        {
+          "level": 2,
+          "title": "Examples",
+          "line": 161
+        },
+        {
+          "level": 2,
+          "title": "Reference",
+          "line": 267
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/44/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0044.mediawiki"
+    },
+    {
+      "number": 65,
+      "path": "bip-0065.mediawiki",
+      "headersRaw": {
+        "BIP": "65",
+        "Layer": "Consensus (soft fork)",
+        "Title": "OP_CHECKLOCKTIMEVERIFY",
+        "Authors": "Peter Todd <pete@petertodd.org>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2014-10-01",
+        "License": "PD"
+      },
+      "title": "OP_CHECKLOCKTIMEVERIFY",
+      "authorsRaw": "Peter Todd <pete@petertodd.org>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2014-10-01",
+      "licenseRaw": "PD",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        9
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 12
+        },
+        {
+          "level": 2,
+          "title": "Summary",
+          "line": 19
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 41
+        },
+        {
+          "level": 3,
+          "title": "Escrow",
+          "line": 53
+        },
+        {
+          "level": 3,
+          "title": "Non-interactive time-locked refunds",
+          "line": 89
+        },
+        {
+          "level": 4,
+          "title": "Two-factor wallets",
+          "line": 101
+        },
+        {
+          "level": 4,
+          "title": "Payment Channels",
+          "line": 128
+        },
+        {
+          "level": 3,
+          "title": "Trustless Payments for Publishing Data",
+          "line": 140
+        },
+        {
+          "level": 3,
+          "title": "Proving sacrifice to miners' fees",
+          "line": 165
+        },
+        {
+          "level": 3,
+          "title": "Freezing Funds",
+          "line": 179
+        },
+        {
+          "level": 3,
+          "title": "Replacing the nLockTime field entirely",
+          "line": 190
+        },
+        {
+          "level": 2,
+          "title": "Detailed Specification",
+          "line": 201
+        },
+        {
+          "level": 2,
+          "title": "Deployment",
+          "line": 279
+        },
+        {
+          "level": 3,
+          "title": "SPV Clients",
+          "line": 294
+        },
+        {
+          "level": 2,
+          "title": "Credits",
+          "line": 304
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 311
+        },
+        {
+          "level": 2,
+          "title": "Implementations",
+          "line": 322
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 333
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/65/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0065.mediawiki"
+    },
+    {
+      "number": 68,
+      "path": "bip-0068.mediawiki",
+      "headersRaw": {
+        "BIP": "68",
+        "Layer": "Consensus (soft fork)",
+        "Title": "Relative lock-time using consensus-enforced sequence numbers",
+        "Authors": "Mark Friedenbach <mark@friedenbach.org>\nBtcDrak <btcdrak@gmail.com>\nNicolas Dorier <nicolas.dorier@gmail.com>\nkinoshitajona <kinoshitajona@gmail.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2015-05-28"
+      },
+      "title": "Relative lock-time using consensus-enforced sequence numbers",
+      "authorsRaw": "Mark Friedenbach <mark@friedenbach.org>\nBtcDrak <btcdrak@gmail.com>\nNicolas Dorier <nicolas.dorier@gmail.com>\nkinoshitajona <kinoshitajona@gmail.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2015-05-28",
+      "licenseRaw": null,
+      "licenseReviewRequired": true,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 18
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 24
+        },
+        {
+          "level": 2,
+          "title": "Implementation",
+          "line": 55
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgments",
+          "line": 216
+        },
+        {
+          "level": 2,
+          "title": "Deployment",
+          "line": 222
+        },
+        {
+          "level": 2,
+          "title": "Compatibility",
+          "line": 232
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 252
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/68/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0068.mediawiki"
+    },
+    {
+      "number": 84,
+      "path": "bip-0084.mediawiki",
+      "headersRaw": {
+        "BIP": "84",
+        "Layer": "Applications",
+        "Title": "Derivation scheme for P2WPKH based accounts",
+        "Authors": "Pavol Rusnak <stick@satoshilabs.com>",
+        "Comments-Summary": "No comments yet.",
+        "Comments-URI": "https://github.com/bitcoin/bips/wiki/Comments:BIP-0084",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2017-12-28",
+        "License": "CC0-1.0"
+      },
+      "title": "Derivation scheme for P2WPKH based accounts",
+      "authorsRaw": "Pavol Rusnak <stick@satoshilabs.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2017-12-28",
+      "licenseRaw": "CC0-1.0",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 18
+        },
+        {
+          "level": 3,
+          "title": "Considerations",
+          "line": 25
+        },
+        {
+          "level": 2,
+          "title": "Specifications",
+          "line": 29
+        },
+        {
+          "level": 3,
+          "title": "Public key derivation",
+          "line": 33
+        },
+        {
+          "level": 3,
+          "title": "Address derivation",
+          "line": 44
+        },
+        {
+          "level": 3,
+          "title": "Extended Key Version",
+          "line": 55
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 62
+        },
+        {
+          "level": 2,
+          "title": "Test vectors",
+          "line": 66
+        },
+        {
+          "level": 2,
+          "title": "Reference",
+          "line": 93
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/84/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0084.mediawiki"
+    },
+    {
+      "number": 86,
+      "path": "bip-0086.mediawiki",
+      "headersRaw": {
+        "BIP": "86",
+        "Layer": "Applications",
+        "Title": "Key Derivation for Single Key P2TR Outputs",
+        "Authors": "Ava Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-22",
+        "License": "BSD-2-Clause"
+      },
+      "title": "Key Derivation for Single Key P2TR Outputs",
+      "authorsRaw": "Ava Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-22",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        9
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 12
+        },
+        {
+          "level": 3,
+          "title": "Copyright",
+          "line": 17
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 21
+        },
+        {
+          "level": 2,
+          "title": "Specifications",
+          "line": 30
+        },
+        {
+          "level": 3,
+          "title": "Public key derivation",
+          "line": 35
+        },
+        {
+          "level": 3,
+          "title": "Address derivation",
+          "line": 51
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 74
+        },
+        {
+          "level": 2,
+          "title": "Test vectors",
+          "line": 83
+        },
+        {
+          "level": 2,
+          "title": "Reference",
+          "line": 119
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/86/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0086.mediawiki"
+    },
+    {
+      "number": 112,
+      "path": "bip-0112.mediawiki",
+      "headersRaw": {
+        "BIP": "112",
+        "Layer": "Consensus (soft fork)",
+        "Title": "CHECKSEQUENCEVERIFY",
+        "Authors": "BtcDrak <btcdrak@gmail.com>\nMark Friedenbach <mark@friedenbach.org>\nEric Lombrozo <elombrozo@gmail.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2015-08-10",
+        "License": "PD"
+      },
+      "title": "CHECKSEQUENCEVERIFY",
+      "authorsRaw": "BtcDrak <btcdrak@gmail.com>\nMark Friedenbach <mark@friedenbach.org>\nEric Lombrozo <elombrozo@gmail.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2015-08-10",
+      "licenseRaw": "PD",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Summary",
+          "line": 22
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 41
+        },
+        {
+          "level": 3,
+          "title": "Contracts With Expiration Deadlines",
+          "line": 55
+        },
+        {
+          "level": 4,
+          "title": "Escrow with Timeout",
+          "line": 57
+        },
+        {
+          "level": 3,
+          "title": "Retroactive Invalidation",
+          "line": 79
+        },
+        {
+          "level": 4,
+          "title": "Hash Time-Locked Contracts",
+          "line": 99
+        },
+        {
+          "level": 4,
+          "title": "Bidirectional Payment Channels",
+          "line": 103
+        },
+        {
+          "level": 4,
+          "title": "Lightning Network",
+          "line": 114
+        },
+        {
+          "level": 4,
+          "title": "2-Way Pegged Sidechains",
+          "line": 218
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 229
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 338
+        },
+        {
+          "level": 2,
+          "title": "Deployment",
+          "line": 345
+        },
+        {
+          "level": 2,
+          "title": "Credits",
+          "line": 355
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 369
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 394
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/112/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0112.mediawiki"
+    },
+    {
+      "number": 113,
+      "path": "bip-0113.mediawiki",
+      "headersRaw": {
+        "BIP": "113",
+        "Layer": "Consensus (soft fork)",
+        "Title": "Median time-past as endpoint for lock-time calculations",
+        "Authors": "Thomas Kerin <me@thomaskerin.io>\nMark Friedenbach <mark@friedenbach.org>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2015-08-10",
+        "License": "PD"
+      },
+      "title": "Median time-past as endpoint for lock-time calculations",
+      "authorsRaw": "Thomas Kerin <me@thomaskerin.io>\nMark Friedenbach <mark@friedenbach.org>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2015-08-10",
+      "licenseRaw": "PD",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        10
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 22
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 44
+        },
+        {
+          "level": 2,
+          "title": "Deployment",
+          "line": 77
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgements",
+          "line": 88
+        },
+        {
+          "level": 2,
+          "title": "Compatibility",
+          "line": 99
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 107
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 122
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/113/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0113.mediawiki"
+    },
+    {
+      "number": 157,
+      "path": "bip-0157.mediawiki",
+      "headersRaw": {
+        "BIP": "157",
+        "Layer": "Peer Services",
+        "Title": "Client Side Block Filtering",
+        "Authors": "Olaoluwa Osuntokun <laolu32@gmail.com>\nAlex Akselrod <alex@akselrod.org>\nJim Posen <jimpo@coinbase.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2017-05-24",
+        "License": "CC0-1.0",
+        "Requires": "158"
+      },
+      "title": "Client Side Block Filtering",
+      "authorsRaw": "Olaoluwa Osuntokun <laolu32@gmail.com>\nAlex Akselrod <alex@akselrod.org>\nJim Posen <jimpo@coinbase.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2017-05-24",
+      "licenseRaw": "CC0-1.0",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        12
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 16
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 36
+        },
+        {
+          "level": 2,
+          "title": "Definitions",
+          "line": 87
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 103
+        },
+        {
+          "level": 3,
+          "title": "Filter Types",
+          "line": 105
+        },
+        {
+          "level": 3,
+          "title": "Filter Headers",
+          "line": 118
+        },
+        {
+          "level": 3,
+          "title": "New Messages",
+          "line": 139
+        },
+        {
+          "level": 4,
+          "title": "getcfilters",
+          "line": 141
+        },
+        {
+          "level": 1,
+          "title": "Nodes SHOULD NOT send <code>getcfilters</code> unless the peer has signaled support for this filter type. Nodes receiving <code>getcfilters</code> with an unsupported filter type SHOULD NOT respond.",
+          "line": 168
+        },
+        {
+          "level": 1,
+          "title": "StopHash MUST be known to belong to a block accepted by the receiving peer. This is the case if the peer had previously sent a <code>headers</code> or <code>inv</code> message with that block or any descendents. A node that receives <code>getcfilters</code> with an unknown StopHash SHOULD NOT respond.",
+          "line": 169
+        },
+        {
+          "level": 1,
+          "title": "The height of the block with hash StopHash MUST be greater than or equal to StartHeight, and the difference MUST be strictly less than 1000.",
+          "line": 170
+        },
+        {
+          "level": 1,
+          "title": "The receiving node MUST respond to valid requests by sending one <code>cfilter</code> message for each block in the requested range, sequentially in order by block height.",
+          "line": 171
+        },
+        {
+          "level": 4,
+          "title": "cfilter",
+          "line": 173
+        },
+        {
+          "level": 1,
+          "title": "The FilterType SHOULD match the field in the <code>getcfilters</code> request, and BlockHash must correspond to a block that is an ancestor of StopHash with height greater than or equal to StartHeight.",
+          "line": 204
+        },
+        {
+          "level": 4,
+          "title": "getcfheaders",
+          "line": 206
+        },
+        {
+          "level": 1,
+          "title": "Nodes SHOULD NOT send <code>getcfheaders</code> unless the peer has signaled support for this filter type. Nodes receiving <code>getcfheaders</code> with an unsupported filter type SHOULD NOT respond.",
+          "line": 232
+        },
+        {
+          "level": 1,
+          "title": "StopHash MUST be known to belong to a block accepted by the receiving peer. This is the case if the peer had previously sent a <code>headers</code> or <code>inv</code> message with that block or any descendents. A node that receives <code>getcfheaders</code> with an unknown StopHash SHOULD NOT respond.",
+          "line": 233
+        },
+        {
+          "level": 1,
+          "title": "The height of the block with hash StopHash MUST be greater than or equal to StartHeight, and the difference MUST be strictly less than 2,000.",
+          "line": 234
+        },
+        {
+          "level": 4,
+          "title": "cfheaders",
+          "line": 236
+        },
+        {
+          "level": 1,
+          "title": "The FilterType and StopHash SHOULD match the fields in the <code>getcfheaders</code> request.",
+          "line": 275
+        },
+        {
+          "level": 1,
+          "title": "FilterHashesLength MUST NOT be greater than 2,000.",
+          "line": 276
+        },
+        {
+          "level": 1,
+          "title": "FilterHashes MUST have one entry for each block on the chain terminating with tip StopHash, starting with the block at height StartHeight. The entries MUST be the filter hashes of the given type for each block in that range, in ascending order by height.",
+          "line": 277
+        },
+        {
+          "level": 1,
+          "title": "PreviousFilterHeader MUST be set to the previous filter header of first block in the requested range.",
+          "line": 278
+        },
+        {
+          "level": 4,
+          "title": "getcfcheckpt",
+          "line": 280
+        },
+        {
+          "level": 1,
+          "title": "Nodes SHOULD NOT send <code>getcfcheckpt</code> unless the peer has signaled support for this filter type. Nodes receiving <code>getcfcheckpt</code> with an unsupported filter type SHOULD NOT respond.",
+          "line": 304
+        },
+        {
+          "level": 1,
+          "title": "StopHash MUST be known to belong to a block accepted by the receiving peer. This is the case if the peer had previously sent a <code>headers</code> or <code>inv</code> message with any descendent blocks. A node that receives <code>getcfcheckpt</code> with an unknown StopHash SHOULD NOT respond.",
+          "line": 305
+        },
+        {
+          "level": 4,
+          "title": "cfcheckpt",
+          "line": 307
+        },
+        {
+          "level": 1,
+          "title": "The FilterType and StopHash SHOULD match the fields in the <code>getcfcheckpt</code> request.",
+          "line": 340
+        },
+        {
+          "level": 1,
+          "title": "FilterHeaders MUST have exactly one entry for each block on the chain terminating in StopHash, where the block height is a multiple of 1,000 greater than 0. The entries MUST be the filter headers of the given type for each such block, in ascending order by height.",
+          "line": 341
+        },
+        {
+          "level": 3,
+          "title": "Node Operation",
+          "line": 343
+        },
+        {
+          "level": 3,
+          "title": "Client Operation",
+          "line": 362
+        },
+        {
+          "level": 2,
+          "title": "Rationale",
+          "line": 421
+        },
+        {
+          "level": 2,
+          "title": "Compatibility",
+          "line": 437
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgments",
+          "line": 446
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 456
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 464
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 468
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/157/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0157.mediawiki"
+    },
+    {
+      "number": 158,
+      "path": "bip-0158.mediawiki",
+      "headersRaw": {
+        "BIP": "158",
+        "Layer": "Peer Services",
+        "Title": "Compact Block Filters for Light Clients",
+        "Authors": "Olaoluwa Osuntokun <laolu32@gmail.com>\nAlex Akselrod <alex@akselrod.org>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2017-05-24",
+        "License": "CC0-1.0",
+        "Requires": "157"
+      },
+      "title": "Compact Block Filters for Light Clients",
+      "authorsRaw": "Olaoluwa Osuntokun <laolu32@gmail.com>\nAlex Akselrod <alex@akselrod.org>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2017-05-24",
+      "licenseRaw": "CC0-1.0",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 15
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 24
+        },
+        {
+          "level": 2,
+          "title": "Definitions",
+          "line": 32
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 54
+        },
+        {
+          "level": 3,
+          "title": "Golomb-Coded Sets",
+          "line": 56
+        },
+        {
+          "level": 1,
+          "title": "hashing all items to 64-bit integers in the range <code>[0, N * M)</code>",
+          "line": 68
+        },
+        {
+          "level": 1,
+          "title": "sorting the hashed values in ascending order",
+          "line": 69
+        },
+        {
+          "level": 1,
+          "title": "computing the differences between each value and the previous one",
+          "line": 70
+        },
+        {
+          "level": 1,
+          "title": "writing the differences sequentially, compressed with Golomb-Rice coding",
+          "line": 71
+        },
+        {
+          "level": 4,
+          "title": "Hashing Data Objects",
+          "line": 75
+        },
+        {
+          "level": 4,
+          "title": "Golomb-Rice Coding",
+          "line": 120
+        },
+        {
+          "level": 4,
+          "title": "Set Construction",
+          "line": 183
+        },
+        {
+          "level": 4,
+          "title": "Set Querying/Decompression",
+          "line": 217
+        },
+        {
+          "level": 3,
+          "title": "Block Filters",
+          "line": 260
+        },
+        {
+          "level": 4,
+          "title": "Contents",
+          "line": 267
+        },
+        {
+          "level": 4,
+          "title": "Construction",
+          "line": 285
+        },
+        {
+          "level": 4,
+          "title": "Signaling",
+          "line": 313
+        },
+        {
+          "level": 2,
+          "title": "Compatibility",
+          "line": 324
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgments",
+          "line": 329
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 340
+        },
+        {
+          "level": 2,
+          "title": "Appendix A: Alternatives",
+          "line": 348
+        },
+        {
+          "level": 4,
+          "title": "Bloom Filters",
+          "line": 354
+        },
+        {
+          "level": 4,
+          "title": "Cryptographic Accumulators",
+          "line": 361
+        },
+        {
+          "level": 4,
+          "title": "Matrix Based Probabilistic Set Data Structures",
+          "line": 373
+        },
+        {
+          "level": 2,
+          "title": "Appendix B: Pseudocode",
+          "line": 381
+        },
+        {
+          "level": 3,
+          "title": "Golomb-Coded Set Multi-Match",
+          "line": 383
+        },
+        {
+          "level": 2,
+          "title": "Appendix C: Test Vectors",
+          "line": 429
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 433
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 437
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/158/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0158.mediawiki"
+    },
+    {
+      "number": 322,
+      "path": "bip-0322.mediawiki",
+      "headersRaw": {
+        "BIP": "322",
+        "Layer": "Applications",
+        "Title": "Generic Signed Message Format",
+        "Authors": "Karl-Johan Alm <karljohan-alm@garage.co.jp>\nOliver Gugger <gugger@gmail.com>",
+        "Status": "Complete",
+        "Type": "Specification",
+        "Assigned": "2018-09-10",
+        "License": "CC0-1.0",
+        "Discussion": "2018-03-14: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-March/015818.html\n2019-07-23: https://github.com/bitcoin/bitcoin/pull/16440\n2022-01-13: https://github.com/bitcoin/bitcoin/pull/24058\n2022-08-06: https://bitcointalk.org/index.php?topic=5408898.0\n2024-05-04: https://groups.google.com/g/bitcoindev/c/RCi1Exs0ZvQ/m/vp6Xo36aBwAJ\n2025-05-10: https://bitcoin.stackexchange.com/questions/126277/where-can-i-use-bip322-to-sign-a-message-to-verify-a-multisig-address\n2026-04-20: https://groups.google.com/g/bitcoindev/c/qd6BNz9gxCk/m/k1fHq4RKAQAJ",
+        "Version": "2.0.0",
+        "Requires": "174, 340, 341"
+      },
+      "title": "Generic Signed Message Format",
+      "authorsRaw": "Karl-Johan Alm <karljohan-alm@garage.co.jp>\nOliver Gugger <gugger@gmail.com>",
+      "statusRaw": "Complete",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2018-09-10",
+      "licenseRaw": "CC0-1.0",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        19
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 22
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 28
+        },
+        {
+          "level": 2,
+          "title": "Terminology",
+          "line": 50
+        },
+        {
+          "level": 2,
+          "title": "Types of Signatures",
+          "line": 59
+        },
+        {
+          "level": 3,
+          "title": "Legacy",
+          "line": 101
+        },
+        {
+          "level": 3,
+          "title": "Simple",
+          "line": 107
+        },
+        {
+          "level": 3,
+          "title": "Full",
+          "line": 129
+        },
+        {
+          "level": 3,
+          "title": "Full (Proof of Funds)",
+          "line": 168
+        },
+        {
+          "level": 2,
+          "title": "Detailed Specification",
+          "line": 214
+        },
+        {
+          "level": 3,
+          "title": "Verification",
+          "line": 220
+        },
+        {
+          "level": 4,
+          "title": "Verification Process",
+          "line": 238
+        },
+        {
+          "level": 1,
+          "title": "Basic validation",
+          "line": 242
+        },
+        {
+          "level": 2,
+          "title": "Compute the transaction <code>to_spend</code> from ''m'' and ''A''",
+          "line": 243
+        },
+        {
+          "level": 2,
+          "title": "Decode ''s'' as the transaction <code>to_sign</code>",
+          "line": 244
+        },
+        {
+          "level": 2,
+          "title": "If ''s'' was a full transaction or PSBT, confirm all fields are set as specified above; in particular that",
+          "line": 245
+        },
+        {
+          "level": 2,
+          "title": "Confirm that the two transactions together satisfy all consensus rules, except for <code>to_spend</code>'s missing input, and except that ''nSequence'' of <code>to_sign</code>'s first input and ''nLockTime'' of <code>to_sign</code> are not checked.",
+          "line": 250
+        },
+        {
+          "level": 1,
+          "title": "(Optional) If the validator does not have a full script interpreter, it should check that it understands all scripts being satisfied. If not, it should stop here and output ''inconclusive''.",
+          "line": 251
+        },
+        {
+          "level": 1,
+          "title": "Check the '''required rules''':",
+          "line": 252
+        },
+        {
+          "level": 2,
+          "title": "All signatures MUST use the <code>SIGHASH_ALL</code> flag, unless the output type supports <code>SIGHASH_DEFAULT</code>, which then MAY be used alternatively (e.g., [[bip-0341.mediawiki|BIP341 P2TR]]).",
+          "line": 253
+        },
+        {
+          "level": 2,
+          "title": "The use of <code>CODESEPARATOR</code> or <code>FindAndDelete</code> is forbidden.",
+          "line": 254
+        },
+        {
+          "level": 2,
+          "title": "<code>LOW_S</code>, <code>STRICTENC</code> and <code>NULLFAIL</code>: valid ECDSA signatures must be strictly DER-encoded and have a low-S value; invalid ECDSA signature must be the empty push",
+          "line": 255
+        },
+        {
+          "level": 2,
+          "title": "<code>MINIMALDATA</code>: all pushes must be minimally encoded",
+          "line": 256
+        },
+        {
+          "level": 2,
+          "title": "<code>CLEANSTACK</code>: require that only a single stack element remains after evaluation",
+          "line": 257
+        },
+        {
+          "level": 2,
+          "title": "<code>MINIMALIF</code>: the argument of <code>IF</code>/<code>NOTIF</code> must be exactly 0x01 or empty push",
+          "line": 258
+        },
+        {
+          "level": 2,
+          "title": "If any of the above steps failed, the validator should stop and output the ''invalid'' state.",
+          "line": 259
+        },
+        {
+          "level": 1,
+          "title": "Check the '''upgradeable rules'''",
+          "line": 260
+        },
+        {
+          "level": 2,
+          "title": "The version of <code>to_sign</code> must be 0 or 2.",
+          "line": 261
+        },
+        {
+          "level": 2,
+          "title": "The use of NOPs reserved for upgrades is forbidden.",
+          "line": 262
+        },
+        {
+          "level": 2,
+          "title": "The use of Segwit versions greater than 1 is forbidden.",
+          "line": 263
+        },
+        {
+          "level": 2,
+          "title": "If any of the above steps failed, the validator should stop and output the ''inconclusive'' state.",
+          "line": 264
+        },
+        {
+          "level": 1,
+          "title": "Let ''T'' be the nLockTime of <code>to_sign</code> and ''S'' be the nSequence of the first input of <code>to_sign</code>. Output the state ''valid at time T and age S''.",
+          "line": 265
+        },
+        {
+          "level": 2,
+          "title": "For ''full Proof of Funds'' signatures, a validator MAY additionally report any non-zero nSequence values on the Proof of Funds inputs (i.e., <code>vin[1..n]</code>), and MAY verify them against the current chain state when the UTXO set is available; such checks are advisory and do not affect the output state.",
+          "line": 266
+        },
+        {
+          "level": 3,
+          "title": "Signing",
+          "line": 269
+        },
+        {
+          "level": 3,
+          "title": "PSBT-based signing",
+          "line": 310
+        },
+        {
+          "level": 3,
+          "title": "PSBT creator",
+          "line": 342
+        },
+        {
+          "level": 3,
+          "title": "PSBT signer",
+          "line": 387
+        },
+        {
+          "level": 3,
+          "title": "PSBT finalizer",
+          "line": 442
+        },
+        {
+          "level": 2,
+          "title": "Compatibility",
+          "line": 459
+        },
+        {
+          "level": 2,
+          "title": "Reference implementation",
+          "line": 466
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgements",
+          "line": 478
+        },
+        {
+          "level": 2,
+          "title": "References",
+          "line": 483
+        },
+        {
+          "level": 2,
+          "title": "Changelog",
+          "line": 492
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 504
+        },
+        {
+          "level": 2,
+          "title": "Test vectors",
+          "line": 508
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/322/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0322.mediawiki"
+    },
+    {
+      "number": 324,
+      "path": "bip-0324.mediawiki",
+      "headersRaw": {
+        "BIP": "324",
+        "Layer": "Peer Services",
+        "Title": "Version 2 P2P Encrypted Transport Protocol",
+        "Authors": "Dhruv Mehta <dhruv@bip324.com>\nTim Ruffing <crypto@timruffing.de>\nJonas Schnelli <dev@jonasschnelli.ch>\nPieter Wuille <bitcoin-dev@wuille.net>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2019-03-08",
+        "License": "BSD-3-Clause",
+        "Version": "1.0.2",
+        "Replaces": "151"
+      },
+      "title": "Version 2 P2P Encrypted Transport Protocol",
+      "authorsRaw": "Dhruv Mehta <dhruv@bip324.com>\nTim Ruffing <crypto@timruffing.de>\nJonas Schnelli <dev@jonasschnelli.ch>\nPieter Wuille <bitcoin-dev@wuille.net>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2019-03-08",
+      "licenseRaw": "BSD-3-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        14
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Introduction",
+          "line": 17
+        },
+        {
+          "level": 3,
+          "title": "Abstract",
+          "line": 19
+        },
+        {
+          "level": 3,
+          "title": "Copyright",
+          "line": 22
+        },
+        {
+          "level": 3,
+          "title": "Motivation",
+          "line": 25
+        },
+        {
+          "level": 2,
+          "title": "Goals",
+          "line": 77
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 90
+        },
+        {
+          "level": 3,
+          "title": "Transport layer specification",
+          "line": 98
+        },
+        {
+          "level": 4,
+          "title": "Overview and design",
+          "line": 102
+        },
+        {
+          "level": 1,
+          "title": "The '''Key exchange phase''', where nodes exchange data to establish shared secrets.",
+          "line": 110
+        },
+        {
+          "level": 1,
+          "title": "The '''Version negotiation phase''', where parties negotiate what transport version they will use, as well as data defined by that version.<ref name=\"example_versions\">'''What features could be added in future protocol versions?''' Examples of features that could be added in future versions include post-quantum cryptography upgrades to the handshake, and optional authentication.</ref>",
+          "line": 128
+        },
+        {
+          "level": 1,
+          "title": "The '''Application phase''', where the packets exchanged have contents to be interpreted as application data.",
+          "line": 136
+        },
+        {
+          "level": 4,
+          "title": "Handshake: key exchange and version negotiation",
+          "line": 176
+        },
+        {
+          "level": 5,
+          "title": "Shared secret computation",
+          "line": 209
+        },
+        {
+          "level": 5,
+          "title": "ElligatorSwift encoding of curve X coordinates",
+          "line": 226
+        },
+        {
+          "level": 5,
+          "title": "Keys and session ID derivation",
+          "line": 290
+        },
+        {
+          "level": 5,
+          "title": "Overall handshake pseudocode",
+          "line": 331
+        },
+        {
+          "level": 4,
+          "title": "Packet encryption",
+          "line": 396
+        },
+        {
+          "level": 5,
+          "title": "Existing cryptographic primitives",
+          "line": 400
+        },
+        {
+          "level": 5,
+          "title": "Rekeying wrappers: FSChaCha20Poly1305 and FSChaCha20",
+          "line": 412
+        },
+        {
+          "level": 5,
+          "title": "Overall packet encryption and decryption pseudocode",
+          "line": 480
+        },
+        {
+          "level": 4,
+          "title": "Performance",
+          "line": 517
+        },
+        {
+          "level": 3,
+          "title": "Application layer specification",
+          "line": 521
+        },
+        {
+          "level": 4,
+          "title": "v2 Bitcoin P2P message structure",
+          "line": 522
+        },
+        {
+          "level": 3,
+          "title": "Signaling specification",
+          "line": 579
+        },
+        {
+          "level": 4,
+          "title": "Signaling v2 support",
+          "line": 580
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 584
+        },
+        {
+          "level": 2,
+          "title": "Changelog",
+          "line": 591
+        },
+        {
+          "level": 2,
+          "title": "Rationale and References",
+          "line": 600
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgements",
+          "line": 603
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/324/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0324.mediawiki"
+    },
+    {
+      "number": 327,
+      "path": "bip-0327.mediawiki",
+      "headersRaw": {
+        "BIP": "327",
+        "Title": "MuSig2 for BIP340-compatible Multi-Signatures",
+        "Authors": "Jonas Nick <jonasd.nick@gmail.com>\nTim Ruffing <crypto@timruffing.de>\nElliott Jin <elliott.jin@gmail.com>",
+        "Status": "Deployed",
+        "Type": "Informational",
+        "Assigned": "2022-03-22",
+        "License": "BSD-3-Clause",
+        "Discussion": "2022-04-05: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2022-April/020198.html [bitcoin-dev] MuSig2 BIP\n2022-10-11: https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2022-October/021000.html [bitcoin-dev] MuSig2 BIP",
+        "Version": "1.0.4"
+      },
+      "title": "MuSig2 for BIP340-compatible Multi-Signatures",
+      "authorsRaw": "Jonas Nick <jonasd.nick@gmail.com>\nTim Ruffing <crypto@timruffing.de>\nElliott Jin <elliott.jin@gmail.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Informational",
+      "assignedOrCreatedRaw": "2022-03-22",
+      "licenseRaw": "BSD-3-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        13
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Introduction",
+          "line": 16
+        },
+        {
+          "level": 3,
+          "title": "Abstract",
+          "line": 18
+        },
+        {
+          "level": 3,
+          "title": "Copyright",
+          "line": 24
+        },
+        {
+          "level": 3,
+          "title": "Motivation",
+          "line": 28
+        },
+        {
+          "level": 3,
+          "title": "Design",
+          "line": 50
+        },
+        {
+          "level": 2,
+          "title": "Overview",
+          "line": 61
+        },
+        {
+          "level": 3,
+          "title": "Optionality of Features",
+          "line": 65
+        },
+        {
+          "level": 3,
+          "title": "General Signing Flow",
+          "line": 78
+        },
+        {
+          "level": 3,
+          "title": "Public Key Aggregation",
+          "line": 106
+        },
+        {
+          "level": 3,
+          "title": "Nonce Generation",
+          "line": 133
+        },
+        {
+          "level": 3,
+          "title": "Identifying Disruptive Signers",
+          "line": 163
+        },
+        {
+          "level": 4,
+          "title": "Further Remarks",
+          "line": 176
+        },
+        {
+          "level": 3,
+          "title": "Tweaking the Aggregate Public Key",
+          "line": 187
+        },
+        {
+          "level": 2,
+          "title": "Algorithms",
+          "line": 207
+        },
+        {
+          "level": 3,
+          "title": "Notation",
+          "line": 213
+        },
+        {
+          "level": 3,
+          "title": "Key Generation and Aggregation",
+          "line": 251
+        },
+        {
+          "level": 4,
+          "title": "Key Generation of an Individual Signer",
+          "line": 253
+        },
+        {
+          "level": 4,
+          "title": "KeyAgg Context",
+          "line": 264
+        },
+        {
+          "level": 4,
+          "title": "Key Sorting",
+          "line": 285
+        },
+        {
+          "level": 4,
+          "title": "Key Aggregation",
+          "line": 295
+        },
+        {
+          "level": 4,
+          "title": "Applying Tweaks",
+          "line": 340
+        },
+        {
+          "level": 3,
+          "title": "Nonce Generation",
+          "line": 361
+        },
+        {
+          "level": 3,
+          "title": "Nonce Aggregation",
+          "line": 393
+        },
+        {
+          "level": 3,
+          "title": "Session Context",
+          "line": 407
+        },
+        {
+          "level": 3,
+          "title": "Signing",
+          "line": 446
+        },
+        {
+          "level": 3,
+          "title": "Partial Signature Verification",
+          "line": 473
+        },
+        {
+          "level": 3,
+          "title": "Partial Signature Aggregation",
+          "line": 508
+        },
+        {
+          "level": 3,
+          "title": "Test Vectors and Reference Code",
+          "line": 524
+        },
+        {
+          "level": 2,
+          "title": "Remarks on Security and Correctness",
+          "line": 532
+        },
+        {
+          "level": 3,
+          "title": "Signing with Tweaked Individual Keys",
+          "line": 534
+        },
+        {
+          "level": 3,
+          "title": "Modifications to Nonce Generation",
+          "line": 575
+        },
+        {
+          "level": 4,
+          "title": "Deterministic and Stateless Signing for a Single Signer",
+          "line": 601
+        },
+        {
+          "level": 3,
+          "title": "Tweaking Definition",
+          "line": 636
+        },
+        {
+          "level": 3,
+          "title": "Negation Of The Secret Key When Signing",
+          "line": 653
+        },
+        {
+          "level": 4,
+          "title": "Negation Of The Individual Public Key When Partially Verifying",
+          "line": 715
+        },
+        {
+          "level": 3,
+          "title": "Dealing with Infinity in Nonce Aggregation",
+          "line": 736
+        },
+        {
+          "level": 3,
+          "title": "Choosing the Size of the Nonce",
+          "line": 753
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 772
+        },
+        {
+          "level": 2,
+          "title": "Changelog",
+          "line": 777
+        },
+        {
+          "level": 2,
+          "title": "Footnotes",
+          "line": 828
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgements",
+          "line": 832
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/327/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0327.mediawiki"
+    },
+    {
+      "number": 352,
+      "path": "bip-0352.mediawiki",
+      "headersRaw": {
+        "BIP": "352",
+        "Layer": "Applications",
+        "Title": "Silent Payments",
+        "Authors": "josibake <josibake@protonmail.com>\nRuben Somsen <rsomsen@gmail.com>\nSebastian Falbesoner <sebastian.falbesoner@gmail.com>",
+        "Status": "Complete",
+        "Type": "Specification",
+        "Assigned": "2023-03-09",
+        "License": "BSD-2-Clause",
+        "Discussion": "2022-03-13: https://gist.github.com/RubenSomsen/c43b79517e7cb701ebf77eec6dbb46b8 [gist] Original proposal\n2022-03-28: https://gnusha.org/pi/bitcoindev/CAPv7TjbXm953U2h+-12MfJ24YqOM5Kcq77_xFTjVK+R2nf-nYg@mail.gmail.com/ [bitcoin-dev] Silent Payments \u2013 Non-interactive private payments with no on-chain overhead\n2022-10-11: https://gnusha.org/pi/bitcoindev/P_21MLHGJicZ-hkbC4DGu86c5BtNKiH8spY4TOw5FJsfimdi_6VyHzU_y-s1mZsOcC2FA3EW_6w6W5qfV9dRK_7AvTAxDlwVfU-yhWZPEuo=@protonmail.com/ [bitcoin-dev] Silent Payment v4 (coinjoin support added)\n2023-08-04: https://gnusha.org/pi/bitcoindev/ZM03twumu88V2NFH@petertodd.org/ [bitcoin-dev] BIP-352 Silent Payments addresses should have an expiration time",
+        "Version": "1.1.1",
+        "Requires": "340, 341, 350"
+      },
+      "title": "Silent Payments",
+      "authorsRaw": "josibake <josibake@protonmail.com>\nRuben Somsen <rsomsen@gmail.com>\nSebastian Falbesoner <sebastian.falbesoner@gmail.com>",
+      "statusRaw": "Complete",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2023-03-09",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        17
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Introduction",
+          "line": 20
+        },
+        {
+          "level": 3,
+          "title": "Abstract",
+          "line": 22
+        },
+        {
+          "level": 3,
+          "title": "Copyright",
+          "line": 26
+        },
+        {
+          "level": 3,
+          "title": "Motivation",
+          "line": 30
+        },
+        {
+          "level": 2,
+          "title": "Goals",
+          "line": 40
+        },
+        {
+          "level": 2,
+          "title": "Overview",
+          "line": 57
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 136
+        },
+        {
+          "level": 3,
+          "title": "Versions",
+          "line": 147
+        },
+        {
+          "level": 3,
+          "title": "Scanning silent payment eligible transactions",
+          "line": 189
+        },
+        {
+          "level": 3,
+          "title": "Address encoding",
+          "line": 197
+        },
+        {
+          "level": 3,
+          "title": "Inputs For Shared Secret Derivation",
+          "line": 223
+        },
+        {
+          "level": 3,
+          "title": "Sender",
+          "line": 285
+        },
+        {
+          "level": 4,
+          "title": "Selecting inputs",
+          "line": 287
+        },
+        {
+          "level": 4,
+          "title": "Creating outputs",
+          "line": 295
+        },
+        {
+          "level": 3,
+          "title": "Receiver",
+          "line": 322
+        },
+        {
+          "level": 4,
+          "title": "Key Derivation",
+          "line": 324
+        },
+        {
+          "level": 4,
+          "title": "Scanning",
+          "line": 335
+        },
+        {
+          "level": 4,
+          "title": "Spending",
+          "line": 364
+        },
+        {
+          "level": 4,
+          "title": "Backup and Recovery",
+          "line": 371
+        },
+        {
+          "level": 2,
+          "title": "Backward Compatibility",
+          "line": 377
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 381
+        },
+        {
+          "level": 3,
+          "title": "Functional tests",
+          "line": 444
+        },
+        {
+          "level": 4,
+          "title": "Sending",
+          "line": 448
+        },
+        {
+          "level": 4,
+          "title": "Receiving",
+          "line": 453
+        },
+        {
+          "level": 2,
+          "title": "Appendix A: Light Client Support",
+          "line": 459
+        },
+        {
+          "level": 3,
+          "title": "Tweak Data",
+          "line": 465
+        },
+        {
+          "level": 3,
+          "title": "Transaction cut-through",
+          "line": 471
+        },
+        {
+          "level": 3,
+          "title": "BIP158",
+          "line": 477
+        },
+        {
+          "level": 3,
+          "title": "Out-of-band notifications",
+          "line": 481
+        },
+        {
+          "level": 2,
+          "title": "Changelog",
+          "line": 501
+        },
+        {
+          "level": 2,
+          "title": "Acknowledgements",
+          "line": 519
+        },
+        {
+          "level": 2,
+          "title": "Rationale and References",
+          "line": 523
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/352/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0352.mediawiki"
+    },
+    {
+      "number": 380,
+      "path": "bip-0380.mediawiki",
+      "headersRaw": {
+        "BIP": "380",
+        "Layer": "Applications",
+        "Title": "Output Script Descriptors General Operation",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause"
+      },
+      "title": "Output Script Descriptors General Operation",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        10
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 13
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 19
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 23
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 45
+        },
+        {
+          "level": 3,
+          "title": "Script Expressions",
+          "line": 52
+        },
+        {
+          "level": 3,
+          "title": "Key Expressions",
+          "line": 63
+        },
+        {
+          "level": 4,
+          "title": "Normalization of Key Expressions with Hardened Derivation",
+          "line": 91
+        },
+        {
+          "level": 3,
+          "title": "Character Set",
+          "line": 99
+        },
+        {
+          "level": 3,
+          "title": "Checksum",
+          "line": 115
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 200
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 258
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 266
+        },
+        {
+          "level": 2,
+          "title": "Appendix A: Index of Expressions",
+          "line": 270
+        },
+        {
+          "level": 2,
+          "title": "Appendix B: Index of Script Expressions",
+          "line": 297
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/380/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0380.mediawiki"
+    },
+    {
+      "number": 381,
+      "path": "bip-0381.mediawiki",
+      "headersRaw": {
+        "BIP": "381",
+        "Layer": "Applications",
+        "Title": "Non-Segwit Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "Non-Segwit Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 21
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 25
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 30
+        },
+        {
+          "level": 3,
+          "title": "<tt>pk()</tt>",
+          "line": 34
+        },
+        {
+          "level": 3,
+          "title": "<tt>pkh()</tt>",
+          "line": 46
+        },
+        {
+          "level": 3,
+          "title": "<tt>sh()</tt>",
+          "line": 58
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 70
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 116
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 122
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/381/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0381.mediawiki"
+    },
+    {
+      "number": 382,
+      "path": "bip-0382.mediawiki",
+      "headersRaw": {
+        "BIP": "382",
+        "Layer": "Applications",
+        "Title": "Segwit Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "Segwit Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 20
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 24
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 29
+        },
+        {
+          "level": 3,
+          "title": "<tt>wpkh()</tt>",
+          "line": 33
+        },
+        {
+          "level": 3,
+          "title": "<tt>wsh()</tt>",
+          "line": 44
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 57
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 106
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 112
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/382/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0382.mediawiki"
+    },
+    {
+      "number": 383,
+      "path": "bip-0383.mediawiki",
+      "headersRaw": {
+        "BIP": "383",
+        "Layer": "Applications",
+        "Title": "Multisig Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "Multisig Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 20
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 24
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 29
+        },
+        {
+          "level": 3,
+          "title": "<tt>sortedmulti()</tt>",
+          "line": 58
+        },
+        {
+          "level": 3,
+          "title": "Multiple Extended Keys",
+          "line": 63
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 68
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 102
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 108
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/383/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0383.mediawiki"
+    },
+    {
+      "number": 384,
+      "path": "bip-0384.mediawiki",
+      "headersRaw": {
+        "BIP": "384",
+        "Layer": "Applications",
+        "Title": "combo() Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "combo() Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 19
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 23
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 27
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 35
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 70
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 76
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/384/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0384.mediawiki"
+    },
+    {
+      "number": 385,
+      "path": "bip-0385.mediawiki",
+      "headersRaw": {
+        "BIP": "385",
+        "Layer": "Applications",
+        "Title": "raw() and addr() Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "raw() and addr() Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 20
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 24
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 28
+        },
+        {
+          "level": 3,
+          "title": "<tt>raw()</tt>",
+          "line": 32
+        },
+        {
+          "level": 3,
+          "title": "<tt>addr()</tt>",
+          "line": 38
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 44
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 66
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 72
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/385/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0385.mediawiki"
+    },
+    {
+      "number": 386,
+      "path": "bip-0386.mediawiki",
+      "headersRaw": {
+        "BIP": "386",
+        "Layer": "Applications",
+        "Title": "tr() Output Script Descriptors",
+        "Authors": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+        "Status": "Deployed",
+        "Type": "Specification",
+        "Assigned": "2021-06-27",
+        "License": "BSD-2-Clause",
+        "Requires": "380"
+      },
+      "title": "tr() Output Script Descriptors",
+      "authorsRaw": "Pieter Wuille <pieter@wuille.net>\nAva Chow <me@achow101.com>",
+      "statusRaw": "Deployed",
+      "typeRaw": "Specification",
+      "assignedOrCreatedRaw": "2021-06-27",
+      "licenseRaw": "BSD-2-Clause",
+      "licenseReviewRequired": false,
+      "preambleLines": [
+        2,
+        11
+      ],
+      "headingCandidates": [
+        {
+          "level": 2,
+          "title": "Abstract",
+          "line": 14
+        },
+        {
+          "level": 2,
+          "title": "Copyright",
+          "line": 19
+        },
+        {
+          "level": 2,
+          "title": "Motivation",
+          "line": 23
+        },
+        {
+          "level": 2,
+          "title": "Specification",
+          "line": 28
+        },
+        {
+          "level": 3,
+          "title": "Tree Expression",
+          "line": 33
+        },
+        {
+          "level": 3,
+          "title": "<tt>tr()</tt>",
+          "line": 47
+        },
+        {
+          "level": 3,
+          "title": "Modified Key Expression",
+          "line": 75
+        },
+        {
+          "level": 2,
+          "title": "Test Vectors",
+          "line": 84
+        },
+        {
+          "level": 2,
+          "title": "Backwards Compatibility",
+          "line": 109
+        },
+        {
+          "level": 2,
+          "title": "Reference Implementation",
+          "line": 120
+        }
+      ],
+      "bodyParsing": "raw-preserved; heading candidates only, not a complete AST",
+      "readerUrl": "https://bips.dev/386/",
+      "canonicalUrl": "https://github.com/bitcoin/bips/blob/3a10b5b5f0a7586df8928d580a3009744ebb2079/bip-0386.mediawiki"
+    }
+  ],
+  "files": [
+    {
+      "path": "bip-0008.mediawiki",
+      "gitBlob": "91379f039894fe16182c66de588565f3bad678ed",
+      "sha256": "e86abe98ea522c919377db46206fac2bbb34c007c67ddbb2f92bcab9d2d617a2",
+      "bytes": 18814
+    },
+    {
+      "path": "bip-0008/assignments.mediawiki",
+      "gitBlob": "c18751b69cc297736996f171fe551ff599d58112",
+      "sha256": "41bdaa7198cba8652e6e800c837443a899e7a264bef9a7d21f45f790c459be13",
+      "bytes": 96
+    },
+    {
+      "path": "bip-0008/states.dot",
+      "gitBlob": "861597876956ac1aed7ee4f922ef17149c9f0a18",
+      "sha256": "3bd62dbee6f4165371c1a5225e25ae3132281fc904be14379065f7798a45ad83",
+      "bytes": 1145
+    },
+    {
+      "path": "bip-0008/states.png",
+      "gitBlob": "f15efdbc17c3319e54b089863cef649ef8d5df3c",
+      "sha256": "170fcce03439cbe7079bf05b541b286f1d4913488e15296749b653658c72c6be",
+      "bytes": 60743
+    },
+    {
+      "path": "bip-0008/states.svg",
+      "gitBlob": "63fe634d8e220fff1def0f06da90791662f7c968",
+      "sha256": "51b2aa65ba27ae3cc37d4455b7a45e1c105e94e5a25c6fd1a2e814624005b504",
+      "bytes": 8598
+    },
+    {
+      "path": "bip-0009.mediawiki",
+      "gitBlob": "ca6db79568ff6787a977c269c01429ee3bac0743",
+      "sha256": "0ffa7b1ad84e1f32c7499d8a8756721c737037cbc91c825d05d11640ed5fedda",
+      "bytes": 14058
+    },
+    {
+      "path": "bip-0009/assignments.mediawiki",
+      "gitBlob": "c6a8f0027e6f4e33e479449732b81b9dee80fd0e",
+      "sha256": "cb88b4b47c8bcdd375b6c9f9309410218ef7ea2f89a5b185fbe0405011f3db58",
+      "bytes": 728
+    },
+    {
+      "path": "bip-0009/states.gv",
+      "gitBlob": "9dc95c56e3554cc33eb4f26b4a23504635dcd4ab",
+      "sha256": "1c3782e5d80dd34673440930f0dc28eefa0955ac461d866bd85e55ea4e64826d",
+      "bytes": 686
+    },
+    {
+      "path": "bip-0009/states.png",
+      "gitBlob": "2048ed870df296d86bef1145b1f10aa980801c8f",
+      "sha256": "ebe189eb21fdeba3b8aab83f35829776354a39739b848b237f1349bedc01c5d5",
+      "bytes": 50153
+    },
+    {
+      "path": "bip-0016.mediawiki",
+      "gitBlob": "21d0e32278fd9ad6bbd049e0836526755d155e3d",
+      "sha256": "9f89c0731bd718ae084802c897c95eb6f85ed2730d01fbc3233ee963b4679feb",
+      "bytes": 8795
+    },
+    {
+      "path": "bip-0016/qa.mediawiki",
+      "gitBlob": "1edf28e5b96d9c22c189ac2de15e2db6a0928e6f",
+      "sha256": "2f9c340c45166896bf668ed7eaa8fea0e32fea0afbff78e1dd673c5a24ceddc7",
+      "bytes": 8789
+    },
+    {
+      "path": "bip-0044.mediawiki",
+      "gitBlob": "a94efba2ec6f8479c7a16d5dded12572be066c28",
+      "sha256": "6a541c79f94077ac529941a8cbd373ce077a5d6e97b6dd8209b45ac10f737eaf",
+      "bytes": 6710
+    },
+    {
+      "path": "bip-0065.mediawiki",
+      "gitBlob": "4bd292f8b45a2b2b68013b24f45c23e354b70e4f",
+      "sha256": "717400aef7789a795bbc86a67e0f40ea94966aea13975052e1fc31a047207399",
+      "bytes": 13054
+    },
+    {
+      "path": "bip-0068.mediawiki",
+      "gitBlob": "5b4c6d66311a28325cd5cb27f4977f1c137dc6ad",
+      "sha256": "ec5a50cc66fff7b4e4bc1f2e24587d7876649d1b5329ef73ffa2e5a3f647281b",
+      "bytes": 14055
+    },
+    {
+      "path": "bip-0068/encoding.png",
+      "gitBlob": "cd7649e0a9c3a29130d51d98f7c7addd9653090c",
+      "sha256": "0b52e44452aeb7e45d3cd6ad99a4d017ae95fb12f47af3ddc3e3bdaa50813659",
+      "bytes": 6311
+    },
+    {
+      "path": "bip-0084.mediawiki",
+      "gitBlob": "f266a1455317e3cfb69e477f24fe9f23577a5433",
+      "sha256": "1900feec6cafca65b8c09906ca0658d2d742b4c9b44cb15678996985b6bfe627",
+      "bytes": 4648
+    },
+    {
+      "path": "bip-0086.mediawiki",
+      "gitBlob": "43c692a56e68913827a99b99964c35814cce121c",
+      "sha256": "d8d01dee331da07c2562615bc1f064c1868ec3fce61184973da76d1196c7f5b0",
+      "bytes": 5896
+    },
+    {
+      "path": "bip-0112.mediawiki",
+      "gitBlob": "085ec730fc46079c72a2931049fcd0e8d7157651",
+      "sha256": "61022872545daeb779ef5d38f769d7a155c0f85333653b20c83b0a2329b523c4",
+      "bytes": 16727
+    },
+    {
+      "path": "bip-0113.mediawiki",
+      "gitBlob": "5ae089682ec3729854e9808591a4e505a7046ed7",
+      "sha256": "f0643ba529837a673015a37287c21972bfa24cebfdc67e2844c6ad8d51d1ea69",
+      "bytes": 4656
+    },
+    {
+      "path": "bip-0157.mediawiki",
+      "gitBlob": "8b8d3bac250ea77c56addf4788f4dda479d304e9",
+      "sha256": "5405acbf04ebd8a1b92ae2b7188022f4c14723ed8a0ae0d077d12a1e6908da9a",
+      "bytes": 21050
+    },
+    {
+      "path": "bip-0158.mediawiki",
+      "gitBlob": "9456809fbc24ed8399c46a868b1627def270ecb3",
+      "sha256": "93a560d966852e081f5e7894f43eddae55ac471ff8bcb99d93eae73f5a859954",
+      "bytes": 16770
+    },
+    {
+      "path": "bip-0158/gentestvectors.go",
+      "gitBlob": "46d9678f621bd348b8161bf12990c1459b6c43d9",
+      "sha256": "1ccc8a0b13b7726fca9953514ffc9af595896e472491fa2fd66840ca34353ced",
+      "bytes": 7179
+    },
+    {
+      "path": "bip-0158/go.mod",
+      "gitBlob": "0e9bd6e1c6fe539f5553f910d4dfc89e987140fb",
+      "sha256": "1fb90c118bdb991616317cdb868c63d98cf3be204349a7effdbde9ee0cbe5abd",
+      "bytes": 213
+    },
+    {
+      "path": "bip-0158/go.sum",
+      "gitBlob": "013eb4b3d088171f3a02f50ebb4c65484b0fc22f",
+      "sha256": "e8391b6971e67513da89a25e5d4a02ee53c3cef87273a05694cb196bc021371d",
+      "bytes": 5337
+    },
+    {
+      "path": "bip-0158/testnet-19.json",
+      "gitBlob": "8945296a079b984d65b0aeb4a3e9b0798df075e0",
+      "sha256": "d9049756f744e561b882a8eff507582fb7cd74ed9cf5542bdac58257449ee2a2",
+      "bytes": 17816
+    },
+    {
+      "path": "bip-0322.mediawiki",
+      "gitBlob": "66fd047f6783c76e9e6ec938218349f4fb967c60",
+      "sha256": "0eb91c5093ef81c462cadffdbe02d4d1638cb270d3ccb47301a6d82860aa0454",
+      "bytes": 21361
+    },
+    {
+      "path": "bip-0322/basic-test-vectors.json",
+      "gitBlob": "f32a5bf45ae8b19ca33d0763669f5718879c82f4",
+      "sha256": "a9184da5687b9cb7a1863807f4a8f4d743ec07d4f683f707cb85ce72f5b33f47",
+      "bytes": 6895
+    },
+    {
+      "path": "bip-0322/generated-test-vectors.json",
+      "gitBlob": "4677eea4544b9fef4814c85640ff109a4d887264",
+      "sha256": "187205f77b4a639f8d7e9a8e9d9070204a4c6658cf925569001b4d15f02a6539",
+      "bytes": 35017
+    },
+    {
+      "path": "bip-0324.mediawiki",
+      "gitBlob": "2b3caff37f5b589d7d42eba0eaf36c42eab332c5",
+      "sha256": "14de484a709946348effa8264991cf124a34ecdaf0a3f9d68a42313287625ad8",
+      "bytes": 67644
+    },
+    {
+      "path": "bip-0324/ellswift_decode_test_vectors.csv",
+      "gitBlob": "1bab96b721e2f3ab90142c318523551eb520f753",
+      "sha256": "a238a66b093bed3c571d5b57cb2bb1f69487788f0f872f7ea7501b5b98be20b0",
+      "bytes": 17323
+    },
+    {
+      "path": "bip-0324/garbage_terminator.png",
+      "gitBlob": "536763e4a9ccc8931aad8e76bc8c017e07282ee0",
+      "sha256": "975e74a7bf7d5acb8987810450d9f29f4565128d0d67ef8ab43c1ad29eb67d30",
+      "bytes": 267163
+    },
+    {
+      "path": "bip-0324/gen_test_vectors.py",
+      "gitBlob": "a9f4de5b9e7b88e70ef2a8b9522d2e72eea0c479",
+      "sha256": "758b46397d8d8d48dfea01f29f45c1eb6d3353e3e11b1ef84fe71c51c65a47f2",
+      "bytes": 17279
+    },
+    {
+      "path": "bip-0324/message_type_ids.md",
+      "gitBlob": "4ececd208b32c7fb2e19f293854e9fc8e72cedb2",
+      "sha256": "e961c04b487c516a997aa5004a692d445a60e19d8c258a8f80ee64a32fcd9c53",
+      "bytes": 1361
+    },
+    {
+      "path": "bip-0324/packet_encoding_test_vectors.csv",
+      "gitBlob": "1588b066b4792d0b03f30d4f7f18e57ccde1f525",
+      "sha256": "61704507945e2fa99e6c799fab888593eb7a2c3d2018f42ee4a3c3abe0684269",
+      "bytes": 18133
+    },
+    {
+      "path": "bip-0324/reference.py",
+      "gitBlob": "44f4c77465e21470b67ea8cc46e3e816c9289e47",
+      "sha256": "cb074b4e64bcb096ff4a2f1ee3a0580c383bb1d02662b7dccdd4968bc6b7af4f",
+      "bytes": 23049
+    },
+    {
+      "path": "bip-0324/run_test_vectors.py",
+      "gitBlob": "8e4b8f255b24cfc30f1308018047c00a895986ee",
+      "sha256": "d8e32dfb863a17b35e8931c7b029898c5174df0054f059c626d3f48b50688517",
+      "bytes": 3536
+    },
+    {
+      "path": "bip-0324/secp256k1_test_vectors.py",
+      "gitBlob": "57ae801cc7efe884aa9c109e3c06bc9b9555b365",
+      "sha256": "f36d0ddf052ab43cc4c3f4b8ee672dfe74794ac5eef0d4bdf27b21495ee33d19",
+      "bytes": 2119
+    },
+    {
+      "path": "bip-0324/test_sage_decoding.py",
+      "gitBlob": "1ec5fdf45a20aa70d1314443448548843f1aabb2",
+      "sha256": "7bfc7cef9a722c54ea7f4ae12d5893aed5ee9121994eb901defb924c74def42f",
+      "bytes": 2470
+    },
+    {
+      "path": "bip-0324/xswiftec_inv_test_vectors.csv",
+      "gitBlob": "138c4cf85c040785a45c6552c0169c8c12fd3cfc",
+      "sha256": "b5e8e0e9edfdee14c3ec4db3c6763543a9f17290a84a93de0ae2671c16f4432a",
+      "bytes": 16029
+    },
+    {
+      "path": "bip-0327.mediawiki",
+      "gitBlob": "117d6c7b6363514723928655fed2aabf75f18dfc",
+      "sha256": "918555f9d67bf4c1124b004f43e7cfa2436570ce46466f06f83f836f58e8ff7c",
+      "bytes": 69444
+    },
+    {
+      "path": "bip-0327/gen_vectors_helper.py",
+      "gitBlob": "03c2dbb2acb7da6ef24ce6bc83472cdd853e0b87",
+      "sha256": "a0acbbacc9c7c1c354923d6bc7bed4ae9d32fae23fcc269c5392f531d8f3f098",
+      "bytes": 7420
+    },
+    {
+      "path": "bip-0327/reference.py",
+      "gitBlob": "7ed94174d97c5d4df907a0214a7778532e787993",
+      "sha256": "1167993fe159c39c004f74d9046e931ae700a2ce9203c4cf58a51a000c1294e8",
+      "bytes": 34695
+    },
+    {
+      "path": "bip-0327/tests.sh",
+      "gitBlob": "b363f40bbd93f2786d6420f573f4d85594fb231b",
+      "sha256": "637414de0197e5f4e7062e9b52c3d7dea4a74484b08f54523829ae3b6432ee45",
+      "bytes": 140
+    },
+    {
+      "path": "bip-0327/vectors/det_sign_vectors.json",
+      "gitBlob": "261669ccd01cd4098fa97045f3d32654f64a48af",
+      "sha256": "3d4fdb64b24e31762f20830036dc0c59d39fa896649131b54b87906ffdc6e9e8",
+      "bytes": 6932
+    },
+    {
+      "path": "bip-0327/vectors/key_agg_vectors.json",
+      "gitBlob": "b2e623de60f302c4004a6d656581bdba1f4e1e05",
+      "sha256": "03c02a97e4ef3f2edfbc8e6013c127496dfcfd5889cfca60ddf009a4e9091cab",
+      "bytes": 3018
+    },
+    {
+      "path": "bip-0327/vectors/key_sort_vectors.json",
+      "gitBlob": "de088a746e27953614b9f5394553911fb2c86d59",
+      "sha256": "2389fa0c146cfd7455c643ca240ec32835dcfc916f430f50dd94d0b49c9ea16c",
+      "bytes": 992
+    },
+    {
+      "path": "bip-0327/vectors/nonce_agg_vectors.json",
+      "gitBlob": "1c04b8818f340a5fe2e10eaf73c17a2c9e020f46",
+      "sha256": "8409e87b81ea769759598ad3ce53b277a78afffb3a490a86ce02c4d69984524b",
+      "bytes": 2627
+    },
+    {
+      "path": "bip-0327/vectors/nonce_gen_vectors.json",
+      "gitBlob": "ced946f3efd9f80cb1a3819939f2b39de2061e42",
+      "sha256": "2e823580fc072427f0db0f000212cc9124ad2b9dca2b58357eb65088aee4358d",
+      "bytes": 3533
+    },
+    {
+      "path": "bip-0327/vectors/sig_agg_vectors.json",
+      "gitBlob": "519562c343b6e4bf686ba6e3eda8cee5c8e8b55d",
+      "sha256": "15f14c034fb2a5739d7ce638be94c5b37ea675a2e01159092dd93b59d69c3439",
+      "bytes": 5978
+    },
+    {
+      "path": "bip-0327/vectors/sign_verify_vectors.json",
+      "gitBlob": "f71c8dd9d935c8c5f398e6a3888943e1e68b729d",
+      "sha256": "692eecc101f3e515c29137f05031935e1210d2a01bab91e674eb0234f095c15c",
+      "bytes": 8857
+    },
+    {
+      "path": "bip-0327/vectors/tweak_vectors.json",
+      "gitBlob": "d0a7cfe832bfe22375af0d64cd5d0dbb350592e0",
+      "sha256": "80ce6385ce062644ad1f4edcb9d4797f70ddb0b74769e4099f51b3c9e6ab4aff",
+      "bytes": 4032
+    },
+    {
+      "path": "bip-0352.mediawiki",
+      "gitBlob": "a369555d831ae5b409eb5dfa8f12d17851703fef",
+      "sha256": "a64d3b9ecc004ea4ae4c168e4631571f16e35eaa66595599729c6c066de4cff4",
+      "bytes": 54301
+    },
+    {
+      "path": "bip-0352/bech32m.py",
+      "gitBlob": "795e1538639c40bce9dda854c9cc9d8b16622eb2",
+      "sha256": "b38e16a9a2f3960945773ccad020d15cd27dd1871c5a9dd26147a8fa9b14df5b",
+      "bytes": 4831
+    },
+    {
+      "path": "bip-0352/bitcoin_utils.py",
+      "gitBlob": "cfd6a8077b76d82570f7f9511140ca123b65960e",
+      "sha256": "80dd73fd9aafea15a37879124bafe4a59aa78f76de2d7d778ed0a62f2c49e7b5",
+      "bytes": 4332
+    },
+    {
+      "path": "bip-0352/reference.py",
+      "gitBlob": "c334d32899715655f37141548aa46693c2497c48",
+      "sha256": "ca44bd5826c238aa6385c65ba31dc5a09a37790eaf4ee75e12959a1d1353124a",
+      "bytes": 18465
+    },
+    {
+      "path": "bip-0352/ripemd160.py",
+      "gitBlob": "12801364b406a36679a4fd3d6abef74b67011fe9",
+      "sha256": "99da6dafa9804d3ca5490a736354027b10ec3d517206caad6ea28c0e097f6b9a",
+      "bytes": 5071
+    },
+    {
+      "path": "bip-0352/scan_data_downloader_per_month.png",
+      "gitBlob": "a672a91add714f825d4b2fd8e0f9cbd3cfcfe824",
+      "sha256": "0eb0ee76738dbd8cfec42ff3cf8b08dd909b78518220223de9bdb37bbb7ff852",
+      "bytes": 169753
+    },
+    {
+      "path": "bip-0352/secp256k1lab/.github/workflows/main.yml",
+      "gitBlob": "4950b965509551f5f6ed2b2c2b38695eb2187003",
+      "sha256": "62e69e97de8483a7111d4f62906635ad3508147633547b32f89e9fc3461a4bf3",
+      "bytes": 423
+    },
+    {
+      "path": "bip-0352/secp256k1lab/.python-version",
+      "gitBlob": "bd28b9c5c27e0dfa60da94179ec9b23f2be8be0c",
+      "sha256": "3ec15f7f82d24dbcd050ce11c3994d981499b029772da41c37a2cd0acce87f6e",
+      "bytes": 4
+    },
+    {
+      "path": "bip-0352/secp256k1lab/CHANGELOG.md",
+      "gitBlob": "15779717c4d8ddb0bbe37c9d1fce863276b1854a",
+      "sha256": "727edfd7a39390c5b4017c679511b553722ff494f7217f778ae64bc3dafd681b",
+      "bytes": 295
+    },
+    {
+      "path": "bip-0352/secp256k1lab/COPYING",
+      "gitBlob": "e8f21636419d7f5b12ab7c08f29dd1e2eec63562",
+      "sha256": "8f13f6dc042fbc546d7217ed87f1639a9f95ba8ba0248364899564c5d4f32576",
+      "bytes": 1190
+    },
+    {
+      "path": "bip-0352/secp256k1lab/README.md",
+      "gitBlob": "dbc9dbd04c7e862b24fb7f2355e41a60388857ba",
+      "sha256": "67dfa2abf53f970974cd9771725ff847af5be47885ecd135957671c09af59d8a",
+      "bytes": 588
+    },
+    {
+      "path": "bip-0352/secp256k1lab/pyproject.toml",
+      "gitBlob": "a0bdd19f42913a6636d69dd4e041716c8d3228b1",
+      "sha256": "8e0756324aa52b1d95586706eff41079ee10bd6335bef1e730d37a9a63bcffe2",
+      "bytes": 1276
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/__init__.py",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/bip340.py",
+      "gitBlob": "ba839d16e1845eb154a11b0a0f880565067f992a",
+      "sha256": "428ee8110175b32b67d22a88efe07a44cede2419d0f547949164f2a8f9d76b96",
+      "bytes": 2492
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/ecdh.py",
+      "gitBlob": "73f47fa1a735f341304636c4c02521ba2994935f",
+      "sha256": "8ee93a3442bce4c438bd6373565071a09fd7c1075e998b7e90b51ae17a8df0e1",
+      "bytes": 522
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/keys.py",
+      "gitBlob": "3e28897e99a900a6df6d85cc5d9d87eed7f577a0",
+      "sha256": "25a7c9d4d70dec7acea57245a529ef5f8454616d075a31fe27964d3e237c2860",
+      "bytes": 548
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/py.typed",
+      "gitBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/secp256k1.py",
+      "gitBlob": "6e262bf51e1023e95dfe00601b25eba2c8a4eafb",
+      "sha256": "3a3316ea6717f8dd6d89eb65e80a09265551955d5c9eb872fae3e12504cc63b0",
+      "bytes": 15741
+    },
+    {
+      "path": "bip-0352/secp256k1lab/src/secp256k1lab/util.py",
+      "gitBlob": "d8c744b795f8fd3f3ebb657bffaea9351c847dd3",
+      "sha256": "3aeccf814f0bd67cdfb0791a6bf054b367c580942acd44942fdf505e5a1af707",
+      "bytes": 645
+    },
+    {
+      "path": "bip-0352/send_and_receive_test_vectors.json",
+      "gitBlob": "3a189757ddbc90e5ec538d643f7ac238a51704e8",
+      "sha256": "f5f9ed4afd76a1b76f3c70b1cbe67532f89abbe559f8e02d7fc3d8ecb93af4a1",
+      "bytes": 418648
+    },
+    {
+      "path": "bip-0380.mediawiki",
+      "gitBlob": "88fd273a186a916a04ae3f3f48c2ba05396db494",
+      "sha256": "34e6510bb2eba9445a68eacf3d24d5a4e5f24481477488d5552f674ac81dd5fe",
+      "bytes": 19681
+    },
+    {
+      "path": "bip-0381.mediawiki",
+      "gitBlob": "b3ccf49abf79497eba495f42d73d759db046b139",
+      "sha256": "f0f6060332f82454f61015815c824eea4b7b6684ce4892ef42d23e4e782fa817",
+      "bytes": 6707
+    },
+    {
+      "path": "bip-0382.mediawiki",
+      "gitBlob": "aaad5426fb11c68df91272f4062183a551ecb52c",
+      "sha256": "6cd2574998ca0d2141d1c487e70da2dfab47abd6a2dfcc3680af2c241f01fe9d",
+      "bytes": 6541
+    },
+    {
+      "path": "bip-0383.mediawiki",
+      "gitBlob": "04e732756c934f234563127411048d289a5492b9",
+      "sha256": "c46f75e5869386c1852dd187725293822b9e3b761342a966fbcf99adaa112aa2",
+      "bytes": 12140
+    },
+    {
+      "path": "bip-0384.mediawiki",
+      "gitBlob": "8db844d02515aadf6e16db788f105638edc3fd01",
+      "sha256": "9d6b32a619e021f50f4b1a07ed8f9d08cfea599c8f484e6b1360ada9aae8541c",
+      "bytes": 4172
+    },
+    {
+      "path": "bip-0385.mediawiki",
+      "gitBlob": "e14aa3829796d94f0b439e3202dd7fa23d504900",
+      "sha256": "8c4963492f1d5b492808e5ece8be75f7f66def37f35d091074fdbfa98a6ddd08",
+      "bytes": 3040
+    },
+    {
+      "path": "bip-0386.mediawiki",
+      "gitBlob": "85a63f0b53fb965641eaa291052b23abdf837506",
+      "sha256": "770121b4b33a50bfadfebcd94931dd0ad04159b9fbc1d3b3c3ae17fc0cc16de8",
+      "bytes": 6794
+    }
+  ],
+  "externalFixtures": "not fetched; independently pin explicitly allowlisted external repositories",
+  "publicationReady": false
+}
