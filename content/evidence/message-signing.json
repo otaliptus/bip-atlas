@@ -40,7 +40,7 @@
     {
       "id": "abstract",
       "statement": "BIP 322 is a standard for signed messages based on Bitcoin Script, for proving availability of funds or committing to a message as the intended recipient of funds sent to an address.",
-      "scope": "normative-rule",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -66,6 +66,14 @@
             32
           ],
           "quote": "The current message signing standard only works for P2PKH (1...) invoice addresses. We propose to extend and generalize the standard by using an approach based on Bitcoin Script. This ensures that any coins, no matter what script they are controlled by, can in principle be signed for."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            461,
+            462
+          ],
+          "quote": "This specification is backwards-compatible with the legacy signmessage/verifymessage specification"
         }
       ]
     },
@@ -120,7 +128,7 @@
     {
       "id": "not-sender",
       "statement": "BIP 322 shows a signer will be able to control funds sent to the address; it cannot prove that the signer sent a prior transaction.",
-      "scope": "normative-rule",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -175,7 +183,7 @@
     },
     {
       "id": "legacy-rules",
-      "statement": "New proofs SHOULD use the new format for all addresses including P2PKH; the legacy format MAY be used but MUST be restricted to P2PKH.",
+      "statement": "New proofs SHOULD use the new format for all addresses including P2PKH; the legacy format MAY be used but MUST be restricted to P2PKH; the table's other legacy script types are possible on a technical level but SHOULD NOT be used.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -186,6 +194,14 @@
             105
           ],
           "quote": "New proofs SHOULD use the new format for all invoice address formats, including P2PKH. The legacy format MAY be used, but MUST be restricted to the legacy P2PKH invoice address format."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            93,
+            94
+          ],
+          "quote": "<sup>1</sup>: Possible on a technical level but SHOULD NOT be used anymore in the context of this BIP"
         }
       ]
     },
@@ -202,6 +218,14 @@
             112
           ],
           "quote": "A ''simple'' signature consists of a witness stack, consensus encoded as a vector of vectors of bytes, and base64-encoded, prefixed by the variant (<code>smp</code>). Validators should construct <code>to_spend</code> and <code>to_sign</code> as defined below, with default values for all fields"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            127,
+            127
+          ],
+          "quote": "and then proceed as they would for a full signature."
         }
       ]
     },
@@ -327,7 +351,7 @@
     },
     {
       "id": "basic-validation",
-      "statement": "Validation recomputes to_spend from the message and address, decodes to_sign, and for full signatures checks that to_sign's first input spends to_spend's output and that it has exactly one output.",
+      "statement": "Validation recomputes to_spend from the message and address, decodes to_sign, and for full signatures checks that to_sign's first input spends to_spend's output and that it has exactly one output. The pair must satisfy consensus, except for to_spend's missing input and to_sign's lock time and first sequence, which are not checked.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -346,6 +370,14 @@
             249
           ],
           "quote": "##* <code>to_sign</code> has exactly one output, as specified above"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            250,
+            250
+          ],
+          "quote": "## Confirm that the two transactions together satisfy all consensus rules, except for <code>to_spend</code>'s missing input, and except that ''nSequence'' of <code>to_sign</code>'s first input and ''nLockTime'' of <code>to_sign</code> are not checked."
         }
       ]
     },
@@ -378,6 +410,14 @@
             254
           ],
           "quote": "## All signatures MUST use the <code>SIGHASH_ALL</code> flag, unless the output type supports <code>SIGHASH_DEFAULT</code>, which then MAY be used alternatively (e.g., [[bip-0341.mediawiki|BIP341 P2TR]]). ## The use of <code>CODESEPARATOR</code> or <code>FindAndDelete</code> is forbidden."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            255,
+            258
+          ],
+          "quote": "## <code>LOW_S</code>, <code>STRICTENC</code> and <code>NULLFAIL</code>: valid ECDSA signatures must be strictly DER-encoded and have a low-S value; invalid ECDSA signature must be the empty push ## <code>MINIMALDATA</code>: all pushes must be minimally encoded ## <code>CLEANSTACK</code>: require that only a single stack element remains after evaluation ## <code>MINIMALIF</code>: the argument of <code>IF</code>/<code>NOTIF</code> must be exactly 0x01 or empty push"
         },
         {
           "bip": 322,
@@ -434,6 +474,14 @@
             306
           ],
           "quote": "If they added no inputs to <code>to_sign</code>, left nVersion, nSequence and nLockTime at 0, and ''A'' is a \"native\" Segwit address (P2WPKH, P2WSH, P2TR), then they may base64-encode <code>message_signature</code> with <code>smp</code> as prefix."
+        },
+        {
+          "bip": 322,
+          "lines": [
+            301,
+            306
+          ],
+          "quote": "If they added no inputs to <code>to_sign</code>, they may base64-encode <code>to_sign</code> with <code>ful</code> as prefix. </li> <li> Otherwise, they must base64-encode the finalized PSBT of <code>to_sign</code> with <code>pof</code> as prefix."
         }
       ]
     },
@@ -479,7 +527,7 @@
     },
     {
       "id": "vectors",
-      "statement": "This site's BIP 322 model reproduces the published message hashes and both transaction IDs, and verifies every simple and full vector whose script it can check (P2WPKH, P2TR key path, P2WSH multisig); for P2PKH, P2SH and time-lock scripts, which need a script interpreter, it reports inconclusive. It rejects every published error vector, and the build fails if a figure's verdict differs from the vector's.",
+      "statement": "This site's BIP 322 model reproduces the published message hashes and both transaction IDs, and verifies every simple and full vector whose script it can check (P2WPKH, P2TR key path, P2WSH multisig); for P2PKH, P2SH and time-lock scripts, which need a script interpreter, it reports inconclusive. It rejects every published error vector. The build fails if a figure's verdict differs from the one recorded for that vector: valid for scripts the model checks, inconclusive for those it cannot, invalid for error vectors.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -530,6 +578,30 @@
             381
           ],
           "quote": "There is no specified maximum length of an input's <code>valuedata</code> or a PSBT as a whole in [[bip-0174.mediawiki|BIP174]], but different signers might impose safety limits. It is recommended to use a maximum length of a few kilobytes to maximize compatibility. Very large messages should be committed to by hash instead."
+        }
+      ]
+    },
+    {
+      "id": "no-timestamp",
+      "statement": "A BIP 322 signature carries no timestamp (T is a lock-time field, not a signing date); how recent it is depends on the message containing something the verifier chose fresh.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 322,
+          "lines": [
+            41,
+            42
+          ],
+          "quote": "a signature is obsolete as soon as it is created"
+        },
+        {
+          "bip": 322,
+          "lines": [
+            265,
+            265
+          ],
+          "quote": "Let ''T'' be the nLockTime of <code>to_sign</code>"
         }
       ]
     }

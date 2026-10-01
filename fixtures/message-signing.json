@@ -70,7 +70,7 @@
     {
       "id": "b322-p2wpkh-full",
       "kind": "bip322-vector",
-      "label": "P2WPKH with time locks",
+      "label": "P2WPKH, lock time and sequence set",
       "shortLabel": "full, T = 2016, S = 2016",
       "source": {
         "bip": 322,

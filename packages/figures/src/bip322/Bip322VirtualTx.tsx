@@ -72,7 +72,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
       <div class="atlas-b322-txs" aria-live="polite">
         {views.includes("to_spend") ? (
           <section class="atlas-panel" aria-label="to_spend">
-            <h3 class="atlas-panel__title">to_spend <small>never broadcast</small></h3>
+            <h3 class="atlas-panel__title">to_spend <small>not meant to be broadcast</small></h3>
             <table class="atlas-b322-tx">
               <tbody>
                 <tr><th scope="row">nVersion</th><td>0</td></tr>
@@ -87,7 +87,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         ) : null}
         {views.includes("to_sign") ? (
           <section class="atlas-panel" aria-label="to_sign">
-            <h3 class="atlas-panel__title">to_sign <small>never broadcast</small></h3>
+            <h3 class="atlas-panel__title">to_sign <small>not meant to be broadcast</small></h3>
             <table class="atlas-b322-tx">
               <tbody>
                 <tr><th scope="row">nVersion</th><td>{d.toSign.version}</td></tr>
@@ -109,7 +109,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         {" "}<small>Checked by the model: {d.checked}.</small>
       </p>
       <p class="atlas-lab__source">
-        Source: BIP 322 {f.source.file?.replace("bip-0322/", "")}, line {f.source.line}. Rebuilt and verified at build time by the tested model; the build fails if its verdict is not the one the vector implies.
+        Source: BIP 322 {f.source.file?.replace("bip-0322/", "")}, line {f.source.line}. Rebuilt and verified at build time by the tested model; the build fails if its verdict differs from the one recorded for this vector.
       </p>
     </div>
   );

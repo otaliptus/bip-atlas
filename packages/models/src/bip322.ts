@@ -3,7 +3,14 @@
  * the two virtual transactions to_spend and to_sign, decoding of "simple"
  * and "full" signatures, and verification of the script types this model
  * can check without a script interpreter: P2WPKH, P2TR key path, and P2WSH
- * m-of-n CHECKMULTISIG. Everything else is reported as not checked.
+ * m-of-n CHECKMULTISIG. Everything else is reported as inconclusive.
+ *
+ * Required rules enforced for those types: SIGHASH_ALL (or SIGHASH_DEFAULT
+ * for P2TR); strict DER and low S for ECDSA; the CHECKMULTISIG dummy and
+ * exact witness shape (clean stack); an empty scriptSig for native SegWit.
+ * MINIMALDATA, MINIMALIF, CODESEPARATOR and FindAndDelete cannot arise in
+ * these templates. The upgradeable version rule (0 or 2) is applied after
+ * the script check, as the BIP orders them.
  *
  * Verification only: it never signs. Hashing from @noble/hashes, curves
  * from @noble/curves (ECDSA and BIP 340 verification), base58 and bech32
@@ -140,12 +147,13 @@ export function verify(address: string, message: string, signature: string): Ver
   const legacyHex = (() => { const v = tx.versionHex, lt = tx.locktimeHex; const ins = "01" + tx.inputs.map((i) => i.prevoutHex + push(i.scriptSigHex) + i.sequenceHex).join(""); return v + ins.replace(/^01/, varint(tx.inputs.length)) + varint(tx.outputs.length) + tx.outputs.map((o) => rev(o.valueSats.toString(16).padStart(16, "0")) + push(o.scriptPubKeyHex)).join("") + lt; })();
   sign.hex = legacyHex; sign.txid = txid(legacyHex);
   const version = parseInt(rev(tx.versionHex), 16);
-  if (version !== 0 && version !== 2) return { state: "inconclusive", reason: "to_sign version must be 0 or 2", toSpend: spend, toSign: sign, checked: "structure" };
   const w = tx.witnesses[0] ?? [];
   const T = parseInt(rev(tx.locktimeHex), 16), S = parseInt(rev(tx.inputs[0].sequenceHex), 16);
-  const valid = { state: "valid" as const, time: T, age: S };
+  // Upgradeable rule (checked after the required rules): version 0 or 2, else inconclusive.
+  const valid = version === 0 || version === 2 ? { state: "valid" as const, time: T, age: S } : { state: "inconclusive" as const, reason: "to_sign version must be 0 or 2" };
   const bad = (reason: string) => ({ state: "invalid" as const, reason, toSpend: spend, toSign: sign });
-  if (tx.inputs.length !== 1) return { state: "inconclusive", reason: "additional inputs are outside this model", toSpend: spend, toSign: sign, checked: "structure" };
+  if (tx.inputs.length !== 1) return { ...bad("a full signature cannot carry the UTXOs of additional inputs"), checked: "structure" };
+  if ((kind === "p2wpkh" || kind === "p2wsh" || kind === "p2tr") && tx.inputs[0].scriptSigHex !== "") return { ...bad("invalid signature: native SegWit requires an empty scriptSig"), checked: kind };
   if (kind === "p2wpkh") {
     const h = spk.slice(4);
     if (w.length !== 2 || bytesToHex(hash160(hexToBytes(w[1]))) !== h) return { ...bad("invalid signature: witness does not match the key hash"), checked: "p2wpkh" };
@@ -153,7 +161,10 @@ export function verify(address: string, message: string, signature: string): Ver
     return ecdsaOk(w[0], w[1], d) ? { ...valid, toSpend: spend, toSign: sign, checked: "p2wpkh" } : { ...bad("invalid signature"), checked: "p2wpkh" };
   }
   if (kind === "p2tr") {
-    if (w.length !== 1) return { state: "inconclusive", reason: "script-path spends are outside this model", toSpend: spend, toSign: sign, checked: "p2tr" };
+    if (w.length === 0) return { ...bad("invalid signature: empty witness"), checked: "p2tr" };
+    const annex = w.length === 2 && w[1].startsWith("50");
+    if (w.length !== 1 || annex) return { state: "inconclusive", reason: annex ? "an annex is outside this model" : "script-path spends are outside this model", toSpend: spend, toSign: sign, checked: "p2tr" };
+    if (w[0].length === 130 && !w[0].endsWith("01")) return { ...bad("invalid signature: sighash must be SIGHASH_ALL or SIGHASH_DEFAULT"), checked: "p2tr key path" };
     const ok = verifyKeyPath(spk.slice(4), w[0], (ht) => taprootSighash(sigMsg(tx, [{ scriptPubKeyHex: spk, amountSats: 0n }], 0, ht)));
     return ok ? { ...valid, toSpend: spend, toSign: sign, checked: "p2tr key path" } : { ...bad("invalid signature"), checked: "p2tr key path" };
   }

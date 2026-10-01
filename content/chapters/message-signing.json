@@ -14,7 +14,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Exchanges, auditors and counterparties sometimes ask: can you show that this address is yours? The old answer, Bitcoin Core’s signmessage, only works for P2PKH addresses, the ones starting with 1. Its signatures also have a flaw the BIP’s authors spell out: they are ECDSA signatures that do not commit to the public key, so they do not actually prove knowledge of a secret key, and third parties can tweak a valid one into a valid signature for certain related keys.",
+        "text": "Exchanges, auditors and counterparties sometimes ask: can you show that this address is yours? The old answer, the legacy signmessage format, was specified only for P2PKH addresses, the ones starting with 1, as the BIP’s authors note. Its signatures also have a flaw the BIP’s authors spell out: they are ECDSA signatures that do not commit to the public key, so they do not actually prove knowledge of a secret key, and third parties can tweak a valid one into a valid signature for certain related keys.",
         "claims": [
           "legacy-limits",
           "ecdsa-no-commit"
@@ -22,7 +22,7 @@
       },
       {
         "type": "paragraph",
-        "text": "BIP 322, assigned in 2018 and recorded as Complete at version 2.0.0, replaces the special-purpose signature with Bitcoin Script itself. A message signature becomes whatever would satisfy the address’s script in a transaction built around the message, so any address, whatever script controls it, can in principle be signed for. The signature comes in several formats, each marked by a three-letter prefix.",
+        "text": "BIP 322, assigned in 2018 and recorded as Complete at version 2.0.0, replaces the special-purpose signature with Bitcoin Script itself. A message signature becomes whatever would satisfy the address’s script in a transaction built around the message, so any address, whatever script controls it, can in principle be signed for. The signature comes in several formats, each new format marked by a three-letter prefix.",
         "claims": [
           "preamble",
           "abstract",
@@ -39,7 +39,7 @@
       "fixtures": [
         "b322-formats"
       ],
-      "caption": "BIP 322’s formats as its table lists them: legacy for P2PKH only, simple for native SegWit, full for anything, and full proof of funds.",
+      "caption": "BIP 322’s formats from its table: legacy, which the BIP restricts to P2PKH; simple for native SegWit; full for anything; and full proof of funds.",
       "claims": [
         "formats",
         "legacy-rules",
@@ -71,7 +71,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or for some formats its scriptSig and other fields, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
+          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
           "claims": [
             "to-sign"
           ]
@@ -89,7 +89,7 @@
             "b322-p2pkh-full",
             "b322-wrong-message"
           ],
-          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from what the vector implies.",
+          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the one recorded for that vector: valid for scripts the model checks, inconclusive for those it cannot, invalid for error vectors.",
           "claims": [
             "vectors",
             "to-spend",
@@ -100,7 +100,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Neither transaction is ever broadcast. to_spend spends an output that cannot exist, so it can never be valid on chain, and to_sign spends to_spend. The BIP gives this shape a practical purpose: it resembles a Bitcoin transaction closely enough that existing signing hardware can sign it, while containing an invalid input so it cannot be spent on any real network.",
+          "text": "Neither transaction is meant to be broadcast. to_spend spends an output that does not exist, so it cannot be relayed as an ordinary transaction, and to_sign spends to_spend. The BIP gives this shape a practical purpose: it resembles a Bitcoin transaction closely enough that existing signing hardware can sign it, while containing an invalid input so it cannot be spent on any real network.",
           "claims": [
             "never-broadcast",
             "tx-shaped"
@@ -108,7 +108,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Apart from that missing coin, both transactions must be valid: they must pass all consensus checks. A signature is therefore not limited to one key. The published vectors include a 3-of-3 multisig address, whose “signature” is three ECDSA signatures and the witness script, and in BIP 322’s terms a signature need not contain a cryptographic signature at all, only whatever satisfies the script.",
+          "text": "Apart from that missing coin, both transactions must be valid: they must pass all consensus checks. A signature is therefore not limited to one key. The published vectors include a 3-of-3 multisig address, whose “signature” is three ECDSA signatures, an empty dummy item and the witness script, and in BIP 322’s terms a signature need not contain a cryptographic signature at all, only whatever satisfies the script.",
           "claims": [
             "consensus-valid",
             "signature-def"
@@ -147,7 +147,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Signing for a multisig address works the way spending from one does. Each signer produces a partial signature on to_sign, coordinated through a PSBT, and BIP 322 adds one global PSBT field, number 0x09, that carries the message itself so every signer can see what they are signing. The BIP recommends keeping messages to a few kilobytes and committing to anything larger by its hash.",
+          "text": "Signing for a multisig address works the way spending from one does. Each signer produces a partial signature on to_sign, coordinated through a PSBT, and BIP 322 adds one global PSBT field, number 0x09, that carries the message itself. The BIP recommends keeping messages to a few kilobytes and committing to very large ones by hash.",
           "claims": [
             "psbt",
             "message-size"
@@ -161,14 +161,14 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A verifier is given an address, a message and a signature. It computes to_spend from the message and address, decodes to_sign from the signature, checks that to_sign’s first input spends to_spend’s output and that it has exactly one output, and then checks that the pair satisfies the consensus rules.",
+          "text": "A verifier is given an address, a message and a signature. It computes to_spend from the message and address, decodes to_sign from the signature, checks that to_sign’s first input spends to_spend’s output and that it has exactly one output, and then checks that the pair satisfies the consensus rules, except that to_sign’s lock time and first sequence are not enforced but reported. (A simple signature has no to_sign to check; the verifier builds it.)",
           "claims": [
             "basic-validation"
           ]
         },
         {
           "type": "paragraph",
-          "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR is forbidden; ECDSA signatures must be strictly encoded with a low S value; pushes must be minimal; and exactly one stack element may remain. Breaking any of these makes the signature invalid.",
+          "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR and FindAndDelete are forbidden; ECDSA signatures must be strictly DER-encoded with a low S value, and a failing one must be empty; pushes must be minimal; IF arguments must be exactly 0x01 or empty; and only a single stack element may remain. Breaking any of these makes the signature invalid.",
           "claims": [
             "required-rules"
           ]
@@ -191,7 +191,7 @@
           "fixtures": [
             "b322-verdicts"
           ],
-          "caption": "One published vector for each state. The inconclusive one is a P2PKH signature: this site’s model has no script interpreter for it, which is the case the state exists for.",
+          "caption": "One published vector for each state. The inconclusive one is a valid P2PKH signature that this site’s model cannot check without a script interpreter, one of the cases the state exists for.",
           "claims": [
             "verdicts",
             "time-age",
@@ -202,7 +202,7 @@
         },
         {
           "type": "paragraph",
-          "text": "This site’s model is such a partial verifier. It checks P2WPKH, P2TR key-path and P2WSH multisig signatures itself, and answers inconclusive for the rest. Even so, it rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
+          "text": "This site’s model is such a partial verifier. It checks P2WPKH, P2TR key-path and P2WSH multisig signatures itself, enforcing the required rules that can arise in those scripts, and answers inconclusive for the rest. Even so, it rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
           "claims": [
             "vectors",
             "basic-validation"
@@ -223,7 +223,7 @@
         },
         {
           "type": "paragraph",
-          "text": "What a valid signature does show is narrower: that the signer will be able to control funds sent to the address, as of the moment of signing. It cannot show that the signer sent some earlier transaction. A proof of funds can list UTXOs, but it does not show they are all the address holds, nor that they are still unspent; a verifier needs the current UTXO set for that.",
+          "text": "What BIP 322 sets out to show, in its authors’ words, is narrower: that the signer will be able to control funds sent to the address. It cannot show that the signer sent some earlier transaction. A proof of funds can list UTXOs, but it does not show they are all the address holds, nor that they are still unspent; a verifier needs the current UTXO set for that.",
           "claims": [
             "not-sender",
             "pof"
@@ -231,10 +231,11 @@
         },
         {
           "type": "paragraph",
-          "text": "So treat a BIP 322 signature as evidence about one moment and one script. It says that at signing time someone could produce what the address’s script demands for this exact message. It says nothing about who that someone is, whether they still can, or whether the coins are still there.",
+          "text": "So treat a BIP 322 signature as evidence about one moment and one script. It says that at some point before it was presented, someone could produce what the address’s script demands for this exact message. It carries no date: T is a lock-time field, not a timestamp, so freshness has to come from the message, for example a challenge the verifier chose. It says nothing about who that someone is, whether they still can, or whether the coins are still there.",
           "claims": [
             "no-proof",
-            "not-sender"
+            "not-sender",
+            "no-timestamp"
           ]
         },
         {

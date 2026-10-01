@@ -1437,7 +1437,7 @@ function deriveBip322Formats(f: Bip322FormatsFixture): DerivedBip322FormatsFixtu
   const lines = pinnedText("bip-0322.mediawiki", SNAPSHOT_PHASE3).split("\n");
   const start = lines.findIndex((l) => l.startsWith("{| class=\"wikitable\""));
   const rows: DerivedBip322FormatsFixture["derived"]["rows"] = [];
-  const strip = (s: string) => s.replace(/<sup>\d<\/sup>/g, "").replace(/<br\/>/g, "").replace(/<\/?code>/g, "").replace(/^\|\s*/, "").trim();
+  const strip = (s: string) => s.replace(/<sup>1<\/sup>/g, "¹").replace(/<sup>2<\/sup>/g, "²").replace(/<br\/>/g, "").replace(/<\/?code>/g, "").replace(/^\|\s*/, "").trim();
   for (let i = start; i < lines.length && !lines[i].startsWith("|}"); i++) {
     if (lines[i] === "|-" && lines[i + 1]?.startsWith("| ") && !lines[i + 1].includes("style")) {
       const [name, scripts, prefix, format] = lines.slice(i + 1, i + 5).map(strip);

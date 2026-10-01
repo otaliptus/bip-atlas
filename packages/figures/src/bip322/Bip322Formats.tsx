@@ -14,7 +14,7 @@ export function Bip322Formats({ fixture }: { fixture: DerivedBip322FormatsFixtur
         </tbody>
       </table>
       </div>
-      <p class="atlas-lab__source">Read from BIP 322’s “Types of Signatures” table (from line {fixture.source.line}). Legacy is the old signmessage format, allowed only for P2PKH; P2WSH and P2TR in the simple format exclude time-lock scripts.</p>
+      <p class="atlas-lab__source">Read from BIP 322’s “Types of Signatures” table (from line {fixture.source.line}). ¹ Technically possible but SHOULD NOT be used; the legacy format MAY be used but MUST be restricted to P2PKH. ² Excluding time-lock scripts.</p>
     </div>
   );
 }

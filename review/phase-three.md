@@ -277,3 +277,63 @@ The test and the build first parsed this CRLF file with `split("\n")`. That left
 | 10–19 (nits) | HKDF label in the salt. Header-flag tense and decoy scope. Exact payload rekey (0xffffffff nonce field) and the length cipher's next nonce. Version packets sent without waiting, possibly after decoys. Terminator rationale attributed. ElligatorSwift wording. Framing note per message. Rekey table says keys after 223 are the model's. `decPacket` doc. Stray `V1_HEADER` check removed. `session-id` scope set to author-rationale. 33-byte overhead without a short ID added to the prose (tested). | All applied. |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 cover the framing figure, the hero (start, stage 3 on mobile, application packet with comparison, decoy, no-JS), the rekey table and the worked tab. There is no overflow. axe-core is clean at 1440, 375, no-JS, the worked tab and three interactive states.
+
+## Chapter 18 — Message signing (BIP 322)
+
+**Model:** `packages/models/src/bip322.ts` does verification only. It covers:
+- the tagged message hash;
+- the to_spend and to_sign virtual transactions, with their txids;
+- mainnet address → script;
+- decoding of simple and full signatures (a missing prefix is read as simple).
+
+It verifies three script types: P2WPKH (BIP 143 digest, ECDSA with strict DER, low S, SIGHASH_ALL), P2TR key path (BIP 341 digest, SIGHASH_ALL or DEFAULT only) and P2WSH m-of-n CHECKMULTISIG (dummy, order-preserving matching, exact witness shape). Other script types return `inconclusive`, the BIP's state for a verifier without a script interpreter. Required rules come before the upgradeable version rule, as the BIP orders them. The model never signs. The review regressions re-sign with the published vector key inside `test/` only.
+
+**Sources:** the pinned `basic-test-vectors.json` and `generated-test-vectors.json`. The model:
+- reproduces all three message-hash and txid vectors;
+- returns `valid` for every simple and full vector of the three checked types, with T and S matching the vector's lock time and sequence;
+- returns `inconclusive` for the others;
+- returns `invalid` for all 36 error vectors.
+
+The build fails if a figure's verdict differs from the one recorded for its fixture.
+
+**Deliberate breakage:**
+
+| Breakage | Tests failing |
+|---|---|
+| Wrong tag | 21 |
+| No OP_0 in to_spend's scriptSig | 21 |
+| Prevout index 0 | 21 |
+| Empty output script | 11 |
+| Any sighash byte accepted | 1 (synthetic) |
+
+**Independent review: 2 must-fix, 12 should-fix, 11 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | P2TR accepted any sighash type | Rejects anything but ALL or DEFAULT. Regression test re-signs the vector's message with 0x02, 0x03 and 0x81. |
+| 2 | Full signature with a non-empty scriptSig on native SegWit was accepted | Rejected. Regression test edits the published full P2WPKH vector. |
+| 3 | Version rule ran before the required rules | Moved after them; regression test added. |
+| 4 | `ful` with extra inputs reported `inconclusive` | Now `invalid`: a full signature cannot carry their UTXOs. |
+| 5 | P2TR empty witness reported `inconclusive` | Now `invalid`. An annex is reported as out of scope. |
+| 6 | "the verdict the vector implies" was false for P2PKH | Caption, hero and ledger now say "the one recorded for that vector". |
+| 7 | The legacy row lost its footnotes | The table keeps ¹ and ². The note quotes the SHOULD NOT and MUST rules, and the caption says the BIP restricts legacy to P2PKH. |
+| 8–13 | Legacy limitation stated as fact; "each" format prefixed; required-rules list incomplete; nLockTime/nSequence exception; encode-choice quote; "as of the moment of signing" | All reworded with added quotes (L93–94, L250, L255–258, L301–306, L461). New editorial claim: a signature carries no timestamp. |
+| 14 | Model's rule coverage undisclosed | Module doc lists the rules enforced and why the others cannot arise. The prose says so too. |
+| 15–25 (nits) | "never broadcast" vs coinbase-shaped to_spend; full-format-only fields; dummy item; PSBT-field purpose; "very large" messages; "one of the cases"; fixture label "lock time and sequence set"; ledger scopes; simple quote L127 | All applied. Not changed: `addressScript` edge cases (odd v0 lengths, mixed case, base58 length) and unknown-prefix handling, which no published vector reaches. |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 cover:
+- the formats table;
+- the hero: to_spend, to_sign with T/S, multisig, wrong message, mobile, no-JS;
+- the verdicts;
+- the worked tab.
+
+There is no overflow. axe-core is clean at 1440, 375, no-JS, the worked tab and three interactive states.
+
+## Phase three summary
+
+Ten chapters, A9–A18. Each has a tested model with a deliberate-breakage table, pinned fixtures, a fail-closed derive step, a two-tab hero, one or two static figures, a ledger and prose within 1,100–1,800 words (with prose-number tests), screenshots, axe checks and one independent review.
+
+Not done:
+- a human sign-off;
+- screen-reader passes;
+- tablet-width screenshots.

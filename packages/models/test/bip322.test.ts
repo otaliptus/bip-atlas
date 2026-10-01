@@ -1,7 +1,12 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { base64 } from "@scure/base";
-import { hexToBytes } from "../src/hex";
+import { schnorr } from "@noble/curves/secp256k1.js";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { createBase58check } from "@scure/base";
+import { bytesToHex, hexToBytes } from "../src/hex";
+import { sigMsg, taprootSighash, tweakSeckey } from "../src/taproot";
+import { parseTransaction } from "../src/tx";
 import { addressScript, decodeSignature, messageHash, toSign, toSpend, verify } from "../src/bip322";
 
 const root = new URL("../../../", import.meta.url);
@@ -91,7 +96,7 @@ describe("message-signing chapter prose numbers", () => {
     expect(b322[17]).toContain("Version: 2.0.0");
     has("BIP 322, assigned in 2018 and recorded as Complete at version 2.0.0");
     expect(["smp", "ful", "pof"].every((p) => p.length === 3)).toBe(true);
-    has("each marked by a three-letter prefix");
+    has("each new format marked by a three-letter prefix");
     expect(b322[140]).toContain("vin[0].prevout.n = 0xFFFFFFFF");
     has("spends output 0xFFFFFFFF of a transaction whose ID is all zeros");
     expect(b322[331]).toContain("PSBT_GLOBAL_GENERIC_SIGNED_MESSAGE = 0x09");
@@ -106,11 +111,54 @@ describe("message-signing chapter prose numbers", () => {
     expect(w.length).toBe(5);
     expect(w[0]).toBe("");
     expect(w[w.length - 1]).toBe(ms.witness_script);
-    has("a 3-of-3 multisig address, whose “signature” is three ECDSA signatures and the witness script");
+    has("a 3-of-3 multisig address, whose “signature” is three ECDSA signatures, an empty dummy item and the witness script");
     expect(basic.simple.some((v: { bip322_signatures: string[] }) => v.bip322_signatures.some((s) => !/^(smp|ful|pof)/.test(s)))).toBe(true);
     has("one of the published vectors tests exactly that");
     const fx = JSON.parse(readFileSync(new URL("fixtures/message-signing.json", root), "utf8")).fixtures;
     expect(fx.filter((f: { kind: string }) => f.kind === "bip322-vector").length).toBe(6);
     has("Six of BIP 322’s published vectors");
+  });
+});
+
+describe("review regressions", () => {
+  // Test-only: re-sign the published P2TR vector's message with the vector's own (public) key and other sighash types.
+  const v = gen.simple[1];
+  const wif = createBase58check(sha256).decode(v.private_keys[0]);
+  const sk = bytesToHex(wif.slice(1, 33));
+  const dk = tweakSeckey(sk, "");
+  const spk = addressScript(v.address).spk;
+  const signWith = (ht: number) => {
+    const spend = toSpend(messageHash(v.message), spk);
+    const tx = parseTransaction(toSign(spend.txid, { witness: ["00".repeat(65)] }).witnessHex);
+    const digest = taprootSighash(sigMsg(tx, [{ scriptPubKeyHex: spk, amountSats: 0n }], 0, ht));
+    const sig = bytesToHex(schnorr.sign(hexToBytes(digest), hexToBytes(dk), new Uint8Array(32))) + ht.toString(16).padStart(2, "0");
+    return "smp" + base64.encode(Uint8Array.from([1, 65, ...hexToBytes(sig)]));
+  };
+
+  it("P2TR: SIGHASH_ALL is accepted, other hash types are invalid", () => {
+    expect(verify(v.address, v.message, signWith(0x01)).state).toBe("valid");
+    for (const ht of [0x02, 0x03, 0x81]) expect(verify(v.address, v.message, signWith(ht)).state).toBe("invalid");
+  });
+
+  it("P2TR: an empty witness is invalid", () => {
+    expect(verify(v.address, v.message, "smpAA==").state).toBe("invalid");
+  });
+
+  it("full P2WPKH with a non-empty scriptSig is invalid", () => {
+    const f = gen.full[1];
+    const hex = bytesToHex(base64.decode(f.bip322_signatures[0].slice(3)));
+    // version (8) + marker/flag (4) + input count (2) + outpoint (72), then the scriptSig length byte "00"
+    const at = 8 + 4 + 2 + 72;
+    expect(hex.slice(at, at + 2)).toBe("00");
+    const bad = hex.slice(0, at) + "020151" + hex.slice(at + 2);
+    expect(verify(f.address, f.message, f.bip322_signatures[0]).state).toBe("valid");
+    expect(verify(f.address, f.message, "ful" + base64.encode(hexToBytes(bad))).state).toBe("invalid");
+  });
+
+  it("required rules come before the version rule", () => {
+    const f = gen.full[1];
+    const hex = bytesToHex(base64.decode(f.bip322_signatures[0].slice(3)));
+    const v1 = "01000000" + hex.slice(8);
+    expect(verify(f.address, f.message, "ful" + base64.encode(hexToBytes(v1))).state).toBe("invalid");
   });
 });
