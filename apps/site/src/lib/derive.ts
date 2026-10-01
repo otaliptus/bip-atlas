@@ -595,7 +595,8 @@ function deriveP2sh(f: P2shSpendFixture): DerivedP2shFixture {
       redeemHash160Hex: bytesToHex(hash160(hexToBytes(t.redeemScriptHex))),
       redeemSigops: t.redeemSigops,
       scriptSigBytes: tx.inputs[f.inputIndex].scriptSigHex.length / 2,
-      witnessBytes: wit.reduce((n, e) => n + e.length / 2, 0),
+      // Serialized witness (item count + each item's length prefix + items); 0 when the input has none.
+      witnessBytes: wit.length ? tx.segments.find((g) => g.id === `witness.${f.inputIndex}`)!.hex.length / 2 : 0,
       stages: t.stages.map((s) => ({
         id: s.id,
         title: s.title,

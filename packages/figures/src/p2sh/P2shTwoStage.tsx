@@ -55,7 +55,7 @@ export function P2shTwoStage({ fixtures, figureId }: { fixtures: DerivedP2shFixt
           <code>OP_HASH160 &lt;{short(d.committedHashHex)}&gt; OP_EQUAL</code>
         </div>
         <div class="atlas-p2sh-lab__box" data-part="redeem" data-revealed={shownReveal ? "true" : "false"}>
-          <span class="atlas-p2sh-lab__tag">Redeem script · {d.redeemScriptHex.length / 2} bytes · {KIND[d.kind]}</span>
+          <span class="atlas-p2sh-lab__tag">{shownReveal ? `Redeem script · ${d.redeemScriptHex.length / 2} bytes · ${KIND[d.kind]}` : "Redeem script · unknown"}</span>
           {shownReveal ? <code class="atlas-break">{d.redeemAsm}</code> : <span class="atlas-p2sh-lab__hidden">Not visible until the coin is spent. The output holds only its 20-byte hash.</span>}
         </div>
       </div>
@@ -67,6 +67,11 @@ export function P2shTwoStage({ fixtures, figureId }: { fixtures: DerivedP2shFixt
         </div>
       ) : null}
 
+      {!shownReveal ? (
+        <p class="atlas-p2sh-lab__before" aria-live="polite">
+          Before the spend, the output is all anyone can see: nothing below it can be checked yet. Choose Revealed, or press Next stage, to replay the spend.
+        </p>
+      ) : (
       <ol class="atlas-p2sh-lab__stages" aria-live="polite">
         {d.stages.map((s, i) => (
           <li class="atlas-stage" data-status={i > current ? "pending" : s.ok ? "pass" : "fail"}>
@@ -99,8 +104,10 @@ export function P2shTwoStage({ fixtures, figureId }: { fixtures: DerivedP2shFixt
           </li>
         ))}
       </ol>
+      )}
       <p class="atlas-lab__source">
-        Source: BIP {f.source.bip} line {f.source.line}. Recorded at build time; signatures verified against digests computed by the tested model. sigops counted for the redeem script: {d.redeemSigops}.
+        Source: BIP {f.source.bip} line {f.source.line}. Recorded at build time; signatures verified against digests computed by the tested model.
+        {shownReveal && d.kind === "legacy" ? ` BIP 16 sigops counted for this redeem script: ${d.redeemSigops}.` : ""}
       </p>
     </div>
   );

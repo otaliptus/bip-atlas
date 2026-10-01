@@ -63,7 +63,7 @@
     },
     {
       "id": "motivation",
-      "statement": "The author's aim is to move the job of supplying spending conditions from the sender to the redeemer, so a sender can fund any transaction, however complex, with a fixed 20-byte hash.",
+      "statement": "The author's aim is to move the job of supplying spending conditions from the sender to the redeemer, so a sender can fund any transaction, however complex, with a fixed 20-byte hash. The BIP records that some felt P2SH unnecessary, preferring to give the sender the complete script.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -82,6 +82,14 @@
             19
           ],
           "quote": "The benefit is allowing a sender to fund any arbitrary transaction, no matter how complicated, using a fixed-length 20-byte hash that is short enough to scan from a QR code or easily copied and pasted."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "several people feel that it is unnecessary, and complex/multisignature transaction types should be supported by simply giving the sender the complete {serialized script}."
         }
       ]
     },
@@ -128,7 +136,7 @@
     {
       "id": "standard-only",
       "statement": "Spends of these outputs are only considered standard if the redeemScript is itself one of the other standard types.",
-      "scope": "normative-rule",
+      "scope": "history",
       "support": "explicit",
       "evidence": [
         {
@@ -423,7 +431,7 @@
     },
     {
       "id": "spends-verified",
-      "statement": "For all three pinned spends, this site's model finds the scriptSig push-only and the redeem script's hash equal to the output's, and every signature verifies (with noble) against the digest the model computes: the original digest for the legacy spend, BIP 143's for the wrapped ones.",
+      "statement": "For all three pinned spends, this site's model finds the scriptSig push-only and the redeem script's HASH160 (computed as RIPEMD-160 of SHA-256) equal to the output's, and every signature verifies (with noble) against the digest the model computes: the original digest for the legacy spend, BIP 143's for the wrapped ones.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -471,7 +479,7 @@
     },
     {
       "id": "sizes",
-      "statement": "The legacy spend's scriptSig is 218 bytes and it has no witness; the P2SH-P2WSH spend's scriptSig is 35 bytes, with 213 bytes of witness items; the P2SH-P2WPKH spend's is 23 bytes, with 104.",
+      "statement": "Measured on the pinned transactions: the legacy spend's scriptSig is 218 bytes with an empty witness; the P2SH-P2WSH spend's scriptSig is 35 bytes and its witness serializes to 218 bytes (item count and length prefixes included); the P2SH-P2WPKH spend's are 23 and 107. Counting scriptSig bytes four times and witness bytes once gives 872 against 358 weight units for the two 2-of-2 spends.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

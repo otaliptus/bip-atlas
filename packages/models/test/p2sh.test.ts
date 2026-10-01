@@ -134,11 +134,17 @@ describe("p2sh chapter prose numbers", () => {
   it("matches the pinned spends", () => {
     expect(legacySpk.length / 2).toBe(23);
     expect(text).toContain("That is 23 bytes whether");
-    expect([tx.inputs[0].scriptSigHex.length / 2, w(tx, 0)]).toEqual([218, 0]);
-    expect([tx.inputs[1].scriptSigHex.length / 2, w(tx, 1)]).toEqual([35, 213]);
+    const ser = (t: ReturnType<typeof parseTransaction>, i: number) => {
+      const g = t.segments.find((x) => x.id === `witness.${i}`)!;
+      return (t.witnesses[i] ?? []).length ? g.hex.length / 2 : 0; // count + length prefixes + items
+    };
+    expect([tx.inputs[0].scriptSigHex.length / 2, w(tx, 0), ser(tx, 0)]).toEqual([218, 0, 0]);
+    expect([tx.inputs[1].scriptSigHex.length / 2, w(tx, 1), ser(tx, 1)]).toEqual([35, 213, 218]);
     const p = parseTransaction(p2wpkhTx);
-    expect([p.inputs[0].scriptSigHex.length / 2, w(p, 0)]).toEqual([23, 104]);
-    expect(text).toContain("The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, with 213 bytes of witness items.");
+    expect([p.inputs[0].scriptSigHex.length / 2, ser(p, 0)]).toEqual([23, 107]);
+    expect([4 * 218 + 0, 4 * 35 + 218]).toEqual([872, 358]);
+    expect(text).toContain("The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes.");
+    expect(text).toContain("that comes to 872 weight units against 358");
     expect(traceP2sh(p2wpkhTx, 0, p2wpkhSpk, 1_000_000_000n).redeemScriptHex.length / 2).toBe(22);
     expect(traceP2sh(extracted, 1, wrappedSpk, wrappedAmount).redeemScriptHex.length / 2).toBe(34);
     expect(text).toContain("the redeem script is a 22-byte program");
@@ -150,5 +156,36 @@ describe("p2sh chapter prose numbers", () => {
     expect(text).toContain("The BIP’s examples come to 3 and 22.");
     expect(b16[95]).toContain("If 550 or more");
     expect(text).toContain("with 550 or more of roughly 1,000");
+  });
+});
+
+describe("BIP141 rules on the P2SH witness path (review follow-ups)", () => {
+  const tx = parseTransaction(extracted);
+  const segs = (f: (id: string, hex: string) => string) => tx.segments.map((g) => f(g.id, g.hex)).join("");
+
+  it("a P2WPKH-shaped spend with an empty witness fails instead of crashing", () => {
+    const p = parseTransaction(p2wpkhTx);
+    const stripped = p.segments.filter((g) => g.part === "base").map((g) => g.hex).join("");
+    const t = traceP2sh(stripped, 0, p2wpkhSpk, 1_000_000_000n);
+    expect(t.valid).toBe(false);
+  });
+
+  it("an extra witness item breaks the clean-stack rule for P2WSH", () => {
+    // Prepend an extra "01" item to input 1's witness.
+    const hex = segs((id, h) => (id === "witness.1" ? "05" + "0101" + h.slice(2) : h));
+    expect(parseTransaction(hex).witnesses[1].length).toBe(5);
+    expect(traceP2sh(hex, 1, wrappedSpk, wrappedAmount).valid).toBe(false);
+  });
+
+  it("refuses witness programs other than v0 20/32 bytes, and requires an empty witness on the legacy path", () => {
+    const v1 = "5120" + "11".repeat(32);
+    const spk = `a914${bytesToHex(hash160(hexToBytes(v1)))}87`;
+    const hex = segs((id, h) => (id === "input.1.scriptsig" ? "23" + "22" + v1 : h));
+    expect(() => traceP2sh(hex, 1, spk, wrappedAmount)).toThrow(P2shScopeError);
+    // Input 1 again, but with its scriptSig claiming the legacy path: its witness must then be empty.
+    const legacyWithWitness = segs((id, h) => (id === "input.1.scriptsig" ? tx.segments.find((g) => g.id === "input.0.scriptsig")!.hex : h));
+    const t = traceP2sh(legacyWithWitness, 1, legacySpk, null);
+    expect(t.valid).toBe(false);
+    expect(t.stages.at(-1)!.note).toContain("witness data");
   });
 });

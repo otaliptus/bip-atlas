@@ -360,7 +360,9 @@ export interface P2shDerived {
   redeemAsm: string;
   redeemHash160Hex: string;
   redeemSigops: number;
+  /** The scriptSig's bytes (push opcodes included, its own length prefix not). */
   scriptSigBytes: number;
+  /** The serialized witness: item count, each item's length prefix and the items; 0 if empty. */
   witnessBytes: number;
   stages: P2shStageView[];
 }

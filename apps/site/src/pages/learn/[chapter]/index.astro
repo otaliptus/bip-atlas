@@ -22,6 +22,11 @@ const primarySources = pub.primaryBips.map((n) => {
   const file = lock.files.find((f) => f.path === entry.path)!;
   return { entry, file };
 });
+/** Quotes are verbatim wikitext; render its <sup> markup (e.g. 2<sup>80</sup>) instead of showing the tags. */
+const quoteParts = (q: string) => q.split(/(<sup>[^<]*<\/sup>)/).filter(Boolean).map((t) => {
+  const m = /^<sup>([^<]*)<\/sup>$/.exec(t);
+  return m ? { sup: true, text: m[1] } : { sup: false, text: t };
+});
 const reviewLabel = {
   "draft-unreviewed": "Draft — hand-authored, not yet reviewed",
   "in-review": "Draft — independent technical review applied; awaiting human sign-off",
@@ -136,7 +141,7 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
                   <summary>Quoted source text ({claim.evidence.length})</summary>
                   {claim.evidence.map((span) => (
                     <blockquote cite={sourceLineUrl(lock, span.bip, span.lines, span.file)}>
-                      <p>{span.quote}</p>
+                      <p>{quoteParts(span.quote).map((q) => (q.sup ? <sup>{q.text}</sup> : q.text))}</p>
                       <footer>BIP {span.bip}{span.file ? ` (${span.file.split("/").pop()})` : ""}, {span.lines[0] === span.lines[1] ? `line ${span.lines[0]}` : `lines ${span.lines[0]}–${span.lines[1]}`}</footer>
                     </blockquote>
                   ))}

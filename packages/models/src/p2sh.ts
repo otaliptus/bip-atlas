@@ -59,17 +59,29 @@ export function decodeScript(hex: string): ScriptOp[] {
 }
 
 /** BIP16 rule 1: only push operations (OP_0…OP_16 and data pushes) are allowed in the scriptSig. */
-export const isPushOnly = (ops: ScriptOp[]) => ops.every((o) => o.dataHex !== null || (o.op >= 0x51 && o.op <= 0x60) || o.op === 0x4f);
+export function isPushOnly(ops: ScriptOp[]): boolean {
+  // Core's IsPushOnly also admits OP_RESERVED (0x50), which then fails when run; that corner is out of scope here.
+  if (ops.some((o) => o.op === 0x50)) throw new P2shScopeError("OP_RESERVED in a scriptSig is outside this recorder's scope");
+  return ops.every((o) => o.dataHex !== null || (o.op >= 0x51 && o.op <= 0x60) || o.op === 0x4f);
+}
+
+/** The stack item a push-only opcode leaves: data pushes, OP_1NEGATE as 0x81, OP_1…OP_16 as one byte. */
+const pushedItem = (o: ScriptOp) => o.dataHex ?? (o.op === 0x4f ? "81" : (o.op - 0x50).toString(16).padStart(2, "0"));
 
 export function isP2shScript(spkHex: string): boolean {
   return /^a914[0-9a-f]{40}87$/.test(spkHex);
 }
 
-/** A version-0 witness program: OP_0 followed by one 20- or 32-byte push. */
-export function witnessProgram(scriptHex: string): { version: 0; programHex: string } | null {
-  const m = /^00(14|20)([0-9a-f]+)$/.exec(scriptHex);
-  if (!m || m[2].length / 2 !== parseInt(m[1], 16)) return null;
-  return { version: 0, programHex: m[2] };
+/**
+ * BIP141's witness-program shape: a version byte (OP_0 or OP_1…OP_16) then a
+ * direct push of 2 to 40 bytes, and nothing else. Returns null for any other script.
+ */
+export function witnessProgram(scriptHex: string): { version: number; programHex: string } | null {
+  const b = hexToBytes(scriptHex);
+  if (b.length < 4 || b.length > 42) return null;
+  const v = b[0], len = b[1];
+  if (!(v === 0x00 || (v >= 0x51 && v <= 0x60)) || len < 2 || len > 40 || b.length !== 2 + len) return null;
+  return { version: v === 0 ? 0 : v - 0x50, programHex: bytesToHex(b.slice(2)) };
 }
 
 /* ---------- signature digests ---------- */
@@ -163,6 +175,7 @@ export function countSigops(scriptHex: string): number {
  * signature digest for a hash type. Returns the steps and the final stack.
  */
 function run(scriptHex: string, stack: string[], digestFor: (hashType: number) => string): { steps: P2shStep[]; ok: boolean } {
+  // `stack` is mutated in place, so callers can apply BIP141's clean-stack rule afterwards.
   const steps: P2shStep[] = [];
   for (const o of decodeScript(scriptHex)) {
     if (o.dataHex !== null) {
@@ -246,7 +259,7 @@ export function traceP2sh(txHex: string, index: number, scriptPubKeyHex: string,
   const sigOps = decodeScript(input.scriptSigHex);
   const stages: P2shStage[] = [];
   const pushOnly = isPushOnly(sigOps);
-  const pushed = sigOps.map((o) => o.dataHex ?? (o.op - 0x50).toString(16).padStart(2, "0"));
+  const pushed = sigOps.map(pushedItem);
   stages.push({ id: "push-only", title: "The scriptSig only pushes data", ok: pushOnly, scriptHex: input.scriptSigHex, stackBefore: [], steps: [], note: pushOnly ? `${pushed.length} pushes; the last is the serialized redeem script` : "a non-push operation appears: validation fails" });
   const redeem = pushed[pushed.length - 1] ?? "";
   const base = { scriptPubKeyHex, redeemScriptHex: redeem, redeemSigops: redeem ? countSigops(redeem) : 0 };
@@ -258,6 +271,8 @@ export function traceP2sh(txHex: string, index: number, scriptPubKeyHex: string,
   stages.push({ id: "hash-match", title: "Its hash matches the output", ok: r2.ok, scriptHex: scriptPubKeyHex, stackBefore: [...pushed], steps: r2.steps, note: r2.ok ? "HASH160 of the serialized script equals the 20 bytes in the output" : "hash mismatch: validation fails immediately" });
 
   const program = witnessProgram(redeem);
+  if (program && !(program.version === 0 && (program.programHex.length === 40 || program.programHex.length === 64)))
+    throw new P2shScopeError("only version-0 programs of 20 or 32 bytes are in scope");
   const kind: P2shTrace["kind"] = !program ? "legacy" : program.programHex.length === 40 ? "p2sh-p2wpkh" : "p2sh-p2wsh";
   if (!r2.ok) return { valid: false, kind, ...base, stages };
 
@@ -265,6 +280,11 @@ export function traceP2sh(txHex: string, index: number, scriptPubKeyHex: string,
   if (!program) {
     // Stage 3: pop the script and run it on what is left, signing over the redeem script.
     const stack3 = [...rest];
+    // BIP141: a spend that is not a witness program MUST have an empty witness.
+    if ((tx.witnesses[index] ?? []).length) {
+      stages.push({ id: "redeem", title: "The redeem script runs on the remaining stack", ok: false, scriptHex: redeem, stackBefore: rest, steps: [], note: "this input carries witness data, which BIP 141 forbids for a spend that is not a witness program" });
+      return { valid: false, kind, ...base, stages };
+    }
     const r3 = run(redeem, stack3, (ht) => legacySighash(tx, index, redeem, ht));
     stages.push({ id: "redeem", title: "The redeem script runs on the remaining stack", ok: r3.ok, scriptHex: redeem, stackBefore: rest, steps: r3.steps, note: r3.ok ? "finishes with true on top: the spend is valid" : "does not finish with true: the spend fails" });
     return { valid: r3.ok, kind, ...base, stages };
@@ -273,22 +293,27 @@ export function traceP2sh(txHex: string, index: number, scriptPubKeyHex: string,
   // Wrapped SegWit: the redeem script is a witness program, so BIP141's rules take over.
   if (amountSats === null) throw new P2shScopeError("wrapped SegWit needs the spent amount");
   const witness = tx.witnesses[index] ?? [];
-  const single = sigOps.length === 1;
+  // BIP141: the scriptSig must be exactly a push of the redeem script (a direct push; both programs are under 76 bytes).
+  const single = input.scriptSigHex === (redeem.length / 2).toString(16).padStart(2, "0") + redeem;
+  const itemsOk = (items: string[]) => items.every((w) => w.length / 2 <= 520);
   if (program.programHex.length === 40) {
     const [sig, key] = witness;
-    const keyOk = witness.length === 2 && bytesToHex(hash160(hexToBytes(key))) === program.programHex;
+    const keyOk = witness.length === 2 && itemsOk(witness) && bytesToHex(hash160(hexToBytes(key))) === program.programHex;
     const scriptCode = `1976a914${program.programHex}88ac`;
     // With the key hash already matched, what remains of P2WPKH is <key> OP_CHECKSIG on the signature.
-    const keyCheck = (key.length / 2).toString(16).padStart(2, "0") + key + "ac";
-    const r = keyOk && single ? run(keyCheck, [sig], (ht) => bip143Digest(tx, index, scriptCode, amountSats, ht).sighashHex) : { steps: [], ok: false };
+    const st: string[] = [sig];
+    const r = keyOk && single ? run((key.length / 2).toString(16).padStart(2, "0") + key + "ac", st, (ht) => bip143Digest(tx, index, scriptCode, amountSats, ht).sighashHex) : { steps: [], ok: false };
+    r.ok = r.ok && st.length === 1;
     stages.push({ id: "witness", title: "The redeem script is a P2WPKH program: the witness is checked instead", ok: keyOk && single && r.ok, scriptHex: null, stackBefore: witness, steps: r.steps, note: keyOk ? "HASH160 of the witness key equals the program; the signature is checked with the BIP 143 digest" : "witness key does not match the program" });
     return { valid: keyOk && single && r.ok, kind, ...base, stages };
   }
   const witnessScript = witness[witness.length - 1] ?? "";
-  const scriptOk = single && bytesToHex(sha256(hexToBytes(witnessScript))) === program.programHex;
   const stack = witness.slice(0, -1);
+  const scriptOk = single && witness.length > 0 && witnessScript.length / 2 <= 10_000 && itemsOk(stack) && bytesToHex(sha256(hexToBytes(witnessScript))) === program.programHex;
   const scriptCode = varint(witnessScript.length / 2) + witnessScript;
-  const r = scriptOk ? run(witnessScript, [...stack], (ht) => bip143Digest(tx, index, scriptCode, amountSats, ht).sighashHex) : { steps: [], ok: false };
+  const st = [...stack];
+  const r = scriptOk ? run(witnessScript, st, (ht) => bip143Digest(tx, index, scriptCode, amountSats, ht).sighashHex) : { steps: [], ok: false };
+  r.ok = r.ok && st.length === 1; // BIP141: exactly a single TRUE left on the stack
   stages.push({ id: "witness", title: "The redeem script is a P2WSH program: the witness script runs", ok: scriptOk && r.ok, scriptHex: witnessScript, stackBefore: stack, steps: r.steps, note: scriptOk ? "SHA-256 of the witness script equals the program; signatures use the BIP 143 digest" : "witness script does not match the program" });
   return { valid: scriptOk && r.ok, kind, ...base, stages };
 }

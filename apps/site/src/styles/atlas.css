@@ -955,6 +955,7 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 .atlas-p2sh-lab__box[data-part="redeem"][data-revealed="false"] { border-style: dashed; background: var(--atlas-hatch), var(--manual-surface); }
 .atlas-p2sh-lab__tag { font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--manual-muted); }
 .atlas-p2sh-lab__hidden { font-style: italic; color: var(--manual-muted); }
+.atlas-p2sh-lab__before { margin-block: 0.75rem; padding: 0.75rem 1rem; border: 1px dashed var(--manual-rule); color: var(--manual-muted); }
 .atlas-p2sh-lab__stages { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--manual-space-3); }
 .atlas-p2sh-lab__asm { font-size: 0.75rem !important; }
 .atlas-p2sh-lab__stack { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: baseline; font-size: 0.8125rem; color: var(--manual-muted); }
