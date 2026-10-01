@@ -1,0 +1,809 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "tapscript",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files. Computed claims about Core test cases rest on sources/external/core-script-assets-excerpt.json, pinned in sources/external/external.lock.json.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 342 is a consensus soft-fork proposal assigned in 2020; its preamble records the status Deployed and that it requires BIPs 340 and 341, and it is deployed identically to BIP 341.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            3,
+            3
+          ],
+          "quote": "Layer: Consensus (soft fork)"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            8,
+            8
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "Assigned: 2020-01-19"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            13,
+            13
+          ],
+          "quote": "Requires: 340, 341"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "This proposal is deployed identically to Taproot ([[bip-0341.mediawiki|BIP341]])."
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 342 specifies the semantics of the initial scripting system under BIP 341.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "This document specifies the semantics of the initial scripting system under [[bip-0341.mediawiki|BIP341]]."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "The authors write that BIP 341 changes only the script structure, while some of its goals conflict with how certain opcodes behave, so Schnorr signatures, batch validation and the new signature hash had to reach script spends as well.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "proposes improvements to just the script structure, but some of its goals are incompatible with the semantics of certain opcodes within the scripting language itself."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            29,
+            29
+          ],
+          "quote": "their impact is not guaranteed unless they are addressed simultaneously with [[bip-0341.mediawiki|BIP341]] itself."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            31,
+            31
+          ],
+          "quote": "Specifically, the goal is making '''Schnorr signatures''', '''batch validation''', and '''signature hash''' improvements available to spends that use the script system as well."
+        }
+      ]
+    },
+    {
+      "id": "scope",
+      "statement": "The rules apply only to a witness version 1, 32-byte, non-P2SH Taproot script path spend whose leaf version is 0xc0; under BIP 341, spends with other leaf versions succeed, leaving them for future rules.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "This implies that for the future leaf versions (non-''0xC0'') the execution must succeed."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            50,
+            52
+          ],
+          "quote": "It is a '''taproot spend''' as defined in [[bip-0341.mediawiki#design|BIP341]] (i.e., the witness version is 1, the witness program is 32 bytes, and it is not P2SH wrapped). * It is a '''script path spend''' as defined in [[bip-0341.mediawiki#design|BIP341]] (i.e., after removing the optional annex from the witness stack, two or more stack elements remain). * The leaf version is ''0xc0''"
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "statement": "Validation must be equivalent to these steps in order: fail if BIP 141 or BIP 341 fails; decode the tapscript; check the initial stack's resource limits; execute; and require exactly one true element at the end.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            54,
+            55
+          ],
+          "quote": "Validation of such inputs must be equivalent to performing the following steps in the specified order. # If the input is invalid due to BIP141 or BIP341, fail."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "If the '''initial stack''' as defined in BIP341 (i.e., the witness stack after removing both the optional annex and the two last stack elements after that) violates any resource limits"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "If the execution results in anything but exactly one element on the stack which evaluates to true with <code>CastToBool()</code>, fail."
+        }
+      ]
+    },
+    {
+      "id": "op-success",
+      "statement": "After the BIP 141 and BIP 341 checks, any OP_SUCCESSx opcode met while decoding the script makes validation succeed, before the remaining tapscript rules and even if later bytes would not decode; a push that runs past the end fails.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "is encountered, validation succeeds (none of the rules below apply). This is true even if later bytes in the tapscript would fail to decode otherwise."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "If any push opcode fails to decode because it would extend past the end of the tapscript, fail."
+        }
+      ]
+    },
+    {
+      "id": "op-success-upgrade",
+      "statement": "The authors describe OP_SUCCESSx as an upgrade mechanism: a soft fork can give one a meaning, only ever turning valid scripts invalid, and they allow new opcodes more cleanly than OP_NOP. In a rationale footnote they warn that using one before it is defined is insecure and leads to fund loss.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            44,
+            44
+          ],
+          "quote": "Additionally, the new tapscript <code>OP_SUCCESS</code> opcodes allow introducing new opcodes more cleanly than through <code>OP_NOP</code>."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "is a mechanism to upgrade the Script system."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "Any rule changes to an <code>OP_SUCCESSx</code>-containing script may only turn a valid script into an invalid one, and this is always achievable with softforks."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "Using an <code>OP_SUCCESSx</code> before its meaning is defined by a softfork is insecure and leads to fund loss."
+        }
+      ]
+    },
+    {
+      "id": "p2wsh-base",
+      "statement": "Tapscript execution follows the P2WSH rules of BIP 141 with a list of modifications.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            71,
+            71
+          ],
+          "quote": "The execution rules for tapscript are based on those for P2WSH according to BIP141"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            71,
+            71
+          ],
+          "quote": "but with the following modifications:"
+        }
+      ]
+    },
+    {
+      "id": "checksig-schnorr",
+      "statement": "OP_CHECKSIG and OP_CHECKSIGVERIFY verify BIP 340 Schnorr signatures, over a signature message based on BIP 341's.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            35,
+            35
+          ],
+          "quote": "signature opcodes <code>OP_CHECKSIG</code> and <code>OP_CHECKSIGVERIFY</code> are modified to verify Schnorr signatures as specified in [[bip-0340.mediawiki|BIP340]] and to use a signature message algorithm based on the common message calculation in [[bip-0341.mediawiki|BIP341]]."
+        }
+      ]
+    },
+    {
+      "id": "multisig-disabled",
+      "statement": "OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY are disabled: like OP_RETURN, they fail the script immediately when executed and are ignored in unexecuted branches. The authors chose this so that anyone who keeps using them notices immediately.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "The disabled opcodes behave in the same way as <code>OP_RETURN</code>, by failing and terminating the script immediately when executed, and being ignored when found in unexecuted branch of the script."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "This is a precaution to make sure people who accidentally keep using <code>OP_CHECKMULTISIG</code> in Tapscript notice a problem immediately."
+        }
+      ]
+    },
+    {
+      "id": "checksigadd",
+      "statement": "Opcode 186 is OP_CHECKSIGADD, a new signature opcode added by BIP 342.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            76,
+            76
+          ],
+          "quote": "The opcode 186 (<code>0xba</code>) is named as <code>OP_CHECKSIGADD</code>."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            75,
+            75
+          ],
+          "quote": "and a new opcode <code>OP_CHECKSIGADD</code> is added."
+        }
+      ]
+    },
+    {
+      "id": "checksigadd-why",
+      "statement": "In a rationale footnote, the authors say OP_CHECKSIGADD compensates for CHECKMULTISIG-like opcodes, which are incompatible with batch verification, and that it is equivalent to OP_ROT OP_SWAP OP_CHECKSIG OP_ADD in one byte.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            76,
+            76
+          ],
+          "quote": "This opcode is added to compensate for the loss of <code>OP_CHECKMULTISIG</code>-like opcodes, which are incompatible with batch verification. <code>OP_CHECKSIGADD</code> is functionally equivalent to <code>OP_ROT OP_SWAP OP_CHECKSIG OP_ADD</code>, but only takes 1 byte."
+        }
+      ]
+    },
+    {
+      "id": "multisig-rewrite",
+      "statement": "In a rationale footnote, the authors show that a CHECKMULTISIG policy can be rewritten as <pubkey_1> CHECKSIG <pubkey_2> CHECKSIGADD … m NUMEQUAL, with one witness element per key that is either a signature or empty.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            77,
+            77
+          ],
+          "quote": "can be rewritten as script <code><pubkey_1> CHECKSIG <pubkey_2> CHECKSIGADD ... <pubkey_n> CHECKSIGADD m NUMEQUAL</code> with witness <code><w_n> ... <w_1></code>. Every witness element <code>w_i</code> is either a signature corresponding to <code>pubkey_i</code> or an empty vector."
+        }
+      ]
+    },
+    {
+      "id": "multisig-alternatives",
+      "statement": "The authors list other ways to express k-of-n: a k-of-k script per combination in separate leaves, an aggregated key per combination, or native threshold signatures, each with trade-offs.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            78,
+            78
+          ],
+          "quote": "A ''k''-of-''n'' policy can be implemented by splitting the script into several leaves of the Merkle tree, each implementing a ''k''-of-''k'' policy"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "This approach is far more efficient, but does require a 3-round interactive signing protocol to jointly produce the (single) signature."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "Multisig policies can also be realized with [http://cacr.uwaterloo.ca/techreports/2001/corr2001-13.ps threshold signatures] using verifiable secret sharing."
+        }
+      ]
+    },
+    {
+      "id": "minimalif",
+      "statement": "MINIMALIF, only a standardness rule in P2WSH, is consensus in tapscript: OP_IF and OP_NOTIF take exactly the empty vector or the single byte 0x01.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            73,
+            73
+          ],
+          "quote": "The MINIMALIF rules, which are only a standardness rule in P2WSH, are consensus enforced in tapscript. This means that the input argument to the <code>OP_IF</code> and <code>OP_NOTIF</code> opcodes must be either exactly 0 (the empty vector) or exactly 1 (the one-byte vector with value 1)"
+        }
+      ]
+    },
+    {
+      "id": "sig-pops",
+      "statement": "CHECKSIG and CHECKSIGVERIFY pop a public key and a signature; CHECKSIGADD also pops a number n between them. Too few elements, an n longer than 4 bytes, or an empty public key MUST make the script fail immediately.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            86,
+            91
+          ],
+          "quote": "For <code>OP_CHECKSIGVERIFY</code> and <code>OP_CHECKSIG</code>, the public key (top element) and a signature (second to top element) are popped from the stack. ** If fewer than 2 elements are on the stack, the script MUST fail and terminate immediately. * For <code>OP_CHECKSIGADD</code>, the public key (top element), a <code>CScriptNum</code> <code>n</code> (second to top element), and a signature (third to top element) are popped from the stack. ** If fewer than 3 elements are on the stack, the script MUST fail and terminate immediately. ** If <code>n</code> is larger than 4 bytes, the script MUST fail and terminate immediately. * If the public key size is zero, the script MUST fail and terminate immediately."
+        }
+      ]
+    },
+    {
+      "id": "sig-known",
+      "statement": "With a 32-byte key, a non-empty signature is checked as a BIP 340 signature, and a failed check ends the script with failure.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            92,
+            93
+          ],
+          "quote": "If the public key size is 32 bytes, it is considered to be a public key as described in BIP340: ** If the signature is not the empty vector, the signature is validated against the public key (see the next subsection). Validation failure in this case immediately terminates script execution with failure."
+        }
+      ]
+    },
+    {
+      "id": "sig-unknown",
+      "statement": "A public key that is neither empty nor 32 bytes is an unknown key type: no signature check is applied and a non-empty signature counts as successful, leaving room for soft forks to add new signature rules.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "If the public key size is not zero and not 32 bytes, the public key is of an ''unknown public key type''"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "and no actual signature verification is applied. During script execution of signature opcodes they behave exactly as known public key types except that signature validation is considered to be successful."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "allow adding new signature validation rules through softforks."
+        }
+      ]
+    },
+    {
+      "id": "sig-empty",
+      "statement": "An empty signature is not checked: CHECKSIGVERIFY MUST fail, CHECKSIG pushes an empty vector, and CHECKSIGADD pushes n unchanged.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            96,
+            99
+          ],
+          "quote": "If the signature is the empty vector: *** For <code>OP_CHECKSIGVERIFY</code>, the script MUST fail and terminate immediately. *** For <code>OP_CHECKSIG</code>, an empty vector is pushed onto the stack, and execution continues with the next opcode. *** For <code>OP_CHECKSIGADD</code>, a <code>CScriptNum</code> with value <code>n</code> is pushed onto the stack, and execution continues with the next opcode."
+        }
+      ]
+    },
+    {
+      "id": "sig-nonempty",
+      "statement": "A non-empty signature counts toward the sigops budget; then CHECKSIGVERIFY continues, CHECKSIG pushes 0x01, and CHECKSIGADD pushes n + 1.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            100,
+            103
+          ],
+          "quote": "If the signature is not the empty vector, the opcode is counted towards the sigops budget (see further). *** For <code>OP_CHECKSIGVERIFY</code>, execution continues without any further changes to the stack. *** For <code>OP_CHECKSIG</code>, a 1-byte value <code>0x01</code> is pushed onto the stack. *** For <code>OP_CHECKSIGADD</code>, a <code>CScriptNum</code> with value of <code>n + 1</code> is pushed onto the stack."
+        }
+      ]
+    },
+    {
+      "id": "sig-message",
+      "statement": "A tapscript signature signs hash_TapSighash(0x00 || SigMsg(hash_type, 1) || ext), where ext adds the tapleaf hash, a key version 0x00 and the position of the last executed OP_CODESEPARATOR; it commits to the executed script through the tapleaf hash rather than a scriptCode.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            116,
+            116
+          ],
+          "quote": "If the ''sig'' is 64 bytes long, return ''Verify(p, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 1) || ext), sig)''"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            108,
+            110
+          ],
+          "quote": "''tapleaf_hash'' (32): the tapleaf hash as defined in [[bip-0341.mediawiki#design|BIP341]] * ''key_version'' (1): a constant value ''0x00'' representing the current version of public keys in the tapscript signature opcode execution. * ''codesep_pos'' (4): the opcode position of the last executed <code>OP_CODESEPARATOR</code>"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            122,
+            122
+          ],
+          "quote": "The signature message commits to the executed script through the ''tapleaf_hash'' which includes the leaf version and script instead of ''scriptCode''."
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "statement": "Tapscript signature operations do not count toward the block-wide sigops limit; instead each input has a budget of 50 plus its serialized witness size, and every signature opcode with a non-empty signature subtracts 50, failing the script if the budget goes below zero. Unknown key types count too.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "The sigops in tapscripts do not count towards the block-wide limit of 80000 (weighted). Instead, there is a per-script sigops ''budget''. The budget equals 50 + the total serialized size in bytes of the transaction input's witness (including the <code>CompactSize</code> prefix). Executing a signature opcode (<code>OP_CHECKSIG</code>, <code>OP_CHECKSIGVERIFY</code>, or <code>OP_CHECKSIGADD</code>) with a non-empty signature decrements the budget by 50. If that brings the budget below zero, the script fails immediately. Signature opcodes with unknown public key type and non-empty signature are also counted."
+        }
+      ]
+    },
+    {
+      "id": "budget-arith",
+      "statement": "A signature checked against a 32-byte key must be 64 or 65 bytes, so with its length prefix it adds at least 65 bytes, more than the 50 its check costs; an unknown-key-type signature can be shorter and is still charged 50.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            116,
+            118
+          ],
+          "quote": "If the ''sig'' is 64 bytes long, return ''Verify(p, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 1) || ext), sig)''"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            118,
+            118
+          ],
+          "quote": "* Otherwise, fail."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "Signature opcodes with unknown public key type and non-empty signature are also counted."
+        }
+      ]
+    },
+    {
+      "id": "budget-why",
+      "statement": "The authors explain that tying signature operations to witness weight removes a second constraint that made block construction harder.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "The old sigop limit makes transaction selection in block construction unnecessarily difficult because it is a second constraint in addition to weight. Instead, the number of tapscript signature opcodes is limited by witness weight."
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "statement": "The 10,000-byte script size limit and the 201 non-push opcode limit do not apply; the 1,000-element stack limit remains and is extended to the initial stack, and the 520-byte element limit remains for the initial stack and pushes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            128,
+            128
+          ],
+          "quote": "The maximum script size of 10000 bytes does not apply."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            129,
+            129
+          ],
+          "quote": "The maximum non-push opcodes limit of 201 per script does not apply."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            131,
+            132
+          ],
+          "quote": "The existing limit of 1000 elements in the stack and altstack together after every executed opcode remains. It is extended to also apply to the size of initial stack. * '''Stack element size limit''' The existing limit of maximum 520 bytes per stack element remains, both in the initial stack and in push opcodes."
+        }
+      ]
+    },
+    {
+      "id": "examples-note",
+      "statement": "BIP 342 says the BIP 341 test vectors also contain tapscript examples; BIP 341 links Bitcoin Core's validation test vectors, used in its unit test framework, on that repository's main branch.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            144,
+            144
+          ],
+          "quote": "The Taproot ([[bip-0341.mediawiki|BIP341]]) test vectors also contain examples for Tapscript execution."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            304,
+            304
+          ],
+          "quote": "Validation test vectors used in the [https://github.com/bitcoin/bitcoin/blob/3820090bd619ac85ab35eff376c03136fe4a9f04/src/test/script_tests.cpp#L1718 Bitcoin Core unit test framework] can be found [https://github.com/bitcoin-core/qa-assets/blob/main/unit_test_data/script_assets_test.json?raw=true here]."
+        }
+      ]
+    },
+    {
+      "id": "wallet-vectors-no-spends",
+      "statement": "The wallet vector file in this snapshot holds tapscript leaves but publishes no script path spends, so the traces here come from the Core validation cases BIP 341 links to, pinned at a fixed commit.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            301,
+            301
+          ],
+          "quote": "For each of its BIP341 inputs, the internal private key and the Merkle root it was derived from is given, as well as the expected witness to spend it."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            298,
+            298
+          ],
+          "quote": "Test vectors for wallet operation (scriptPubKey computation, key path spending, control block construction) can be found"
+        }
+      ]
+    },
+    {
+      "id": "traces-agree",
+      "statement": "For each of the six recorded Core cases, the recorder's verdict on both the success and the failure witness matches Core's label, and every control block passes the BIP 341 commitment check; the recorder refuses any opcode outside its reviewed set rather than guessing.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            54,
+            54
+          ],
+          "quote": "Validation of such inputs must be equivalent to performing the following steps in the specified order."
+        }
+      ]
+    },
+    {
+      "id": "case-checksigadd",
+      "statement": "In Core case 1109, CHECKSIGADD with n = 23 and a valid signature leaves 24, which equals the pushed 24; the failure witness's 5-byte n stops the script.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            90,
+            90
+          ],
+          "quote": "If <code>n</code> is larger than 4 bytes, the script MUST fail and terminate immediately."
+        },
+        {
+          "bip": 342,
+          "lines": [
+            103,
+            103
+          ],
+          "quote": "For <code>OP_CHECKSIGADD</code>, a <code>CScriptNum</code> with value of <code>n + 1</code> is pushed onto the stack."
+        }
+      ]
+    },
+    {
+      "id": "case-empty",
+      "statement": "In Core case 1135 the script checks one signature with CHECKSIGVERIFY and gives CHECKSIGADD an empty signature, which leaves n = 0 and costs no budget; the failure witness's script hands CHECKSIGADD an empty public key, which stops it.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            99,
+            99
+          ],
+          "quote": "For <code>OP_CHECKSIGADD</code>, a <code>CScriptNum</code> with value <code>n</code> is pushed onto the stack"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            91,
+            91
+          ],
+          "quote": "If the public key size is zero, the script MUST fail and terminate immediately."
+        }
+      ]
+    },
+    {
+      "id": "case-multisig",
+      "statement": "In Core case 804 the success witness's script is <key> CHECKSIG; the failure witness tries a 1-of-1 CHECKMULTISIG, which fails as soon as it runs.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "by failing and terminating the script immediately when executed"
+        }
+      ]
+    },
+    {
+      "id": "case-minimalif",
+      "statement": "In Core case 662 the success witness gives OP_IF the byte 0x01; the failure witness gives it a 3-byte value, which MINIMALIF rejects.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            73,
+            73
+          ],
+          "quote": "must be either exactly 0 (the empty vector) or exactly 1 (the one-byte vector with value 1)"
+        }
+      ]
+    },
+    {
+      "id": "case-unknown",
+      "statement": "In Core case 824 a 33-byte key makes CHECKSIG skip verification and push 1, while still spending 50 of the budget; the failure witness uses the 32-byte form of the same key, so the signature is checked for real and fails.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "If the public key size is not zero and not 32 bytes, the public key is of an ''unknown public key type''"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "Signature opcodes with unknown public key type and non-empty signature are also counted."
+        }
+      ]
+    },
+    {
+      "id": "case-success",
+      "statement": "In Core case 50 the success script is the single opcode 126, an OP_SUCCESSx, so the spend is valid without running anything; the failure script is OP_NOP, which leaves an empty stack and fails.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 342,
+          "lines": [
+            56,
+            57
+          ],
+          "quote": "## If any opcode numbered ''80, 98, 126-129"
+        },
+        {
+          "bip": 342,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "If the execution results in anything but exactly one element on the stack which evaluates to true"
+        }
+      ]
+    }
+  ]
+}

@@ -149,9 +149,9 @@ export function DerivationTree({ fixture, figureId }: Props) {
         </ul>
 
         <section class="atlas-panel atlas-node" aria-label={`Details for ${current.path}`} aria-live="polite">
-          <h4 class="atlas-panel__title">
+          <h3 class="atlas-panel__title">
             {label(current)} · depth {current.depth} {current.vectorLine ? `· matches BIP 32 lines ${current.vectorLine}–${current.vectorLine + 2}` : "· computed by the tested implementation"}
-          </h4>
+          </h3>
           {!currentOk ? (
             <p class="atlas-node__blocked">
               <strong>Not derivable from M.</strong> The path passes through the hardened edge {current.hardenedAncestor}.

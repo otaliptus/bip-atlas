@@ -12,7 +12,7 @@ export function PsbtLayout({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
       </p>
       {state.maps.map((m) => (
         <section class="atlas-env__map" data-scope={m.scope} aria-label={title(m.scope, m.index)}>
-          <h5 class="atlas-env__title">{title(m.scope, m.index)}</h5>
+          <h2 class="atlas-env__title">{title(m.scope, m.index)}</h2>
           {m.records.length ? (
             <ul class="atlas-env__records">
               {m.records.map((r) => (

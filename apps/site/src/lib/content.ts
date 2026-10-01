@@ -66,6 +66,15 @@ export function listChapterIds(): string[] {
   return loadCatalog().chapters.filter((c) => present.has(c.id)).sort((a, b) => a.readingOrder - b.readingOrder).map((c) => c.id);
 }
 
+/** Anchor id for the citation marker of the block at `path` (a walkBlocks path). */
+export const citeAnchor = (path: string) => `cite-${path.replace(/[^A-Za-z0-9]+/g, "-").replace(/-$/, "")}`;
+
+export interface Citation {
+  anchor: string;
+  /** Where the citing text sits, for the back-link's accessible name. */
+  where: string;
+}
+
 export interface LoadedChapter {
   publication: Publication;
   ledger: EvidenceLedger;
@@ -74,6 +83,8 @@ export interface LoadedChapter {
   /** Claims in order of first citation, numbered from 1. */
   citedClaims: Array<Claim & { number: number }>;
   claimNumbers: Map<string, number>;
+  /** Every place each claim is cited, in reading order. */
+  citations: Map<string, Citation[]>;
 }
 
 const cache = new Map<string, LoadedChapter>();
@@ -96,12 +107,21 @@ export function loadChapter(id: string): LoadedChapter {
   if (problems.length) throw new Error(`Chapter ${id} failed validation:\n- ${problems.join("\n- ")}`);
 
   const claimNumbers = new Map<string, number>();
-  for (const { block } of walkBlocks(publication)) {
-    if ("claims" in block) for (const c of block.claims) if (!claimNumbers.has(c)) claimNumbers.set(c, claimNumbers.size + 1);
+  const citations = new Map<string, Citation[]>();
+  const headings = new Map(publication.sections.map((s) => [s.id, s.heading]));
+  for (const { block, path } of walkBlocks(publication)) {
+    if (!("claims" in block)) continue;
+    const section = /^sections\.([^[]+)/.exec(path)?.[1];
+    const place = section ? headings.get(section)! : "Opening";
+    const where = block.type === "figure" ? `Fig. ${block.figure} caption` : place;
+    for (const c of block.claims) {
+      if (!claimNumbers.has(c)) claimNumbers.set(c, claimNumbers.size + 1);
+      citations.set(c, [...(citations.get(c) ?? []), { anchor: citeAnchor(path), where }]);
+    }
   }
   const byId = new Map(ledger.claims.map((c) => [c.id, c]));
   const citedClaims = [...claimNumbers].map(([cid, number]) => ({ ...byId.get(cid)!, number }));
-  const loaded = { publication, ledger, fixtures, lock, citedClaims, claimNumbers };
+  const loaded = { publication, ledger, fixtures, lock, citedClaims, claimNumbers, citations };
   cache.set(id, loaded);
   return loaded;
 }

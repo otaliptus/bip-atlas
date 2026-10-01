@@ -21,6 +21,27 @@ import {
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
+  MnemonicWorked,
+  Bip32Worked,
+  TxWorked,
+  AddressWorked,
+  PsbtWorked,
+  SchnorrWorked,
+  TaprootWorked,
+  TapscriptWorked,
+  SignatureLayout,
+  SchnorrVerifier,
+  ChallengePreimage,
+  TaprootTweak,
+  TaprootCommitment,
+  SigMsgLayout,
+  TapscriptWitness,
+  TapscriptTrace,
+  SigopsBudget,
+  type DerivedTapscriptFixture,
+  type DerivedTaprootTreeFixture,
+  type DerivedTaprootKeyspendFixture,
+  type DerivedSchnorrFixture,
   type AddressFixture,
   type BaseFixture,
   type DerivedBip32Fixture,
@@ -37,8 +58,10 @@ interface Props {
   figure: Figure;
   numbers: Map<string, number>;
   fixtures: Map<string, BaseFixture>;
+  /** walkBlocks path of this figure, for the caption's citation anchor. */
+  path: string;
 }
-const { figure, numbers, fixtures } = Astro.props;
+const { figure, numbers, fixtures, path } = Astro.props;
 const recipe = RECIPE_MAP.get(figure.recipe);
 if (!recipe) throw new Error(`No recipe ${figure.recipe}`);
 const picked = deriveFixtures(figure.fixtures.map((id) => fixtures.get(id)!));
@@ -49,8 +72,12 @@ const hd = picked as DerivedBip32Fixture[];
 const tx = picked as DerivedTransactionFixture[];
 const trace = picked as DerivedPsbtTraceFixture[];
 const pair = picked as DerivedPsbtCombineFixture[];
+const sig = picked as DerivedSchnorrFixture[];
+const tap = picked as DerivedTaprootTreeFixture[];
+const keyspend = picked as DerivedTaprootKeyspendFixture[];
+const ts = picked as DerivedTapscriptFixture[];
 ---
-<Plate figure={figure} numbers={numbers} interactive={recipe.interactive}>
+<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
   {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
   {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
@@ -66,4 +93,25 @@ const pair = picked as DerivedPsbtCombineFixture[];
   {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
   {figure.recipe === "psbt-envelope.v1" && <PsbtEnvelope client:visible fixture={trace[0]} figureId={figureId} />}
   {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
+  {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
+  {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
+  {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
+  {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
+  {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
+  {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
+  {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
+  {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
+  {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {recipe.interactive && (
+    <Fragment slot="worked">
+      {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
+      {figure.recipe === "entropy-word-pipeline.v1" && <MnemonicWorked fixture={mnemonic[0]} />}
+      {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
+      {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
+      {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
+      {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
+      {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
+      {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
+    </Fragment>
+  )}
 </Plate>

@@ -28,6 +28,22 @@
         "line": 135
       },
       "license": "see upstream repository"
+    },
+    {
+      "file": "core-script-assets-excerpt.json",
+      "repository": "https://github.com/bitcoin-core/qa-assets",
+      "commit": "0739b29cfb99e8de42298f550e9cdbf1a7659dcf",
+      "path": "unit_test_data/script_assets_test.json (excerpt: 6 of 2244 cases)",
+      "sha256": "b8cad9c0999f5a1d6a6eb205a8ece733b3452c35feb35a0e7802e44cfffac8ea",
+      "bytes": 17992,
+      "upstreamSha256": "cd789a58ec45916e1721cdd14e82ca4c93100959f1cef4e229b22e3bf539f095",
+      "upstreamBytes": 9243520,
+      "citedBy": {
+        "bip": 341,
+        "line": 304
+      },
+      "license": "see upstream repository",
+      "note": "Excerpt made by tools/extract-script-assets.mjs, which checks the full file's SHA-256 first."
     }
   ]
 }

@@ -115,7 +115,7 @@ export function PsbtEnvelope({ fixture, figureId }: Props) {
 
       {isExtract ? (
         <section class="atlas-panel atlas-psbt-lab__final">
-          <h4 class="atlas-panel__title">Network transaction · BIP 174 line {fixture.extracted.line}</h4>
+          <h3 class="atlas-panel__title">Network transaction · BIP 174 line {fixture.extracted.line}</h3>
           <dl class="atlas-tx-lab__sizes">
             <div><dt>Size</dt><dd>{extracted.bytes} bytes</dd></div>
             <div><dt>Inputs · outputs</dt><dd>{extracted.inputs} · {extracted.outputs}</dd></div>
@@ -130,7 +130,7 @@ export function PsbtEnvelope({ fixture, figureId }: Props) {
             <p class="atlas-env__magic"><code>70 73 62 74 ff</code> <span>“psbt” + 0xff</span></p>
             {state!.maps.map((m) => (
               <section class="atlas-env__map" data-scope={m.scope} aria-label={`${title(m.scope, m.index)} map`}>
-                <h5 class="atlas-env__title">{title(m.scope, m.index)} map</h5>
+                <h3 class="atlas-env__title">{title(m.scope, m.index)} map</h3>
                 <ul class="atlas-env__records">
                   {m.records.map((r) => (
                     <li>
@@ -163,7 +163,7 @@ export function PsbtEnvelope({ fixture, figureId }: Props) {
           <section class="atlas-panel atlas-psbt-lab__detail" aria-live="polite" aria-label="Field detail">
             {detail ? (
               <>
-                <h4 class="atlas-panel__title">{detail.name}</h4>
+                <h3 class="atlas-panel__title">{detail.name}</h3>
                 <dl class="atlas-node__fields">
                   <div><dt>Map</dt><dd>{title(detail.scope, detail.index)}</dd></div>
                   <div><dt>Key type</dt><dd><code>0x{detail.keyType.toString(16).padStart(2, "0")}</code> {detail.constant ? <code>{detail.constant}</code> : null}</dd></div>

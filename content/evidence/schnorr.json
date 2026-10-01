@@ -1,0 +1,744 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "schnorr",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files. Claims citing bip-0340/test-vectors.csv use its line numbers (header = line 1).",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 340 was assigned in 2020; its preamble records the status Deployed and the type Specification.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            11,
+            11
+          ],
+          "quote": "Assigned: 2020-01-19"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            9,
+            9
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "Type: Specification"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 340 proposes a standard for 64-byte Schnorr signatures over the curve secp256k1. It reuses the curve and hash function Bitcoin already uses for ECDSA.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            21,
+            21
+          ],
+          "quote": "This document proposes a standard for 64-byte Schnorr signatures over the elliptic curve ''secp256k1''."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "By reusing the same curve and hash function as Bitcoin uses for ECDSA"
+        }
+      ]
+    },
+    {
+      "id": "verify-inputs",
+      "statement": "Verify takes a 32-byte public key, a message of any length (a byte array), and a 64-byte signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            177,
+            179
+          ],
+          "quote": "* The public key ''pk'': a 32-byte array * The message ''m'': a byte array * A signature ''sig'': a 64-byte array"
+        }
+      ]
+    },
+    {
+      "id": "verify-steps",
+      "statement": "Verify lifts pk to a point P, checks r < p and s < n, computes the challenge e, computes R = s⋅G − e⋅P, and fails if R is infinite, has odd y, or has an x coordinate different from r; it succeeds only if no step failed.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            182,
+            190
+          ],
+          "quote": "* Let ''P = lift_x(int(pk))''; fail if that fails. * Let ''r = int(sig[0:32])''; fail if ''r &ge; p''. * Let ''s = int(sig[32:64])''; fail if ''s &ge; n''. * Let ''e = int(hash<sub>BIP0340/challenge</sub>(bytes(r) || bytes(P) || m)) mod n''. * Let ''R = s⋅G - e⋅P''. * Fail if ''is_infinite(R)''. * Fail if ''not has_even_y(R)''. * Fail if ''x(R) &ne; r''. * Return success iff no failure occurred before reaching this point."
+        }
+      ]
+    },
+    {
+      "id": "correctness",
+      "statement": "For every valid secret key and message, verifying the default signer's signature with the matching public key succeeds.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            192,
+            192
+          ],
+          "quote": "For every valid secret key ''sk'' and message ''m'', ''Verify(PubKey(sk),m,Sign(sk,m))'' will succeed."
+        }
+      ]
+    },
+    {
+      "id": "completely-specified",
+      "statement": "The authors require the verification algorithm to be completely specified at the byte level, so that nobody can make a signature valid to some verifiers but not others; they cite DER parsing problems with ECDSA.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "To be safe for usage in consensus systems, the verification algorithm must be completely specified at the byte level. This guarantees that nobody can construct a signature that is valid to some verifiers but not all."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "the lack of exact specification for the DER parsing of ECDSA signatures has caused problems for Bitcoin"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "This is traditionally not a requirement for digital signature schemes"
+        }
+      ]
+    },
+    {
+      "id": "encodings",
+      "statement": "BIP 340 uses a fixed 64-byte signature instead of DER encoding (variable size, up to 72 bytes) and 32-byte public keys instead of 33-byte compressed points.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            43,
+            43
+          ],
+          "quote": "-encoding for signatures (which are variable size, and up to 72 bytes), we can use a simple fixed 64-byte format."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            44,
+            44
+          ],
+          "quote": "public keys in this proposal are encoded as 32 bytes."
+        }
+      ]
+    },
+    {
+      "id": "final-scheme",
+      "statement": "The public key pk is the x coordinate of a point P with even y; a signature is (r, s) where r is the x coordinate of a point R with even y, and s⋅G = R + tagged_hash(r || pk || m)⋅P.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "our final scheme ends up using public key ''pk'' which is the X coordinate of a point ''P'' on the curve whose Y coordinate is even and signatures ''(r,s)'' where ''r'' is the X coordinate of a point ''R'' whose Y coordinate is even. The signature satisfies ''s⋅G = R + tagged_hash(r || pk || m)⋅P''."
+        }
+      ]
+    },
+    {
+      "id": "curve-arithmetic",
+      "statement": "Points are on the curve y² = x³ + 7 over the integers modulo p; p is the field size and n the curve order, both given as exact constants.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            100,
+            100
+          ],
+          "quote": "Uppercase variables refer to points on the curve with equation ''y<sup>2</sup> = x<sup>3</sup> + 7'' over the integers modulo ''p''."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            98,
+            99
+          ],
+          "quote": "The constant ''p'' refers to the field size, ''0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F''. ** The constant ''n'' refers to the curve order, ''0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141''."
+        }
+      ]
+    },
+    {
+      "id": "lift-x",
+      "statement": "lift_x(x) returns the point with that x coordinate and even y, or fails if x is greater than p − 1 or no such point exists.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            113,
+            114
+          ],
+          "quote": "returns the point ''P'' for which ''x(P) = x''"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            114,
+            114
+          ],
+          "quote": "and ''has_even_y(P)'', or fails if ''x'' is greater than ''p-1'' or no such point exists."
+        }
+      ]
+    },
+    {
+      "id": "lift-x-steps",
+      "statement": "lift_x fails if x ≥ p, computes c = x³ + 7 mod p and y = c^((p+1)/4) mod p, fails if y² ≠ c, and returns the point with the even one of y and p − y.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            115,
+            119
+          ],
+          "quote": "*** Fail if ''x &ge; p''. *** Let ''c = x<sup>3</sup> + 7 mod p''. *** Let ''y = c<sup>(p+1)/4</sup> mod p''. *** Fail if ''c &ne; y<sup>2</sup> mod p''. *** Return the unique point ''P'' such that ''x(P) = x'' and ''y(P) = y'' if ''y mod 2 = 0'' or ''y(P) = p-y'' otherwise."
+        }
+      ]
+    },
+    {
+      "id": "implicit-y",
+      "statement": "Every valid x coordinate has two possible y coordinates, one even and one odd; BIP 340 implicitly takes the even one for both P and R, so an x-only key is equivalent to a compressed key with the prefix byte 0x02.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            82,
+            82
+          ],
+          "quote": "we pick that option for ''P'', and thus our X-only public keys become equivalent to a compressed public key that is the X-only key prefixed by the byte 0x02. For consistency, the same is done for ''R''"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            77,
+            77
+          ],
+          "quote": "(every valid X coordinate has two possible Y coordinates)"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "This means that for a valid X coordinate, one of the corresponding Y coordinates will be even, and the other will be odd."
+        }
+      ]
+    },
+    {
+      "id": "no-security-loss",
+      "statement": "The authors argue that implicit y coordinates are not a reduction in security, although they halve the set of valid public keys: breaking an x-only key can be at most a small constant term faster than breaking a full one.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            84,
+            84
+          ],
+          "quote": "Despite halving the size of the set of valid public keys, implicit Y coordinates are not a reduction in security."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            84,
+            84
+          ],
+          "quote": "This shows that breaking an X-only public key can be at most a small constant term faster than breaking a full one."
+        }
+      ]
+    },
+    {
+      "id": "two-secret-keys",
+      "statement": "Every BIP 340 public key has two corresponding secret keys, sk and n − sk.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "A side effect is that ''PubKey(sk) = PubKey(bytes(n - int(sk))'', so every public key has two corresponding secret keys."
+        }
+      ]
+    },
+    {
+      "id": "tagged-hash",
+      "statement": "hash_name(x) is SHA256(SHA256(tag) || SHA256(tag) || x), where tag is the UTF-8 encoding of name.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            120,
+            120
+          ],
+          "quote": "returns the 32-byte hash ''SHA256(SHA256(tag) || SHA256(tag) || x)'', where ''tag'' is the UTF-8 encoding of ''name''."
+        }
+      ]
+    },
+    {
+      "id": "tag-rationale",
+      "statement": "Tags keep a hash computed for one purpose from being reinterpreted in another context.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            86,
+            86
+          ],
+          "quote": "To make sure hashes used in one context can't be reinterpreted in another one, hash functions can be tweaked with a context-dependent tag name, in such a way that collisions across contexts can be assumed to be infeasible."
+        }
+      ]
+    },
+    {
+      "id": "key-prefixing",
+      "statement": "Without the public key in the challenge, a third party could turn a signature for P into one for P + a⋅G for any additive tweak a, which the authors say would make signatures insecure with BIP 32 unhardened derivation and with tweaks such as Taproot's; so the public key is prefixed to the message in the challenge.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "a third party can convert a signature ''(R, s)'' for public key ''P'' into a signature ''(R, s + a⋅hash(R || m))'' for public key ''P + a⋅G'' and the same message ''m'', for any given additive tweak ''a'' to the signing key."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "and other methods that rely on additive tweaks to existing keys such as Taproot."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "which means that the public key is prefixed to the message in the challenge hash input."
+        }
+      ]
+    },
+    {
+      "id": "r-variant",
+      "statement": "BIP 340 signatures reveal R (as r) rather than e; the authors chose this because it supports batch verification, as no elliptic-curve operations sit inside the hashes.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            60,
+            60
+          ],
+          "quote": "This supports batch verification, as there are no elliptic curve operations inside the hashes."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "We choose the ''R''-option, which supports batch verification."
+        }
+      ]
+    },
+    {
+      "id": "batch",
+      "statement": "BIP 340 also specifies batch verification: if every signature is valid it succeeds; if any is invalid it succeeds only with negligible probability.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            215,
+            215
+          ],
+          "quote": "If all individual signatures are valid (i.e., ''Verify'' would return success for them), ''BatchVerify'' will always return success. If at least one signature is invalid, ''BatchVerify'' will return success with at most a negligible probability."
+        }
+      ]
+    },
+    {
+      "id": "arbitrary-size",
+      "statement": "BIP 340 accepts messages of arbitrary size; earlier revisions required exactly 32 bytes, and the changelog records the change in 2023-04. Pre-hashing is still recommended for performance with large messages. Implementations may reject messages too large for their environment.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            221,
+            221
+          ],
+          "quote": "The signature scheme specified in this BIP accepts byte strings of arbitrary size as input messages."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            225,
+            225
+          ],
+          "quote": "Earlier revisions of this BIP required messages to be exactly 32 bytes."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            299,
+            299
+          ],
+          "quote": "2023-04: Allow messages of arbitrary size"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            234,
+            234
+          ],
+          "quote": "We note that pre-hashing is recommended for performance reasons in applications that deal with large messages."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            222,
+            222
+          ],
+          "quote": "It is understood that implementations may reject messages which are too large in their environment or application context,"
+        }
+      ]
+    },
+    {
+      "id": "bip341-prehash",
+      "statement": "BIP 340 gives BIP 341 as an example of pre-hashing to a 32-byte digest; BIP 341's key-path rule verifies a signature over hash_TapSighash(0x00 || SigMsg(...)), a 32-byte tagged hash.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            227,
+            229
+          ],
+          "quote": "to create a 32-byte digest which can be passed to signing or verification (as for example done in [[bip-0341.mediawiki|BIP341]].)"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "return ''Verify(q, hash<sub>TapSighash</sub>(0x00 || SigMsg(0x00, 0)), sig)''"
+        }
+      ]
+    },
+    {
+      "id": "domain-separation",
+      "statement": "BIP 340 says applications should make sure a message signed for one context is never accepted in another, and recommends a tagged pre-hash or a 33-byte context prefix.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            249,
+            249
+          ],
+          "quote": "applications should ensure that a signed application message intended for one context is never deemed valid in a different context"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            255,
+            255
+          ],
+          "quote": "we recommend applications to use exactly one of the following methods to pre-process application messages before passing it to the signature scheme:"
+        }
+      ]
+    },
+    {
+      "id": "non-malleable",
+      "statement": "The authors state that the SUF-CMA security of Schnorr signatures implies they are non-malleable, whereas ECDSA signatures are inherently malleable.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            35,
+            35
+          ],
+          "quote": "The SUF-CMA security of Schnorr signatures implies that they are non-malleable. On the other hand, ECDSA signatures are inherently malleable"
+        }
+      ]
+    },
+    {
+      "id": "multisig-scope",
+      "statement": "Multiparty signing is left to interactive schemes such as MuSig2 (BIP 327); BIP 340 warns that multisignature schemes are generally insecure with the rand generation of its default signing algorithm or any other deterministic method.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            268,
+            268
+          ],
+          "quote": "By means of an interactive scheme such as [https://eprint.iacr.org/2020/1261.pdf MuSig2] ([[bip-0327.mediawiki|BIP327]]), participants can aggregate their public keys into a single public key which they can jointly sign for."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            170,
+            170
+          ],
+          "quote": "It is important to note that multisignature signing schemes in general are insecure with the ''rand'' generation from the default signing algorithm above (or any other deterministic method)."
+        }
+      ]
+    },
+    {
+      "id": "verifier-view",
+      "statement": "From a verifier's perspective, an n-of-n MuSig2 signature is no different from an ordinary signature.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            268,
+            268
+          ],
+          "quote": "This allows ''n''-of-''n'' multisignatures which, from a verifier's perspective, are no different from ordinary signatures"
+        }
+      ]
+    },
+    {
+      "id": "not-unique",
+      "statement": "Signing is not unique: other ways of generating the rand value produce different but equally valid signatures; however rand is generated, it must be a fresh uniformly random 32-byte string not even partially predictable to an attacker.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            165,
+            165
+          ],
+          "quote": "producing a different but still valid signature (in other words, this is not a ''unique'' signature scheme)"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            165,
+            165
+          ],
+          "quote": "the value must be a fresh uniformly random 32-byte string which is not even partially predictable for the attacker."
+        }
+      ]
+    },
+    {
+      "id": "reference-demo",
+      "statement": "The BIP's Python reference implementation is naive, non-constant-time and for demonstration only; the vectors are published as a CSV file.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            289,
+            289
+          ],
+          "quote": "a naive, highly inefficient, and non-constant time [[bip-0340/reference.py|pure Python 3.7 reference implementation of the signing and verification algorithm]]"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            292,
+            292
+          ],
+          "quote": "The reference implementation is for demonstration purposes only and not to be used in production environments."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            288,
+            288
+          ],
+          "quote": "we provide a [[bip-0340/test-vectors.csv|collection of test vectors in CSV format]]"
+        }
+      ]
+    },
+    {
+      "id": "vectors-reproduced",
+      "statement": "All 19 published vectors (9 valid, 10 invalid) give the published result when run through this site's step-by-step verifier, which uses @noble/curves arithmetic and is cross-checked against noble's own verifier; the eight vectors with secret keys also reproduce their signatures.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            1,
+            1
+          ],
+          "quote": "index,secret key,public key,aux_rand,message,signature,verification result,comment",
+          "file": "bip-0340/test-vectors.csv"
+        }
+      ]
+    },
+    {
+      "id": "comment-vs-stage",
+      "statement": "The CSV comment says how an invalid vector was made, not necessarily which check rejects it: vector 7 ('negated message') is rejected because the recomputed R has odd y, before any x comparison; vectors 8 and 11 fail at the x(R) comparison.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            9,
+            9
+          ],
+          "quote": "FALSE,negated message",
+          "file": "bip-0340/test-vectors.csv"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            188,
+            188
+          ],
+          "quote": "* Fail if ''not has_even_y(R)''."
+        },
+        {
+          "bip": 340,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "FALSE,negated s value",
+          "file": "bip-0340/test-vectors.csv"
+        }
+      ]
+    },
+    {
+      "id": "message-swap",
+      "statement": "Checking each valid hero vector's key and signature against another fixture's message fails, in every such pairing, at the even-y or x(R) step, because the message changes e and therefore R.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            185,
+            186
+          ],
+          "quote": "* Let ''e = int(hash<sub>BIP0340/challenge</sub>(bytes(r) || bytes(P) || m)) mod n''. * Let ''R = s⋅G - e⋅P''."
+        }
+      ]
+    },
+    {
+      "id": "challenge-sizes",
+      "statement": "The published vectors include valid signatures on messages of 0, 1, 17, 32 and 100 bytes; for each, the challenge hash input is 64 tag bytes, 32 bytes of r, 32 bytes of P and the whole message.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 340,
+          "lines": [
+            17,
+            17
+          ],
+          "quote": "message of size 0 (added 2022-12)",
+          "file": "bip-0340/test-vectors.csv"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            18,
+            18
+          ],
+          "quote": "message of size 1 (added 2022-12)",
+          "file": "bip-0340/test-vectors.csv"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            19,
+            19
+          ],
+          "quote": "message of size 17 (added 2022-12)",
+          "file": "bip-0340/test-vectors.csv"
+        },
+        {
+          "bip": 340,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "message of size 100 (added 2022-12)",
+          "file": "bip-0340/test-vectors.csv"
+        }
+      ]
+    }
+  ]
+}

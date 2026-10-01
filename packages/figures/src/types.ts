@@ -5,6 +5,8 @@ export interface FixtureSource {
   bip?: number;
   line?: number;
   section?: string;
+  /** Auxiliary file in the BIP's directory (e.g. "bip-0340/test-vectors.csv"); defaults to the BIP itself. */
+  file?: string;
   /** Verbatim text that must appear on the cited BIP line. */
   quote?: string;
   /** File name in sources/external/external.lock.json. */
@@ -171,3 +173,157 @@ export interface PsbtCombineDerived {
 }
 
 export type DerivedPsbtCombineFixture = PsbtCombineFixture & { derived: PsbtCombineDerived };
+
+export interface SchnorrVectorFixture extends BaseFixture {
+  kind: "schnorr-vector";
+  vectorIndex: number;
+  publicKeyHex: string;
+  messageHex: string;
+  signatureHex: string;
+  /** The CSV's "verification result" column. */
+  expected: boolean;
+  /** The CSV's comment column, verbatim. */
+  comment: string;
+}
+
+export type SchnorrStageId = "lift-x" | "r-range" | "s-range" | "challenge" | "compute-r" | "infinity" | "even-y" | "x-match";
+
+export interface SchnorrTraceView {
+  valid: boolean;
+  failedStage: SchnorrStageId | null;
+  steps: Array<{ stage: SchnorrStageId; ok: boolean; values: Record<string, string> }>;
+}
+
+export interface SchnorrDerived {
+  /** Messages available in this figure: each comes from one of its fixtures. */
+  messages: Array<{ key: string; fromVector: number; hex: string; bytes: number }>;
+  /** Key of this vector's own message in `messages`. */
+  ownMessage: string;
+  /** Verification trace of this vector's key and signature against each message. */
+  traces: Record<string, SchnorrTraceView>;
+  /** SHA256("BIP0340/challenge"), the tag half of the challenge prefix. */
+  challengeTagHex: string;
+  challengeHashHex: string | null;
+}
+
+export type DerivedSchnorrFixture = SchnorrVectorFixture & { derived: SchnorrDerived };
+
+export type TaprootScriptTree = null | { id: number; script: string; leafVersion: number } | [TaprootScriptTree, TaprootScriptTree];
+
+export interface TaprootTreeFixture extends BaseFixture {
+  kind: "taproot-tree";
+  vectorIndex: number;
+  given: { internalPubkey: string; scriptTree: TaprootScriptTree };
+  intermediary: { leafHashes?: string[]; merkleRoot: string | null; tweak: string; tweakedPubkey: string };
+  expected: { scriptPubKey: string; bip350Address: string; scriptPathControlBlocks?: string[] };
+  /** A published key-path spend of this same output, if the vectors include one. */
+  keySpend?: { pointer: string; txinIndex: number; hashType: number; sigHash: string; witness: string[] };
+}
+
+export interface TaprootNodeView {
+  hash: string;
+  leaf: number | null;
+  children: TaprootNodeView[];
+}
+
+export interface TaprootLeafView {
+  id: number;
+  leafVersion: number;
+  scriptHex: string;
+  /** Short reading of the script, e.g. "<32-byte key> OP_CHECKSIG". */
+  scriptReading: string;
+  leafHash: string;
+  path: string[];
+  controlBlockHex: string;
+  /** The verifier's recomputation from the control block, step by step. */
+  check: Array<{ id: string; ok: boolean; values: Record<string, string> }>;
+}
+
+export interface TaprootTreeDerived {
+  internalKeyHex: string;
+  merkleRootHex: string | null;
+  tweakHex: string;
+  outputKeyHex: string;
+  parity: 0 | 1;
+  scriptPubKeyHex: string;
+  address: string;
+  root: TaprootNodeView | null;
+  leaves: TaprootLeafView[];
+  keySpend: { signatureHex: string; hashType: number; sighashHex: string; verified: boolean } | null;
+}
+
+export type DerivedTaprootTreeFixture = TaprootTreeFixture & { derived: TaprootTreeDerived };
+
+export interface TaprootKeyspendFixture extends BaseFixture {
+  kind: "taproot-keyspend";
+  rawUnsignedTx: string;
+  utxosSpent: Array<{ scriptPubKey: string; amountSats: number }>;
+  inputSpending: {
+    given: { txinIndex: number; merkleRoot: string | null; hashType: number };
+    intermediary: { internalPubkey: string; tweak: string; sigMsg: string; precomputedUsed: string[]; sigHash: string };
+    expected: { witness: string[] };
+  };
+}
+
+export interface TaprootKeyspendDerived {
+  inputs: number;
+  outputs: number;
+  txinIndex: number;
+  hashType: number;
+  items: Array<{ id: string; label: string; hex: string; bytes: number; note: string }>;
+  sigMsgBytes: number;
+  sighashHex: string;
+  totalSpentSats: string;
+  totalOutSats: string;
+}
+
+export type DerivedTaprootKeyspendFixture = TaprootKeyspendFixture & { derived: TaprootKeyspendDerived };
+
+export interface TapscriptCaseFixture extends BaseFixture {
+  kind: "tapscript-case";
+  /** Index of the case in the upstream script_assets_test.json array. */
+  caseIndex: number;
+  /** The upstream case's comment, verbatim. */
+  comment: string;
+}
+
+export interface TapscriptElement {
+  hex: string;
+  bytes: number;
+  /** Short reading: "signature", "32-byte key", "number 24", "empty"… */
+  label: string;
+}
+
+export interface TapscriptTraceView {
+  /** Core's label for this witness. */
+  expected: "success" | "failure";
+  valid: boolean;
+  failStage: string | null;
+  reason: string;
+  scriptHex: string;
+  ops: Array<{ position: number; name: string; dataBytes: number | null }>;
+  elements: TapscriptElement[];
+  /** Indices into `elements`, bottom of stack first. */
+  initialStack: number[];
+  /** Serialized sizes, each including its length prefix; totalBytes adds the item-count prefix. */
+  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number; siblings: number };
+  budgetStart: number;
+  sigOpsCounted: number;
+  steps: Array<{
+    position: number;
+    name: string;
+    executed: boolean;
+    note: string;
+    failed: boolean;
+    before: number[];
+    after: number[];
+    sig: { check: string; budgetAfter: number; keyBytes: number } | null;
+  }>;
+}
+
+export interface TapscriptDerived {
+  success: TapscriptTraceView;
+  failure: TapscriptTraceView;
+}
+
+export type DerivedTapscriptFixture = TapscriptCaseFixture & { derived: TapscriptDerived };

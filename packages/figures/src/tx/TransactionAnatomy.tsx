@@ -110,7 +110,7 @@ export function TransactionAnatomy({ fixtures, figureId }: Props) {
         <section class="atlas-panel atlas-tx-lab__panel" aria-live="polite" aria-label="Lens result">
           {lens !== "bip143" ? (
             <>
-              <h4 class="atlas-panel__title">{lens === "txid" ? "txid" : "wtxid"} = double SHA-256 of the {lens === "txid" ? measures.baseSize : measures.totalSize} marked bytes</h4>
+              <h3 class="atlas-panel__title">{lens === "txid" ? "txid" : "wtxid"} = double SHA-256 of the {lens === "txid" ? measures.baseSize : measures.totalSize} marked bytes</h3>
               <code class="atlas-tx-lab__hash">{lens === "txid" ? measures.txidHex : measures.wtxidHex}</code>
               <p class="atlas-tx-lab__other">
                 {lens === "txid" ? "wtxid" : "txid"}: <code>{short(lens === "txid" ? measures.wtxidHex : measures.txidHex)}</code>
@@ -125,7 +125,7 @@ export function TransactionAnatomy({ fixtures, figureId }: Props) {
             </>
           ) : (
             <>
-              <h4 class="atlas-panel__title">Signing input {signed} · SIGHASH_ALL · 10 items</h4>
+              <h3 class="atlas-panel__title">Signing input {signed} · SIGHASH_ALL · 10 items</h3>
               <ol class="atlas-preimage">
                 {digest.items.map((it, n) => (
                   <li data-external={it.from.length === 0 ? "true" : undefined} data-focus={item === it.id ? "true" : undefined}>

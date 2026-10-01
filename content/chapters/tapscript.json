@@ -1,0 +1,290 @@
+{
+ "schemaVersion": "bip-atlas.publication.v1",
+ "chapterId": "tapscript",
+ "primaryBips": [
+  342
+ ],
+ "specimenLabel": "BIP 0342",
+ "title": "What changes when Bitcoin runs a Taproot script?",
+ "dek": "Taproot decides which script may run. Tapscript decides what running it means: new signature opcodes, a budget instead of a count, and opcodes held in reserve for the future.",
+ "authorship": "hand-authored",
+ "reviewState": "in-review",
+ "sourceSnapshot": "sources/research-2026-10-01",
+ "opening": {
+  "blocks": [
+   {
+    "type": "paragraph",
+    "text": "The previous chapter ended at a door. A script path spend proves that the output committed to a particular script, and then the script has to run. BIP 341 deliberately says little about how. That is BIP 342’s job.",
+    "claims": [
+     "abstract",
+     "scope"
+    ]
+   },
+   {
+    "type": "paragraph",
+    "text": "BIP 342, assigned in 2020 and deployed together with BIP 341, specifies the first scripting system for Taproot, called tapscript. Its authors explain why it could not wait: Taproot’s goals, Schnorr signatures, batch validation and a better signature hash, clash with how some existing opcodes behave, so the script language had to change at the same time.",
+    "claims": [
+     "preamble",
+     "abstract",
+     "motivation"
+    ]
+   }
+  ],
+  "figure": {
+   "type": "figure",
+   "figure": "A08.1",
+   "recipe": "tapscript-witness.v1",
+   "title": "Two specifications, one witness",
+   "fixtures": [
+    "core-case-1135"
+   ],
+   "caption": "A recorded script path witness from Bitcoin Core’s tests. BIP 341 consumes the last two items; BIP 342 runs the script on the items before them.",
+   "claims": [
+    "scope",
+    "order",
+    "traces-agree"
+   ],
+   "layout": "prose"
+  }
+ },
+ "sections": [
+  {
+   "id": "handoff",
+   "heading": "Structure first, then execution",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "BIP 342 applies only in one situation: a version 1, 32-byte Taproot output, spent by its script path, with leaf version 0xc0. Spends with other leaf versions simply succeed under BIP 341, leaving them for future rules. The checks happen in a fixed order. First, anything BIP 141 or BIP 341 rejects is rejected. Then the script is decoded, the starting stack is checked against resource limits, the script runs, and it must finish with exactly one element on the stack, and that element must be true.",
+     "claims": [
+      "scope",
+      "order"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The execution rules themselves start from those of P2WSH, SegWit version 0’s script spends, and change a short list of things. The rest of this chapter walks through that list.",
+     "claims": [
+      "p2wsh-base"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "signatures",
+   "heading": "Signature opcodes, rewritten",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "OP_CHECKSIG and OP_CHECKSIGVERIFY now take 32-byte keys and check BIP 340 Schnorr signatures. What gets signed is BIP 341’s signature message with a tapscript extension: the hash of the leaf being run, a key version byte and the position of the last executed OP_CODESEPARATOR. The signature therefore names the script it authorizes, through the leaf hash, instead of a copy of the script code.",
+     "claims": [
+      "checksig-schnorr",
+      "sig-message"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The opcodes pop a public key and a signature, and the BIP spells out each case; the failure cases use MUST. Too few stack elements, or an empty public key, make the script fail immediately. A 32-byte key with a non-empty signature means a real BIP 340 check, and a failed check ends the script at once rather than pushing false.",
+     "claims": [
+      "sig-pops",
+      "sig-known"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "An empty signature is the polite way to decline. It is never checked. OP_CHECKSIG pushes an empty vector, meaning false, and carries on; OP_CHECKSIGVERIFY fails. A key of any other non-zero length is an unknown key type: no verification happens and a non-empty signature simply counts as success. That sounds alarming; the authors explain that the slot exists so that a future soft fork can add new kinds of keys and signature rules.",
+     "claims": [
+      "sig-empty",
+      "sig-unknown"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "multisig",
+   "heading": "No more CHECKMULTISIG",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Tapscript disables OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY. Run one, and the script fails on the spot, exactly as OP_RETURN would; in a branch that is not taken it is ignored. The authors chose an outright failure so that anyone still writing the old opcode notices immediately.",
+     "claims": [
+      "multisig-disabled"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Its replacement is OP_CHECKSIGADD. It pops a key, a number n and a signature; a valid signature pushes n + 1 and an empty one pushes n unchanged. The authors note that the old multisignature opcodes cannot be batch verified, and that the new one does the work of four existing opcodes in one byte. Their suggested rewrite of a k-of-n policy is a chain: check the first key with OP_CHECKSIG, add each further key with OP_CHECKSIGADD, and compare the total with k. Each signer’s slot in the witness holds either a signature or an empty vector.",
+     "claims": [
+      "checksigadd",
+      "checksigadd-why",
+      "sig-nonempty",
+      "sig-empty",
+      "multisig-rewrite"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "That is not the only design. They also describe putting each k-of-k combination in its own leaf, aggregating each combination into one key, or using threshold signatures, each trading privacy, cost and interaction differently.",
+     "claims": [
+      "multisig-alternatives"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The figure below replays six spends from Bitcoin Core’s validation tests, each with a witness Core accepts and one it rejects. Step through them opcode by opcode. In one, a valid signature turns 23 into 24 and the script compares the result; in its failing twin, n is five bytes long, and the BIP says that MUST fail. Another hands OP_CHECKSIGADD an empty signature and pays nothing for it, while its failure witness offers an empty key instead.",
+     "claims": [
+      "traces-agree",
+      "case-checksigadd",
+      "case-empty"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A08.2",
+     "recipe": "tapscript-trace.v1",
+     "title": "Recorded tapscript runs",
+     "fixtures": [
+      "core-case-1135",
+      "core-case-1109",
+      "core-case-804",
+      "core-case-824",
+      "core-case-662",
+      "core-case-50"
+     ],
+     "caption": "Six Core test cases, twelve recorded witnesses. Every recorded verdict matches Core’s own label, and every control block was checked against its output key first.",
+     "claims": [
+      "traces-agree",
+      "case-checksigadd",
+      "case-empty",
+      "case-multisig",
+      "case-minimalif",
+      "case-unknown",
+      "case-success",
+      "budget"
+     ],
+     "layout": "wide"
+    },
+    {
+     "type": "paragraph",
+     "text": "The CHECKMULTISIG case shows the change most plainly. Its success witness runs a one-key OP_CHECKSIG. Its failure witness tries the same 1-of-1 policy with OP_CHECKMULTISIG, which fails the moment it executes, before any signature is looked at.",
+     "claims": [
+      "case-multisig",
+      "multisig-disabled"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "budget",
+   "heading": "A budget instead of a count",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Older scripts count signature operations against a limit for the whole block. Tapscript signature operations are left out of that count. Instead each input gets its own budget: 50 plus the size of its witness in bytes. Every signature opcode run with a non-empty signature subtracts 50, and if the budget drops below zero the script fails. The authors’ reason is practical: a second block-wide limit, alongside weight, made it harder to choose transactions for a block.",
+     "claims": [
+      "budget",
+      "budget-why"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The effect is that signatures are paid for in witness bytes. A signature checked against a 32-byte key must be 64 or 65 bytes, and with its length prefix it raises the budget by more than the 50 its check costs. Empty signatures are free. Unknown key types are not: they skip verification but are still charged, whatever the signature’s length.",
+     "claims": [
+      "budget",
+      "budget-arith",
+      "sig-unknown",
+      "case-unknown"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A08.3",
+     "recipe": "sigops-budget.v1",
+     "title": "What the recorded witnesses could afford",
+     "fixtures": [
+      "core-case-1135",
+      "core-case-1109",
+      "core-case-804",
+      "core-case-824",
+      "core-case-662",
+      "core-case-50"
+     ],
+     "caption": "Budgets of the six recorded success witnesses. Large control blocks from deep test trees make most budgets generous; the spent share is what their signature opcodes used.",
+     "claims": [
+      "budget",
+      "traces-agree"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "Other limits move too. The 10,000-byte script size limit and the 201 non-push opcode limit do not apply to tapscript. The limit of 1,000 stack elements remains and now also covers the starting stack taken from the witness, and elements still may not exceed 520 bytes.",
+     "claims": [
+      "limits"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "upgrades",
+   "heading": "Room to grow, and a rule made strict",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Some opcode numbers are reserved as OP_SUCCESSx. Once the BIP 141 and BIP 341 checks have passed, if the decoder meets one of these opcodes anywhere in the script, the spend is valid at once, before the remaining tapscript rules, even if bytes after it would not decode. In the recorded case the whole script is opcode 126, OP_SUCCESS126, and nothing runs. The authors present this as an upgrade mechanism: a later soft fork can give such an opcode a meaning, which only ever makes fewer spends valid. In a footnote they also warn that using one before it is defined is insecure and leads to fund loss.",
+     "claims": [
+      "op-success",
+      "op-success-upgrade",
+      "case-success"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "One rule went the other way, from advice to consensus. In P2WSH, MINIMALIF is only a standardness rule; in tapscript, OP_IF and OP_NOTIF must receive exactly an empty vector or the single byte 0x01. In the recorded MINIMALIF case, the failing witness offers a three-byte value instead, and the script stops at OP_IF.",
+     "claims": [
+      "minimalif",
+      "case-minimalif"
+     ]
+    },
+    {
+     "type": "callout",
+     "label": "Caveat",
+     "text": "The figure is a player for recorded runs, not a script interpreter. The recorder behind it supports a small reviewed set of opcodes and refuses anything else, so it cannot quietly accept a script it does not understand. A trace reaching true here says nothing about scripts outside these six cases.",
+     "claims": [
+      "traces-agree"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sources",
+   "heading": "Where these traces come from",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "BIP 342 says that BIP 341’s test vectors contain tapscript examples. The wallet vector file pinned for this site contains tapscript leaves but no script path spends, so there is nothing there to execute. BIP 341 also links Bitcoin Core’s validation test vectors, on the main branch of Core’s test-asset repository; this site chose one commit of that file, and this chapter uses six cases from it, copied and checked by hash.",
+     "claims": [
+      "examples-note",
+      "wallet-vectors-no-spends"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Two of the cases are upgrade hooks: an OP_SUCCESS opcode and an unknown key type. Core’s tests show what consensus accepts, not what is safe; the BIP warns against using OP_SUCCESS opcodes before a soft fork defines them, and unknown key types exist only so that one can.",
+     "claims": [
+      "op-success-upgrade",
+      "sig-unknown",
+      "case-success",
+      "case-unknown"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Each recorded run was checked twice at build time: the control block against the output key, as in the previous chapter, and the final verdict against Core’s label. If either check had disagreed, this page would not have been built.",
+     "claims": [
+      "traces-agree"
+     ]
+    }
+   ]
+  }
+ ]
+}

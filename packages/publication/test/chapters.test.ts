@@ -26,7 +26,7 @@ const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
 interface Fixture {
   id: string;
   kind: string;
-  source: { bip?: number; line?: number; quote?: string; external?: string; pointer?: string };
+  source: { bip?: number; file?: string; line?: number; quote?: string; external?: string; pointer?: string };
 }
 
 /** Resolve a pointer such as `english[3]` or `[5].seed` inside parsed JSON. */
@@ -114,7 +114,7 @@ for (const id of chapterIds) {
           expect(resolvePointer(data, f.source.pointer!), `${f.id} pointer`).toBeDefined();
         } else {
           expect(f.source.quote, `${f.id} quote`).toBeTruthy();
-          expect(sourceLines(f.source.bip!)[f.source.line! - 1], f.id).toContain(f.source.quote);
+          expect(sourceLines(f.source.bip!, f.source.file)[f.source.line! - 1], f.id).toContain(f.source.quote);
         }
       }
     });
@@ -147,6 +147,12 @@ describe("shared contracts", () => {
     expect(problems).toMatch(/unknown claim no-such-claim/);
     expect(problems).toMatch(/unregistered recipe freeform-svg/);
     expect(problems).toMatch(/unknown fixture nope/);
+  });
+
+  it("gives every interactive recipe a worked-example tab", () => {
+    const dispatcher = readFileSync(new URL("apps/site/src/components/Figure.astro", root), "utf8");
+    const worked = dispatcher.slice(dispatcher.indexOf('slot="worked"'));
+    for (const r of RECIPE_MAP.values()) if (r.interactive) expect(worked, r.id).toContain(`"${r.id}"`);
   });
 
   it("parses only code and emphasis marks", () => {

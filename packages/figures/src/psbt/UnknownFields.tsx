@@ -17,14 +17,14 @@ export function UnknownFields({ fixture }: { fixture: DerivedPsbtCombineFixture 
       <div class="atlas-unknown__inputs">
         {parts.map((p, i) => (
           <section class="atlas-env__map" aria-label={`PSBT ${i + 1}`}>
-            <h5 class="atlas-env__title">PSBT {i + 1} · BIP 174 line {p.line}</h5>
+            <h3 class="atlas-env__title">PSBT {i + 1} · BIP 174 line {p.line}</h3>
             <ul class="atlas-env__records">{unknown(p.records).map(row)}</ul>
           </section>
         ))}
       </div>
       <div class="atlas-split__arrow" aria-hidden="true">↓ Combiner</div>
       <section class="atlas-env__map atlas-unknown__out" aria-label="Combined PSBT">
-        <h5 class="atlas-env__title">Combined · matches BIP 174 line {combined.line}</h5>
+        <h3 class="atlas-env__title">Combined · matches BIP 174 line {combined.line}</h3>
         <ul class="atlas-env__records">{unknown(combined.records).map(row)}</ul>
       </section>
     </div>

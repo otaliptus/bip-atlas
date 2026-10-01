@@ -1,19 +1,23 @@
 ---
 import { analyzeSegwitAddress } from "@bip-atlas/models";
+import ClaimRefs from "./ClaimRefs.astro";
 import { stageVerdict, type AddressFixture, type BaseFixture } from "@bip-atlas/figures";
 
 interface Props {
   fixtures: BaseFixture[];
   caption: string;
+  claims: string[];
+  numbers: Map<string, number>;
+  at: string;
 }
-const { caption } = Astro.props;
+const { caption, claims, numbers, at } = Astro.props;
 const fixtures = Astro.props.fixtures as AddressFixture[];
 if (fixtures.some((f) => f.kind !== "address")) throw new Error("fixture-table currently supports address fixtures only");
 const rows = fixtures.map((f) => ({ f, a: analyzeSegwitAddress(f.address, f.network) }));
 ---
 <div class="atlas-table-wrap" tabindex="0" role="region" aria-label="Sample results, scrollable">
   <table class="manual-table atlas-fixture-table">
-    <caption>{caption}</caption>
+    <caption>{caption}<ClaimRefs claims={claims} numbers={numbers} at={at} /></caption>
     <thead>
       <tr>
         <th scope="col">Sample</th>
