@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "version-bits",
+  "warning": "Deployment parameters as BIP 9's assignment table and BIP 8's guidelines record them. History, not a schedule.",
+  "fixtures": [
+    {
+      "id": "bip9-csv",
+      "kind": "versionbits-deployment",
+      "label": "csv (BIPs 68, 112, 113)",
+      "shortLabel": "BIP 9 · bit 0",
+      "source": {
+        "bip": 9,
+        "file": "bip-0009/assignments.mediawiki",
+        "line": 18,
+        "section": "Deployments",
+        "quote": "| csv"
+      },
+      "name": "csv",
+      "crossCheck": {
+        "bip": 68,
+        "mainnetLine": 226,
+        "testnetLine": 228
+      }
+    },
+    {
+      "id": "bip9-segwit",
+      "kind": "versionbits-deployment",
+      "label": "segwit (BIPs 141, 143, 147)",
+      "shortLabel": "BIP 9 · bit 1",
+      "source": {
+        "bip": 9,
+        "file": "bip-0009/assignments.mediawiki",
+        "line": 28,
+        "section": "Deployments",
+        "quote": "| segwit"
+      },
+      "name": "segwit",
+      "crossCheck": {
+        "bip": 141,
+        "mainnetLine": 308,
+        "testnetLine": 310
+      }
+    },
+    {
+      "id": "bip8-guidelines",
+      "kind": "versionbits-guideline",
+      "label": "BIP 8’s suggested parameters",
+      "shortLabel": "not a real deployment",
+      "source": {
+        "bip": 8,
+        "line": 51,
+        "section": "Selection guidelines",
+        "quote": "'''threshold''' should be 1815 blocks (90% of 2016)"
+      },
+      "timeoutLine": 50,
+      "timeoutQuote": "52416 blocks (26 retarget intervals)"
+    }
+  ]
+}

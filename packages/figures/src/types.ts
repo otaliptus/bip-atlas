@@ -434,3 +434,44 @@ export interface TimelockEncodingDerived {
   typeFlagSequence: number;
 }
 export type DerivedTimelockEncodingFixture = TimelockEncodingFixture & { derived: TimelockEncodingDerived };
+
+/* ---------- version bits (BIPs 9, 8) ---------- */
+
+export interface VersionbitsDeploymentFixture extends BaseFixture {
+  kind: "versionbits-deployment";
+  name: string;
+  crossCheck: { bip: number; mainnetLine: number; testnetLine: number };
+}
+
+export interface VersionbitsNetworkView {
+  start: string;
+  expire: string;
+  startEpoch: number;
+  expireEpoch: number;
+  state: string;
+  activeHeight: number | null;
+  implied: { activePeriod: number; lockedInFrom: number; tallyFrom: number; tallyTo: number } | null;
+  threshold: number;
+}
+
+export interface VersionbitsDeploymentDerived {
+  name: string;
+  bit: number;
+  bips: number[];
+  signalVersion: number;
+  mainnet: VersionbitsNetworkView;
+  testnet: VersionbitsNetworkView;
+}
+export type DerivedVersionbitsDeploymentFixture = VersionbitsDeploymentFixture & { derived: VersionbitsDeploymentDerived };
+
+export interface VersionbitsGuidelineFixture extends BaseFixture {
+  kind: "versionbits-guideline";
+  timeoutLine: number;
+  timeoutQuote: string;
+}
+
+export interface VersionbitsGuidelineDerived {
+  threshold: number;
+  timeoutPeriods: number;
+}
+export type DerivedVersionbitsGuidelineFixture = VersionbitsGuidelineFixture & { derived: VersionbitsGuidelineDerived };

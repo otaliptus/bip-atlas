@@ -56,6 +56,12 @@ describe("bit layout and constants", () => {
     expect(readSequence(0x00400000 | 0xffff, 2)).toMatchObject({ unit: "time", value: 65535, seconds: 65535 * 512 });
   });
 
+  it("compares the version as unsigned, so 0xffffffff counts as at least 2 (BIP 68, BIP 112)", () => {
+    expect(b68[114]).toContain("static_cast<uint32_t>(tx.nVersion) >= 2");
+    expect(readSequence(5, 0xffffffff).enforced).toBe(true);
+    expect(checkSequenceVerify(5n, { version: 0xffffffff, nLockTime: 0, sequences: [5] }, 0).ok).toBe(true);
+  });
+
   it("gives BIP 68 meaning only to version >= 2 with the disable flag clear", () => {
     expect(readSequence(5, 1)).toMatchObject({ enforced: false, reason: "version" });
     expect(readSequence(0x80000005, 2)).toMatchObject({ enforced: false, reason: "disable-flag" });
@@ -220,6 +226,25 @@ describe("timelocks chapter prose numbers", () => {
     expect(text).toContain("Twelve one-input transactions from Bitcoin Core’s test suite");
     expect(text.match(/"core-(valid|invalid)-\d+"/g)!.length).toBe(12);
     expect(excerpt.cases.length).toBe(51);
+  });
+
+  it("ties the remaining prose numbers to the pinned lines", () => {
+    expect(b65[7]).toContain("Assigned: 2014-10-01");
+    expect(b68[10]).toContain("Assigned: 2015-05-28");
+    expect(b112[9]).toContain("Assigned: 2015-08-10");
+    expect(b113[8]).toContain("Assigned: 2015-08-10");
+    expect(text).toContain("four specifications from 2014 and 2015");
+    expect(b68[223]).toContain('"versionbits" BIP9 using bit 0');
+    expect(b68[225]).toContain("midnight 1st May 2016 UTC (Epoch timestamp 1462060800)");
+    expect(new Date(1462060800 * 1000).toISOString()).toBe("2016-05-01T00:00:00.000Z");
+    expect(text).toContain("through BIP 9 on bit 0, with a mainnet start of 1 May 2016");
+    expect(b112[58]).toContain("30 days after being funded");
+    expect(text).toContain("to Alice alone after 30 days");
+    expect(b65[229]).toContain("to accept up");
+    expect(b65[230]).toContain("5-byte bignums");
+    expect(text).toContain("a number of up to five bytes");
+    expect(b65[281]).toContain("for nVersion = 4");
+    expect(text).toContain("for version-4 blocks");
   });
 
   it("restates the deployment numbers as the BIPs give them", () => {

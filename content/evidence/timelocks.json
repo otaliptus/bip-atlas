@@ -111,7 +111,7 @@
     },
     {
       "id": "two-kinds",
-      "statement": "nLockTime is read either as a block height or as a time, depending on whether it is below LOCKTIME_THRESHOLD; Bitcoin Core's script.h (pinned excerpt, v29.0) defines that threshold as 500,000,000, a Unix time in November 1985.",
+      "statement": "nLockTime is read either as a block height or as a time, depending on whether it is below LOCKTIME_THRESHOLD; Bitcoin Core's script.h (pinned excerpt, v29.0) defines that threshold as 500,000,000, a Unix time in November 1985. (The value rests on the pinned script.h lines in sources/external/core-locktime-cases-excerpt.json and a test that checks the model's constant against them.)",
       "scope": "observed-implementation",
       "support": "inference",
       "evidence": [
@@ -513,15 +513,15 @@
             59,
             61
           ],
-          "quote": "An escrow that times out automatically 30 days after being funded can be established in the following way."
+          "quote": "An escrow that times out automatically 30 days after being funded can be established in the following way. Alice, Bob and Escrow create a 2-of-3 address with the following redeemscript."
         },
         {
           "bip": 112,
           "lines": [
-            73,
+            70,
             76
           ],
-          "quote": "After 30 days Alice can sign alone. The clock does not start ticking until the payment to the escrow address confirms."
+          "quote": "At any time funds can be spent using signatures from any two of Alice, Bob or the Escrow. After 30 days Alice can sign alone. The clock does not start ticking until the payment to the escrow address confirms."
         }
       ]
     },
@@ -583,7 +583,7 @@
     },
     {
       "id": "mtp-all",
-      "statement": "BIP 113's rule applies to all transactions, including the coinbase, and the authors expected time-locked transactions to confirm about an hour later than before.",
+      "statement": "BIP 113's rule applies to all transactions, including the coinbase.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -594,7 +594,15 @@
             69
           ],
           "quote": "The new rule applies to all transactions, including the coinbase transaction."
-        },
+        }
+      ]
+    },
+    {
+      "id": "mtp-hour",
+      "statement": "The authors expected transactions using time-based lock-time to confirm about an hour later than under the old rules.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
         {
           "bip": 113,
           "lines": [
@@ -631,7 +639,7 @@
     },
     {
       "id": "core-cases",
-      "statement": "This chapter's opcode figure uses 12 of 51 one-input CLTV/CSV transactions from Bitcoin Core's own transaction tests (v29.0, pinned excerpt); for all 51 the site's model gives the same verdict Core's tests expect, and the build fails otherwise.",
+      "statement": "This chapter's opcode figure uses 12 of 51 one-input CLTV/CSV transactions from Bitcoin Core's own transaction tests (v29.0, pinned excerpt); for all 51 the site's model gives the same verdict Core's tests expect, and the build fails otherwise. The cases and their labels are in sources/external/core-locktime-cases-excerpt.json, pinned by commit and SHA-256; the BIP line cited is the reference implementation those tests accompany.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -642,6 +650,46 @@
             342
           ],
           "quote": "A reference implementation is provided by the following pull request: https://github.com/bitcoin/bitcoin/pull/7524"
+        }
+      ]
+    },
+    {
+      "id": "repurposed",
+      "statement": "BIP 68 repurposes nSequence, whose only use in Bitcoin Core until then was disabling nLockTime checks (a use the BIP preserves).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "nSequence will be repurposed to prevent mining of a transaction until a certain age of the spent output in blocks or timespan."
+        },
+        {
+          "bip": 68,
+          "lines": [
+            234,
+            234
+          ],
+          "quote": "The only use of sequence numbers by the Bitcoin Core reference client software is to disable checking the nLockTime constraints in a transaction. The semantics of that application are preserved by this BIP."
+        }
+      ]
+    },
+    {
+      "id": "last-invalid",
+      "statement": "A transaction is excluded from a block while the height (or time) is less than or equal to its nLockTime, so nLockTime names the last height or time at which it may not be mined.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 113,
+          "lines": [
+            24,
+            26
+          ],
+          "quote": "At present, transactions are excluded from inclusion in a block if the present time or block height is less than or equal to that specified in the locktime."
         }
       ]
     }

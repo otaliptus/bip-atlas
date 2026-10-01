@@ -9,7 +9,7 @@
   ],
   "specimenLabel": "BIPs 0065 · 0068 · 0112 · 0113",
   "title": "When is a coin allowed to move?",
-  "dek": "Two fields in every transaction can hold it back: nLockTime by the calendar, nSequence by the age of the coin it spends. Two opcodes let an output insist on them.",
+  "dek": "Two fields in every transaction can hold it back: nLockTime by block height or date, nSequence by the age of the coin it spends. Two opcodes let an output insist on them.",
   "authorship": "hand-authored",
   "reviewState": "in-review",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -17,12 +17,13 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A payment channel, an escrow with a deadline, a refund that must wait: each needs a coin that cannot move yet. Bitcoin gets there with four specifications from 2014 and 2015, all consensus soft forks recorded as deployed. BIP 65 lets an output demand a date or a block height. BIP 68 turns a long-unused field into a relative lock, BIP 112 lets an output demand it, and BIP 113 decides which clock time locks read.",
+        "text": "A payment channel, an escrow with a deadline, a refund that must wait: each needs a coin that cannot move yet. Bitcoin gets there with four specifications from 2014 and 2015, all consensus soft forks recorded as deployed. BIP 65 lets an output demand a date or a block height. BIP 68 repurposes each input’s sequence number as a relative lock, BIP 112 lets an output demand it, and BIP 113 decides which clock time locks read.",
         "claims": [
           "preambles",
           "cltv-abstract",
           "csv-abstract",
-          "mtp"
+          "mtp",
+          "repurposed"
         ]
       },
       {
@@ -59,9 +60,10 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Every transaction ends with a four-byte number, nLockTime. It keeps that transaction from being mined until a given block height or block time has been reached. Nothing about it touches the coins being spent: it is a property of one particular spending transaction.",
+          "text": "Every transaction ends with a four-byte number, nLockTime. It keeps that transaction from being mined until a given block height or block time has been reached; strictly, a block may include it only once its height, or time, is greater than nLockTime. Nothing about it touches the coins being spent: it is a property of one particular spending transaction.",
           "claims": [
-            "nlocktime"
+            "nlocktime",
+            "last-invalid"
           ]
         },
         {
@@ -80,7 +82,7 @@
         },
         {
           "type": "paragraph",
-          "text": "There is one more condition, and it is easy to miss. If every input of a transaction has the maximum sequence number, 0xffffffff, nLockTime is not enforced at all. Published transactions show all three situations. BIP 143’s native P2WPKH example sets nLockTime to 17 and leaves one input non-final, so no block below height 18 could include it. BIP 174’s final transaction has nLockTime 0 and only final inputs.",
+          "text": "There is one more condition, and it is easy to miss. If every input of a transaction has the maximum sequence number, 0xffffffff, nLockTime is not enforced at all. Published transactions show both sides. BIP 143’s native P2WPKH example sets nLockTime to 17 and leaves one input non-final, so no block below height 18 could include it. BIP 174’s final transaction has nLockTime 0 and only final inputs.",
           "claims": [
             "final-disables",
             "pinned-reading"
@@ -180,7 +182,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The BIP’s examples show what this buys. Its simplest one freezes funds outright: an expiry time, the opcode, and then an ordinary pay-to-public-key-hash check, which nobody can spend before the expiry.",
+          "text": "The BIP’s examples show what this buys. Its simplest one freezes funds outright: an expiry time, the opcode, a DROP, and then an ordinary pay-to-public-key-hash check, which nobody can spend before the expiry.",
           "claims": [
             "freeze"
           ]
@@ -201,11 +203,12 @@
         },
         {
           "type": "paragraph",
-          "text": "The bits are laid out carefully. If bit 31 is set, the field has no consensus meaning at all. If it is clear, the field is a relative lock-time: bit 22 picks the unit, blocks when clear and 512-second units when set, and the value sits in the low 16 bits. The mask that extracts it, 0x0000ffff, MUST be applied; the bits in between are left for future use.",
+          "text": "The bits are laid out carefully. If bit 31 is set, BIP 68 gives the field no meaning (though 0xffffffff still marks the input final for nLockTime). If it is clear, the field is a relative lock-time: bit 22 picks the unit, blocks when clear and 512-second units when set, and the value sits in the low 16 bits. The mask that extracts it, 0x0000ffff, MUST be applied; the bits in between are left for future use.",
           "claims": [
             "bip68-disable",
             "bip68-type",
-            "bip68-mask"
+            "bip68-mask",
+            "repurposed"
           ]
         },
         {
@@ -236,11 +239,12 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "A relative lock needs both halves: a transaction version of 2 or more, and bit 31 of nSequence clear. With either missing, nSequence carries no lock at all, and CHECKSEQUENCEVERIFY fails rather than passing.",
+          "text": "A relative lock needs both halves: a transaction version of 2 or more, and bit 31 of nSequence clear. With either missing, nSequence carries no relative lock under BIP 68, and a CHECKSEQUENCEVERIFY whose argument has bit 31 clear fails rather than passing.",
           "claims": [
             "bip68-version",
             "bip68-disable",
-            "csv-rules"
+            "csv-rules",
+            "csv-nop"
           ]
         },
         {
@@ -270,7 +274,8 @@
           "claims": [
             "mtp",
             "mtp-all",
-            "bip68-type"
+            "bip68-type",
+            "mtp-hour"
           ]
         },
         {

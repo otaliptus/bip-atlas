@@ -30,13 +30,15 @@ const utc = (s: number) => new Date(s * 1000).toISOString().replace("T", " ").re
 function span(seconds: number): string {
   if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
   if (seconds < 86_400 * 2) return `${(seconds / 3600).toFixed(1)} h`;
-  if (seconds < 86_400 * 365) return `${(seconds / 86_400).toFixed(1)} days`;
-  return `${(seconds / (86_400 * 365.25)).toFixed(2)} years`;
+  const YEAR = 86_400 * 365.25;
+  if (seconds < YEAR) return `${(seconds / 86_400).toFixed(1)} days`;
+  return `${(seconds / YEAR).toFixed(2)} years`;
 }
 
 /** What each bit of nSequence means under BIP 68 (when bit 31 is clear). */
-function bitRole(b: number): "disable" | "type" | "value" | "unused" {
+function bitRole(b: number, disabled: boolean): "disable" | "type" | "value" | "unused" {
   if (b === 31) return "disable";
+  if (disabled) return "unused"; // with bit 31 set, BIP 68 gives the other 31 bits no meaning
   if (b === 22) return "type";
   if (b <= 15) return "value";
   return "unused";
@@ -186,7 +188,7 @@ export function TimelockFields({ fixtures, figureId }: Props) {
           <div class="atlas-tl-bits" role="group" aria-label={`nSequence bits, 31 down to 0${hydrated ? "; press a bit to flip it" : ""}`}>
             {Array.from({ length: 32 }, (_, k) => 31 - k).map((b) => {
               const on = ((e.nSequence >>> b) & 1) === 1;
-              const role = bitRole(b);
+              const role = bitRole(b, (e.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG) !== 0);
               const label = `bit ${b}, ${ROLE_TEXT[role]}, ${on ? "set" : "clear"}`;
               return hydrated ? (
                 <button type="button" class="atlas-tl-bit" data-role={role} data-on={on ? "true" : "false"} aria-pressed={on} aria-label={label} title={label} onClick={() => set({ nSequence: (e.nSequence ^ (2 ** b)) >>> 0 })}>
@@ -231,20 +233,23 @@ export function TimelockFields({ fixtures, figureId }: Props) {
               <h3 class="atlas-panel__title">nLockTime {num(e.nLockTime)}, read both ways</h3>
               <ul class="atlas-tl-units__rows">
                 <li data-chosen={!isTime ? "true" : undefined}>
-                  <strong>As a block height</strong> {num(e.nLockTime)}: the first block that could include it is {num(e.nLockTime + 1)}.
+                  <strong>As a block height</strong> {num(e.nLockTime)}: the first block that could include it would be {num(e.nLockTime + 1)}.
                 </li>
                 <li data-chosen={isTime ? "true" : undefined}>
-                  <strong>As a Unix time</strong> {utc(e.nLockTime)}: a block can include it once the median time past of the block before it is later.
+                  <strong>As a Unix time</strong> {utc(e.nLockTime)}: a block could include it once the median time past of the block before it is later.
                 </li>
               </ul>
-              <p class="atlas-panel__scope">Consensus picks one reading: below {num(LOCKTIME_THRESHOLD)} ({utc(LOCKTIME_THRESHOLD)}) it is a height, otherwise a time. Here: {isTime ? "time" : "height"}.</p>
+              <p class="atlas-panel__scope">
+                Consensus picks one reading: below {num(LOCKTIME_THRESHOLD)} ({utc(LOCKTIME_THRESHOLD)}) it is a height, otherwise a time. Here: {isTime ? "time" : "height"}.
+                {e.nSequence === SEQUENCE_FINAL ? " But this transaction’s only input is final, so nLockTime is not enforced at all." : ""}
+              </p>
             </>
           ) : (
             <>
               <h3 class="atlas-panel__title">Value {num(value16)} (the low 16 bits), read both ways</h3>
               <ul class="atlas-tl-units__rows">
                 {[
-                  { chosen: !isTime, title: "As blocks", seconds: value16 * 600, text: `${num(value16)} blocks after the coin’s block, about ${span(value16 * 600)} at one block per 600 s` },
+                  { chosen: !isTime, title: "As blocks", seconds: value16 * 600, text: `${num(value16)} blocks after the coin’s block, about ${span(value16 * 600)} at the 600-second average` },
                   { chosen: isTime, title: "As 512-second units", seconds: value16 * 512, text: `${num(value16)} × 512 = ${num(value16 * 512)} s, about ${span(value16 * 512)}, counted in median time past` },
                 ].map((r, _i, all) => (
                   <li data-chosen={r.chosen ? "true" : undefined}>
@@ -255,7 +260,7 @@ export function TimelockFields({ fixtures, figureId }: Props) {
               </ul>
               <p class="atlas-panel__scope">
                 Bit 22 picks the reading: here {isTime ? "set, so 512-second units" : "clear, so blocks"}.
-                {relActive ? "" : e.version < 2 ? " But the version is below 2, so BIP 68 gives this field no meaning at all." : " But bit 31 is set, so BIP 68 gives this field no meaning at all."}
+                {relActive ? "" : e.version < 2 ? " But the version is below 2, so BIP 68 reads no relative lock here." : " But bit 31 is set, so BIP 68 reads no relative lock here."}
               </p>
             </>
           )}

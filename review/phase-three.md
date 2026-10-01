@@ -29,3 +29,34 @@ Branch `main-q0i8zv`. Ten chapters from `catalog-phase3.json`, sources pinned in
 | 13 (nit) | Raw `<sup>` in an evidence quote | Evidence quotes render `<sup>` markup |
 
 **Checked and fine (per the reviewer):** the three rules and their order, the template, sigop counting and both BIP examples, 520 bytes / 15 keys, rollout dates and thresholds (presented as recorded, not reconciled), BIP 141/143 facts, the legacy and BIP 143 digests, and the worked example.
+
+## Chapter 10 — Timelocks (BIPs 65, 68, 112, 113)
+
+**Model:** `packages/models/src/timelock.ts`, pure integer code (no crypto, importable by the island): nLockTime reading (height/time threshold, finality bypass), BIP 68 nSequence decoding and relative-lock evaluation (with the reference code's minus-one semantics), BIP 113 median time past, and OP_CHECKLOCKTIMEVERIFY / OP_CHECKSEQUENCEVERIFY checks recorded in the order of BIP 65's and BIP 112's reference code.
+
+**Sources:** the BIPs carry no test vectors, so the opcode cases come from Bitcoin Core's own transaction tests: `sources/external/core-locktime-cases-excerpt.json`, 51 one-input cases (`<n> CHECKLOCKTIMEVERIFY|CHECKSEQUENCEVERIFY [1]`) from `tx_valid.json` / `tx_invalid.json` at tag v29.0 (commit `f490f556…`), plus the `LOCKTIME_THRESHOLD` lines of `script.h`. `tools/extract-locktime-cases.mjs` rebuilds it and refuses to run unless each upstream file matches its pinned SHA-256. The build fails unless the model agrees with Core's label on every hero case; a test checks all 51 (27 valid, 24 invalid) and that each invalid case fails at the check its Core comment names. Field readings also use transactions published in BIP 143 (L190, L206) and BIP 174 (L619, L833).
+
+**Deliberate breakage:** threshold + 1 (5 tests fail), no CSV masking (1), no CLTV finality check (3), CSV version ≥ 1 (2).
+
+**Independent review: 0 blocking, 7 should-fix, 9 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | "no consensus meaning at all" overstated BIP 68 (0xffffffff still affects nLockTime) | Prose, caveat and figure now say "no relative lock under BIP 68"; the finality role is stated |
+| 2 | Caveat's "CSV fails" lacked the bit-31 condition | "a CHECKSEQUENCEVERIFY whose argument has bit 31 clear fails" |
+| 3 | "long-unused field" contradicted BIP 68 | "repurposes each input's sequence number"; new claim `repurposed` (L22, L234) |
+| 4 | nLockTime "until … reached" vs "below height 18" | Added the strict rule (included only once height or time exceeds nLockTime); new claim `last-invalid` (BIP 113 L24–26) |
+| 5 | "all three situations" unclear | "both sides" |
+| 6 | `csv-escrow` evidence missed 2-of-3 / any time | Quotes extended to L59–61 and L70–76 |
+| 7 | Units panel stated a lock for a final input | Says nLockTime is not enforced when the only input is final |
+| 8 | "one block per 600 s" and mixed year lengths | "at the 600-second average"; one year constant |
+| 9 | Bit map labelled value bits when bit 31 set | With bit 31 set, every other bit is drawn as "no meaning" |
+| 10 | Worked example skipped the input-disable check | Step added |
+| 11 | "about an hour later" scoped as a rule | Split into `mtp-hour`, author-rationale |
+| 12 | `two-kinds` / `core-cases` rest on external files | Statements name the pinned excerpt and the tests |
+| 13 | Freeze example dropped DROP | Added |
+| 14 | Untested prose numbers | Tests tie 2014/2015, bit 0, 1 May 2016, 30 days, five bytes, version 4 to pinned lines |
+| 15 | Unsigned version cast untested | Tests for version 0xffffffff |
+| 16 | Dek "by the calendar" | "by block height or date" |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (absolute and relative states, edited fields, units comparison, worked tab, no-JS) in `review/screenshots/phase3/`; `scrollWidth` equals the viewport in every state after one fix (the 32-cell bit row overflowed at 375 px; it now wraps to 16 columns). axe-core (WCAG 2.1 A/AA + best practice) is clean at 1440 and 375, without JS, on the worked tab and in the relative/compare states.

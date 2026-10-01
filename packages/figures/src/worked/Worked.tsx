@@ -336,6 +336,12 @@ export function TimelockWorked({ fixtures }: { fixtures: DerivedTimelockCaseFixt
       layer: { size: 0.35, tone: d.version >= 2 ? "plain" : "fail", cells: 1 },
     },
     {
+      title: `The input's own bit 31 is ${check("input-disabled")?.ok === false ? "set, so the opcode fails" : "clear"}`,
+      values: [{ label: "input 0 nSequence", value: hex32(d.nSequence) }],
+      note: "An input with bit 31 set carries no relative lock, so it could not satisfy one.",
+      layer: { size: 0.35, tone: check("input-disabled")?.ok === false ? "fail" : "plain", cells: 1 },
+    },
+    {
       title: "Read the input's nSequence with the same mask",
       values: [{ label: "input 0 nSequence", value: hex32(d.nSequence) }, ...(check("type") ? [{ label: "units", value: check("type")!.detail }] : [])],
       layer: { tone: "hatch", cells: 32, highlight: VALUE_CELLS, mark: FLAG_CELLS },
