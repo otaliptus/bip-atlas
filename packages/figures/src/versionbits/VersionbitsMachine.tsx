@@ -40,10 +40,13 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
   const opt = options.find((o) => o.key === key)!;
   const isBip9 = opt.f.kind === "versionbits-deployment";
   const threshold = isBip9 ? (opt.f as DerivedVersionbitsDeploymentFixture).derived.mainnet.threshold : (opt.f as DerivedVersionbitsGuidelineFixture).derived.threshold;
-  const [meets, setMeets] = useState<boolean[]>(() => Array(PERIODS).fill(false));
+  /** Default hypothetical: for a BIP 9 deployment one period (10) reaches the threshold; for BIP 8 none does, to show the timeout paths. */
+  const defaults = (o: Option) => Array.from({ length: PERIODS }, (_, k) => o.f.kind === "versionbits-deployment" && k === 10);
+  const [meets, setMeets] = useState<boolean[]>(() => defaults(options[0]));
   const [at, setAt] = useState(0);
   const current = hydrated ? at : PERIODS - 1;
   const counts = meets.map((m) => (m ? threshold : threshold - 1));
+  const togglable = (state: Bip8State) => state === "STARTED";
 
   // Period k starts at block k × 2016 of this schematic run; the window opens at period START and closes WINDOW periods later.
   const run: Array<{ state: Bip8State; rule: string | null }> = isBip9
@@ -66,7 +69,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
   const states = isBip9 ? BIP9_STATES : BIP8_STATES;
   const reset = (k: string) => {
     setKey(k);
-    setMeets(Array(PERIODS).fill(false));
+    setMeets(defaults(options.find((o) => o.key === k)!));
     setAt(0);
   };
 
@@ -86,7 +89,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
         </div>
       ) : (
         <p class="atlas-lab__static-note">
-          Static view: the first deployment with no period reaching the threshold, played to the end. With JavaScript you can choose a deployment, step through
+          Static view: a hypothetical csv run in which period 10 reaches the threshold, played to the end. With JavaScript you can choose a deployment, step through
           the periods and set which periods reach the threshold.
         </p>
       )}
@@ -106,11 +109,13 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
             <>
               <span class="atlas-vb-period__n">{k}</span>
               <span class="atlas-vb-period__s">{shown ? SHORT[r.state] : "·"}</span>
-              <span class="atlas-vb-period__c">{shown && counted(k) ? (meets[k] ? "≥" : "<") : ""}</span>
+              <span class="atlas-vb-period__c">{shown && counted(k) ? (r.state === "MUST_SIGNAL" || meets[k] ? "≥" : "<") : ""}</span>
             </>
           );
-          const label = `Period ${k}: ${shown ? r.state : "not reached yet"}${shown && counted(k) ? `, ${counts[k]} of 2016 signal (${meets[k] ? "meets" : "below"} ${threshold})` : ""}`;
-          return hydrated && shown && counted(k) ? (
+          const label = `Period ${k}: ${shown ? r.state : "not reached yet"}${
+            shown && r.state === "MUST_SIGNAL" ? `, at least ${threshold} of 2016 must signal (required)` : shown && counted(k) ? `, ${counts[k]} of 2016 signal (${meets[k] ? "meets" : "below"} ${threshold})` : ""
+          }`;
+          return hydrated && shown && togglable(r.state) ? (
             <button type="button" class="atlas-vb-period" data-state={r.state} data-current={k === current ? "true" : undefined} aria-pressed={meets[k]} aria-label={label}
               onClick={() => setMeets(meets.map((m, i) => (i === k ? !m : m)))}>{body}</button>
           ) : (
@@ -141,7 +146,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
             : state === "LOCKED_IN"
               ? "Locked in: nothing more is counted; the rules are not enforced yet."
               : state === "MUST_SIGNAL"
-                ? `Blocks must signal: once more than ${PERIOD - threshold} of this period’s blocks do not, further non-signalling blocks are invalid.`
+                ? `Blocks must signal: once ${PERIOD - threshold} of this period’s blocks have not, any further non-signalling block is invalid, so at least ${threshold} signal and the deployment locks in.`
                 : state === "STARTED"
                   ? `Counting: ${threshold} of this period’s 2016 blocks must signal for lock-in at the next boundary. Signalling alone changes no rule.`
                   : state === "FAILED"

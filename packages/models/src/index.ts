@@ -10,3 +10,4 @@ export * from "./tapscript";
 export * from "./p2sh";
 export * from "./timelock";
 export * from "./versionbits";
+export * from "./walletpaths";

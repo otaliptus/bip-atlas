@@ -168,6 +168,8 @@ describe("version-bits chapter prose numbers", () => {
     expect(text).toContain("names its bit, from 0 to 28");
     expect(text).toContain("csv used bit 0 and segwit bit 1");
     expect([csv.bit, segwit.bit]).toEqual([0, 1]);
+    expect(csv.bips).toEqual([68, 112, 113]);
+    expect(text).toContain("csv, the bundle of BIPs 68, 112 and 113");
   });
 
   it("thresholds and windows", () => {

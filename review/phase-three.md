@@ -60,3 +60,30 @@ Branch `main-q0i8zv`. Ten chapters from `catalog-phase3.json`, sources pinned in
 | 16 | Dek "by the calendar" | "by block height or date" |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (absolute and relative states, edited fields, units comparison, worked tab, no-JS) in `review/screenshots/phase3/`; `scrollWidth` equals the viewport in every state after one fix (the 32-cell bit row overflowed at 375 px; it now wraps to 16 columns). axe-core (WCAG 2.1 A/AA + best practice) is clean at 1440 and 375, without JS, on the worked tab and in the relative/compare states.
+
+## Chapter 11 — Version bits (BIPs 9, 8)
+
+**Model:** `packages/models/src/versionbits.ts`, pure integer code: the signalling test (top bits 001 plus the deployment bit), BIP 9's and BIP 8's GetStateForBlock as per-period transitions (BIP 9: FAILED before counting; BIP 8: count, then MUST_SIGNAL, then FAILED; MUST_SIGNAL → LOCKED_IN; LOCKED_IN waits for minimum_activation_height), BIP 8's parameter rules and mandatory-signalling check, a parser for BIP 9's assignment table, and `bip9Implied` (activation height → LOCKED_IN and tally periods).
+
+**Sources:** BIP 9's `assignments.mediawiki` (csv and segwit rows). The build cross-checks every start and timeout against the Unix times in BIP 68's and BIP 141's deployment sections, and fails if they disagree. The four recorded activation heights are period boundaries (tested). BIP 8's assignment file has no rows; its suggested parameters (1,815, 52,416 blocks) come from its selection guidelines. No per-period signalling counts exist in the pinned sources, so the hero's counts are hypothetical and labelled as such.
+
+**Deliberate breakage:** BIP 9 count before timeout (1 test fails), `>` for `≥` at the threshold (2), no top-bits check (1), BIP 8 MUST_SIGNAL off by one (1). A first attempt at the fourth (swapping BIP 8's MUST_SIGNAL and FAILED checks) changed nothing, because with timeoutheight ≥ startheight + 4032 the two orders cannot disagree; it was replaced.
+
+**Independent review: 0 blocking, 7 should-fix, 5 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | MUST_SIGNAL text off by one | "once 201 have not, any further non-signalling block is invalid" (threshold-derived) |
+| 2 | A MUST_SIGNAL period could be toggled "below threshold" | MUST_SIGNAL periods are not toggles; shown as "≥ (required)" |
+| 3 | No-JS default ran csv to FAILED next to its real activation | Default hypothetical run has period 10 reaching the threshold; static note says it is hypothetical |
+| 4 | "signalling is not consent" stretched BIP 8's words | Now quotes "in lieu of full nodes upgrading" and "ultimately enforced by full nodes" |
+| 5 | "went wrong in two places" undercounted BIP 8 | "what its authors call perceived mistakes", all four listed, L15 and L27 quoted |
+| 6 | BIP 8's diagram vs pseudocode at the timeout | Claim `bip8-fail` notes the model follows the pseudocode, with L38 quoted |
+| 7 | No quote for minimum_activation_height in the changelog | L300 added |
+| 8 | "No deployments" quote proved nothing | Split into `bip8-empty`, computed-fixture (parser finds no rows) |
+| 9 | Warning paragraph flattened "should" | "says it should warn loudly"; tracking clause quoted |
+| 10 | "passes starttime" vs ≥; "probably" dropped; uncited opening sentences | "reaches"; "probably at least a year"; `abstract` claim now covers both BIPs |
+| 11 | Caveat ignored MUST_SIGNAL | Exception added |
+| 12 | "BIPs 68, 112 and 113" untested | Test added |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (default, played, BIP 8 lockinontimeout true, worked tab, no-JS); one overflow at 375 px (the record figure's grid items took the table's minimum width) fixed with `min-inline-size: 0`. axe-core clean at 1440, 375, no-JS, worked tab and the played states.

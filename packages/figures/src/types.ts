@@ -475,3 +475,48 @@ export interface VersionbitsGuidelineDerived {
   timeoutPeriods: number;
 }
 export type DerivedVersionbitsGuidelineFixture = VersionbitsGuidelineFixture & { derived: VersionbitsGuidelineDerived };
+
+/* ---------- wallet paths (BIPs 44, 84, 86) ---------- */
+
+export interface WalletPathVectorFixture extends BaseFixture {
+  kind: "wallet-path-vector";
+  scheme: 44 | 84 | 86;
+  root: { privLine: number; pubLine: number } | null;
+  account: { path: string; privLine: number | null; pubLine: number | null };
+  addresses: Array<{ path: string; label: string; lines: Record<string, number> }>;
+  keySource?: { bip: number; line: number; note: string };
+}
+
+export interface WalletNodeView {
+  level: string;
+  segment: string;
+  index: number | null;
+  hardened: boolean;
+  depth: number;
+  parentFingerprintHex: string;
+  publicKeyHex: string;
+}
+
+export interface WalletAddressView {
+  path: string;
+  label: string;
+  change: number;
+  index: number;
+  nodes: WalletNodeView[];
+  publicKeyHex: string;
+  /** null for BIP 44, which names no script type. */
+  output: null | { kind: "p2wpkh"; keyHashHex: string; scriptPubKeyHex: string; address: string } | { kind: "p2tr"; internalKeyHex: string; tweakHex: string; outputKeyHex: string; scriptPubKeyHex: string; address: string };
+  /** The same address re-derived from the account extended public key alone. */
+  fromXpubMatches: boolean;
+  /** Pinned lines this view was checked against. */
+  checkedLines: number[];
+}
+
+export interface WalletPathDerived {
+  scheme: 44 | 84 | 86;
+  accountPath: string;
+  accountXpub: string;
+  accountXpubPublished: boolean;
+  addresses: WalletAddressView[];
+}
+export type DerivedWalletPathFixture = WalletPathVectorFixture & { derived: WalletPathDerived };

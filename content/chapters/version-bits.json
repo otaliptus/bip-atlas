@@ -15,11 +15,12 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A soft fork tightens the rules. Once it is active, blocks that older software would accept can be rejected, so everyone needs to know from which block the new rules apply. BIP 9, assigned in 2015 and recorded as deployed, is the mechanism that told them for the csv and segwit soft forks. BIP 8, assigned in 2017 and now recorded as complete, is an alternative that counts in block heights and can force the outcome.",
+        "text": "A soft fork tightens the rules in a backward-compatible way. Once it is active, blocks that older software would accept can be rejected, so everyone needs to know from which block the new rules apply. BIP 9, assigned in 2015 and recorded as deployed, is the mechanism that told them for the csv and segwit soft forks. BIP 8, assigned in 2017 and now recorded as complete, is an alternative that counts in block heights and can force the outcome.",
         "claims": [
           "preambles",
           "assignments",
-          "bip8-abstract"
+          "bip8-abstract",
+          "abstract"
         ]
       },
       {
@@ -100,7 +101,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The clock is not the wall clock. BIP 9 compares starttime and timeout with the median time past of the block before each period begins, a value the chain itself makes monotonic. Once that passes starttime, the deployment is STARTED and the bit means something.",
+          "text": "The clock is not the wall clock. BIP 9 compares starttime and timeout with the median time past of the block before each period begins, a value the chain itself makes monotonic. Once that reaches starttime, the deployment is STARTED and the bit means something.",
           "claims": [
             "mtp-clock",
             "params"
@@ -152,16 +153,17 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "Signalling is not activation. A STARTED or LOCKED_IN deployment changes no rule; only ACTIVE blocks enforce it, at least one full period after the count that locked it in.",
+          "text": "Signalling is not activation. A STARTED or LOCKED_IN deployment changes no rule; only ACTIVE blocks enforce it, at least one full period after the count that locked it in. (BIP 8’s MUST_SIGNAL period is the one exception: there, a block that fails to signal can itself be invalid.)",
           "claims": [
             "signal-lockedin",
             "lockin-active",
-            "states"
+            "states",
+            "bip8-must-signal"
           ]
         },
         {
           "type": "paragraph",
-          "text": "Nodes that have not upgraded still notice. BIP 9 has software track unexpected bits as an unknown upgrade, and warn loudly when one locks in.",
+          "text": "Nodes that have not upgraded still notice. BIP 9 has software track unexpected bits as an unknown upgrade, and says it should warn loudly when one locks in.",
           "claims": [
             "warning"
           ]
@@ -222,14 +224,14 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 8 starts from the authors’ view that BIP 9 went wrong in two places. A near-unanimous hashrate threshold lets a small minority of non-signalling miners veto a change, and timestamps meant a sudden loss of hashrate could interfere with a late activation. Heights, they argue, are more reliable, since each block adds exactly one.",
+          "text": "BIP 8 sets out to correct what its authors call perceived mistakes in BIP 9. Among them: a near-unanimous hashrate threshold lets a small minority of non-signalling miners veto a change, and timestamps meant a sudden loss of hashrate could interfere with a late activation. Block times are unreliable, and triggering at the first retarget after a date is non-intuitive. Heights, they argue, are more reliable, since each block adds exactly one.",
           "claims": [
             "bip8-why"
           ]
         },
         {
           "type": "paragraph",
-          "text": "So a BIP 8 deployment counts in heights: startheight and timeoutheight, both on retarget boundaries and at least 4,032 blocks apart. Its suggested threshold is lower, 1,815 blocks or 90 percent, and its suggested window is at least a year, 52,416 blocks. A minimum activation height can hold a locked-in deployment back so that nodes have time to upgrade; set to 0, LOCKED_IN lasts one period, as in BIP 9.",
+          "text": "So a BIP 8 deployment counts in heights: startheight and timeoutheight, both on retarget boundaries and at least 4,032 blocks apart. Its suggested threshold is lower, 1,815 blocks or 90 percent, and its suggested window is probably at least a year, 52,416 blocks. A minimum activation height can hold a locked-in deployment back so that nodes have time to upgrade; set to 0, LOCKED_IN lasts one period, as in BIP 9.",
           "claims": [
             "bip8-params",
             "bip8-guidelines",
@@ -254,7 +256,7 @@
         },
         {
           "type": "paragraph",
-          "text": "One distinction runs through both proposals. Signalling counts blocks, which measures mining; it does not show that users or their nodes have adopted the rules. BIP 8’s authors say as much: consensus rules are ultimately enforced by full nodes, and in the end by the economy.",
+          "text": "One distinction runs through both proposals. Signalling counts blocks, which measures mining; it does not show that users or their nodes have adopted the rules. BIP 8’s motivation draws the same line: hash-power activation enforces new rules in lieu of full nodes upgrading, while all consensus rules are ultimately enforced by full nodes.",
           "claims": [
             "signalling-not-consent"
           ]
@@ -263,7 +265,8 @@
           "type": "paragraph",
           "text": "BIP 8’s own history is in its changelog: rejected after a three-year timeout in 2020, revised with MUST_SIGNAL and a minimum activation height, and advanced to complete in 2026. Its pinned assignments file lists no deployments.",
           "claims": [
-            "bip8-history"
+            "bip8-history",
+            "bip8-empty"
           ]
         }
       ]

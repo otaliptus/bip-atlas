@@ -31,7 +31,7 @@
     },
     {
       "id": "abstract",
-      "statement": "BIP 9 reads the block version field as a bit vector, so several soft forks can be deployed in parallel, each tracked on its own bit.",
+      "statement": "BIP 9 reads the block version field as a bit vector, so several backward-compatible changes (soft forks) can be deployed in parallel, each tracked on its own bit; BIP 8 reads the field the same way.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -42,6 +42,14 @@
             16
           ],
           "quote": "allowing multiple backward-compatible changes (further called \"soft forks\") to be deployed in parallel. It relies on interpreting the version field as a bit vector, where each bit can be used to track an independent change."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            73,
+            76
+          ],
+          "quote": "The nVersion block header field is to be interpreted as a 32-bit little-endian integer (as present), and bits are selected within this integer as values (1 << N) where N is the bit number."
         }
       ]
     },
@@ -295,7 +303,7 @@
     },
     {
       "id": "warning",
-      "statement": "Software tracks unexpected version bits as an unknown upgrade and should warn loudly when one locks in.",
+      "statement": "BIP 9 has software track unexpected version bits as an extra unknown upgrade, and says it should warn loudly when one locks in.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -305,7 +313,7 @@
             163,
             163
           ],
-          "quote": "Whenever LOCKED_IN for the unknown upgrade is detected, the software should warn loudly about the upcoming soft fork."
+          "quote": "To support upgrade warnings, an extra \"unknown upgrade\" is tracked, using the \"implicit bit\" mask = (block.nVersion & ~expectedVersion) != 0. Mask will be non-zero whenever an unexpected bit is set in nVersion.  Whenever LOCKED_IN for the unknown upgrade is detected, the software should warn loudly about the upcoming soft fork."
         }
       ]
     },
@@ -387,7 +395,7 @@
     },
     {
       "id": "signalling-not-consent",
-      "statement": "Signalling counts blocks that set a bit, which is a measure of mining, not of whether users or nodes have adopted the rules; BIP 8's authors make the same distinction, noting that consensus rules are ultimately enforced by full nodes and the economy.",
+      "statement": "Signalling counts blocks that set a bit, which is a measure of mining, not of whether users or nodes have adopted the rules; BIP 8's motivation draws the same line, saying hash-power activation enforces new rules in lieu of full nodes upgrading, while all consensus rules are ultimately enforced by full nodes.",
       "scope": "editorial-analysis",
       "support": "inference",
       "evidence": [
@@ -405,7 +413,7 @@
             23,
             23
           ],
-          "quote": "Since all consensus rules are ultimately enforced by full nodes, eventually any new soft fork will be enforced by the economy."
+          "quote": "Super majority hashrate based activation triggers allow for accelerated activation where the majority hash power enforces the new rules in lieu of full nodes upgrading. Since all consensus rules are ultimately enforced by full nodes"
         }
       ]
     },
@@ -427,10 +435,18 @@
     },
     {
       "id": "bip8-why",
-      "statement": "BIP 8's authors argue that BIP 9's near-unanimous hashrate requirement lets a small minority veto, that timestamps let a sudden hashrate loss interfere with a late activation, and that heights are more reliable.",
+      "statement": "BIP 8 sets out to correct what its authors call perceived mistakes in BIP 9: a near-unanimous hashrate requirement that lets a small minority veto, timestamps that let a sudden hashrate loss interfere with a late activation, unreliable block times, and a non-intuitive trigger at the first retarget after a given time.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            15,
+            15
+          ],
+          "quote": "This document specifies an alternative to [[bip-0009.mediawiki|BIP9]] that corrects for a number of perceived mistakes."
+        },
         {
           "bip": 8,
           "lines": [
@@ -454,6 +470,14 @@
             27
           ],
           "quote": "Since each new block must increase the height by one, thresholds based on block height are much more reliable and intuitive and can be calculated exactly for difficulty retarget."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "Block time is somewhat unreliable and may be intentionally or unintentionally inaccurate, so thresholds based on block time are not ideal. Secondly, BIP9 specified triggers based on the first retarget after a given time, which is non-intuitive."
         }
       ]
     },
@@ -571,7 +595,7 @@
     },
     {
       "id": "bip8-fail",
-      "statement": "Without lockinontimeout, a deployment that has not reached the threshold fails at the timeout height; the count is checked first.",
+      "statement": "Without lockinontimeout, a deployment that has not reached the threshold fails at the timeout height; the count is checked first. (BIP 8's state diagram labels lock-in \"height < timeoutheight AND threshold reached\"; this site follows the pseudocode, which counts first, so a threshold-reaching period can still lock in at the timeout height, consistent with the parameter text's \"excluding this block's bit state\".)",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -590,6 +614,14 @@
             149
           ],
           "quote": "if (count >= threshold) { return LOCKED_IN; } else if (lockinontimeout && block.height + 2016 >= timeoutheight) { return MUST_SIGNAL; } else if (block.height >= timeoutheight) { return FAILED; }"
+        },
+        {
+          "bip": 8,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "Once this height has been reached, if the soft fork has not yet locked in (excluding this block's bit state), the deployment is considered failed on all descendants of the block."
         }
       ]
     },
@@ -611,7 +643,7 @@
     },
     {
       "id": "bip8-history",
-      "statement": "BIP 8's changelog records it moving to Rejected after a three-year timeout in 2020, being revised (MUST_SIGNAL, minimum_activation_height, a 90% recommendation), and advancing to Complete in 2026; its pinned assignments file lists no deployments.",
+      "statement": "BIP 8's changelog records it moving to Rejected after a three-year timeout in 2020, being revised (MUST_SIGNAL, a minimum_activation_height parameter, a 90% recommendation), and advancing to Complete in 2026.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -642,19 +674,18 @@
         {
           "bip": 8,
           "lines": [
-            304,
-            305
+            300,
+            300
           ],
-          "quote": "* '''0.0.2''' (2020-02-26): ** Move to Rejected due to 3-year time-out."
+          "quote": "** Add minimum_activation_height parameter."
         },
         {
           "bip": 8,
           "lines": [
-            3,
-            3
+            304,
+            305
           ],
-          "quote": "List of deployments.",
-          "file": "bip-0008/assignments.mediawiki"
+          "quote": "* '''0.0.2''' (2020-02-26): ** Move to Rejected due to 3-year time-out."
         }
       ]
     },
@@ -695,6 +726,23 @@
             224
           ],
           "quote": "The fallow period at the conclusion of a soft fork attempt allows some detection of buggy clients, and allows time for warnings and software upgrades for successful soft forks."
+        }
+      ]
+    },
+    {
+      "id": "bip8-empty",
+      "statement": "BIP 8's pinned assignments file has a heading and a note but no deployment rows (this site's parser finds none).",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            1,
+            5
+          ],
+          "quote": "==Deployments== List of deployments. State can be defined, active, failed. Dates are in UTC.",
+          "file": "bip-0008/assignments.mediawiki"
         }
       ]
     }

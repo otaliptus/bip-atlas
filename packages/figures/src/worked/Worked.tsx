@@ -383,7 +383,7 @@ export function VersionbitsWorked({ fixtures }: { fixtures: Array<DerivedVersion
       layer: { size: 0.55, tone: "plain", cells: 3 },
     },
     {
-      title: `Once the median time past passes starttime, a block signals by setting bit ${d.bit}`,
+      title: `Once the median time past reaches starttime, a block signals by setting bit ${d.bit}`,
       values: [{ label: "signalling version", value: `0x${d.signalVersion.toString(16).padStart(8, "0")}` }],
       note: "Top bits 001 and the deployment bit set. Signalling changes no rule by itself.",
       layer: { tone: "wash", cells: 32, highlight: [2, 31 - d.bit] },

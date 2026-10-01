@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "wallet-paths",
+  "warning": "BIP 84 and BIP 86 publish keys from the well-known 'abandon … about' test mnemonic. Test material only: anyone can spend from these keys.",
+  "fixtures": [
+    {
+      "id": "bip84-vectors",
+      "kind": "wallet-path-vector",
+      "label": "BIP 84 · P2WPKH",
+      "shortLabel": "purpose 84′",
+      "source": {
+        "bip": 84,
+        "line": 69,
+        "section": "Test vectors",
+        "quote": "mnemonic = abandon abandon abandon"
+      },
+      "scheme": 84,
+      "root": {
+        "privLine": 70,
+        "pubLine": 71
+      },
+      "account": {
+        "path": "m/84'/0'/0'",
+        "privLine": 74,
+        "pubLine": 75
+      },
+      "addresses": [
+        {
+          "path": "m/84'/0'/0'/0/0",
+          "label": "first receiving",
+          "lines": {
+            "pubkey": 79,
+            "address": 80
+          }
+        },
+        {
+          "path": "m/84'/0'/0'/0/1",
+          "label": "second receiving",
+          "lines": {
+            "pubkey": 84,
+            "address": 85
+          }
+        },
+        {
+          "path": "m/84'/0'/0'/1/0",
+          "label": "first change",
+          "lines": {
+            "pubkey": 89,
+            "address": 90
+          }
+        }
+      ]
+    },
+    {
+      "id": "bip86-vectors",
+      "kind": "wallet-path-vector",
+      "label": "BIP 86 · P2TR",
+      "shortLabel": "purpose 86′",
+      "source": {
+        "bip": 86,
+        "line": 86,
+        "section": "Test vectors",
+        "quote": "mnemonic = abandon abandon abandon"
+      },
+      "scheme": 86,
+      "root": {
+        "privLine": 87,
+        "pubLine": 88
+      },
+      "account": {
+        "path": "m/86'/0'/0'",
+        "privLine": 91,
+        "pubLine": 92
+      },
+      "addresses": [
+        {
+          "path": "m/86'/0'/0'/0/0",
+          "label": "first receiving",
+          "lines": {
+            "xprv": 95,
+            "xpub": 96,
+            "internal": 97,
+            "output": 98,
+            "spk": 99,
+            "address": 100
+          }
+        },
+        {
+          "path": "m/86'/0'/0'/0/1",
+          "label": "second receiving",
+          "lines": {
+            "xprv": 103,
+            "xpub": 104,
+            "internal": 105,
+            "output": 106,
+            "spk": 107,
+            "address": 108
+          }
+        },
+        {
+          "path": "m/86'/0'/0'/1/0",
+          "label": "first change",
+          "lines": {
+            "xprv": 111,
+            "xpub": 112,
+            "internal": 113,
+            "output": 114,
+            "spk": 115,
+            "address": 116
+          }
+        }
+      ]
+    },
+    {
+      "id": "bip44-paths",
+      "kind": "wallet-path-vector",
+      "label": "BIP 44 · path only",
+      "shortLabel": "purpose 44′",
+      "source": {
+        "bip": 44,
+        "line": 174,
+        "section": "Examples",
+        "quote": "|m / 44' / 0' / 0' / 0 / 0"
+      },
+      "scheme": 44,
+      "root": null,
+      "account": {
+        "path": "m/44'/0'/0'",
+        "privLine": null,
+        "pubLine": null
+      },
+      "addresses": [
+        {
+          "path": "m/44'/0'/0'/0/0",
+          "label": "first receiving",
+          "lines": {
+            "path": 174
+          }
+        },
+        {
+          "path": "m/44'/0'/0'/0/1",
+          "label": "second receiving",
+          "lines": {
+            "path": 180
+          }
+        },
+        {
+          "path": "m/44'/0'/0'/1/0",
+          "label": "first change",
+          "lines": {
+            "path": 186
+          }
+        }
+      ],
+      "keySource": {
+        "bip": 84,
+        "line": 69,
+        "note": "BIP 44 publishes paths but no keys; keys here come from BIP 84's mnemonic, derived by the tested BIP 32 model."
+      }
+    }
+  ]
+}
