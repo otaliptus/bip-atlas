@@ -655,7 +655,11 @@ export interface SpDerived {
   sharedSecret: string;
   /** The sender's shared secret for this receiver equals the receiver's. */
   secretsAgree: boolean;
+  /** The sender's shared secret with the (first) scan key it pays. */
+  senderSecret: string;
   receiver: { address: string; Bscan: string; Bspend: string; labels: number[]; labeledAddresses: string[] };
+  /** The addresses the sender pays; ours = in the receiving case's address list, label null = its unlabeled address. */
+  paidTo: Array<{ address: string; ours: boolean; label: number | null }>;
   senderOutputs: string[];
   txOutputs: Array<{ key: string; mine: boolean; label: number | null; k: number | null }>;
   steps: Array<{ k: number; tk: string; Pk: string; matched: boolean; via: string | null }>;

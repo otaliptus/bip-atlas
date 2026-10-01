@@ -393,6 +393,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "musig2-psig-checks",
   },
+  {
+    id: "silent-payment-derivation.v1",
+    description: "BIP 352 send-and-receive vectors: input keys, input hash, shared secret, outputs, and the receiver's scan.",
+    minFixtures: 1,
+    maxFixtures: 8,
+    interactive: true,
+    controls: ["Choose a published vector", "Switch sender/receiver view", "Reveal shared-secret steps"],
+    fixtureKind: "sp-vector",
+  },
+  {
+    id: "sp-address.v1",
+    description: "The parts of a version 0 silent payment address.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "sp-vector",
+  },
+  {
+    id: "sp-input-eligibility.v1",
+    description: "Which inputs of published BIP 352 vectors contribute a key to the shared secret.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "sp-eligibility",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

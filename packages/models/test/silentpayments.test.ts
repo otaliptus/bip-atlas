@@ -87,3 +87,34 @@ describe("labels and limits", () => {
     expect(addr.startsWith("sp1q")).toBe(true);
   });
 });
+
+describe("silent-payments chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/silent-payments.json", root), "utf8");
+
+  it("dates, sizes and counts", () => {
+    expect(b352[9]).toContain("Assigned: 2023-03-09");
+    expect(b352[7]).toContain("Status: Complete");
+    expect(text).toContain("BIP 352, assigned in 2023 and recorded as Complete");
+    const addr = vectors[0].receiving[0].expected.addresses[0];
+    expect(addr.length).toBe(116);
+    expect(text).toContain("116 characters for version 0 on mainnet, always starting sp1q");
+    const { Bscan, Bm } = decodeAddress(addr);
+    expect([Bscan.length / 2, Bm.length / 2]).toEqual([33, 33]);
+    expect(text).toContain("two public keys of 33 bytes each");
+    expect(text).toContain("inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH");
+    expect(b352[509]).toContain("'''1.1.0'''");
+    expect(b352[510]).toContain("K<sub>max</sub>");
+    expect(text).toContain("Since version 1.1.0 the search is also capped");
+    expect(text).toContain("K_max = 2323 outputs, and a receiver stops at k = 2323");
+    expect(b352[194]).toContain("SegWit version > 1");
+    expect(text).toContain("SegWit version above 1");
+  });
+
+  it("figure facts the prose relies on", () => {
+    const fx = JSON.parse(readFileSync(new URL("fixtures/silent-payments.json", root), "utf8")).fixtures;
+    expect(fx.filter((f: { kind: string }) => f.kind === "sp-vector").length).toBe(6);
+    expect(text).toContain("Six of BIP 352’s send-and-receive vectors");
+    expect(fx.find((f: { kind: string }) => f.kind === "sp-eligibility").caseIndices.length).toBe(5);
+    expect(text).toContain("The inputs of five published vectors");
+  });
+});

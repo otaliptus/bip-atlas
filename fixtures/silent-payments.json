@@ -77,7 +77,7 @@
       "id": "sp-case-23",
       "kind": "sp-vector",
       "label": "Unrelated outputs in the same transaction",
-      "shortLabel": "receiver ignores them",
+      "shortLabel": "outputs to someone else",
       "source": {
         "bip": 352,
         "file": "bip-0352/send_and_receive_test_vectors.json",

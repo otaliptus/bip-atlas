@@ -1154,7 +1154,12 @@ function deriveSp(f: SpVectorFixture): DerivedSpFixture {
       tweak: res.tweak!,
       sharedSecret: res.sharedSecret!,
       secretsAgree: senderSecret === res.sharedSecret,
+      senderSecret: send.sharedSecrets[0]?.secret ?? "",
       receiver: { address: addrs[0], Bscan: dec.Bscan, Bspend: dec.Bm, labels: g.labels, labeledAddresses: addrs.slice(1) },
+      paidTo: [...new Set<string>(s.given.recipients.map((x: any) => x.address))].map((a) => {
+        const i = addrs.indexOf(a);
+        return { address: a, ours: i >= 0, label: i > 0 ? g.labels[i - 1] : null };
+      }),
       senderOutputs: send.outputs,
       txOutputs: g.outputs.map((o: string) => {
         const hit = res.found.find((x) => x.pubKey === o);
