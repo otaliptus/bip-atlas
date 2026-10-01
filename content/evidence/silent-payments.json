@@ -1,0 +1,873 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "silent-payments",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 352 (josibake, Ruben Somsen, Sebastian Falbesoner) is a Specification BIP assigned in 2023 and recorded as Complete; this snapshot is version 1.1.1.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            4,
+            10
+          ],
+          "quote": "Title: Silent Payments Authors: josibake <josibake@protonmail.com> Ruben Somsen <rsomsen@gmail.com> Sebastian Falbesoner <sebastian.falbesoner@gmail.com> Status: Complete Type: Specification Assigned: 2023-03-09"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "Version: 1.1.1"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 352 specifies static payment addresses without on-chain linkability of payments or on-chain notifications.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            24,
+            24
+          ],
+          "quote": "This document specifies a protocol for static payment addresses in Bitcoin without on-chain linkability of payments or a need for on-chain notifications."
+        }
+      ]
+    },
+    {
+      "id": "interaction",
+      "statement": "The authors motivate the BIP by the privacy value of fresh addresses, which usually needs sender-receiver interaction (an address, a batch, or an xpub).",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            32,
+            32
+          ],
+          "quote": "Using a new address for each Bitcoin transaction is a crucial aspect of maintaining privacy. This often requires a secure interaction between sender and receiver, so that the receiver can hand out a fresh address, a batch of fresh addresses, or a method for the sender to generate addresses on-demand, such as an xpub."
+        }
+      ]
+    },
+    {
+      "id": "cost-scan",
+      "statement": "The benefits come at the cost of wallets scanning the blockchain; the authors call this generally feasible for full nodes but a challenge for light clients, and light-client support open research.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "These benefits come at the cost of requiring wallets to scan the blockchain in order to detect payments. This added requirement is generally feasible for full nodes but poses a challenge for light clients. While it is possible today to implement a privacy-preserving light client at the cost of increased bandwidth, light client support is considered an area of open research"
+        }
+      ]
+    },
+    {
+      "id": "collaborative",
+      "statement": "The design keeps CoinJoins and MuSig/FROST inputs in mind, but recommends that all inputs belong to one entity because there is no formal proof of security in a collaborative setting.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "The design keeps collaborative transactions such as CoinJoins and inputs with MuSig and FROST keys in mind, but it is recommended that the keys of all inputs of a transaction belong to the same entity as there is no formal proof that the protocol is secure in a collaborative setting."
+        }
+      ]
+    },
+    {
+      "id": "goals",
+      "statement": "The stated goals include no increase in transaction size or cost, transactions that blend in, and no linking of transactions to a silent payment address by an outside observer.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            44,
+            46
+          ],
+          "quote": "* No increase in the size or cost of transactions * Resulting transactions blend in with other bitcoin transactions and can't be distinguished * Transactions can't be linked to a silent payment address by an outside observer"
+        }
+      ]
+    },
+    {
+      "id": "ecdh",
+      "statement": "Simple case: Alice pays P = B + hash(a·B)·G; since a·B == b·A (ECDH), Bob finds P by computing hash(b·A) from the input public keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            65,
+            68
+          ],
+          "quote": "* Let ''P = B + hash(a·B)·G'' * Encode ''P'' as a [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP341] taproot output Since ''a·B == b·A''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            68,
+            68
+          ],
+          "quote": "Bob scans with his private key ''b'' by collecting the input public keys for each transaction with at least one unspent taproot output and performing the ECDH calculation until ''P'' is found"
+        }
+      ]
+    },
+    {
+      "id": "multi-output",
+      "statement": "Further outputs to the same receiver use k = 1, 2, …; after finding P_0 the receiver checks P_1 and stops at the first one not found.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            80,
+            84
+          ],
+          "quote": "Once he detects the first output, he must: * Check for ''P<sub>1</sub> = B + hash(b·A || 1)·G'' * If ''P<sub>1</sub>'' is not found, stop"
+        }
+      ]
+    },
+    {
+      "id": "input-hash",
+      "statement": "The input hash prevents a second payment from the same key from deriving the same outputs; it hashes the smallest outpoint and A.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            90,
+            90
+          ],
+          "quote": "If Alice were to use a different UTXO from the same public key ''A'' for a subsequent payment to Bob, she would end up deriving the same destinations ''P<sub>k</sub>''. To prevent this, Alice should include an input hash"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            303,
+            303
+          ],
+          "quote": "Let ''input_hash = hash<sub>BIP0352/Inputs</sub>(outpoint<sub>L</sub> || A)'', where ''outpoint<sub>L</sub>'' is the smallest ''outpoint'' lexicographically used in the transaction"
+        }
+      ]
+    },
+    {
+      "id": "sum-inputs",
+      "statement": "The sender tweaks with the sum of the input private keys, a = a1 + … + an, and A = a·G.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            101,
+            104
+          ],
+          "quote": "Alice performs the tweak with the sum of her input private keys in the following manner: * Let ''a = a<sub>1</sub> + a<sub>2</sub> + ... + a<sub>n</sub>'' * Let ''A = a·G''"
+        }
+      ]
+    },
+    {
+      "id": "scan-spend",
+      "statement": "An address carries a scan key and a spend key so b_spend can stay in cold storage while scanning uses b_scan.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            110,
+            110
+          ],
+          "quote": "Bob can instead publish an address of the form ''(B<sub>scan</sub>, B<sub>spend</sub>)''. This allows Bob to keep ''b<sub>spend</sub>'' in offline cold storage and perform the scanning with the public key ''B<sub>spend</sub>'' and private key ''b<sub>scan</sub>''."
+        }
+      ]
+    },
+    {
+      "id": "derive",
+      "statement": "The sender computes ecdh_shared_secret = input_hash·a·B_scan, t_k as a tagged hash of the secret and k, and P = B_m + t_k·G; the receiver computes input_hash·b_scan·A and P_k = B_spend + t_k·G.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            309,
+            310
+          ],
+          "quote": "** Let ''ecdh_shared_secret = input_hash·a·B<sub>scan</sub>'' ** Let ''k = 0''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            312,
+            312
+          ],
+          "quote": "Let ''t<sub>k</sub> = hash<sub>BIP0352/SharedSecret</sub>(ser<sub>P</sub>(ecdh_shared_secret) || ser<sub>32</sub>(k))''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            314,
+            314
+          ],
+          "quote": "Let ''P<sub>mn</sub> = B<sub>m</sub> + t<sub>k</sub>·G''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            343,
+            343
+          ],
+          "quote": "* Let ''ecdh_shared_secret = input_hash·b<sub>scan</sub>·A''"
+        }
+      ]
+    },
+    {
+      "id": "spend-key",
+      "statement": "The receiver spends with d = (b_spend + t_k + optional label tweak) mod n.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            368,
+            369
+          ],
+          "quote": "Let ''d = (b<sub>spend</sub> + t<sub>k</sub> + hash<sub>BIP0352/Label</sub>(ser<sub>256</sub>(b<sub>scan</sub>) || ser<sub>32</sub>(m))) mod n''"
+        }
+      ]
+    },
+    {
+      "id": "labels",
+      "statement": "A label tweaks the spend key, B_m = B_spend + hash(b_scan || m)·G, so a receiver can tell payments apart without scanning for multiple addresses.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            118,
+            120
+          ],
+          "quote": "Naively, Bob could publish multiple silent payment addresses, but this would require him to scan for each one, which becomes prohibitively expensive. Instead, Bob can label his spend public key ''B<sub>spend</sub>'' with an integer ''m'' in the following way: * Let ''B<sub>m</sub> = B<sub>spend</sub> + hash(b<sub>scan</sub> || m)·G''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            356,
+            357
+          ],
+          "quote": "Compute ''label = output - P<sub>k</sub>'' ***** Check if ''label'' exists in the list of labels used by the wallet"
+        }
+      ]
+    },
+    {
+      "id": "labels-linkable",
+      "statement": "An outside observer can easily tell that labeled addresses belong to one entity because they share B_scan; labels are not for separate identities.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            128,
+            128
+          ],
+          "quote": "It is important to note that an outside observer can easily deduce that each published ''(B<sub>scan</sub>, B<sub>m</sub>)'' pair is owned by the same entity as each published address will have ''B<sub>scan</sub>'' in common. As such, labels are not meant as a way for Bob to manage separate identities"
+        }
+      ]
+    },
+    {
+      "id": "change-label",
+      "statement": "Label m = 0 is reserved for change; it is important that a wallet never hands it out.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "We reserve ''m = 0'' for this use case."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "It is important that the wallet never hands out the label with ''m = 0'' in order to ensure nobody else can create payments that are wrongly labeled as change."
+        }
+      ]
+    },
+    {
+      "id": "negate-output",
+      "statement": "If no label matches, the receiver negates the output and checks again, because taproot outputs are x-only.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            361,
+            361
+          ],
+          "quote": "If a label is not found, negate ''output'' and check a second time"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            361,
+            361
+          ],
+          "quote": "Unfortunately taproot outputs are X-only, meaning we don't know what the correct Y coordinate is."
+        }
+      ]
+    },
+    {
+      "id": "version",
+      "statement": "Version 0 addresses start sp1q; the version is carried as in bech32 addresses.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            149,
+            149
+          ],
+          "quote": "This document defines version 0 (''sp1q'')."
+        }
+      ]
+    },
+    {
+      "id": "address-format",
+      "statement": "An address is bech32m with HRP sp (mainnet) or tsp, the character q for version 0, and the 66-byte concatenation of B_scan and B_m; a v0 mainnet address is 116 characters.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            205,
+            209
+          ],
+          "quote": "** The human-readable part \"sp\" for mainnet, \"tsp\" for testnets (e.g.  signet, testnet) ** The data-part values: *** The character \"q\", to represent a silent payment address of version 0 *** The 66-byte concatenation of the receiver's public keys, ''ser<sub>P</sub>(B<sub>scan</sub>) || ser<sub>P</sub>(B<sub>m</sub>)''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            221,
+            221
+          ],
+          "quote": "For a silent payments v0 address, this results in a 116-character address when using the 2-character mainnet HRP (\"sp\")"
+        }
+      ]
+    },
+    {
+      "id": "taproot-only",
+      "statement": "Receiver outputs are always BIP 341 taproot outputs.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            185,
+            185
+          ],
+          "quote": "* Receiver addresses are always [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP341] taproot outputs"
+        }
+      ]
+    },
+    {
+      "id": "anyonecanpay",
+      "statement": "The sender should sign with DEFAULT, ALL, SINGLE or NONE; ANYONECANPAY is unsafe.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            186,
+            186
+          ],
+          "quote": "The sender should sign with one of the sighash flags ''DEFAULT'', ''ALL'', ''SINGLE'', ''NONE'' (''ANYONECANPAY'' is unsafe)."
+        }
+      ]
+    },
+    {
+      "id": "scan-conditions",
+      "statement": "A v0 transaction MUST be scanned iff it has at least one taproot output, at least one eligible input, and spends no output with SegWit version > 1.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            191,
+            195
+          ],
+          "quote": "For silent payments v0 a transaction MUST be scanned if and only if all of the following are true: * The transaction contains at least one BIP341 taproot output"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            194,
+            195
+          ],
+          "quote": "* The transaction has at least one input from the ''[[#inputs-for-shared-secret-derivation|Inputs For Shared Secret Derivation]]'' list * The transaction does not spend an output with SegWit version > 1"
+        }
+      ]
+    },
+    {
+      "id": "input-list",
+      "statement": "Any UTXO with known output scripts can fund the transaction, but sender and receiver MUST derive the secret from P2TR, P2WPKH, P2SH-P2WPKH and P2PKH inputs only.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            225,
+            230
+          ],
+          "quote": "While any UTXO with known output scripts can be used to fund the transaction, the sender and receiver MUST use inputs from the following list when deriving the shared secret: * ''P2TR'' * ''P2WPKH'' * ''P2SH-P2WPKH'' * ''P2PKH''"
+        }
+      ]
+    },
+    {
+      "id": "excluded-multi",
+      "statement": "Inputs with conditional branches or multiple keys are excluded because a malicious participant in a collaborative transaction could re-sign with different keys.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            232,
+            232
+          ],
+          "quote": "Inputs with conditional branches or multiple public keys (e.g. ''CHECKMULTISIG'') are excluded from shared secret derivation as this introduces malleability and would allow a sender to re-sign with a different set of public keys after the silent payment output has been derived. This is not a concern when the sender controls all of the inputs, but is an issue for CoinJoins and other collaborative protocols, where a malicious participant can participate in deriving the silent payment address with one set of keys and then re-broadcast the transaction with signatures for a different set of public keys."
+        }
+      ]
+    },
+    {
+      "id": "compressed-only",
+      "statement": "Only x-only and compressed public keys are permitted.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            234,
+            234
+          ],
+          "quote": "For all of the output types listed, only X-only and compressed public keys are permitted"
+        }
+      ]
+    },
+    {
+      "id": "where-keys",
+      "statement": "The receiver reads the key from the last witness item for P2WPKH and P2SH-P2WPKH, from the scriptSig for P2PKH, and from the scriptPubKey (output key) for P2TR, including script-path spends.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            254,
+            254
+          ],
+          "quote": "Same as a keypath spend, the receiver obtains the public key from the ''scriptPubKey'' (i.e. the taproot output key)"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            265,
+            265
+          ],
+          "quote": "the receiver obtains the public key as the last witness item."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            275,
+            275
+          ],
+          "quote": "the receiver obtains the public key as the last witness item."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            283,
+            283
+          ],
+          "quote": "The receiver obtains the public key from the ''scriptSig''."
+        }
+      ]
+    },
+    {
+      "id": "nums",
+      "statement": "Script-path spends whose internal key is the NUMS point H are skipped.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            256,
+            256
+          ],
+          "quote": "The one exception is script path spends that use NUMS point ''H'' as their internal key"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            256,
+            256
+          ],
+          "quote": "in which case the input will be skipped for the purposes of shared secret derivation"
+        }
+      ]
+    },
+    {
+      "id": "p2pkh-malleated",
+      "statement": "The receiver MUST parse a P2PKH scriptSig for the key even when it does not match the template, to address third-party malleability.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            283,
+            283
+          ],
+          "quote": "The receiver MUST parse the ''scriptSig'' for the public key, even if the ''scriptSig'' does not match the template specified (e.g. <code><dummy> OP_DROP <Signature> <Public Key></code>). This is to address the [https://en.bitcoin.it/wiki/Transaction_malleability third-party malleability of ''P2PKH'' ''scriptSigs'']."
+        }
+      ]
+    },
+    {
+      "id": "taproot-negate",
+      "statement": "The sender negates a taproot private key whose point has odd y, because the receiver assumes even y when summing x-only keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            300,
+            300
+          ],
+          "quote": "check that the private key produces a point with an even Y coordinate and negate the private key if not"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            300,
+            300
+          ],
+          "quote": "since the receiver will assume the even Y coordinate when summing the taproot X-only public keys."
+        }
+      ]
+    },
+    {
+      "id": "select-inputs",
+      "statement": "Coin selection MUST include at least one eligible input.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            291,
+            291
+          ],
+          "quote": "* At least one input MUST be from the ''[[#inputs-for-shared-secret-derivation|Inputs For Shared Secret Derivation]]'' list"
+        }
+      ]
+    },
+    {
+      "id": "kmax",
+      "statement": "Since version 1.1.0, a sender fails if a scan-key group exceeds K_max = 2323 addresses and a receiver stops at k = K_max, to mitigate quadratic scanning for adversarial transactions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            306,
+            306
+          ],
+          "quote": "* If any of the groups exceed the limit of ''K<sub>max</sub>'' (=2323) silent payment addresses, fail."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            347,
+            347
+          ],
+          "quote": "*** If ''k == K<sub>max</sub>'' (=2323), stop scanning."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            510,
+            511
+          ],
+          "quote": "* '''1.1.0''' (2026-03-02): ** Introduce per-group recipient limit ''K<sub>max</sub>'' to mitigate quadratic scanning behavior for adversarial transactions."
+        }
+      ]
+    },
+    {
+      "id": "all-outputs",
+      "statement": "All generated outputs MUST be in the final transaction; omitting P_i hides later outputs from the receiver.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            320,
+            320
+          ],
+          "quote": "All generated outputs MUST be present in the final transaction. If an output ''P<sub>i</sub>'' with ''i < k'' is omitted, the receiver will not be able to find outputs ''P<sub>j</sub>'' where ''i < j <= k''."
+        }
+      ]
+    },
+    {
+      "id": "backup",
+      "statement": "Each output is derived independently, so regular backups are recommended and recovery requires scanning; a seed-only restore scans from the wallet birthday.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            373,
+            373
+          ],
+          "quote": "Since each silent payment output address is derived independently, regular backups are recommended. When recovering from a backup, the wallet will need to scan since the last backup to detect new payments."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            375,
+            375
+          ],
+          "quote": "can recover the full wallet history by scanning the blockchain starting from the wallet birthday."
+        }
+      ]
+    },
+    {
+      "id": "light-clients",
+      "statement": "Light-client scanning is out of scope; an appendix sketches tweak data served per transaction and BIP 158 block filters.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            461,
+            461
+          ],
+          "quote": "While this is out of scope for the current BIP"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            479,
+            479
+          ],
+          "quote": "Once a light client has the tweak data for a block, they can determine whether or not an output to them exists in the block using BIP158 block filters."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's silent payments model reproduces all 28 of BIP 352's send-and-receive vectors: sender outputs and shared secrets, receiver addresses, tweaks, shared secrets, found outputs and spending tweaks. The figures show six of them, recomputed at build time and checked against the published values.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            383,
+            383
+          ],
+          "quote": "A [[bip-0352/send_and_receive_test_vectors.json|collection of test vectors in JSON format]] is provided"
+        }
+      ]
+    },
+    {
+      "id": "eligibility-vectors",
+      "statement": "Read by the model, the vectors with a malleated P2PKH scriptSig, uncompressed keys, a non-P2WPKH P2SH input and a NUMS script-path spend each have inputs that are skipped or parsed as the BIP requires, while the shared secret still matches.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            442,
+            442
+          ],
+          "quote": "Wallets should include inputs not in the ''[[#inputs-for-shared-secret-derivation|Inputs For Shared Secret Derivation]]'' list when testing to ensure that only inputs from the list are being used for shared secret derivation."
+        }
+      ]
+    },
+    {
+      "id": "address-computed",
+      "statement": "The first vector's address decodes to two 33-byte compressed keys, and the model re-encodes the same 116-character address.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            209,
+            209
+          ],
+          "quote": "The 66-byte concatenation of the receiver's public keys"
+        }
+      ]
+    },
+    {
+      "id": "negligible",
+      "statement": "Because the follow-up checks run only after a match, the authors call the added scanning cost negligible.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            86,
+            86
+          ],
+          "quote": "Since Bob will only perform these subsequent checks after a transaction with at least one output paying him is found, the increase to his overall scanning requirement is negligible."
+        }
+      ]
+    },
+    {
+      "id": "scan-loop",
+      "statement": "The receiver computes P_k = B_spend + t_k·G starting at k = 0, checks the transaction's taproot output keys, rescans with k++ after each match, and stops when no match is found.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            345,
+            350
+          ],
+          "quote": "** Let ''outputs_to_check'' be the taproot output keys from all taproot outputs in the transaction (spent and unspent). ** Starting with ''k = 0'':"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            350,
+            350
+          ],
+          "quote": "*** Compute ''P<sub>k</sub> = B<sub>spend</sub> + t<sub>k</sub>·G''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            354,
+            354
+          ],
+          "quote": "Remove ''output'' from ''outputs_to_check'' and rescan ''outputs_to_check'' with ''k++''"
+        },
+        {
+          "bip": 352,
+          "lines": [
+            362,
+            362
+          ],
+          "quote": "*** If no matches are found, stop"
+        }
+      ]
+    },
+    {
+      "id": "exclude-v2",
+      "statement": "In coin selection the sender excludes inputs with SegWit version > 1.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            292,
+            292
+          ],
+          "quote": "* Exclude inputs with SegWit version > 1"
+        }
+      ]
+    },
+    {
+      "id": "taproot-key-required",
+      "statement": "For a taproot input, including a script-path spend, the sender MUST use the private key of the taproot output key; if it is not available the output cannot be an input, unless H is the internal key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            254,
+            254
+          ],
+          "quote": "Same as a keypath spend, the sender MUST use the private key corresponding to the taproot output key. If this key is not available, the output cannot be included as an input to the transaction."
+        },
+        {
+          "bip": 352,
+          "lines": [
+            293,
+            293
+          ],
+          "quote": "* For each taproot output spent the sending wallet MUST have access to the private key corresponding to the taproot output key, unless ''H'' is used as the internal public key"
+        }
+      ]
+    },
+    {
+      "id": "change-scan",
+      "statement": "Every receiving silent payments wallet should at least scan for the change label when recovering from backup.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 352,
+          "lines": [
+            134,
+            134
+          ],
+          "quote": "every receiving silent payments wallet should at least scan for the change label when recovering from backup in order to ensure maximum cross-compatibility."
+        }
+      ]
+    }
+  ]
+}

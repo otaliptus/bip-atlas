@@ -1,0 +1,609 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "wallet-paths",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preambles",
+      "statement": "BIP 44 (Palatinus, Rusnak; assigned 2014; requires BIPs 32 and 43), BIP 84 (Rusnak; 2017) and BIP 86 (Chow; 2021) are application-layer specifications, all recorded as Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            3,
+            12
+          ],
+          "quote": "Layer: Applications Title: Multi-Account Hierarchy for Deterministic Wallets Authors: Marek Palatinus <slush@satoshilabs.com> Pavol Rusnak <stick@satoshilabs.com>"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            9,
+            12
+          ],
+          "quote": "Status: Deployed Type: Specification Assigned: 2014-04-24 Requires: 32, 43"
+        },
+        {
+          "bip": 84,
+          "lines": [
+            3,
+            10
+          ],
+          "quote": "Layer: Applications Title: Derivation scheme for P2WPKH based accounts Authors: Pavol Rusnak <stick@satoshilabs.com>"
+        },
+        {
+          "bip": 84,
+          "lines": [
+            8,
+            10
+          ],
+          "quote": "Status: Deployed Type: Specification Assigned: 2017-12-28"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            3,
+            8
+          ],
+          "quote": "Layer: Applications Title: Key Derivation for Single Key P2TR Outputs Authors: Ava Chow <me@achow101.com> Status: Deployed Type: Specification Assigned: 2021-06-22"
+        }
+      ]
+    },
+    {
+      "id": "on-bip32",
+      "statement": "BIP 44 defines a logical hierarchy on top of BIP 32's derivation algorithm and BIP 43's purpose scheme; it is a particular application of BIP 43.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            17,
+            21
+          ],
+          "quote": "This BIP defines a logical hierarchy for deterministic wallets based on an algorithm described in BIP-0032 (BIP32 from now on) and purpose scheme described in BIP-0043 (BIP43 from now on). This BIP is a particular application of BIP43."
+        }
+      ]
+    },
+    {
+      "id": "levels",
+      "statement": "BIP 44 defines five levels below m: purpose', coin_type', account', change and address_index; an apostrophe marks hardened derivation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            31,
+            37
+          ],
+          "quote": "We define the following 5 levels in BIP32 path: <pre> m / purpose' / coin_type' / account' / change / address_index </pre> Apostrophe in the path indicates that BIP32 hardened derivation is used."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "BIP 44's hierarchy is meant to handle multiple coins, multiple accounts, external and internal chains per account, and millions of addresses per chain.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            25,
+            27
+          ],
+          "quote": "It allows the handling of multiple coins, multiple accounts, external and internal chains per account and millions of addresses per chain."
+        }
+      ]
+    },
+    {
+      "id": "purpose",
+      "statement": "Purpose is the constant 44' (0x8000002C), following BIP 43, and marks the subtree as following this specification; it is hardened.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            43,
+            46
+          ],
+          "quote": "Purpose is a constant set to 44' (or 0x8000002C) following the BIP43 recommendation. It indicates that the subtree of this node is used according to this specification. Hardened derivation is used at this level."
+        }
+      ]
+    },
+    {
+      "id": "coin-type",
+      "statement": "Coin type gives each coin its own hardened subtree, avoiding address reuse across coins; BIP 44 lists 0' for Bitcoin and 1' for Bitcoin testnet and points to SLIP-0044 for the full list.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            54,
+            55
+          ],
+          "quote": "This level creates a separate subtree for every cryptocoin, avoiding reusing addresses across cryptocoins and improving privacy issues."
+        },
+        {
+          "bip": 44,
+          "lines": [
+            144,
+            150
+          ],
+          "quote": "|0 |0x80000000 |Bitcoin |- |1 |0x80000001 |Bitcoin Testnet"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            153,
+            154
+          ],
+          "quote": "This BIP is not a central directory for the registered coin types, please visit SatoshiLabs that maintains the full list:"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            156,
+            156
+          ],
+          "quote": "[[https://github.com/satoshilabs/slips/blob/master/slip-0044.md|SLIP-0044 : Registered coin types for BIP-0044]]"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "statement": "Accounts split the key space into independent user identities so coins are never mixed; they are numbered from 0, use hardened derivation, and software should not create an account while the previous one has no transaction history. BIP 44 likens them to bank accounts: one for donations, one for savings, one for common expenses.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            67,
+            68
+          ],
+          "quote": "This level splits the key space into independent user identities, so the wallet never mixes the coins across different accounts."
+        },
+        {
+          "bip": 44,
+          "lines": [
+            75,
+            81
+          ],
+          "quote": "Accounts are numbered from index 0 in sequentially increasing manner. This number is used as child index in BIP32 derivation. Hardened derivation is used at this level. Software should prevent a creation of an account if a previous account does not have a transaction history"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            70,
+            73
+          ],
+          "quote": "Users can use these accounts to organize the funds in the same fashion as bank accounts; for donation purposes (where all addresses are considered public), for saving purposes, for common expenses etc."
+        }
+      ]
+    },
+    {
+      "id": "change",
+      "statement": "Change is 0 for the external chain (addresses shown outside the wallet, for receiving) and 1 for the internal chain (change); it uses public derivation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            88,
+            94
+          ],
+          "quote": "Constant 0 is used for external chain and constant 1 for internal chain (also known as change addresses). External chain is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal chain is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. Public derivation is used at this level."
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "statement": "Addresses are numbered from 0 along each chain, with public derivation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            98,
+            101
+          ],
+          "quote": "Addresses are numbered from index 0 in sequentially increasing manner. This number is used as child index in BIP32 derivation. Public derivation is used at this level."
+        }
+      ]
+    },
+    {
+      "id": "discovery",
+      "statement": "After importing a seed, software discovers accounts in order, scanning each account's external chain and stopping at the first account with no transactions; it works on transaction history, not balances.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            108,
+            112
+          ],
+          "quote": "# derive the first account's node (index = 0) # derive the external chain node of this account # scan addresses of the external chain; respect the gap limit described below # if no transactions are found on the external chain, stop discovery # if there are some transactions, increase the account index and go to step 1"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            118,
+            120
+          ],
+          "quote": "Please note that the algorithm works with the transaction history, not account balances"
+        }
+      ]
+    },
+    {
+      "id": "gap-limit",
+      "statement": "BIP 44 gives the address gap limit as 20 at the time of writing: after 20 unused addresses in a row, software stops scanning that chain. It scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains, and wallet software should warn a user who tries to exceed the limit.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            124,
+            127
+          ],
+          "quote": "Address gap limit is currently set to 20. If the software hits 20 unused addresses in a row, it expects there are no used addresses beyond this point and stops searching the address chain. We scan just the external chains, because internal chains receive only coins that come from the associated external chains."
+        },
+        {
+          "bip": 44,
+          "lines": [
+            129,
+            130
+          ],
+          "quote": "Wallet software should warn when the user is trying to exceed the gap limit on an external chain by generating a new address."
+        }
+      ]
+    },
+    {
+      "id": "b84",
+      "statement": "BIP 84 keeps BIP 44's account structure and changes only the purpose, 84', to indicate the P2WPKH serialization (the BIP 173 format), building addresses with BIP 141's P2WPKH encapsulation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "This BIP defines the derivation scheme for HD wallets using the P2WPKH ([[bip-0173.mediawiki|BIP 173]]) serialization format for segregated witness transactions."
+        },
+        {
+          "bip": 84,
+          "lines": [
+            35,
+            35
+          ],
+          "quote": "this BIP uses the same account-structure as defined in [[bip-0044.mediawiki|BIP 44]] and [[bip-0049.mediawiki|BIP 49]], but only uses a different purpose value to indicate the different transaction serialization method."
+        },
+        {
+          "bip": 84,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "For the <code>purpose</code>-path level it uses <code>84'</code>."
+        },
+        {
+          "bip": 84,
+          "lines": [
+            49,
+            52
+          ],
+          "quote": "witness: <signature> <pubkey> scriptSig: (empty) scriptPubKey: 0 <20-byte-key-hash> (0x0014{20-byte-key-hash})"
+        }
+      ]
+    },
+    {
+      "id": "b84-why",
+      "statement": "BIP 84's motivation: a common scheme lets different wallets share a seed, and dedicated SegWit accounts mean only compatible wallets detect them.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            20,
+            23
+          ],
+          "quote": "With the usage of P2WPKH transactions it is necessary to have a common derivation scheme. It allows the user to use different HD wallets with the same masterseed and/or a single account seamlessly. Thus the user needs to create dedicated segregated witness accounts, which ensures that only wallets compatible with this BIP will detect the accounts and handle them appropriately."
+        }
+      ]
+    },
+    {
+      "id": "b84-versions",
+      "statement": "BIP 84 serializes extended keys with alternate version bytes: 0x04b24746 (zpub) and 0x04b2430c (zprv), with vpub/vprv on testnet.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "Extended public keys use <code>0x04b24746</code> to produce a \"zpub\" prefix, and private keys use <code>0x04b2430c</code> to produce a \"zprv\" prefix. Testnet uses <code>0x045f1cf6</code> \"vpub\" and <code>0x045f18bc</code> \"vprv.\""
+        }
+      ]
+    },
+    {
+      "id": "not-compatible",
+      "statement": "BIPs 84 and 86 are not backwards compatible by design: a wallet that does not implement them will not discover the accounts at all.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "This BIP is not backwards compatible by design as described under [[#considerations|considerations]]. An incompatible wallet will not discover accounts at all and the user will notice that something is wrong."
+        },
+        {
+          "bip": 86,
+          "lines": [
+            76,
+            78
+          ],
+          "quote": "This BIP is not backwards compatible by design. An incompatible wallet will not discover these accounts at all and the user will notice that something is wrong."
+        }
+      ]
+    },
+    {
+      "id": "b86",
+      "statement": "BIP 86 uses purpose 86' for keys used as the internal key of single-key P2TR outputs: the internal key is lift_x(derived key), tweaked with a hash of the key alone so that, as BIP 341 recommends, the output commits to an unspendable script path rather than none, in a version 1 output 0x5120{output key}.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 86,
+          "lines": [
+            14,
+            15
+          ],
+          "quote": "This document suggests a derivation scheme for HD wallets whose keys are involved in single key P2TR ([[bip-0341.mediawiki|BIP 341]]) outputs as the Taproot internal key."
+        },
+        {
+          "bip": 86,
+          "lines": [
+            45,
+            45
+          ],
+          "quote": "For the <tt>purpose</tt>-path level it uses <tt>86'</tt>."
+        },
+        {
+          "bip": 86,
+          "lines": [
+            60,
+            61
+          ],
+          "quote": "internal_key: lift_x(derived_key) 32_byte_output_key: internal_key + int(HashTapTweak(bytes(internal_key)))G"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            70,
+            71
+          ],
+          "quote": "scriptPubKey: 1 <32_byte_output_key> (0x5120{32_byte_output_key})"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            54,
+            57
+          ],
+          "quote": "If the spending conditions do not require a script path, the output key should commit to an unspendable script path instead of having no script path."
+        }
+      ]
+    },
+    {
+      "id": "b86-why",
+      "statement": "BIP 86's motivation: many wallets and hardware signers still use seed backups without derivation path or script information, so a fixed path makes single-key Taproot outputs likely to be recoverable; although there are now solutions that avoid fixed paths, it largely reuses the approach of BIPs 49 and 84 for ease of implementation.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 86,
+          "lines": [
+            23,
+            28
+          ],
+          "quote": "it is useful to have a common derivation scheme so that HD wallets that only have a backup of the HD seed can be likely to recover single key Taproot outputs. Although there are now solutions which obviate the need for fixed derivation paths for specific script types, many software wallets and hardware signers still use seed backups which lack derivation path and script information. Thus we largely use the same approach used in BIPs [[bip-0049.mediawiki|49]] and [[bip-0084.mediawiki|84]] for ease of implementation."
+        }
+      ]
+    },
+    {
+      "id": "script-by-purpose",
+      "statement": "BIP 44 itself names no script type or address format; BIPs 84 and 86 treat the purpose value as what signals the script type or serialization, and tie one to each purpose.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            35,
+            35
+          ],
+          "quote": "but only uses a different purpose value to indicate the different transaction serialization method."
+        },
+        {
+          "bip": 86,
+          "lines": [
+            37,
+            39
+          ],
+          "quote": "To derive a public key from the root account, this BIP uses the same account-structure as defined in BIPs [[bip-0044.mediawiki|44]], [[bip-0049.mediawiki|49]], and [[bip-0084.mediawiki|84]], but with a different purpose value for the script type."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's model, starting from BIP 84's and BIP 86's published mnemonic, reproduces every published root, account and address value in both BIPs' test vectors (zprv/zpub for BIP 84; xprv/xpub, internal key, output key, scriptPubKey and address for BIP 86); the build fails otherwise. Intermediate values (node keys, fingerprints, key hashes, tweaks) are derived by the same tested model and implied by the published leaves, but not published themselves. BIP 86 defines no alternate version bytes, and its vectors print as xprv/xpub.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            69,
+            71
+          ],
+          "quote": "mnemonic = abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about rootpriv = zprvAWgYBBk7JR8Gjrh4UJQ2uJdG1r3WNRRfURiABBE3RvMXYSrRJL62XuezvGdPvG6GFBZduosCc1YP5wixPox7zhZLfiUm8aunE96BBa4Kei5"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            86,
+            87
+          ],
+          "quote": "mnemonic = abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about rootpriv = xprv9s21ZrQH143K3GJpoapnV8SFfukcVBSfeCficPSGfubmSFDxo1kuHnLisriDvSnRRuL2Qrg5ggqHKNVpxR86QEC8w35uxmGoggxtQTPvfUu"
+        }
+      ]
+    },
+    {
+      "id": "xpub-exposure",
+      "statement": "From an account's extended public key alone, the model re-derives every published receiving and change address of that account, because the two levels below the account use public derivation. On its own such a key cannot spend.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "Public derivation is used at this level."
+        },
+        {
+          "bip": 84,
+          "lines": [
+            75,
+            75
+          ],
+          "quote": "xpub  = zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "xpub = xpub6BgBgsespWvERF3LHQu6CnqdvfEvtMcQjYrcRzx53QJjSxarj2afYWcLteoGVky7D3UKDP9QyrLprQ3VCECoY49yfdDEHGCtMMj92pReUsQ"
+        }
+      ]
+    },
+    {
+      "id": "same-seed",
+      "statement": "The same mnemonic gives unrelated keys under purposes 44', 84' and 86' (and the schemes use different output types).",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            77,
+            80
+          ],
+          "quote": "// Account 0, first receiving address = m/84'/0'/0'/0/0"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "// Account 0, first receiving address = m/86'/0'/0'/0/0"
+        }
+      ]
+    },
+    {
+      "id": "examples",
+      "statement": "BIP 44's examples table lists 16 paths: the first and second address of the external and change chains, for the first and second account, for Bitcoin and for Bitcoin testnet.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            170,
+            174
+          ],
+          "quote": "|Bitcoin |first |external |first |m / 44' / 0' / 0' / 0 / 0"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            260,
+            264
+          ],
+          "quote": "|Bitcoin Testnet |second |change |second |m / 44' / 1' / 1' / 1 / 1"
+        }
+      ]
+    },
+    {
+      "id": "spend-layouts",
+      "statement": "BIP 84's outputs are spent with an empty scriptSig and a witness of a signature and the public key; BIP 86's with an empty scriptSig and a witness holding only a signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            49,
+            51
+          ],
+          "quote": "witness: <signature> <pubkey> scriptSig: (empty)"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            68,
+            69
+          ],
+          "quote": "witness: <signature> scriptSig: (empty)"
+        }
+      ]
+    },
+    {
+      "id": "easy",
+      "statement": "BIP 86 notes that because it uses the same method as BIPs 44, 49 and 84 it should not be difficult to implement; BIP 84 points to SLIP-0132 for further registered version bytes.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 86,
+          "lines": [
+            80,
+            81
+          ],
+          "quote": "However this BIP uses the same method used in BIPs 44, 49, and 84, so it should not be difficult to implement."
+        },
+        {
+          "bip": 84,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "Additional registered version bytes are listed in [[https://github.com/satoshilabs/slips/blob/master/slip-0132.md|SLIP-0132]]."
+        }
+      ]
+    }
+  ]
+}

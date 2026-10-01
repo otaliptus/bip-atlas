@@ -1,0 +1,255 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "silent-payments",
+  "primaryBips": [
+    352
+  ],
+  "specimenLabel": "BIP 0352",
+  "title": "Can you receive without handing out an address?",
+  "dek": "Silent payments let a receiver publish one static address while every payment lands on a fresh taproot output. The price is that the receiver has to scan transactions to find them.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01-phase3",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Paying the same address again and again ties every payment together. The usual remedy, a fresh address for each payment, means the receiver has to hand each sender something new: an address, a batch of addresses, or an xpub. BIP 352, assigned in 2023 and recorded as Complete, specifies another arrangement: a static address the receiver can publish once, without on-chain notifications and, in the BIP’s words, without on-chain linkability of payments.",
+        "claims": [
+          "interaction",
+          "preamble",
+          "abstract"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "The address is long: 116 characters for version 0 on mainnet, always starting sp1q. Inside are two public keys of 33 bytes each, a scan key and a (possibly labeled) spend key. A sender never pays to either of them. It pays to a new taproot key computed from those two keys and from the inputs of its own transaction.",
+        "claims": [
+          "address-format",
+          "version",
+          "scan-spend",
+          "taproot-only"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A15.1",
+      "recipe": "sp-address.v1",
+      "title": "Inside an sp1 address",
+      "fixtures": [
+        "sp-case-0"
+      ],
+      "caption": "The address from BIP 352’s first test vector, split into its parts: the prefix, the version character, two public keys, and the checksum.",
+      "claims": [
+        "address-format",
+        "version",
+        "address-computed"
+      ],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "secret",
+      "heading": "A secret two parties can compute",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The idea is elliptic-curve Diffie–Hellman. If Alice holds the private key a for public key A, and Bob holds b for B, then a·B and b·A are the same point. In BIP 352’s simple case, Alice pays Bob at P = B + hash(a·B)·G. Bob sees A in Alice’s transaction, computes hash(b·A) himself, and looks for P among the outputs. Under the usual Diffie–Hellman assumption, anyone without a or b cannot compute that hash, so cannot connect P to B.",
+          "claims": [
+            "ecdh",
+            "goals"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The full protocol adds three refinements. Alice uses all her eligible inputs at once: a is the sum of their private keys and A the sum of their public keys. She multiplies by an input hash, a tagged hash of the smallest outpoint in the transaction and A, so that a second payment from the same keys does not land on the same output. And Bob’s address carries two keys: B_scan for finding payments and B_spend for spending them, so the scanning key can sit on an online machine while the spending key stays in cold storage.",
+          "claims": [
+            "sum-inputs",
+            "input-hash",
+            "scan-spend"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G, starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
+          "claims": [
+            "derive",
+            "multi-output",
+            "spend-key"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A15.2",
+          "recipe": "silent-payment-derivation.v1",
+          "title": "One payment, seen from both sides",
+          "fixtures": [
+            "sp-case-0",
+            "sp-case-9",
+            "sp-case-10",
+            "sp-case-12",
+            "sp-case-19",
+            "sp-case-23"
+          ],
+          "caption": "Six of BIP 352’s send-and-receive vectors, recomputed by the tested model. The sender’s outputs, the receiver’s shared secret and the outputs the receiver finds all equal the published values.",
+          "claims": [
+            "vectors",
+            "derive",
+            "multi-output",
+            "labels"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each output is an ordinary BIP 341 taproot output. Among the authors’ stated goals are no increase in the size or cost of transactions, transactions that blend in with other bitcoin transactions, and no way for an outside observer to link them to a silent payment address.",
+          "claims": [
+            "taproot-only",
+            "goals"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "inputs",
+      "heading": "Which inputs count",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Not every input contributes to the secret. Any UTXO with a known output script can fund the transaction (though the sender leaves out outputs with a SegWit version above 1), but sender and receiver MUST derive the shared secret only from inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH. For each, the receiver has to find the public key in what the transaction reveals: the last witness item for the two P2WPKH forms, the scriptSig for P2PKH, and the taproot output key itself for P2TR.",
+          "claims": [
+            "input-list",
+            "where-keys",
+            "exclude-v2"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Inputs with conditional branches or several keys, such as CHECKMULTISIG, are left out; the BIP explains that they would let a participant in a collaborative transaction re-sign with different keys after the output was derived. Only compressed and x-only keys count, so an input that reveals an uncompressed key is skipped. A taproot script-path spend still counts, through its output key: the sender MUST hold that key’s private key or leave the input out, unless the internal key is the NUMS point H from BIP 341, in which case the input is skipped.",
+          "claims": [
+            "excluded-multi",
+            "compressed-only",
+            "where-keys",
+            "nums",
+            "taproot-key-required"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Two details keep sender and receiver in step. A taproot key is x-only, and the receiver assumes the even-y point when it sums the keys, so the sender negates any taproot private key whose point has odd y. And for P2PKH, the receiver MUST parse the scriptSig for the key even when it does not match the usual template, because a third party can malleate a P2PKH scriptSig.",
+          "claims": [
+            "taproot-negate",
+            "p2pkh-malleated"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A15.3",
+          "recipe": "sp-input-eligibility.v1",
+          "title": "Inputs that count, inputs that do not",
+          "fixtures": [
+            "sp-eligibility"
+          ],
+          "caption": "The inputs of five published vectors, read by the tested model: which contribute a key, and why the others are skipped.",
+          "claims": [
+            "eligibility-vectors",
+            "input-list",
+            "compressed-only",
+            "nums"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "A transaction with no eligible input has no secret at all, so a sender’s coin selection MUST include at least one.",
+          "claims": [
+            "select-inputs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scanning",
+      "heading": "The receiver has to look",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Nothing on chain tells Bob a payment has arrived. For silent payments v0, a transaction MUST be scanned if and only if it has at least one taproot output, at least one eligible input, and spends no output with a SegWit version above 1. For each such transaction Bob sums the input keys, computes the input hash and the shared secret, and checks the taproot outputs for P_0.",
+          "claims": [
+            "scan-conditions",
+            "derive",
+            "cost-scan",
+            "scan-loop"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "If P_0 is there, he checks for P_1, and so on; at the first one not found, he stops. These extra checks happen only after a match, so the authors call the added cost negligible. Since version 1.1.0 the search is also capped: a sender fails if any group of recipient addresses sharing one scan key is larger than K_max = 2323, and a receiver stops at k = 2323, which the changelog says mitigates quadratic scanning on adversarial transactions.",
+          "claims": [
+            "multi-output",
+            "kmax",
+            "scan-loop",
+            "negligible"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Labels let Bob tell payments apart without scanning for several addresses. He publishes (B_scan, B_m), where B_m = B_spend + hash(b_scan ‖ m)·G. When an output does not match P_k directly, he subtracts P_k and checks whether the difference is one of his label points; if not, he negates the output and tries again, because an x-only output does not say which y it had. Label m = 0 is reserved for change: the BIP stresses that a wallet never hands it out, and says every receiving wallet should at least scan for it when recovering from backup.",
+          "claims": [
+            "labels",
+            "negate-output",
+            "change-label",
+            "change-scan"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The scanning cost is real. The authors note that it is generally feasible for full nodes but poses a challenge for light clients, and they treat light-client support as open research. An appendix, outside the specification, sketches how a light client might fetch per-transaction tweak data and check BIP 158 block filters.",
+          "claims": [
+            "cost-scan",
+            "light-clients"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "What it does not hide",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The authors’ goal is that outside observers cannot link a transaction to a silent payment address. Even so, the scheme does not hide everything. Every labeled address shares the same B_scan, so anyone can tell that they belong to one receiver; the BIP says labels are not a way to manage separate identities.",
+          "claims": [
+            "labels-linkable",
+            "goals"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "The design keeps CoinJoins and multi-party keys in mind, but the authors recommend that all inputs of a transaction belong to the same entity, because there is no formal proof the protocol is secure in a collaborative setting.",
+          "claims": [
+            "collaborative"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The sender has rules of its own. It should sign with DEFAULT, ALL, SINGLE or NONE; the BIP calls ANYONECANPAY unsafe. And every output it generated MUST appear in the final transaction: if P_1 were dropped, the receiver, stopping at the first gap, would never find P_2.",
+          "claims": [
+            "anyonecanpay",
+            "all-outputs"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Recovery needs scanning too. Each output is derived on its own, so the BIP recommends regular backups, and a wallet restored from its seed alone has to scan the chain from its birthday to rebuild its full history.",
+          "claims": [
+            "backup"
+          ]
+        }
+      ]
+    }
+  ]
+}

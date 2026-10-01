@@ -29,6 +29,69 @@ import {
   SchnorrWorked,
   TaprootWorked,
   TapscriptWorked,
+  P2shWorked,
+  P2shTwoStage,
+  P2shCommitment,
+  P2shWrapped,
+  TimelockFields,
+  TimelockPinned,
+  TimelockRanges,
+  TimelockWorked,
+  VersionbitsMachine,
+  VersionbitsField,
+  VersionbitsRecord,
+  VersionbitsWorked,
+  WalletPathWalk,
+  WalletPathLevels,
+  WalletPathSchemes,
+  WalletPathWorked,
+  DescriptorAnatomy,
+  DescriptorChecksum,
+  DescriptorIndex,
+  DescriptorWorked,
+  Musig2Rounds,
+  Musig2KeyAgg,
+  Musig2PsigChecks,
+  Musig2Worked,
+  SpDerivation,
+  SpAddress,
+  SpEligibility,
+  SpWorked,
+  GcsFilter,
+  BfGolomb,
+  BfChain,
+  BfWorked,
+  V2Handshake,
+  V2Framing,
+  V2Rekey,
+  V2Worked,
+  Bip322VirtualTx,
+  Bip322Formats,
+  Bip322Verdicts,
+  Bip322Worked,
+  type DerivedBip322Fixture,
+  type DerivedBip322FormatsFixture,
+  type DerivedBip322VerdictsFixture,
+  type DerivedV2Fixture,
+  type DerivedV2FramingFixture,
+  type DerivedV2RekeyFixture,
+  type DerivedBfBlockFixture,
+  type DerivedBfChainFixture,
+  type DerivedBfGolombFixture,
+  type DerivedSpFixture,
+  type DerivedSpEligibilityFixture,
+  type DerivedMusig2SessionFixture,
+  type DerivedMusig2KeyaggFixture,
+  type DerivedMusig2PsigChecksFixture,
+  type DerivedDescriptorFixture,
+  type DerivedDescriptorIndexFixture,
+  type DerivedWalletPathFixture,
+  type DerivedVersionbitsDeploymentFixture,
+  type DerivedVersionbitsGuidelineFixture,
+  type DerivedTimelockCaseFixture,
+  type DerivedTimelockBipTxFixture,
+  type DerivedTimelockEncodingFixture,
+  type DerivedP2shFixture,
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
@@ -76,6 +139,29 @@ const sig = picked as DerivedSchnorrFixture[];
 const tap = picked as DerivedTaprootTreeFixture[];
 const keyspend = picked as DerivedTaprootKeyspendFixture[];
 const ts = picked as DerivedTapscriptFixture[];
+const p2sh = picked as DerivedP2shFixture[];
+const timelock = picked as DerivedTimelockCaseFixture[];
+const timelockTx = picked as DerivedTimelockBipTxFixture[];
+const timelockEnc = picked as DerivedTimelockEncodingFixture[];
+const vbAny = picked as Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture>;
+const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
+const wallet = picked as DerivedWalletPathFixture[];
+const desc = picked as DerivedDescriptorFixture[];
+const descIndex = picked as DerivedDescriptorIndexFixture[];
+const musig = picked as DerivedMusig2SessionFixture[];
+const musigKa = picked as DerivedMusig2KeyaggFixture[];
+const musigChecks = picked as DerivedMusig2PsigChecksFixture[];
+const sp = picked as DerivedSpFixture[];
+const spElig = picked as DerivedSpEligibilityFixture[];
+const bfBlocks = picked as DerivedBfBlockFixture[];
+const bfChain = picked as DerivedBfChainFixture[];
+const bfGolomb = picked as DerivedBfGolombFixture[];
+const v2 = picked as DerivedV2Fixture[];
+const v2Framing = picked as DerivedV2FramingFixture[];
+const v2Rekey = picked as DerivedV2RekeyFixture[];
+const b322 = picked as DerivedBip322Fixture[];
+const b322Formats = picked as DerivedBip322FormatsFixture[];
+const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -102,6 +188,36 @@ const ts = picked as DerivedTapscriptFixture[];
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
+  {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
+  {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
+  {figure.recipe === "timelock-fields.v1" && <TimelockFields client:visible fixtures={timelock} figureId={figureId} />}
+  {figure.recipe === "timelock-pinned-fields.v1" && <TimelockPinned fixtures={timelockTx} />}
+  {figure.recipe === "timelock-ranges.v1" && <TimelockRanges fixture={timelockEnc[0]} />}
+  {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
+  {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
+  {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
+  {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
+  {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
+  {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
+  {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
+  {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
+  {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
+  {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
+  {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
+  {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
+  {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
+  {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
+  {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
+  {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
+  {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
+  {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
+  {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
+  {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
+  {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
+  {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
+  {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
+  {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -112,6 +228,16 @@ const ts = picked as DerivedTapscriptFixture[];
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
+      {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
+      {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
+      {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
+      {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
+      {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
+      {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
+      {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
+      {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
+      {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
+      {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
   )}
 </Plate>

@@ -1,0 +1,769 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "block-filters",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 157 (Osuntokun, Akselrod, Posen) and BIP 158 (Osuntokun, Akselrod) were both assigned on 2017-05-24 and are recorded as Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            4,
+            10
+          ],
+          "quote": "Title: Client Side Block Filtering Authors: Olaoluwa Osuntokun <laolu32@gmail.com> Alex Akselrod <alex@akselrod.org> Jim Posen <jimpo@coinbase.com> Status: Deployed Type: Specification Assigned: 2017-05-24"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            4,
+            9
+          ],
+          "quote": "Title: Compact Block Filters for Light Clients Authors: Olaoluwa Osuntokun <laolu32@gmail.com> Alex Akselrod <alex@akselrod.org> Status: Deployed Type: Specification Assigned: 2017-05-24"
+        }
+      ]
+    },
+    {
+      "id": "light-clients",
+      "statement": "Light clients download all block headers, verify proof of work, follow the most-work chain, and then download only the data relevant to them; headers are a fixed 80 bytes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            41,
+            47
+          ],
+          "quote": "They achieve this by downloading all block headers, verifying the proofs of work, and following the longest proof-of-work chain. Since block headers are a fixed 80-bytes and are generated every 10 minutes on average, the bandwidth required to sync the block headers is minimal. Light clients then download only the blockchain data relevant to them directly from peers and validate inclusion in the header chain."
+        }
+      ]
+    },
+    {
+      "id": "bip37-flaws",
+      "statement": "The authors argue that with BIP 37 the client sends a Bloom filter to a full node, that most implementations offer virtually zero privacy, that malicious nodes can omit data with little risk of detection, and that crafted filters are a DoS vector.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            51,
+            53
+          ],
+          "quote": "With BIP 37, a client sends a Bloom filter it wants to watch to a full node peer, then receives notifications for each new transaction or block that matches the filter."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            57,
+            59
+          ],
+          "quote": "It has been shown, however, that most implementations available offer virtually ''zero privacy'' to wallets and other"
+        },
+        {
+          "bip": 157,
+          "lines": [
+            61,
+            62
+          ],
+          "quote": "Additionally, malicious full nodes serving light clients can omit critical data with little risk of detection"
+        },
+        {
+          "bip": 157,
+          "lines": [
+            64,
+            66
+          ],
+          "quote": "honest nodes servicing BIP 37 light clients may incur significant I/O and CPU resource usage due to maliciously crafted Bloom filters, creating a denial-of-service (DoS) vector"
+        }
+      ]
+    },
+    {
+      "id": "reverse",
+      "statement": "BIP 157 is the opposite of BIP 37: full nodes generate deterministic filters of block data, built once and stored, and the client downloads a block if the filter matches.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            70,
+            76
+          ],
+          "quote": "The alternative detailed in this document can be seen as the opposite of BIP 37: instead of the client sending a filter to a full node peer, full nodes generate deterministic filters on block data that are served to the client. A light client can then download an entire block if the filter matches the data it is watching for. Since filters are deterministic, they only need to be constructed once and stored on disk, whenever a new block is connected to the chain."
+        }
+      ]
+    },
+    {
+      "id": "privacy-any-source",
+      "statement": "The authors argue privacy improves because blocks can be downloaded from any source, so no one peer gets complete information; very privacy-conscious clients may use Private Information Retrieval.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            80,
+            85
+          ],
+          "quote": "Finally, client privacy is improved because blocks can be downloaded from ''any source'', so that no one peer gets complete information on the data required by a client. Extremely privacy conscious light clients may opt to anonymously fetch blocks using advanced techniques such a Private Information Retrieval"
+        }
+      ]
+    },
+    {
+      "id": "random-peers",
+      "statement": "A client fetching full blocks from the P2P network SHOULD download them from outbound peers at random to mitigate privacy loss from transaction intersection analysis. (Inference: the peer serving a downloaded block sees which block was requested.)",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            416,
+            418
+          ],
+          "quote": "If a client is fetching full blocks from the P2P network, they SHOULD be downloaded from outbound peers at random to mitigate privacy loss due to transaction intersection analysis."
+        }
+      ]
+    },
+    {
+      "id": "gcs-def",
+      "statement": "A Golomb-coded set matches all items in the set with probability 1 and other items with probability 1/M.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            60,
+            63
+          ],
+          "quote": "compressed into a probabilistic structure called a ''Golomb-coded set'' (GCS), which matches all items in the set with probability 1, and matches other items with probability <code>1/M</code> for some integer parameter <code>M</code>."
+        }
+      ]
+    },
+    {
+      "id": "gcs-steps",
+      "statement": "A GCS of N items is built by hashing into [0, N·M), sorting, taking differences, and Golomb-Rice coding them.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            67,
+            71
+          ],
+          "quote": "At a high level, a GCS is constructed from a set of <code>N</code> items by: # hashing all items to 64-bit integers in the range <code>[0, N * M)</code> # sorting the hashed values in ascending order # computing the differences between each value and the previous one # writing the differences sequentially, compressed with Golomb-Rice coding"
+        }
+      ]
+    },
+    {
+      "id": "siphash",
+      "statement": "Items are hashed with SipHash, which MUST use c = 2 and d = 4, and mapped into [0, F) by multiplying by F and taking the top 64 bits of the 128-bit product.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            87,
+            90
+          ],
+          "quote": "The items are first passed through the pseudorandom function ''SipHash'', which takes a 128-bit key <code>k</code> and a variable-sized byte vector and produces a uniformly random 64-bit output. Implementations of this BIP MUST use the SipHash parameters <code>c = 2</code> and <code>d = 4</code>."
+        },
+        {
+          "bip": 158,
+          "lines": [
+            92,
+            93
+          ],
+          "quote": "The 64-bit SipHash outputs are then mapped uniformly over the desired range by multiplying with F and taking the top 64 bits of the 128-bit result."
+        }
+      ]
+    },
+    {
+      "id": "key",
+      "statement": "The key k MUST be the first 16 bytes of the block hash in little-endian representation, so it is deterministic but varies by block.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            300,
+            303
+          ],
+          "quote": "The parameter <code>k</code> MUST be set to the first 16 bytes of the hash (in standard little-endian representation) of the block for which the filter is constructed. This ensures the key is deterministic while still varying from block to block."
+        }
+      ]
+    },
+    {
+      "id": "gr-coding",
+      "statement": "Golomb-Rice coding splits a value into a quotient and a remainder modulo 2^P; the quotient is written in unary (q ones then a zero) and the remainder as P big-endian bits.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            131,
+            134
+          ],
+          "quote": "With Golomb-Rice, a value is split into a quotient and remainder modulo <code>2^P</code>, which are encoded separately. The quotient <code>q</code> is encoded as ''unary'', with a string of <code>q</code> 1's followed by one 0. The remainder <code>r</code> is represented in big-endian by P bits."
+        }
+      ]
+    },
+    {
+      "id": "serialize",
+      "statement": "The bit stream is padded with zeros to a byte boundary; the serialized filter is N as a CompactSize followed by the compressed bytes; a zero-element filter MUST be one zero byte.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            197,
+            198
+          ],
+          "quote": "Finally, the bit stream is padded with 0's to the nearest byte boundary and serialized to the output byte vector."
+        },
+        {
+          "bip": 158,
+          "lines": [
+            305,
+            309
+          ],
+          "quote": "Since the value <code>N</code> is required to decode a GCS, a serialized GCS includes it as a prefix, written as a <code>CompactSize</code>. Thus, the complete serialization of a filter is: * <code>N</code>, encoded as a <code>CompactSize</code> * The bytes of the compressed filter itself"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            311,
+            311
+          ],
+          "quote": "A zero element filter MUST be written as one byte containing zeroes."
+        }
+      ]
+    },
+    {
+      "id": "query",
+      "statement": "To query, the target is hashed the same way and the decoded deltas are summed in order; the search stops once a value exceeds the target.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            219,
+            223
+          ],
+          "quote": "To check membership of an item in a compressed GCS, one must reconstruct the hashed set members from the encoded deltas. The procedure to do so is the reverse of the compression: deltas are decoded one by one and added to a cumulative sum. Each intermediate sum represents a hashed value in the original set. The queried item is hashed in the same way as the set members"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            243,
+            246
+          ],
+          "quote": "// Since the values in the set are sorted, terminate the search once // the decoded value exceeds the target. if set_item > target_hash: break"
+        }
+      ]
+    },
+    {
+      "id": "multi-match",
+      "statement": "Several targets can be checked at once by hashing and sorting them and merging against the decoded set.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            253,
+            257
+          ],
+          "quote": "Some applications may need to check for set intersection instead of membership of a single item. This can be performed far more efficiently than checking each item individually by leveraging the sorted structure of the compressed GCS. First the query elements are all hashed and sorted, then compared in order against the decompressed GCS contents."
+        }
+      ]
+    },
+    {
+      "id": "basic-params",
+      "statement": "The basic filter (type 0x00) MUST use P = 19 and M = 784931.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            263,
+            265
+          ],
+          "quote": "* Basic (<code>0x00</code>) ** <code>M = 784931</code> ** <code>P = 19</code>"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            290,
+            291
+          ],
+          "quote": "The parameter <code>P</code> MUST be set to <code>19</code>, and the parameter <code>M</code> MUST be set to <code>784931</code>."
+        }
+      ]
+    },
+    {
+      "id": "params-why",
+      "statement": "The authors cite analysis that M = 1.497137·2^P is close to optimal when P and M are chosen independently, and empirical analysis that these parameters minimize bandwidth, counting both false-positive block downloads and filter size.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            291,
+            294
+          ],
+          "quote": "Analysis has shown that if one is able to select <code>P</code> and <code>M</code> independently, then setting <code>M=1.497137 * 2^P</code> is close to optimal"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            296,
+            298
+          ],
+          "quote": "Empirical analysis also shows that these parameters minimize the bandwidth utilized, considering both the expected number of blocks downloaded due to false positives and the size of the filters themselves."
+        }
+      ]
+    },
+    {
+      "id": "contents",
+      "statement": "A basic filter MUST contain exactly, for each transaction, the previous output script of each input (except the coinbase) and each output's scriptPubKey except OP_RETURN outputs; nil items MUST NOT be included.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            269,
+            275
+          ],
+          "quote": "The basic filter is designed to contain everything that a light client needs to sync a regular Bitcoin wallet. A basic filter MUST contain exactly the following items for each transaction in a block: * The previous output script (the script being spent) for each input, except for the coinbase transaction. * The scriptPubKey of each output, aside from all <code>OP_RETURN</code> output scripts. Any \"nil\" items MUST NOT be included into the final set of filter elements."
+        }
+      ]
+    },
+    {
+      "id": "opreturn-why",
+      "statement": "OP_RETURN outputs are excluded so filters can later be committed to by soft fork, likely in a coinbase OP_RETURN, without a circular dependency.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            277,
+            283
+          ],
+          "quote": "We exclude all outputs that start with <code>OP_RETURN</code> in order to allow filters to easily be committed to in the future via a soft-fork. A likely area for future commitments is an additional <code>OP_RETURN</code> output in the coinbase transaction similar to the current witness commitment"
+        },
+        {
+          "bip": 158,
+          "lines": [
+            282,
+            283
+          ],
+          "quote": "we avoid a circular dependency between the commitment, and the item being committed to."
+        }
+      ]
+    },
+    {
+      "id": "scope-of-miss",
+      "statement": "A filter holds scripts only; a missing match rules out an output paying to, or an input spending from, that script in the block, and says nothing about data outside the element set (txids, OP_RETURN outputs).",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            270,
+            273
+          ],
+          "quote": "A basic filter MUST contain exactly the following items for each transaction in a block: * The previous output script (the script being spent) for each input, except for the coinbase transaction. * The scriptPubKey of each output, aside from all <code>OP_RETURN</code> output scripts."
+        },
+        {
+          "bip": 158,
+          "lines": [
+            61,
+            62
+          ],
+          "quote": "which matches all items in the set with probability 1"
+        }
+      ]
+    },
+    {
+      "id": "headers-def",
+      "statement": "A filter's hash is the double-SHA256 of the serialized filter; its header is the double-SHA256 of the filter hash concatenated with the previous filter header; the genesis block's previous header is 32 zero bytes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            133,
+            137
+          ],
+          "quote": "The canonical hash of a block filter is the double-SHA256 of the serialized filter. Filter headers are 32-byte hashes derived for each block filter. They are computed as the double-SHA256 of the concatenation of the filter hash with the previous filter header. The previous filter header used to calculate that of the genesis block is defined to be the 32-byte array of 0's."
+        }
+      ]
+    },
+    {
+      "id": "headers-why",
+      "statement": "Filter headers commit to all previous filters, like block headers; if peers' header chains differ, the client finds where they diverge, downloads the block, computes the correct filter, and identifies the faulty peer.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            122,
+            131
+          ],
+          "quote": "Similar to how block headers have a Merkle commitment to all transaction data in the block, we define filter headers that have commitments to the block filters. Also like block headers, filter headers each have a commitment to the preceding one. Before downloading the block filters themselves, a light client can download all filter headers for the current block chain and use them to verify the authenticity of the filters. If the filter header chains differ between multiple peers, the client can identify the point where they diverge, then download the full block and compute the correct filter, thus identifying which peer is faulty."
+        }
+      ]
+    },
+    {
+      "id": "honest-peer",
+      "statement": "The protocol guarantees that light clients with at least one honest peer can identify the correct block filters.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            32,
+            34
+          ],
+          "quote": "The resulting protocol guarantees that light clients with at least one honest peer are able to identify the correct block filters."
+        }
+      ]
+    },
+    {
+      "id": "client-sync",
+      "statement": "Clients SHOULD sync block headers first, then download and verify filter headers (getcfheaders), MAY first fetch checkpoints every 1,000 blocks (getcfcheckpt), SHOULD connect to multiple peers unless a trusted peer serves headers, and on conflict SHOULD download the block, derive the filter and ban peers whose header does not match.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            367,
+            369
+          ],
+          "quote": "Clients SHOULD first sync the entire block header chain from peers using the standard headers-first syncing mechanism before downloading any block filters or filter headers."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            374,
+            378
+          ],
+          "quote": "Once a client's block headers are in sync, it SHOULD download and verify filter headers for all blocks and filter types that it might later download. The client SHOULD send <code>getcfheaders</code> messages to peers and derive and store the filter headers for each block. The client MAY first fetch headers at evenly spaced intervals of 1,000 by sending <code>getcfcheckpt</code>."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            383,
+            385
+          ],
+          "quote": "Unless securely connected to a trusted peer that is serving filter headers, the client SHOULD connect to multiple outbound peers that support each filter type to mitigate the risk of downloading incorrect headers."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            389,
+            392
+          ],
+          "quote": "The client then SHOULD download the full block from any peer and derive the correct filter and filter header. The client SHOULD ban any peers that sent a filter header that does not match the computed one."
+        }
+      ]
+    },
+    {
+      "id": "filter-check",
+      "statement": "The client SHOULD test that each filter links to its filter header and ban peers that send incorrect filters.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            404,
+            405
+          ],
+          "quote": "The client SHOULD test that each filter links to its corresponding filter header and ban peers that send incorrect filters."
+        }
+      ]
+    },
+    {
+      "id": "node-op",
+      "statement": "Nodes SHOULD generate and persist filters for each new block, and SHOULD NOT generate filters dynamically on request, because small filters of large blocks would allow DoS through asymmetric I/O.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            347,
+            349
+          ],
+          "quote": "For each new block that is connected to the main chain, nodes SHOULD generate filters for all supported types and persist them."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            355,
+            357
+          ],
+          "quote": "Nodes SHOULD NOT generate filters dynamically on request, as malicious peers may be able to perform DoS attacks by requesting small filters derived from large blocks."
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "statement": "A getcfilters request MUST span a height difference strictly less than 1,000 (at most 1,000 blocks) and a getcfheaders request strictly less than 2,000; checkpoints are filter headers at heights that are positive multiples of 1,000.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            170,
+            170
+          ],
+          "quote": "The height of the block with hash StopHash MUST be greater than or equal to StartHeight, and the difference MUST be strictly less than 1000."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            234,
+            234
+          ],
+          "quote": "The height of the block with hash StopHash MUST be greater than or equal to StartHeight, and the difference MUST be strictly less than 2,000."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            308,
+            310
+          ],
+          "quote": "The filter headers included are the set of all filter headers on the requested chain where the height is a positive multiple of 1,000."
+        }
+      ]
+    },
+    {
+      "id": "service-bit",
+      "statement": "BIP 158 allocates service bit NODE_COMPACT_FILTERS (1 << 6); a node that sets it MUST respond to all BIP 157 messages for filter type 0x00.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            319,
+            321
+          ],
+          "quote": "| NODE_COMPACT_FILTERS | style=\"white-space: nowrap;\" | <code>1 << 6</code> | If enabled, the node MUST respond to all BIP 157 messages for filter type <code>0x00</code>"
+        }
+      ]
+    },
+    {
+      "id": "why-p2p",
+      "statement": "The authors chose filter headers at the P2P layer over requiring blocks to commit to filters, which would need a consensus change.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            425,
+            429
+          ],
+          "quote": "An alternative solution is to require Bitcoin blocks to include commitments to derived block filters, so light clients can verify authenticity given block headers and some additional witness data. This would require a network-wide change to the Bitcoin consensus rules, however, whereas this document proposes a solution purely at the P2P layer."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's block-filter model rebuilds all ten of BIP 158's testnet filter vectors (the BIP's text says five blocks; the pinned file has ten) from the blocks and spent scripts, byte for byte, and reproduces their filter headers; the figures show some of them, rebuilt at build time.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            431,
+            431
+          ],
+          "quote": "Test vectors for basic block filters on five testnet blocks, including the filters and filter headers, can be found [[bip-0158/testnet-19.json|here]]."
+        }
+      ]
+    },
+    {
+      "id": "gr-computed",
+      "statement": "The model reproduces every row of BIP 158's P = 2 Golomb-Rice table, and the first code of a published filter with P = 19.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            134,
+            135
+          ],
+          "quote": "For example, this is a table of Golomb-Rice coded values using <code>P=2</code>:"
+        }
+      ]
+    },
+    {
+      "id": "fp-arith",
+      "statement": "With M = 784931, an unrelated script matches a given filter with probability 1/784931, about 1.3 in a million; checking 100 scripts against 10,000 blocks gives an expected 1.3 false matches.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            83,
+            84
+          ],
+          "quote": "Set membership queries against the hash outputs will have a false positive rate of <code>1 / M</code>."
+        }
+      ]
+    },
+    {
+      "id": "min-size",
+      "statement": "A GCS takes at least N·(P + 1) bits.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            191,
+            192
+          ],
+          "quote": "The result is a byte vector with a minimum size of <code>N * (P + 1)</code> bits."
+        }
+      ]
+    },
+    {
+      "id": "size-computed",
+      "statement": "In the published vectors, block 180,480's filter has 13 elements in 35 bytes and block 926,485's has 9 in 25 bytes: about 21 bits per element, close to the 20-bit floor, against about 23 bits to write each hashed value at fixed width below N·M.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            431,
+            431
+          ],
+          "quote": "Test vectors for basic block filters on five testnet blocks, including the filters and filter headers"
+        }
+      ]
+    },
+    {
+      "id": "geometric",
+      "statement": "Because the hashed items are uniformly distributed, their sorted differences resemble a geometric distribution, which Golomb-Rice coding compresses optimally.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            124,
+            129
+          ],
+          "quote": "Since the items are distributed uniformly, it can be shown that the differences resemble a geometric distribution<ref>https://en.wikipedia.org/wiki/Geometric_distribution</ref>. ''Golomb-Rice'' ''coding''<ref>https://en.wikipedia.org/wiki/Golomb_coding#Rice_coding</ref> is a technique that optimally compresses geometrically distributed values."
+        }
+      ]
+    },
+    {
+      "id": "dedup",
+      "statement": "Each script enters the filter once: BIP 158 calls the elements a set, and the published filter for block 926,485, whose scripts repeat, only reproduces when duplicates are collapsed (9 elements, not 17).",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            275,
+            275
+          ],
+          "quote": "Any \"nil\" items MUST NOT be included into the final set of filter elements."
+        }
+      ]
+    },
+    {
+      "id": "block-not-enough",
+      "statement": "To recompute a basic filter one needs the scripts the block's inputs spend, which the block itself does not contain; BIP 157 does not say how a light client should obtain or check them.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            272,
+            272
+          ],
+          "quote": "* The previous output script (the script being spent) for each input, except for the coinbase transaction."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            389,
+            391
+          ],
+          "quote": "The client then SHOULD download the full block from any peer and derive the correct filter and filter header."
+        }
+      ]
+    },
+    {
+      "id": "empty-check",
+      "statement": "A client MAY check whether a filter is empty from its header before requesting it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            407,
+            409
+          ],
+          "quote": "The client MAY check if a filter is empty before requesting it by checking if the filter header commits to the hash of the empty filter, saving a round trip if that is the case."
+        }
+      ]
+    },
+    {
+      "id": "checkpoints-sync",
+      "statement": "Clients configured with trusted checkpoints MAY sync block headers only from the last checkpoint; separately, a client MAY fetch filter headers at every 1,000th block with getcfcheckpt and verify each 1,000-header range against them.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            377,
+            381
+          ],
+          "quote": "The client MAY first fetch headers at evenly spaced intervals of 1,000 by sending <code>getcfcheckpt</code>. The header checkpoints allow the client to download filter headers for different intervals from multiple peers in parallel, verifying each range of 1,000 headers against the checkpoints."
+        }
+      ]
+    }
+  ]
+}

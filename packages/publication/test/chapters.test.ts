@@ -17,7 +17,7 @@ import {
 
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
-const catalog = read("catalog.json");
+const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
 const externalLock = read("sources/external/external.lock.json");
 const chapterIds = readdirSync(new URL("content/chapters/", root)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
 
@@ -85,7 +85,8 @@ for (const id of chapterIds) {
       const byId = new Map(fixtures.map((f) => [f.id, f]));
       for (const f of figures) {
         const kind = RECIPE_MAP.get(f.recipe)!.fixtureKind;
-        for (const fid of f.fixtures) expect(byId.get(fid)!.kind, `${f.figure} ${fid}`).toBe(kind);
+        // A recipe may accept several kinds, written "a|b".
+        for (const fid of f.fixtures) expect(kind.split("|"), `${f.figure} ${fid}`).toContain(byId.get(fid)!.kind);
       }
     });
 

@@ -1,0 +1,750 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "version-bits",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preambles",
+      "statement": "BIP 9 (Wuille, Todd, Maxwell, Russell) was assigned in 2015 and is recorded as Deployed; BIP 8 (Fry, Dashjr) was assigned in 2017 and is recorded as Complete. Both are Informational.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            3,
+            10
+          ],
+          "quote": "Title: Version bits with timeout and delay Authors: Pieter Wuille <pieter.wuille@gmail.com> Peter Todd <pete@petertodd.org> Greg Maxwell <greg@xiph.org> Rusty Russell <rusty@rustcorp.com.au> Status: Deployed Type: Informational Assigned: 2015-10-04"
+        },
+        {
+          "bip": 8,
+          "lines": [
+            3,
+            8
+          ],
+          "quote": "Title: Version bits with lock-in by height Authors: Shaolin Fry <shaolinfry@protonmail.ch> Luke Dashjr <luke+bip@dashjr.org> Status: Complete Type: Informational Assigned: 2017-02-01"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 9 reads the block version field as a bit vector, so several backward-compatible changes (soft forks) can be deployed in parallel, each tracked on its own bit; BIP 8 reads the field the same way.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "allowing multiple backward-compatible changes (further called \"soft forks\") to be deployed in parallel. It relies on interpreting the version field as a bit vector, where each bit can be used to track an independent change."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            73,
+            76
+          ],
+          "quote": "The nVersion block header field is to be interpreted as a 32-bit little-endian integer (as present), and bits are selected within this integer as values (1 << N) where N is the bit number."
+        }
+      ]
+    },
+    {
+      "id": "bip34-problem",
+      "statement": "BIP 9's motivation: BIP 34's integer version comparison allowed only one change at a time, could not reject a proposal permanently, and every upgrade permanently removed version values.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "As it relies on comparing version numbers as integers however, it only supports one single change being rolled out at once, requiring coordination between proposals, and does not allow for permanent rejection"
+        },
+        {
+          "bip": 9,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "every upgrade permanently restricts the set of allowed nVersion field values."
+        }
+      ]
+    },
+    {
+      "id": "params",
+      "statement": "A BIP 9 deployment has a name, a bit from 0 to 28, a starttime (a minimum median time past) and a timeout after which it is considered failed if not locked in.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            29,
+            31
+          ],
+          "quote": "It is chosen from the set {0,1,2,...,28}. # The '''starttime''' specifies a minimum median time past of a block at which the bit gains its meaning. # The '''timeout''' specifies a time at which the deployment is considered failed."
+        }
+      ]
+    },
+    {
+      "id": "guidelines",
+      "statement": "BIP 9 suggests a starttime about a month after a release including the soft fork, and a timeout one year (31,536,000 seconds) later.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            39,
+            40
+          ],
+          "quote": "'''starttime''' should be set to some date in the future, approximately one month after a software release date including the soft fork."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            40,
+            40
+          ],
+          "quote": "'''timeout''' should be 1 year (31536000 seconds) after starttime."
+        }
+      ]
+    },
+    {
+      "id": "states",
+      "statement": "The states are DEFINED, STARTED, LOCKED_IN (for one period after a period in which at least threshold blocks set the bit), ACTIVE and FAILED.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            49,
+            53
+          ],
+          "quote": "'''DEFINED''' is the first state that each soft fork starts out as."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            51,
+            53
+          ],
+          "quote": "'''LOCKED_IN''' for one retarget period after the first retarget period with STARTED blocks of which at least threshold have the associated bit set in nVersion. # '''ACTIVE''' for all blocks after the LOCKED_IN retarget period. # '''FAILED''' for one retarget period past the timeout time, if LOCKED_IN was not reached."
+        }
+      ]
+    },
+    {
+      "id": "periods",
+      "statement": "All blocks in one 2016-block retarget period have the same state, and a block's state never depends on its own version, only on its ancestors'.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            86,
+            88
+          ],
+          "quote": "All blocks within a retarget period have the same state."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            118,
+            118
+          ],
+          "quote": "Note that a block's state never depends on its own nVersion; only on that of its ancestors."
+        }
+      ]
+    },
+    {
+      "id": "top-bits",
+      "statement": "A signalling block's top three version bits must be 001, giving versions 0x20000000 to 0x3FFFFFFF; a version without those top bits counts as signalling nothing.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            59,
+            60
+          ],
+          "quote": "The top 3 bits of such blocks must be 001, so the range of actually possible nVersion values is [0x20000000...0x3FFFFFFF], inclusive."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            65,
+            66
+          ],
+          "quote": "When a block nVersion does not have top bits 001, it is treated as if all bits are 0 for the purposes of deployments."
+        }
+      ]
+    },
+    {
+      "id": "29-bits",
+      "statement": "Restricting the top bits to 001 leaves 29 deployment bits and keeps top bits 010 and 011 for two future mechanisms.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            63,
+            64
+          ],
+          "quote": "By restricting the top 3 bits to 001 we get 29 out of those for the purposes of this proposal, and support two future upgrades for different mechanisms (top bits 010 and 011)."
+        }
+      ]
+    },
+    {
+      "id": "signal-lockedin",
+      "statement": "Miners should keep setting the bit in LOCKED_IN so uptake stays visible, but this has no effect on consensus rules; the new rules are enforced only in ACTIVE blocks.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            68,
+            69
+          ],
+          "quote": "Miners should continue setting the bit in LOCKED_IN phase so uptake is visible, though this has no effect on consensus rules."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            73,
+            73
+          ],
+          "quote": "The new consensus rules for each soft fork are enforced for each block that has ACTIVE state."
+        }
+      ]
+    },
+    {
+      "id": "mtp-clock",
+      "statement": "BIP 9's clock is the median time past of the period's first block's parent, treated as a monotonic clock defined by the chain.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            98,
+            100
+          ],
+          "quote": "The expression GetMedianTimePast(block.parent) is referred to as MTP in the diagram above, and is treated as a monotonic clock defined by the chain."
+        }
+      ]
+    },
+    {
+      "id": "threshold",
+      "statement": "BIP 9's lock-in threshold is at least 1,916 of a period's 2,016 blocks (95%), or 1,512 (75%) on testnet; failure takes precedence over counting.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            113,
+            114
+          ],
+          "quote": "The threshold is ≥1916 blocks (95% of 2016), or ≥1512 for testnet (75% of 2016). The transition to FAILED takes precedence, as otherwise an ambiguity can arise."
+        }
+      ]
+    },
+    {
+      "id": "lockin-active",
+      "statement": "After one period of LOCKED_IN the deployment becomes ACTIVE automatically; ACTIVE and FAILED are terminal.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            137,
+            137
+          ],
+          "quote": "After a retarget period of LOCKED_IN, we automatically transition to ACTIVE."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "And ACTIVE and FAILED are terminal states, which a deployment stays in once they're reached."
+        }
+      ]
+    },
+    {
+      "id": "timeout-why",
+      "statement": "The authors give the timeout as a way to reuse bits even when a soft fork never activates, so a new use of a bit clearly refers to a new BIP.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            216,
+            218
+          ],
+          "quote": "The failure timeout allows eventual reuse of bits even if a soft fork was never activated, so it's clear that the new use of the bit refers to a new BIP."
+        }
+      ]
+    },
+    {
+      "id": "warning",
+      "statement": "BIP 9 has software track unexpected version bits as an extra unknown upgrade, and says it should warn loudly when one locks in.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            163,
+            163
+          ],
+          "quote": "To support upgrade warnings, an extra \"unknown upgrade\" is tracked, using the \"implicit bit\" mask = (block.nVersion & ~expectedVersion) != 0. Mask will be non-zero whenever an unexpected bit is set in nVersion.  Whenever LOCKED_IN for the unknown upgrade is detected, the software should warn loudly about the upcoming soft fork."
+        }
+      ]
+    },
+    {
+      "id": "assignments",
+      "statement": "BIP 9's assignment table records csv (bit 0; mainnet 1 May 2016 to 1 May 2017; active since block 419,328) and segwit (bit 1; mainnet 15 November 2016 to 15 November 2017; active since block 481,824).",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            18,
+            22
+          ],
+          "quote": "| csv | 0 | 2016-05-01 00:00:00 | 2017-05-01 00:00:00 | active since #419328",
+          "file": "bip-0009/assignments.mediawiki"
+        },
+        {
+          "bip": 9,
+          "lines": [
+            28,
+            32
+          ],
+          "quote": "| segwit | 1 | 2016-11-15 00:00:00 | 2017-11-15 00:00:00 | active since #481824",
+          "file": "bip-0009/assignments.mediawiki"
+        }
+      ]
+    },
+    {
+      "id": "crosscheck",
+      "statement": "Those dates match the Unix times in the deployment sections of BIP 68 and BIP 141.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            226,
+            226
+          ],
+          "quote": "midnight 1st May 2016 UTC (Epoch timestamp 1462060800) and BIP9 '''timeout''' will be midnight 1st May 2017 UTC (Epoch timestamp 1493596800)"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            308,
+            308
+          ],
+          "quote": "midnight 15 November 2016 UTC (Epoch timestamp 1479168000) and BIP9 timeout will be midnight 15 November 2017 UTC (Epoch timestamp 1510704000)"
+        }
+      ]
+    },
+    {
+      "id": "implied",
+      "statement": "Read with BIP 9's rules, csv's activation at block 419,328 means LOCKED_IN from block 417,312 and a threshold-reaching count in blocks 415,296 to 417,311; segwit's at 481,824 means LOCKED_IN from 479,808. Each recorded activation height is a multiple of 2,016.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "active since #419328",
+          "file": "bip-0009/assignments.mediawiki"
+        },
+        {
+          "bip": 9,
+          "lines": [
+            32,
+            32
+          ],
+          "quote": "active since #481824",
+          "file": "bip-0009/assignments.mediawiki"
+        }
+      ]
+    },
+    {
+      "id": "signalling-not-consent",
+      "statement": "Signalling counts blocks that set a bit, which is a measure of mining, not of whether users or nodes have adopted the rules; BIP 8's motivation draws the same line, saying hash-power activation enforces new rules in lieu of full nodes upgrading, while all consensus rules are ultimately enforced by full nodes.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            128,
+            128
+          ],
+          "quote": "if (walk.nVersion & 0xE0000000 == 0x20000000 && (walk.nVersion >> bit) & 1 == 1) {"
+        },
+        {
+          "bip": 8,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "Super majority hashrate based activation triggers allow for accelerated activation where the majority hash power enforces the new rules in lieu of full nodes upgrading. Since all consensus rules are ultimately enforced by full nodes"
+        }
+      ]
+    },
+    {
+      "id": "bip8-abstract",
+      "statement": "BIP 8 is an alternative to BIP 9 that uses block heights instead of timestamps for start and timeout, and adds a parameter that can guarantee activation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            15,
+            17
+          ],
+          "quote": "This document specifies an alternative to [[bip-0009.mediawiki|BIP9]] that corrects for a number of perceived mistakes. Block heights are used for start and timeout rather than POSIX timestamps. It additionally introduces an activation parameter that can guarantee activation of backward-compatible changes"
+        }
+      ]
+    },
+    {
+      "id": "bip8-why",
+      "statement": "BIP 8 sets out to correct what its authors call perceived mistakes in BIP 9: a near-unanimous hashrate requirement that lets a small minority veto, timestamps that let a sudden hashrate loss interfere with a late activation, unreliable block times, and a non-intuitive trigger at the first retarget after a given time.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            15,
+            15
+          ],
+          "quote": "This document specifies an alternative to [[bip-0009.mediawiki|BIP9]] that corrects for a number of perceived mistakes."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "Activation is dependent on near unanimous hashrate signalling which may be impractical and result in veto by a small minority of non-signalling hashrate."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            25,
+            25
+          ],
+          "quote": "Due to using timestamps rather than block heights, it was found to be a risk that a sudden loss of significant hashrate could interfere with a late activation."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "Since each new block must increase the height by one, thresholds based on block height are much more reliable and intuitive and can be calculated exactly for difficulty retarget."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "Block time is somewhat unreliable and may be intentionally or unintentionally inaccurate, so thresholds based on block time are not ideal. Secondly, BIP9 specified triggers based on the first retarget after a given time, which is non-intuitive."
+        }
+      ]
+    },
+    {
+      "id": "bip8-params",
+      "statement": "A BIP 8 deployment adds startheight, timeoutheight, a threshold, minimum_activation_height and the lockinontimeout flag, with heights on retarget boundaries and the timeout at least 4,032 blocks after the start.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            37,
+            41
+          ],
+          "quote": "The '''startheight''' specifies the height of the first block at which the bit gains its meaning."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "The '''lockinontimeout''' boolean if set to true, blocks are required to signal in the final period, ensuring the soft fork has locked in by timeoutheight."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "'''startheight''', '''timeoutheight''', and '''minimum_activation_height''' must be an exact multiple of 2016 (ie, at a retarget boundary), and '''timeoutheight''' must be at least 4032 blocks (2 retarget intervals) after '''startheight'''."
+        }
+      ]
+    },
+    {
+      "id": "bip8-guidelines",
+      "statement": "BIP 8 suggests a threshold of 1,815 blocks (90%), a timeout of probably at least a year or 52,416 blocks after the start, and lockinontimeout true for a soft fork facing political opposition from a non-negligible share of miners.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            50,
+            51
+          ],
+          "quote": "probably at least 1 year, or 52416 blocks (26 retarget intervals) after '''startheight'''. # '''threshold''' should be 1815 blocks (90% of 2016), or 1512 (75%) for testnet."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            53,
+            53
+          ],
+          "quote": "'''lockinontimeout''' should be set to true for any softfork that is expected or found to have political opposition from a non-negligible percent of miners."
+        }
+      ]
+    },
+    {
+      "id": "bip8-min-activation",
+      "statement": "minimum_activation_height lets LOCKED_IN last longer so nodes can upgrade; setting it to 0 keeps LOCKED_IN to a single period.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            52,
+            52
+          ],
+          "quote": "This allows more time to be spent in the LOCKED_IN state so that nodes can upgrade. This may be set to 0 to have the LOCKED_IN state be a single retarget period."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            97,
+            97
+          ],
+          "quote": "Regardless of the value of '''lockinontimeout''', if LOCKED_IN is reached, ACTIVE will be reached either one retarget period later, or at '''minimum_activation_height''', whichever comes later."
+        }
+      ]
+    },
+    {
+      "id": "bip8-must-signal",
+      "statement": "With lockinontimeout set, the last period before the timeout is MUST_SIGNAL: once 2,016 minus threshold blocks in it have failed to signal, further non-signalling blocks are invalid, and LOCKED_IN follows.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "'''MUST_SIGNAL''' for one retarget period prior to the timeout, if LOCKED_IN was not reached and '''lockinontimeout''' is true."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            90,
+            90
+          ],
+          "quote": "During the MUST_SIGNAL phase, if '''(2016 - threshold)''' blocks in the retarget period have already failed to signal, any further blocks that fail to signal are invalid."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            152,
+            152
+          ],
+          "quote": "If we have finished a period of MUST_SIGNAL, we transition directly to LOCKED_IN."
+        }
+      ]
+    },
+    {
+      "id": "bip8-fail",
+      "statement": "Without lockinontimeout, a deployment that has not reached the threshold fails at the timeout height; the count is checked first. (BIP 8's state diagram labels lock-in \"height < timeoutheight AND threshold reached\"; this site follows the pseudocode, which counts first, so a threshold-reaching period can still lock in at the timeout height, consistent with the parameter text's \"excluding this block's bit state\".)",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "If the threshold hasn't been met and we reach the timeout, we transition directly to FAILED."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            143,
+            149
+          ],
+          "quote": "if (count >= threshold) { return LOCKED_IN; } else if (lockinontimeout && block.height + 2016 >= timeoutheight) { return MUST_SIGNAL; } else if (block.height >= timeoutheight) { return FAILED; }"
+        },
+        {
+          "bip": 8,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "Once this height has been reached, if the soft fork has not yet locked in (excluding this block's bit state), the deployment is considered failed on all descendants of the block."
+        }
+      ]
+    },
+    {
+      "id": "bip8-split",
+      "statement": "BIP 8 warns that nodes with lockinontimeout set may follow a lower-work chain than nodes without it for an extended period, and may need to connect preferentially to each other.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            209,
+            209
+          ],
+          "quote": "Implementations with ''lockinontimeout'' set to true may potentially follow a lower work chain than nodes with ''lockinontimeout'' set to false for an extended period. In order for this not to result in a net split nodes with ''lockinontimeout'' set to true, those nodes may need to preferentially connect to each other."
+        }
+      ]
+    },
+    {
+      "id": "bip8-history",
+      "statement": "BIP 8's changelog records it moving to Rejected after a three-year timeout in 2020, being revised (MUST_SIGNAL, a minimum_activation_height parameter, a 90% recommendation), and advancing to Complete in 2026.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            280,
+            281
+          ],
+          "quote": "* '''1.0.0''' (2026-08-03): ** Advance to Complete."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            284,
+            284
+          ],
+          "quote": "** Reduce recommended threshold from 95% to 90%."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            293,
+            293
+          ],
+          "quote": "** Replace FAILING state with MUST_SIGNAL phase."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            300,
+            300
+          ],
+          "quote": "** Add minimum_activation_height parameter."
+        },
+        {
+          "bip": 8,
+          "lines": [
+            304,
+            305
+          ],
+          "quote": "* '''0.0.2''' (2020-02-26): ** Move to Rejected due to 3-year time-out."
+        }
+      ]
+    },
+    {
+      "id": "precedence-why",
+      "statement": "The authors explain why failure takes precedence: otherwise two non-overlapping deployments on the same bit could both demand the bit, one locking in while the other starts.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            114,
+            116
+          ],
+          "quote": "The transition to FAILED takes precedence, as otherwise an ambiguity can arise. There could be two non-overlapping deployments on the same bit, where the first one transitions to LOCKED_IN while the other one simultaneously transitions to STARTED, which would mean both would demand setting the bit."
+        }
+      ]
+    },
+    {
+      "id": "bit-reuse",
+      "statement": "A later deployment may reuse a bit once the previous one has timed out or activated, though BIP 9 discourages it until necessary and recommends a pause; the authors say the fallow period after an attempt helps detect buggy clients and leaves time for warnings and upgrades.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 9,
+          "lines": [
+            42,
+            43
+          ],
+          "quote": "A later deployment using the same bit is possible as long as the starttime is after the previous one's timeout or activation, but it is discouraged until necessary, and even then recommended to have a pause in between to detect buggy software."
+        },
+        {
+          "bip": 9,
+          "lines": [
+            222,
+            224
+          ],
+          "quote": "The fallow period at the conclusion of a soft fork attempt allows some detection of buggy clients, and allows time for warnings and software upgrades for successful soft forks."
+        }
+      ]
+    },
+    {
+      "id": "bip8-empty",
+      "statement": "BIP 8's pinned assignments file has a heading and a note but no deployment rows (this site's parser finds none).",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 8,
+          "lines": [
+            1,
+            5
+          ],
+          "quote": "==Deployments== List of deployments. State can be defined, active, failed. Dates are in UTC.",
+          "file": "bip-0008/assignments.mediawiki"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "descriptors",
+  "warning": "Descriptors copied from the test vectors of BIPs 380–386. Several contain private keys (xprv, WIF) published as test material: never use them for funds.",
+  "fixtures": [
+    {
+      "id": "bip380-raw-valid",
+      "kind": "descriptor-vector",
+      "label": "raw() with a valid checksum",
+      "shortLabel": "BIP 380 · checksum",
+      "source": {
+        "bip": 380,
+        "line": 204,
+        "section": "Test Vectors",
+        "quote": "raw(deadbeef)#89f8spxm"
+      },
+      "descriptor": "raw(deadbeef)#89f8spxm",
+      "scriptLines": []
+    },
+    {
+      "id": "bip380-raw-typo",
+      "kind": "descriptor-vector",
+      "label": "The same, one character changed",
+      "shortLabel": "BIP 380 · error in payload",
+      "source": {
+        "bip": 380,
+        "line": 209,
+        "section": "Test Vectors",
+        "quote": "raw(deedbeef)#89f8spxm"
+      },
+      "descriptor": "raw(deedbeef)#89f8spxm",
+      "scriptLines": []
+    },
+    {
+      "id": "bip381-pkh-origin",
+      "kind": "descriptor-vector",
+      "label": "pkh() with key origin",
+      "shortLabel": "BIP 381",
+      "source": {
+        "bip": 381,
+        "line": 80,
+        "section": "Test Vectors",
+        "quote": "pkh([deadbeef/1/2'/3/4']03a34b99f22c790c4e36b2b3c2c35a36db06"
+      },
+      "descriptor": "pkh([deadbeef/1/2'/3/4']03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)",
+      "scriptLines": [
+        81
+      ]
+    },
+    {
+      "id": "bip382-wpkh-ranged",
+      "kind": "descriptor-vector",
+      "label": "wpkh() over a ranged xpub",
+      "shortLabel": "BIP 382 · ranged",
+      "source": {
+        "bip": 382,
+        "line": 67,
+        "section": "Test Vectors",
+        "quote": "wpkh([ffffffff/13']xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3"
+      },
+      "descriptor": "wpkh([ffffffff/13']xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/1/2/*)",
+      "scriptLines": [
+        68,
+        69,
+        70
+      ]
+    },
+    {
+      "id": "bip382-sh-wpkh-xprv",
+      "kind": "descriptor-vector",
+      "label": "sh(wpkh()) with a private key",
+      "shortLabel": "BIP 382 · holds an xprv",
+      "source": {
+        "bip": 382,
+        "line": 71,
+        "section": "Test Vectors",
+        "quote": "sh(wpkh(xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq"
+      },
+      "descriptor": "sh(wpkh(xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi/10/20/30/40/*'))",
+      "scriptLines": [
+        72,
+        73,
+        74
+      ]
+    },
+    {
+      "id": "bip383-sortedmulti",
+      "kind": "descriptor-vector",
+      "label": "sortedmulti() 2-of-2",
+      "shortLabel": "BIP 383 · ranged",
+      "source": {
+        "bip": 383,
+        "line": 80,
+        "section": "Test Vectors",
+        "quote": "sortedmulti(2,xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQ"
+      },
+      "descriptor": "sortedmulti(2,xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/*,xpub68NZiKmJWnxxS6aaHmn81bvJeTESw724CRDs6HbuccFQN9Ku14VQrADWgqbhhTHBaohPX4CjNLf9fq9MYo6oDaPPLPxSb7gwQN3ih19Zm4Y/0/0/*)",
+      "scriptLines": [
+        81,
+        82,
+        83
+      ]
+    },
+    {
+      "id": "bip384-combo",
+      "kind": "descriptor-vector",
+      "label": "combo() of one xpub",
+      "shortLabel": "BIP 384 · four scripts",
+      "source": {
+        "bip": 384,
+        "line": 47,
+        "section": "Test Vectors",
+        "quote": "combo([01234567]xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBU"
+      },
+      "descriptor": "combo([01234567]xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL)",
+      "scriptLines": [
+        48,
+        49,
+        50,
+        51
+      ]
+    },
+    {
+      "id": "bip386-tr-tree",
+      "kind": "descriptor-vector",
+      "label": "tr() with a script tree",
+      "shortLabel": "BIP 386",
+      "source": {
+        "bip": 386,
+        "line": 98,
+        "section": "Test Vectors",
+        "quote": "tr(a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c"
+      },
+      "descriptor": "tr(a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd,{pk(xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334/0),{{pk(xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL),pk(02df12b7035bdac8e3bab862a3a83d06ea6b17b6753d52edecba9be46f5d09e076)},pk(L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1)}})",
+      "scriptLines": [
+        99
+      ]
+    },
+    {
+      "id": "bip380-index",
+      "kind": "descriptor-index",
+      "label": "BIP 380’s index of script expressions",
+      "shortLabel": "Appendix B",
+      "source": {
+        "bip": 380,
+        "line": 297,
+        "section": "Appendix B",
+        "quote": "==Appendix B: Index of Script Expressions=="
+      },
+      "tableFrom": 302,
+      "tableTo": 344
+    }
+  ]
+}

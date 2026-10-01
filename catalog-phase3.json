@@ -1,0 +1,493 @@
+{
+ "schemaVersion": "bip-atlas.catalog.v1",
+ "projectName": "BIP Atlas (working name)",
+ "sourceRepository": "bitcoin/bips",
+ "observedResearchCommit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+ "observedResearchCommitDate": "2026-09-28T15:24:34Z",
+ "researchedAt": "2026-10-01",
+ "researchNote": "Phase three extension to the kit catalog, kept in a separate file because catalog.json is a kit original. Same contract and fields; briefs are proposed, not reviewed publications.",
+ "supportingBips": [
+  141,
+  143,
+  174
+ ],
+ "chapters": [
+  {
+   "id": "p2sh",
+   "primaryBips": [
+    16
+   ],
+   "phase": 3,
+   "readingOrder": 9,
+   "buildOrder": 9,
+   "questionTitle": "How can a script hide behind a hash?",
+   "heroRecipe": "p2sh-two-stage.v1",
+   "primitiveFamilies": [
+    "byte-ribbon",
+    "stage-pipeline",
+    "reveal-mask"
+   ],
+   "allowedControls": [
+    "Choose a pinned spend",
+    "Step through both evaluations",
+    "Reveal the redeem script"
+   ],
+   "misconceptionChecklist": [
+    "The redeem script is revealed when spent, not hidden forever",
+    "P2SH-wrapped SegWit is not native SegWit",
+    "Do not imply P2SH adds signature security beyond the redeem script"
+   ],
+   "requiredTestFamilies": [
+    "BIP16 rules and examples",
+    "Pinned P2SH transactions",
+    "Hash160 commitment checks"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/16/"
+   ]
+  },
+  {
+   "id": "timelocks",
+   "primaryBips": [
+    65,
+    68,
+    112,
+    113
+   ],
+   "phase": 3,
+   "readingOrder": 10,
+   "buildOrder": 10,
+   "questionTitle": "When is a coin allowed to move?",
+   "heroRecipe": "timelock-fields.v1",
+   "primitiveFamilies": [
+    "bit-field",
+    "timeline",
+    "state-comparison"
+   ],
+   "allowedControls": [
+    "Choose absolute or relative lock",
+    "Change a fixture field",
+    "Compare height and time units"
+   ],
+   "misconceptionChecklist": [
+    "nLockTime alone does not lock an output",
+    "Relative locks need version 2 and the disable flag clear",
+    "Median time past, not the block timestamp, is compared for time locks"
+   ],
+   "requiredTestFamilies": [
+    "Bit-layout and masking checks",
+    "Height/time threshold cases",
+    "BIP-published examples"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/65/",
+    "https://bips.dev/68/",
+    "https://bips.dev/112/",
+    "https://bips.dev/113/"
+   ]
+  },
+  {
+   "id": "version-bits",
+   "primaryBips": [
+    9,
+    8
+   ],
+   "phase": 3,
+   "readingOrder": 11,
+   "buildOrder": 11,
+   "questionTitle": "How does a soft fork switch on?",
+   "heroRecipe": "versionbits-state-machine.v1",
+   "primitiveFamilies": [
+    "state-machine",
+    "timeline",
+    "bit-field"
+   ],
+   "allowedControls": [
+    "Step through retarget periods",
+    "Choose a published deployment",
+    "Toggle signalling count"
+   ],
+   "misconceptionChecklist": [
+    "Signalling is not activation",
+    "Miner signalling is not user consent or consensus",
+    "A BIP's deployment parameters are history, not a promise"
+   ],
+   "requiredTestFamilies": [
+    "State transition rules",
+    "Threshold arithmetic",
+    "Pinned deployment parameters"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/9/",
+    "https://bips.dev/8/"
+   ]
+  },
+  {
+   "id": "wallet-paths",
+   "primaryBips": [
+    44,
+    84,
+    86
+   ],
+   "phase": 3,
+   "readingOrder": 12,
+   "buildOrder": 12,
+   "questionTitle": "Where in the tree do wallet keys live?",
+   "heroRecipe": "wallet-path-walk.v1",
+   "primitiveFamilies": [
+    "tree",
+    "path-ribbon",
+    "derivation-trace"
+   ],
+   "allowedControls": [
+    "Choose a published path scheme",
+    "Step through path levels",
+    "Switch receive/change"
+   ],
+   "misconceptionChecklist": [
+    "BIP 44 levels are conventions layered on BIP 32",
+    "Account xpubs expose all addresses below them",
+    "A path scheme does not choose the script type by itself"
+   ],
+   "requiredTestFamilies": [
+    "BIP 84 and BIP 86 published vectors",
+    "Path parsing and hardening",
+    "Address derivation round trips"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/44/",
+    "https://bips.dev/84/",
+    "https://bips.dev/86/"
+   ]
+  },
+  {
+   "id": "descriptors",
+   "primaryBips": [
+    380,
+    381,
+    382,
+    383,
+    384,
+    385,
+    386
+   ],
+   "phase": 3,
+   "readingOrder": 13,
+   "buildOrder": 13,
+   "questionTitle": "How do you describe a wallet in one line?",
+   "heroRecipe": "descriptor-anatomy.v1",
+   "primitiveFamilies": [
+    "token-ribbon",
+    "tree",
+    "checksum-trace"
+   ],
+   "allowedControls": [
+    "Choose a published descriptor",
+    "Highlight a key expression",
+    "Check the descriptor checksum"
+   ],
+   "misconceptionChecklist": [
+    "A descriptor is not a secret unless it holds private keys",
+    "The checksum detects typos; it does not authenticate",
+    "Ranged descriptors stand for many scripts, not one"
+   ],
+   "requiredTestFamilies": [
+    "Checksum vectors",
+    "Script expansion vectors",
+    "Invalid-descriptor cases"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/380/",
+    "https://bips.dev/381/",
+    "https://bips.dev/382/",
+    "https://bips.dev/383/",
+    "https://bips.dev/384/",
+    "https://bips.dev/385/",
+    "https://bips.dev/386/"
+   ]
+  },
+  {
+   "id": "musig2",
+   "primaryBips": [
+    327
+   ],
+   "phase": 3,
+   "readingOrder": 14,
+   "buildOrder": 14,
+   "questionTitle": "How can many signers share one key?",
+   "heroRecipe": "musig2-rounds.v1",
+   "primitiveFamilies": [
+    "equation-flow",
+    "party-swimlane",
+    "verification-trace"
+   ],
+   "allowedControls": [
+    "Step through signing rounds",
+    "Choose a published vector",
+    "Reveal aggregated values"
+   ],
+   "misconceptionChecklist": [
+    "Key aggregation is not adding raw public keys",
+    "Nonces must never be reused",
+    "The final signature is an ordinary BIP 340 signature"
+   ],
+   "requiredTestFamilies": [
+    "BIP327 JSON vectors",
+    "Key aggregation coefficients",
+    "Partial-signature verification"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/327/"
+   ]
+  },
+  {
+   "id": "silent-payments",
+   "primaryBips": [
+    352
+   ],
+   "phase": 3,
+   "readingOrder": 15,
+   "buildOrder": 15,
+   "questionTitle": "Can you receive without handing out an address?",
+   "heroRecipe": "silent-payment-derivation.v1",
+   "primitiveFamilies": [
+    "equation-flow",
+    "party-swimlane",
+    "byte-ribbon"
+   ],
+   "allowedControls": [
+    "Choose a published vector",
+    "Switch sender/receiver view",
+    "Reveal shared-secret steps"
+   ],
+   "misconceptionChecklist": [
+    "The receiver must scan transactions to find payments",
+    "Not every input type contributes to the shared secret",
+    "Do not imply payments are unlinkable in every case"
+   ],
+   "requiredTestFamilies": [
+    "BIP352 send-and-receive vectors",
+    "Input-eligibility checks",
+    "Label derivation"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/352/"
+   ]
+  },
+  {
+   "id": "block-filters",
+   "primaryBips": [
+    157,
+    158
+   ],
+   "phase": 3,
+   "readingOrder": 16,
+   "buildOrder": 16,
+   "questionTitle": "How can a light client ask whether a block concerns it?",
+   "heroRecipe": "gcs-filter.v1",
+   "primitiveFamilies": [
+    "bit-ribbon",
+    "set-sketch",
+    "verification-trace"
+   ],
+   "allowedControls": [
+    "Choose a published block",
+    "Test a fixture script against the filter",
+    "Reveal Golomb-Rice coding"
+   ],
+   "misconceptionChecklist": [
+    "A filter match can be a false positive",
+    "A missing match is reliable only for the filter's element set",
+    "Filters do not hide what the client later downloads"
+   ],
+   "requiredTestFamilies": [
+    "BIP158 filter vectors",
+    "Golomb-Rice encode/decode",
+    "False-positive rate arithmetic"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/157/",
+    "https://bips.dev/158/"
+   ]
+  },
+  {
+   "id": "v2-transport",
+   "primaryBips": [
+    324
+   ],
+   "phase": 3,
+   "readingOrder": 17,
+   "buildOrder": 17,
+   "questionTitle": "What changes when nodes encrypt their traffic?",
+   "heroRecipe": "v2-handshake.v1",
+   "primitiveFamilies": [
+    "party-swimlane",
+    "byte-ribbon",
+    "state-comparison"
+   ],
+   "allowedControls": [
+    "Step through the handshake",
+    "Choose a published packet vector",
+    "Compare v1 and v2 framing"
+   ],
+   "misconceptionChecklist": [
+    "Encryption is not authentication of the peer",
+    "ElligatorSwift encodings look random but encode real keys",
+    "v2 does not change consensus or transaction formats"
+   ],
+   "requiredTestFamilies": [
+    "BIP324 packet vectors",
+    "ElligatorSwift and ECDH vectors",
+    "Length and tag checks"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/324/"
+   ]
+  },
+  {
+   "id": "message-signing",
+   "primaryBips": [
+    322
+   ],
+   "phase": 3,
+   "readingOrder": 18,
+   "buildOrder": 18,
+   "questionTitle": "How do you prove you control an address?",
+   "heroRecipe": "bip322-virtual-tx.v1",
+   "primitiveFamilies": [
+    "transaction-anatomy",
+    "byte-ribbon",
+    "verification-trace"
+   ],
+   "allowedControls": [
+    "Choose a published vector",
+    "Switch to_spend/to_sign view",
+    "Reveal the message hash"
+   ],
+   "misconceptionChecklist": [
+    "A signed message proves control at signing time, not ownership now",
+    "The virtual transactions are never broadcast",
+    "Legacy message signing differs from BIP322"
+   ],
+   "requiredTestFamilies": [
+    "BIP322 published vectors",
+    "Tagged message hash",
+    "Virtual transaction construction"
+   ],
+   "briefStatus": "proposed-editorial-brief",
+   "releaseState": "not-generated",
+   "targetWords": {
+    "min": 1100,
+    "max": 1800
+   },
+   "figureBudget": {
+    "hero": 1,
+    "supportingMin": 1,
+    "supportingMax": 2
+   },
+   "sourceLinks": [
+    "https://bips.dev/322/"
+   ]
+  }
+ ],
+ "supportingNote": "Supporting BIPs whose published transactions and test material serve as fixtures for phase-three chapters (e.g. P2SH spends inside BIP 143 and BIP 174 examples)."
+}

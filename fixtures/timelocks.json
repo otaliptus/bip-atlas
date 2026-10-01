@@ -1,0 +1,265 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "timelocks",
+  "warning": "Transactions from Bitcoin Core's consensus tests (pinned excerpt) and from BIP 143 and BIP 174's test material. Test data only; never use for funds.",
+  "fixtures": [
+    {
+      "id": "core-valid-99",
+      "kind": "timelock-case",
+      "label": "Height lock, argument equals nLockTime",
+      "shortLabel": "499,999,999 vs 499,999,999",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.1",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_valid.json",
+      "coreIndex": 99,
+      "comment": "By-height locks, with argument == 0 and == tx nLockTime",
+      "expected": "valid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-valid-102",
+      "kind": "timelock-case",
+      "label": "Time lock, argument equals nLockTime",
+      "shortLabel": "500,000,000 vs 500,000,000",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.3",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_valid.json",
+      "coreIndex": 102,
+      "comment": "By-time locks, with argument just beyond tx nLockTime (but within numerical boundaries)",
+      "expected": "valid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-invalid-68",
+      "kind": "timelock-case",
+      "label": "Height lock, argument one block too late",
+      "shortLabel": "499,999,999 vs 499,999,998",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.28",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 68,
+      "comment": "By-height locks, with argument just beyond tx nLockTime",
+      "expected": "invalid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-invalid-90",
+      "kind": "timelock-case",
+      "label": "A time argument against a height nLockTime",
+      "shortLabel": "500,000,000 vs 499,999,999",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.37",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 90,
+      "comment": "Argument/tx height/time mismatch, both versions",
+      "expected": "invalid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-invalid-81",
+      "kind": "timelock-case",
+      "label": "The input is final",
+      "shortLabel": "nSequence 0xffffffff",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.33",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 81,
+      "comment": "Input locked",
+      "expected": "invalid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-invalid-76",
+      "kind": "timelock-case",
+      "label": "A negative argument",
+      "shortLabel": "−1",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.31",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 76,
+      "comment": "Argument negative with by-blockheight nLockTime=0",
+      "expected": "invalid",
+      "lock": "absolute"
+    },
+    {
+      "id": "core-valid-122",
+      "kind": "timelock-case",
+      "label": "Block lock, argument equals the input's lock",
+      "shortLabel": "65,535 blocks",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.8",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_valid.json",
+      "coreIndex": 122,
+      "comment": "By-height locks, with argument == 0 and == txin.nSequence",
+      "expected": "valid",
+      "lock": "relative"
+    },
+    {
+      "id": "core-valid-127",
+      "kind": "timelock-case",
+      "label": "Time lock, argument equals the input's lock",
+      "shortLabel": "65,535 × 512 s",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.12",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_valid.json",
+      "coreIndex": 127,
+      "comment": "By-time locks, with argument == 0 and == txin.nSequence",
+      "expected": "valid",
+      "lock": "relative"
+    },
+    {
+      "id": "core-valid-131",
+      "kind": "timelock-case",
+      "label": "Argument with the disable flag set",
+      "shortLabel": "does nothing",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.15",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_valid.json",
+      "coreIndex": 131,
+      "comment": "Upper sequence with upper sequence is fine",
+      "expected": "valid",
+      "lock": "relative"
+    },
+    {
+      "id": "core-invalid-105",
+      "kind": "timelock-case",
+      "label": "Block lock, one block short",
+      "shortLabel": "1 vs 0 blocks",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.39",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 105,
+      "comment": "By-height locks, with argument just beyond txin.nSequence",
+      "expected": "invalid",
+      "lock": "relative"
+    },
+    {
+      "id": "core-invalid-118",
+      "kind": "timelock-case",
+      "label": "Blocks against a time-based input",
+      "shortLabel": "unit mismatch",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.46",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 118,
+      "comment": "Argument/tx height/time mismatch, both versions",
+      "expected": "invalid",
+      "lock": "relative"
+    },
+    {
+      "id": "core-invalid-128",
+      "kind": "timelock-case",
+      "label": "Version 1 transaction",
+      "shortLabel": "no BIP 68 meaning",
+      "source": {
+        "external": "core-locktime-cases-excerpt.json",
+        "pointer": "cases.49",
+        "section": "Bitcoin Core transaction tests (reference implementation, BIP 112 L342)"
+      },
+      "coreFile": "tx_invalid.json",
+      "coreIndex": 128,
+      "comment": "Failure due to insufficient tx.version (<2)",
+      "expected": "invalid",
+      "lock": "relative"
+    },
+    {
+      "id": "bip143-p2wpkh-signed",
+      "kind": "timelock-bip-tx",
+      "label": "Native P2WPKH example (signed)",
+      "shortLabel": "BIP 143 · version 1",
+      "source": {
+        "bip": 143,
+        "line": 190,
+        "section": "Native P2WPKH",
+        "quote": "01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433"
+      },
+      "txHex": "01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000"
+    },
+    {
+      "id": "bip143-p2sh-p2wpkh-unsigned",
+      "kind": "timelock-bip-tx",
+      "label": "P2SH-P2WPKH example (unsigned)",
+      "shortLabel": "BIP 143 · version 1",
+      "source": {
+        "bip": 143,
+        "line": 206,
+        "section": "P2SH-P2WPKH",
+        "quote": "0100000001db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d"
+      },
+      "txHex": "0100000001db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d3ceb1a54770100000000feffffff02b8b4eb0b000000001976a914a457b684d7f0d539a46a45bbc043f35b59d0d96388ac0008af2f000000001976a914fd270b1ee6abcaea97fea7ad0402e8bd8ad6d77c88ac92040000"
+    },
+    {
+      "id": "bip174-legacy-signed",
+      "kind": "timelock-bip-tx",
+      "label": "Signed legacy transaction",
+      "shortLabel": "BIP 174 · version 2",
+      "source": {
+        "bip": 174,
+        "line": 619,
+        "section": "Test Vectors",
+        "quote": "0200000001268171371edff285e937adeea4b37b78000c0566cbb3ad64641713"
+      },
+      "txHex": "0200000001268171371edff285e937adeea4b37b78000c0566cbb3ad64641713ca42171bf6000000006a473044022070b2245123e6bf474d60c5b50c043d4c691a5d2435f09a34a7662a9dc251790a022001329ca9dacf280bdf30740ec0390422422c81cb45839457aeb76fc12edd95b3012102657d118d3357b8e0f4c2cd46db7b39f6d9c38d9a70abcb9b2de5dc8dbfe4ce31feffffff02d3dff505000000001976a914d0c59903c5bac2868760e90fd521a4665aa7652088ac00e1f5050000000017a9143545e6e33b832c47050f24d3eeb93c9c03948bc787b32e1300"
+    },
+    {
+      "id": "bip174-final",
+      "kind": "timelock-bip-tx",
+      "label": "Final extracted transaction",
+      "shortLabel": "BIP 174 · version 2",
+      "source": {
+        "bip": 174,
+        "line": 833,
+        "section": "Test Vectors",
+        "quote": "0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f5"
+      },
+      "txHex": "0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd7500000000da00473044022074018ad4180097b873323c0015720b3684cc8123891048e7dbcd9b55ad679c99022073d369b740e3eb53dcefa33823c8070514ca55a7dd9544f157c167913261118c01483045022100f61038b308dc1da865a34852746f015772934208c6d24454393cd99bdf2217770220056e675a675a6d0a02b85b14e5e29074d8a25a9b5760bea2816f661910a006ea01475221029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f2102dab61ff49a14db6a7d02b0cd1fbb78fc4b18312b5b4e54dae4dba2fbfef536d752aeffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d01000000232200208c2353173743b595dfb4a07b72ba8e42e3797da74e87fe7d9d7497e3b2028903ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f000400473044022062eb7a556107a7c73f45ac4ab5a1dddf6f7075fb1275969a7f383efff784bcb202200c05dbb7470dbf2f08557dd356c7325c1ed30913e996cd3840945db12228da5f01473044022065f45ba5998b59a27ffe1a7bed016af1f1f90d54b3aa8f7450aa5f56a25103bd02207f724703ad1edb96680b284b56d4ffcb88f7fb759eabbe08aa30f29b851383d20147522103089dc10c7ac6db54f91329af617333db388cead0c231f723379d1b99030b02dc21023add904f3d6dcf59ddb906b0dee23529b7ffb9ed50e5e86151926860221f0e7352ae00000000"
+    },
+    {
+      "id": "bip68-encodings",
+      "kind": "timelock-encoding",
+      "label": "BIP 68's encoding examples",
+      "shortLabel": "BIP 68 · Compatibility",
+      "source": {
+        "bip": 68,
+        "line": 243,
+        "section": "Compatibility",
+        "quote": "0 <= nHeight <= 65,535 blocks (1.25 years)"
+      },
+      "timeLine": 247,
+      "timeQuote": "0 <= nTime < 33,554,431 seconds (1.06 years)"
+    }
+  ]
+}

@@ -1,0 +1,561 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "p2sh",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot at the same bitcoin/bips commit.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 16 is a consensus soft-fork proposal by Gavin Andresen, assigned in 2012; its preamble records the status Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            3,
+            3
+          ],
+          "quote": "Layer: Consensus (soft fork)"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            5,
+            5
+          ],
+          "quote": "Authors: Gavin Andresen"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            6,
+            6
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            8,
+            8
+          ],
+          "quote": "Assigned: 2012-01-03"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 16 describes a new standard transaction type and additional validation rules that apply only to it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            13,
+            13
+          ],
+          "quote": "This BIP describes a new \"standard\" transaction type for the Bitcoin scripting system, and defines additional validation rules that apply only to the new transactions."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "The author's aim is to move the job of supplying spending conditions from the sender to the redeemer, so a sender can fund any transaction, however complex, with a fixed 20-byte hash. The BIP records that some felt P2SH unnecessary, preferring to give the sender the complete script.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            17,
+            17
+          ],
+          "quote": "The purpose of pay-to-script-hash is to move the responsibility for supplying the conditions to redeem a transaction from the sender of the funds to the redeemer."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            19,
+            19
+          ],
+          "quote": "The benefit is allowing a sender to fund any arbitrary transaction, no matter how complicated, using a fixed-length 20-byte hash that is short enough to scan from a QR code or easily copied and pasted."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "several people feel that it is unnecessary, and complex/multisignature transaction types should be supported by simply giving the sender the complete {serialized script}."
+        }
+      ]
+    },
+    {
+      "id": "template",
+      "statement": "A P2SH output's script is OP_HASH160, a push of exactly 20 bytes, and OP_EQUAL.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            25,
+            27
+          ],
+          "quote": "OP_HASH160 [20-byte-hash-value] OP_EQUAL [20-byte-hash-value] shall be the push-20-bytes-onto-the-stack opcode (0x14) followed by exactly 20 bytes."
+        }
+      ]
+    },
+    {
+      "id": "scriptsig-form",
+      "statement": "It is redeemed by a scriptSig of signatures followed by the serialized script, also called the redeemScript.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            31,
+            31
+          ],
+          "quote": "...signatures... {serialized script}"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            33,
+            33
+          ],
+          "quote": "the ''serialized script'' - also referred to as the ''redeemScript'' -"
+        }
+      ]
+    },
+    {
+      "id": "standard-only",
+      "statement": "Spends of these outputs are only considered standard if the redeemScript is itself one of the other standard types.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            33,
+            33
+          ],
+          "quote": "Transactions that redeem these pay-to-script outpoints are only considered standard if the ''serialized script'' - also referred to as the ''redeemScript'' - is, itself, one of the other standard transaction types."
+        }
+      ]
+    },
+    {
+      "id": "rules",
+      "statement": "Validation fails if the scriptSig has anything but push operations; normal validation then hashes the serialized script and fails at once if it does not match the output; finally the serialized script is popped and the transaction is validated again with the remaining stack and the deserialized script.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            37,
+            39
+          ],
+          "quote": "# Validation fails if there are any operations other than \"push data\" operations in the scriptSig. # Normal validation is done: an initial stack is created from the signatures and {serialized script}, and the hash of the script is computed and validation fails immediately if it does not match the hash in the outpoint. # {serialized script} is popped off the initial stack, and the transaction is validated again using the popped stack and the deserialized script as the scriptPubKey."
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "statement": "The BIP's example is a one-signature script: the scriptSig holds a signature and the serialized {pubkey OP_CHECKSIG}, and the output holds its 20-byte hash.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            45,
+            46
+          ],
+          "quote": "scriptSig: [signature] {[pubkey] OP_CHECKSIG} scriptPubKey: OP_HASH160 [20-byte-hash of {[pubkey] OP_CHECKSIG} ] OP_EQUAL"
+        }
+      ]
+    },
+    {
+      "id": "activation",
+      "statement": "BIP 16 says its rules should apply only to blocks with timestamps from 1 April 2012, and that earlier transactions in the chain fail them; its rollout plan counted blocks carrying \"/P2SH/\" in the coinbase.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "These new rules should only be applied when validating transactions in blocks with timestamps >= 1333238400 (Apr 1 2012)"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "There are transactions earlier than 1333238400 in the block chain that fail these new validation rules."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "miners are asked to upgrade their software and put the string \"/P2SH/\" in the input of the coinbase transaction for blocks that they create."
+        }
+      ]
+    },
+    {
+      "id": "sigops",
+      "statement": "Signature operations in the serialized script count toward the block limit: CHECKSIG as 1, CHECKMULTISIG after OP_1–OP_16 as that number, and any other CHECKMULTISIG as 20, whether or not they run; the BIP's examples count 3 and 22.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            48,
+            52
+          ],
+          "quote": "Signature operations in the {serialized script} shall contribute to the maximum number allowed per block (20,000) as follows: # OP_CHECKSIG and OP_CHECKSIGVERIFY count as 1 signature operation, whether or not they are evaluated. # OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY immediately preceded by OP_1 through OP_16 are counted as 1 to 16 signature operation, whether or not they are evaluated. # All other OP_CHECKMULTISIG and OP_CHECKMULTISIGVERIFY are counted as 20 signature operations."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            56,
+            57
+          ],
+          "quote": "+3 signature operations: {2 [pubkey1] [pubkey2] [pubkey3] 3 OP_CHECKMULTISIG}"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            59,
+            60
+          ],
+          "quote": "+22 signature operations: {OP_CHECKSIG OP_IF OP_CHECKSIGVERIFY OP_ELSE OP_CHECKMULTISIGVERIFY OP_ENDIF}"
+        }
+      ]
+    },
+    {
+      "id": "sigops-why",
+      "statement": "The author explains the counting rule is meant to be quick to apply by scanning the script, and that the block limit guards miners against denial-of-service blocks.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            70,
+            70
+          ],
+          "quote": "The signature operation counting rules are intended to be easy and quick to implement by statically scanning the {serialized script}. Bitcoin imposes a maximum-number-of-signature-operations per block to prevent denial-of-service attacks on miners."
+        }
+      ]
+    },
+    {
+      "id": "replaces-eval",
+      "statement": "BIP 16 replaced BIP 12's proposed OP_EVAL; the author describes recognizing one special output form as ugly but less so than the alternatives, and notes the motivation was controversial.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "This BIP replaces BIP 12, which proposed a new Script opcode (\"OP_EVAL\") to accomplish everything in this BIP and more."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "The Motivation for this BIP (and BIP 13, the pay-to-script-hash address type) is somewhat controversial"
+        },
+        {
+          "bip": 16,
+          "lines": [
+            68,
+            68
+          ],
+          "quote": "Recognizing one 'special' form of scriptPubKey and performing extra validation when it is detected is ugly. However, the consensus is that the alternatives are either uglier, are more complex to implement, and/or expand the power of the expression language in dangerous ways."
+        }
+      ]
+    },
+    {
+      "id": "old-nodes",
+      "statement": "Old implementations check only that the serialized script's hash matches, and do no other validation, when they validate blocks from upgraded software.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            86,
+            86
+          ],
+          "quote": "Old implementations will validate that the {serialize script}'s hash value matches when they validate blocks created by software that fully support this BIP, but will do no other validation."
+        }
+      ]
+    },
+    {
+      "id": "one-conf-attack",
+      "statement": "The BIP describes a 1-confirmation attack on old implementations, which the author judges expensive and difficult in practice.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "There is a 1-confirmation attack on old implementations, but it is expensive and difficult in practice."
+        }
+      ]
+    },
+    {
+      "id": "limit-520",
+      "statement": "Because the serialized script is pushed like any other data, it cannot exceed 520 bytes, so a P2SH multisig with 33-byte keys can have at most 15 keys: 3 + 15 × 34 = 513 bytes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            102,
+            102
+          ],
+          "quote": "no data greater than 520 bytes may be pushed to the stack. Thus it is not possible to spend a P2SH output if the redemption script it refers to is >520 bytes in length."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            102,
+            102
+          ],
+          "quote": "it is only possible to spend a P2SH output requiring a maximum of 15 pubkeys to redeem: 3 bytes + 15 pubkeys * 34 bytes/pubkey = 513 bytes"
+        }
+      ]
+    },
+    {
+      "id": "p2sh-witness",
+      "statement": "Under BIP 141, if the redeemScript is exactly a witness version byte plus a witness program, it is a P2SH witness program: the scriptSig must be exactly a push of the redeemScript, and the witness carries the rest.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "Triggered when a <code>scriptPubKey</code> is a P2SH script, and the BIP16 <code>redeemScript</code> pushed in the <code>scriptSig</code> is exactly a push of a version byte plus a push of a witness program. The <code>scriptSig</code> must be exactly a push of the BIP16 <code>redeemScript</code> or validation fails."
+        }
+      ]
+    },
+    {
+      "id": "p2wsh-size",
+      "statement": "BIP 141 notes that a native P2WSH output takes 34 bytes against BIP 16's 23, a size its authors chose for better collision resistance.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            216,
+            216
+          ],
+          "quote": "The scriptPubKey occupies 34 bytes, as opposed to 23 bytes of BIP16 P2SH. The increased size improves security against possible collision attacks, as 2<sup>80</sup> work is not infeasible anymore"
+        }
+      ]
+    },
+    {
+      "id": "weight",
+      "statement": "Transaction weight is base size × 3 plus total size, so a byte outside the witness counts four times and a witness byte once.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "''Transaction weight'' is defined as ''Base transaction size'' * 3 + ''Total transaction size''"
+        }
+      ]
+    },
+    {
+      "id": "trace-spends",
+      "statement": "BIP 174's published role trace ends in a transaction whose first input spends a legacy P2SH 2-of-2 multisig and whose second spends a P2SH-wrapped P2WSH 2-of-2; BIP 143 publishes a P2SH-wrapped P2WPKH example.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            833,
+            833
+          ],
+          "quote": "0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd75"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            203,
+            203
+          ],
+          "quote": "=== P2SH-P2WPKH ==="
+        },
+        {
+          "bip": 143,
+          "lines": [
+            215,
+            216
+          ],
+          "quote": "scriptPubKey : a9144733f37cf4db86fbc2efed2500b4f4e49f31202387, value: 10 redeemScript : 001479091972186c449eb1ded22b78e40d009bdf0089"
+        }
+      ]
+    },
+    {
+      "id": "spends-verified",
+      "statement": "For all three pinned spends, this site's model finds the scriptSig push-only and the redeem script's HASH160 (computed as RIPEMD-160 of SHA-256) equal to the output's, and every signature verifies (with noble) against the digest the model computes: the original digest for the legacy spend, BIP 143's for the wrapped ones.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            37,
+            39
+          ],
+          "quote": "# Validation fails if there are any operations other than \"push data\" operations in the scriptSig."
+        }
+      ]
+    },
+    {
+      "id": "multisig-order",
+      "statement": "In the legacy 2-of-2 spend, signature 1 matches key 1 and signature 2 matches key 2; with the two signatures swapped the redeem script fails, because CHECKMULTISIG checks keys in order. CHECKMULTISIG also pops one extra item, which here is empty.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            39,
+            39
+          ],
+          "quote": "the transaction is validated again using the popped stack and the deserialized script as the scriptPubKey."
+        }
+      ]
+    },
+    {
+      "id": "tamper",
+      "statement": "Changing one byte of the redeem script inside the scriptSig makes its hash differ from the output and validation fails at the second stage; adding a non-push opcode to the scriptSig fails the first.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "the hash of the script is computed and validation fails immediately if it does not match the hash in the outpoint."
+        }
+      ]
+    },
+    {
+      "id": "sizes",
+      "statement": "Measured on the pinned transactions: the legacy spend's scriptSig is 218 bytes with an empty witness; the P2SH-P2WSH spend's scriptSig is 35 bytes and its witness serializes to 218 bytes (item count and length prefixes included); the P2SH-P2WPKH spend's are 23 and 107. Counting scriptSig bytes four times and witness bytes once gives 872 against 358 weight units for the two 2-of-2 spends.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "''Transaction weight'' is defined as ''Base transaction size'' * 3 + ''Total transaction size''"
+        }
+      ]
+    },
+    {
+      "id": "rollout",
+      "statement": "To avoid a lasting split, BIP 16 says more than 50% of miners had to enforce the new rules at the same time; its plan was to count blocks marked /P2SH/ over the week before 1 February 2012 and, with 550 or more of roughly 1,000, fully validate these spends in blocks after 15 February 2012.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "more than 50% of miners must support full validation of the new transaction type and must switch from the old validation rules to the new rules at the same time."
+        },
+        {
+          "bip": 16,
+          "lines": [
+            96,
+            96
+          ],
+          "quote": "On February 1, 2012, the block-chain will be examined to determine the number of blocks supporting pay-to-script-hash for the previous 7 days. If 550 or more contain \"/P2SH/\" in their coinbase, then all blocks with timestamps after 15 Feb 2012, 00:00:00 GMT shall have their pay-to-script-hash transactions fully validated."
+        }
+      ]
+    },
+    {
+      "id": "old-nonstandard",
+      "statement": "To old implementations these transactions are non-standard, so they typically neither relay nor mine them.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 16,
+          "lines": [
+            84,
+            84
+          ],
+          "quote": "These transactions are non-standard to old implementations, which will (typically) not relay them or include them in blocks."
+        }
+      ]
+    },
+    {
+      "id": "wrapped-compat",
+      "statement": "BIP 141 lists sending to upgraded wallets using a P2SH address among the things a non-upgraded wallet can still do.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            293,
+            293
+          ],
+          "quote": "What a non-upgraded wallet can do"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            297,
+            297
+          ],
+          "quote": "Sending bitcoin to upgraded wallets using a P2SH address"
+        }
+      ]
+    }
+  ]
+}

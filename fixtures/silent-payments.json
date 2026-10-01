@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "silent-payments",
+  "warning": "BIP 352 test vectors. Their private keys are public test material; never use them.",
+  "fixtures": [
+    {
+      "id": "sp-case-0",
+      "kind": "sp-vector",
+      "label": "Two P2PKH inputs",
+      "shortLabel": "simple send",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 3,
+        "section": "Test Vectors",
+        "quote": "Simple send: two inputs"
+      },
+      "caseIndex": 0
+    },
+    {
+      "id": "sp-case-9",
+      "kind": "sp-vector",
+      "label": "Taproot input with odd y, plus a P2PKH input",
+      "shortLabel": "taproot negation",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 993,
+        "section": "Test Vectors",
+        "quote": "Single recipient: taproot input with odd y-value and non-taproot input"
+      },
+      "caseIndex": 9
+    },
+    {
+      "id": "sp-case-10",
+      "kind": "sp-vector",
+      "label": "Two outputs to one recipient",
+      "shortLabel": "k = 0, 1",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 1103,
+        "section": "Test Vectors",
+        "quote": "Multiple outputs: multiple outputs, same recipient"
+      },
+      "caseIndex": 10
+    },
+    {
+      "id": "sp-case-12",
+      "kind": "sp-vector",
+      "label": "A labeled address",
+      "shortLabel": "found via a label",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 1357,
+        "section": "Test Vectors",
+        "quote": "Receiving with labels: label with even parity"
+      },
+      "caseIndex": 12
+    },
+    {
+      "id": "sp-case-19",
+      "kind": "sp-vector",
+      "label": "A taproot input with the NUMS key",
+      "shortLabel": "input skipped",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 2357,
+        "section": "Test Vectors",
+        "quote": "Single recipient: taproot input with NUMS point"
+      },
+      "caseIndex": 19
+    },
+    {
+      "id": "sp-case-23",
+      "kind": "sp-vector",
+      "label": "Unrelated outputs in the same transaction",
+      "shortLabel": "outputs to someone else",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 2887,
+        "section": "Test Vectors",
+        "quote": "Recipient ignores unrelated outputs"
+      },
+      "caseIndex": 23
+    },
+    {
+      "id": "sp-eligibility",
+      "kind": "sp-eligibility",
+      "label": "Which inputs count",
+      "shortLabel": "five vectors",
+      "source": {
+        "bip": 352,
+        "file": "bip-0352/send_and_receive_test_vectors.json",
+        "line": 2489,
+        "section": "Test Vectors",
+        "quote": "Pubkey extraction from malleated p2pkh"
+      },
+      "caseIndices": [
+        0,
+        20,
+        21,
+        22,
+        19
+      ]
+    }
+  ]
+}

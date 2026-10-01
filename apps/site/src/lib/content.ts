@@ -50,8 +50,12 @@ export interface Catalog {
   chapters: CatalogChapter[];
 }
 
+/** Catalog files in order: the kit's original, then extensions kept separate because kit files are frozen. */
+export const CATALOG_FILES = ["catalog.json", "catalog-phase3.json"] as const;
+
 export function loadCatalog(): Catalog {
-  return readJson<Catalog>("catalog.json");
+  const [base, ...extensions] = CATALOG_FILES.map((f) => readJson<Catalog>(f));
+  return { ...base, chapters: [...base.chapters, ...extensions.flatMap((e) => e.chapters)] };
 }
 
 export function loadExternalLock(): ExternalLock {

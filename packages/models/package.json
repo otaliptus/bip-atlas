@@ -8,8 +8,10 @@
     "./*": "./src/*.ts"
   },
   "dependencies": {
+    "@noble/ciphers": "^2",
     "@noble/curves": "^2.4.0",
     "@noble/hashes": "^2.4.0",
-    "@scure/base": "^2.4.0"
+    "@scure/base": "^2.4.0",
+    "siphash": "1.2.0"
   }
 }

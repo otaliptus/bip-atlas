@@ -1,0 +1,269 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "p2sh",
+  "primaryBips": [
+    16
+  ],
+  "specimenLabel": "BIP 0016",
+  "title": "How can a script hide behind a hash?",
+  "dek": "A pay-to-script-hash output commits to a 20-byte hash. The conditions behind it stay off chain until someone spends the coin, and then they have to match exactly.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01-phase3",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Suppose a coin should need two signatures out of two keys. Someone has to write those conditions into the output that receives it, and without P2SH that someone is the sender. The alternative BIP 16 weighed was simply giving the sender the complete script.",
+        "claims": [
+          "motivation",
+          "scriptsig-form"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 16, assigned in 2012 and recorded as deployed, turned that around. The sender pays to a fixed-length 20-byte hash of a script. The receiver keeps the script and reveals it only when spending. The author’s stated purpose was to move responsibility for the spending conditions from the sender to the redeemer.",
+        "claims": [
+          "preamble",
+          "abstract",
+          "motivation"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A09.1",
+      "recipe": "p2sh-commitment.v1",
+      "title": "Twenty bytes now, the script later",
+      "fixtures": [
+        "bip174-legacy"
+      ],
+      "caption": "The 2-of-2 multisig spend from BIP 174’s published trace. The output holds only a hash; the spend supplies the script, and the two must agree.",
+      "claims": [
+        "template",
+        "scriptsig-form",
+        "trace-spends",
+        "spends-verified"
+      ],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "shape",
+      "heading": "A fixed shape",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every P2SH output has the same three parts: OP_HASH160, a push of exactly 20 bytes, and OP_EQUAL. That is 23 bytes whether the hidden conditions are one key or fifteen. A spend supplies the signatures or other data the script needs, followed by the script itself, serialized as one more piece of pushed data. BIP 16 calls that last item the redeemScript.",
+          "claims": [
+            "template",
+            "scriptsig-form",
+            "p2wsh-size"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The BIP’s own example is the simplest case: a script that checks one signature against one key. The output holds the 20-byte hash of that script, and the spending scriptSig holds a signature and the script. Nothing in the output says what kind of script it is, or how many keys it has.",
+          "claims": [
+            "example",
+            "motivation"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The responsibility BIP 16 moves is real. The sender needs only the 20 bytes. The receiver must keep the full script, because no spend is possible without supplying it exactly: the scriptSig has to carry the very bytes that hash to the output’s value, and they then have to run successfully.",
+          "claims": [
+            "motivation",
+            "scriptsig-form",
+            "rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and the figure above recomputes it for real spends and compares it with the output byte for byte.",
+          "claims": [
+            "template",
+            "spends-verified"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stages",
+      "heading": "Checked twice",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 16 gives the rules as three steps. First, the scriptSig may contain nothing but push operations; anything else fails. Second, normal validation runs: the pushed items become the stack, the output’s script hashes the top item, and validation fails at once if that hash differs from the one in the output.",
+          "claims": [
+            "rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Third, and only for these outputs, the serialized script is popped off the stack, decoded, and run against whatever is left. The coin moves only if that second run also succeeds. The same pushed bytes are used twice: once as data to be hashed, once as a program.",
+          "claims": [
+            "rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Step through the three published spends below. In the legacy 2-of-2, the redeem script is a CHECKMULTISIG over two keys, and each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
+          "claims": [
+            "multisig-order",
+            "spends-verified"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A09.2",
+          "recipe": "p2sh-two-stage.v1",
+          "title": "One push, two evaluations",
+          "fixtures": [
+            "bip174-legacy",
+            "bip174-p2sh-p2wsh",
+            "bip143-p2sh-p2wpkh"
+          ],
+          "caption": "Three spends published in BIP 174 and BIP 143, replayed stage by stage. Signatures are checked against digests computed at build time; every one verifies.",
+          "claims": [
+            "rules",
+            "spends-verified",
+            "multisig-order",
+            "p2sh-witness",
+            "trace-spends"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Each stage can fail on its own. Change one byte of the redeem script inside the scriptSig and the hash no longer matches: the second stage stops the spend before the script ever runs. Put a non-push opcode into the scriptSig and the first stage stops it.",
+          "claims": [
+            "tamper",
+            "rules"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "The redeem script is hidden only until the first spend. After that it is public, in the spending transaction, for anyone to read.",
+          "claims": [
+            "scriptsig-form",
+            "rules"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wrapped",
+      "heading": "A wrapper for SegWit",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "When SegWit arrived, BIP 141 reused this envelope. If the redeem script is exactly a witness version and a witness program, the output is a P2SH witness program: the scriptSig must hold nothing but that one push, and the real conditions move into the witness.",
+          "claims": [
+            "p2sh-witness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Two of the figure’s spends work this way. In the P2SH-wrapped P2WPKH from BIP 143, the redeem script is a 22-byte program naming a key hash; the witness holds a signature and the key. In the P2SH-wrapped P2WSH from BIP 174, the redeem script is a 34-byte program naming a script hash, and the witness holds the 2-of-2 script itself. Their signatures commit to the BIP 143 digest, not the original one.",
+          "claims": [
+            "p2sh-witness",
+            "trace-spends",
+            "spends-verified"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, that comes to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
+          "claims": [
+            "sizes",
+            "weight"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A09.3",
+          "recipe": "p2sh-wrapped.v1",
+          "title": "Where the signatures live",
+          "fixtures": [
+            "bip174-legacy",
+            "bip174-p2sh-p2wsh",
+            "bip143-p2sh-p2wpkh"
+          ],
+          "caption": "scriptSig and witness sizes of the three pinned spends. Wrapping leaves only the program in the scriptSig.",
+          "claims": [
+            "sizes",
+            "weight",
+            "p2sh-witness"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "The wrapper had a practical reason. BIP 141 lists, among the things a wallet that never upgraded can still do, sending bitcoin to upgraded wallets using a P2SH address. The payer sees an ordinary P2SH output; only the spender has to understand the witness.",
+          "claims": [
+            "wrapped-compat",
+            "p2sh-witness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Wrapped SegWit is still not native SegWit. The output is an ordinary 23-byte P2SH output and the scriptSig is not empty. BIP 141 notes that native P2WSH outputs use 34 bytes instead, and its authors chose the longer hash for better resistance to collision attacks.",
+          "claims": [
+            "p2wsh-size",
+            "p2sh-witness"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "Limits and history",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Because the redeem script travels as pushed data, it obeys the 520-byte limit on any push. BIP 16 works the consequence through for multisig with 33-byte keys: three bytes plus 34 per key allows at most 15 keys, 513 bytes in all.",
+          "claims": [
+            "limit-520"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Signature operations inside the redeem script still count toward the block’s limit, by scanning rather than running: one per CHECKSIG, the key count for a CHECKMULTISIG preceded by OP_1 to OP_16, and 20 otherwise. The BIP’s examples come to 3 and 22. The author explains that the counting is meant to be quick, and that the per-block limit protects miners from blocks crafted to be slow to validate.",
+          "claims": [
+            "sigops",
+            "sigops-why"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The rest is history the BIP records. It replaced an earlier proposal, BIP 12’s OP_EVAL, and the author describes recognizing one special output form as ugly, but less so than the alternatives. Its rollout asked miners to mark their blocks with /P2SH/, and its rules were to apply to blocks timestamped from 1 April 2012; some earlier transactions in the chain fail them. Old nodes, the BIP notes, check only that the hash matches, which is why it also discusses a costly one-confirmation attack against them.",
+          "claims": [
+            "replaces-eval",
+            "activation",
+            "old-nodes",
+            "one-conf-attack"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The rollout plan in the text is concrete. To avoid a lasting split, more than half of miners had to switch to the new rules at once. On 1 February 2012 the previous week’s blocks would be counted: with 550 or more of roughly 1,000 carrying /P2SH/, full validation would start for blocks after 15 February. The rule section, as recorded, names 1 April 2012 instead; the BIP keeps both dates, and this chapter does not try to reconcile them. To old software, meanwhile, these spends were non-standard: it would typically neither relay nor mine them.",
+          "claims": [
+            "rollout",
+            "activation",
+            "old-nonstandard"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "One more distinction matters. BIP 16 says spends are only standard, meaning relayed and mined by default, if the redeem script is itself one of the standard script types. That was relay policy as BIP 16 states it, separate from the three validation rules that decide whether a block containing the spend is valid.",
+          "claims": [
+            "standard-only"
+          ]
+        }
+      ]
+    }
+  ]
+}

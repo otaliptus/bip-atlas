@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "message-signing",
+  "warning": "BIP 322 test vectors: their private keys are public test material; never use them.",
+  "fixtures": [
+    {
+      "id": "b322-formats",
+      "kind": "bip322-formats",
+      "label": "Signature formats",
+      "shortLabel": "legacy, simple, full, proof of funds",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322.mediawiki",
+        "line": 61,
+        "section": "Types of Signatures",
+        "quote": "This BIP specifies three formats for signing messages: ''legacy'', ''simple'' and ''full''."
+      }
+    },
+    {
+      "id": "b322-p2wpkh-hello",
+      "kind": "bip322-vector",
+      "label": "P2WPKH, “Hello World”",
+      "shortLabel": "simple",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/basic-test-vectors.json",
+        "line": 48,
+        "section": "Test vectors",
+        "quote": "smpAkcwRAIgZRfIY3p7/DoVTty6YZbWS71bc5Vct"
+      },
+      "set": "basic",
+      "group": "simple",
+      "index": 1,
+      "expect": "valid"
+    },
+    {
+      "id": "b322-p2tr-simple",
+      "kind": "bip322-vector",
+      "label": "P2TR key path",
+      "shortLabel": "simple",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/generated-test-vectors.json",
+        "line": 24,
+        "section": "Test vectors",
+        "quote": "smpAUB6B2Rbupzua8LTQIF06516wzl+cwKy1be8R"
+      },
+      "set": "gen",
+      "group": "simple",
+      "index": 1,
+      "expect": "valid"
+    },
+    {
+      "id": "b322-p2wsh-3of3",
+      "kind": "bip322-vector",
+      "label": "P2WSH 3-of-3 multisig",
+      "shortLabel": "simple",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/basic-test-vectors.json",
+        "line": 63,
+        "section": "Test vectors",
+        "quote": "smpBQBHMEQCIFX9aaqPJWq2Ff2kpen5bFDTid+eh"
+      },
+      "set": "basic",
+      "group": "simple",
+      "index": 2,
+      "expect": "valid"
+    },
+    {
+      "id": "b322-p2wpkh-full",
+      "kind": "bip322-vector",
+      "label": "P2WPKH, lock time and sequence set",
+      "shortLabel": "full, T = 2016, S = 2016",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/generated-test-vectors.json",
+        "line": 81,
+        "section": "Test vectors",
+        "quote": "fulAgAAAAABAUrfzHHOLAKmgCIFSTT3krp+cQxj1"
+      },
+      "set": "gen",
+      "group": "full",
+      "index": 1,
+      "expect": "valid"
+    },
+    {
+      "id": "b322-p2pkh-full",
+      "kind": "bip322-vector",
+      "label": "P2PKH",
+      "shortLabel": "full, needs an interpreter",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/generated-test-vectors.json",
+        "line": 65,
+        "section": "Test vectors",
+        "quote": "fulAgAAAAGn3Z6t/gsHNyHdgZTOVro0Hej+qbd/i"
+      },
+      "set": "gen",
+      "group": "full",
+      "index": 0,
+      "expect": "inconclusive"
+    },
+    {
+      "id": "b322-wrong-message",
+      "kind": "bip322-vector",
+      "label": "Wrong message",
+      "shortLabel": "error vector",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/basic-test-vectors.json",
+        "line": 95,
+        "section": "Test vectors",
+        "quote": "wrong message for valid simple p2wpkh signature (empty message was signed)"
+      },
+      "set": "basic",
+      "group": "error",
+      "index": 2,
+      "expect": "invalid"
+    },
+    {
+      "id": "b322-verdicts",
+      "kind": "bip322-verdicts",
+      "label": "Three verdicts",
+      "shortLabel": "valid, invalid, inconclusive",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322.mediawiki",
+        "line": 223,
+        "section": "Verification",
+        "quote": "''s'' and message ''m'', and outputs one of three states:"
+      },
+      "cases": [
+        "b322-p2wpkh-full",
+        "b322-wrong-message",
+        "b322-p2pkh-full"
+      ]
+    }
+  ]
+}

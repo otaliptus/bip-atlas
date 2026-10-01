@@ -1,0 +1,721 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "descriptors",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preambles",
+      "statement": "BIPs 380 to 386 are application-layer specifications by Pieter Wuille and Ava Chow, assigned in 2021 and recorded as Deployed; 381 to 386 each require BIP 380.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            3,
+            9
+          ],
+          "quote": "Layer: Applications Title: Output Script Descriptors General Operation Authors: Pieter Wuille <pieter@wuille.net> Ava Chow <me@achow101.com> Status: Deployed Type: Specification Assigned: 2021-06-27"
+        },
+        {
+          "bip": 386,
+          "lines": [
+            4,
+            11
+          ],
+          "quote": "Title: tr() Output Script Descriptors Authors: Pieter Wuille <pieter@wuille.net> Ava Chow <me@achow101.com> Status: Deployed Type: Specification Assigned: 2021-06-27 License: BSD-2-Clause Requires: 380"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "Output script descriptors are a simple language for describing collections of output scripts; BIP 380 gives the general syntax, the checksum and the common expressions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            15,
+            17
+          ],
+          "quote": "Output Script Descriptors are a simple language which can be used to describe collections of output scripts. There can be many different descriptor fragments and functions. This document describes the general syntax for descriptors, descriptor checksums, and common expressions."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "The authors' motivation: backups of private keys alone, now mostly BIP 39 mnemonics, do not tell a restored wallet which output scripts to produce, and missing derivation-path information adds more incompatibilities.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            26,
+            29
+          ],
+          "quote": "Typically backups have consisted of solely the private keys, nowadays primarily in the form of BIP 39 mnemonics. However this backup solution is insufficient, especially since the introduction of Segregated Witness which added new output types. Given just the private keys, it is not possible for restored wallets to know which kinds of output scripts and addresses to produce."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            32,
+            32
+          ],
+          "quote": "Although BIPs 44, 49, and 84 have specified standard BIP 32 derivation paths for different output scripts and addresses, not all wallets support those derivation paths nor use them."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            32,
+            33
+          ],
+          "quote": "The lack of derivation path information in these backups and exports leads to further incompatibilities between wallets."
+        }
+      ]
+    },
+    {
+      "id": "layer-violation",
+      "statement": "The authors call alternative version bytes for extended keys a layer violation, since key derivation should be separate from script type, and specific to one path and script type.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "Solutions such as introducing different version bytes for extended key serialization both are a layer violation (key derivation should be separate from script type meaning) and specific only to a particular derivation path and script type."
+        }
+      ]
+    },
+    {
+      "id": "solution",
+      "statement": "Descriptors state script types explicitly in script expressions and derivation paths in key expressions, so backups and exports can specify the exact scripts, subscripts and keys, in a form meant to be readable at a glance.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            39,
+            43
+          ],
+          "quote": "Script types are specified explicitly through the use of Script Expressions. Key derivation paths are specified explicitly in Key Expressions. These allow for creating wallet backups and exports which specify the exact scripts, subscripts (redeemScript, witnessScript, etc.), and keys to produce."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            43,
+            43
+          ],
+          "quote": "the use of common terminology and existing standards allow for Output Script Descriptors to be engineer readable so that the results can be understood at a glance."
+        }
+      ]
+    },
+    {
+      "id": "structure",
+      "statement": "A descriptor is a top-level script expression, optionally followed by # and an 8-character checksum; the checksum is optional for parsing, but applications may reject descriptors without one.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            48,
+            50
+          ],
+          "quote": "The top level expression is a <tt>SCRIPT</tt>. This expression may be followed by <tt>#CHECKSUM</tt>, where <tt>CHECKSUM</tt> is an 8 character alphanumeric descriptor checksum. Although the checksum is optional for parsing, applications may choose to reject descriptors that do not contain a checksum."
+        }
+      ]
+    },
+    {
+      "id": "script-expr",
+      "statement": "Script expressions are written as functions whose arguments fill a script template; the arguments may be script expressions, key expressions or something else.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            54,
+            61
+          ],
+          "quote": "Script Expressions (denoted <tt>SCRIPT</tt>) are expressions which correspond directly with a Bitcoin script. These expressions are written as functions and take arguments. Such expressions have a script template which is filled with the arguments correspondingly."
+        }
+      ]
+    },
+    {
+      "id": "key-expr",
+      "statement": "A key expression is optional origin information (an 8-hex-character fingerprint and the derivation steps from it, in brackets), then a hex public key, a WIF private key, or an xpub or xprv followed by derivation steps and optionally /* or /*h; h and ' both mark hardened steps.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            70,
+            74
+          ],
+          "quote": "* Optionally, key origin information, consisting of: ** An open bracket <tt>[</tt> ** Exactly 8 hex characters for the fingerprint of the key where the derivation starts (see BIP 32 for details)"
+        },
+        {
+          "bip": 380,
+          "lines": [
+            75,
+            82
+          ],
+          "quote": "** A [[https://en.bitcoin.it/wiki/Wallet_import_format|WIF]] encoded private key ** <tt>xpub</tt> encoded extended public key or <tt>xprv</tt> encoded extended private key (as defined in BIP 32) *** Followed by zero or more <tt>/NUM</tt> or <tt>/NUMh</tt> path elements indicating BIP 32 derivation steps to be taken after the given extended key. *** Optionally followed by a single <tt>/*</tt> or <tt>/*h</tt> final step to denote all direct unhardened or hardened children."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            89,
+            89
+          ],
+          "quote": "the hardened indicator <tt>h</tt> may be replaced with alternative hardened indicator of <tt>'</tt>."
+        }
+      ]
+    },
+    {
+      "id": "ranged",
+      "statement": "When the final step is /* or /*', an output script is produced for every child index.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            85,
+            85
+          ],
+          "quote": "When the final step is <tt>/*</tt> or <tt>/*'</tt>, an output script will be produced for every child key index."
+        }
+      ]
+    },
+    {
+      "id": "normalization",
+      "statement": "When a descriptor is exported without private keys, BIP 380 says the exporter should derive the extended public key at the last hardened step, and the steps taken to get there must be added to the key origin.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            93,
+            95
+          ],
+          "quote": "When a descriptor is exported without private keys, it is necessary to do additional derivation to remove any intermediate hardened derivation steps for the exported descriptor to be useful. The exporter should derive the extended public key at the last hardened derivation step and use that extended public key as the key in the descriptor. The derivation steps that were taken to get to that key must be added to the previous key origin information."
+        }
+      ]
+    },
+    {
+      "id": "charset",
+      "statement": "Descriptors may only use a fixed character set, which BIP 380 writes as three groups of 32 (its own code has 95 characters, the last group one short) in an order chosen so the checksum can identify more errors.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            101,
+            101
+          ],
+          "quote": "The expressions used in descriptors must only contain characters within this character set so that the descriptor checksum will work."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            111,
+            112
+          ],
+          "quote": "This character set is written as 3 groups of 32 characters in this specific order so that the checksum below can identify more errors. The first group are the most common \"unprotected\" characters (i.e. things such as hex and keypaths that do not already have their own checksums)."
+        }
+      ]
+    },
+    {
+      "id": "checksum-props",
+      "statement": "The checksum is an error-correcting code similar to bech32: any 1 symbol error is always detected, any 2 or 3 in descriptors up to 49,154 characters, any 4 up to 507, any 5 up to 77, and random errors go undetected with a chance of 1 in 2^40.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            118,
+            118
+          ],
+          "quote": "The checksum is an error correcting checksum similar to bech32."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            127,
+            132
+          ],
+          "quote": "* Any 1 symbol error is always detected. * Any 2 or 3 symbol error in a descriptor of up to 49154 characters is always detected. * Any 4 symbol error in a descriptor of up to 507 characters is always detected. * Any 5 symbol error in a descriptor of up to 77 characters is always detected."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "* Random errors have a chance of 1 in 2<super>40</super> of being undetected."
+        }
+      ]
+    },
+    {
+      "id": "checksum-expand",
+      "statement": "Each character becomes its position within its group, and after every third character a symbol for the three group numbers is inserted, so a change to only the position or only the group affects a single symbol.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            184,
+            187
+          ],
+          "quote": "The entire descriptor string is first processed into an array of symbols. The symbol for each character is its position within its group. After every 3rd symbol, a 4th symbol is inserted which represents the group numbers combined together. This means that a change that only affects the position within a group, or only a group number change, will only affect a single symbol."
+        }
+      ]
+    },
+    {
+      "id": "checksum-tested",
+      "statement": "This site's checksum code, transcribed from BIP 380's Python, reproduces the published checksum #89f8spxm for raw(deadbeef) and gives the expected verdict for each of BIP 380's checksum vectors; a test confirms every single-character substitution from the first group in that descriptor is detected.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            204,
+            209
+          ],
+          "quote": "* Valid checksum: <tt>raw(deadbeef)#89f8spxm</tt>"
+        }
+      ]
+    },
+    {
+      "id": "not-authentication",
+      "statement": "The checksum is computed from the descriptor text alone, with no key, so anyone can produce a valid checksum for any descriptor: it catches typos, not tampering.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            192,
+            196
+          ],
+          "quote": "def descsum_create(s): \"\"\"Add a checksum to a descriptor without\"\"\" symbols = descsum_expand(s) + [0, 0, 0, 0, 0, 0, 0, 0] checksum = descsum_polymod(symbols) ^ 1"
+        }
+      ]
+    },
+    {
+      "id": "secret-or-not",
+      "statement": "A descriptor whose keys are all public reveals the scripts it stands for but cannot spend them; one that contains a WIF key or an xprv is as sensitive as those keys.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            79,
+            80
+          ],
+          "quote": "** A [[https://en.bitcoin.it/wiki/Wallet_import_format|WIF]] encoded private key ** <tt>xpub</tt> encoded extended public key or <tt>xprv</tt> encoded extended private key (as defined in BIP 32)"
+        }
+      ]
+    },
+    {
+      "id": "b381",
+      "statement": "BIP 381 defines pk() (P2PK, allowed at any level), pkh() (P2PKH; top level or inside sh() or wsh()) and sh() (P2SH, top level only, whose argument becomes the redeemScript), the three main standard formats before SegWit.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 381,
+          "lines": [
+            27,
+            28
+          ],
+          "quote": "Prior to the activation of Segregated Witness, there were 3 main standard output script formats: P2PK, P2PKH, and P2SH."
+        },
+        {
+          "bip": 381,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "The <tt>pk(KEY)</tt> expression can be used in any context or level of a descriptor."
+        },
+        {
+          "bip": 381,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "The <tt>pkh(KEY)</tt> expression can be used as a top level expression, or inside of either a <tt>sh()</tt> or <tt>wsh()</tt> descriptor."
+        },
+        {
+          "bip": 381,
+          "lines": [
+            60,
+            63
+          ],
+          "quote": "The <tt>sh(SCRIPT)</tt> expression can only be used as a top level expression. It takes a single script expression as an argument and produces a P2SH output script. <tt>sh()</tt> expressions also create a redeemScript which is required in order to spend outputs which use its output script."
+        }
+      ]
+    },
+    {
+      "id": "b382",
+      "statement": "BIP 382 defines wpkh() and wsh() for SegWit's P2WPKH and P2WSH, usable at the top level or inside sh(); only compressed public keys are allowed in wpkh() and anywhere under wsh().",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 382,
+          "lines": [
+            35,
+            37
+          ],
+          "quote": "The <tt>wpkh(KEY)</tt> expression can be used as a top level expression, or inside of a <tt>sh()</tt> descriptor. It takes a single key expression as an argument and produces a P2WPKH output script. Only keys which are/have compressed public keys can be contained in a <tt>wpkh()</tt> expression."
+        },
+        {
+          "bip": 382,
+          "lines": [
+            50,
+            50
+          ],
+          "quote": "Any key expression found in any script expression contained by a <tt>wsh()</tt> expression must only produce compressed public keys."
+        }
+      ]
+    },
+    {
+      "id": "b383",
+      "statement": "multi(k, KEY_1, …, KEY_n) and sortedmulti() produce a k-of-n CHECKMULTISIG script with k ≤ n; sortedmulti() sorts the derived keys, extended keys advance in lockstep, and the number of keys is limited to 3 at the top level, 15 compressed keys in sh() (the 520-byte push limit), and 20 otherwise.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 383,
+          "lines": [
+            33,
+            35
+          ],
+          "quote": "They are written as <tt>multi(k,KEY_1,KEY_2,...,KEY_n)</tt>. <tt>k</tt> is the threshold - the number of keys that must sign the input for the script to be valid. <tt>KEY_1,KEY_2,...,KEY_n</tt> are the key expressions for the multisig. <tt>k</tt> must be less than or equal to <tt>n</tt>."
+        },
+        {
+          "bip": 383,
+          "lines": [
+            41,
+            47
+          ],
+          "quote": "When used at the top level, there can only be at most 3 keys. When used inside of a <tt>sh()</tt> expression, the output script produced is the redeem script, which is pushed as a single element in the spending scriptSig and must therefore not exceed the 520 byte limit on the size of a script element. This allows at most 15 compressed public keys, or at most 7 uncompressed ones, as an uncompressed key takes 66 bytes of the script rather than 34. Otherwise the maximum number of keys is 20."
+        },
+        {
+          "bip": 383,
+          "lines": [
+            60,
+            61
+          ],
+          "quote": "The only change for <tt>sortedmulti()</tt> is that the keys are sorted lexicographically prior to the creation of the output script. This sorting is on the keys that are to be put into the output script, i.e. after all extended keys are derived."
+        },
+        {
+          "bip": 383,
+          "lines": [
+            65,
+            66
+          ],
+          "quote": "When one or more the key expressions in a <tt>multi()</tt> or <tt>sortedmulti()</tt> expression are extended keys, the derived keys use the same child index."
+        }
+      ]
+    },
+    {
+      "id": "b384",
+      "statement": "combo(KEY), top level only, produces P2PK and P2PKH scripts, plus P2WPKH and P2SH-P2WPKH for a compressed key, to ease the move from key-based to descriptor-based wallets.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 384,
+          "lines": [
+            25,
+            25
+          ],
+          "quote": "In order to make the transition from traditional key based wallets to descriptor based wallets easier, it is useful to be able to take a key and produce the scripts which have traditionally been produced by wallet software."
+        },
+        {
+          "bip": 384,
+          "lines": [
+            30,
+            33
+          ],
+          "quote": "This expression can only be used as a top level expression. It takes a single key expression as an argument and produces either 2 or 4 output scripts, depending on the key."
+        }
+      ]
+    },
+    {
+      "id": "b385",
+      "statement": "raw(HEX) and addr(ADDR), top level only, wrap an arbitrary script or an address as a descriptor.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 385,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "In order to make descriptors maximally compatible with scripts in use today, it is useful to be able to wrap any arbitrary output script or an address into a descriptor."
+        },
+        {
+          "bip": 385,
+          "lines": [
+            34,
+            36
+          ],
+          "quote": "The <tt>raw(HEX)</tt> expression can only be used as a top level descriptor. As the argument, it takes a hex string representing a Bitcoin script."
+        }
+      ]
+    },
+    {
+      "id": "b386",
+      "statement": "tr(KEY) produces a P2TR output with no usable script path (the key is tweaked to commit to an unspendable one); tr(KEY, TREE) adds a script tree written with braces; all keys under tr() are x-only, and uncompressed keys are not allowed.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 386,
+          "lines": [
+            49,
+            50
+          ],
+          "quote": "The <tt>tr(KEY)</tt> or <tt>tr(KEY, TREE)</tt> expression can only be used as a top level expression. All key expressions under any <tt>tr()</tt> expression must create x-only public keys."
+        },
+        {
+          "bip": 386,
+          "lines": [
+            52,
+            52
+          ],
+          "quote": "<tt>tr(KEY)</tt> takes a single key expression as an argument and produces a P2TR output script which does not have a script path."
+        },
+        {
+          "bip": 386,
+          "lines": [
+            63,
+            66
+          ],
+          "quote": "<tt>tr(KEY, TREE)</tt> takes a key expression as the first argument, and a tree expression as the second argument and produces a P2TR output script which has a script path."
+        },
+        {
+          "bip": 386,
+          "lines": [
+            78,
+            78
+          ],
+          "quote": "Uncompressed public keys are not allowed, but compressed public keys would be implicitly converted to x-only public keys."
+        }
+      ]
+    },
+    {
+      "id": "b386-leaves",
+      "statement": "Of the script expressions that existed when BIP 386 was written, only pk() can be used in a tree; Miniscript (BIP 379) and BIP 387's multi_a() came later.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 386,
+          "lines": [
+            116,
+            118
+          ],
+          "quote": "Of the script expressions that existed when this BIP was written, only <tt>pk()</tt> can be used in a tree expression. Script expressions specified since then that can be used in a tree expression are the Miniscript expressions of [[bip-0379.md|379]], which include a <tt>pkh()</tt> fragment, and the <tt>multi_a()</tt> and <tt>sortedmulti_a()</tt> expressions of [[bip-0387.mediawiki|387]]."
+        }
+      ]
+    },
+    {
+      "id": "expansion-tested",
+      "statement": "This site's descriptor model expands every valid descriptor listed in BIPs 381 to 386 to exactly the scripts the BIPs list (for ranged ones, the children each BIP lists: 0 to 2, or 0 and 1 for combo()) and rejects every listed invalid descriptor; the one listed valid descriptor with a Miniscript leaf, tr(…, pkh(…)), is outside the model's scope and is refused as such.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 381,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "Valid descriptors followed by the scripts they produce. Descriptors involving derived child keys will have the 0th, 1st, and 2nd scripts listed."
+        },
+        {
+          "bip": 386,
+          "lines": [
+            100,
+            100
+          ],
+          "quote": "* <tt>tr(a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd,pkh(L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1))</tt>"
+        }
+      ]
+    },
+    {
+      "id": "in-core",
+      "statement": "The BIPs record descriptors as implemented in Bitcoin Core since version 0.17, and tr() since version 22.0.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            268,
+            268
+          ],
+          "quote": "Descriptors have been implemented in Bitcoin Core since version 0.17."
+        },
+        {
+          "bip": 386,
+          "lines": [
+            122,
+            122
+          ],
+          "quote": "<tt>tr()</tt> descriptors have been implemented in Bitcoin Core since version 22.0."
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "statement": "BIP 380's appendix indexes the script expressions and the BIPs that define them, and leaves room for future ones such as musig() (BIP 390) and sp() (BIP 392).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            299,
+            300
+          ],
+          "quote": "Script expressions will be specified in additional BIPs. This Table lists all available Script expressions and the BIPs specifying them."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            339,
+            343
+          ],
+          "quote": "| <tt>musig(KEY, KEY, ..., KEY)</tt> | [[bip-0390.mediawiki|390]] |- | <tt>sp(KEY)</tt>, <tt>sp(KEY, KEY)</tt> | [[bip-0392.mediawiki|392]]"
+        }
+      ]
+    },
+    {
+      "id": "origin-no-effect",
+      "statement": "Key origin information describes where a key came from and does not change the script: BIP 381 lists pkh() with an origin, written with ' or with h, and with a WIF key or its public key, all producing the same script.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "These represent a public or private key and, optionally, information about the origin of that key."
+        },
+        {
+          "bip": 381,
+          "lines": [
+            78,
+            83
+          ],
+          "quote": "* <tt>pkh([deadbeef/1/2'/3/4']L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt> * <tt>pkh([deadbeef/1/2'/3/4']03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt> * <tt>pkh([deadbeef/1/2h/3/4h]03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt>"
+        }
+      ]
+    },
+    {
+      "id": "templates",
+      "statement": "Each script expression fills a fixed template: pk() gives <KEY> OP_CHECKSIG, pkh() gives OP_DUP OP_HASH160 <KEY_hash160> OP_EQUALVERIFY OP_CHECKSIG, and wpkh() gives OP_0 <KEY_hash160>.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 381,
+          "lines": [
+            43,
+            43
+          ],
+          "quote": "<KEY> OP_CHECKSIG"
+        },
+        {
+          "bip": 381,
+          "lines": [
+            55,
+            55
+          ],
+          "quote": "OP_DUP OP_HASH160 <KEY_hash160> OP_EQUALVERIFY OP_CHECKSIG"
+        },
+        {
+          "bip": 382,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "OP_0 <KEY_hash160>"
+        }
+      ]
+    },
+    {
+      "id": "checksum-cases",
+      "statement": "BIP 380's checksum vectors cover a valid checksum, a missing one, one character too many or too few, an error in the payload, an error in the checksum, and a character outside the set.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            204,
+            211
+          ],
+          "quote": "* Valid checksum: <tt>raw(deadbeef)#89f8spxm</tt> * No checksum: <tt>raw(deadbeef)</tt> * Missing checksum: <tt>raw(deadbeef)#</tt> * Too long checksum (9 chars): <tt>raw(deadbeef)#89f8spxmx</tt> * Too short checksum (7 chars): <tt>raw(deadbeef)#89f8spx</tt> * Error in payload: <tt>raw(deedbeef)#89f8spxm</tt> * Error in checksum: <tt>raw(deedbeef)##9f8spxm</tt> * Invalid characters in payload: <tt>raw(Ü)#00000000</tt>"
+        }
+      ]
+    },
+    {
+      "id": "origin-for-signers",
+      "statement": "The origin information exists so that software holding the root key can tell which of its keys a descriptor key is; the script itself does not depend on it.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            72,
+            73
+          ],
+          "quote": "** Exactly 8 hex characters for the fingerprint of the key where the derivation starts (see BIP 32 for details) ** Followed by zero or more <tt>/NUM</tt> or <tt>/NUMh</tt>  path elements to indicate the unhardened or hardened derivation steps between the fingerprint and the key that follows."
+        }
+      ]
+    },
+    {
+      "id": "three-formats",
+      "statement": "BIP 381 counts three main standard output formats before SegWit: P2PK, P2PKH and P2SH.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 381,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "Prior to the activation of Segregated Witness, there were 3 main standard output script formats: P2PK, P2PKH, and P2SH."
+        }
+      ]
+    }
+  ]
+}
