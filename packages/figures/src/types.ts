@@ -278,3 +278,51 @@ export interface TaprootKeyspendDerived {
 }
 
 export type DerivedTaprootKeyspendFixture = TaprootKeyspendFixture & { derived: TaprootKeyspendDerived };
+
+export interface TapscriptCaseFixture extends BaseFixture {
+  kind: "tapscript-case";
+  /** Index of the case in the upstream script_assets_test.json array. */
+  caseIndex: number;
+  /** The upstream case's comment, verbatim. */
+  comment: string;
+}
+
+export interface TapscriptElement {
+  hex: string;
+  bytes: number;
+  /** Short reading: "signature", "32-byte key", "number 24", "empty"… */
+  label: string;
+}
+
+export interface TapscriptTraceView {
+  /** Core's label for this witness. */
+  expected: "success" | "failure";
+  valid: boolean;
+  failStage: string | null;
+  reason: string;
+  scriptHex: string;
+  ops: Array<{ position: number; name: string; dataBytes: number | null }>;
+  elements: TapscriptElement[];
+  /** Indices into `elements`, bottom of stack first. */
+  initialStack: number[];
+  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number };
+  budgetStart: number;
+  sigOpsCounted: number;
+  steps: Array<{
+    position: number;
+    name: string;
+    executed: boolean;
+    note: string;
+    failed: boolean;
+    before: number[];
+    after: number[];
+    sig: { check: string; budgetAfter: number; keyBytes: number } | null;
+  }>;
+}
+
+export interface TapscriptDerived {
+  success: TapscriptTraceView;
+  failure: TapscriptTraceView;
+}
+
+export type DerivedTapscriptFixture = TapscriptCaseFixture & { derived: TapscriptDerived };

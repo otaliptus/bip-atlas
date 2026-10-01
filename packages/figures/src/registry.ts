@@ -203,6 +203,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "taproot-keyspend",
   },
+  {
+    id: "tapscript-witness.v1",
+    description: "One recorded script-path witness split into what BIP 341 checks and what BIP 342 runs.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "tapscript-case",
+  },
+  {
+    id: "tapscript-trace.v1",
+    description: "Recorded, verified tapscript executions from Bitcoin Core's test cases, step by step.",
+    minFixtures: 2,
+    maxFixtures: 6,
+    interactive: true,
+    controls: ["Step a reviewed trace", "Compare success/failure fixtures", "Inspect signature count"],
+    fixtureKind: "tapscript-case",
+  },
+  {
+    id: "sigops-budget.v1",
+    description: "The per-input signature budget of recorded witnesses: 50 plus witness size, 50 per signature.",
+    minFixtures: 1,
+    maxFixtures: 6,
+    interactive: false,
+    controls: [],
+    fixtureKind: "tapscript-case",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

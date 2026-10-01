@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "tapscript",
+  "warning": "Spends copied from Bitcoin Core's script_assets_test.json (qa-assets, pinned commit). Test material only; the keys and transactions hold no funds and must never be used for any.",
+  "fixtures": [
+    {
+      "id": "core-case-804",
+      "kind": "tapscript-case",
+      "label": "CHECKSIG vs CHECKMULTISIG",
+      "shortLabel": "disabled opcode",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.804",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 804,
+      "comment": "tapscript/disabled_checkmultisig"
+    },
+    {
+      "id": "core-case-1135",
+      "kind": "tapscript-case",
+      "label": "Empty signatures with CHECKSIGADD",
+      "shortLabel": "empty signature, empty key",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.1135",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 1135,
+      "comment": "tapscript/emptysigs/checksigadd"
+    },
+    {
+      "id": "core-case-1109",
+      "kind": "tapscript-case",
+      "label": "CHECKSIGADD counts",
+      "shortLabel": "n + 1, and a 5-byte n",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.1109",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 1109,
+      "comment": "tapscript/checksigaddresults"
+    },
+    {
+      "id": "core-case-662",
+      "kind": "tapscript-case",
+      "label": "IF needs exactly 0 or 1",
+      "shortLabel": "MINIMALIF",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.662",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 662,
+      "comment": "tapscript/minimalif"
+    },
+    {
+      "id": "core-case-824",
+      "kind": "tapscript-case",
+      "label": "An unknown key type",
+      "shortLabel": "33-byte key",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.824",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 824,
+      "comment": "tapscript/oldpk/checksig"
+    },
+    {
+      "id": "core-case-50",
+      "kind": "tapscript-case",
+      "label": "OP_SUCCESS",
+      "shortLabel": "upgrade hook",
+      "source": {
+        "external": "core-script-assets-excerpt.json",
+        "pointer": "cases.50",
+        "section": "BIP 341 Test vectors (L304)"
+      },
+      "caseIndex": 50,
+      "comment": "opsuccess/bare"
+    }
+  ]
+}

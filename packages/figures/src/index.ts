@@ -1,5 +1,5 @@
 export { RECIPES, RECIPE_MAP } from "./registry";
-export type { AddressFixture, BaseFixture, Bip32Derived, Bip32NodeDerived, Bip32SeedFixture, DerivedBip32Fixture, DerivedMnemonicFixture, DerivedPsbtCombineFixture, DerivedPsbtTraceFixture, DerivedTransactionFixture, FixtureSource, PsbtCombineFixture, PsbtRecordView, PsbtTraceFixture, DerivedSchnorrFixture, SchnorrDerived, SchnorrStageId, SchnorrTraceView, SchnorrVectorFixture, DerivedTaprootTreeFixture, DerivedTaprootKeyspendFixture, TaprootTreeFixture, TaprootKeyspendFixture, TaprootLeafView, TaprootNodeView, TaprootTreeDerived, TaprootKeyspendDerived, TransactionDerived, TransactionFixture, MnemonicDerived, MnemonicFixture } from "./types";
+export type { AddressFixture, BaseFixture, Bip32Derived, Bip32NodeDerived, Bip32SeedFixture, DerivedBip32Fixture, DerivedMnemonicFixture, DerivedPsbtCombineFixture, DerivedPsbtTraceFixture, DerivedTransactionFixture, FixtureSource, PsbtCombineFixture, PsbtRecordView, PsbtTraceFixture, DerivedSchnorrFixture, SchnorrDerived, SchnorrStageId, SchnorrTraceView, SchnorrVectorFixture, DerivedTaprootTreeFixture, DerivedTaprootKeyspendFixture, TaprootTreeFixture, TaprootKeyspendFixture, TaprootLeafView, TaprootNodeView, TaprootTreeDerived, TaprootKeyspendDerived, TapscriptCaseFixture, TapscriptDerived, TapscriptElement, TapscriptTraceView, DerivedTapscriptFixture, TransactionDerived, TransactionFixture, MnemonicDerived, MnemonicFixture } from "./types";
 export { AddressAnatomy } from "./AddressAnatomy";
 export { AddressChecksumLab } from "./AddressChecksumLab";
 export { ProgramRegrouping } from "./ProgramRegrouping";
@@ -22,3 +22,6 @@ export { ChallengePreimage } from "./schnorr/ChallengePreimage";
 export { TaprootTweak } from "./taproot/TaprootTweak";
 export { TaprootCommitment } from "./taproot/TaprootCommitment";
 export { SigMsgLayout } from "./taproot/SigMsgLayout";
+export { TapscriptWitness } from "./tapscript/TapscriptWitness";
+export { TapscriptTrace } from "./tapscript/TapscriptTrace";
+export { SigopsBudget } from "./tapscript/SigopsBudget";

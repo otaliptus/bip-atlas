@@ -197,14 +197,16 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
   const end = (ops: DecodedOp[], valid: boolean, failStage: FailStage | null, reason: string): Trace =>
     ({ ...base, ops, steps, valid, failStage, reason, sigOpsCounted });
 
+  // Scope first: this is a property of the recorder, not a consensus step.
+  const decoded = decodeTapscript(scriptHex);
+  if (decoded.kind === "ok") {
+    for (const o of decoded.ops) if (o.dataHex === null && !SUPPORTED.has(o.op)) throw new TraceScopeError(`${o.name} is outside this recorder's reviewed opcode set`);
+  }
   if (!commitmentOk) return end([], false, "commitment", "the control block does not commit to this script");
 
-  const decoded = decodeTapscript(scriptHex);
   if (decoded.kind === "op-success") return end(decoded.ops, true, null, `${decoded.at.name} found while decoding: validation succeeds without executing anything`);
   if (decoded.kind === "bad-push") return end(decoded.ops, false, "decode", "a push runs past the end of the script");
   const ops = decoded.ops;
-  for (const o of ops) if (o.dataHex === null && !SUPPORTED.has(o.op)) throw new TraceScopeError(`${o.name} is outside this recorder's reviewed opcode set`);
-  if (ops.some((o) => o.op === OP.OP_CODESEPARATOR)) throw new TraceScopeError("OP_CODESEPARATOR is out of scope");
 
   if (stack0.length > 1000 || stack0.some((e) => e.length / 2 > 520)) return end(ops, false, "initial-stack", "initial stack exceeds a resource limit");
 
@@ -230,12 +232,12 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
   for (const o of ops) {
     const before = [...stack];
     const executed = running() || o.op === OP.OP_IF || o.op === OP.OP_NOTIF || o.op === OP.OP_ELSE || o.op === OP.OP_ENDIF;
-    const step: TraceStep = { position: o.position, name: o.dataHex !== null ? `<${o.dataHex.length / 2}-byte push>` : o.name, executed: running(), stackBefore: before, stackAfter: before, note: "" };
+    const step: TraceStep = { position: o.position, name: o.dataHex !== null ? `<${o.dataHex.length / 2}-byte push>` : o.name, executed, stackBefore: before, stackAfter: before, note: "" };
     steps.push(step);
     const fail = (why: string): Trace => {
       step.failed = true;
       step.note = why;
-      step.stackAfter = [...stack];
+      step.stackAfter = before;
       return end(ops, false, "execute", why);
     };
     if (!executed) {
@@ -245,7 +247,7 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
     if (o.dataHex !== null) {
       if (o.dataHex.length / 2 > 520) return fail("push larger than 520 bytes");
       stack.push(o.dataHex);
-      step.note = o.dataHex.length ? `push ${o.dataHex.length / 2} bytes` : "push the empty vector";
+      step.note = o.dataHex.length ? `push ${o.dataHex.length / 2} byte${o.dataHex.length === 2 ? "" : "s"}` : "push the empty vector";
     } else if (o.op === OP.OP_0) {
       stack.push("");
       step.note = "push the empty vector";

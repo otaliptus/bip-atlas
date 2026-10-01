@@ -27,6 +27,10 @@ import {
   TaprootTweak,
   TaprootCommitment,
   SigMsgLayout,
+  TapscriptWitness,
+  TapscriptTrace,
+  SigopsBudget,
+  type DerivedTapscriptFixture,
   type DerivedTaprootTreeFixture,
   type DerivedTaprootKeyspendFixture,
   type DerivedSchnorrFixture,
@@ -61,6 +65,7 @@ const pair = picked as DerivedPsbtCombineFixture[];
 const sig = picked as DerivedSchnorrFixture[];
 const tap = picked as DerivedTaprootTreeFixture[];
 const keyspend = picked as DerivedTaprootKeyspendFixture[];
+const ts = picked as DerivedTapscriptFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -84,4 +89,7 @@ const keyspend = picked as DerivedTaprootKeyspendFixture[];
   {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
   {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
   {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
+  {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
+  {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
+  {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
 </Plate>
