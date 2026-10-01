@@ -730,3 +730,62 @@ export interface BfGolombDerived {
   example: { height: number; value: string; F: string; code: BfCode };
 }
 export type DerivedBfGolombFixture = BfGolombFixture & { derived: BfGolombDerived };
+
+/* ---------- BIP 324 ---------- */
+export interface V2VectorFixture extends BaseFixture {
+  kind: "v2-vector";
+  /** in_idx: how many packets this side had sent before. */
+  index: number;
+}
+export interface V2Derived {
+  initiating: boolean;
+  ellOurs: string;
+  ellTheirs: string;
+  xOurs: string;
+  xTheirs: string;
+  xShared: string;
+  sharedSecret: string;
+  sessionId: string;
+  keys: { initiatorL: string; initiatorP: string; responderL: string; responderP: string };
+  sendTerminator: string;
+  recvTerminator: string;
+  packet: {
+    index: number;
+    nonce: string;
+    rekeysSoFar: number;
+    lengthPlain: string;
+    lengthEnc: string;
+    ignore: boolean;
+    contentsLen: number;
+    contentsHead: string;
+    aadLen: number;
+    ciphertextHead: string;
+    ciphertextTail: string;
+    tag: string;
+    totalLen: number;
+  };
+}
+export type DerivedV2Fixture = V2VectorFixture & { derived: V2Derived };
+
+export interface V2FramingFixture extends BaseFixture {
+  kind: "v2-framing";
+  messageType: string;
+}
+export interface V2FramingDerived {
+  messageType: string;
+  shortId: number;
+  v1: Array<{ field: string; bytes: number }>;
+  v2: Array<{ field: string; bytes: number }>;
+}
+export type DerivedV2FramingFixture = V2FramingFixture & { derived: V2FramingDerived };
+
+export interface V2RekeyFixture extends BaseFixture {
+  kind: "v2-rekey";
+  index: number;
+  show: number[];
+}
+export interface V2RekeyDerived {
+  initiating: boolean;
+  rows: Array<{ packet: number; nonce: string; epoch: number; key: string }>;
+}
+export type DerivedV2RekeyFixture = V2RekeyFixture & { derived: V2RekeyDerived };

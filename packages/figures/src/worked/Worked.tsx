@@ -23,6 +23,7 @@ import type {
   DerivedMusig2SessionFixture,
   DerivedSpFixture,
   DerivedBfBlockFixture,
+  DerivedV2Fixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -549,6 +550,28 @@ export function BfWorked({ fixtures }: { fixtures: DerivedBfBlockFixture[] }) {
       steps={steps}
       label="Elements, hashed values, Golomb-Rice codes, the serialized filter and a query, drawn as stacked layers."
       source={<>Source: BIP 158 testnet-19.json (line {f.source.line}); rebuilt by the tested model and checked against the vector.</>}
+    />
+  );
+}
+
+/* ---------- BIP 324 ---------- */
+export function V2Worked({ fixtures }: { fixtures: DerivedV2Fixture[] }) {
+  const f = fixtures[0];
+  const d = f.derived;
+  const p = d.packet;
+  const steps: WorkedStep[] = [
+    { title: "Two 64-byte public keys cross the wire", values: [{ label: "ours", value: d.ellOurs }, { label: "theirs", value: d.ellTheirs }], note: "ElligatorSwift encodings: uniformly random-looking bytes that decode to curve X coordinates.", layer: { size: 0.95, tone: "plain", cells: 2 } },
+    { title: "X-only ECDH, hashed with both encodings", values: [{ label: "x(ECDH)", value: d.xShared }, { label: "shared secret", value: d.sharedSecret }], layer: { size: 0.7, tone: "wash", cells: 1 } },
+    { title: "HKDF-SHA256 key schedule", values: [{ label: "session ID", value: d.sessionId }, { label: d.initiating ? "initiator_P (our payload key)" : "responder_P (our payload key)", value: d.initiating ? d.keys.initiatorP : d.keys.responderP }], layer: { size: 0.6, tone: "hatch", cells: 4 } },
+    { title: "Garbage terminator, then encrypted packets", values: [{ label: "our terminator", value: d.sendTerminator }], layer: { size: 0.5, tone: "accent", cells: 1 } },
+    { title: `Packet ${p.index}: length, ciphertext, tag`, values: [{ label: "encrypted length", value: p.lengthEnc }, { label: "nonce", value: p.nonce }, { label: "tag", value: p.tag }], note: `${p.totalLen} bytes in all for ${p.contentsLen} bytes of contents.`, layer: { size: 0.85, tone: "plain", cells: 3 } },
+  ];
+  return (
+    <WorkedExample
+      intro={<>BIP 324’s packet vector for packet {p.index}, seen from the {d.initiating ? "initiator" : "responder"}: from two public keys to one encrypted packet.</>}
+      steps={steps}
+      label="Public keys, shared secret, key schedule, terminator and packet, drawn as stacked layers."
+      source={<>Source: BIP 324 packet_encoding_test_vectors.csv (line {f.source.line}); recomputed by the tested model and checked against the vector.</>}
     />
   );
 }

@@ -1,0 +1,697 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "v2-transport",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 324 (Mehta, Ruffing, Schnelli, Wuille), a Peer Services specification assigned in 2019, is recorded as Deployed and replaces BIP 151.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            3,
+            14
+          ],
+          "quote": "Layer: Peer Services Title: Version 2 P2P Encrypted Transport Protocol Authors: Dhruv Mehta <dhruv@bip324.com> Tim Ruffing <crypto@timruffing.de> Jonas Schnelli <dev@jonasschnelli.ch> Pieter Wuille <bitcoin-dev@wuille.net> Status: Deployed Type: Specification Assigned: 2019-03-08 License: BSD-3-Clause Version: 1.0.2 Replaces: 151"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 324 proposes a new P2P transport with opportunistic encryption, a mild bandwidth reduction, and upgrade negotiation before application messages.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "This document proposes a new Bitcoin P2P transport protocol, which features opportunistic encryption, a mild bandwidth reduction, and the ability to negotiate upgrades before exchanging application messages."
+        }
+      ]
+    },
+    {
+      "id": "v1-plaintext",
+      "statement": "The authors note that v1 peers talk over unencrypted, unauthenticated connections; the data is public but metadata can reveal private information, such as a transaction's source and timing to a global passive attacker.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "peers talk to each other over unencrypted and unauthenticated connections."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "While the relayed data itself is public in nature, the associated metadata may reveal private information and hamper privacy of users. For example, a global passive attacker eavesdropping on all Bitcoin P2P connections can trivially identify the source and timing of a transaction."
+        }
+      ]
+    },
+    {
+      "id": "v1-tamper-reveal",
+      "statement": "The authors note v1 connections can be tampered with cheaply, and are self-revealing because they start with fixed magic bytes, which enables censorship.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            29,
+            29
+          ],
+          "quote": "Since connections are unauthenticated, they can be tampered with at a low cost and often even with a low risk of detection."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            30,
+            30
+          ],
+          "quote": "The protocol is self-revealing. For example, deep packet inspection can identify a P2P connection trivially because connections start with a fixed sequence of magic bytes. The ability to detect connections enables censorship"
+        }
+      ]
+    },
+    {
+      "id": "aim",
+      "statement": "v2 aims to raise the cost of these attacks mainly through unauthenticated, opportunistic encryption, and makes the bytestream pseudorandom to a passive eavesdropper.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            32,
+            32
+          ],
+          "quote": "This proposal for a new P2P protocol version (v2) aims to improve upon this by raising the costs for performing these attacks substantially, primarily through the use of unauthenticated, opportunistic transport encryption. In addition, the bytestream on the wire is made pseudorandom (i.e., indistinguishable from uniformly random bytes) to a passive eavesdropper."
+        }
+      ]
+    },
+    {
+      "id": "forces-active",
+      "statement": "The authors argue encryption forces an eavesdropper to become active: a persistent MitM, downgrading to v1, or running its own nodes; for manual connections, comparing session IDs would expose an attacker.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            34,
+            34
+          ],
+          "quote": "Encryption, even when it is unauthenticated and only used when both endpoints support v2, impedes eavesdropping by forcing the attacker to become active: either by performing a persistent man-in-the-middle (MitM) attack, by downgrading connections to v1, or by spinning up their own nodes and getting honest nodes to make connections to them."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            34,
+            34
+          ],
+          "quote": "even very basic checks, e.g., operators manually comparing protocol versions and session IDs (as supported by the proposed protocol), will expose the attacker."
+        }
+      ]
+    },
+    {
+      "id": "no-auth",
+      "statement": "The proposal does not include peer authentication; the authors argue authentication should be addressed separately, if desired, and the session ID provides a basis for it.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "The communication protocol establishing that the communication partner's identity matches who we expect them to be, through some public key mechanism. The proposal in this document does '''not''' include such a mechanism."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            44,
+            44
+          ],
+          "quote": "As a consequence, we believe that authentication should be addressed separately (if desired), and this proposal aims to provide a solid technical basis for future protocol upgrades, including the addition of optional authentication"
+        }
+      ]
+    },
+    {
+      "id": "session-id",
+      "statement": "A session ID derived from the Diffie-Hellman negotiation identifies the channel; operators can compare it out of band, so an active MitM risks detection.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            82,
+            82
+          ],
+          "quote": "* Observability of active attacks: A session ID identifying the encrypted channel uniquely is derived deterministically from a Diffie-Hellman negotiation. An active man-in-the-middle attacker is forced to incur a risk of being detected as peer operators can compare session IDs manually"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            329,
+            329
+          ],
+          "quote": "v2 clients supporting this proposal may present the entire session ID (encoded as a hex string) to the node operator to allow for manual, out of band comparison with the peer node operator."
+        }
+      ]
+    },
+    {
+      "id": "goals",
+      "statement": "Goals include confidentiality against passive attacks, a pseudorandom and shapable bytestream, forward secrecy, upgradability, accepting inbound v1, and low overhead.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "* Confidentiality against passive attacks: A passive attacker having recorded a v2 P2P bytestream (without timing and fragmentation information) must not be able to determine the plaintext being exchanged by the nodes."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            83,
+            83
+          ],
+          "quote": "* Pseudorandom bytestream: A passive attacker having recorded a v2 P2P bytestream (without timing information and fragmentation information) must not be able to distinguish it from a uniformly random bytestream."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            85,
+            85
+          ],
+          "quote": "* Forward secrecy: An eavesdropping attacker who compromises a peer's sessions secrets should not be able to decrypt past session traffic, except for the latest few packets."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            87,
+            87
+          ],
+          "quote": "* Compatibility: v2 clients will allow inbound v1 connections to minimize risk of network partitions."
+        }
+      ]
+    },
+    {
+      "id": "traffic-analysis",
+      "statement": "Traffic analysis of packet lengths and timing, and active attacks, can still reveal that v2 is in use.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "Traffic analysis, e.g., observing packet lengths and timing, as well as active attacks can still reveal that the Bitcoin v2 P2P protocol is in use."
+        }
+      ]
+    },
+    {
+      "id": "ellswift",
+      "statement": "Each side sends a 64-byte ElligatorSwift encoding of an ephemeral public key; every 512-bit string is a valid encoding, so encodings sampled uniformly look random.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            112,
+            112
+          ],
+          "quote": "Generates a random ephemeral secp256k1 private key and sends a corresponding 64-byte ElligatorSwift"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            112,
+            112
+          ],
+          "quote": "While a random 256-bit string has about 50% chance of being a valid X coordinate on the secp256k1 curve, every 512-bit string is a valid ElligatorSwift encoding of a curve point, making the encoded point indistinguishable from random when using an encoder that can sample uniformly."
+        }
+      ]
+    },
+    {
+      "id": "garbage",
+      "statement": "Each side may send up to 4095 bytes of garbage after its public key, for shapability and to avoid a recognizable 64-byte pattern.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            113,
+            113
+          ],
+          "quote": "bytes of arbitrary data after their public key, called '''garbage''', providing a form of shapability and avoiding a recognizable pattern of exactly 64 bytes."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            113,
+            113
+          ],
+          "quote": "May send up to 4095"
+        }
+      ]
+    },
+    {
+      "id": "v1-detect",
+      "statement": "The responder treats a connection as v1 if the first 16 bytes match the network magic followed by \"version\" and padding.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            115,
+            115
+          ],
+          "quote": "Waits until one byte is received which does not match the 16 bytes consisting of the network magic followed by \"version\\x00\\x00\\x00\\x00\\x00\". If the first 16 bytes do match, the connection is treated as using the v1 protocol instead."
+        }
+      ]
+    },
+    {
+      "id": "ecdh",
+      "statement": "Both sides compute X-only ECDH and hash it with the exact 64-byte encodings sent (initiator's first), so the encodings cannot be modified without a full MitM.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            214,
+            221
+          ],
+          "quote": "def v2_ecdh(priv, ellswift_theirs, ellswift_ours, initiating): ecdh_point_x32 = ellswift_ecdh_xonly(ellswift_theirs, priv) if initiating: # Initiating, place our public key encoding first. return sha256_tagged(\"bip324_ellswift_xonly_ecdh\", ellswift_ours + ellswift_theirs + ecdh_point_x32)"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            121,
+            121
+          ],
+          "quote": "This makes sure that an attacker cannot modify the public key encoding used without modifying the rest of the stream. If a third party wants the ability to modify stream bytes, they need to perform a full MitM attack on the connection."
+        }
+      ]
+    },
+    {
+      "id": "hkdf",
+      "statement": "HKDF-SHA256, salted with \"bitcoin_v2_shared_secret\" and the network magic, derives the session ID, four cipher keys and the two 16-byte garbage terminators.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            296,
+            308
+          ],
+          "quote": "# Include NETWORK_MAGIC to ensure a connection between nodes on different networks will immediately fail prk = HKDF_Extract(Hash=sha256, salt=b'bitcoin_v2_shared_secret' + NETWORK_MAGIC, ikm=ecdh_secret) peer.session_id = HKDF_Expand(Hash=sha256, PRK=prk, info=b'session_id', L=32) # Initialize the packet encryption ciphers. initiator_L = HKDF_Expand(Hash=sha256, PRK=prk, info=b'initiator_L', L=32) initiator_P = HKDF_Expand(Hash=sha256, PRK=prk, info=b'initiator_P', L=32) responder_L = HKDF_Expand(Hash=sha256, PRK=prk, info=b'responder_L', L=32) responder_P = HKDF_Expand(Hash=sha256, PRK=prk, info=b'responder_P', L=32) garbage_terminators = HKDF_Expand(Hash=sha256, PRK=prk, info=b'garbage_terminators', L=32) initiator_garbage_terminator = garbage_terminators[:16] responder_garbage_terminator = garbage_terminators[16:]"
+        }
+      ]
+    },
+    {
+      "id": "terminator-aad",
+      "statement": "Each side sends its 16-byte garbage terminator; the first encrypted packet in each direction authenticates the garbage sent as associated data, so a third party cannot modify it without consequence.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            123,
+            123
+          ],
+          "quote": "#** Send their 16-byte garbage terminator."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            127,
+            127
+          ],
+          "quote": "the first encrypted packet that will be sent in that direction (regardless of it being a decoy packet or not) will make use of the associated authenticated data (AAD) feature of the AEAD to authenticate the garbage that has been sent in that direction."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            127,
+            127
+          ],
+          "quote": "Without garbage authentication, the garbage would be modifiable by a third party without consequences."
+        }
+      ]
+    },
+    {
+      "id": "decoys",
+      "statement": "Packets with the ignore bit set are decoys, ignored apart from verifying they decrypt; they are the main shapability mechanism.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            126,
+            126
+          ],
+          "quote": "Encrypted packets have an '''ignore bit''', which makes them '''decoy packets''' if set. Decoy packets are to be ignored by the receiver apart from verifying they decrypt correctly. Either peer may send such decoy packets at any point from here on. These form the primary shapability mechanism in the protocol."
+        }
+      ]
+    },
+    {
+      "id": "version-packet",
+      "statement": "After the terminators, the responder and initiator each send a version packet with empty contents to indicate v2 support; other contents are reserved for future versions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            130,
+            130
+          ],
+          "quote": "Sends a '''version packet''' with empty content, to indicate support for the v2 P2P protocol proposed by this document. Any other value for content is reserved for future versions."
+        }
+      ]
+    },
+    {
+      "id": "packet-format",
+      "statement": "A packet is a 3-byte encrypted length, then ChaCha20Poly1305 over a 1-byte header and the contents; a packet is 20 bytes plus its contents, which may be up to 2^24 - 1 bytes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            157,
+            157
+          ],
+          "quote": "The total size of a packet is 20 bytes plus the length of its contents."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            160,
+            163
+          ],
+          "quote": "* A 3-byte encrypted '''length''' field, encoding the length of the '''contents''' (between ''0'' and ''2<sup>24</sup>-1''"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            161,
+            162
+          ],
+          "quote": "* An authenticated encryption of the '''plaintext''', which consists of: ** A 1-byte '''header''' which consists of transport layer protocol flags. Currently, only the highest bit is defined as the '''ignore bit'''."
+        }
+      ]
+    },
+    {
+      "id": "length-unauth",
+      "statement": "The length field is encrypted with a separate ChaCha20 stream but not covered by the Poly1305 tag; incorrect lengths still make the packet fail authentication.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            170,
+            170
+          ],
+          "quote": "The Poly1305 authentication tag only covers the encrypted plaintext, and not the encrypted length field."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            170,
+            170
+          ],
+          "quote": "as incorrect lengths will still trigger authentication failure for the overall packet (the plaintext length is implicitly authenticated by ChaCha20Poly1305)."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            169,
+            169
+          ],
+          "quote": "* Length encryption keeps drawing pseudorandom bytes from the same ChaCha20 cipher for multiple packets, rather than incrementing the nonce for every packet."
+        }
+      ]
+    },
+    {
+      "id": "rekey",
+      "statement": "Both ciphers rekey every 224 messages; the AEAD's nonce is the packet number within the epoch and the epoch number, and its new key is an encryption of 32 zero bytes under the old one.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            414,
+            414
+          ],
+          "quote": "To provide re-keying every 224 packets, we specify two wrappers."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            429,
+            437
+          ],
+          "quote": "nonce = ((self.packet_counter % REKEY_INTERVAL).to_bytes(4, 'little') + (self.packet_counter // REKEY_INTERVAL).to_bytes(8, 'little'))"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            435,
+            437
+          ],
+          "quote": "if (self.packet_counter + 1) % REKEY_INTERVAL == 0: rekey_nonce = b\"\\xFF\\xFF\\xFF\\xFF\" + nonce[4:] self.key = aead_chacha20_poly1305_encrypt(self.key, rekey_nonce, b\"\", b\"\\x00\" * 32)[:32]"
+        }
+      ]
+    },
+    {
+      "id": "forward-secrecy",
+      "statement": "Rekeying gives forward secrecy within a session: an attacker who compromises current secrets cannot derive past keys; ECDH is not refreshed.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            174,
+            174
+          ],
+          "quote": "Re-keying ensures [https://eprint.iacr.org/2001/035.pdf forward secrecy within a session], i.e., an attacker compromising the current session secrets cannot derive past encryption keys in the same session."
+        }
+      ]
+    },
+    {
+      "id": "message-type",
+      "statement": "Application contents are a message type, a 1-byte ID or 0x00 plus the 12-byte ASCII type as in v1, followed by the message payload.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            528,
+            528
+          ],
+          "quote": "| <code>message_type</code> || 1 or 13 || either a one byte ID in range ''1..255'' or <code>b'\\x00'</code> followed by a 12-byte ASCII message type (as in the v1 P2P protocol)"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            530,
+            530
+          ],
+          "quote": "| <code>message_payload</code> || <code>message_length</code> || message payload"
+        }
+      ]
+    },
+    {
+      "id": "same-messages",
+      "statement": "v2 changes only how P2P messages are carried: payloads and message types are those of the v1 protocol, and the BIP sits in the Peer Services layer, not consensus.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            3,
+            3
+          ],
+          "quote": "Layer: Peer Services"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            523,
+            523
+          ],
+          "quote": "An unencrypted application layer '''contents''' is composed of:"
+        },
+        {
+          "bip": 324,
+          "lines": [
+            528,
+            528
+          ],
+          "quote": "a 12-byte ASCII message type (as in the v1 P2P protocol)"
+        }
+      ]
+    },
+    {
+      "id": "performance",
+      "statement": "Encrypting and authenticating a v2 message costs roughly as much as v1's truncated double-SHA256 checksum.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            519,
+            519
+          ],
+          "quote": "Each v1 P2P message uses a double-SHA256 checksum truncated to 4 bytes. Roughly the same amount of computation power is required for encrypting and authenticating a v2 P2P message as proposed."
+        }
+      ]
+    },
+    {
+      "id": "signaling",
+      "statement": "v2 support is signalled with the NODE_P2P_V2 = (1 << 11) service flag; clients met with immediate disconnection are encouraged to retry with v1.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            581,
+            581
+          ],
+          "quote": "Peers supporting the v2 transport protocol signal support by advertising the <code>NODE_P2P_V2 = (1 << 11)</code> service flag in addr relay. If met with immediate disconnection when establishing a v2 connection, clients implementing this proposal are encouraged to retry connecting using the v1 protocol."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's model reproduces all seven BIP 324 packet-encoding vectors: x(ours), X-only ECDH, shared secret, all HKDF outputs, session ID and the packet bytes, including packets after two, three and four rekeys and one of the largest size allowed (2^24 - 1 bytes of contents). ElligatorSwift decoding is not implemented: the model takes the decoded X coordinates from the vectors.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            589,
+            589
+          ],
+          "quote": "* [[bip-0324/packet_encoding_test_vectors.csv|Packet encoding vectors]] illustrate the lifecycle of the authenticated encryption scheme proposed in this document."
+        }
+      ]
+    },
+    {
+      "id": "framing-computed",
+      "statement": "A v1 message header is 24 bytes (magic, command, length, checksum); a v2 packet adds 20 bytes plus a 1-byte type ID for listed types, 21 bytes in all, or 33 with a 13-byte type.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            157,
+            157
+          ],
+          "quote": "The total size of a packet is 20 bytes plus the length of its contents."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            528,
+            528
+          ],
+          "quote": "either a one byte ID in range ''1..255''"
+        }
+      ]
+    },
+    {
+      "id": "not-tls",
+      "statement": "The authors argue TLS and Noise are unsuitable: they lack a modular treatment of authentication, a pseudorandom and shapable bytestream, native secp256k1 support, and a packet interface.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "While it would be possible to rely on an off-the-shelf transport encryption protocol such as TLS or Noise, the specific requirements of the Bitcoin P2P network laid out above make these protocols an unsuitable choice."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "The primary requirement which existing protocols fail to meet is a sufficiently modular treatment of encryption and authentication."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            70,
+            73
+          ],
+          "quote": "* Neither offers a pseudorandom bytestream. * Neither offers native support for elliptic curve cryptography on the curve secp256k1 as otherwise used in Bitcoin."
+        }
+      ]
+    },
+    {
+      "id": "terminator-why",
+      "statement": "A fixed 16-byte terminator is used because scanning for a byte sequence is much faster than trying to authenticate a packet at every offset; a receiver reads at most 4111 bytes looking for it.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 324,
+          "lines": [
+            123,
+            123
+          ],
+          "quote": "While it is in principle possible to use the first packet after the garbage directly as a terminator (scan until a valid packet follows), this would be significantly slower than just scanning for a fixed byte sequence, as it would require recomputing a Poly1305 tag after every received byte."
+        },
+        {
+          "bip": 324,
+          "lines": [
+            124,
+            124
+          ],
+          "quote": "#** Receive up to 4111 bytes, stopping when encountering the garbage terminator."
+        }
+      ]
+    }
+  ]
+}

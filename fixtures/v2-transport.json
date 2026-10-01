@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "v2-transport",
+  "warning": "BIP 324 test vectors: their private keys are public test material; never use them.",
+  "fixtures": [
+    {
+      "id": "v2-framing",
+      "kind": "v2-framing",
+      "label": "v1 and v2 framing",
+      "shortLabel": "header sizes",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324.mediawiki",
+        "line": 560,
+        "section": "v2 Bitcoin P2P message structure",
+        "quote": "<code>ping</code>"
+      },
+      "messageType": "ping"
+    },
+    {
+      "id": "v2-packet-1",
+      "kind": "v2-vector",
+      "label": "Packet 1, initiator",
+      "shortLabel": "1-byte contents",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 2,
+        "section": "Test Vectors",
+        "quote": "61062ea5071d800bbfd59e2e8b53d47d194b095ae5a4df04936b49772ef0d4d7"
+      },
+      "index": 1
+    },
+    {
+      "id": "v2-packet-999",
+      "kind": "v2-vector",
+      "label": "Packet 999, responder",
+      "shortLabel": "after 4 rekeys",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 3,
+        "section": "Test Vectors",
+        "quote": "6f312890ec83bbb26798abaadd574684a53e74ccef7953b790fcc29409080246"
+      },
+      "index": 999
+    },
+    {
+      "id": "v2-packet-0",
+      "kind": "v2-vector",
+      "label": "Packet 0, initiator",
+      "shortLabel": "first packet, garbage as AAD",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 4,
+        "section": "Test Vectors",
+        "quote": "846a784f1a03dea59cc679754a60a7145542fa130e3efbd815c81e909ce32933"
+      },
+      "index": 0
+    },
+    {
+      "id": "v2-packet-223",
+      "kind": "v2-vector",
+      "label": "Packet 223, responder",
+      "shortLabel": "decoy, last before a rekey",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 5,
+        "section": "Test Vectors",
+        "quote": "c0f15820459f64d98e5c48681d13340572c574533dd9f7161b85fcc8224fdf30"
+      },
+      "index": 223
+    },
+    {
+      "id": "v2-packet-448",
+      "kind": "v2-vector",
+      "label": "Packet 448, initiator",
+      "shortLabel": "two rekeys in",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 6,
+        "section": "Test Vectors",
+        "quote": "96cb391886681d1d3e23948e51987771a8ec3001b640c18fb994a855cea66b6e"
+      },
+      "index": 448
+    },
+    {
+      "id": "v2-rekey",
+      "kind": "v2-rekey",
+      "label": "Rekeying schedule",
+      "shortLabel": "nonces and keys",
+      "source": {
+        "bip": 324,
+        "file": "bip-0324/packet_encoding_test_vectors.csv",
+        "line": 5,
+        "section": "Test Vectors",
+        "quote": "c0f15820459f64d98e5c48681d13340572c574533dd9f7161b85fcc8224fdf30"
+      },
+      "index": 223,
+      "show": [
+        0,
+        1,
+        222,
+        223,
+        224,
+        447,
+        448
+      ]
+    }
+  ]
+}

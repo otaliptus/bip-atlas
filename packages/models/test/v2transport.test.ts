@@ -91,3 +91,55 @@ describe("rekeying and framing", () => {
     expect(V2_OVERHEAD).toBe(20);
   });
 });
+
+describe("v2-transport chapter prose numbers", () => {
+  const text = readFileSync(new URL("content/chapters/v2-transport.json", root), "utf8");
+  const has = (s: string) => expect(text).toContain(s);
+
+  it("dates and sizes the BIP states", () => {
+    expect(b324[10]).toContain("Assigned: 2019-03-08");
+    expect(b324[8]).toContain("Status: Deployed");
+    has("BIP 324, assigned in 2019 and recorded as Deployed");
+    expect(b324[111]).toContain("64-byte ElligatorSwift");
+    has("as 64 bytes of ElligatorSwift encoding");
+    expect(b324[111]).toContain("about 50% chance of being a valid X coordinate");
+    has("which a random string matches only about half the time");
+    expect(b324[112]).toContain("May send up to 4095");
+    has("up to 4095 bytes of garbage");
+    expect(b324[123]).toContain("Receive up to 4111 bytes");
+    expect(4095 + 16).toBe(4111);
+    has("A receiver reads at most 4111 bytes, 4095 of garbage and the terminator");
+    expect(V1_PREFIX.length / 2).toBe(16);
+    has("It watches the first 16 bytes");
+    expect(b324[156]).toContain("The total size of a packet is 20 bytes plus the length of its contents.");
+    has("A packet is 20 bytes plus its contents: a 3-byte length, encrypted, then ChaCha20-Poly1305 over a 1-byte header and the contents, ending in a 16-byte tag. Contents can be up to 2^24 − 1 bytes.");
+    expect(b324[159]).toContain("''2<sup>24</sup>-1''");
+    has("two 16-byte garbage terminators");
+    has("the same 12-byte ASCII name v1 uses");
+  });
+
+  it("framing and rekeying arithmetic", () => {
+    expect(v1Header("ping", new Uint8Array(0)).length).toBe(24);
+    expect(V2_OVERHEAD + 1).toBe(21);
+    has("Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead.");
+    expect(REKEY_INTERVAL).toBe(224);
+    has("Both ciphers change their keys every 224 packets.");
+    has("the encryption of 32 zero bytes under the old one");
+    has("the next 32 bytes of its own stream");
+    // The rekey figure: keys change after packets 223 and 447.
+    const s = senderFor(deriveKeys(new Uint8Array(32).fill(3)), false);
+    const keys: string[] = [];
+    for (let i = 0; i <= 448; i++) { keys.push(bytesToHex(s.P.key)); encPacket(s, new Uint8Array(0)); }
+    expect(keys[223]).toBe(keys[0]);
+    expect(keys[224]).not.toBe(keys[223]);
+    expect(keys[447]).toBe(keys[224]);
+    expect(keys[448]).not.toBe(keys[447]);
+    has("the nonce resets and the key changes after packets 223 and 447");
+  });
+
+  it("figure facts", () => {
+    const fx = JSON.parse(readFileSync(new URL("fixtures/v2-transport.json", root), "utf8")).fixtures;
+    expect(fx.filter((f: { kind: string }) => f.kind === "v2-vector").length).toBe(5);
+    has("Five of BIP 324’s packet-encoding vectors");
+  });
+});

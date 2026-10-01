@@ -447,6 +447,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "bf-chain",
   },
+  {
+    id: "v2-handshake.v1",
+    description: "BIP 324 packet vectors: key exchange, key schedule and one encrypted packet, step by step.",
+    minFixtures: 1,
+    maxFixtures: 8,
+    interactive: true,
+    controls: ["Step through the handshake", "Choose a published packet vector", "Compare v1 and v2 framing"],
+    fixtureKind: "v2-vector",
+  },
+  {
+    id: "v1-v2-framing.v1",
+    description: "Per-message overhead of v1 and v2 framing.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "v2-framing",
+  },
+  {
+    id: "v2-rekey.v1",
+    description: "FSChaCha20Poly1305 nonces and keys across the 224-packet rekey boundary.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "v2-rekey",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
