@@ -854,3 +854,4 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 @media (max-width: 47.99rem) {
   .atlas-ts-stacks, .atlas-ts-witness__split { grid-template-columns: minmax(0, 1fr); }
 }
+.atlas-tweak__flow li[data-part="output"] .atlas-tweak__label { color: var(--manual-ink); }

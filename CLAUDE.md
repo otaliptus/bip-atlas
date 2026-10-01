@@ -18,14 +18,15 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 
 | Path | What |
 |---|---|
-| `packages/models` | Tested teaching models: `bech32`, `bip39`, `bip32`, `tx` (141/143), `psbt`. Hashing and curves come from audited `@noble/*`; never hand-roll crypto. |
+| `packages/models` | Tested teaching models: `bech32`, `bip39`, `bip32`, `tx` (141/143), `psbt`, `schnorr` (340, step-by-step Verify), `taproot` (341: trees, tweak, control blocks, SigMsg), `tapscript` (342: a narrow trace *recorder*, not an interpreter; it throws `TraceScopeError` for any opcode outside its reviewed set). Hashing and curves come from audited `@noble/*`; never hand-roll crypto. Test-only signing helpers live in `packages/models/test/`, never in `src/`. |
 | `packages/publication` | `bip-atlas.publication.v1` schema + validator; `test/chapters.test.ts` applies every content contract to every chapter. |
 | `packages/figures` | Recipe registry (`registry.ts`) and Preact figure components. Components only draw; exact values arrive precomputed. |
 | `apps/site` | Astro pages, `lib/content.ts` (load + validate), `lib/derive.ts` (build-time values from models; throws if a value differs from a published vector), `components/Figure.astro` (recipe dispatcher), `styles/atlas.css`. |
 | `content/chapters/<id>.json` | Hand-authored chapter: paragraphs with claim IDs, figures naming recipes + fixture IDs. |
 | `content/evidence/<id>.json` | Evidence ledger: each claim has scope, support, and verbatim quotes with line numbers in the pinned sources. |
 | `fixtures/<id>.json` | Public test material, each tied to a pinned BIP line (`source.quote`) or a pinned external vector file (`source.external` + `pointer`). |
-| `sources/research-2026-10-01` | Pinned `bitcoin/bips` snapshot (commit `3a10b5b5…`) + `sources.lock.json` hashes. `sources/external` holds external vector files + lock. |
+| `sources/research-2026-10-01` | Pinned `bitcoin/bips` snapshot (commit `3a10b5b5…`) + `sources.lock.json` hashes. `sources/external` holds external vector files + lock, including `core-script-assets-excerpt.json` (6 cases of Bitcoin Core's `script_assets_test.json`, linked from BIP 341 L304; full-file commit and SHA-256 recorded). |
+| `tools/` | Repo tooling that is not a kit original, e.g. `extract-script-assets.mjs` (rebuilds the Core excerpt from the pinned full file). |
 | `review/` | Review records and candidate screenshots (not approved baselines). |
 | Kit originals | `BIP_ATLAS_SPEC.md`, `catalog.json`, `design-tokens.css`, `scripts/`, `tests/`, `examples/`, `prompts/` — do not modify (see `CHECKSUMS.json`). |
 
@@ -47,4 +48,4 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 
 ## Visual checks
 
-Screenshot desktop 1440 and mobile 375 of every chapter and key figure states; `document.documentElement.scrollWidth` must equal the viewport width. Islands must render a static equivalent without JS (`data-hydrated="false"` path). Client JS budget: < 60 KB gzipped (currently ~22 KB); client components must import `@bip-atlas/models/bech32` style subpaths, not the package index, or crypto gets bundled.
+Screenshot desktop 1440 and mobile 375 of every chapter and key figure states; `document.documentElement.scrollWidth` must equal the viewport width. Islands must render a static equivalent without JS (`data-hydrated="false"` path). Client JS budget: < 60 KB gzipped (currently ~29 KB); client components must import `@bip-atlas/models/bech32` style subpaths, not the package index, or crypto gets bundled.

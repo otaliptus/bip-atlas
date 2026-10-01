@@ -130,7 +130,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
         <section class="atlas-panel atlas-ts-step" aria-live="polite" aria-label="Current step">
           {step ? (
             <>
-              <h4 class="atlas-panel__title">Step {shown + 1} of {last} · {step.name}</h4>
+              <h3 class="atlas-panel__title">Step {shown + 1} of {last} · {step.name}</h3>
               <p class="atlas-ts-step__note" data-failed={step.failed ? "true" : undefined}>{step.failed ? "✕ " : ""}{step.note}</p>
               <div class="atlas-ts-stacks">
                 <Stack ids={step.before} view={view} label="Stack before" />
@@ -143,7 +143,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
             </>
           ) : (
             <>
-              <h4 class="atlas-panel__title">Result</h4>
+              <h3 class="atlas-panel__title">Result</h3>
               <p class="atlas-lab__status">
                 <span class="atlas-lab__verdict" data-valid={view.valid ? "true" : "false"}>{view.valid ? "✓ valid" : "✕ invalid"}</span>{" "}
                 {view.reason}. Bitcoin Core labels this witness <strong>{view.expected === "success" ? "valid" : "invalid"}</strong>; the recording agrees.
@@ -155,7 +155,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
         </section>
 
         <section class="atlas-panel atlas-ts-budget" aria-label="Signature checks and budget">
-          <h4 class="atlas-panel__title">Signature checks</h4>
+          <h3 class="atlas-panel__title">Signature checks</h3>
           <p class="atlas-ts-budget__start">
             Budget = 50 + {view.witness.totalBytes} witness bytes = <strong>{view.budgetStart}</strong>
           </p>

@@ -170,7 +170,7 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
         <section class="atlas-panel atlas-tap-lab__panel" aria-live="polite" aria-label="Witness and verification">
           {path === "key" ? (
             <>
-              <h4 class="atlas-panel__title">Key-path witness · 1 element</h4>
+              <h3 class="atlas-panel__title">Key-path witness · 1 element</h3>
               {d.keySpend ? (
                 <>
                   <ol class="atlas-tap-witness">
@@ -191,7 +191,7 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
             </>
           ) : leaf ? (
             <>
-              <h4 class="atlas-panel__title">Script-path witness for {leafName(leaf.id)}</h4>
+              <h3 class="atlas-panel__title">Script-path witness for {leafName(leaf.id)}</h3>
               <ol class="atlas-tap-witness">
                 <li data-missing="true">
                   <span class="atlas-tap-witness__label">script inputs</span>
