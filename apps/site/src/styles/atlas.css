@@ -1201,3 +1201,4 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
   .atlas-ds-body { grid-template-columns: minmax(0, 1fr); }
   .atlas-ds-dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
 }
+.atlas-ds-tok[data-role="num"], .atlas-ds-legend span[data-role="num"] { font-weight: 700; color: var(--manual-blue-dark); }

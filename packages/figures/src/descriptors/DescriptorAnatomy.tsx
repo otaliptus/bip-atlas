@@ -64,7 +64,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
           </fieldset>
         </div>
       ) : (
-        <p class="atlas-lab__static-note">Static view: the first descriptor with its first key highlighted and its checksum checked. With JavaScript you can pick any of {fixtures.length} published descriptors and highlight each key.</p>
+        <p class="atlas-lab__static-note">Static view: the first descriptor with its first key highlighted and its checksum (none is written) computed. With JavaScript you can pick any of {fixtures.length} published descriptors and highlight each key.</p>
       )}
 
       <p class="atlas-ds-flags">
@@ -86,7 +86,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
         )}
       </p>
       <p class="atlas-ds-legend">
-        <span data-role="fn">script expression</span> <span data-role="origin">key origin</span> <span data-role="key">key</span> <span data-role="path">derivation</span>{" "}
+        <span data-role="fn">script expression</span> <span data-role="num">number</span> <span data-role="origin">key origin</span> <span data-role="key">key</span> <span data-role="path">derivation</span>{" "}
         <span data-role="range">range</span> <span data-role="checksum">checksum</span>
         {d.keys.length > 1 && hydrated ? " · press a key to highlight it" : ""}
       </p>
@@ -97,7 +97,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
             <>
               <h3 class="atlas-panel__title">Key {Math.min(keySel, d.keys.length - 1) + 1} of {d.keys.length} · {KIND[k.kind]}</h3>
               <dl class="atlas-ds-dl">
-                <div><dt>origin</dt><dd>{k.origin ? <code>[{k.origin}]</code> : "none given"}</dd></div>
+                <div><dt>origin (normalized, h for hardened)</dt><dd>{k.origin ? <code>[{k.origin}]</code> : "none given"}</dd></div>
                 <div><dt>derivation after the key</dt><dd>{k.derivation ? <code>{k.derivation}</code> : "none"}</dd></div>
                 {k.publicKeys.map((p, i) => (
                   <div><dt>{k.range ? `public key, child ${i}` : "public key"}</dt><dd><code>{short(p)}</code></dd></div>

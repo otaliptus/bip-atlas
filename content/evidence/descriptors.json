@@ -63,6 +63,14 @@
           "bip": 380,
           "lines": [
             32,
+            32
+          ],
+          "quote": "Although BIPs 44, 49, and 84 have specified standard BIP 32 derivation paths for different output scripts and addresses, not all wallets support those derivation paths nor use them."
+        },
+        {
+          "bip": 380,
+          "lines": [
+            32,
             33
           ],
           "quote": "The lack of derivation path information in these backups and exports leads to further incompatibilities between wallets."
@@ -191,7 +199,7 @@
     },
     {
       "id": "normalization",
-      "statement": "Exporting a descriptor without private keys requires deriving the extended public key at the last hardened step and moving those steps into the key origin.",
+      "statement": "When a descriptor is exported without private keys, BIP 380 says the exporter should derive the extended public key at the last hardened step, and the steps taken to get there must be added to the key origin.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -207,7 +215,7 @@
     },
     {
       "id": "charset",
-      "statement": "Descriptors may only use a fixed character set, written as three groups of 32 in an order chosen so the checksum detects more errors.",
+      "statement": "Descriptors may only use a fixed character set, which BIP 380 writes as three groups of 32 (its own code has 95 characters, the last group one short) in an order chosen so the checksum can identify more errors.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -529,13 +537,13 @@
             116,
             118
           ],
-          "quote": "Of the script expressions that existed when this BIP was written, only <tt>pk()</tt> can be used in a tree expression."
+          "quote": "Of the script expressions that existed when this BIP was written, only <tt>pk()</tt> can be used in a tree expression. Script expressions specified since then that can be used in a tree expression are the Miniscript expressions of [[bip-0379.md|379]], which include a <tt>pkh()</tt> fragment, and the <tt>multi_a()</tt> and <tt>sortedmulti_a()</tt> expressions of [[bip-0387.mediawiki|387]]."
         }
       ]
     },
     {
       "id": "expansion-tested",
-      "statement": "This site's descriptor model expands every valid descriptor listed in BIPs 381 to 386 to exactly the scripts the BIPs list (for ranged ones, children 0 to 2) and rejects every listed invalid descriptor; the one listed valid descriptor with a Miniscript leaf, tr(…, pkh(…)), is outside the model's scope and is refused as such.",
+      "statement": "This site's descriptor model expands every valid descriptor listed in BIPs 381 to 386 to exactly the scripts the BIPs list (for ranged ones, the children each BIP lists: 0 to 2, or 0 and 1 for combo()) and rejects every listed invalid descriptor; the one listed valid descriptor with a Miniscript leaf, tr(…, pkh(…)), is outside the model's scope and is refused as such.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -625,7 +633,7 @@
             78,
             83
           ],
-          "quote": "* <tt>pkh([deadbeef/1/2'/3/4']L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt>"
+          "quote": "* <tt>pkh([deadbeef/1/2'/3/4']L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt> * <tt>pkh([deadbeef/1/2'/3/4']03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt> * <tt>pkh([deadbeef/1/2h/3/4h]03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)</tt> ** <tt>76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac</tt>"
         }
       ]
     },
@@ -673,7 +681,39 @@
             204,
             211
           ],
-          "quote": "* Valid checksum: <tt>raw(deadbeef)#89f8spxm</tt> * No checksum: <tt>raw(deadbeef)</tt> * Missing checksum: <tt>raw(deadbeef)#</tt> * Too long checksum (9 chars): <tt>raw(deadbeef)#89f8spxmx</tt> * Too short checksum (7 chars): <tt>raw(deadbeef)#89f8spx</tt> * Error in payload: <tt>raw(deedbeef)#89f8spxm</tt>"
+          "quote": "* Valid checksum: <tt>raw(deadbeef)#89f8spxm</tt> * No checksum: <tt>raw(deadbeef)</tt> * Missing checksum: <tt>raw(deadbeef)#</tt> * Too long checksum (9 chars): <tt>raw(deadbeef)#89f8spxmx</tt> * Too short checksum (7 chars): <tt>raw(deadbeef)#89f8spx</tt> * Error in payload: <tt>raw(deedbeef)#89f8spxm</tt> * Error in checksum: <tt>raw(deedbeef)##9f8spxm</tt> * Invalid characters in payload: <tt>raw(Ü)#00000000</tt>"
+        }
+      ]
+    },
+    {
+      "id": "origin-for-signers",
+      "statement": "The origin information exists so that software holding the root key can tell which of its keys a descriptor key is; the script itself does not depend on it.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 380,
+          "lines": [
+            72,
+            73
+          ],
+          "quote": "** Exactly 8 hex characters for the fingerprint of the key where the derivation starts (see BIP 32 for details) ** Followed by zero or more <tt>/NUM</tt> or <tt>/NUMh</tt>  path elements to indicate the unhardened or hardened derivation steps between the fingerprint and the key that follows."
+        }
+      ]
+    },
+    {
+      "id": "three-formats",
+      "statement": "BIP 381 counts three main standard output formats before SegWit: P2PK, P2PKH and P2SH.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 381,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "Prior to the activation of Segregated Witness, there were 3 main standard output script formats: P2PK, P2PKH, and P2SH."
         }
       ]
     }

@@ -572,3 +572,61 @@ export interface DescriptorIndexDerived {
   rows: Array<{ expression: string; bip: number; contexts: string[] | null; template: string | null }>;
 }
 export type DerivedDescriptorIndexFixture = DescriptorIndexFixture & { derived: DescriptorIndexDerived };
+
+/* ---------- MuSig2 (BIP 327) ---------- */
+
+export interface Musig2SessionFixture extends BaseFixture {
+  kind: "musig2-session";
+  caseIndex: number;
+}
+
+export interface Musig2SignerView {
+  pubkey: string;
+  coefficient: string;
+  /** The second distinct key gets coefficient 1 (MuSig2*). */
+  secondKey: boolean;
+  pubnonce: [string, string];
+  psig: string;
+  psigVerifies: boolean;
+}
+
+export interface Musig2SessionDerived {
+  msg: string;
+  keyListHash: string;
+  signers: Musig2SignerView[];
+  /** Aggregate key before tweaks: plain (33 bytes) and x-only. */
+  aggPlain: string;
+  aggXonly: string;
+  tweaks: Array<{ tweak: string; xonly: boolean; resultXonly: string }>;
+  finalXonly: string;
+  aggnonce: [string, string];
+  b: string;
+  R: string;
+  rEvenY: boolean;
+  e: string;
+  tacc: string;
+  signature: string;
+  signatureVerifies: boolean;
+}
+export type DerivedMusig2SessionFixture = Musig2SessionFixture & { derived: Musig2SessionDerived };
+
+export interface Musig2KeyaggFixture extends BaseFixture {
+  kind: "musig2-keyagg";
+  caseIndices: number[];
+}
+
+export interface Musig2KeyaggDerived {
+  orders: Array<{ keys: string[]; coefficients: string[]; aggXonly: string }>;
+  /** The x coordinate of P1 + P2 + P3, which MuSig2 does not use. */
+  naiveSumXonly: string;
+}
+export type DerivedMusig2KeyaggFixture = Musig2KeyaggFixture & { derived: Musig2KeyaggDerived };
+
+export interface Musig2PsigChecksFixture extends BaseFixture {
+  kind: "musig2-psig-checks";
+}
+
+export interface Musig2PsigChecksDerived {
+  rows: Array<{ label: string; signer: number; psig: string; verdict: "valid" | "invalid" | "error"; detail: string }>;
+}
+export type DerivedMusig2PsigChecksFixture = Musig2PsigChecksFixture & { derived: Musig2PsigChecksDerived };

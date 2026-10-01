@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { descsumCheck, descsumCreate, descsumExpand } from "../src/descsum";
-import { DescriptorError, DescriptorScopeError, expand, keyAt, parseDescriptor, parseKey } from "../src/descriptors";
+import { DescriptorDerivationError, DescriptorError, DescriptorScopeError, expand, keyAt, parseDescriptor, parseKey } from "../src/descriptors";
 import { bytesToHex } from "../src/hex";
 
 const root = new URL("../../../", import.meta.url);
@@ -122,6 +122,18 @@ describe("invalid-descriptor cases (BIPs 381–386)", () => {
   }
 });
 
+describe("rules the vectors do not exercise (review follow-ups)", () => {
+  const X = "a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd";
+  it("rejects uncompressed keys anywhere under tr(), leaves included (BIP 386)", () => {
+    expect(() => parseDescriptor(`tr(${X},pk(04a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd5b8dec5235a0fa8722476c7709c02559e3aa73aa03918ba2d492eea75abea235))`)).toThrow(DescriptorError);
+    expect(() => parseDescriptor(`tr(${X},pk(5KYZdUEo39z3FPrtuX2QbbwGnNP5zTd7yyr2SC1j299sBCnWjss))`)).toThrow(DescriptorError);
+  });
+  it("rejects BIP 383's 16-key P2SH multisig while parsing", () => {
+    const bad = invalidVectors(383).find((v) => v.why.startsWith("* More than 15 keys"))!;
+    expect(() => parseDescriptor(bad.desc)).toThrow(/520-byte/);
+  });
+});
+
 describe("key derivation inside descriptors", () => {
   it("ranged keys step the last index; xpub and xprv agree", () => {
     const pub = parseDescriptor("wpkh([ffffffff/13']xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH/1/2/*)");
@@ -137,7 +149,7 @@ describe("key derivation inside descriptors", () => {
   it("parses hardened steps after an xpub (BIP 380 lists them as valid) but cannot derive from them", () => {
     const k = parseKey("xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/3h/4h/5h/*");
     expect(k.path.every((p) => p.hardened)).toBe(true);
-    expect(() => keyAt(k, 0)).toThrow(/hardened derivation needs a private/);
+    expect(() => keyAt(k, 0)).toThrow(DescriptorDerivationError);
   });
 });
 
@@ -174,7 +186,13 @@ describe("descriptors chapter prose numbers", () => {
     expect(b383[40]).toContain("at most 3 keys");
     expect(b383[44]).toContain("at most 15 compressed public keys");
     expect(b383[46]).toContain("the maximum number of keys is 20");
-    expect(text).toContain("3 at the top level, 15 compressed keys inside sh() because of the 520-byte push limit, 20 otherwise");
+    expect(b383[43]).toContain("520 byte limit");
+    expect(b383[44]).toContain("at most 7 uncompressed");
+    expect(text).toContain("15 compressed keys (or 7 uncompressed) directly inside sh()");
+    expect(raw(381)[26]).toContain("3 main standard output script formats");
+    expect(text).toContain("the three main standard formats from before SegWit");
+    expect(text).toContain("the key’s 20-byte hash");
+
     expect(b380[267]).toContain("since version 0.17");
     expect(raw(386)[121]).toContain("since version 22.0");
     expect(text).toContain("in Bitcoin Core since version 0.17, and tr() since 22.0");

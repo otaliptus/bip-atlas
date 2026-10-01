@@ -22,6 +22,8 @@ const base58check = createBase58check(sha256);
 export class DescriptorError extends Error {}
 /** Valid or not, the descriptor uses something this model does not implement. */
 export class DescriptorScopeError extends Error {}
+/** The descriptor is valid, but a value cannot be computed from what it holds (e.g. hardened steps after an xpub). */
+export class DescriptorDerivationError extends Error {}
 
 export type Context = "top" | "sh" | "wsh" | "tr";
 
@@ -157,12 +159,10 @@ export function parseKey(text: string, offset = 0, ctx: Context = "top"): KeyExp
     else if (base.length === 64 && ctx === "tr") k.kind = "xonly";
     else throw new DescriptorError("hex public key of the wrong length or prefix");
     k.pub = hexToBytes(base.toLowerCase());
-    if (k.kind !== "xonly") {
-      try {
-        secp256k1.Point.fromHex(base.toLowerCase());
-      } catch {
-        throw new DescriptorError("public key is not on the curve");
-      }
+    try {
+      secp256k1.Point.fromHex((k.kind === "xonly" ? "02" : "") + base.toLowerCase());
+    } catch {
+      throw new DescriptorError("public key is not on the curve");
     }
     return k;
   }
@@ -180,7 +180,7 @@ export function keyAt(k: KeyExpr, index: number): { pub: Uint8Array; derivedPath
   if (k.ext) {
     const steps = [...k.path, ...(k.range ? [{ index, hardened: k.range === "hardened" }] : [])];
     let key = k.ext;
-    if (!k.ext.privateKey && steps.some((s) => s.hardened)) throw new DescriptorError("hardened derivation needs a private extended key");
+    if (!k.ext.privateKey && steps.some((s) => s.hardened)) throw new DescriptorDerivationError("valid, but hardened derivation needs the private extended key");
     for (const s of steps) {
       const i = s.index + (s.hardened ? HARDENED : 0);
       key = (key.privateKey ? ckdPriv(key, i) : ckdPub(key, i)).key;
@@ -263,8 +263,14 @@ function parseScript(s: string, offset: number, ctx: Context, keys: KeyExpr[]): 
       keys.push(key);
       node.args.push(key);
     }
-    const max = ctx === "top" ? 3 : ctx === "wsh" ? 20 : 20;
+    const max = ctx === "top" ? 3 : 20;
     if (n > max) throw new DescriptorError(`at most ${max} keys in ${fn}() ${ctx === "top" ? "at the top level" : `inside ${ctx}()`}`);
+    if (ctx === "sh") {
+      // The redeem script is one push, so at most 520 bytes: 34 per compressed key, 66 per uncompressed (BIP 383).
+      const keyBytes = node.args.slice(1).reduce((t, a) => t + ((a as KeyExpr).compressed ? 34 : 66), 0);
+      const size = (k > 16 ? 2 : 1) + keyBytes + (n > 16 ? 2 : 1) + 1;
+      if (size > 520) throw new DescriptorError("more keys than fit a 520-byte P2SH redeem script");
+    }
   } else if (fn === "raw" || fn === "addr") {
     if (args.length !== 1) throw new DescriptorError(`${fn}() takes one argument`);
     const t = args[0].text;
@@ -278,7 +284,10 @@ function parseScript(s: string, offset: number, ctx: Context, keys: KeyExpr[]): 
     node.args.push(key);
     if (args.length === 2) node.args.push(parseTree(args[1].text, args[1].start, keys));
   }
-  // Compressed-key rules that depend on context.
+  // Compressed-key rules that depend on context. Under tr(), BIP 386 allows only x-only keys: no uncompressed key anywhere.
+  if (ctx === "tr" || fn === "tr") {
+    for (const k of collectKeys(node)) if (!k.compressed) throw new DescriptorError("tr() keys must be x-only; uncompressed keys are not allowed");
+  }
   if (ctx === "wsh" || fn === "wsh" || fn === "wpkh") {
     for (const k of collectKeys(node)) if (!k.compressed) throw new DescriptorError(`uncompressed public keys are not allowed ${fn === "wpkh" ? "in wpkh()" : "under wsh()"}`);
   }

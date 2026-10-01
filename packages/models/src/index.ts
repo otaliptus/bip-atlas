@@ -13,3 +13,4 @@ export * from "./versionbits";
 export * from "./walletpaths";
 export * from "./descsum";
 export * from "./descriptors";
+export * from "./musig2";

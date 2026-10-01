@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "musig2",
+  "warning": "BIP 327 test vectors. Their secret keys and nonces are public test material; never use them.",
+  "fixtures": [
+    {
+      "id": "sig-agg-0",
+      "kind": "musig2-session",
+      "label": "Two signers",
+      "shortLabel": "sig_agg case 0 \u00b7 no tweaks",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/sig_agg_vectors.json",
+        "line": 50,
+        "section": "Test Vectors",
+        "quote": "041DA22223CE65C92C9A0D6C2CAC828A"
+      },
+      "caseIndex": 0
+    },
+    {
+      "id": "sig-agg-1",
+      "kind": "musig2-session",
+      "label": "Two signers, other nonces",
+      "shortLabel": "sig_agg case 1 \u00b7 no tweaks",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/sig_agg_vectors.json",
+        "line": 68,
+        "section": "Test Vectors",
+        "quote": "1069B67EC3D2F3C7C08291ACCB17A9C9"
+      },
+      "caseIndex": 1
+    },
+    {
+      "id": "sig-agg-2",
+      "kind": "musig2-session",
+      "label": "Plain tweak",
+      "shortLabel": "sig_agg case 2 \u00b7 1 tweak",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/sig_agg_vectors.json",
+        "line": 90,
+        "section": "Test Vectors",
+        "quote": "5C558E1DCADE86DA0B2F02626A512E30"
+      },
+      "caseIndex": 2
+    },
+    {
+      "id": "sig-agg-3",
+      "kind": "musig2-session",
+      "label": "Three tweaks, x-only and plain",
+      "shortLabel": "sig_agg case 3 \u00b7 3 tweaks",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/sig_agg_vectors.json",
+        "line": 116,
+        "section": "Test Vectors",
+        "quote": "839B08820B681DBA8DAF4CC7B104E8F2"
+      },
+      "caseIndex": 3
+    },
+    {
+      "id": "key-agg-order",
+      "kind": "musig2-keyagg",
+      "label": "Three keys, two orders",
+      "shortLabel": "key_agg cases 0 and 1",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/key_agg_vectors.json",
+        "line": 18,
+        "section": "Test Vectors",
+        "quote": "90539EEDE565F5D054F32CC0C2201268"
+      },
+      "caseIndices": [
+        0,
+        1
+      ]
+    },
+    {
+      "id": "psig-checks",
+      "kind": "musig2-psig-checks",
+      "label": "Partial-signature checks",
+      "shortLabel": "sign_verify vectors",
+      "source": {
+        "bip": 327,
+        "file": "bip-0327/vectors/sign_verify_vectors.json",
+        "line": 158,
+        "section": "Test Vectors",
+        "quote": "\"verify_fail_test_cases\""
+      }
+    }
+  ]
+}

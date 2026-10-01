@@ -67,11 +67,12 @@
         },
         {
           "type": "paragraph",
-          "text": "So sh(wpkh(KEY)) reads from the outside in: pay to the hash of a script, and that script pays to the hash of one key. Each BIP after 380 adds a few such functions. BIP 381 covers the three standard formats from before SegWit, pk(), pkh() and sh(); BIP 382 adds wpkh() and wsh(); BIP 386 adds tr().",
+          "text": "So sh(wpkh(KEY)) reads from the outside in: pay to the hash of a script, and that script pays to the hash of one key. Each BIP after 380 adds a few such functions. BIP 381 covers the three main standard formats from before SegWit, pk(), pkh() and sh(); BIP 382 adds wpkh() and wsh(); BIP 386 adds tr().",
           "claims": [
             "b381",
             "b382",
-            "b386"
+            "b386",
+            "three-formats"
           ]
         },
         {
@@ -114,10 +115,11 @@
         },
         {
           "type": "paragraph",
-          "text": "The origin is for the people and devices that sign, not for the script. A hardware signer shown a key needs to know where in its own tree that key sits. The script does not change: BIP 381 lists the same pkh() with an origin written with apostrophes or with h, and with a private key or its public key, and all of them produce one and the same script.",
+          "text": "The origin records where a key came from: the fingerprint of the key where derivation started and the steps since. That lets software holding the root recognise the key as its own. The script does not change: BIP 381 lists the same pkh() with an origin written with apostrophes or with h, and with a private key or its public key, and all of them produce one and the same script.",
           "claims": [
             "origin-no-effect",
-            "key-expr"
+            "key-expr",
+            "origin-for-signers"
           ]
         },
         {
@@ -156,7 +158,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Whether a descriptor is a secret depends on what is inside it. With only public keys it reveals every script it stands for, which is a privacy matter, but it cannot spend. With a WIF key or an xprv inside, it is as sensitive as those keys. BIP 380 adds a rule for exporting without private keys: derive the extended public key at the last hardened step and move those steps into the origin.",
+          "text": "Whether a descriptor is a secret depends on what is inside it. With only public keys it reveals every script it stands for, which is a privacy matter, but it cannot spend. With a WIF key or an xprv inside, it is as sensitive as those keys. For exporting without private keys, BIP 380 says the exporter should derive the extended public key at the last hardened step, and the steps taken must then be added to the origin.",
           "claims": [
             "secret-or-not",
             "normalization"
@@ -165,7 +167,7 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "A descriptor holding an xprv or a WIF key is a spending secret, and one with a range stands for an unbounded set of scripts. Read the keys before sharing one.",
+          "text": "A descriptor holding an xprv or a WIF key is a spending secret, and one with a range stands for a very large set of scripts, one per child index. Read the keys before sharing one.",
           "claims": [
             "secret-or-not",
             "ranged"
@@ -179,7 +181,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Descriptors are meant to be copied by people, so BIP 380 gives them a checksum like bech32’s. Characters are restricted to a fixed set of 95, which BIP 380 describes as three groups of 32 (the last group is one short), in an order chosen so that common mistakes stay detectable. Each character becomes its position in its group, and after every third character an extra symbol records the three group numbers.",
+          "text": "BIP 380 gives descriptors a checksum like bech32’s. Characters are restricted to a fixed set of 95, which BIP 380 describes as three groups of 32 (the last group is one short), in an order chosen so that the checksum can identify more errors. Each character becomes its position in its group, and after every third character an extra symbol records the three group numbers.",
           "claims": [
             "charset",
             "checksum-expand",
@@ -218,7 +220,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 383 adds multisig. multi(k, KEY_1, …, KEY_n) produces a k-of-n CHECKMULTISIG script with k at most n, and sortedmulti() sorts the derived keys first, so cosigners need not agree on an order. Ranged keys in a multisig advance together, each using the same child index. The number of keys is limited by context: 3 at the top level, 15 compressed keys inside sh() because of the 520-byte push limit, 20 otherwise.",
+          "text": "BIP 383 adds multisig. multi(k, KEY_1, …, KEY_n) produces a k-of-n CHECKMULTISIG script with k at most n, and sortedmulti() sorts the derived keys first. Ranged keys in a multisig advance together, each using the same child index. The number of keys is limited by context: 3 at the top level, 15 compressed keys (or 7 uncompressed) directly inside sh() because of the 520-byte push limit, 20 otherwise.",
           "claims": [
             "b383"
           ]

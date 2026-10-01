@@ -28,7 +28,7 @@ export function DescriptorChecksum({ fixture }: { fixture: DerivedDescriptorFixt
         {d.symbols.length} symbols → BCH polymod → <code>#{d.checksumComputed}</code> {d.checksumGiven === d.checksumComputed ? "(matches the published checksum)" : ""}
       </p>
       <p class="atlas-lab__source">
-        Each character becomes its position within one of three groups of 32; after every third character one more symbol records the three group numbers (shaded).
+        Each character becomes its position within one of three groups (32, 32 and 31 characters); after every third character one more symbol records the three group numbers, and a final one records the groups of any leftover characters (shaded).
         Computed by the tested checksum model, a transcription of BIP 380’s Python code; checked against the BIP’s vector.
       </p>
     </div>

@@ -113,3 +113,32 @@ Branch `main-q0i8zv`. Ten chapters from `catalog-phase3.json`, sources pinned in
 | 11–14 (nits) | "never share an address", "never reused", SLIP-0044 link, opening citation, "extended public key" wording, label consistency | All applied |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (account level, BIP 86 change address, BIP 44 path-only, schemes, levels, worked tab, no-JS); one overflow at 375 (an unbroken 40-hex key hash) fixed. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.
+
+## Chapter 13 — Descriptors (BIPs 380–386)
+
+**Models:** `packages/models/src/descsum.ts` (BIP 380's checksum, transcribed from its Python; no imports, so islands may use it) and `packages/models/src/descriptors.ts` (key-expression grammar, script expressions, the placement rules of BIPs 381–386, and expansion; Miniscript leaves and the later expressions throw `DescriptorScopeError`).
+
+**Sources:** every valid and invalid vector in BIPs 380–386, parsed from the pinned text by the tests: BIP 380's 8 checksum cases and 21 valid / 16 invalid key expressions; every listed descriptor in BIPs 381–386 expands to exactly the listed scripts, and every listed invalid one is rejected. The one listed valid descriptor with a Miniscript leaf (BIP 386 L100, no script given) is refused as out of scope. Finding while testing: BIP 380 describes its character set as three groups of 32, but its own `INPUT_CHARSET` has 95 characters (32 + 32 + 31); the chapter says so, and a test pins it.
+
+**Deliberate breakage:** checksum generator constant (1 test fails), no sorting in sortedmulti (1), compressed-key rule under wsh dropped (1), tapscript leaf with a 33-byte key (1).
+
+**Independent review: 0 blocking, 6 should-fix, 6 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | Uncompressed keys accepted in tr() leaves | Rejected anywhere under tr(); two tests added |
+| 2 | Normalization rule's strength | "should derive … must then be added" |
+| 3 | Unsourced rationale (hardware signers; sortedmulti "so cosigners need not agree") | Rewritten from BIP 380 L72–73 as an editorial claim; sortedmulti clause dropped |
+| 4 | "unbounded set of scripts" | "a very large set of scripts, one per child index" |
+| 5 | Quotes shorter than the claims | `checksum-cases` to L211, `origin-no-effect` to L83, `b386-leaves` to L118, `motivation` adds L32 |
+| 6 | Checksum figure repeated "groups of 32" and omitted the trailing symbol | Says 32/32/31 and describes the final group symbol |
+| 7 | 16-key P2SH multisig accepted by the parser | Redeem-script size checked while parsing; test |
+| 8 | xpub + hardened steps raised a "rule broken" error | New `DescriptorDerivationError` ("valid, but … needs the private extended key") |
+| 9 | x-only keys not checked on the curve at parse time | Checked |
+| 10 | Hero: origin shown normalized without saying so; static note; legend missing numbers | Labelled "normalized"; note fixed; legend entry added |
+| 11 | Wording ("hardened steps already taken", "copied by people", charset order rationale, "directly inside sh()") | Applied |
+| 12 | `expansion-tested` said children 0–2 for combo too; untested numbers | Fixed; tests for 520 bytes, 7 uncompressed, "three main standard formats", 20-byte hash |
+
+Not changed: `raw()` with an empty argument, a threshold written `01`, mainnet-only WIF and `addr()`, and uppercase hex are accepted; the BIPs do not rule on them and no vector exercises them.
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (each descriptor kind, key highlighting, checksum check, the one-character typo, tr() tree on mobile, worked tab, no-JS); no overflow. The key buttons were restructured so each key highlights as one unit. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.
