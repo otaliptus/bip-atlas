@@ -89,7 +89,7 @@
             "b322-p2pkh-full",
             "b322-wrong-message"
           ],
-          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the one recorded for that vector: valid for scripts the model checks, inconclusive for those it cannot, invalid for error vectors.",
+          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the one recorded for that vector.",
           "claims": [
             "vectors",
             "to-spend",
@@ -191,7 +191,7 @@
           "fixtures": [
             "b322-verdicts"
           ],
-          "caption": "One published vector for each state. The inconclusive one is a valid P2PKH signature that this site’s model cannot check without a script interpreter, one of the cases the state exists for.",
+          "caption": "One published vector for each state. The inconclusive one is a proof-of-funds signature: this site’s model does not decode proof-of-funds PSBTs, so it cannot check the scripts they satisfy.",
           "claims": [
             "verdicts",
             "time-age",
@@ -202,7 +202,7 @@
         },
         {
           "type": "paragraph",
-          "text": "This site’s model is such a partial verifier. It checks P2WPKH, P2TR key-path and P2WSH multisig signatures itself, enforcing the required rules that can arise in those scripts, and answers inconclusive for the rest. Even so, it rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
+          "text": "This site’s model is such a partial verifier. Its script interpreter runs only a reviewed set of opcodes, enough for every published simple and full vector: P2PKH, P2SH, nested and native SegWit, multisig, Taproot key and script paths, and time locks. It applies the required rules in all of them, answers inconclusive for any script outside that set and for proof-of-funds signatures, and rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
           "claims": [
             "vectors",
             "basic-validation"

@@ -1,29 +1,27 @@
 /**
  * Generic signed message teaching model (BIP 322): the tagged message hash,
  * the two virtual transactions to_spend and to_sign, decoding of "simple"
- * and "full" signatures, and verification of the script types this model
- * can check without a script interpreter: P2WPKH, P2TR key path, and P2WSH
- * m-of-n CHECKMULTISIG. Everything else is reported as inconclusive.
+ * and "full" signatures, and verification through this package's
+ * reviewed-opcode interpreter (interpreter.ts), which applies BIP 322's
+ * required rules in every script version.
  *
- * Required rules enforced for those types: SIGHASH_ALL (or SIGHASH_DEFAULT
- * for P2TR); strict DER and low S for ECDSA; the CHECKMULTISIG dummy and
- * exact witness shape (clean stack); an empty scriptSig for native SegWit.
- * MINIMALDATA, MINIMALIF, CODESEPARATOR and FindAndDelete cannot arise in
- * these templates. The upgradeable version rule (0 or 2) is applied after
- * the script check, as the BIP orders them.
+ * Verdicts follow the BIP's verification steps: decoding and structure
+ * errors are invalid; a script the interpreter does not cover (an opcode
+ * outside its reviewed set, OP_SUCCESSx, an annex, other leaf versions) is
+ * inconclusive; a required-rule or script failure is invalid; then the
+ * upgradeable rules (to_sign version 0 or 2, reserved NOPs, witness versions
+ * above 1) give inconclusive; otherwise valid at time T and age S.
+ * Proof-of-funds PSBTs are outside this model and report inconclusive.
  *
- * Verification only: it never signs. Hashing from @noble/hashes, curves
- * from @noble/curves (ECDSA and BIP 340 verification), base58 and bech32
- * from @scure/base; sighashes from this package's tested BIP 143 and BIP 341
- * models.
+ * Verification only: it never signs. Hashing from @noble/hashes, base58 and
+ * bech32 from @scure/base; curves and sighashes via the interpreter.
  */
-import { secp256k1 } from "@noble/curves/secp256k1.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { base64, bech32, bech32m, createBase58check } from "@scure/base";
-import { hash160 } from "./bip32";
+import { InterpreterScopeError, ScriptError, verifyInput, type InputResult } from "./interpreter";
 import { bytesToHex, hexToBytes } from "./hex";
-import { tagged, sigMsg, taprootSighash, verifyKeyPath } from "./taproot";
-import { bip143Digest, dsha256, parseTransaction, type Transaction } from "./tx";
+import { tagged } from "./taproot";
+import { dsha256, legacySerialization, parseTransaction, type Transaction } from "./tx";
 
 const base58check = createBase58check(sha256);
 const enc = (s: string) => new TextEncoder().encode(s);
@@ -111,25 +109,9 @@ export function decodeSignature(sig: string): DecodedSignature {
 
 export type Verdict = { state: "valid"; time: number; age: number } | { state: "invalid"; reason: string } | { state: "inconclusive"; reason: string };
 
-const parseMultisig = (ws: string): { m: number; keys: string[] } | null => {
-  const b = hexToBytes(ws);
-  if (b.length < 3 || b[b.length - 1] !== 0xae) return null;
-  const m = b[0] - 0x50, n = b[b.length - 2] - 0x50;
-  const keys: string[] = [];
-  let o = 1;
-  while (o < b.length - 2) { if (b[o] !== 33) return null; keys.push(bytesToHex(b.slice(o + 1, o + 34))); o += 34; }
-  return keys.length === n && m >= 1 && m <= n ? { m, keys } : null;
-};
-
-function ecdsaOk(sigHex: string, pubHex: string, digestHex: string): boolean {
-  const sig = hexToBytes(sigHex);
-  if (sig.length < 2 || sig[sig.length - 1] !== 0x01) return false; // SIGHASH_ALL required
-  try { return secp256k1.verify(sig.slice(0, -1), hexToBytes(digestHex), hexToBytes(pubHex), { prehash: false, format: "der", lowS: true }); } catch { return false; }
-}
-
 /** Verify a signature for (address, message). Returns the BIP's three states. */
 export function verify(address: string, message: string, signature: string): Verdict & { toSpend: VirtualTx; toSign: VirtualTx; checked: string } {
-  const { spk, kind } = addressScript(address);
+  const { spk } = addressScript(address);
   const spend = toSpend(messageHash(message), spk);
   let dec: DecodedSignature;
   try { dec = decodeSignature(signature); } catch (e) { return { state: "invalid", reason: (e as Error).message, toSpend: spend, toSign: toSign(spend.txid), checked: "decoding" }; }
@@ -143,41 +125,24 @@ export function verify(address: string, message: string, signature: string): Ver
   } else {
     tx = parseTransaction(toSign(spend.txid, { witness: dec.witness }).witnessHex);
   }
-  const sign = { hex: "", txid: "" };
-  const legacyHex = (() => { const v = tx.versionHex, lt = tx.locktimeHex; const ins = "01" + tx.inputs.map((i) => i.prevoutHex + push(i.scriptSigHex) + i.sequenceHex).join(""); return v + ins.replace(/^01/, varint(tx.inputs.length)) + varint(tx.outputs.length) + tx.outputs.map((o) => rev(o.valueSats.toString(16).padStart(16, "0")) + push(o.scriptPubKeyHex)).join("") + lt; })();
-  sign.hex = legacyHex; sign.txid = txid(legacyHex);
+  const legacyHex = bytesToHex(legacySerialization(tx));
+  const sign = { hex: legacyHex, txid: txid(legacyHex) };
+  if (tx.inputs.length !== 1) return { state: "invalid", reason: "a full signature cannot carry the UTXOs of additional inputs", toSpend: spend, toSign: sign, checked: "structure" };
+
+  // Steps 2 and 3: scope (inconclusive), then the required rules (invalid).
+  let result: InputResult;
+  try {
+    result = verifyInput({ tx, index: 0, spent: [{ scriptPubKeyHex: spk, amountSats: 0n }] });
+  } catch (e) {
+    if (e instanceof InterpreterScopeError) return { state: "inconclusive", reason: e.message, toSpend: spend, toSign: sign, checked: "scope" };
+    if (e instanceof ScriptError) return { state: "invalid", reason: `invalid signature: ${e.message}`, toSpend: spend, toSign: sign, checked: "script" };
+    throw e;
+  }
+  // Step 4: the upgradeable rules (inconclusive).
   const version = parseInt(rev(tx.versionHex), 16);
-  const w = tx.witnesses[0] ?? [];
+  const upgradeable = [...(version === 0 || version === 2 ? [] : ["to_sign version must be 0 or 2"]), ...result.upgradeable.map((u) => `${u} is reserved for upgrades`)];
+  if (upgradeable.length) return { state: "inconclusive", reason: upgradeable.join("; "), toSpend: spend, toSign: sign, checked: result.path };
+  // Step 5.
   const T = parseInt(rev(tx.locktimeHex), 16), S = parseInt(rev(tx.inputs[0].sequenceHex), 16);
-  // Upgradeable rule (checked after the required rules): version 0 or 2, else inconclusive.
-  const valid = version === 0 || version === 2 ? { state: "valid" as const, time: T, age: S } : { state: "inconclusive" as const, reason: "to_sign version must be 0 or 2" };
-  const bad = (reason: string) => ({ state: "invalid" as const, reason, toSpend: spend, toSign: sign });
-  if (tx.inputs.length !== 1) return { ...bad("a full signature cannot carry the UTXOs of additional inputs"), checked: "structure" };
-  if ((kind === "p2wpkh" || kind === "p2wsh" || kind === "p2tr") && tx.inputs[0].scriptSigHex !== "") return { ...bad("invalid signature: native SegWit requires an empty scriptSig"), checked: kind };
-  if (kind === "p2wpkh") {
-    const h = spk.slice(4);
-    if (w.length !== 2 || bytesToHex(hash160(hexToBytes(w[1]))) !== h) return { ...bad("invalid signature: witness does not match the key hash"), checked: "p2wpkh" };
-    const d = bip143Digest(tx, 0, `1976a914${h}88ac`, 0n).sighashHex;
-    return ecdsaOk(w[0], w[1], d) ? { ...valid, toSpend: spend, toSign: sign, checked: "p2wpkh" } : { ...bad("invalid signature"), checked: "p2wpkh" };
-  }
-  if (kind === "p2tr") {
-    if (w.length === 0) return { ...bad("invalid signature: empty witness"), checked: "p2tr" };
-    const annex = w.length === 2 && w[1].startsWith("50");
-    if (w.length !== 1 || annex) return { state: "inconclusive", reason: annex ? "an annex is outside this model" : "script-path spends are outside this model", toSpend: spend, toSign: sign, checked: "p2tr" };
-    if (w[0].length === 130 && !w[0].endsWith("01")) return { ...bad("invalid signature: sighash must be SIGHASH_ALL or SIGHASH_DEFAULT"), checked: "p2tr key path" };
-    const ok = verifyKeyPath(spk.slice(4), w[0], (ht) => taprootSighash(sigMsg(tx, [{ scriptPubKeyHex: spk, amountSats: 0n }], 0, ht)));
-    return ok ? { ...valid, toSpend: spend, toSign: sign, checked: "p2tr key path" } : { ...bad("invalid signature"), checked: "p2tr key path" };
-  }
-  if (kind === "p2wsh") {
-    const ws = w[w.length - 1] ?? "";
-    if (bytesToHex(sha256(hexToBytes(ws))) !== spk.slice(4)) return { ...bad("invalid signature: witness script does not match"), checked: "p2wsh" };
-    const ms = parseMultisig(ws);
-    if (!ms) return { state: "inconclusive", reason: "witness scripts other than m-of-n CHECKMULTISIG are outside this model", toSpend: spend, toSign: sign, checked: "p2wsh" };
-    if (w[0] !== "" || w.length !== ms.m + 2) return { ...bad("invalid signature: wrong witness shape for CHECKMULTISIG"), checked: "p2wsh multisig" };
-    const d = bip143Digest(tx, 0, push(ws), 0n).sighashHex;
-    let k = 0;
-    for (const s of w.slice(1, -1)) { while (k < ms.keys.length && !ecdsaOk(s, ms.keys[k], d)) k++; if (k === ms.keys.length) return { ...bad("invalid signature"), checked: "p2wsh multisig" }; k++; }
-    return { ...valid, toSpend: spend, toSign: sign, checked: "p2wsh multisig" };
-  }
-  return { state: "inconclusive", reason: `${kind} needs a script interpreter`, toSpend: spend, toSign: sign, checked: "structure" };
+  return { state: "valid", time: T, age: S, toSpend: spend, toSign: sign, checked: result.path };
 }
