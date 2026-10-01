@@ -796,7 +796,7 @@ export type DerivedV2RekeyFixture = V2RekeyFixture & { derived: V2RekeyDerived }
 export interface Bip322VectorFixture extends BaseFixture {
   kind: "bip322-vector";
   set: "basic" | "gen";
-  group: "simple" | "full" | "error";
+  group: "simple" | "full" | "error" | "proof_of_funds";
   index: number;
   expect: "valid" | "invalid" | "inconclusive";
 }

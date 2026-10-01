@@ -13,7 +13,7 @@ const root = new URL("../../../", import.meta.url);
 const raw = "sources/research-2026-10-01-phase3/raw/";
 const basic = JSON.parse(readFileSync(new URL(raw + "bip-0322/basic-test-vectors.json", root), "utf8"));
 const gen = JSON.parse(readFileSync(new URL(raw + "bip-0322/generated-test-vectors.json", root), "utf8"));
-const CHECKED = ["p2wpkh", "p2tr", "p2wsh-multisig-2of2", "p2wsh-multisig-3of3"];
+const CHECKED = ["p2pkh", "p2wpkh", "p2tr", "p2tr-time-lock", "p2sh-p2wpkh", "p2wsh-time-lock", "p2wsh-multisig-2of2", "p2wsh-multisig-3of3", "p2sh-p2wsh-multisig-2of2", "p2sh-multisig-2of2"];
 
 describe("BIP 322 message hash and virtual transactions", () => {
   for (const v of basic.tx_hashes) {
@@ -114,8 +114,9 @@ describe("message-signing chapter prose numbers", () => {
     has("a 3-of-3 multisig address, whose “signature” is three ECDSA signatures, an empty dummy item and the witness script");
     expect(basic.simple.some((v: { bip322_signatures: string[] }) => v.bip322_signatures.some((s) => !/^(smp|ful|pof)/.test(s)))).toBe(true);
     has("one of the published vectors tests exactly that");
-    const fx = JSON.parse(readFileSync(new URL("fixtures/message-signing.json", root), "utf8")).fixtures;
-    expect(fx.filter((f: { kind: string }) => f.kind === "bip322-vector").length).toBe(6);
+    const chapter = JSON.parse(text);
+    const hero = chapter.sections.flatMap((s: { blocks: { figure?: string; fixtures?: string[] }[] }) => s.blocks).find((b: { figure?: string }) => b.figure === "A18.2");
+    expect(hero.fixtures.length).toBe(6);
     has("Six of BIP 322’s published vectors");
   });
 });

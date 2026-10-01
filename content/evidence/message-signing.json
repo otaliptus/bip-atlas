@@ -527,7 +527,7 @@
     },
     {
       "id": "vectors",
-      "statement": "This site's BIP 322 model reproduces the published message hashes and both transaction IDs, and verifies every simple and full vector whose script it can check (P2WPKH, P2TR key path, P2WSH multisig); for P2PKH, P2SH and time-lock scripts, which need a script interpreter, it reports inconclusive. It rejects every published error vector. The build fails if a figure's verdict differs from the one recorded for that vector: valid for scripts the model checks, inconclusive for those it cannot, invalid for error vectors.",
+      "statement": "This site's BIP 322 model reproduces the published message hashes and both transaction IDs, and verifies every published simple and full vector (P2PKH, P2SH, P2SH-wrapped and native SegWit, multisig, P2TR key and script paths, and time locks) with a script interpreter limited to a reviewed opcode set that applies the required rules in every script version; it reports inconclusive for scripts outside that set and for proof-of-funds signatures, whose PSBTs it does not decode. It rejects every published error vector. The build fails if a figure's verdict differs from the one recorded for that vector.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

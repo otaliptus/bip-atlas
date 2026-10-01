@@ -11,7 +11,7 @@ export function Bip322Verdicts({ fixture }: { fixture: DerivedBip322VerdictsFixt
           <p class="atlas-b322-verdicts__detail">{r.detail}</p>
         </section>
       ))}
-      <p class="atlas-lab__source">Vectors from BIP 322’s test files, checked by the tested model. “Inconclusive” here means this model has no script interpreter for that script type, one of the cases the BIP’s inconclusive state is for.</p>
+      <p class="atlas-lab__source">Vectors from BIP 322’s test files, checked by the tested model. “Inconclusive” here means this model does not decode proof-of-funds PSBTs, so it cannot check the scripts they satisfy.</p>
     </div>
   );
 }

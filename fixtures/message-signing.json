@@ -88,7 +88,7 @@
       "id": "b322-p2pkh-full",
       "kind": "bip322-vector",
       "label": "P2PKH",
-      "shortLabel": "full, needs an interpreter",
+      "shortLabel": "full, T = 2016, S = 2016",
       "source": {
         "bip": 322,
         "file": "bip-0322/generated-test-vectors.json",
@@ -99,7 +99,7 @@
       "set": "gen",
       "group": "full",
       "index": 0,
-      "expect": "inconclusive"
+      "expect": "valid"
     },
     {
       "id": "b322-wrong-message",
@@ -119,6 +119,23 @@
       "expect": "invalid"
     },
     {
+      "id": "b322-pof",
+      "kind": "bip322-vector",
+      "label": "P2PKH proof of funds",
+      "shortLabel": "pof, not decoded by this model",
+      "source": {
+        "bip": 322,
+        "file": "bip-0322/generated-test-vectors.json",
+        "line": 234,
+        "section": "Test vectors",
+        "quote": "pofcHNidP8BAI8CAAAAA3UzG05Nmq3GQGeM4RuOv"
+      },
+      "set": "gen",
+      "group": "proof_of_funds",
+      "index": 0,
+      "expect": "inconclusive"
+    },
+    {
       "id": "b322-verdicts",
       "kind": "bip322-verdicts",
       "label": "Three verdicts",
@@ -133,7 +150,7 @@
       "cases": [
         "b322-p2wpkh-full",
         "b322-wrong-message",
-        "b322-p2pkh-full"
+        "b322-pof"
       ]
     }
   ]
