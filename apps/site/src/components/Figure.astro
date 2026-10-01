@@ -21,6 +21,14 @@ import {
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
+  MnemonicWorked,
+  Bip32Worked,
+  TxWorked,
+  AddressWorked,
+  PsbtWorked,
+  SchnorrWorked,
+  TaprootWorked,
+  TapscriptWorked,
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
@@ -94,4 +102,16 @@ const ts = picked as DerivedTapscriptFixture[];
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {recipe.interactive && (
+    <Fragment slot="worked">
+      {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
+      {figure.recipe === "entropy-word-pipeline.v1" && <MnemonicWorked fixture={mnemonic[0]} />}
+      {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
+      {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
+      {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
+      {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
+      {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
+      {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
+    </Fragment>
+  )}
 </Plate>

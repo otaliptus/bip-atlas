@@ -11,6 +11,7 @@ interface Props {
 }
 const { figure, numbers, interactive = false, path } = Astro.props;
 const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
+const tabbed = interactive && Astro.slots.has("worked");
 ---
 <figure class:list={["manual-plate", "atlas-plate", `atlas-plate--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`}>
   <div class="atlas-plate__head">
@@ -20,9 +21,56 @@ const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
   </div>
   <div class="manual-plate-stage">
     <span class="atlas-plate__code" aria-hidden="true">FIG. {figure.figure}</span>
-    <slot />
+    {tabbed ? (
+      <div class="atlas-tabs" data-tabs>
+        <div class="atlas-tabs__list" role="tablist" aria-label={`Fig. ${figure.figure} views`} hidden>
+          <button type="button" role="tab" id={`${id}-tab-live`} aria-controls={`${id}-panel-live`} aria-selected="true">
+            <span class="atlas-tabs__num">A</span> Interactive
+          </button>
+          <button type="button" role="tab" id={`${id}-tab-worked`} aria-controls={`${id}-panel-worked`} aria-selected="false" tabindex="-1">
+            <span class="atlas-tabs__num">B</span> Worked example
+          </button>
+        </div>
+        <div class="atlas-tabs__panel" role="tabpanel" id={`${id}-panel-live`} aria-labelledby={`${id}-tab-live`} data-panel="live">
+          <p class="atlas-tabs__fallback">A · Interactive</p>
+          <slot />
+        </div>
+        <div class="atlas-tabs__panel" role="tabpanel" id={`${id}-panel-worked`} aria-labelledby={`${id}-tab-worked`} data-panel="worked">
+          <p class="atlas-tabs__fallback">B · Worked example</p>
+          <slot name="worked" />
+        </div>
+      </div>
+    ) : <slot />}
   </div>
   <figcaption class="manual-plate-caption">
     <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
   </figcaption>
 </figure>
+
+<script>
+  // Progressive enhancement: without JS both views stay visible, one after the other.
+  for (const root of document.querySelectorAll<HTMLElement>("[data-tabs]")) {
+    const list = root.querySelector<HTMLElement>("[role=tablist]")!;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[role=tab]")];
+    const panels = tabs.map((t) => document.getElementById(t.getAttribute("aria-controls")!)!);
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, k) => {
+        t.setAttribute("aria-selected", String(k === i));
+        t.tabIndex = k === i ? 0 : -1;
+        panels[k].hidden = k !== i;
+      });
+      if (focus) tabs[i].focus();
+    };
+    list.hidden = false;
+    root.classList.add("is-enhanced");
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(i));
+      t.addEventListener("keydown", (e) => {
+        const n = tabs.length;
+        const k = e.key === "ArrowRight" ? (i + 1) % n : e.key === "ArrowLeft" ? (i - 1 + n) % n : e.key === "Home" ? 0 : e.key === "End" ? n - 1 : -1;
+        if (k >= 0) (e.preventDefault(), select(k, true));
+      });
+    });
+    select(0);
+  }
+</script>

@@ -25,3 +25,4 @@ export { SigMsgLayout } from "./taproot/SigMsgLayout";
 export { TapscriptWitness } from "./tapscript/TapscriptWitness";
 export { TapscriptTrace } from "./tapscript/TapscriptTrace";
 export { SigopsBudget } from "./tapscript/SigopsBudget";
+export { MnemonicWorked, Bip32Worked, TxWorked, AddressWorked, PsbtWorked, SchnorrWorked, TaprootWorked, TapscriptWorked } from "./worked/Worked";

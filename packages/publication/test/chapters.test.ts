@@ -149,6 +149,12 @@ describe("shared contracts", () => {
     expect(problems).toMatch(/unknown fixture nope/);
   });
 
+  it("gives every interactive recipe a worked-example tab", () => {
+    const dispatcher = readFileSync(new URL("apps/site/src/components/Figure.astro", root), "utf8");
+    const worked = dispatcher.slice(dispatcher.indexOf('slot="worked"'));
+    for (const r of RECIPE_MAP.values()) if (r.interactive) expect(worked, r.id).toContain(`"${r.id}"`);
+  });
+
   it("parses only code and emphasis marks", () => {
     expect(parseInline("a `b` *c* <d>")).toEqual([
       { kind: "text", value: "a " }, { kind: "code", value: "b" }, { kind: "text", value: " " },

@@ -38,7 +38,7 @@ const scopeLabel: Record<string, string> = {
 const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
 ---
 <Base title={`${pub.title} · BIP Atlas`} description={pub.dek} current="chapter">
-  <article class="atlas-chapter">
+  <article class="atlas-chapter" data-chapter={chapter}>
     <header class="manual-page atlas-chapter-head">
       <div class="atlas-chapter-intro">
         <p class="atlas-specimen">{pub.specimenLabel}</p>
