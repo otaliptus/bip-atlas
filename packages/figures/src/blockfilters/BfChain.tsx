@@ -11,21 +11,21 @@ export function BfChain({ fixture }: { fixture: DerivedBfChainFixture }) {
         {rows.map((r, i) => (
           <>
             {i > 0 && r.height !== rows[i - 1].height + 1 ? (
-              <li class="atlas-bf-chain__gap">blocks {rows[i - 1].height + 1}–{r.height - 1} are not in the vectors</li>
+              <li class="atlas-bf-chain__gap">{rows[i - 1].height + 1 === r.height - 1 ? `block ${r.height - 1} is not in the vectors` : `blocks ${rows[i - 1].height + 1}–${r.height - 1} are not in the vectors`}</li>
             ) : null}
             <li class="atlas-bf-chain__row">
               <p class="atlas-bf-chain__h">Block {r.height}</p>
               <dl>
                 <div><dt>filter</dt><dd><code>{r.filterHex}</code></dd></div>
                 <div><dt>filter hash = dSHA256(filter)</dt><dd><code>{short(r.filterHash)}</code></dd></div>
-                <div><dt>previous header</dt><dd><code>{short(r.prevHeader)}</code>{r.linksToPrevious ? <small> {i === 0 ? "(32 zero bytes, for genesis)" : `(block ${rows[i - 1].height}’s header)`}</small> : null}</dd></div>
+                <div><dt>previous header</dt><dd><code>{short(r.prevHeader)}</code>{r.linksToPrevious ? <small> {i === 0 ? "(32 zero bytes, for genesis)" : `(block ${rows[i - 1].height}’s header)`}</small> : <small> (block {r.height - 1}’s header)</small>}</dd></div>
                 <div><dt>header = dSHA256(hash ‖ previous)</dt><dd><code>{short(r.header)}</code></dd></div>
               </dl>
             </li>
           </>
         ))}
       </ol>
-      <p class="atlas-lab__source">Blocks from BIP 158’s testnet-19.json; hashes and headers recomputed by the tested model and checked against the vectors.</p>
+      <p class="atlas-lab__source">Blocks from BIP 158’s testnet-19.json; hashes and headers recomputed by the tested model and checked against the vectors. Hashes are shown in display byte order, as the vectors print them; the double SHA-256 is computed over the internal (reversed) order.</p>
     </div>
   );
 }

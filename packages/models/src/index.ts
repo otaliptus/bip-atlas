@@ -16,3 +16,4 @@ export * from "./descriptors";
 export * from "./musig2";
 export * from "./silentpayments";
 export * from "./blockfilter";
+export * from "./v2transport";

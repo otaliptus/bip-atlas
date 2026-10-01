@@ -81,6 +81,14 @@ describe("hashing and parameters", () => {
     expect(empty[5]).toBe("00");
   });
 
+  it("block 926,485 needs duplicates collapsed: 9 elements, not 17", () => {
+    const r = rows.find((x) => x[0] === 926485)!;
+    const f = buildBasicFilter(r[1], r[2], r[3], r[4]);
+    expect(f.N).toBe(9);
+    const raw = f.views.filter((v) => v.included || v.reason?.startsWith("duplicate")).length;
+    expect(raw).toBe(17);
+  });
+
   it("a non-member is not found and the search stops early", () => {
     const [, hash, block, prev, prevHeader] = rows.find((r) => r[0] === 926485)!;
     const f = buildBasicFilter(hash, block, scriptsOf(prev), prevHeader);
@@ -108,9 +116,9 @@ describe("block-filters chapter prose numbers", () => {
     expect(text).toContain("M ≈ 1.497137·2^P");
     expect(b157[169]).toContain("strictly less than 1000");
     expect(b157[233]).toContain("strictly less than 2,000");
-    expect(text).toContain("fewer than 1,000 blocks of filters, or 2,000 filter headers");
+    expect(text).toContain("at most 1,000 blocks of filters, or 2,000 filter headers");
     expect(b157[377]).toContain("intervals of 1,000");
-    expect(text).toContain("checkpoints every 1,000 blocks");
+    expect(text).toContain("the filter header at every 1,000th block");
     expect(text).toContain("the first 16 bytes of the block’s hash");
   });
 
@@ -130,7 +138,9 @@ describe("block-filters chapter prose numbers", () => {
     expect(text).toContain("block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25");
     expect(Math.round(((a.filter.length - 1) * 8) / a.N)).toBe(21);
     expect(Math.round(((b.filter.length - 1) * 8) / b.N)).toBe(21);
-    expect(text).toContain("about 21 bits per item, against 64");
+    expect(text).toContain("about 21 bits per item, close to that floor, against about 23 bits");
+    expect(Math.round(Math.log2(13 * 784931))).toBe(23);
+    expect(Math.round(Math.log2(9 * 784931))).toBe(23);
     expect(rows.find((r) => r[7] === "Empty data")![5]).toBe("00");
     expect(text).toContain("whose filter is the single byte 00");
   });

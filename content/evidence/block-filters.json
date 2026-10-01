@@ -32,7 +32,7 @@
     {
       "id": "light-clients",
       "statement": "Light clients download all block headers, verify proof of work, follow the most-work chain, and then download only the data relevant to them; headers are a fixed 80 bytes.",
-      "scope": "author-rationale",
+      "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
         {
@@ -119,7 +119,7 @@
     },
     {
       "id": "random-peers",
-      "statement": "A client fetching full blocks from the P2P network SHOULD download them from outbound peers at random to mitigate privacy loss from transaction intersection analysis.",
+      "statement": "A client fetching full blocks from the P2P network SHOULD download them from outbound peers at random to mitigate privacy loss from transaction intersection analysis. (Inference: the peer serving a downloaded block sees which block was requested.)",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -535,7 +535,7 @@
     },
     {
       "id": "limits",
-      "statement": "A getcfilters range must be under 1,000 blocks and a getcfheaders range under 2,000; checkpoints are filter headers at heights that are positive multiples of 1,000.",
+      "statement": "A getcfilters request MUST span a height difference strictly less than 1,000 (at most 1,000 blocks) and a getcfheaders request strictly less than 2,000; checkpoints are filter headers at heights that are positive multiples of 1,000.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -599,7 +599,7 @@
     },
     {
       "id": "vectors",
-      "statement": "This site's block-filter model rebuilds all ten of BIP 158's testnet filter vectors from the blocks and spent scripts, byte for byte, and reproduces their filter headers; the figures show some of them, rebuilt at build time.",
+      "statement": "This site's block-filter model rebuilds all ten of BIP 158's testnet filter vectors (the BIP's text says five blocks; the pinned file has ten) from the blocks and spent scripts, byte for byte, and reproduces their filter headers; the figures show some of them, rebuilt at build time.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -663,7 +663,7 @@
     },
     {
       "id": "size-computed",
-      "statement": "In the published vectors, block 180,480's filter has 13 elements in 35 bytes and block 926,485's has 9 in 25 bytes: about 21 bits per element against 64 for the raw hashes.",
+      "statement": "In the published vectors, block 180,480's filter has 13 elements in 35 bytes and block 926,485's has 9 in 25 bytes: about 21 bits per element, close to the 20-bit floor, against about 23 bits to write each hashed value at fixed width below N·M.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -674,6 +674,94 @@
             431
           ],
           "quote": "Test vectors for basic block filters on five testnet blocks, including the filters and filter headers"
+        }
+      ]
+    },
+    {
+      "id": "geometric",
+      "statement": "Because the hashed items are uniformly distributed, their sorted differences resemble a geometric distribution, which Golomb-Rice coding compresses optimally.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            124,
+            129
+          ],
+          "quote": "Since the items are distributed uniformly, it can be shown that the differences resemble a geometric distribution<ref>https://en.wikipedia.org/wiki/Geometric_distribution</ref>. ''Golomb-Rice'' ''coding''<ref>https://en.wikipedia.org/wiki/Golomb_coding#Rice_coding</ref> is a technique that optimally compresses geometrically distributed values."
+        }
+      ]
+    },
+    {
+      "id": "dedup",
+      "statement": "Each script enters the filter once: BIP 158 calls the elements a set, and the published filter for block 926,485, whose scripts repeat, only reproduces when duplicates are collapsed (9 elements, not 17).",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            275,
+            275
+          ],
+          "quote": "Any \"nil\" items MUST NOT be included into the final set of filter elements."
+        }
+      ]
+    },
+    {
+      "id": "block-not-enough",
+      "statement": "To recompute a basic filter one needs the scripts the block's inputs spend, which the block itself does not contain; BIP 157 does not say how a light client should obtain or check them.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 158,
+          "lines": [
+            272,
+            272
+          ],
+          "quote": "* The previous output script (the script being spent) for each input, except for the coinbase transaction."
+        },
+        {
+          "bip": 157,
+          "lines": [
+            389,
+            391
+          ],
+          "quote": "The client then SHOULD download the full block from any peer and derive the correct filter and filter header."
+        }
+      ]
+    },
+    {
+      "id": "empty-check",
+      "statement": "A client MAY check whether a filter is empty from its header before requesting it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            407,
+            409
+          ],
+          "quote": "The client MAY check if a filter is empty before requesting it by checking if the filter header commits to the hash of the empty filter, saving a round trip if that is the case."
+        }
+      ]
+    },
+    {
+      "id": "checkpoints-sync",
+      "statement": "Clients configured with trusted checkpoints MAY sync block headers only from the last checkpoint; separately, a client MAY fetch filter headers at every 1,000th block with getcfcheckpt and verify each 1,000-header range against them.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 157,
+          "lines": [
+            377,
+            381
+          ],
+          "quote": "The client MAY first fetch headers at evenly spaced intervals of 1,000 by sending <code>getcfcheckpt</code>. The header checkpoints allow the client to download filter headers for different intervals from multiple peers in parallel, verifying each range of 1,000 headers against the checkpoints."
         }
       ]
     }

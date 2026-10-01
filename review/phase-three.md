@@ -193,3 +193,41 @@ Not changed: `raw()` with an empty argument, a threshold written `01`, mainnet-o
 | 11–20 (nits) | Spend key with label tweak mod n; change-label recovery scan (new claim); "(possibly labeled) spend key"; abstract wording; ledger line range; overview vs specification citations (new `scan-loop` claim on L345–362, "negligible" split into an author-rationale claim); "five vectors"; "P2SH" kind label; "x-only, read as even y" note; HRP check in `decodeAddress` | All applied. Not changed: `scan()` still checks only the labels passed in, as the reference does; the module doc says a wallet must pass m = 0 itself. Sender private keys are not range-checked; only published vectors reach the model. |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (sender and receiver views, labeled and unrelated-output vectors, eligibility figure, address figure, worked tab, no-JS); no overflow. Panel titles keep their case so the math stays readable. axe-core clean at 1440, 375, no-JS, worked tab and four interactive states.
+
+## Chapter 16 — Block filters (BIPs 157/158)
+
+**Model:** `packages/models/src/blockfilter.ts`: the basic filter's element set (output scripts except OP_RETURN, spent scripts, nil items dropped, duplicates collapsed), hash_to_range on BigInt, Golomb-Rice encode/decode with an MSB-first bit stream, GCS construction and querying with a step trace, CompactSize, filter hash and header. SipHash-2-4 comes from the `siphash` package (Frank Denis): not a `@noble` package, but not hand-rolled either. It passes the SipHash paper's reference vector, and SipHash is not security-critical here. SHA-256 comes from `@noble/hashes`.
+
+**Sources:** the pinned `testnet-19.json`. All ten blocks rebuild byte for byte, filters and headers. The BIP's text says five blocks; the file has ten. The build fails if any filter, block hash or header differs; if a drawn Golomb-Rice code differs from the filter's own leading bits; if a block's own script fails to match; or if a script from another block matches (the prose says none do).
+
+**Deliberate breakage:**
+- keep OP_RETURN outputs: 2 tests fail;
+- key in display byte order: 10 fail;
+- modulo instead of multiply-and-shift: 9 fail;
+- keep empty scripts: 3 fail;
+- no deduplication: fails block 926,485, which has 17 scripts and 9 distinct ones. My first attempt at this breakage left the set in place and changed nothing; it was redone properly.
+
+**Independent review: 2 must-fix, 8 should-fix, 8 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | Block 15,007 has no OP_RETURN output, despite the vector's note | Replaced in the hero by block 987,876 (unparseable coinbase script). The prose now cites the coinbase witness commitment of 926,485 and 1,263,442. |
+| 2 | "Gaps are mostly of similar size" was wrong | Now: roughly geometric, small gaps common; the BIP's L124–129 rationale is quoted. |
+| 3 | Comparing ~21 bits with "64" overstated the saving | Compared with ≈23 bits at fixed width below N·M (tested). The Golomb figure shows the fixed-width size for its F. |
+| 4 | Message limits were off by one | "at most 1,000 blocks of filters, or 2,000 filter headers"; the ledger now states the height-difference rule. |
+| 5 | Deduplication was done but never stated | A prose sentence, a computed claim and a test that 926,485 needs it. |
+| 6 | The "miss is reliable" paragraph rested on the wrong evidence and lacked a condition | "provided the filter is the right one". The figure's own-block matches are cited. The verdict text says "if this is the correct filter". |
+| 7 | A block alone cannot recompute a filter; "ban the peer that lied" | New editorial-analysis paragraph: spent scripts are not in the block, and BIP 157 does not say how to get them. Now "ban any peer whose header does not match". |
+| 8 | Checkpoint MAY was ambiguous | "MAY first fetch the filter header at every 1,000th block (getcfcheckpt)…" |
+| 9 | Empty filter showed a query on [0, 0) | N = 0 now shows a one-line explanation, with no number line or test scripts. The empty-filter MAY (L407–409) is cited. |
+| 10 | "blocks 1–1" | Singular and plural fixed; block 2's previous header is labelled as block 1's. |
+| 11–18 (nits) | Wording changes: "most implementations"; "nil" (empty); five/ten vector note; download visibility as an inference. Model: SegWit flag must be 0x01; non-minimal and oversized CompactSize rejected; padding not checked (comment). The chain figure states its display byte order. The siphash exception is recorded here. | Applied. Scope labels on descriptive spec claims were left as normative-rule. |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 covered:
+- the Golomb table;
+- hero start, a miss, the empty filter, the unparseable coinbase, mobile with coding shown;
+- the header chain;
+- the worked tab;
+- no-JS.
+
+There is no overflow. axe-core is clean at 1440, 375, no-JS, the worked tab and two interactive states.

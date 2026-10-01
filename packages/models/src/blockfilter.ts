@@ -101,6 +101,8 @@ function readCompactSize(b: Uint8Array, o: number): { value: number; size: numbe
   if (o + 1 + n > b.length) throw new FilterError("Unexpected end of data.");
   let v = 0;
   for (let i = n; i >= 1; i--) v = v * 256 + b[o + i];
+  if (v > Number.MAX_SAFE_INTEGER) throw new FilterError("CompactSize too large.");
+  if (v < (n === 2 ? 0xfd : n === 4 ? 0x10000 : 0x100000000)) throw new FilterError("Non-minimal CompactSize.");
   return { value: v, size: 1 + n };
 }
 
@@ -134,7 +136,7 @@ export function constructGcs(items: Uint8Array[], P: number, key: Uint8Array, M:
 export interface MatchStep { delta: bigint; value: bigint; outcome: "less" | "equal" | "greater" }
 export interface MatchResult { N: number; F: bigint; target: bigint; matched: boolean; steps: MatchStep[] }
 
-/** gcs_match on a serialized filter (CompactSize N prefix included), recording each decoded value. */
+/** gcs_match on a serialized filter (CompactSize N prefix included), recording each decoded value. It does not check that padding bits are zero or that no bytes trail. */
 export function matchFilter(filter: Uint8Array, target: Uint8Array, key: Uint8Array, P = BASIC_P, M = BASIC_M): MatchResult {
   const { value: N, size } = readCompactSize(filter, 0);
   const F = BigInt(N) * M;
@@ -179,7 +181,11 @@ export function blockOutputScripts(blockHex: string): BlockScripts {
   for (let t = 0; t < txCount; t++) {
     take(4);
     let witness = false;
-    if (b[o] === 0x00 && b[o + 1] !== 0x00) { witness = true; take(2); }
+    if (b[o] === 0x00) {
+      if (b[o + 1] !== 0x01) throw new FilterError("SegWit flag must be 0x01.");
+      witness = true;
+      take(2);
+    }
     const nin = cs();
     for (let i = 0; i < nin; i++) { take(36); take(cs()); take(4); }
     const nout = cs();

@@ -1278,7 +1278,7 @@ function deriveBfGolomb(f: BfGolombFixture): DerivedBfGolombFixture {
   const { f: b } = bfBuild(f.exampleHeight);
   const r = new BitReader(b.compressed);
   if (golombDecode(r, BASIC_P) !== b.deltas[0]) throw new Error(`${f.id}: example delta differs`);
-  return { ...f, derived: { table, example: { height: f.exampleHeight, value: b.values[0].toString(), code: bfCode(b.deltas[0]) } } };
+  return { ...f, derived: { table, example: { height: f.exampleHeight, value: b.values[0].toString(), F: b.F.toString(), code: bfCode(b.deltas[0]) } } };
 }
 
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {

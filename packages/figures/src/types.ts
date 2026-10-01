@@ -727,6 +727,6 @@ export interface BfGolombFixture extends BaseFixture {
 }
 export interface BfGolombDerived {
   table: Array<{ n: number; q: number; r: number; code: string }>;
-  example: { height: number; value: string; code: BfCode };
+  example: { height: number; value: string; F: string; code: BfCode };
 }
 export type DerivedBfGolombFixture = BfGolombFixture & { derived: BfGolombDerived };

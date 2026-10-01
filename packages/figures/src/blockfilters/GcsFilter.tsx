@@ -66,7 +66,7 @@ export function GcsFilter({ fixtures, figureId }: Props) {
 
       <section class="atlas-panel atlas-bf-query" aria-label="Test a script against the filter">
         <h3 class="atlas-panel__title">Test a script against the filter</h3>
-        {d.probes.length === 0 ? <p class="atlas-panel__empty">No scripts to test.</p> : hydrated ? (
+        {d.probes.length === 0 || d.N === 0 ? null : hydrated ? (
           <fieldset class="atlas-bf-probes">
             <legend>Fixture script</legend>
             {d.probes.map((p, i) => (
@@ -77,7 +77,9 @@ export function GcsFilter({ fixtures, figureId }: Props) {
             ))}
           </fieldset>
         ) : <p>Script <code>{short(probe.script)}</code>, from {probe.from}.</p>}
-        {probe ? (
+        {d.N === 0 ? (
+          <p class="atlas-bf-verdict" data-matched="false">N = 0: the filter is empty, so no script can match and there is nothing to hash or decode.</p>
+        ) : probe ? (
           <>
             <svg class="atlas-bf-line" viewBox="0 0 1000 60" role="img" aria-label={`The ${d.N} hashed values on the range 0 to F, with the queried script's value marked.`}>
               <line x1="10" y1="30" x2="990" y2="30" class="atlas-bf-line__axis" />
@@ -97,7 +99,7 @@ export function GcsFilter({ fixtures, figureId }: Props) {
             <p class="atlas-bf-verdict" data-matched={probe.matched ? "true" : "false"}>
               {probe.matched
                 ? "Match: the block may concern this script. A match can be a false positive, so the client downloads the block to find out."
-                : "No match: this script is not among the filter’s elements, so no output in this block pays to it and no input spends from it. That certainty covers only what the filter holds: OP_RETURN outputs, for one, are left out."}
+                : "No match: if this is the correct filter, no output in this block pays to this script and no input spends from it. That certainty covers only what the filter holds: OP_RETURN outputs, for one, are left out."}
             </p>
           </>
         ) : null}

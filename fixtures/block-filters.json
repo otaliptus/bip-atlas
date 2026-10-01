@@ -74,18 +74,18 @@
       "height": 49291
     },
     {
-      "id": "bf-block-15007",
+      "id": "bf-block-987876",
       "kind": "bf-block",
-      "label": "Block 15,007",
-      "shortLabel": "OP_RETURN output",
+      "label": "Block 987,876",
+      "shortLabel": "unparseable coinbase script",
       "source": {
         "bip": 158,
         "file": "bip-0158/testnet-19.json",
-        "line": 6,
+        "line": 10,
         "section": "Appendix C: Test Vectors",
-        "quote": "0000000038c44c703bae0f98cdd6bf30922326340a5996cc692aaae8bacf47ad"
+        "quote": "0000000000000c00901f2049055e2a437c819d79a3d54fd63e6af796cd7b8a79"
       },
-      "height": 15007
+      "height": 987876
     },
     {
       "id": "bf-block-1414221",
