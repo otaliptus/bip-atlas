@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import { PERIOD, simulateBip8, simulateBip9, type Bip8State } from "@bip-atlas/models/versionbits";
 import type { DerivedVersionbitsDeploymentFixture, DerivedVersionbitsGuidelineFixture } from "../types";
 
@@ -74,7 +75,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
   };
 
   return (
-    <div class="atlas-lab atlas-vb-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-vb-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-lab__samples">
@@ -98,7 +99,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
 
       <ol class="atlas-vb-states" aria-label="Deployment states">
         {states.map((s) => (
-          <li data-current={s === state ? "true" : undefined} data-state={s}>{s}</li>
+          <li data-current={s === state ? "true" : undefined} aria-current={s === state ? "step" : undefined} data-state={s}>{s}</li>
         ))}
       </ol>
 

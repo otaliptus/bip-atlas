@@ -66,16 +66,13 @@ export function DerivationTree({ fixture, figureId }: Props) {
     const value = view === "private" ? n.xprv : n.xpub;
     return (
       <li
-        role="treeitem"
-        aria-expanded={kids.length ? open : undefined}
-        aria-selected={hydrated ? n.path === current.path : undefined}
         class="atlas-tree__item"
         data-hardened={n.hardened ? "true" : undefined}
         data-reachable={ok ? "true" : "false"}
       >
         <div class="atlas-tree__row">
           {kids.length && hydrated ? (
-            <button type="button" class="atlas-tree__twisty" aria-label={`${open ? "Collapse" : "Expand"} ${n.path}`} onClick={() => toggleExpand(n.path)}>
+            <button type="button" class="atlas-tree__twisty" aria-label={`Branch ${n.path}`} aria-expanded={open} onClick={() => toggleExpand(n.path)}>
               {open ? "−" : "+"}
             </button>
           ) : (
@@ -93,6 +90,7 @@ export function DerivationTree({ fixture, figureId }: Props) {
               class="atlas-tree__node"
               data-selected={n.path === current.path ? "true" : undefined}
               onClick={() => setSelected(n.path)}
+              aria-current={n.path === current.path ? "true" : undefined}
               aria-label={`${n.path}: ${ok ? (view === "private" ? "extended private key" : "extended public key") : "not derivable from M"}`}
             >
               <span class="atlas-tree__path">{view === "public" && ok ? n.path.replace(/^m/, "M") : n.path}</span>
@@ -107,7 +105,7 @@ export function DerivationTree({ fixture, figureId }: Props) {
             </span>
           )}
         </div>
-        {kids.length && open ? <ul role="group" class="atlas-tree__group">{kids.map(renderNode)}</ul> : null}
+        {kids.length && open ? <ul class="atlas-tree__group">{kids.map(renderNode)}</ul> : null}
       </li>
     );
   };
@@ -144,7 +142,8 @@ export function DerivationTree({ fixture, figureId }: Props) {
       )}
 
       <div class="atlas-hd-lab__body">
-        <ul role="tree" class="atlas-tree" aria-label={`Key tree from BIP 32 test vector 1, ${view} view`}>
+        {/* Nested lists of buttons, not role="tree": a tree promises arrow-key navigation, which this figure does not implement; Tab reaches every button. */}
+        <ul class="atlas-tree" aria-label={`Key tree from BIP 32 test vector 1, ${view} view`}>
           {renderNode(byPath.get("m")!)}
         </ul>
 

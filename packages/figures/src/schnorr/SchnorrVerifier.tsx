@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedSchnorrFixture, SchnorrStageId, SchnorrTraceView } from "../types";
 
 interface Props {
@@ -75,7 +76,7 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
   const failedAt = trace.failedStage ? SCHNORR_STAGES.findIndex((st) => st.id === trace.failedStage) : -1;
 
   return (
-    <div class="atlas-lab atlas-sig-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-sig-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls atlas-sig-lab__controls">
           <fieldset class="atlas-lab__samples">
@@ -185,7 +186,7 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
               : <>This pairing of vector {fixture.vectorIndex}’s key and signature with vector {message.fromVector}’s message is not itself a published vector; the result is computed by the tested model.</>}
           </>
         ) : (
-          <>Stage {shown} of {SCHNORR_STAGES.length} revealed.</>
+          <>Stage {shown} of {SCHNORR_STAGES.length} revealed: {SCHNORR_STAGES[shown - 1].label}, {{ pass: "passes", fail: "fails", "not-reached": "not reached", pending: "not revealed" }[statusOf(shown - 1)]}.</>
         )}
       </p>
       <p class="atlas-lab__source">

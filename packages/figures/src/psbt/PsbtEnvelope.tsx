@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedPsbtTraceFixture, PsbtRecordView } from "../types";
 
 interface Props {
@@ -71,7 +72,7 @@ export function PsbtEnvelope({ fixture, figureId }: Props) {
   }
 
   return (
-    <div class="atlas-lab atlas-psbt-lab" data-hydrated="true">
+    <div class="atlas-lab atlas-psbt-lab" data-hydrated="true" onClickCapture={holdFocus}>
       <ol class="atlas-roles" aria-label="Roles in the published trace">
         {steps.map((s, i) => (
           <li>

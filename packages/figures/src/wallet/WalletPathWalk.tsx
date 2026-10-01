@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedWalletPathFixture, WalletAddressView } from "../types";
 
 interface Props {
@@ -37,7 +38,7 @@ export function WalletPathWalk({ fixtures, figureId }: Props) {
   const node = step < last ? a.nodes[step] : null;
 
   return (
-    <div class="atlas-lab atlas-wp-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-wp-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-segmented">

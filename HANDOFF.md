@@ -43,8 +43,8 @@ Last updated: 1 October 2026, at the end of the cloud session that built phase t
 1. **Open (or update) the phase-three PR** from `main-q0i8zv` to `main`, check CI, and merge only when the user asks.
 2. **Human review of phase three.** The user should read `review/phase-three.md` and the ten chapters on the preview URL or with `pnpm dev`.
 3. **Open items, in rough priority:**
-   - **Screen readers:** a screen-reader pass on each hero.
-   - **Tablet screenshots:** 768–1024 px.
+   - **Screen readers:** an accessibility-tree + keyboard + axe audit of all 18 heroes is done (`review/accessibility-and-tablet.md`, fixes applied; message-signing findings recorded, not applied). A live VoiceOver/NVDA session is still open, as are the items in that record's "Not done" list.
+   - **Tablet screenshots:** done at 768 and 1024 (`review/screenshots/tablet/`, `tools/a11y-tablet-audit.mjs`); squeezed two-column labs now stack below 80rem.
    - **BIP 322:** a script interpreter would turn the `inconclusive` cases (P2PKH, P2SH, time-lock scripts) into checked ones. That needs the same reviewed-opcode discipline as `tapscript.ts`.
    - **BIP 324:** if an audited ElligatorSwift implementation appears (e.g. in `@noble/curves`), add decoding and check `ellswift_decode_test_vectors.csv`.
    - **Milestone 3** of the spec (generation from the ledger), only after sign-off.
