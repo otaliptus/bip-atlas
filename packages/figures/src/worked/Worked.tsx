@@ -43,13 +43,13 @@ export function MnemonicWorked({ fixture: f }: { fixture: DerivedMnemonicFixture
     {
       title: "Stretch words and passphrase into a 64-byte seed",
       values: [{ label: "passphrase", value: f.passphrase || "(empty)" }, { label: "seed", value: d.seeds[0].seedHex }],
-      note: "PBKDF2-HMAC-SHA512, 2,048 iterations, salt “mnemonic” + passphrase.",
+      note: "PBKDF2-HMAC-SHA512, 2,048 iterations; password the words, salt “mnemonic” + passphrase, both UTF-8 NFKD.",
       layer: { size: 0.7, tone: "accent" },
     },
   ];
   return (
     <WorkedExample
-      intro={<>One published vector, end to end: <strong>{f.label}</strong>. A public test phrase — never use it for funds.</>}
+      intro={<>One published vector, end to end: <strong>{f.label}</strong>. The hatched layer is the checksum. A public test phrase — never use it for funds.</>}
       steps={steps}
       label={`Entropy, checksum, ${d.layout.wordCount} groups, words, then seed, drawn as stacked layers.`}
       source={<>Source: {f.source.external ? `${f.source.external} ${f.source.pointer}` : `BIP 39 line ${f.source.line}`}; computed by the tested BIP 39 model.</>}
@@ -64,13 +64,13 @@ export function Bip32Worked({ fixture: f }: { fixture: DerivedBip32Fixture }) {
   const steps: WorkedStep[] = [
     {
       title: "Seed → master key and chain code",
-      values: [{ label: "seed", value: f.seedHex }, { label: "HMAC-SHA512", value: f.derived.masterIHex }],
+      values: [{ label: "seed", value: f.seedHex }, { label: "HMAC-SHA512, key “Bitcoin seed”", value: f.derived.masterIHex }],
       note: "Left 32 bytes: master private key. Right 32 bytes: master chain code.",
       layer: { size: 0.75, tone: "plain", cells: 2 },
     },
     ...nodes.map((n): WorkedStep => ({
-      title: n.path === "m" ? "Master node m" : `${n.path} — ${n.hardened ? "hardened child: needs the parent’s private key" : "normal child: derivable from the parent’s public key too"}`,
-      values: [{ label: "xpub", value: n.xpub }, { label: "fingerprint", value: n.fingerprintHex }],
+      title: n.path === "m" ? "Master node m" : `${n.path} — ${n.hardened ? "hardened child: needs the parent’s private key" : "normal child: derivable from the parent’s extended public key too"}`,
+      values: [{ label: "xpub", value: n.xpub }, { label: "own key fingerprint", value: n.fingerprintHex }],
       layer: { size: 0.9 - n.depth * 0.12, tone: n.path === "m" ? "accent" : n.hardened ? "hatch" : "wash" },
     })),
   ];
@@ -109,7 +109,7 @@ export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture })
     }),
     {
       title: "Two identifiers",
-      values: [{ label: `txid (${m.baseSize} bytes hashed)`, value: m.txidHex }, { label: `wtxid (${m.totalSize} bytes)`, value: m.wtxidHex }],
+      values: [{ label: `txid (${m.baseSize} bytes hashed)`, value: m.txidHex }, { label: `wtxid (${m.totalSize} bytes hashed)`, value: m.wtxidHex }],
       note: `Hashes in the byte order they are computed. Weight 3 × ${m.baseSize} + ${m.totalSize} = ${m.weight}; ${m.vsize} virtual bytes.`,
       layer: { size: 0.5, tone: "accent", cells: 2 },
     },
@@ -132,7 +132,7 @@ export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
   const sep = good.address.lastIndexOf("1");
   const program = good.address.slice(sep + 2, -6);
   const steps: WorkedStep[] = [
-    { title: "Human-readable part and separator", values: [{ label: "network", value: `${good.address.slice(0, sep)} + ${good.address[sep]}` }], layer: { size: 0.3, tone: "plain", cells: sep + 1 } },
+    { title: "Human-readable part and separator", values: [{ label: "HRP + separator", value: `${good.address.slice(0, sep)} + ${good.address[sep]}` }], layer: { size: 0.3, tone: "plain", cells: sep + 1 } },
     { title: "Witness version, one character", values: [{ label: "character → version", value: `${good.address[sep + 1]} → ${a.witnessVersion}` }], layer: { size: 0.25, tone: "wash", cells: 1 } },
     {
       title: `Program: ${program.length} characters of 5 bits`,
@@ -142,7 +142,7 @@ export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
     {
       title: `Checksum: 6 characters, ${a.encoding === "bech32" ? "Bech32" : "Bech32m"}`,
       values: [{ label: "checksum", value: good.address.slice(-6) }],
-      note: `Version ${a.witnessVersion} must use ${a.witnessVersion === 0 ? "Bech32" : "Bech32m"}; it does, so the address is valid.`,
+      note: `Version ${a.witnessVersion} must use ${a.witnessVersion === 0 ? "Bech32" : "Bech32m"}; it does, and the program length fits the version, so the address is valid.`,
       layer: { size: 0.4, tone: "accent", cells: 6 },
     },
   ];
@@ -153,7 +153,7 @@ export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
       steps.push({
         title: `Change one character (position ${pos + 1}: ${good.address[pos]} → ${typo.address[pos]})`,
         values: [{ label: "typed", value: typo.address }],
-        note: "The checksum no longer matches either family: rejected at the checksum stage. It does not say which character is wrong.",
+        note: "The checksum no longer matches either family: rejected at the checksum stage. Validation only rejects; BIP 173 lets software at most hint where an error might be, never suggest the correction.",
         layer: { tone: "fail", cells: good.address.length - sep - 1, mark: [pos - sep - 1] },
       });
     }
@@ -174,15 +174,17 @@ export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture })
     const records = s.maps.flatMap((m) => m.records);
     const added = records.filter((r) => r.status === "added");
     const removed = s.maps.reduce((n, m) => n + m.removed.length, 0);
-    const names = [...new Set(added.map((r) => r.name))];
+    const counts = [...added.reduce((m, r) => m.set(r.name, (m.get(r.name) ?? 0) + 1), new Map<string, number>())].map(([name, n]) => `${n} ${name} record${n === 1 ? "" : "s"}`);
+    const parent = s.basedOn.length === 1 ? f.derived.states.findIndex((x) => x.id === s.basedOn[0]) : -1;
+    const parallel = parent >= 0 && parent !== i - 1 ? ` Works on state ${parent + 1}, in parallel with ${f.derived.states[i - 1].role}.` : "";
     return {
       title: `${s.role} · ${s.bytes} bytes, ${records.length} record${records.length === 1 ? "" : "s"}`,
       note:
         i === 0
           ? "Unsigned transaction in the global map; every input and output map empty."
           : s.basedOn.length > 1
-            ? `Merges ${s.basedOn.length} PSBTs into one holding every record from each${s.uniqueFrom ? ` (${s.uniqueFrom.join(" and ")} records found in only one of them)` : ""}.`
-            : `${added.length ? `Adds ${names.join(", ")}.` : "Adds nothing new."}${removed ? ` Removes ${removed} record${removed === 1 ? "" : "s"}.` : ""}`,
+            ? `Merges ${s.basedOn.length} PSBTs into one holding every record from each${s.uniqueFrom ? `: ${s.uniqueFrom.map((n, k) => `${n} only in ${f.derived.states.find((x) => x.id === s.basedOn[k])?.role ?? "one copy"}’s copy`).join(", ")}` : ""}.`
+            : `${added.length ? `Adds ${counts.join(", ")}.` : "Adds nothing new."}${removed ? ` Removes ${removed} record${removed === 1 ? "" : "s"}.` : ""}${parallel}`,
       layer: { size: 0.45 + 0.55 * Math.min(1, records.length / 16), tone: removed ? "hatch" : i === 0 ? "plain" : "wash", cells: Math.min(records.length, 24), highlight: records.map((r, k) => (r.status === "added" && i > 0 ? k : -1)).filter((k) => k >= 0 && k < 24) },
     };
   });
@@ -193,7 +195,7 @@ export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture })
   });
   return (
     <WorkedExample
-      intro={<>The <strong>{f.label}</strong>, one published state per layer. Cells are records; filled cells were just added.</>}
+      intro={<>The <strong>{f.label}</strong>, one published state per layer. Cells are records; filled cells were just added; a hatched layer removed records.</>}
       steps={steps}
       label="Each published PSBT state stacked in order, growing as roles add records."
       source={<>Source: BIP 174 lines {f.steps[0].line}–{f.extracted.line}; parsed and combined by the tested PSBT model.</>}
@@ -208,9 +210,9 @@ export function SchnorrWorked({ fixtures }: { fixtures: DerivedSchnorrFixture[] 
   const v = (stage: string) => t.steps.find((s) => s.stage === stage)?.values ?? {};
   const steps: WorkedStep[] = [
     { title: "Lift the key to the point P with even y", values: [{ label: "pk = x(P)", value: f.publicKeyHex }, { label: "y(P)", value: v("lift-x").y }], layer: { size: 0.6, tone: "plain" } },
-    { title: "Split the signature: r < p and s < n", values: [{ label: "r", value: v("r-range").r }, { label: "s", value: v("s-range").s }], layer: { tone: "wash", cells: 2 } },
-    { title: "Hash r ‖ P ‖ m with the BIP0340/challenge tag", values: [{ label: "m", value: f.messageHex || "(empty)" }, { label: "e", value: v("challenge").e }], layer: { size: 0.8, tone: "hatch", cells: 3 } },
-    { title: "Compute R = s⋅G − e⋅P", values: [{ label: "x(R)", value: v("compute-r").x }], note: "R is a finite point with even y.", layer: { size: 0.6, tone: "wash" } },
+    { title: "Split the signature and check r < p and s < n", values: [{ label: "r", value: v("r-range").r }, { label: "s", value: v("s-range").s }], layer: { tone: "wash", cells: 2 } },
+    { title: "Hash r ‖ P ‖ m with the BIP0340/challenge tag", values: [{ label: "m", value: f.messageHex || "(empty)" }, { label: "e", value: v("challenge").e }], layer: { size: 0.8, tone: "wash", cells: 3 } },
+    { title: "Compute R = s⋅G − e⋅P", values: [{ label: "x(R)", value: v("compute-r").x }, { label: "y(R)", value: v("compute-r").y }], note: "Checked: R is not the point at infinity, and y(R) is even.", layer: { size: 0.6, tone: "wash" } },
     { title: "Compare x(R) with r", note: t.valid ? "Equal: the signature verifies, as the CSV says." : "Different: verification fails.", layer: { size: 0.45, tone: t.valid ? "accent" : "fail" } },
   ];
   return (
@@ -230,18 +232,18 @@ export function TaprootWorked({ fixture: f }: { fixture: DerivedTaprootTreeFixtu
   const branches = leaf.check.filter((s) => s.id === "branch");
   const tweak = leaf.check.find((s) => s.id === "tweak")!.values;
   const steps: WorkedStep[] = [
-    { title: `Reveal one script (leaf ${String.fromCharCode(65 + leaf.id)}) and hash it`, values: [{ label: "script", value: leaf.scriptHex }, { label: "TapLeaf hash", value: leaf.leafHash }], layer: { size: 0.4, tone: "accent" } },
+    { title: `Reveal one script (leaf ${String.fromCharCode(65 + leaf.id)}) and hash it with its leaf version 0x${leaf.leafVersion.toString(16)} and length`, values: [{ label: "script", value: leaf.scriptHex }, { label: "TapLeaf hash", value: leaf.leafHash }], layer: { size: 0.4, tone: "accent" } },
     ...branches.map((b, j): WorkedStep => ({
       title: `Fold in sibling hash ${j + 1}, smaller first`,
       values: [{ label: "sibling", value: b.values.e }, { label: "TapBranch", value: b.values.next }],
       layer: { size: 0.55 + 0.2 * j, tone: "wash", cells: 2 },
     })),
-    { title: "Tweak the internal key with the root", values: [{ label: "internal key P", value: d.internalKeyHex }, { label: "t", value: tweak.t }], layer: { size: 0.9, tone: "hatch", cells: 2 } },
-    { title: "Q = P + t⋅G must equal the output key", values: [{ label: "output key q", value: d.outputKeyHex }], note: "It does: the output committed to this script all along.", layer: { size: 0.6, tone: "accent" } },
+    { title: "Tweak the internal key with the root", values: [{ label: "internal key P", value: d.internalKeyHex }, { label: "t", value: tweak.t }], layer: { size: 0.9, tone: "wash", cells: 2 } },
+    { title: "Q = P + t⋅G must equal the output key", values: [{ label: "output key q", value: d.outputKeyHex }], note: `It does, and y(Q) is ${d.parity ? "odd" : "even"}, matching the control block’s parity bit: the output committed to this script all along.`, layer: { size: 0.6, tone: "accent" } },
   ];
   return (
     <WorkedExample
-      intro={<>Spending published vector {f.vectorIndex} through its deepest leaf: what the verifier rebuilds from the control block.</>}
+      intro={<>Spending published vector {f.vectorIndex} through one of its deepest leaves: what the verifier rebuilds from the control block.</>}
       steps={steps}
       label="A leaf hash folded with sibling hashes up to the root, then tweaked into the output key."
       source={<>Source: BIP 341 wallet-test-vectors.json, {f.source.pointer}; every value matched the vector at build time.</>}
@@ -255,7 +257,12 @@ export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixtur
   const v = f.derived.success;
   const label = (ids: number[]) => (ids.length ? [...ids].reverse().map((i) => v.elements[i].label).join(" / ") : "empty");
   const steps: WorkedStep[] = [
-    { title: "Start from the witness items", values: [{ label: "stack, top first", value: label(v.initialStack) }], layer: { size: 0.35, tone: "plain", cells: v.initialStack.length } },
+    {
+      title: "Start from the witness, minus the script and control block",
+      values: [{ label: "stack, top first", value: label(v.initialStack) }],
+      note: `Sigops budget: 50 + ${v.witness.totalBytes} witness bytes = ${v.budgetStart}; each checked signature costs 50.`,
+      layer: { size: 0.35, tone: "plain", cells: v.initialStack.length },
+    },
     ...v.steps.map((s): WorkedStep => ({
       title: s.name,
       values: [{ label: "stack, top first", value: label(s.after) }],
@@ -265,7 +272,7 @@ export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixtur
   ];
   return (
     <WorkedExample
-      intro={<>Bitcoin Core test case {f.caseIndex} ({f.label}), success witness, one opcode per layer. Cells are stack elements.</>}
+      intro={<>Bitcoin Core test case {f.caseIndex} ({f.label}), success witness: the starting stack, then one opcode per layer. Cells are stack elements.</>}
       steps={steps}
       label="The stack after each opcode of one recorded tapscript run."
       source={<>Source: Core script_assets_test.json case {f.caseIndex}, pinned; recorded at build time and matched to Core’s label.</>}

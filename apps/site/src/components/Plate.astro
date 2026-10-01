@@ -31,11 +31,11 @@ const tabbed = interactive && Astro.slots.has("worked");
             <span class="atlas-tabs__num">B</span> Worked example
           </button>
         </div>
-        <div class="atlas-tabs__panel" role="tabpanel" id={`${id}-panel-live`} aria-labelledby={`${id}-tab-live`} data-panel="live">
+        <div class="atlas-tabs__panel" data-tabpanel id={`${id}-panel-live`} data-tab={`${id}-tab-live`} data-panel="live">
           <p class="atlas-tabs__fallback">A · Interactive</p>
           <slot />
         </div>
-        <div class="atlas-tabs__panel" role="tabpanel" id={`${id}-panel-worked`} aria-labelledby={`${id}-tab-worked`} data-panel="worked">
+        <div class="atlas-tabs__panel" data-tabpanel id={`${id}-panel-worked`} data-tab={`${id}-tab-worked`} data-panel="worked">
           <p class="atlas-tabs__fallback">B · Worked example</p>
           <slot name="worked" />
         </div>
@@ -61,6 +61,12 @@ const tabbed = interactive && Astro.slots.has("worked");
       });
       if (focus) tabs[i].focus();
     };
+    // Tab roles only once the tab bar works; until then the panels are plain sections.
+    for (const panel of panels) {
+      panel.setAttribute("role", "tabpanel");
+      panel.setAttribute("aria-labelledby", panel.dataset.tab!);
+      panel.tabIndex = 0;
+    }
     list.hidden = false;
     root.classList.add("is-enhanced");
     tabs.forEach((t, i) => {
