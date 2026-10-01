@@ -142,3 +142,28 @@ Branch `main-q0i8zv`. Ten chapters from `catalog-phase3.json`, sources pinned in
 Not changed: `raw()` with an empty argument, a threshold written `01`, mainnet-only WIF and `addr()`, and uppercase hex are accepted; the BIPs do not rule on them and no vector exercises them.
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (each descriptor kind, key highlighting, checksum check, the one-character typo, tr() tree on mobile, worked tab, no-JS); no overflow. The key buttons were restructured so each key highlights as one unit. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.
+
+## Chapter 14 — MuSig2 (BIP 327)
+
+**Model:** `packages/models/src/musig2.ts`, a function-by-function transcription of BIP 327's `reference.py` onto `@noble/curves` point arithmetic (no hand-rolled field or curve code): KeySort, KeyAgg (with the MuSig2* second-key coefficient), ApplyTweak, NonceGen (with supplied randomness, as the vectors use it), NonceAgg, session values (including R = G), Sign (wipes the secret nonce), PartialSigVerify, PartialSigAgg, deterministic signing. Error types and messages follow the reference.
+
+**Sources:** all eight JSON vector files pinned with the BIP: key sort, key aggregation (valid and error), nonce generation, nonce aggregation (valid and error), sign/verify (valid, sign errors, verify failures, verify errors), tweaks (valid and error), deterministic signing (valid and error), signature aggregation (valid and error). The hero uses the four published signature-aggregation sessions, which need no secret keys: the build recomputes every aggregate value, requires every published partial signature to verify, and requires the aggregate to equal the vector's and to pass noble's BIP 340 verification.
+
+**Deliberate breakage:** second-key coefficient not 1 (7 tests fail), nonce coefficient b dropped (4), R-parity negation of nonces dropped (4), tweak term dropped from aggregation (1). A test I first wrote for nonce reuse did not demonstrate what its title claimed; it was removed before commit, and the reuse point rests on the BIP's text plus the secnonce-wipe test.
+
+**Independent review: 0 blocking, 9 should-fix, 6 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | Infinity/G case framed as chance, rationale unquoted | Now: signals a dishonest party; G lets signing continue so the culprit is caught; L738–740 quoted |
+| 2 | Duplicate-check rationale misattributed | "to simplify error handling"; the blame point and applications' right to reject duplicates added (L125, L128–131) |
+| 3 | "Each coefficient depends on the list" (not the coefficient-1 key) | "each hashed coefficient" |
+| 4 | Self-check stated as unconditional | "The BIP recommends…"; footnote quoted |
+| 5 | Cost/benefit trade-off misframed | MuSig-DN and MuSig1 comparisons separated as the BIP has them |
+| 6 | Benefits folded into the "primary motivation" | Split: motivation, then the authors' arguments |
+| 7 | Partial-signature figure mixed 0- and 1-based signers; blame text copied, not checked | Build now asserts the thrown error's signer and contribution; rows use 1-based signers from the model |
+| 8 | "The equation fails" wrong for the s ≥ n case | Per-case detail |
+| 9 | "Plain sum matches neither" untested; a fixture label wrong | Test and build assertion added; label "different second key" |
+| 10–15 (nits) | Key-path scoping of "nothing on chain shows"; "allows" not "suggests"; "make it possible to extract"; "a requirement"; ECDSA tense; caption "a valid one"; derive now fails on any non-verifying partial signature; clearer parity wording | All applied |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (start, three-tweak case at the end, hidden aggregates, mobile mid-session, key-aggregation and partial-signature figures, worked tab, no-JS); no overflow. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.

@@ -630,3 +630,44 @@ export interface Musig2PsigChecksDerived {
   rows: Array<{ label: string; signer: number; psig: string; verdict: "valid" | "invalid" | "error"; detail: string }>;
 }
 export type DerivedMusig2PsigChecksFixture = Musig2PsigChecksFixture & { derived: Musig2PsigChecksDerived };
+
+/* ---------- silent payments (BIP 352) ---------- */
+
+export interface SpVectorFixture extends BaseFixture {
+  kind: "sp-vector";
+  caseIndex: number;
+}
+
+export interface SpInputView {
+  outpoint: string;
+  kind: string;
+  pubkey: string | null;
+  skipped: string | null;
+}
+
+export interface SpDerived {
+  comment: string;
+  inputs: SpInputView[];
+  smallestOutpoint: string;
+  A: string;
+  inputHash: string;
+  tweak: string;
+  sharedSecret: string;
+  /** The sender's shared secret for this receiver equals the receiver's. */
+  secretsAgree: boolean;
+  receiver: { address: string; Bscan: string; Bspend: string; labels: number[]; labeledAddresses: string[] };
+  senderOutputs: string[];
+  txOutputs: Array<{ key: string; mine: boolean; label: number | null; k: number | null }>;
+  steps: Array<{ k: number; tk: string; Pk: string; matched: boolean; via: string | null }>;
+}
+export type DerivedSpFixture = SpVectorFixture & { derived: SpDerived };
+
+export interface SpEligibilityFixture extends BaseFixture {
+  kind: "sp-eligibility";
+  caseIndices: number[];
+}
+
+export interface SpEligibilityDerived {
+  rows: Array<{ comment: string; inputs: SpInputView[] }>;
+}
+export type DerivedSpEligibilityFixture = SpEligibilityFixture & { derived: SpEligibilityDerived };

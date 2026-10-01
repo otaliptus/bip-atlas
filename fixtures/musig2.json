@@ -20,7 +20,7 @@
     {
       "id": "sig-agg-1",
       "kind": "musig2-session",
-      "label": "Two signers, other nonces",
+      "label": "Two signers, different second key",
       "shortLabel": "sig_agg case 1 \u00b7 no tweaks",
       "source": {
         "bip": 327,

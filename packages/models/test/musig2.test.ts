@@ -10,6 +10,7 @@ import {
   keyAggAndTweak,
   keyAggCoeff,
   keySort,
+  naiveSumXonly,
   MusigValueError,
   nonceAgg,
   nonceGenInternal,
@@ -167,6 +168,8 @@ describe("key aggregation coefficients", () => {
     expect(ordered).toBe(d.valid_test_cases[0].expected);
     expect(H(xonlyPk(keyAgg([X[2], X[1], X[0]])))).toBe(d.valid_test_cases[1].expected);
     expect(ordered).not.toBe(d.valid_test_cases[1].expected);
+    const naive = H(naiveSumXonly(keys));
+    expect([d.valid_test_cases[0].expected, d.valid_test_cases[1].expected]).not.toContain(naive);
   });
 });
 
@@ -209,8 +212,8 @@ describe("musig2 chapter prose numbers", () => {
     const v = vec("sign_verify_vectors");
     expect(v.verify_fail_test_cases.length).toBe(3);
     expect(v.verify_error_test_cases.length).toBe(2);
-    expect(text).toContain("one valid, three that fail the check, and two that point at a bad public nonce or key");
+    expect(text).toContain("a valid one, three that fail the check, and two that point at a bad public nonce or key");
     expect(v.valid_test_cases.some((c: { comment?: string }) => c.comment?.includes("point at infinity"))).toBe(true);
-    expect(text).toContain("one of its signing vectors exercises exactly that case");
+    expect(text).toContain("One of its signing vectors exercises exactly that case");
   });
 });

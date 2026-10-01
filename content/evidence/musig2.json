@@ -103,7 +103,7 @@
     },
     {
       "id": "features",
-      "statement": "The authors list its features: non-interactive key aggregation, two communication rounds, a security proof under the AOMDL assumption, and low complexity, at the cost of no deterministic nonces and the need to handle signing state securely.",
+      "statement": "The authors list its features: non-interactive key aggregation, two communication rounds (fewer than three-round schemes such as MuSig1), a security proof under the AOMDL assumption, and substantially lower complexity than MuSig-DN, at the cost of no deterministic nonces and signing state that must be handled securely.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -130,6 +130,14 @@
             48
           ],
           "quote": "However, this comes at the cost of having no ability to generate nonces deterministically and the requirement to securely handle signing state."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            48,
+            48
+          ],
+          "quote": "'''Low complexity''': MuSig2 has a substantially lower computational and implementation complexity than alternative schemes like [https://eprint.iacr.org/2020/1057 MuSig-DN]."
         }
       ]
     },
@@ -199,7 +207,7 @@
     },
     {
       "id": "duplicates",
-      "statement": "The same key may appear more than once; the algorithms handle it, and applications are recommended not to check for duplicates, since the blame cannot be assigned at key aggregation.",
+      "statement": "The same key may appear more than once; the algorithms handle it, and the BIP recommends omitting duplicate checks to simplify error handling, noting it is often impossible then to tell which signer is to blame. Applications may still reject duplicates, for example when one owner runs several signing devices.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -210,6 +218,22 @@
             125
           ],
           "quote": "The same individual public key is allowed to occur more than once in the input of ''KeyAgg'' and ''KeySort''. This is by design: All algorithms in this proposal handle multiple signers who (claim to) have identical individual public keys properly, and applications are not required to check for duplicate individual public keys. In fact, applications are recommended to omit checks for duplicate individual public keys in order to simplify error handling."
+        },
+        {
+          "bip": 327,
+          "lines": [
+            125,
+            125
+          ],
+          "quote": "Moreover, it is often impossible to tell at key aggregation which signer is to blame for the duplicate"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            128,
+            131
+          ],
+          "quote": "While the algorithms in this proposal are able to handle duplicate individual public keys, there are scenarios where applications may choose to abort when encountering duplicates. For example, we can imagine a scenario where a single entity creates a MuSig2 setup with multiple signing devices."
         }
       ]
     },
@@ -359,7 +383,7 @@
     },
     {
       "id": "session",
-      "statement": "Session values: the nonce coefficient b is a tagged hash of the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂ (or G if that is infinity); and e is the BIP 340 challenge for R, Q and the message.",
+      "statement": "Session values: the nonce coefficient b is a tagged hash of the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂; and e is the BIP 340 challenge for R, Q and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest aggregator or signer, R is set to G so that signing continues and the culprit is revealed when partial signatures are verified.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -386,12 +410,20 @@
             434
           ],
           "quote": "* Let ''e = int(hash<sub>BIP0340/challenge</sub>(xbytes(R) || xbytes(Q) || m)) mod n''"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            738,
+            740
+          ],
+          "quote": "If the nonce aggregator provides ''aggnonce = bytes(33,0) || bytes(33,0)'', either the nonce aggregator is dishonest or there is at least one dishonest signer (except with negligible probability). If signing aborted in this case, it would be impossible to determine who is dishonest. Therefore, signing continues so that the culprit is revealed when collecting and verifying partial signatures."
         }
       ]
     },
     {
       "id": "sign",
-      "statement": "Each partial signature is s = k₁ + b·k₂ + e·a·d mod n, with the nonces negated if R has odd y and the key negated as Q and the tweaks require; the signer verifies its own partial signature before releasing it.",
+      "statement": "Each partial signature is s = k₁ + b·k₂ + e·a·d mod n, with the secret nonces negated if R has odd y and the key negated as Q and the tweaks require; the BIP recommends that a signer verify its own partial signature before releasing it, a check that can be omitted if too costly.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -418,6 +450,14 @@
             469
           ],
           "quote": "* If ''PartialSigVerifyInternal(psig, pubnonce, pk, session_ctx)'' (see below) returns failure, fail"
+        },
+        {
+          "bip": 327,
+          "lines": [
+            469,
+            469
+          ],
+          "quote": "It is recommended but can be omitted if the computation cost is prohibitive."
         }
       ]
     },
@@ -519,7 +559,7 @@
     },
     {
       "id": "not-plain-sum",
-      "statement": "For BIP 327's three-key vector, the aggregate key differs when the same keys are given in reverse order, and neither equals the plain sum of the keys.",
+      "statement": "For BIP 327's three-key vector, the aggregate key differs when the same keys are given in reverse order, and neither equals the plain sum of the keys (checked by a test and at build time).",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

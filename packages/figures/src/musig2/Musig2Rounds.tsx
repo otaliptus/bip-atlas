@@ -112,7 +112,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
         ) : (
           <dl class="atlas-mu-dl">
             <div><dt>key-list hash L</dt><dd><code>{short(d.keyListHash)}</code></dd></div>
-            <div><dt>aggregate key Q</dt><dd><code class="atlas-break">{d.aggXonly}</code><small>x-only; the {d.aggPlain.startsWith("02") ? "even" : "odd"}-y point</small></dd></div>
+            <div><dt>aggregate key Q</dt><dd><code class="atlas-break">{d.aggXonly}</code><small>{d.aggPlain.startsWith("02") ? "Q has even y" : "Q has odd y; the x-only key stands for −Q"}</small></dd></div>
             {reached("tweaks") && d.tweaks.length
               ? d.tweaks.map((t, i) => (
                   <div><dt>after tweak {i + 1} ({t.xonly ? "x-only" : "plain"} tweak), x</dt><dd><code class="atlas-break">{t.resultXonly}</code></dd></div>
@@ -122,7 +122,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
             {reached("session") ? (
               <>
                 <div><dt>nonce coefficient b</dt><dd><code>{short(d.b)}</code></dd></div>
-                <div><dt>final nonce R</dt><dd><code>{short(d.R)}</code><small>{d.rEvenY ? "even y: nonces used as is" : "odd y: every signer negates its nonces"}</small></dd></div>
+                <div><dt>final nonce R</dt><dd><code>{short(d.R)}</code><small>{d.rEvenY ? "even y: secret nonces used as is" : "odd y: every signer negates its secret nonces k₁, k₂"}</small></dd></div>
                 <div><dt>challenge e</dt><dd><code>{short(d.e)}</code></dd></div>
               </>
             ) : null}

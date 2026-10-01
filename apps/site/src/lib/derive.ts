@@ -43,6 +43,12 @@ import {
   decodeScript,
   hash160,
   evaluateCoreLockCase,
+  createOutputs,
+  scan as spScan,
+  readInput as spReadInput,
+  receiverAddresses,
+  parseWitness,
+  decodeAddress as spDecodeAddress,
   keyAgg,
   keyAggAndTweak,
   keyAggCoeff,
@@ -56,6 +62,7 @@ import {
   hasEvenYPoint,
   xonlyPk,
   getSecondKey,
+  InvalidContributionError,
   bip340Verify,
   naiveSumXonly,
   parseDescriptor,
@@ -90,6 +97,10 @@ import {
 } from "@bip-atlas/models";
 import { sha256 } from "@noble/hashes/sha2.js";
 import type {
+  SpVectorFixture,
+  DerivedSpFixture,
+  SpEligibilityFixture,
+  DerivedSpEligibilityFixture,
   Musig2SessionFixture,
   DerivedMusig2SessionFixture,
   Musig2KeyaggFixture,
@@ -1022,6 +1033,7 @@ function deriveMusig2Session(f: Musig2SessionFixture): DerivedMusig2SessionFixtu
   if (!verifies) throw new Error(`${f.id}: signature fails BIP 340 verification`);
   const pk2 = getSecondKey(pubkeys);
   const base = keyAgg(pubkeys);
+  if (!psigs.every((p, i) => partialSigVerify(p, pubnonces, pubkeys, tweaks, c.is_xonly, msg, i))) throw new Error(`${f.id}: a published partial signature does not verify`);
   let ctx = base;
   const tweakViews = tweaks.map((t, i) => {
     ctx = keyAggAndTweak(pubkeys, tweaks.slice(0, i + 1), c.is_xonly.slice(0, i + 1));
@@ -1068,7 +1080,9 @@ function deriveMusig2Keyagg(f: Musig2KeyaggFixture): DerivedMusig2KeyaggFixture 
     return { keys: keys.map(HX), coefficients: keys.map((k) => big(keyAggCoeff(keys, k))), aggXonly: agg };
   });
   const first = d.valid_test_cases[f.caseIndices[0]].key_indices.map((i: number) => X[i]);
-  return { ...f, derived: { orders, naiveSumXonly: HX(naiveSumXonly(first)) } };
+  const naive = HX(naiveSumXonly(first));
+  if (orders.some((o) => o.aggXonly === naive)) throw new Error(`${f.id}: the plain sum equals an aggregate`);
+  return { ...f, derived: { orders, naiveSumXonly: naive } };
 }
 
 function deriveMusig2PsigChecks(f: Musig2PsigChecksFixture): DerivedMusig2PsigChecksFixture {
@@ -1083,24 +1097,85 @@ function deriveMusig2PsigChecks(f: Musig2PsigChecksFixture): DerivedMusig2PsigCh
   for (const c of d.verify_fail_test_cases) {
     const r = partialSigVerify(hx(c.sig), c.nonce_indices.map((i: number) => P[i]), c.key_indices.map((i: number) => X[i]), [], [], M[c.msg_index], c.signer_index);
     if (r) throw new Error(`${f.id}: "${c.comment}" verifies but should not`);
-    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "invalid", detail: "the equation fails" });
+    const s = BigInt(`0x${c.sig}`);
+    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "invalid", detail: s >= 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n ? "s is not below the group order n" : "s·G = Re + e·a·g·P does not hold" });
   }
   for (const c of d.verify_error_test_cases) {
-    let threw = "";
+    let caught: unknown = null;
     try {
       partialSigVerify(hx(c.sig), c.nonce_indices.map((i: number) => P[i]), c.key_indices.map((i: number) => X[i]), [], [], M[c.msg_index], c.signer_index);
     } catch (e) {
-      threw = (e as Error).message;
+      caught = e;
     }
-    if (!threw) throw new Error(`${f.id}: "${c.comment}" should raise`);
-    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "error", detail: `blames signer ${c.error.signer} (${c.error.contrib})` });
+    if (!(caught instanceof InvalidContributionError) || caught.signer !== c.error.signer || caught.contrib !== c.error.contrib) throw new Error(`${f.id}: "${c.comment}" should blame signer ${c.error.signer} (${c.error.contrib})`);
+    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "error", detail: `blames signer ${caught.signer! + 1} for an invalid ${caught.contrib}` });
   }
   return { ...f, derived: { rows } };
+}
+
+/* ---------- silent payments ---------- */
+
+let spVectorsCache: any = null;
+const spVectors = () => (spVectorsCache ??= JSON.parse(pinnedText("bip-0352/send_and_receive_test_vectors.json", SNAPSHOT_PHASE3)));
+const spVin = (v: any) => ({ txid: v.txid, vout: v.vout, scriptSigHex: v.scriptSig, witness: parseWitness(v.txinwitness), prevoutSpkHex: v.prevout.scriptPubKey.hex });
+const spInputs = (vins: any[]) =>
+  vins.map((v) => {
+    const r = spReadInput(spVin(v));
+    return { outpoint: `${v.txid.slice(0, 8)}…:${v.vout}`, kind: r.kind, pubkey: r.pubkey, skipped: r.skipped };
+  });
+
+function deriveSp(f: SpVectorFixture): DerivedSpFixture {
+  checkMusigSource(f);
+  const c = spVectors()[f.caseIndex];
+  const s = c.sending[0], r = c.receiving[0];
+  const send = createOutputs(s.given.vin.map((v: any) => ({ ...spVin(v), privateKey: v.private_key })), s.given.recipients.flatMap((x: any) => Array(x.count ?? 1).fill(x.address)));
+  if (!s.expected.outputs.some((set: string[]) => set.length === send.outputs.length && set.every((o) => send.outputs.includes(o)))) throw new Error(`${f.id}: sender outputs differ from the vector`);
+  const g = r.given;
+  const bScan = hexToBytes(g.key_material.scan_priv_key), bSpend = hexToBytes(g.key_material.spend_priv_key);
+  const addrs = receiverAddresses(bScan, bSpend, g.labels);
+  if (JSON.stringify(addrs) !== JSON.stringify(r.expected.addresses)) throw new Error(`${f.id}: addresses differ from the vector`);
+  const res = spScan(g.vin.map(spVin), [...g.outputs], bScan, bSpend, g.labels);
+  if (res.sharedSecret !== r.expected.shared_secret || res.tweak !== r.expected.tweak || res.A !== r.expected.input_pub_key_sum) throw new Error(`${f.id}: receiver values differ from the vector`);
+  const want = r.expected.outputs.map((o: any) => o.pub_key).sort();
+  if (JSON.stringify(res.found.map((x) => x.pubKey).sort()) !== JSON.stringify(want)) throw new Error(`${f.id}: found outputs differ from the vector`);
+  const dec = spDecodeAddress(addrs[0]);
+  const senderSecret = send.sharedSecrets.find((x) => x.Bscan === dec.Bscan)?.secret ?? null;
+  return {
+    ...f,
+    derived: {
+      comment: c.comment,
+      inputs: spInputs(g.vin),
+      smallestOutpoint: send.failure ? "" : (() => {
+        const ser = g.vin.map((v: any) => v.txid.match(/../g)!.reverse().join("") + [0, 8, 16, 24].map((sh) => ((v.vout >>> sh) & 0xff).toString(16).padStart(2, "0")).join("")).sort()[0];
+        return ser;
+      })(),
+      A: res.A!,
+      inputHash: res.inputHash!,
+      tweak: res.tweak!,
+      sharedSecret: res.sharedSecret!,
+      secretsAgree: senderSecret === res.sharedSecret,
+      receiver: { address: addrs[0], Bscan: dec.Bscan, Bspend: dec.Bm, labels: g.labels, labeledAddresses: addrs.slice(1) },
+      senderOutputs: send.outputs,
+      txOutputs: g.outputs.map((o: string) => {
+        const hit = res.found.find((x) => x.pubKey === o);
+        const step = res.steps.find((st) => st.match?.output === o);
+        return { key: o, mine: !!hit, label: hit?.label ?? null, k: step?.k ?? null };
+      }),
+      steps: res.steps.map((st) => ({ k: st.k, tk: st.tk, Pk: st.Pk, matched: !!st.match, via: st.match?.via ?? null })),
+    },
+  };
+}
+
+function deriveSpEligibility(f: SpEligibilityFixture): DerivedSpEligibilityFixture {
+  checkMusigSource(f);
+  return { ...f, derived: { rows: f.caseIndices.map((i) => ({ comment: spVectors()[i].comment, inputs: spInputs(spVectors()[i].receiving[0].given.vin) })) } };
 }
 
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
   const schnorrGroup = fixtures.filter((f) => f.kind === "schnorr-vector") as unknown as SchnorrVectorFixture[];
   return fixtures.map((f) => {
+    if (f.kind === "sp-vector") return deriveSp(f as unknown as SpVectorFixture) as unknown as T;
+    if (f.kind === "sp-eligibility") return deriveSpEligibility(f as unknown as SpEligibilityFixture) as unknown as T;
     if (f.kind === "musig2-session") return deriveMusig2Session(f as unknown as Musig2SessionFixture) as unknown as T;
     if (f.kind === "musig2-keyagg") return deriveMusig2Keyagg(f as unknown as Musig2KeyaggFixture) as unknown as T;
     if (f.kind === "musig2-psig-checks") return deriveMusig2PsigChecks(f as unknown as Musig2PsigChecksFixture) as unknown as T;

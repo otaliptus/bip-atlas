@@ -6,7 +6,7 @@
   ],
   "specimenLabel": "BIP 0327",
   "title": "How can many signers share one key?",
-  "dek": "MuSig2 turns several public keys into one, and two rounds of messages into one ordinary BIP 340 signature. Nothing on chain shows there was more than one signer.",
+  "dek": "MuSig2 turns several public keys into one, and two rounds of messages into one ordinary BIP 340 signature. Nothing in a key-path spend shows there was more than one signer.",
   "authorship": "hand-authored",
   "reviewState": "in-review",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -23,7 +23,7 @@
       },
       {
         "type": "paragraph",
-        "text": "The result is an ordinary BIP 340 key and an ordinary BIP 340 signature. The authors’ main aim was letting people using different software jointly control a Taproot output and spend it through its key path, more compactly and privately than a script that checks every signer. The standard also supports tweaking the aggregate key, for BIP 32 child keys and for BIP 341 Taproot commitments.",
+        "text": "The result is an ordinary BIP 340 key and an ordinary BIP 340 signature. The authors’ primary motivation is letting people using different software jointly control a Taproot output and spend it through its key path; they argue this is more compact, cheaper to verify and more private than an n-of-n script that checks every signer. The standard also supports tweaking the aggregate key, for BIP 32 child keys and for BIP 341 Taproot commitments.",
         "claims": [
           "why-taproot",
           "bip340-compat",
@@ -65,7 +65,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The coefficients are what make this different from adding keys together: each one depends on the entire list as well as on the key it multiplies. The figure above shows the effect on BIP 327’s own three-key example: the plain sum of the keys matches neither aggregate.",
+          "text": "The coefficients are what make this different from adding keys together: each hashed coefficient depends on the entire list as well as on the key it multiplies. The figure above shows the effect on BIP 327’s own three-key example: the plain sum of the keys matches neither aggregate.",
           "claims": [
             "keyagg",
             "not-plain-sum"
@@ -81,7 +81,7 @@
         },
         {
           "type": "paragraph",
-          "text": "One coefficient is fixed. The second distinct key in the list always gets coefficient 1, an optimization the BIP calls MuSig2*, which saves one point multiplication. The same key may even appear twice; the algorithms handle it, and the BIP recommends that applications not check for duplicates, since at that stage nobody can tell which signer copied whom.",
+          "text": "One coefficient is fixed. The second distinct key in the list always gets coefficient 1, an optimization the BIP calls MuSig2*, which saves one point multiplication. The same key may even appear twice; the algorithms handle it, and the BIP recommends omitting duplicate checks to simplify error handling; at that point it is often impossible to tell which signer copied whom. Applications may still reject duplicates, for instance when one owner runs several devices.",
           "claims": [
             "keyagg",
             "duplicates"
@@ -104,7 +104,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂; and e is the usual BIP 340 challenge for R, the key and the message. In the rare case that R₁ + b·R₂ is the point at infinity, the BIP uses the generator G as the final nonce instead, so the result is still a valid signature format; one of its signing vectors exercises exactly that case.",
+          "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂; and e is the usual BIP 340 challenge for R, the key and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest signer or aggregator, the BIP uses the generator G instead: signing can then continue, and the culprit is caught when partial signatures are verified. One of its signing vectors exercises exactly that case.",
           "claims": [
             "session",
             "vectors"
@@ -134,14 +134,14 @@
         },
         {
           "type": "paragraph",
-          "text": "In the second round each signer sends a partial signature: a single number, s = k₁ + b·k₂ + e·a·d, built from its two secret nonces, its coefficient and its secret key, with signs adjusted so the final nonce and key have even y. Before sending, a signer checks its own result.",
+          "text": "In the second round each signer sends a partial signature: a single number, s = k₁ + b·k₂ + e·a·d, built from its two secret nonces, its coefficient and its secret key, with signs adjusted so the final nonce and key have even y. The BIP recommends that a signer verify its own result before sending it.",
           "claims": [
             "sign"
           ]
         },
         {
           "type": "paragraph",
-          "text": "Adding the partial signatures, plus a term for any tweaks, gives s, and the pair of R’s x coordinate and s is the signature: 64 bytes, verified exactly like any single-signer BIP 340 signature. The verifier never learns there was more than one signer.",
+          "text": "Adding the partial signatures, plus a term for any tweaks, gives s, and the pair of R’s x coordinate and s is the signature: 64 bytes, verified exactly like any single-signer BIP 340 signature. For a key-path spend, the verifier never learns there was more than one signer.",
           "claims": [
             "aggregate",
             "bip340-compat",
@@ -163,7 +163,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "MuSig2 has one requirement that single-signer BIP 340 signing does not. The secret nonces must come from a good random generator, and they must not be derived deterministically from the session, because an active adversary could then trick a signer into reusing one.",
+          "text": "MuSig2 has a requirement that single-signer BIP 340 signing does not. The secret nonces must come from a good random generator, and they must not be derived deterministically from the session, because an active adversary could then trick a signer into reusing one.",
           "claims": [
             "nonce-random"
           ]
@@ -171,14 +171,14 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "Never run Sign twice with the same secret nonce. BIP 327 states that two partial signatures from one nonce let anyone extract the signer’s secret key.",
+          "text": "Never run Sign twice with the same secret nonce. BIP 327 states that two partial signatures from one nonce make it possible to extract the signer’s secret key.",
           "claims": [
             "nonce-reuse"
           ]
         },
         {
           "type": "paragraph",
-          "text": "Reuse is the catastrophic case. The BIP says Sign must not be executed twice with the same secret nonce, because the secret key can be extracted from the two partial signatures. It suggests overwriting the secret nonce with zeros once Sign has read it, and an all-zero nonce is rejected; this site’s model does exactly that, and its tests confirm a second signing attempt fails.",
+          "text": "Reuse is the catastrophic case. The BIP says Sign must not be executed twice with the same secret nonce, because the secret key can be extracted from the two partial signatures. It allows an implementation to overwrite the secret nonce with zeros once Sign has read it, and an all-zero nonce is rejected; this site’s model does exactly that, and its tests confirm a second signing attempt fails.",
           "claims": [
             "nonce-reuse"
           ]
@@ -200,7 +200,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The authors list what this costs: MuSig2 cannot generate nonces deterministically, and implementations have to handle signing state securely. In exchange it needs only two rounds and is simpler than the alternatives they compare it with.",
+          "text": "The authors list what this costs: MuSig2 cannot generate nonces deterministically, and implementations have to handle signing state securely. Compared with MuSig-DN, they say MuSig2 is substantially less complex; compared with three-round schemes such as MuSig1, it needs only two rounds.",
           "claims": [
             "features"
           ]
@@ -227,7 +227,7 @@
           "fixtures": [
             "psig-checks"
           ],
-          "caption": "BIP 327’s partial-signature cases: one valid, three that fail the check, and two that point at a bad public nonce or key.",
+          "caption": "BIP 327’s partial-signature cases: a valid one, three that fail the check, and two that point at a bad public nonce or key.",
           "claims": [
             "psig-verify",
             "vectors"
@@ -250,7 +250,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The scheme’s limits are part of its definition. It is n-of-n: every signer who contributed a key must take part in signing, so it is not a threshold scheme. And it produces BIP 340 signatures only; it is not compatible with the ECDSA signatures Bitcoin used before Taproot.",
+          "text": "The scheme’s limits are part of its definition. It is n-of-n: every signer who contributed a key must take part in signing, so it is not a threshold scheme. And it produces BIP 340 signatures only; it is not compatible with ECDSA, the signatures traditionally used in Bitcoin.",
           "claims": [
             "n-of-n",
             "ecdsa"
