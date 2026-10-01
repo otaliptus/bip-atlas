@@ -891,7 +891,7 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 .atlas-tabs__list [role="tab"]:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: -4px; }
 .atlas-tabs__num { display: inline-grid; place-items: center; inline-size: 1.3rem; block-size: 1.3rem; border: 1px solid currentColor; font-size: 0.75rem; }
 [aria-selected="true"] > .atlas-tabs__num { background: var(--atlas-accent); border-color: var(--atlas-accent); color: #ffffff; }
-.atlas-tabs__fallback { margin: 0 0 var(--manual-space-3); font-family: var(--manual-code); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.05em; border-block-end: 1px solid var(--manual-ink); padding-block-end: 0.35rem; }
+.atlas-tabs__fallback { margin: 0 0 var(--manual-space-3); font-family: var(--manual-code); font-size: 0.8125rem; font-weight: 500; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.05em; border-block-end: 1px solid var(--manual-ink); padding-block-end: 0.35rem; }
 .atlas-tabs.is-enhanced .atlas-tabs__fallback { display: none; }
 .atlas-tabs:not(.is-enhanced) .atlas-tabs__panel + .atlas-tabs__panel { margin-block-start: var(--manual-space-6); }
 

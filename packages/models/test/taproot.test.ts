@@ -134,6 +134,10 @@ describe("BIP341 keyPathSpending vector", () => {
     expect(() => sigMsg(tx, spent, 0, 0x04)).toThrow(SigMsgError);
     expect(() => sigMsg(tx, spent, 8, 0x03)).toThrow(SigMsgError);
     expect(() => sigMsg(tx, spent, 0, 0, 128)).toThrow(SigMsgError);
+    for (const bad of [-1, 1.5, tx.inputs.length]) {
+      expect(() => sigMsg(tx, spent, bad, 0x00)).toThrow(SigMsgError);
+      expect(() => sigMsg(tx, spent, bad, 0x81)).toThrow(SigMsgError);
+    }
     // A 65-byte signature with an undefined hash_type is simply invalid.
     expect(verifyKeyPath(q, sig + "04", sighashFor)).toBe(false);
   });

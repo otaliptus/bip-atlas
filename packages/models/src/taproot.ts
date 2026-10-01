@@ -247,6 +247,7 @@ export function sigMsg(tx: Transaction, spent: SpentOutput[], index: number, has
   if (!Number.isInteger(extFlag) || extFlag < 0 || extFlag > 127) throw new SigMsgError("ext_flag must be 0–127");
   if (!(VALID_HASH_TYPES as readonly number[]).includes(hashType)) throw new SigMsgError(`undefined hash_type 0x${hashType.toString(16)}`);
   if (spent.length !== tx.inputs.length) throw new SigMsgError("need one spent output per input");
+  if (!Number.isInteger(index) || index < 0 || index >= tx.inputs.length) throw new SigMsgError(`no input ${index} in this transaction`);
   const anyoneCanPay = (hashType & 0x80) === 0x80;
   const base = hashType & 3;
   if (base === 3 && index >= tx.outputs.length) throw new SigMsgError("SIGHASH_SINGLE without a corresponding output");

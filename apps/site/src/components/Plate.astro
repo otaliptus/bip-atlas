@@ -32,11 +32,11 @@ const tabbed = interactive && Astro.slots.has("worked");
           </button>
         </div>
         <div class="atlas-tabs__panel" data-tabpanel id={`${id}-panel-live`} data-tab={`${id}-tab-live`} data-panel="live">
-          <p class="atlas-tabs__fallback">A · Interactive</p>
+          <h3 class="atlas-tabs__fallback">A · Interactive</h3>
           <slot />
         </div>
         <div class="atlas-tabs__panel" data-tabpanel id={`${id}-panel-worked`} data-tab={`${id}-tab-worked`} data-panel="worked">
-          <p class="atlas-tabs__fallback">B · Worked example</p>
+          <h3 class="atlas-tabs__fallback">B · Worked example</h3>
           <slot name="worked" />
         </div>
       </div>
