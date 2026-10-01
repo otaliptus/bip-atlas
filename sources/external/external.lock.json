@@ -44,6 +44,25 @@
       },
       "license": "see upstream repository",
       "note": "Excerpt made by tools/extract-script-assets.mjs, which checks the full file's SHA-256 first."
+    },
+    {
+      "file": "core-locktime-cases-excerpt.json",
+      "repository": "https://github.com/bitcoin/bitcoin",
+      "commit": "f490f5562d4b20857ef8d042c050763795fd43da",
+      "path": "src/test/data/tx_valid.json, src/test/data/tx_invalid.json (51 one-input CLTV/CSV cases) and src/script/script.h (lines 45-47), tag v29.0",
+      "sha256": "c8b0189f1ff4098cb896a6fb5e4cde38edeab47f041bd869fb27893f311c58e7",
+      "bytes": 24856,
+      "upstreamSha256": {
+        "tx_valid.json": "a85d479081d6fd93188377e27fdfa099fa1a6aefdae565d0f473003c855d1e90",
+        "tx_invalid.json": "0c02ce44ff3a880458f9569a25589315a07f924fcaadac828613d4615776ca52",
+        "script.h": "7ee09e112e9675e9c4b2a585f033ae7a007abd3c43901bd8eda4b4cb3d8b4c7f"
+      },
+      "citedBy": {
+        "bip": 112,
+        "line": 342
+      },
+      "license": "MIT (Bitcoin Core)",
+      "note": "Not linked from the BIP text itself: Bitcoin Core's consensus tests for the reference implementation BIP 112 links (L342; BIP 65 links its own at L276). Excerpt made by tools/extract-locktime-cases.mjs, which checks each upstream file's SHA-256 first."
     }
   ]
 }

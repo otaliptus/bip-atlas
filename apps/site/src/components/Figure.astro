@@ -33,6 +33,13 @@ import {
   P2shTwoStage,
   P2shCommitment,
   P2shWrapped,
+  TimelockFields,
+  TimelockPinned,
+  TimelockRanges,
+  TimelockWorked,
+  type DerivedTimelockCaseFixture,
+  type DerivedTimelockBipTxFixture,
+  type DerivedTimelockEncodingFixture,
   type DerivedP2shFixture,
   SignatureLayout,
   SchnorrVerifier,
@@ -82,6 +89,9 @@ const tap = picked as DerivedTaprootTreeFixture[];
 const keyspend = picked as DerivedTaprootKeyspendFixture[];
 const ts = picked as DerivedTapscriptFixture[];
 const p2sh = picked as DerivedP2shFixture[];
+const timelock = picked as DerivedTimelockCaseFixture[];
+const timelockTx = picked as DerivedTimelockBipTxFixture[];
+const timelockEnc = picked as DerivedTimelockEncodingFixture[];
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -111,6 +121,9 @@ const p2sh = picked as DerivedP2shFixture[];
   {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
   {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
+  {figure.recipe === "timelock-fields.v1" && <TimelockFields client:visible fixtures={timelock} figureId={figureId} />}
+  {figure.recipe === "timelock-pinned-fields.v1" && <TimelockPinned fixtures={timelockTx} />}
+  {figure.recipe === "timelock-ranges.v1" && <TimelockRanges fixture={timelockEnc[0]} />}
   {recipe.interactive && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -122,6 +135,7 @@ const p2sh = picked as DerivedP2shFixture[];
       {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
+      {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
     </Fragment>
   )}
 </Plate>

@@ -257,6 +257,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "p2sh-spend",
   },
+  {
+    id: "timelock-fields.v1",
+    description: "Bitcoin Core's CLTV/CSV test transactions with BIP 65's and BIP 112's checks; fields editable, re-checked by the tested model.",
+    minFixtures: 2,
+    maxFixtures: 12,
+    interactive: true,
+    controls: ["Choose absolute or relative lock", "Change a fixture field", "Compare height and time units"],
+    fixtureKind: "timelock-case",
+  },
+  {
+    id: "timelock-pinned-fields.v1",
+    description: "How consensus reads the version, nLockTime and nSequence of published transactions.",
+    minFixtures: 2,
+    maxFixtures: 4,
+    interactive: false,
+    controls: [],
+    fixtureKind: "timelock-bip-tx",
+  },
+  {
+    id: "timelock-ranges.v1",
+    description: "nLockTime's height/time split and nSequence's two units, at their ranges.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "timelock-encoding",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

@@ -1,0 +1,649 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "timelocks",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01-phase3",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-three snapshot. Claims scoped observed-implementation or computed-fixture rest on Bitcoin Core files pinned in sources/external (core-locktime-cases-excerpt.json) and on this site's tested model.",
+  "claims": [
+    {
+      "id": "preambles",
+      "statement": "BIP 65 (OP_CHECKLOCKTIMEVERIFY) was assigned in 2014, BIPs 68, 112 and 113 in 2015; all four are consensus soft forks recorded as Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            3,
+            8
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: OP_CHECKLOCKTIMEVERIFY Authors: Peter Todd <pete@petertodd.org> Status: Deployed Type: Specification Assigned: 2014-10-01"
+        },
+        {
+          "bip": 68,
+          "lines": [
+            3,
+            11
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: Relative lock-time using consensus-enforced sequence numbers"
+        },
+        {
+          "bip": 68,
+          "lines": [
+            9,
+            11
+          ],
+          "quote": "Status: Deployed Type: Specification Assigned: 2015-05-28"
+        },
+        {
+          "bip": 112,
+          "lines": [
+            3,
+            10
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: CHECKSEQUENCEVERIFY"
+        },
+        {
+          "bip": 112,
+          "lines": [
+            8,
+            10
+          ],
+          "quote": "Status: Deployed Type: Specification Assigned: 2015-08-10"
+        },
+        {
+          "bip": 113,
+          "lines": [
+            3,
+            9
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: Median time-past as endpoint for lock-time calculations"
+        },
+        {
+          "bip": 113,
+          "lines": [
+            7,
+            9
+          ],
+          "quote": "Status: Deployed Type: Specification Assigned: 2015-08-10"
+        }
+      ]
+    },
+    {
+      "id": "nlocktime",
+      "statement": "nLockTime keeps a transaction from being mined until a given block height or block time.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            33,
+            34
+          ],
+          "quote": "The nLockTime field in a transaction prevents the transaction from being mined until either a certain block height, or block time, has been reached."
+        }
+      ]
+    },
+    {
+      "id": "not-a-lock",
+      "statement": "BIP 65's motivation: nLockTime can show a spend is possible later, but cannot show the output is unspendable until then, because another valid signed transaction spending it may exist.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            43,
+            50
+          ],
+          "quote": "The nLockTime field in transactions can be used to prove that it is ''possible'' to spend a transaction output in the future, by constructing a valid transaction spending that output with the nLockTime field set."
+        },
+        {
+          "bip": 65,
+          "lines": [
+            47,
+            50
+          ],
+          "quote": "However, the nLockTime field can't prove that it is ''impossible'' to spend a transaction output until some time in the future, as there is no way to know if a valid signature for a different transaction spending that output has been created."
+        }
+      ]
+    },
+    {
+      "id": "two-kinds",
+      "statement": "nLockTime is read either as a block height or as a time, depending on whether it is below LOCKTIME_THRESHOLD; Bitcoin Core's script.h (pinned excerpt, v29.0) defines that threshold as 500,000,000, a Unix time in November 1985.",
+      "scope": "observed-implementation",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            241,
+            243
+          ],
+          "quote": "// There are two types of nLockTime: lock-by-blockheight // and lock-by-blocktime, distinguished by whether // nLockTime < LOCKTIME_THRESHOLD."
+        }
+      ]
+    },
+    {
+      "id": "final-disables",
+      "statement": "If every input's nSequence is the maximum value (0xffffffff), nLockTime is not enforced.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            259,
+            263
+          ],
+          "quote": "// Finally the nLockTime feature can be disabled and thus // CHECKLOCKTIMEVERIFY bypassed if every txin has been // finalized by setting nSequence to maxint."
+        },
+        {
+          "bip": 68,
+          "lines": [
+            67,
+            69
+          ],
+          "quote": "Setting nSequence to this value for every input in a transaction * disables nLockTime. */ static const uint32_t SEQUENCE_FINAL = 0xffffffff;"
+        }
+      ]
+    },
+    {
+      "id": "pinned-reading",
+      "statement": "Read by this site's model, BIP 143's native P2WPKH example has version 1, nLockTime 17 and one non-final input, so no block below height 18 can include it; BIP 174's signed legacy transaction has version 2 and nLockTime 1,257,139 with a non-final input; BIP 174's final transaction has nLockTime 0 and only final inputs.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            184,
+            184
+          ],
+          "quote": "nLockTime:    11000000"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            619,
+            619
+          ],
+          "quote": "0200000001268171371edff285e937adeea4b37b78000c0566cbb3ad64641713ca42171bf6"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            833,
+            833
+          ],
+          "quote": "0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd75"
+        }
+      ]
+    },
+    {
+      "id": "cltv-abstract",
+      "statement": "OP_CHECKLOCKTIMEVERIFY lets a transaction output be made unspendable until some point in the future; it redefines NOP2.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            14,
+            16
+          ],
+          "quote": "This BIP describes a new opcode (OP_CHECKLOCKTIMEVERIFY) for the Bitcoin scripting system that allows a transaction output to be made unspendable until some point in the future."
+        },
+        {
+          "bip": 65,
+          "lines": [
+            21,
+            21
+          ],
+          "quote": "CHECKLOCKTIMEVERIFY redefines the existing NOP2 opcode."
+        }
+      ]
+    },
+    {
+      "id": "cltv-rules",
+      "statement": "CHECKLOCKTIMEVERIFY fails if the stack is empty, the top item is negative, its lock-time type differs from nLockTime's, it is greater than nLockTime, or the input's nSequence is 0xffffffff; otherwise it acts as a NOP.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            25,
+            31
+          ],
+          "quote": "* the stack is empty; or * the top item on the stack is less than 0; or * the lock-time type (height vs. timestamp) of the top stack item and the nLockTime field are not the same; or * the top stack item is greater than the transaction's nLockTime field; or * the nSequence field of the txin is 0xffffffff; Otherwise, script execution will continue as if a NOP had been executed."
+        }
+      ]
+    },
+    {
+      "id": "cltv-indirect",
+      "statement": "By comparing its argument with nLockTime, the opcode indirectly verifies that the height or time has been reached; the BIP credits Gregory Maxwell with suggesting the comparison against nLockTime rather than the chain.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            34,
+            38
+          ],
+          "quote": "By comparing the argument to CHECKLOCKTIMEVERIFY against the nLockTime field, we indirectly verify that the desired block height or block time has been reached; until that block height or block time has been reached the transaction output remains unspendable."
+        },
+        {
+          "bip": 65,
+          "lines": [
+            306,
+            308
+          ],
+          "quote": "Thanks goes to Gregory Maxwell for suggesting that the argument be compared against the per-transaction nLockTime, rather than the current block height and time."
+        }
+      ]
+    },
+    {
+      "id": "cltv-5byte",
+      "statement": "The argument may be a 5-byte number so that, like the 32-bit nLockTime field, it lasts until 2106 rather than hitting a year-2038 limit.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            225,
+            232
+          ],
+          "quote": "// If we kept to that limit we'd have a year 2038 problem, // even though the nLockTime field in transactions // themselves is uint32 which only becomes meaningless // after the year 2106."
+        }
+      ]
+    },
+    {
+      "id": "freeze",
+      "statement": "BIP 65's example of frozen funds: <expiry time> CHECKLOCKTIMEVERIFY DROP followed by an ordinary pay-to-public-key-hash check, which nobody can spend before the expiry.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            183,
+            187
+          ],
+          "quote": "With the following scriptPubKey, nobody will be able to spend the encumbered output until the provided expiry time."
+        },
+        {
+          "bip": 65,
+          "lines": [
+            187,
+            187
+          ],
+          "quote": "<expiry time> CHECKLOCKTIMEVERIFY DROP DUP HASH160 <pubKeyHash> EQUALVERIFY CHECKSIG"
+        }
+      ]
+    },
+    {
+      "id": "cltv-deploy",
+      "statement": "BIP 65 activated by the IsSuperMajority mechanism for version-4 blocks: enforced when 750 of the previous 1,000 blocks signalled, and lower versions rejected at 950.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 65,
+          "lines": [
+            281,
+            287
+          ],
+          "quote": "The new rules are in effect for every block (at height H) with nVersion = 4 and at least 750 out of 1000 blocks preceding it (with heights H-1000..H-1) also have nVersion >= 4. Furthermore, when 950 out of the 1000 blocks preceding a block do have nVersion >= 4, nVersion < 4 blocks become invalid"
+        }
+      ]
+    },
+    {
+      "id": "bip68-version",
+      "statement": "BIP 68 gives nSequence meaning only in transactions with nVersion 2 or more.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "This specification defines the meaning of sequence numbers for transactions with an nVersion greater than or equal to 2"
+        }
+      ]
+    },
+    {
+      "id": "bip68-disable",
+      "statement": "If bit 31 is set, nSequence has no consensus meaning; if it is clear, the field is an encoded relative lock-time.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            30,
+            32
+          ],
+          "quote": "If bit (1 << 31) of the sequence number is set, then no consensus meaning is applied to the sequence number and can be included in any block under all currently possible circumstances. If bit (1 << 31) of the sequence number is not set, then the sequence number is interpreted as an encoded relative lock-time."
+        }
+      ]
+    },
+    {
+      "id": "bip68-type",
+      "statement": "Bit 22 chooses the unit: set means 512-second units counted from the median time past of the coin's previous block, clear means blocks.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "Bit (1 << 22) determines if the relative lock-time is time-based or block based: If the bit is set, the relative lock-time specifies a timespan in units of 512 seconds granularity. The timespan starts from the median-time-past of the output’s previous block, and ends at the MTP of the previous block. If the bit is not set, the relative lock-time specifies a number of blocks."
+        }
+      ]
+    },
+    {
+      "id": "bip68-mask",
+      "statement": "Only 16 bits are interpreted: a 0x0000ffff mask MUST be applied, leaving the other bits for future expansion.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            40,
+            40
+          ],
+          "quote": "This specification only interprets 16 bits of the sequence number as relative lock-time, so a mask of 0x0000ffff MUST be applied to the sequence field to extract the relative lock-time. The 16-bit specification allows for a year of relative lock-time and the remaining bits allow for future expansion."
+        },
+        {
+          "bip": 68,
+          "lines": [
+            236,
+            238
+          ],
+          "quote": "Additionally, this BIP specifies only 16 bits to actually encode relative lock-time meaning a further 6 are unused (1 << 16 through 1 << 21 inclusive)."
+        }
+      ]
+    },
+    {
+      "id": "bip68-512",
+      "statement": "The authors chose 512-second granularity because blocks come every 600 seconds on average, so either unit covers about the same span with the same bits.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            44,
+            44
+          ],
+          "quote": "For time based relative lock-time, 512 second granularity was chosen because bitcoin blocks are generated every 600 seconds. So when using block-based or time-based, the same amount of time can be encoded with the available number of bits."
+        }
+      ]
+    },
+    {
+      "id": "bip68-ranges",
+      "statement": "BIP 68's encoding examples: up to 65,535 blocks (about 1.25 years), or a time under 33,554,431 seconds (about 1.06 years) encoded as (1 << 22) | (nTime >> 9).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            243,
+            249
+          ],
+          "quote": "0 <= nHeight <= 65,535 blocks (1.25 years) nSequence = nHeight; nHeight = nSequence & 0x0000ffff; // 0 <= nTime < 33,554,431 seconds (1.06 years) nSequence = (1 << 22) | (nTime >> 9);"
+        }
+      ]
+    },
+    {
+      "id": "bip68-age",
+      "statement": "A relative lock n allows inclusion n blocks, or 512 × n seconds, after the output being spent was mined.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            51,
+            51
+          ],
+          "quote": "More generally, a relative block lock-time n can be included n blocks after the mining date of the output it is spending, or any block thereafter."
+        },
+        {
+          "bip": 68,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "More generally, a relative time-based lock-time n can be included into any block produced 512 * n seconds after the mining date of the output it is spending"
+        }
+      ]
+    },
+    {
+      "id": "bip68-coinbase",
+      "statement": "The rules do not apply to the coinbase input's nSequence.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            53,
+            53
+          ],
+          "quote": "The new rules are not applied to the nSequence field of the input of the coinbase transaction."
+        }
+      ]
+    },
+    {
+      "id": "csv-abstract",
+      "statement": "CHECKSEQUENCEVERIFY redefines NOP3 and, with BIP 68, lets a script branch require a minimum age of the output being spent.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            16,
+            19
+          ],
+          "quote": "This BIP describes a new opcode (CHECKSEQUENCEVERIFY) for the Bitcoin scripting system that in combination with BIP 68 allows execution pathways of a script to be restricted based on the age of the output being spent."
+        },
+        {
+          "bip": 112,
+          "lines": [
+            24,
+            24
+          ],
+          "quote": "CHECKSEQUENCEVERIFY redefines the existing NOP3 opcode."
+        }
+      ]
+    },
+    {
+      "id": "csv-rules",
+      "statement": "CHECKSEQUENCEVERIFY fails on an empty stack or a negative argument; if the argument's disable flag is clear, it also fails when the transaction version is below 2, the input's disable flag is set, the units differ, or the masked argument exceeds the masked nSequence.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            27,
+            33
+          ],
+          "quote": "* the stack is empty; or * the top item on the stack is less than 0; or * the top item on the stack has the disable flag (1 << 31) unset; and ** the transaction version is less than 2; or ** the transaction input sequence number disable flag (1 << 31) is set; or ** the relative lock-time type is not the same; or ** the top stack item is greater than the transaction input sequence (when masked according to the BIP68);"
+        }
+      ]
+    },
+    {
+      "id": "csv-nop",
+      "statement": "An argument with the disable flag set makes CHECKSEQUENCEVERIFY behave as a NOP, kept for future soft-fork extensibility.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            279,
+            283
+          ],
+          "quote": "// To provide for future soft-fork extensibility, if the // operand has the disabled lock-time flag set, // CHECKSEQUENCEVERIFY behaves as a NOP."
+        }
+      ]
+    },
+    {
+      "id": "csv-escrow",
+      "statement": "BIP 112's escrow example: a 2-of-3 branch any time, or Alice alone after 30 days; the clock starts only when the payment to the escrow confirms.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            59,
+            61
+          ],
+          "quote": "An escrow that times out automatically 30 days after being funded can be established in the following way."
+        },
+        {
+          "bip": 112,
+          "lines": [
+            73,
+            76
+          ],
+          "quote": "After 30 days Alice can sign alone. The clock does not start ticking until the payment to the escrow address confirms."
+        }
+      ]
+    },
+    {
+      "id": "csv-channels",
+      "statement": "BIP 112 argues relative locks suit payment channels: the clock starts when a transaction confirms, giving a predictable time to respond, while an absolute deadline forces channels to close before it.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            105,
+            111
+          ],
+          "quote": "Scriptable relative locktime provides a predictable amount of time to respond in the event a counterparty broadcasts a revoked transaction: Absolute locktime necessitates closing the channel and reopen it when getting close to the timeout, whereas with relative locktime, the clock starts ticking the moment the transactions confirms in a block."
+        }
+      ]
+    },
+    {
+      "id": "mtp",
+      "statement": "BIP 113 compares time locks against the median of the past 11 blocks' timestamps instead of the including block's own timestamp; that median advances monotonically.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 113,
+          "lines": [
+            16,
+            19
+          ],
+          "quote": "The median of the last 11 blocks is used instead of the block's timestamp, ensuring that it increases monotonically with each block."
+        },
+        {
+          "bip": 113,
+          "lines": [
+            64,
+            67
+          ],
+          "quote": "This BIP proposes that after activation calls to IsFinalTx() within consensus code use the return value of `GetMedianTimePast(pindexPrev)` instead."
+        }
+      ]
+    },
+    {
+      "id": "mtp-why",
+      "statement": "The authors' reason: block timestamps are not strictly ordered, so miners had an incentive to lie about time to include not-yet-mature transactions and collect their fees.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 113,
+          "lines": [
+            24,
+            30
+          ],
+          "quote": "At present, transactions are excluded from inclusion in a block if the present time or block height is less than or equal to that specified in the locktime. Since the consensus rules do not mandate strict ordering of block timestamps, this has the unfortunate outcome of creating a perverse incentive for miners to lie about the time of their blocks in order to collect more fees by including transactions that by wall clock determination have not yet matured."
+        }
+      ]
+    },
+    {
+      "id": "mtp-all",
+      "statement": "BIP 113's rule applies to all transactions, including the coinbase, and the authors expected time-locked transactions to confirm about an hour later than before.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 113,
+          "lines": [
+            69,
+            69
+          ],
+          "quote": "The new rule applies to all transactions, including the coinbase transaction."
+        },
+        {
+          "bip": 113,
+          "lines": [
+            101,
+            103
+          ],
+          "quote": "Transactions generated using time-based lock-time will take approximately an hour longer to confirm than would be expected under the old rules."
+        }
+      ]
+    },
+    {
+      "id": "csv-deploy",
+      "statement": "BIPs 68, 112 and 113 were to deploy together through BIP 9 using bit 0, with a mainnet start time of midnight 1 May 2016 UTC.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 68,
+          "lines": [
+            224,
+            226
+          ],
+          "quote": "This BIP is to be deployed by \"versionbits\" BIP9 using bit 0. For Bitcoin '''mainnet''', the BIP9 '''starttime''' will be midnight 1st May 2016 UTC"
+        },
+        {
+          "bip": 112,
+          "lines": [
+            353,
+            353
+          ],
+          "quote": "This BIP must be deployed simultaneously with BIP68 and BIP113 using the same deployment mechanism."
+        }
+      ]
+    },
+    {
+      "id": "core-cases",
+      "statement": "This chapter's opcode figure uses 12 of 51 one-input CLTV/CSV transactions from Bitcoin Core's own transaction tests (v29.0, pinned excerpt); for all 51 the site's model gives the same verdict Core's tests expect, and the build fails otherwise.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 112,
+          "lines": [
+            340,
+            342
+          ],
+          "quote": "A reference implementation is provided by the following pull request: https://github.com/bitcoin/bitcoin/pull/7524"
+        }
+      ]
+    }
+  ]
+}

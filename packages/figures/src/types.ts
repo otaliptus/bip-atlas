@@ -368,3 +368,69 @@ export interface P2shDerived {
 }
 
 export type DerivedP2shFixture = P2shSpendFixture & { derived: P2shDerived };
+
+/* ---------- timelocks (BIPs 65, 68, 112, 113) ---------- */
+
+export interface TimelockCaseFixture extends BaseFixture {
+  kind: "timelock-case";
+  coreFile: "tx_valid.json" | "tx_invalid.json";
+  coreIndex: number;
+  comment: string;
+  expected: "valid" | "invalid";
+  lock: "absolute" | "relative";
+}
+
+export interface TimelockCheckView {
+  id: string;
+  label: string;
+  ok: boolean;
+  stopsHere?: boolean;
+  detail: string;
+}
+
+export interface TimelockCaseDerived {
+  asm: string;
+  opcode: "CHECKLOCKTIMEVERIFY" | "CHECKSEQUENCEVERIFY";
+  /** The script argument, as a decimal string (it may exceed 32 bits or be negative). */
+  argument: string;
+  trailingOne: boolean;
+  version: number;
+  nLockTime: number;
+  nSequence: number;
+  txHex: string;
+  checks: TimelockCheckView[];
+  valid: boolean;
+}
+export type DerivedTimelockCaseFixture = TimelockCaseFixture & { derived: TimelockCaseDerived };
+
+export interface TimelockBipTxFixture extends BaseFixture {
+  kind: "timelock-bip-tx";
+  txHex: string;
+}
+
+export interface TimelockBipTxDerived {
+  version: number;
+  nLockTime: number;
+  lockKind: "height" | "time";
+  enforced: boolean;
+  firstHeight: number | null;
+  inputs: Array<{ nSequence: number; final: boolean; disableFlag: boolean; relative: { unit: "blocks" | "time"; value: number } | null; reason: "version" | "disable-flag" | null }>;
+}
+export type DerivedTimelockBipTxFixture = TimelockBipTxFixture & { derived: TimelockBipTxDerived };
+
+export interface TimelockEncodingFixture extends BaseFixture {
+  kind: "timelock-encoding";
+  timeLine: number;
+  timeQuote: string;
+}
+
+export interface TimelockEncodingDerived {
+  threshold: number;
+  thresholdIso: string;
+  maxLockTimeIso: string;
+  maxBlocks: number;
+  maxTimeUnits: number;
+  maxTimeSeconds: number;
+  typeFlagSequence: number;
+}
+export type DerivedTimelockEncodingFixture = TimelockEncodingFixture & { derived: TimelockEncodingDerived };
