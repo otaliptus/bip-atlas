@@ -16,10 +16,11 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A seed gives a wallet one master key, and BIP 32 can derive children from it without end. That raises a practical question: if two wallets restore the same seed, where do they look for coins? Without an agreement, each could derive keys in a different corner of the tree and never find the other’s.",
+        "text": "A seed gives a wallet one master key, and BIP 32 can derive children from it without end. That raises a practical question: if two wallets restore the same seed, where do they look for coins? Without an agreement, each could derive keys in a different corner of the tree and never find the other’s; BIP 84’s author puts the aim as letting different wallets use the same seed seamlessly.",
         "claims": [
           "on-bip32",
-          "motivation"
+          "motivation",
+          "b84-why"
         ]
       },
       {
@@ -66,7 +67,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The purpose is a constant, 44′, which tells software that everything below follows this specification. The coin type gives each coin its own subtree, so addresses are never reused across coins: 0′ for Bitcoin and 1′ for Bitcoin testnet, with a longer list kept outside the BIP in SLIP-0044.",
+          "text": "The purpose is a constant, 44′, which tells software that everything below follows this specification. The coin type gives each coin its own subtree, avoiding address reuse across coins: 0′ for Bitcoin and 1′ for Bitcoin testnet, with a longer list kept outside the BIP in SLIP-0044.",
           "claims": [
             "purpose",
             "coin-type"
@@ -83,7 +84,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Restoring a wallet means finding where coins went. BIP 44 describes how: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. Only external chains are scanned, since change only ever comes from coins that arrived on them.",
+          "text": "Restoring a wallet means finding where coins went. BIP 44 describes how: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. BIP 44 scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains.",
           "claims": [
             "discovery",
             "account",
@@ -106,7 +107,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code and checked against the published vectors when the site is built.",
+          "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
           "claims": [
             "vectors"
           ]
@@ -141,7 +142,7 @@
         },
         {
           "type": "paragraph",
-          "text": "So an account’s extended public key reaches every address the account will ever use, receiving and change alike. The build demonstrates it: from the published account public keys alone, the model re-derives all of the published addresses below them. Sharing an account xpub with a watch-only wallet or a server reveals the account’s whole history and future addresses, though not the keys to spend them.",
+          "text": "So an account’s extended public key reaches every address the account will ever use, receiving and change alike. The build demonstrates it: from the published account public keys alone, the model re-derives all of the published addresses below them. Sharing an account xpub with a watch-only wallet or a server reveals the account’s whole history and future addresses; on its own, it cannot spend.",
           "claims": [
             "xpub-exposure"
           ]
@@ -174,7 +175,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 44 stops at the key. It defines the path and nothing about the script that key should be used in, nor the address format. Two wallets could follow BIP 44 exactly and still pay to different kinds of output.",
+          "text": "BIP 44 stops at the key. It defines the path and nothing about the script that key should be used in, nor the address format. Later BIPs treat the purpose value as what signals the script type.",
           "claims": [
             "levels",
             "script-by-purpose"
@@ -217,21 +218,22 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 86 does the same for Taproot. Purpose 86′ marks keys used as the internal key of a single-key P2TR output. The derived key becomes the internal key, is tweaked so the output commits to no script path, and the result goes into a version 1 output, 0x5120 followed by the 32-byte output key. Its extended keys keep the ordinary xpub prefix.",
+          "text": "BIP 86 does the same for Taproot. Purpose 86′ marks keys used as the internal key of a single-key P2TR output. The derived key becomes the internal key, is tweaked with a hash of the key alone, so that, as BIP 341 recommends, the output commits to an unspendable script path rather than to none, and the result goes into a version 1 output, 0x5120 followed by the 32-byte output key. BIP 86 defines no alternate version bytes, and its test vectors print as xprv and xpub.",
           "claims": [
-            "b86"
+            "b86",
+            "vectors"
           ]
         },
         {
           "type": "paragraph",
-          "text": "Its motivation is candid about why fixed paths still matter. Many wallets and hardware signers keep only a seed backup, without the derivation path or script type, so a fixed path makes single-key Taproot outputs likely to be recovered. The author notes that there are now solutions that avoid fixed paths, and kept the approach of BIPs 49 and 84 anyway.",
+          "text": "Its motivation is candid about why fixed paths still matter. Many wallets and hardware signers keep only a seed backup, without the derivation path or script type, so a fixed path makes single-key Taproot outputs likely to be recovered. The author notes that there are now solutions that avoid fixed paths, and largely reuses the approach of BIPs 49 and 84 for ease of implementation.",
           "claims": [
             "b86-why"
           ]
         },
         {
           "type": "paragraph",
-          "text": "The purpose also keeps the schemes apart. The same mnemonic produces unrelated keys under 44′, 84′ and 86′, so the three never share an address. What ties a key to a script is the BIP that defines the purpose, not anything in the key itself.",
+          "text": "The purpose also keeps the schemes apart. The same mnemonic produces unrelated keys under 44′, 84′ and 86′, and the three build different kinds of output. What ties a key to a script is the BIP that defines the purpose, not anything in the key itself.",
           "claims": [
             "same-seed",
             "script-by-purpose"
@@ -239,7 +241,7 @@
         },
         {
           "type": "paragraph",
-          "text": "None of this needed new cryptography. BIP 86 points out that it uses the same method as BIPs 44, 49 and 84, so it should not be difficult to implement, and BIP 84 leaves further version bytes to SLIP-0132. A wallet that already walks BIP 44’s tree only has to change one number at the top and one encoding at the bottom.",
+          "text": "No new derivation was needed. BIP 86 points out that it uses the same method as BIPs 44, 49 and 84, so it should not be difficult to implement, and BIP 84 leaves further version bytes to SLIP-0132. A wallet that already walks BIP 44’s tree keeps the walk and changes the purpose at the top and the output it builds at the bottom.",
           "claims": [
             "easy",
             "script-by-purpose"

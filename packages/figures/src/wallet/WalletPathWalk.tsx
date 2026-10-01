@@ -54,7 +54,7 @@ export function WalletPathWalk({ fixtures, figureId }: Props) {
             {d.addresses.map((x, k) => (
               <label class="atlas-choice">
                 <input type="radio" name={`${figureId}-addr`} checked={k === which} onChange={() => setWhich(k)} />
-                <span>{x.change === 0 ? `Receive #${x.index}` : `Change #${x.index}`}<small>…/{x.change}/{x.index}</small></span>
+                <span>{x.change === 0 ? `Receiving #${x.index}` : `Change #${x.index}`}<small>…/{x.change}/{x.index}</small></span>
               </label>
             ))}
           </fieldset>
@@ -110,7 +110,7 @@ export function WalletPathWalk({ fixtures, figureId }: Props) {
             {node.level !== "m" ? (
               <p class="atlas-wp-node__how" data-hardened={node.hardened ? "true" : "false"}>
                 {node.hardened
-                  ? "Hardened: this child needs the parent’s private key. Its parent’s public key alone cannot reach it."
+                  ? "Hardened: this child needs the parent’s private key. The parent’s extended public key alone cannot reach it."
                   : "Public (normal) derivation: anyone with the parent’s extended public key can compute this child."}
               </p>
             ) : null}
@@ -158,7 +158,7 @@ export function WalletPathWalk({ fixtures, figureId }: Props) {
       <p class="atlas-lab__source">
         {d.scheme === 44
           ? `Paths from BIP 44's examples (lines ${a.checkedLines.join(", ")}). BIP 44 publishes no keys: these come from BIP 84's test mnemonic, derived by the tested BIP 32 model.`
-          : `BIP ${d.scheme} test vectors from the "abandon … about" mnemonic; every value above was checked against its test vectors at build time (this address: lines ${a.checkedLines.join(", ")}).`}
+          : `BIP ${d.scheme} test vectors from the "abandon … about" mnemonic; values derived by the tested model; the account keys and the published leaf values were checked at build time (this address: lines ${a.checkedLines.join(", ")}).`}
       </p>
     </div>
   );

@@ -119,7 +119,7 @@
     },
     {
       "id": "coin-type",
-      "statement": "Coin type gives each coin its own hardened subtree, to avoid reusing addresses across coins; BIP 44 lists 0' for Bitcoin and 1' for Bitcoin testnet and points to SLIP-0044 for the full list.",
+      "statement": "Coin type gives each coin its own hardened subtree, avoiding address reuse across coins; BIP 44 lists 0' for Bitcoin and 1' for Bitcoin testnet and points to SLIP-0044 for the full list.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -146,6 +146,14 @@
             154
           ],
           "quote": "This BIP is not a central directory for the registered coin types, please visit SatoshiLabs that maintains the full list:"
+        },
+        {
+          "bip": 44,
+          "lines": [
+            156,
+            156
+          ],
+          "quote": "[[https://github.com/satoshilabs/slips/blob/master/slip-0044.md|SLIP-0044 : Registered coin types for BIP-0044]]"
         }
       ]
     },
@@ -239,7 +247,7 @@
     },
     {
       "id": "gap-limit",
-      "statement": "BIP 44 gives the address gap limit as 20 at the time of writing: after 20 unused addresses in a row, software stops scanning that chain; only external chains are scanned. Wallet software should warn a user who tries to exceed it by generating a new address.",
+      "statement": "BIP 44 gives the address gap limit as 20 at the time of writing: after 20 unused addresses in a row, software stops scanning that chain. It scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains, and wallet software should warn a user who tries to exceed the limit.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -263,10 +271,18 @@
     },
     {
       "id": "b84",
-      "statement": "BIP 84 keeps BIP 44's account structure and changes only the purpose, 84', to indicate the P2WPKH serialization, building addresses with BIP 141's P2WPKH encapsulation.",
+      "statement": "BIP 84 keeps BIP 44's account structure and changes only the purpose, 84', to indicate the P2WPKH serialization (the BIP 173 format), building addresses with BIP 141's P2WPKH encapsulation.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
+        {
+          "bip": 84,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "This BIP defines the derivation scheme for HD wallets using the P2WPKH ([[bip-0173.mediawiki|BIP 173]]) serialization format for segregated witness transactions."
+        },
         {
           "bip": 84,
           "lines": [
@@ -351,7 +367,7 @@
     },
     {
       "id": "b86",
-      "statement": "BIP 86 uses purpose 86' for keys used as the internal key of single-key P2TR outputs: the internal key is lift_x(derived key), tweaked so the output commits to no script path, in a version 1 output 0x5120{output key}.",
+      "statement": "BIP 86 uses purpose 86' for keys used as the internal key of single-key P2TR outputs: the internal key is lift_x(derived key), tweaked with a hash of the key alone so that, as BIP 341 recommends, the output commits to an unspendable script path rather than none, in a version 1 output 0x5120{output key}.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -386,12 +402,20 @@
             71
           ],
           "quote": "scriptPubKey: 1 <32_byte_output_key> (0x5120{32_byte_output_key})"
+        },
+        {
+          "bip": 86,
+          "lines": [
+            54,
+            57
+          ],
+          "quote": "If the spending conditions do not require a script path, the output key should commit to an unspendable script path instead of having no script path."
         }
       ]
     },
     {
       "id": "b86-why",
-      "statement": "BIP 86's motivation: many wallets and hardware signers still use seed backups without derivation path or script information, so a fixed path makes single-key Taproot outputs likely to be recoverable, even though there are now solutions that avoid fixed paths.",
+      "statement": "BIP 86's motivation: many wallets and hardware signers still use seed backups without derivation path or script information, so a fixed path makes single-key Taproot outputs likely to be recoverable; although there are now solutions that avoid fixed paths, it largely reuses the approach of BIPs 49 and 84 for ease of implementation.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -399,15 +423,15 @@
           "bip": 86,
           "lines": [
             23,
-            27
+            28
           ],
-          "quote": "it is useful to have a common derivation scheme so that HD wallets that only have a backup of the HD seed can be likely to recover single key Taproot outputs. Although there are now solutions which obviate the need for fixed derivation paths for specific script types, many software wallets and hardware signers still use seed backups which lack derivation path and script information."
+          "quote": "it is useful to have a common derivation scheme so that HD wallets that only have a backup of the HD seed can be likely to recover single key Taproot outputs. Although there are now solutions which obviate the need for fixed derivation paths for specific script types, many software wallets and hardware signers still use seed backups which lack derivation path and script information. Thus we largely use the same approach used in BIPs [[bip-0049.mediawiki|49]] and [[bip-0084.mediawiki|84]] for ease of implementation."
         }
       ]
     },
     {
       "id": "script-by-purpose",
-      "statement": "BIP 44 itself names no script type or address format; BIPs 84 and 86 tie one to a purpose value, each describing its purpose as indicating the script type or serialization.",
+      "statement": "BIP 44 itself names no script type or address format; BIPs 84 and 86 treat the purpose value as what signals the script type or serialization, and tie one to each purpose.",
       "scope": "editorial-analysis",
       "support": "inference",
       "evidence": [
@@ -431,7 +455,7 @@
     },
     {
       "id": "vectors",
-      "statement": "This site's model, starting from BIP 84's and BIP 86's published mnemonic, reproduces every root, account and address value in both BIPs' test vectors (zprv/zpub for BIP 84; xprv/xpub, internal key, output key, scriptPubKey and address for BIP 86); the build fails otherwise.",
+      "statement": "This site's model, starting from BIP 84's and BIP 86's published mnemonic, reproduces every published root, account and address value in both BIPs' test vectors (zprv/zpub for BIP 84; xprv/xpub, internal key, output key, scriptPubKey and address for BIP 86); the build fails otherwise. Intermediate values (node keys, fingerprints, key hashes, tweaks) are derived by the same tested model and implied by the published leaves, but not published themselves. BIP 86 defines no alternate version bytes, and its vectors print as xprv/xpub.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -455,7 +479,7 @@
     },
     {
       "id": "xpub-exposure",
-      "statement": "From an account's extended public key alone, the model re-derives every published receiving and change address of that account, because the two levels below the account use public derivation.",
+      "statement": "From an account's extended public key alone, the model re-derives every published receiving and change address of that account, because the two levels below the account use public derivation. On its own such a key cannot spend.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [
@@ -487,7 +511,7 @@
     },
     {
       "id": "same-seed",
-      "statement": "The same mnemonic gives unrelated keys under purposes 44', 84' and 86', so the schemes never share addresses.",
+      "statement": "The same mnemonic gives unrelated keys under purposes 44', 84' and 86' (and the schemes use different output types).",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

@@ -1,9 +1,9 @@
 import type { DerivedWalletPathFixture } from "../types";
 
 const SAYS: Record<number, { script: string; encoding: string; keys: string }> = {
-  44: { script: "Not specified", encoding: "Not specified", keys: "xpub / xprv" },
-  84: { script: "P2WPKH: 0x0014{20-byte key hash}", encoding: "bech32 (BIP 173)", keys: "zpub / zprv version bytes" },
-  86: { script: "P2TR key path: 0x5120{output key}, no script tree", encoding: "bech32m", keys: "xpub / xprv" },
+  44: { script: "Not specified", encoding: "Not specified", keys: "Not specified" },
+  84: { script: "P2WPKH: 0x0014{20-byte key hash}", encoding: "BIP 173 format (published addresses: bc1q…)", keys: "zpub / zprv version bytes" },
+  86: { script: "P2TR key path: 0x5120{output key}, unspendable script path", encoding: "Not named (published addresses: bc1p…, bech32m)", keys: "None defined (vectors print xpub / xprv)" },
 };
 
 /** wallet-path-schemes.v1 — static. Same path shape, three purposes; what each BIP fixes beyond the path. */
@@ -30,7 +30,7 @@ export function WalletPathSchemes({ fixtures }: { fixtures: DerivedWalletPathFix
           </section>
         );
       })}
-      <p class="atlas-lab__source">Script and encoding as each BIP specifies them. Addresses from BIP 84’s and BIP 86’s test vectors, reproduced by the tested model from the same mnemonic.</p>
+      <p class="atlas-lab__source">What each BIP states; where it states nothing, the published vectors are described instead. Addresses from BIP 84’s and BIP 86’s test vectors, reproduced by the tested model from the same mnemonic.</p>
     </div>
   );
 }

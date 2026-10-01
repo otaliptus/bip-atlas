@@ -135,6 +135,25 @@ describe("wallet-paths chapter prose numbers", () => {
     expect(parseWalletPath(paths[2])).toMatchObject({ account: 0, change: 1, index: 0 });
   });
 
+  it("level facts the prose restates", () => {
+    expect(b44[42]).toContain("Purpose is a constant set to 44'");
+    expect(b84[40]).toContain("<code>84'</code>");
+    expect(b86[44]).toContain("<tt>86'</tt>");
+    expect(text).toContain("The purpose is a constant, 44′");
+    expect(text).toContain("changes only the purpose, 84′");
+    expect(text).toContain("Purpose 86′ marks keys");
+    expect(text).toContain("and the first three levels are hardened");
+    expect(text).toContain("0 for the external chain");
+    expect(text).toContain("and 1 for the internal chain");
+    expect(b44[87]).toContain("Constant 0 is used for external chain and constant 1 for internal chain");
+    expect(text).toContain("between the third and fourth levels");
+    expect(parseWalletPath("m/84'/0'/0'/0/0")).toBeTruthy();
+    expect(text).toContain("so they print as zpub and zprv");
+    expect(text).toContain("SegWit version 0");
+    expect(text).toContain("into a version 1 output");
+    expect(p2wpkh(walkPath(master, "m/84'/0'/0'/0/0")[5].key.publicKey).address.startsWith("bc1q")).toBe(true);
+  });
+
   it("output layouts and vector counts", () => {
     const leaf = walkPath(master, "m/84'/0'/0'/0/0")[5].key;
     const w = p2wpkh(leaf.publicKey);

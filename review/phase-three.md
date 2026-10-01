@@ -87,3 +87,29 @@ Branch `main-q0i8zv`. Ten chapters from `catalog-phase3.json`, sources pinned in
 | 12 | "BIPs 68, 112 and 113" untested | Test added |
 
 **Visual and accessibility checks:** screenshots at 1440 and 375 (default, played, BIP 8 lockinontimeout true, worked tab, no-JS); one overflow at 375 px (the record figure's grid items took the table's minimum width) fixed with `min-inline-size: 0`. axe-core clean at 1440, 375, no-JS, worked tab and the played states.
+
+## Chapter 12 — Wallet paths (BIPs 44, 84, 86)
+
+**Model:** `packages/models/src/walletpaths.ts`: BIP 44 path parsing (five levels, hardened pattern, change ∈ {0, 1}), a level-by-level walk from the master key (BIP 32 via `./bip32`), BIP 84's P2WPKH and zpub/zprv version bytes, BIP 86's key-path P2TR (lift_x, TapTweak with no tree, via `./taproot`), and re-derivation from an account xpub. Encodings from `@scure/base`.
+
+**Sources:** BIP 84's and BIP 86's test vectors (same mnemonic): root, account and three leaves each. The build checks every published value and fails on any difference, and checks that the account xpub alone reproduces each leaf. BIP 44 publishes paths only (16 examples, all parsed); its keys in the hero come from BIP 84's mnemonic and are labelled so.
+
+**Deliberate breakage:** no TapTweak (2 tests fail), xpub version bytes for BIP 84 (1), account level unhardened (8), change/index swapped in xpub re-derivation (1).
+
+**Independent review: 0 blocking, 10 should-fix, 4 nits. Applied:**
+
+| # | Finding | Change |
+|---|---|---|
+| 1 | "commits to no script path" reversed BIP 86/341 | "commits to an unspendable script path rather than to none"; L54–57 quoted |
+| 2 | "keeps the ordinary xpub prefix" unsupported | "defines no alternate version bytes; its vectors print as xprv/xpub"; schemes figure says "None defined" / "Not specified" |
+| 3 | bech32/bech32m not named by BIPs 84/86 | BIP 84 cited for "BIP 173 format"; figure attributes bc1q…/bc1p… to the published addresses |
+| 4 | "Two wallets could follow BIP 44 and pay to different outputs" unsupported | "Later BIPs treat the purpose value as what signals the script type" |
+| 5 | Gap-limit rationale stated as fact | Attributed to BIP 44's reasoning |
+| 6 | BIP 86 "kept the approach anyway" | "largely reuses … for ease of implementation"; quote extended to L28 |
+| 7 | "Every value checked against the vectors" overclaimed | Prose, hero and worked example now say which values are published and checked, and which are derived |
+| 8 | "not the keys to spend them" | "on its own, it cannot spend" |
+| 9 | "None of this needed new cryptography … one number and one encoding" | "No new derivation was needed"; the closing sentence no longer counts changes |
+| 10 | Prose facts without text tests | Tests for 44′/84′/86′, first three hardened, 0/1 chains, third/fourth levels, zpub/zprv, SegWit v0, version 1 output |
+| 11–14 (nits) | "never share an address", "never reused", SLIP-0044 link, opening citation, "extended public key" wording, label consistency | All applied |
+
+**Visual and accessibility checks:** screenshots at 1440 and 375 (account level, BIP 86 change address, BIP 44 path-only, schemes, levels, worked tab, no-JS); one overflow at 375 (an unbroken 40-hex key hash) fixed. axe-core clean at 1440, 375, no-JS, worked tab and two interactive states.

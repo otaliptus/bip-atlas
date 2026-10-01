@@ -450,7 +450,7 @@ export function WalletPathWorked({ fixtures }: { fixtures: DerivedWalletPathFixt
   ];
   return (
     <WorkedExample
-      intro={<>BIP {f.derived.scheme}’s <strong>{a.label}</strong> address, <code>{a.path}</code>, from the published test mnemonic. Every value matches the BIP’s test vectors.</>}
+      intro={<>BIP {f.derived.scheme}’s <strong>{a.label}</strong> address, <code>{a.path}</code>, from the published test mnemonic. The derived key’s extended keys, the internal key, output key, scriptPubKey and address match the BIP’s test vectors; the others are derived by the same tested model.</>}
       steps={steps}
       label="Three hardened levels, two public levels, then the key-path Taproot tweak and the address, drawn as stacked layers."
       source={<>Source: BIP {f.derived.scheme} test vectors (lines {a.checkedLines.join(", ")}); derived by the tested BIP 32 and wallet-path models.</>}
