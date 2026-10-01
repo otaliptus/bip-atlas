@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@bip-atlas/site", "dev"],
+      "port": 4321
+    },
+    {
+      "name": "site-preview",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@bip-atlas/site", "preview"],
+      "port": 4322
+    }
+  ]
+}

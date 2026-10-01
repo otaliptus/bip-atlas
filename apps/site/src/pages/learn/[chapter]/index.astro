@@ -1,0 +1,153 @@
+---
+import Base from "../../../layouts/Base.astro";
+import Blocks from "../../../components/Blocks.astro";
+import Inline from "../../../components/Inline.astro";
+import ClaimRefs from "../../../components/ClaimRefs.astro";
+import Figure from "../../../components/Figure.astro";
+import { formatDate, listChapterIds, loadCatalog, loadChapter, shortCommit, sourceLineUrl } from "../../../lib/content";
+
+export function getStaticPaths() {
+  return listChapterIds().map((chapter) => ({ params: { chapter } }));
+}
+
+const { chapter } = Astro.params as { chapter: string };
+const { publication: pub, fixtures, lock, citedClaims, claimNumbers } = loadChapter(chapter);
+const order = listChapterIds();
+const titles = new Map(loadCatalog().chapters.map((c) => [c.id, c.questionTitle]));
+const here = order.indexOf(chapter);
+const previous = here > 0 ? order[here - 1] : null;
+const next = here < order.length - 1 ? order[here + 1] : null;
+const primarySources = pub.primaryBips.map((n) => {
+  const entry = lock.sources.find((s) => s.number === n)!;
+  const file = lock.files.find((f) => f.path === entry.path)!;
+  return { entry, file };
+});
+const reviewLabel = {
+  "draft-unreviewed": "Draft — hand-authored, not yet reviewed",
+  "in-review": "Draft — independent technical review applied; awaiting human sign-off",
+  approved: "Reviewed",
+}[pub.reviewState];
+const scopeLabel: Record<string, string> = {
+  "normative-rule": "Rule",
+  "author-rationale": "Author’s rationale",
+  history: "History",
+  "observed-implementation": "Observed",
+  "computed-fixture": "Test vector",
+  "editorial-analysis": "Editorial inference",
+};
+const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
+---
+<Base title={`${pub.title} · BIP Atlas`} description={pub.dek} current="chapter">
+  <article class="atlas-chapter">
+    <header class="manual-page atlas-chapter-head">
+      <div class="atlas-chapter-intro">
+        <p class="atlas-specimen">{pub.specimenLabel}</p>
+        <h1>{pub.title}</h1>
+        <p class="atlas-dek">{pub.dek}</p>
+        <div class="atlas-opening">
+          {pub.opening.blocks.map((b) => (
+            <p><Inline text={b.text} /><ClaimRefs claims={b.claims} numbers={claimNumbers} /></p>
+          ))}
+        </div>
+        <dl class="manual-meta atlas-meta">
+          <div><dt>Source revision</dt><dd><a href={commitUrl}>bitcoin/bips @ {shortCommit(lock.commit)}</a></dd></div>
+          <div><dt>Source checked</dt><dd>{formatDate(lock.retrievedAt)}</dd></div>
+          <div><dt>Review state</dt><dd>{reviewLabel}</dd></div>
+        </dl>
+        <details class="atlas-details atlas-source-details">
+          <summary>Source details</summary>
+          <div class="atlas-details__body">
+            <p class="atlas-small">
+              This chapter is an independent explanation, not the proposals themselves. Preamble fields are shown as recorded
+              in the pinned files, with author e-mail addresses omitted. Status is the proposal’s own field, not an
+              endorsement or a sign of consensus.
+            </p>
+            {primarySources.map(({ entry, file }) => (
+              <section class="atlas-preamble" aria-label={`BIP ${entry.number} preamble`}>
+                <h3>BIP {entry.number}: {entry.title}</h3>
+                <dl>
+                  {Object.entries(entry.headersRaw).filter(([k]) => k !== "Discussion").map(([k, v]) => (
+                    <div><dt>{k}</dt><dd>{v.split("\n").map((line, i) => <>{i > 0 && <br />}{line.replace(/<[^>]*@[^>]*>/, "").trim()}</>)}</dd></div>
+                  ))}
+                </dl>
+                <p class="manual-meta">
+                  <a href={entry.canonicalUrl}>Pinned source</a> · <a href={entry.readerUrl}>Reader view on bips.dev</a><br />
+                  SHA-256 <code class="atlas-break">{file.sha256}</code><br />
+                  Git blob <code class="atlas-break">{file.gitBlob}</code>
+                </p>
+              </section>
+            ))}
+          </div>
+        </details>
+      </div>
+      <div class="atlas-chapter-hero">
+        <Figure figure={pub.opening.figure} numbers={claimNumbers} fixtures={fixtures} />
+      </div>
+    </header>
+
+    <div class="manual-reader atlas-reader">
+      <aside class="manual-toc atlas-toc" aria-label="On this page">
+        <nav>
+          <p class="atlas-toc__label">In this chapter</p>
+          <ol>
+            {pub.sections.map((s) => <li><a href={`#${s.id}`}>{s.heading}</a></li>)}
+            <li><a href="#evidence">Evidence</a></li>
+          </ol>
+        </nav>
+      </aside>
+      <div class="manual-reader-main">
+        {pub.sections.map((section) => (
+          <section id={section.id} class="atlas-flow" aria-labelledby={`${section.id}-h`}>
+            <h2 id={`${section.id}-h`}>{section.heading}</h2>
+            <Blocks blocks={section.blocks} numbers={claimNumbers} fixtures={fixtures} />
+          </section>
+        ))}
+
+        <section id="evidence" class="atlas-flow atlas-evidence" aria-labelledby="evidence-h">
+          <h2 id="evidence-h">Evidence</h2>
+          <p class="atlas-small">
+            Each numbered marker in the text points here. Quotes are verbatim from the BIP files at commit
+            <a href={commitUrl}><code>{shortCommit(lock.commit)}</code></a>, including their wiki markup; links open
+            the exact lines; the quoted text sits under each entry. Labels say what kind of statement each is: a rule, the author’s rationale, history,
+            a test vector, or our own inference.
+          </p>
+          <ol class="atlas-evidence__list">
+            {citedClaims.map((claim) => (
+              <li id={`claim-${claim.id}`} value={claim.number}>
+                <p>
+                  <span class="atlas-tag" data-scope={claim.scope}>{scopeLabel[claim.scope]}</span>
+                  {claim.statement}
+                </p>
+                <p class="atlas-evidence__links">
+                  {claim.evidence.map((span) => (
+                    <a href={sourceLineUrl(lock, span.bip, span.lines, span.file)}>
+                      BIP {span.bip}{span.file ? ` (${span.file.split("/").pop()})` : ""} {span.lines[0] === span.lines[1] ? `L${span.lines[0]}` : `L${span.lines[0]}–${span.lines[1]}`}
+                    </a>
+                  ))}
+                </p>
+                <details>
+                  <summary>Quoted source text ({claim.evidence.length})</summary>
+                  {claim.evidence.map((span) => (
+                    <blockquote cite={sourceLineUrl(lock, span.bip, span.lines, span.file)}>
+                      <p>{span.quote}</p>
+                      <footer>BIP {span.bip}{span.file ? ` (${span.file.split("/").pop()})` : ""}, {span.lines[0] === span.lines[1] ? `line ${span.lines[0]}` : `lines ${span.lines[0]}–${span.lines[1]}`}</footer>
+                    </blockquote>
+                  ))}
+                </details>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {(previous || next) && (
+          <nav class="atlas-flow atlas-pager" aria-label="Chapters">
+            <div class="atlas-pager__row">
+              {previous ? <a href={`/learn/${previous}/`} rel="prev"><span>Previous chapter</span>{titles.get(previous)}</a> : <span />}
+              {next ? <a href={`/learn/${next}/`} rel="next"><span>Next chapter</span>{titles.get(next)}</a> : <span />}
+            </div>
+          </nav>
+        )}
+      </div>
+    </div>
+  </article>
+</Base>

@@ -1,0 +1,38 @@
+---
+import { analyzeSegwitAddress } from "@bip-atlas/models";
+import { stageVerdict, type AddressFixture, type BaseFixture } from "@bip-atlas/figures";
+
+interface Props {
+  fixtures: BaseFixture[];
+  caption: string;
+}
+const { caption } = Astro.props;
+const fixtures = Astro.props.fixtures as AddressFixture[];
+if (fixtures.some((f) => f.kind !== "address")) throw new Error("fixture-table currently supports address fixtures only");
+const rows = fixtures.map((f) => ({ f, a: analyzeSegwitAddress(f.address, f.network) }));
+---
+<div class="atlas-table-wrap" tabindex="0" role="region" aria-label="Sample results, scrollable">
+  <table class="manual-table atlas-fixture-table">
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">Sample</th>
+        <th scope="col">String</th>
+        <th scope="col">Outcome</th>
+        <th scope="col">Reason or result</th>
+        <th scope="col">Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(({ f, a }) => (
+        <tr data-valid={a.valid ? "true" : "false"}>
+          <th scope="row">{f.label}</th>
+          <td><code class="atlas-break">{f.address}</code></td>
+          <td class="atlas-outcome">{a.valid ? "✓ " : "✕ "}{stageVerdict(a)}</td>
+          <td>{a.valid ? <>v{a.witnessVersion}, <code>{a.scriptPubKeyHex!.slice(0, 4)}…</code> ({a.programHex!.length / 2}-byte program)</> : a.reason}</td>
+          <td class="atlas-nowrap">BIP {f.source.bip} L{f.source.line}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,56 @@
+---
+import Base from "../../layouts/Base.astro";
+import { formatDate, listChapterIds, loadExternalLock, loadChapter, shortCommit } from "../../lib/content";
+
+const chapters = listChapterIds().map((id) => ({ id, ...loadChapter(id) }));
+const { lock } = chapters[0];
+const claimCount = chapters.reduce((n, c) => n + c.ledger.claims.length, 0);
+const external = loadExternalLock();
+---
+<Base title="Methodology · BIP Atlas" description="Sources, checks and limits behind BIP Atlas." current="methodology">
+  <div class="manual-page atlas-flow atlas-method">
+    <h1>Methodology</h1>
+    <p>
+      Every chapter is built from a pinned revision of the <code>bitcoin/bips</code> repository. The current source is
+      commit <a href={`https://github.com/bitcoin/bips/commit/${lock.commit}`}><code>{shortCommit(lock.commit)}</code></a>,
+      read on {formatDate(lock.retrievedAt)}. File hashes are recorded in a lock file, and links in each chapter open
+      the exact lines that support a statement.
+    </p>
+    <p>
+      Some BIPs publish their test vectors in other repositories. Those files are fetched at an explicit commit and
+      hashed too:
+    </p>
+    <ul>
+      {external.files.map((f) => (
+        <li><a href={`${f.repository}/blob/${f.commit}/${f.path}`}>{f.repository.replace("https://github.com/", "")}/{f.path}</a> at <code>{shortCommit(f.commit)}</code>, cited by BIP {f.citedBy.bip}</li>
+      ))}
+    </ul>
+    <h2>What has been checked</h2>
+    <p>
+      Each chapter’s figures draw only reviewed recipes, and every exact value they show comes from a tested model,
+      computed at build time or in your browser. The models use the audited <code>@noble</code> libraries for hashing and
+      elliptic-curve arithmetic. The tests check them against the proposals’ own vectors:
+    </p>
+    <ul>
+      <li><strong>BIP 39:</strong> all 24 English and 24 Japanese reference vectors, from entropy to words to seed, and the pinned wordlist’s hash.</li>
+      <li><strong>BIP 32:</strong> all 17 derivation chains embedded in the BIP, all 16 invalid extended keys (each for its stated reason), and the master keys of all 24 BIP 39 English vectors.</li>
+      <li><strong>BIPs 141 and 143:</strong> the two SIGHASH_ALL witness examples, byte for byte: serialization, signing preimage and digest.</li>
+      <li><strong>BIPs 173 and 350:</strong> every Bech32, Bech32m and SegWit address vector, including the stage at which each invalid one is stopped.</li>
+      <li><strong>BIP 174:</strong> all 20 invalid and 10 valid PSBTs, the published role trace (combining in either order, extraction) and unknown-field preservation.</li>
+      <li>All {claimCount} evidence quotes across {chapters.length} chapters appear verbatim at their cited lines, and every sample is tied to a pinned source line or vector file.</li>
+    </ul>
+    <h2>What has not</h2>
+    <ul>
+      <li>Every chapter is hand-authored. Each has had one independent technical review whose findings were applied, but none has formal sign-off; all are marked as drafts.</li>
+      <li>No automated writing pipeline is connected yet.</li>
+      <li>The models are teaching models. They check structure and encodings against published vectors; they are not wallets, signers or full conformance suites, and they say nothing about ownership, balance, or whether a payment is safe.</li>
+      <li>No screen-reader session or accessibility audit has been performed beyond the checks recorded in the project.</li>
+    </ul>
+    <h2>Privacy</h2>
+    <p>
+      Pages load no third-party scripts, fonts or analytics. Figures run entirely in your browser, accept no
+      free-text addresses, keys, recovery phrases or PSBTs, and never send what you do in them anywhere. Nothing on
+      this site signs or broadcasts a transaction.
+    </p>
+  </div>
+</Base>

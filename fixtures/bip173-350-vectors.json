@@ -1,0 +1,681 @@
+{
+  "type": "bip-atlas.vectors.v1",
+  "repository": "https://github.com/bitcoin/bips",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "sources": [
+    {
+      "bip": 173,
+      "path": "bip-0173.mediawiki",
+      "sha256": "b19eab06b264bbd15ad7f7d640fa34de8f4a8809fba8a6ecc3e165545b27a543",
+      "gitBlob": "5bcc4a5255bc85c78f3a4abaa7f4782f8acf6477"
+    },
+    {
+      "bip": 350,
+      "path": "bip-0350.mediawiki",
+      "sha256": "63634b06aa8bae88b31929674736e74964c4598684269ac2b0b140c43a7a0dec",
+      "gitBlob": "8acc839867639c780621dc11aa401b0b181d69cb"
+    }
+  ],
+  "note": "Copied verbatim from the pinned BIP text. Public test material; never use for funds.",
+  "vectors": [
+    {
+      "bip": 173,
+      "line": 277,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "A12UEL5L"
+    },
+    {
+      "bip": 173,
+      "line": 278,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "a12uel5l"
+    },
+    {
+      "bip": 173,
+      "line": 279,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "an83characterlonghumanreadablepartthatcontainsthenumber1andtheexcludedcharactersbio1tt5tgs"
+    },
+    {
+      "bip": 173,
+      "line": 280,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "abcdef1qpzry9x8gf2tvdw0s3jn54khce6mua7lmqqqxw"
+    },
+    {
+      "bip": 173,
+      "line": 281,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "11qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqc8247j"
+    },
+    {
+      "bip": 173,
+      "line": 282,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "split1checkupstagehandshakeupstreamerranterredcaperred2y9e3w"
+    },
+    {
+      "bip": 173,
+      "line": 283,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32",
+      "string": "?1ezyfcl",
+      "note": "WARNING: During conversion to US-ASCII some encoders may set unmappable characters to a valid US-ASCII character, such as '?'. For example:"
+    },
+    {
+      "bip": 173,
+      "line": 291,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": " 1nwldj5",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 173,
+      "line": 292,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "\u007f1axkwrx",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 173,
+      "line": 293,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "\u00801eym55h",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 173,
+      "line": 294,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "an84characterslonghumanreadablepartthatcontainsthenumber1andtheexcludedcharactersbio1569pvx",
+      "reason": "overall max length exceeded"
+    },
+    {
+      "bip": 173,
+      "line": 295,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "pzry9x0s0muk",
+      "reason": "No separator character"
+    },
+    {
+      "bip": 173,
+      "line": 296,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "1pzry9x0s0muk",
+      "reason": "Empty HRP"
+    },
+    {
+      "bip": 173,
+      "line": 297,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "x1b4n0q5v",
+      "reason": "Invalid data character"
+    },
+    {
+      "bip": 173,
+      "line": 298,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "li1dgmt3",
+      "reason": "Too short checksum"
+    },
+    {
+      "bip": 173,
+      "line": 299,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "de1lg7wt\u00ff",
+      "reason": "Invalid character in checksum"
+    },
+    {
+      "bip": 173,
+      "line": 300,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "A1G7SGD8",
+      "reason": "checksum calculated with uppercase form of HRP"
+    },
+    {
+      "bip": 173,
+      "line": 301,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "10a06t8",
+      "reason": "empty HRP"
+    },
+    {
+      "bip": 173,
+      "line": 302,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32",
+      "string": "1qzzfhee",
+      "reason": "empty HRP"
+    },
+    {
+      "bip": 173,
+      "line": 306,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+      "scriptPubKeyHex": "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+    },
+    {
+      "bip": 173,
+      "line": 307,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7",
+      "scriptPubKeyHex": "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
+    },
+    {
+      "bip": 173,
+      "line": 308,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx",
+      "scriptPubKeyHex": "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6"
+    },
+    {
+      "bip": 173,
+      "line": 309,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "BC1SW50QA3JX3S",
+      "scriptPubKeyHex": "6002751e"
+    },
+    {
+      "bip": 173,
+      "line": 310,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "bc1zw508d6qejxtdg4y5r3zarvaryvg6kdaj",
+      "scriptPubKeyHex": "5210751e76e8199196d454941c45d1b3a323"
+    },
+    {
+      "bip": 173,
+      "line": 311,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy",
+      "scriptPubKeyHex": "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"
+    },
+    {
+      "bip": 173,
+      "line": 315,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tc1qw508d6qejxtdg4y5r3zarvary0c5xw7kg3g4ty",
+      "reason": "Invalid human-readable part"
+    },
+    {
+      "bip": 173,
+      "line": 316,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t5",
+      "reason": "Invalid checksum"
+    },
+    {
+      "bip": 173,
+      "line": 317,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "BC13W508D6QEJXTDG4Y5R3ZARVARY0C5XW7KN40WF2",
+      "reason": "Invalid witness version"
+    },
+    {
+      "bip": 173,
+      "line": 318,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1rw5uspcuh",
+      "reason": "Invalid program length"
+    },
+    {
+      "bip": 173,
+      "line": 319,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc10w508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kw5rljs90",
+      "reason": "Invalid program length"
+    },
+    {
+      "bip": 173,
+      "line": 320,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "BC1QR508D6QEJXTDG4Y5R3ZARVARYV98GJ9P",
+      "reason": "Invalid program length for witness version 0 (per BIP141)"
+    },
+    {
+      "bip": 173,
+      "line": 321,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sL5k7",
+      "reason": "Mixed case"
+    },
+    {
+      "bip": 173,
+      "line": 322,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1zw508d6qejxtdg4y5r3zarvaryvqyzf3du",
+      "reason": "zero padding of more than 4 bits"
+    },
+    {
+      "bip": 173,
+      "line": 323,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3pjxtptv",
+      "reason": "Non-zero padding in 8-to-5 conversion"
+    },
+    {
+      "bip": 173,
+      "line": 324,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1gmk9yu",
+      "reason": "Empty data section"
+    },
+    {
+      "bip": 350,
+      "line": 156,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "A1LQFN3A"
+    },
+    {
+      "bip": 350,
+      "line": 157,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "a1lqfn3a"
+    },
+    {
+      "bip": 350,
+      "line": 158,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "an83characterlonghumanreadablepartthatcontainsthetheexcludedcharactersbioandnumber11sg7hg6"
+    },
+    {
+      "bip": 350,
+      "line": 159,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "abcdef1l7aum6echk45nj3s0wdvt2fg8x9yrzpqzd3ryx"
+    },
+    {
+      "bip": 350,
+      "line": 160,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "11llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllludsr8"
+    },
+    {
+      "bip": 350,
+      "line": 161,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "split1checkupstagehandshakeupstreamerranterredcaperredlc445v"
+    },
+    {
+      "bip": 350,
+      "line": 162,
+      "family": "generic",
+      "validity": "valid",
+      "encoding": "bech32m",
+      "string": "?1v759aa"
+    },
+    {
+      "bip": 350,
+      "line": 167,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": " 1xj0phk",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 350,
+      "line": 168,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "\u007f1g6xzxy",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 350,
+      "line": 169,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "\u00801vctc34",
+      "reason": "HRP character out of range"
+    },
+    {
+      "bip": 350,
+      "line": 170,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "an84characterslonghumanreadablepartthatcontainsthetheexcludedcharactersbioandnumber11d6pts4",
+      "reason": "overall max length exceeded"
+    },
+    {
+      "bip": 350,
+      "line": 171,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "qyrz8wqd2c9m",
+      "reason": "No separator character"
+    },
+    {
+      "bip": 350,
+      "line": 172,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "1qyrz8wqd2c9m",
+      "reason": "Empty HRP"
+    },
+    {
+      "bip": 350,
+      "line": 173,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "y1b0jsk6g",
+      "reason": "Invalid data character"
+    },
+    {
+      "bip": 350,
+      "line": 174,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "lt1igcx5c0",
+      "reason": "Invalid data character"
+    },
+    {
+      "bip": 350,
+      "line": 175,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "in1muywd",
+      "reason": "Too short checksum"
+    },
+    {
+      "bip": 350,
+      "line": 176,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "mm1crxm3i",
+      "reason": "Invalid character in checksum"
+    },
+    {
+      "bip": 350,
+      "line": 177,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "au1s5cgom",
+      "reason": "Invalid character in checksum"
+    },
+    {
+      "bip": 350,
+      "line": 178,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "M1VUXWEZ",
+      "reason": "checksum calculated with uppercase form of HRP"
+    },
+    {
+      "bip": 350,
+      "line": 179,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "16plkw9",
+      "reason": "empty HRP"
+    },
+    {
+      "bip": 350,
+      "line": 180,
+      "family": "generic",
+      "validity": "invalid",
+      "encoding": "bech32m",
+      "string": "1p2gdwpf",
+      "reason": "empty HRP"
+    },
+    {
+      "bip": 350,
+      "line": 186,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+      "scriptPubKeyHex": "0014751e76e8199196d454941c45d1b3a323f1433bd6"
+    },
+    {
+      "bip": 350,
+      "line": 187,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "tb1qrp33g0q5c5txsp9arysrx4k6zdkfs4nce4xj0gdcccefvpysxf3q0sl5k7",
+      "scriptPubKeyHex": "00201863143c14c5166804bd19203356da136c985678cd4d27a1b8c6329604903262"
+    },
+    {
+      "bip": 350,
+      "line": 188,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y",
+      "scriptPubKeyHex": "5128751e76e8199196d454941c45d1b3a323f1433bd6751e76e8199196d454941c45d1b3a323f1433bd6"
+    },
+    {
+      "bip": 350,
+      "line": 189,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "BC1SW50QGDZ25J",
+      "scriptPubKeyHex": "6002751e"
+    },
+    {
+      "bip": 350,
+      "line": 190,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "bc1zw508d6qejxtdg4y5r3zarvaryvaxxpcs",
+      "scriptPubKeyHex": "5210751e76e8199196d454941c45d1b3a323"
+    },
+    {
+      "bip": 350,
+      "line": 191,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "tb1qqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesrxh6hy",
+      "scriptPubKeyHex": "0020000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"
+    },
+    {
+      "bip": 350,
+      "line": 192,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c",
+      "scriptPubKeyHex": "5120000000c4a5cad46221b2a187905e5266362b99d5e91c6ce24d165dab93e86433"
+    },
+    {
+      "bip": 350,
+      "line": 193,
+      "family": "segwit",
+      "validity": "valid",
+      "string": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
+      "scriptPubKeyHex": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+    },
+    {
+      "bip": 350,
+      "line": 197,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq5zuyut",
+      "reason": "Invalid human-readable part"
+    },
+    {
+      "bip": 350,
+      "line": 198,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqh2y7hd",
+      "reason": "Invalid checksum (Bech32 instead of Bech32m)"
+    },
+    {
+      "bip": 350,
+      "line": 199,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1z0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqglt7rf",
+      "reason": "Invalid checksum (Bech32 instead of Bech32m)"
+    },
+    {
+      "bip": 350,
+      "line": 200,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "BC1S0XLXVLHEMJA6C4DQV22UAPCTQUPFHLXM9H8Z3K2E72Q4K9HCZ7VQ54WELL",
+      "reason": "Invalid checksum (Bech32 instead of Bech32m)"
+    },
+    {
+      "bip": 350,
+      "line": 201,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kemeawh",
+      "reason": "Invalid checksum (Bech32m instead of Bech32)"
+    },
+    {
+      "bip": 350,
+      "line": 202,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1q0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq24jc47",
+      "reason": "Invalid checksum (Bech32m instead of Bech32)"
+    },
+    {
+      "bip": 350,
+      "line": 203,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1p38j9r5y49hruaue7wxjce0updqjuyyx0kh56v8s25huc6995vvpql3jow4",
+      "reason": "Invalid character in checksum"
+    },
+    {
+      "bip": 350,
+      "line": 204,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "BC130XLXVLHEMJA6C4DQV22UAPCTQUPFHLXM9H8Z3K2E72Q4K9HCZ7VQ7ZWS8R",
+      "reason": "Invalid witness version"
+    },
+    {
+      "bip": 350,
+      "line": 205,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1pw5dgrnzv",
+      "reason": "Invalid program length (1 byte)"
+    },
+    {
+      "bip": 350,
+      "line": 206,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7v8n0nx0muaewav253zgeav",
+      "reason": "Invalid program length (41 bytes)"
+    },
+    {
+      "bip": 350,
+      "line": 207,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "BC1QR508D6QEJXTDG4Y5R3ZARVARYV98GJ9P",
+      "reason": "Invalid program length for witness version 0 (per BIP141)"
+    },
+    {
+      "bip": 350,
+      "line": 208,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq47Zagq",
+      "reason": "Mixed case"
+    },
+    {
+      "bip": 350,
+      "line": 209,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7v07qwwzcrf",
+      "reason": "zero padding of more than 4 bits"
+    },
+    {
+      "bip": 350,
+      "line": 210,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vpggkg4j",
+      "reason": "Non-zero padding in 8-to-5 conversion"
+    },
+    {
+      "bip": 350,
+      "line": 211,
+      "family": "segwit",
+      "validity": "invalid",
+      "string": "bc1gmk9yu",
+      "reason": "Empty data section"
+    }
+  ]
+}

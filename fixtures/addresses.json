@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "addresses",
+  "warning": "Public test material copied from the pinned BIP text. Never send funds to any of these strings.",
+  "fixtures": [
+    {
+      "id": "v0-p2wpkh",
+      "kind": "address",
+      "label": "Valid v0",
+      "shortLabel": "v0 · Bech32",
+      "address": "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+      "network": "bc",
+      "source": {
+        "bip": 173,
+        "line": 64,
+        "section": "Examples",
+        "quote": "<tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4</tt>"
+      },
+      "lab": true
+    },
+    {
+      "id": "v1-32byte",
+      "kind": "address",
+      "label": "Valid v1",
+      "shortLabel": "v1 · Bech32m",
+      "address": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 193,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0</tt>"
+      },
+      "lab": true
+    },
+    {
+      "id": "v1-bech32-checksum",
+      "kind": "address",
+      "label": "Wrong checksum family",
+      "shortLabel": "v1 · Bech32",
+      "address": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqh2y7hd",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 198,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqh2y7hd</tt>"
+      },
+      "lab": true
+    },
+    {
+      "id": "v0-typo",
+      "kind": "address",
+      "label": "One wrong character",
+      "shortLabel": "v0 · typo",
+      "address": "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t5",
+      "network": "bc",
+      "source": {
+        "bip": 173,
+        "line": 316,
+        "section": "Test vectors",
+        "quote": "<tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t5</tt>"
+      },
+      "lab": true
+    },
+    {
+      "id": "v0-bech32m-checksum",
+      "kind": "address",
+      "label": "v0 with a Bech32m checksum",
+      "address": "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kemeawh",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 201,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kemeawh</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "bip173-v1-bech32",
+      "kind": "address",
+      "label": "BIP 173's own v1 example",
+      "address": "bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx",
+      "network": "bc",
+      "source": {
+        "bip": 173,
+        "line": 308,
+        "section": "Test vectors",
+        "quote": "<tt>bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "mixed-case",
+      "kind": "address",
+      "label": "Mixed case",
+      "address": "tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq47Zagq",
+      "network": "tb",
+      "source": {
+        "bip": 350,
+        "line": 208,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq47Zagq</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "bad-alphabet",
+      "kind": "address",
+      "label": "Letter outside the alphabet",
+      "address": "bc1p38j9r5y49hruaue7wxjce0updqjuyyx0kh56v8s25huc6995vvpql3jow4",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 203,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>bc1p38j9r5y49hruaue7wxjce0updqjuyyx0kh56v8s25huc6995vvpql3jow4</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "wrong-prefix",
+      "kind": "address",
+      "label": "Unknown prefix “tc”",
+      "address": "tc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq5zuyut",
+      "network": "tb",
+      "source": {
+        "bip": 350,
+        "line": 197,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>tc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq5zuyut</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "v0-wrong-length",
+      "kind": "address",
+      "label": "v0 program of the wrong length",
+      "address": "BC1QR508D6QEJXTDG4Y5R3ZARVARYV98GJ9P",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 207,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>BC1QR508D6QEJXTDG4Y5R3ZARVARYV98GJ9P</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "excess-padding",
+      "kind": "address",
+      "label": "Too much padding",
+      "address": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7v07qwwzcrf",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 209,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7v07qwwzcrf</tt>"
+      },
+      "lab": false
+    },
+    {
+      "id": "version-17",
+      "kind": "address",
+      "label": "Witness version above 16",
+      "address": "BC130XLXVLHEMJA6C4DQV22UAPCTQUPFHLXM9H8Z3K2E72Q4K9HCZ7VQ7ZWS8R",
+      "network": "bc",
+      "source": {
+        "bip": 350,
+        "line": 204,
+        "section": "Test vectors for v0-v16 native segregated witness addresses",
+        "quote": "<tt>BC130XLXVLHEMJA6C4DQV22UAPCTQUPFHLXM9H8Z3K2E72Q4K9HCZ7VQ7ZWS8R</tt>"
+      },
+      "lab": false
+    }
+  ]
+}

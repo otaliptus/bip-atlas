@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.astro/
+vendor/
+__pycache__/
+*.pyc
+.DS_Store
+.playwright-mcp/
+.wrangler/
+.claude/settings.local.json
+.env
+.env.*
+# Full-page screenshots are large and regenerable; focused figure shots are kept.
+review/screenshots/*-full.png

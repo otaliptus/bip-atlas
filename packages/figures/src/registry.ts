@@ -1,0 +1,154 @@
+/**
+ * Registered figure recipes. A publication may only name recipes listed
+ * here; each recipe's component is trusted code reviewed with this repo.
+ */
+export interface RecipeDefinition {
+  id: string;
+  description: string;
+  minFixtures: number;
+  maxFixtures: number;
+  interactive: boolean;
+  controls: string[];
+  /** Fixture kind every fixture passed to this recipe must have. */
+  fixtureKind: string;
+}
+
+export const RECIPES: readonly RecipeDefinition[] = [
+  {
+    id: "address-anatomy.v1",
+    description: "One valid address split into prefix, separator, version, program and checksum.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "address",
+  },
+  {
+    id: "address-checksum-lab.v1",
+    description: "Validation stages for public fixtures, with single-character substitution.",
+    minFixtures: 2,
+    maxFixtures: 6,
+    interactive: true,
+    controls: ["Choose public address fixture", "Change one character", "Compare checksum families"],
+    fixtureKind: "address",
+  },
+  {
+    id: "program-regrouping.v1",
+    description: "Witness program bits regrouped from 8-bit bytes into 5-bit characters.",
+    minFixtures: 2,
+    maxFixtures: 2,
+    interactive: false,
+    controls: [],
+    fixtureKind: "address",
+  },
+  {
+    id: "mnemonic-card.v1",
+    description: "A public BIP39 test phrase laid out as a numbered backup card.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+  },
+  {
+    id: "entropy-word-pipeline.v1",
+    description: "Entropy and checksum bits cut into 11-bit groups and looked up as words.",
+    minFixtures: 2,
+    maxFixtures: 6,
+    interactive: true,
+    controls: ["Choose public fixture", "Toggle 128/256-bit fixture", "Reveal 11-bit groups"],
+    fixtureKind: "mnemonic",
+  },
+  {
+    id: "seed-derivation.v1",
+    description: "Mnemonic and passphrase through PBKDF2-HMAC-SHA512 into a 64-byte seed.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+  },
+  {
+    id: "master-key-split.v1",
+    description: "Seed through HMAC-SHA512 into master private key and chain code.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bip32-seed",
+  },
+  {
+    id: "derivation-tree.v1",
+    description: "A fixed BIP32 key tree seen with the master xprv or xpub, with a hardened boundary.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: true,
+    controls: ["Expand a branch", "Switch public/private view", "Toggle hardened boundary"],
+    fixtureKind: "bip32-seed",
+  },
+  {
+    id: "extended-key-layout.v1",
+    description: "The 78-byte extended key payload of one node, public versus private.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "bip32-seed",
+  },
+  {
+    id: "two-serializations.v1",
+    description: "The txid and wtxid preimages of one transaction, to scale.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "transaction",
+  },
+  {
+    id: "transaction-anatomy.v1",
+    description: "A serialized transaction by field, with txid, wtxid and BIP143 signing lenses.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: true,
+    controls: ["Switch txid/wtxid preimage view", "Select a public transaction fixture", "Inspect BIP143 signing preimage"],
+    fixtureKind: "transaction",
+  },
+  {
+    id: "weight-meter.v1",
+    description: "Weight as four units per base byte and one per witness byte.",
+    minFixtures: 1,
+    maxFixtures: 4,
+    interactive: false,
+    controls: [],
+    fixtureKind: "transaction",
+  },
+  {
+    id: "psbt-layout.v1",
+    description: "A newly created PSBT as an envelope of key-value maps.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "psbt-trace",
+  },
+  {
+    id: "psbt-envelope.v1",
+    description: "Replay of BIP174's published role trace, field by field.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: true,
+    controls: ["Advance through a reviewed trace", "Inspect added fields", "Compare partial/final states"],
+    fixtureKind: "psbt-trace",
+  },
+  {
+    id: "unknown-fields.v1",
+    description: "Two PSBTs with unknown key-value pairs combined without losing them.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "psbt-combine",
+  },
+];
+
+export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));

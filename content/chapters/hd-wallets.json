@@ -1,0 +1,295 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "hd-wallets",
+  "primaryBips": [
+    32
+  ],
+  "specimenLabel": "BIP 0032",
+  "title": "How can one seed grow an entire wallet?",
+  "dek": "One backup, billions of keys. The trick is a 32-byte companion to every key, and a rule about which branches an extended public key may follow.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "When BIP 32 was written, the reference wallet generated each key at random. To avoid needing a new backup after every transaction, it kept a pool of a hundred spare keys. Every key was independent, so every key had to be saved.",
+        "claims": [
+          "random-keys-history"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 32, assigned in 2012 and recorded as deployed, takes another route: derive every key from one seed, arranged as a tree. Branches of that tree can be shared with other systems, entirely or in part, with or without the ability to spend.",
+        "claims": [
+          "preamble-dates",
+          "two-parts",
+          "abstract"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A02.1",
+      "recipe": "master-key-split.v1",
+      "title": "The first split",
+      "fixtures": [
+        "tv1"
+      ],
+      "caption": "HMAC-SHA512 turns a seed into 64 bytes. The left half becomes the master private key; the right half becomes the master chain code.",
+      "claims": [
+        "master",
+        "vectors"
+      ],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "extended-keys",
+      "heading": "Keys with an extra 32 bytes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every node in the tree is an *extended key*: an ordinary key plus a chain code, 32 more bytes of entropy. BIP 32 adds the chain code so that a node’s children do not depend on the key alone. The chain code is the same in the private and the public version of a node.",
+          "claims": [
+            "chain-code"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Without it, a child would depend only on its parent’s key. With it, knowing a public key is not enough to find that key’s children: you need the extended public key, key and chain code together.",
+          "claims": [
+            "chain-code",
+            "reconstruction"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "An extended private key is the pair (k, c): private key and chain code. Its public counterpart is (K, c), where K is the public key for k. Turning the first into the second is called neutering it, because the result can no longer sign transactions.",
+          "claims": [
+            "extended-key",
+            "neuter"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "one-step",
+      "heading": "One step down the tree",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "To make child number *i*, run HMAC-SHA512 keyed with the parent’s chain code. The 64-byte output splits as the master did. The left half is added to the parent’s private key, modulo the order of the curve, to give the child’s private key. The right half becomes the child’s chain code.",
+          "claims": [
+            "split",
+            "ckdpriv-normal"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "What goes into the HMAC depends on the index. Indices 0 to 2³¹ − 1 are *normal*, and the input is the parent’s public key followed by the index. Indices from 2³¹ upward are *hardened*, and the input is the parent’s private key, padded with a zero byte, followed by the index. Paths mark hardened indices with an H: `m/0H/1` is normal child 1 of hardened child 0 of the master.",
+          "claims": [
+            "indices",
+            "ckdpriv-normal",
+            "ckdpriv-hardened",
+            "notation"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In rare cases a step produces an invalid key, and the wallet moves on to the next index. BIP 32 puts the odds below one in 2¹²⁷. That one difference in the HMAC input, public key or private key, is what the figure below is about.",
+          "claims": [
+            "invalid-rare",
+            "ckdpriv-hardened"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.2",
+          "recipe": "derivation-tree.v1",
+          "title": "Who can derive what",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "A hardened edge is a wall for public keys. Holding M, you can follow normal edges down to M/1/0, but you cannot cross into m/0H: deriving it needs a private key you do not have.",
+          "claims": [
+            "ckdpub",
+            "pub-to-priv",
+            "reconstruction",
+            "vectors"
+          ],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "public",
+      "heading": "What an extended public key can do",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Because a normal child’s HMAC input is the parent’s public key, someone holding only the extended public key can compute the child’s public key and chain code too: add the public point of the left half to the parent’s public key. BIP 32 notes that both routes give the same child, and that this is exactly what makes normal keys useful.",
+          "claims": [
+            "ckdpub",
+            "equivalence"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Its own example is a webshop. The shop’s server can hold one extended public key and generate a fresh address for every order, without ever holding a key that could spend the payments. If the server is broken into, BIP 32 says the attacker can at most see the incoming payments.",
+          "claims": [
+            "webshop",
+            "webserver-breach"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 32 lists other kinds of partial sharing too. An auditor can be given every account’s extended public key and see all transactions without a single secret key. A business partner can be given one account’s external chain and use it as a kind of super address, without asking for a new address for each payment.",
+          "claims": [
+            "audits",
+            "b2b"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Hardened children are different. Their HMAC input contains the parent’s private key, so public derivation is simply not defined for them, and there is no way at all from a public parent to a private child. An extended public key reaches the public keys of descendants that are linked to it by normal steps only, and nothing else.",
+          "claims": [
+            "ckdpub",
+            "pub-to-priv",
+            "reconstruction",
+            "not-rewritable"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hardened",
+      "heading": "Why hardened keys exist",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "If normal derivation is so useful, why not use it everywhere? BIP 32 points to a weakness that is easy to miss. An extended public key, together with the private key of any descendant reached from it by normal steps only, is equivalent to the parent’s extended private key, and therefore to every key beneath it.",
+          "claims": [
+            "weakness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The tests behind this page check this on the published vector. From the extended public key of `m/0H` and the private key of its child `m/0H/1`, they recompute the private key of `m/0H` exactly: subtract the left half of the HMAC, which anyone holding the extended public key can compute.",
+          "claims": [
+            "recovery-computed",
+            "weakness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "This is why BIP 32 uses hardened derivation at the account level. A leak of one account’s private keys then cannot climb past the hardened edge to the master or to other accounts. It is also why BIP 32 says extended public keys must be treated more carefully than ordinary public keys. The risk to funds arises only when an extended public key meets a leaked private key reached from it by normal steps; on its own it reconstructs public keys and nothing more.",
+          "claims": [
+            "hardened-reason",
+            "weakness",
+            "reconstruction"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "Sharing an extended public key is also a privacy decision. It lets the holder see every public key reached from it by normal steps, and with them the payments. BIP 32’s auditor use case relies on exactly that.",
+          "claims": [
+            "leak-privacy",
+            "audits",
+            "reconstruction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "serialization",
+      "heading": "Writing a key down",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "An extended key travels as 78 bytes: a version, the depth in the tree, the parent’s fingerprint, the child number, the chain code and the key. Base58Check adds four checksum bytes and produces exactly 111 characters, beginning `xpub` or `xprv` on mainnet.",
+          "claims": [
+            "serialization"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.3",
+          "recipe": "extended-key-layout.v1",
+          "title": "One node, two serializations",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "Only the version and the key data differ. Depth, parent fingerprint, child number and chain code are identical: they describe the node’s place in the tree, and the chain code is shared by both forms. The checksum differs only as a consequence.",
+          "claims": [
+            "serialization",
+            "chain-code"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "The fingerprint is the first four bytes of the Hash160 of a key’s public key. It only helps software spot parents and children quickly. Different keys can share a fingerprint, and BIP 32 says software must be willing to deal with such collisions.",
+          "claims": [
+            "identifier",
+            "fingerprint-collisions"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Importing an extended public key also requires a check that its X coordinate corresponds to a point on the curve. BIP 32’s fifth test vector is a list of malformed keys of this and other kinds, and the decoder behind this page rejects all sixteen of them, each for its stated reason.",
+          "claims": [
+            "verify-point",
+            "vectors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "heading": "A tree, not a wallet layout",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 32 also suggests a default structure. Accounts are hardened children of the master, and each has an external chain for receiving addresses and an internal chain for change, written `m/iH/0/k` and `m/iH/1/k`. The proposal calls this layout a default that clients are encouraged to follow, and allows implementations to deviate for their own needs.",
+          "claims": [
+            "wallet-layout"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 32 defines only this default, and explicitly lets implementations deviate from it. Path conventions defined in other proposals are layers built on the mechanism described here; they are not part of BIP 32 itself, and an unfamiliar path is not by itself a sign of a broken wallet.",
+          "claims": [
+            "wallet-layout"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seed",
+      "heading": "Back to the seed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 32 asks for a seed of 128 to 512 bits from a random number generator, and advises 256. The 64-byte seed that BIP 39 produces, described in the previous chapter, fits. The BIP 39 test vector file referenced by BIP 39 also lists the master extended key for each of its 24 English seeds, and the tests behind this page reproduce all of them.",
+          "claims": [
+            "master",
+            "bip39-handoff"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "From that one value, every node can have 2³¹ normal and 2³¹ hardened children, and every one of them can be recomputed from the seed alone. That is the whole promise of the title: a single backup covers the entire tree.",
+          "claims": [
+            "indices",
+            "reconstruction",
+            "master"
+          ]
+        }
+      ]
+    }
+  ]
+}

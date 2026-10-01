@@ -1,0 +1,39 @@
+{
+  "type": "selected-public-fixture-examples",
+  "notACompletePublication": true,
+  "fullPinnedSourceSnapshotIncluded": false,
+  "fixtures": [
+    {
+      "id": "bip350-v0-example",
+      "address": "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+      "expectedHrp": "bc",
+      "result": {
+        "hrp": "bc",
+        "witnessVersion": 0,
+        "encoding": "bech32",
+        "programHex": "751e76e8199196d454941c45d1b3a323f1433bd6",
+        "scriptPubKeyHex": "0014751e76e8199196d454941c45d1b3a323f1433bd6",
+        "validationScope": "address syntax and encoding only; not spendability or ownership"
+      },
+      "source": "https://bips.dev/350/",
+      "sourceSection": "Test vectors for v0-v16 native segregated witness addresses",
+      "warning": "Public test example. Never use for funds."
+    },
+    {
+      "id": "bip350-v1-example",
+      "address": "bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0",
+      "expectedHrp": "bc",
+      "result": {
+        "hrp": "bc",
+        "witnessVersion": 1,
+        "encoding": "bech32m",
+        "programHex": "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "scriptPubKeyHex": "512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "validationScope": "address syntax and encoding only; not spendability or ownership"
+      },
+      "source": "https://bips.dev/350/",
+      "sourceSection": "Test vectors for v0-v16 native segregated witness addresses",
+      "warning": "Public test example. Never use for funds."
+    }
+  ]
+}

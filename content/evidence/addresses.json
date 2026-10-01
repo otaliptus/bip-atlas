@@ -1,0 +1,849 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "addresses",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for the hand-authored golden chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files.",
+  "claims": [
+    {
+      "id": "base58-mixed-case",
+      "statement": "BIP173 motivates a new format partly because base58's mixed case is hard to write down, type, or read aloud, and its double-SHA256 checksum has no error-detection guarantees.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            37,
+            37
+          ],
+          "quote": "The mixed case in base58 makes it inconvenient to reliably write down, type on mobile keyboards, or read out loud."
+        },
+        {
+          "bip": 173,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "The double SHA256 checksum is slow and has no error-detection guarantees."
+        }
+      ]
+    },
+    {
+      "id": "string-shape",
+      "statement": "A Bech32 string is at most 90 characters: a human-readable part, the separator \"1\" (the last 1 in the string), and a data part of at least 6 characters.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "string is at most 90 characters long and consists of:"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "the last one in the string is the separator"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            89,
+            89
+          ],
+          "quote": "The '''data part''', which is at least 6 characters long"
+        }
+      ]
+    },
+    {
+      "id": "alphabet",
+      "statement": "The data part uses 32 alphanumeric characters, excluding 1, b, i and o; the set and its order were chosen using visual-similarity data.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            89,
+            89
+          ],
+          "quote": "only consists of alphanumeric characters excluding \"1\", \"b\", \"i\", and \"o\""
+        },
+        {
+          "bip": 173,
+          "lines": [
+            90,
+            91
+          ],
+          "quote": "The character set is chosen to minimize ambiguity according to"
+        }
+      ]
+    },
+    {
+      "id": "case-rules",
+      "statement": "Checksums are computed on the lowercase form; decoders must reject mixed case; uppercase is recommended inside QR codes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            186,
+            186
+          ],
+          "quote": "The lowercase form is used when determining a character's value for checksum purposes."
+        },
+        {
+          "bip": 173,
+          "lines": [
+            192,
+            192
+          ],
+          "quote": "Decoders MUST NOT accept strings where some characters are uppercase and some are lowercase"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            194,
+            194
+          ],
+          "quote": "inside QR codes uppercase SHOULD be used"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            195,
+            195
+          ],
+          "quote": "which is 45% more compact than the normal"
+        }
+      ]
+    },
+    {
+      "id": "checksum-six",
+      "statement": "The last six characters of the data part are the checksum and carry no information of their own.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            127,
+            128
+          ],
+          "quote": "The last six characters of the data part form a checksum and contain no information."
+        }
+      ]
+    },
+    {
+      "id": "checksum-computation",
+      "statement": "Verification expands the human-readable part (high bits, a zero, low bits), appends the data values, runs the polymod function, and compares the result with a constant: 1 for Bech32. The encoder picks the six checksum values so the result lands on that constant; the code is a BCH code.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            146,
+            146
+          ],
+          "quote": "return [ord(x) >> 5 for x in s] + [0] + [ord(x) & 31 for x in s]"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            149,
+            149
+          ],
+          "quote": "return bech32_polymod(bech32_hrp_expand(hrp) + data) == 1"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            152,
+            152
+          ],
+          "quote": "This implements a [https://en.wikipedia.org/wiki/BCH_code BCH code] that"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            168,
+            168
+          ],
+          "quote": "polymod = bech32_polymod(values + [0,0,0,0,0,0]) ^ 1"
+        }
+      ]
+    },
+    {
+      "id": "bech32-guarantee",
+      "statement": "BIP173 states that its BCH code guarantees detection of any error affecting at most four characters, with under a 1 in 10^9 chance of missing larger errors.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            153,
+            153
+          ],
+          "quote": "guarantees detection of '''any error affecting at most 4 characters'''"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            154,
+            155
+          ],
+          "quote": "has less than a 1 in 10<sup>9</sup> chance of failing to detect more errors."
+        }
+      ]
+    },
+    {
+      "id": "substitution-guarantee",
+      "statement": "BIP350's analysis restates the firm guarantee as substitutions: Bech32 always detects up to four substituted characters, and Bech32m keeps that property.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            224,
+            224
+          ],
+          "quote": "Bech32 has a probability of 0 to incorrectly accept error patterns consisting of up to 4 substitutions—they are always detected."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            218,
+            218
+          ],
+          "quote": "For Bech32m, we aim to retain Bech32's guarantees for substitution errors"
+        }
+      ]
+    },
+    {
+      "id": "cross-family-limit",
+      "statement": "BIP350 reports detection properties separately for each code and verifier pair, and calls errors that change a witness version across checksum families unlikely but hard to analyze. Its four-substitution guarantee therefore applies within one checksum family, not to a decoder that accepts both.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            236,
+            236
+          ],
+          "quote": "Whether this line is about Bech32 or Bech32m encoded strings, and whether those are evaluated regarding their probability of being accepted by either a Bech32 or a Bech32m verifier."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            236,
+            236
+          ],
+          "quote": "This situation may in theory occur for segregated witness addresses when errors occur that change the version number in a v1+ address to v0. Due to the specificity of this type of error, plus the additional constraints that apply for v0 addresses, this is both unlikely and hard to analyze."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            95,
+            95
+          ],
+          "quote": "a valid Bech32 and Bech32m string will always differ by at least 3 characters if they are the same length."
+        }
+      ]
+    },
+    {
+      "id": "no-correction",
+      "statement": "Error correction erodes error detection; implementations should not correct beyond suggesting where an error might be, because an incorrect but valid input can lose funds irrecoverably.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            178,
+            179
+          ],
+          "quote": "Use of an incorrect but valid input can cause funds to be lost irrecoverably."
+        },
+        {
+          "bip": 173,
+          "lines": [
+            179,
+            182
+          ],
+          "quote": "implementations SHOULD NOT implement correction beyond potentially suggesting to the user where in the string an error might be found, without suggesting the correction to make."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            123,
+            123
+          ],
+          "quote": "implementations should refrain from using this for more than indicating where an error may be present."
+        }
+      ]
+    },
+    {
+      "id": "segwit-hrp",
+      "statement": "A SegWit address uses the human-readable part bc for mainnet and tb for testnet, and decoders must check it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            221,
+            221
+          ],
+          "quote": "MUST verify that the human-readable part is \"bc\" for mainnet and \"tb\" for testnet."
+        }
+      ]
+    },
+    {
+      "id": "version-char",
+      "statement": "The first data character holds the witness version as 5 bits, and decoders must check that it is between 0 and 16.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            212,
+            212
+          ],
+          "quote": "1 character (representing 5 bits of data): the witness version"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            222,
+            222
+          ],
+          "quote": "MUST verify that the first decoded data value (the witness version) is between 0 and 16, inclusive."
+        }
+      ]
+    },
+    {
+      "id": "program-regrouping",
+      "statement": "The 2-to-40-byte witness program is written as bits, regrouped into 5-bit groups padded with zeroes, and each group becomes one character.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            213,
+            213
+          ],
+          "quote": "A conversion of the 2-to-40-byte witness program"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            215,
+            215
+          ],
+          "quote": "Re-arrange those bits into groups of 5, and pad with zeroes at the end if needed."
+        }
+      ]
+    },
+    {
+      "id": "padding-rule",
+      "statement": "When decoding, an incomplete final group must be at most 4 bits and all zeroes, and there must be 2 to 40 bytes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            225,
+            225
+          ],
+          "quote": "Any incomplete group at the end MUST be 4 bits or less, MUST be all zeroes, and is discarded."
+        },
+        {
+          "bip": 173,
+          "lines": [
+            226,
+            226
+          ],
+          "quote": "There MUST be between 2 and 40 groups, which are interpreted as the bytes of the witness program."
+        }
+      ]
+    },
+    {
+      "id": "v0-lengths",
+      "statement": "BIP141 makes a version 0 program of any length other than 20 or 32 bytes fail; BIP173 asks decoders to enforce such known-length rules, so v0 addresses are always 42 or 62 characters.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            229,
+            230
+          ],
+          "quote": "If the version byte is 0, but the witness program is neither 20 nor 32 bytes, the script must fail."
+        },
+        {
+          "bip": 173,
+          "lines": [
+            233,
+            233
+          ],
+          "quote": "Version 0 witness addresses are always 42 or 62 characters"
+        }
+      ]
+    },
+    {
+      "id": "v0-types",
+      "statement": "In BIP141, a 20-byte version 0 program must match the HASH160 of a public key, and a 32-byte one must match the SHA256 of a witness script.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            97,
+            97
+          ],
+          "quote": "The HASH160 of the public key must match the 20-byte witness program."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            103,
+            103
+          ],
+          "quote": "SHA256 of the <code>witnessScript</code> must match the 32-byte witness program."
+        }
+      ]
+    },
+    {
+      "id": "script-opcodes",
+      "statement": "Converting to a scriptPubKey stores version n as OP_n: 0x00 for version 0 and 0x51–0x60 for versions 1–16; getting this wrong can make an output unspendable or insecure.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            236,
+            238
+          ],
+          "quote": "OP_0 is encoded as 0x00, but OP_1 through OP_16 are encoded as 0x51 though 0x60"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            238,
+            239
+          ],
+          "quote": "If a bech32 address is converted to an incorrect scriptPubKey the result will likely be either unspendable or insecure."
+        }
+      ]
+    },
+    {
+      "id": "q-weakness",
+      "statement": "Bech32 has an insertion weakness: when the final character is p, inserting or deleting q characters just before it leaves the checksum valid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "whenever the final character is a 'p', inserting or deleting any number of 'q' characters immediately preceding it does not invalidate the checksum."
+        }
+      ]
+    },
+    {
+      "id": "v0-unaffected",
+      "statement": "BIP350 states the weakness does not affect version 0 addresses, because they are restricted to two lengths. It may affect future uses.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "This does not affect existing uses of witness version 0 BIP173 addresses due to their restriction to two specific lengths"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "but may affect future uses and/or other applications using the Bech32 encoding."
+        }
+      ]
+    },
+    {
+      "id": "bech32m-constant",
+      "statement": "Bech32m changes only the final constant xored into the checksum, from 1 to 0x2bc830a3; all other aspects of Bech32 are unchanged.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "replacing the constant ''1'' that is xored into the checksum at the end with ''0x2bc830a3''"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "All other aspects of Bech32 remain unchanged, including its human-readable parts (HRPs)."
+        }
+      ]
+    },
+    {
+      "id": "family-rule",
+      "statement": "Witness version 0 is encoded with Bech32; versions 1 and higher with Bech32m; the decoder must check that the encoding matches the decoded version.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            92,
+            93
+          ],
+          "quote": "If its witness version is 0, encode it using Bech32. * If its witness version is 1 or higher, encode it using Bech32m."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            95,
+            95
+          ],
+          "quote": "the address decoder has to verify that the encoding matches what is expected for the decoded witness version"
+        }
+      ]
+    },
+    {
+      "id": "not-both",
+      "statement": "No string is valid as both Bech32 and Bech32m; two valid strings of the same length, one of each kind, differ in at least three characters.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            95,
+            95
+          ],
+          "quote": "a valid Bech32 and Bech32m string will always differ by at least 3 characters if they are the same length."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            164,
+            164
+          ],
+          "quote": "No string can be simultaneously valid Bech32 and Bech32m"
+        }
+      ]
+    },
+    {
+      "id": "why-not-both",
+      "statement": "Accepting both encodings for version 0 would weaken detection to the equivalent of a 29-bit checksum.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            88,
+            88
+          ],
+          "quote": "Permitting both encodings reduces the error detection capabilities (it makes it equivalent to only have 29 bits of checksum)."
+        }
+      ]
+    },
+    {
+      "id": "clean-break",
+      "statement": "BIP350 intentionally breaks forward compatibility: old Bech32-only senders reject Bech32m addresses, which the author argues protects them from the mutation issue and from burning funds.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            135,
+            135
+          ],
+          "quote": "the Bech32m proposal breaks forward-compatibility for sending to v1 and higher version segregated witness addresses"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            135,
+            135
+          ],
+          "quote": "the chosen approach will prevent such software from destroying funds when attempting to send to a Bech32m address."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            135,
+            135
+          ],
+          "quote": "those experiments identified cases in which segregated witness implementations would have caused wallets to burn funds when sending to version 1 addresses."
+        }
+      ]
+    },
+    {
+      "id": "history-2020",
+      "statement": "When BIP350 was written, it noted that no wallets were creating v1 addresses yet, because the output type was not usable on mainnet.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "no wallets are creating v1 segregated witness addresses yet, as the output type is not usable on mainnet."
+        }
+      ]
+    },
+    {
+      "id": "higher-versions",
+      "statement": "BIP350 asks senders to treat all higher witness versions as valid recipients, while saying versions not defined on the network should never be created or handed to a sender.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "All higher versions of native segregated witness outputs should be recognized as valid recipients."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "As higher versions are not defined on the network, no wallet should ever create them and no recipient should ever provide them to a sender."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "future soft forks introducing higher versions of native segwit outputs will be forward-compatible to all wallets correctly implementing the Bech32m specification."
+        }
+      ]
+    },
+    {
+      "id": "taproot-definition",
+      "statement": "BIP341 defines a Taproot output as a native SegWit output with version 1 and a 32-byte witness program; the address format itself does not define that meaning.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 341,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "A Taproot output is a native SegWit output (see [[bip-0141.mediawiki|BIP141]]) with version number 1, and a 32-byte witness program."
+        }
+      ]
+    },
+    {
+      "id": "fixture-v0",
+      "statement": "Public example: bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4 is the mainnet P2WPKH example; its uppercase form decodes to scriptPubKey 0014751e76e8199196d454941c45d1b3a323f1433bd6.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "Mainnet P2WPKH: <tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4</tt>"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            186,
+            186
+          ],
+          "quote": "<tt>BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4</tt>: <tt>0014751e76e8199196d454941c45d1b3a323f1433bd6</tt>"
+        }
+      ]
+    },
+    {
+      "id": "fixture-v1",
+      "statement": "Public test vector: a v1 Bech32m address that decodes to a 32-byte program.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            193,
+            193
+          ],
+          "quote": "<tt>bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqzk5jj0</tt>: <tt>512079be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798</tt>"
+        }
+      ]
+    },
+    {
+      "id": "fixture-wrong-family",
+      "statement": "Public test vectors: the same v1 program with a Bech32 checksum, and the v0 example with a Bech32m checksum, are both invalid.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 350,
+          "lines": [
+            198,
+            198
+          ],
+          "quote": "<tt>bc1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vqh2y7hd</tt>: Invalid checksum (Bech32 instead of Bech32m)"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            201,
+            201
+          ],
+          "quote": "<tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kemeawh</tt>: Invalid checksum (Bech32m instead of Bech32)"
+        }
+      ]
+    },
+    {
+      "id": "fixture-typo",
+      "statement": "Public test vector: the v0 example with its last character changed is an invalid checksum.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            316,
+            316
+          ],
+          "quote": "<tt>bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t5</tt>: Invalid checksum"
+        }
+      ]
+    },
+    {
+      "id": "fixture-superseded",
+      "statement": "BIP173 listed Bech32 v1, v2 and v16 addresses as valid; BIP350 lists the same programs with Bech32m checksums instead.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            308,
+            308
+          ],
+          "quote": "<tt>bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7k7grplx</tt>"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            188,
+            188
+          ],
+          "quote": "<tt>bc1pw508d6qejxtdg4y5r3zarvary0c5xw7kw508d6qejxtdg4y5r3zarvary0c5xw7kt5nd6y</tt>"
+        }
+      ]
+    },
+    {
+      "id": "preamble-dates",
+      "statement": "BIP173 was assigned in 2017 and BIP350, which lists itself as replacing BIP173, in 2020. Both preambles record the status Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            11,
+            11
+          ],
+          "quote": "Assigned: 2017-03-20"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            8,
+            8
+          ],
+          "quote": "Assigned: 2020-12-16"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            11,
+            11
+          ],
+          "quote": "Replaces: 173"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            6,
+            6
+          ],
+          "quote": "Status: Deployed"
+        }
+      ]
+    },
+    {
+      "id": "validity-scope",
+      "statement": "Passing the address checks establishes encoding validity only; it does not establish ownership, use, or whether sending is wise.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 173,
+          "lines": [
+            178,
+            179
+          ],
+          "quote": "Use of an incorrect but valid input can cause funds to be lost irrecoverably."
+        },
+        {
+          "bip": 350,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "no recipient should ever provide them to a sender"
+        }
+      ]
+    }
+  ]
+}

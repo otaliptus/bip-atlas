@@ -1,0 +1,417 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "addresses",
+  "primaryBips": [
+    173,
+    350
+  ],
+  "specimenLabel": "BIP 0173 + 0350",
+  "title": "How does an address notice a typing mistake?",
+  "dek": "The last six characters of a bc1 address carry no information at all. They exist to catch mistakes, and the rules around them decide what a wallet must refuse.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Copy an address by hand and sooner or later you will get a character wrong. Older Bitcoin addresses made that easy. They mix upper- and lowercase letters, which are awkward to write down, type on a phone or read aloud, and their checksum gave no guarantee about which mistakes it would catch.",
+        "claims": [
+          "base58-mixed-case"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Addresses that begin with `bc1` were designed the other way round. BIP 173, assigned in 2017, defined their format, Bech32. BIP 350, assigned in 2020, amended it with a variant called Bech32m. Together they say what every character means and what a decoder must do when one of them is wrong.",
+        "claims": [
+          "preamble-dates"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A04.1",
+      "recipe": "address-anatomy.v1",
+      "title": "Anatomy of a SegWit address",
+      "fixtures": [
+        "v0-p2wpkh"
+      ],
+      "caption": "Forty-two characters, five jobs. Only the version and the program describe the destination; the prefix names the network, the 1 marks where data begins, and the last six characters exist only to be checked.",
+      "claims": [
+        "string-shape",
+        "segwit-hrp",
+        "version-char",
+        "checksum-six",
+        "fixture-v0"
+      ],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "four-parts",
+      "heading": "Four parts and an alphabet",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Read the example from BIP 173 left to right. First comes a human-readable prefix, `bc`, which names the network: mainnet. Testnet uses `tb`. Then comes a separator, which is always the digit `1`. Everything after it is the data part. If a prefix ever contained a 1 of its own, the last 1 in the string would be the separator.",
+          "claims": [
+            "fixture-v0",
+            "segwit-hrp",
+            "string-shape"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The data part is written in an alphabet of exactly 32 characters: lowercase letters and digits, minus `1`, `b`, `i` and `o`. BIP 173 chose the set, and even the order of its characters, using data about which characters people confuse with one another.",
+          "claims": [
+            "alphabet"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Because the alphabet has no case distinctions, an address can be written entirely in capitals. BIP 173 recommends exactly that inside QR codes, whose alphanumeric mode is considerably more compact. What a decoder must refuse is a string that mixes the two cases. The checksum is always computed on the lowercase form.",
+          "claims": [
+            "case-rules"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "six-characters",
+      "heading": "Six characters that say nothing",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The last six characters of the data part are the checksum. They carry no information of their own: remove them and nothing about the destination is lost. Their job is to make almost every string invalid, so that a wrong one is noticed before anyone acts on it.",
+          "claims": [
+            "checksum-six"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "To check them, a decoder turns each data character into a number from 0 to 31, puts a few numbers derived from the prefix in front, and runs the whole sequence through a short function that BIP 173 calls `polymod`. For a correctly copied Bech32 string, the function returns exactly 1. Any other result means the string is not one an encoder produced.",
+          "claims": [
+            "checksum-computation"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Details: what polymod does",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The function implements a BCH code. It keeps a 30-bit state, six characters of five bits each, and folds in one fixed generator value for every bit that overflows the top as each new character arrives. The prefix is fed in twice: first the high bits of each of its characters, then a zero, then the low bits, so that a typo in the prefix is caught too. When encoding, the six checksum values are chosen so that the final state equals the agreed constant.",
+              "claims": [
+                "checksum-computation"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "What this buys is a guarantee, not just good odds. BIP 173 states that the code detects any error affecting at most four characters and has less than a one-in-a-billion chance of missing larger ones. BIP 350's later analysis states the firm part more narrowly: within one checksum family, up to four substituted characters are *always* detected. A decoder that accepts both families does not inherit that guarantee for edits that also change the witness version; that case needs separate analysis.",
+          "claims": [
+            "bech32-guarantee",
+            "substitution-guarantee",
+            "cross-family-limit"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The figure below runs the checks a decoder runs, in the order it runs them. Choose one of the public samples, then change any character after the separator and watch where the string is stopped.",
+          "claims": [
+            "family-rule",
+            "padding-rule"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.2",
+          "recipe": "address-checksum-lab.v1",
+          "title": "Checksum lab",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v1-32byte",
+            "v1-bech32-checksum",
+            "v0-typo"
+          ],
+          "caption": "Any single change you make to a valid sample is stopped at the checksum stage. The decoder learns that the string is wrong, not where: the marked cell is your edit, which the decoder never sees.",
+          "claims": [
+            "substitution-guarantee",
+            "no-correction",
+            "family-rule",
+            "fixture-typo",
+            "fixture-wrong-family"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "Every sample on this page, and where it stops",
+          "blocks": [
+            {
+              "type": "fixture-table",
+              "caption": "All results are computed at build time by the same tested decoder the lab uses. Every string is a public test vector copied from the pinned BIP text.",
+              "fixtures": [
+                "v0-p2wpkh",
+                "v1-32byte",
+                "v1-bech32-checksum",
+                "v0-typo",
+                "v0-bech32m-checksum",
+                "bip173-v1-bech32",
+                "mixed-case",
+                "bad-alphabet",
+                "wrong-prefix",
+                "v0-wrong-length",
+                "excess-padding",
+                "version-17"
+              ],
+              "claims": [
+                "fixture-v0",
+                "fixture-v1",
+                "fixture-wrong-family",
+                "fixture-typo",
+                "fixture-superseded"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "no-repair",
+      "heading": "It notices; it does not repair",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Look at what the checksum stage reports when you change a character: only that the result matches neither constant. Codes of this family can, in principle, locate a few errors and even correct them. BIP 173 advises implementations against the second part.",
+          "claims": [
+            "no-correction",
+            "checksum-computation"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The reason is money, not mathematics. Correction turns an invalid string into a valid one. If more mistakes were made than the code can account for, the valid string it produces is the wrong one, and an incorrect but valid address can lose funds irrecoverably. So implementations should at most point to where an error might be, and should leave correction to the user, who can check the original.",
+          "claims": [
+            "no-correction"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "A wallet that silently fixes an address is not being helpful. If an address is rejected, copy it again from its source rather than accepting a guess.",
+          "claims": [
+            "no-correction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "two-checksums",
+      "heading": "Why there are two checksums",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The firm guarantee covers substituted characters. A different kind of mistake turned out to slip through. When a Bech32 string ends in `p`, inserting or deleting any number of `q` characters just before that final `p` leaves the checksum valid.",
+          "claims": [
+            "substitution-guarantee",
+            "q-weakness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 350 notes that existing version 0 addresses were not affected, because they are restricted to two lengths, 42 or 62 characters. It also warns that the weakness may affect future uses of the format.",
+          "claims": [
+            "v0-unaffected",
+            "v0-lengths"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The fix is deliberately small. Bech32m is Bech32 with one change: the constant a valid string must produce. Instead of 1, it is `0x2bc830a3`. The alphabet, the separator, the prefixes and the polymod function all stay the same.",
+          "claims": [
+            "bech32m-constant"
+          ]
+        },
+        {
+          "type": "table",
+          "caption": "One computation, two accepted results. The witness version decides which one is required.",
+          "columns": [
+            "Witness version",
+            "Checksum",
+            "Required result"
+          ],
+          "rows": [
+            [
+              "0",
+              "Bech32",
+              "`0x00000001`"
+            ],
+            [
+              "1 to 16",
+              "Bech32m",
+              "`0x2bc830a3`"
+            ]
+          ],
+          "claims": [
+            "family-rule",
+            "bech32m-constant"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A decoder therefore checks the result against both constants, then checks that the one it found is the one the version requires. That last step is not a formality. In the lab, choose *Wrong checksum family*. The string passes the checksum stage, because it is a perfectly valid Bech32 string, and is rejected only at the end, because its version is 1.",
+          "claims": [
+            "family-rule",
+            "fixture-wrong-family"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "No string can be valid under both constants. Even so, BIP 350 explains that a decoder accepting either one for version 0 would weaken its error detection to the equivalent of a 29-bit checksum. The version and the checksum have to agree.",
+          "claims": [
+            "not-both",
+            "why-not-both"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The change also broke something on purpose. Software that only knows Bech32 rejects every Bech32m address. BIP 350 argues that this clean break protects older senders from the insertion weakness, and from implementations that experiments had shown would burn funds sent to version 1 addresses. When it was written, the BIP noted that no wallets were creating version 1 addresses yet.",
+          "claims": [
+            "clean-break",
+            "history-2020"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Details: BIP 173's own examples, revisited",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 173 listed Bech32 addresses for versions 1, 2 and 16 among its valid test vectors. Under BIP 350 those exact strings are invalid, and BIP 350 lists the same programs with Bech32m checksums. The tests behind this page check both lists against the pinned text, and the table above shows where one of BIP 173's examples now stops.",
+              "claims": [
+                "fixture-superseded",
+                "family-rule"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contents",
+      "heading": "What the characters carry",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Between the separator and the checksum sit the actual contents. The first data character is the witness version, a number from 0 to 16 held in a single five-bit character. After it comes the witness program, between 2 and 40 bytes long.",
+          "claims": [
+            "version-char",
+            "program-regrouping",
+            "padding-rule"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Bytes have eight bits and characters carry five, so the program is regrouped. Write out its bits, cut them into groups of five and look each group up in the alphabet. A 20-byte program is 160 bits, exactly 32 characters. A 32-byte program is 256 bits, which takes 52 characters, the last one ending in four bits of zero padding. A decoder reverses the process and must reject padding that is longer than four bits or not all zeroes.",
+          "claims": [
+            "program-regrouping",
+            "padding-rule"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.3",
+          "recipe": "program-regrouping.v1",
+          "title": "Eight-bit bytes, five-bit characters",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v1-32byte"
+          ],
+          "caption": "The same bits, cut two ways. Byte boundaries and character boundaries line up only every 40 bits, so half the characters in each complete 40-bit block straddle two bytes, and a 32-byte program needs padding to fill its final character.",
+          "claims": [
+            "program-regrouping",
+            "padding-rule",
+            "fixture-v0",
+            "fixture-v1"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Finally, the address becomes the script that a transaction output actually contains. The version becomes an opcode, `OP_0` for version 0 and `OP_1` to `OP_16` for the rest, written as the byte `0x00` or the bytes `0x51` to `0x60`. Then come the program's length and the program itself. BIP 173 warns that getting this mapping wrong is likely to produce an output that is unspendable or insecure. The lab shows the resulting script for each valid sample.",
+          "claims": [
+            "script-opcodes",
+            "fixture-v0",
+            "fixture-v1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "what-it-does-not-say",
+      "heading": "What a valid address does not tell you",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Passing every stage in the lab means one thing: the string is a well-formed SegWit address. It does not say who controls it, whether it has ever been used, or whether sending to it is wise.",
+          "claims": [
+            "validity-scope"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Version numbers make this concrete. The format accepts every version from 0 to 16, and BIP 350 asks senders to recognise all of them as valid recipients, so that future upgrades work with existing wallets. The same paragraph says versions not defined on the network should never be created or handed to a sender.",
+          "claims": [
+            "higher-versions"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "What a program means comes from other BIPs. BIP 141 gives version 0 programs of 20 and 32 bytes their meaning, and BIP 341 defines a Taproot output as version 1 with a 32-byte program. A version 1 address with a program of any other length can be valid as an address and still not be a Taproot output.",
+          "claims": [
+            "v0-types",
+            "taproot-definition"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Note",
+          "text": "Every address on this page is a public test vector copied from the BIP text. None of them should ever receive funds.",
+          "claims": [
+            "fixture-v0",
+            "fixture-v1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "again",
+      "heading": "The six characters, again",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Go back to the six characters at the end of the address. They hold no part of the destination. They let software reject a mistyped string, with certainty for up to four substitutions within one checksum family and with overwhelming odds otherwise. The rules around them say what happens next: refuse, point at most to where an error might be, and leave the correction to the user.",
+          "claims": [
+            "checksum-six",
+            "substitution-guarantee",
+            "cross-family-limit",
+            "bech32-guarantee",
+            "no-correction"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Bech32m changed a single constant to close a gap that the original guarantee never covered, and it tied each witness version to the checksum that must protect it.",
+          "claims": [
+            "bech32m-constant",
+            "q-weakness",
+            "family-rule"
+          ]
+        }
+      ]
+    }
+  ]
+}

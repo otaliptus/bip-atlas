@@ -1,0 +1,400 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "mnemonics",
+  "primaryBips": [
+    39
+  ],
+  "specimenLabel": "BIP 0039",
+  "title": "How can a wallet backup become a list of words?",
+  "dek": "Twelve ordinary words can stand in for 128 random bits. There is no encryption involved, just counting, a small checksum and a list of 2,048 words.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Many wallets ask you to write down a dozen or two dozen words and keep them somewhere safe. The words are not a password you chose, and nobody composed them as a sentence. BIP 39 describes them as a way to carry computer-generated randomness in a form people can write on paper or read over the telephone.",
+        "claims": [
+          "purpose",
+          "computer-randomness"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "The proposal, assigned in 2013 and recorded as deployed, has two halves: turning random bits into words, and turning words into a binary seed for later wallet machinery. This chapter follows both, using only published test phrases that anyone can look up, and values computed from them.",
+        "claims": [
+          "preamble-dates",
+          "two-parts"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A01.1",
+      "recipe": "mnemonic-card.v1",
+      "title": "A published test phrase",
+      "fixtures": [
+        "ozone-128"
+      ],
+      "caption": "Each word stands for a number from 0 to 2,047. The numbers carry the entropy, but the seed is later computed from the words themselves.",
+      "claims": [
+        "split-11",
+        "vectors"
+      ],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "randomness",
+      "heading": "Randomness first",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Everything starts with entropy: a block of random bits produced by a computer. BIP 39 allows between 128 and 256 bits, in steps of 32. More bits make a stronger backup and a longer sentence.",
+          "claims": [
+            "ent-sizes"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Why words at all? A 128-bit number written in hexadecimal is thirty-two characters of digits and letters, easy to transpose and tiring to read aloud. Twelve familiar words carry the same information in a form that is easier to copy by hand and to check against the original.",
+          "claims": [
+            "purpose",
+            "length-table"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The proposal is explicit that it transcribes randomness. It is not a way to turn a sentence someone made up into a wallet; such *brainwallets* are outside its scope.",
+          "claims": [
+            "computer-randomness"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "checksum",
+      "heading": "A checksum from a hash",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Before any words appear, the entropy gets a short checksum. Hash the entropy with SHA-256 and keep the first ENT / 32 bits of the result, where ENT is the number of entropy bits: 4 checksum bits for 128 bits of entropy, 8 for 256. Append them to the end.",
+          "claims": [
+            "checksum-def",
+            "length-table"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The total is now a multiple of 11: 132 bits for 128 bits of entropy, 264 for 256. Cut it into 11-bit groups. Each group is a number from 0 to 2,047, and each number picks one word from a list of exactly 2,048. Twelve groups give twelve words; twenty-four give twenty-four.",
+          "claims": [
+            "split-11",
+            "length-table"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The published all-zero sample shows the whole procedure at its plainest. Its 128 entropy bits are all zero. The SHA-256 hash of those sixteen zero bytes happens to begin with the bits `0011`, so those four bits become the checksum. The first eleven groups are eleven zeros each, index 0, the word *abandon*. The last group is seven zeros followed by `0011`: index 3, the word *about*. That is why this famous test phrase reads *abandon* eleven times and then *about*. All-zero entropy is, of course, useless as a real backup: it is public precisely because it is predictable.",
+          "claims": [
+            "zero-example",
+            "checksum-def",
+            "split-11"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The figure below starts from the bits of a public sample. Reveal the groups to see where the cuts fall, then step through to the last word.",
+          "claims": [
+            "split-11"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A01.2",
+          "recipe": "entropy-word-pipeline.v1",
+          "title": "From bits to words",
+          "fixtures": [
+            "zero-128",
+            "ozone-128",
+            "zero-256",
+            "all-hour-256"
+          ],
+          "caption": "The last word is not “the checksum word”. In a 12-word phrase it carries 7 bits of entropy and 4 checksum bits; in a 24-word phrase, 3 and 8.",
+          "claims": [
+            "last-word-split",
+            "checksum-def",
+            "split-11",
+            "vectors"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "Details: every allowed length",
+          "blocks": [
+            {
+              "type": "table",
+              "caption": "The first four columns are BIP 39’s own table. The last follows from appending the checksum after the entropy.",
+              "columns": [
+                "Entropy bits",
+                "Checksum bits",
+                "Total bits",
+                "Words",
+                "Entropy bits in last word"
+              ],
+              "rows": [
+                [
+                  "128",
+                  "4",
+                  "132",
+                  "12",
+                  "7"
+                ],
+                [
+                  "160",
+                  "5",
+                  "165",
+                  "15",
+                  "6"
+                ],
+                [
+                  "192",
+                  "6",
+                  "198",
+                  "18",
+                  "5"
+                ],
+                [
+                  "224",
+                  "7",
+                  "231",
+                  "21",
+                  "4"
+                ],
+                [
+                  "256",
+                  "8",
+                  "264",
+                  "24",
+                  "3"
+                ]
+              ],
+              "claims": [
+                "length-table",
+                "last-word-split"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Leading zeros count. The 24-word sample beginning *all hour* comes from entropy whose first five bits are zero, and those zeros are part of its first group like any other bits.",
+              "claims": [
+                "split-11",
+                "vectors"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "wordlist",
+      "heading": "A list built for people",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The list has 2,048 words for a reason: 2,048 is two to the eleventh power, so every word stands for exactly 11 bits, no more and no less. That is what lets the bit string and the sentence convert into each other without anything left over.",
+          "claims": [
+            "split-11",
+            "length-table"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The English list was chosen with care. BIP 39 describes an ideal list as one where the first four letters identify each word, where near-pairs such as *build* and *built* or *woman* and *women* are avoided, and which is sorted so software can search it quickly.",
+          "claims": [
+            "wordlist-design"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The pinned English list used on this page has 2,048 entries, and the tests behind it confirm that no two share their first four letters. Lists with accented or composed characters must be stored in a Unicode form called NFKD, a detail that returns below.",
+          "claims": [
+            "wordlist-checked",
+            "nfkd-wordlist"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Other languages exist, but BIP 39 strongly discourages generating sentences from them, because most wallets support only the English list.",
+          "claims": [
+            "english-recommend"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "short-checksum",
+      "heading": "How short is the checksum?",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A checksum lets software notice a wrong word, but this one is small. BIP 39 lists it among its own shortcomings: it gives only modest odds of catching random errors, citing one in 256 missed, and offers no help correcting them.",
+          "claims": [
+            "short-checksum"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "That figure matches the 8 checksum bits of a 24-word phrase. A 12-word phrase has only 4, so swapping its last word for a random one still passes one time in sixteen. The tests behind this page count exactly 128 of the 2,048 possible last words that do.",
+          "claims": [
+            "odds-by-length",
+            "length-table"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 39 does require software to compute the checksum of a sentence and to warn when it is invalid. A warning is the whole of the job: the checksum cannot say which word is wrong.",
+          "claims": [
+            "warn-invalid",
+            "short-checksum"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seed",
+      "heading": "From words to a seed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The second half of BIP 39 does not reverse the first, and never recovers the entropy. Instead it feeds the sentence itself into PBKDF2, a deliberately repetitive function: HMAC-SHA512, 2,048 iterations, a 64-byte result. The sentence is the password. The salt is the word `mnemonic` followed by an optional passphrase. Both are normalized to NFKD first.",
+          "claims": [
+            "pbkdf2",
+            "independent"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The result is 512 bits, four times the 128 bits of entropy behind a 12-word phrase, yet it holds no new randomness. Every bit of it is fixed by the words and the passphrase. A wallet that never asks for a passphrase is simply using the empty one.",
+          "claims": [
+            "pbkdf2",
+            "independent",
+            "passphrase-empty"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A01.3",
+          "recipe": "seed-derivation.v1",
+          "title": "Words and passphrase to seed",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "The same words with a different passphrase give an unrelated seed. An empty passphrase is still a passphrase; it is simply the default.",
+          "claims": [
+            "pbkdf2",
+            "passphrase-empty",
+            "deniability",
+            "vectors"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Because this step starts from the words rather than the entropy, the seed depends on exactly how the sentence is written. The same entropy written with another wordlist gives a completely different seed, and there is no way back from a seed to a sentence.",
+          "claims": [
+            "wordlist-dependence",
+            "independent"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Details: why NFKD matters",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Unicode can write some visible text in more than one way. NFKD picks one decomposed form, so that two devices showing the same characters feed the same bytes into PBKDF2. The Japanese test vectors referenced by BIP 39 use passphrases full of symbols such as ㍍, which NFKD expands into the four characters メートル. The tests behind this page check all 24 of those vectors.",
+              "claims": [
+                "nfkd-example",
+                "pbkdf2",
+                "vectors"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Notice also what the seed step leaves out. It never checks the checksum and places no constraints on how the sentence is built; clients are free to use their own wordlists or even whole sentence generators, though BIP 39 advises against using sentences its own algorithm did not produce. Software must still compute the checksum with a wordlist and warn if it is invalid.",
+          "claims": [
+            "no-structure",
+            "independent",
+            "warn-invalid"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "passphrase",
+      "heading": "A passphrase is not a password",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The optional passphrase changes the seed entirely, and every passphrase produces a valid one. BIP 39 presents this as plausible deniability: only the right passphrase opens the intended wallet, while any other opens a different, working wallet rather than an error.",
+          "claims": [
+            "deniability",
+            "passphrase-empty"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "That makes it unlike an app’s unlock password, which protects a file on one device and complains when you get it wrong. Mistype a BIP 39 passphrase and nothing complains; the words simply lead somewhere else.",
+          "claims": [
+            "passphrase-not-password"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "A mnemonic is not a private key, but together with its passphrase, if any, it is everything needed to rebuild the keys. Anyone who sees both can recreate the wallet. This page never asks for a phrase and only shows published test vectors and values computed from them.",
+          "claims": [
+            "pbkdf2",
+            "bip32-next",
+            "vectors",
+            "passphrase-empty"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "heading": "Still not a key",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The 64-byte seed still signs nothing. BIP 39 hands it to BIP 32 or a similar scheme, which grows a whole tree of keys from it. That is the next chapter.",
+          "claims": [
+            "bip32-next"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "It is tempting to call the words a private key. They are not. They encode entropy; the seed is produced by stretching the sentence; keys come from the seed in a further step. All three must stay secret, because each one, together with the passphrase if one is used, is enough to rebuild everything that follows.",
+          "claims": [
+            "two-parts",
+            "pbkdf2",
+            "bip32-next"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 39 lists other shortcomings too, including the lack of a versioning scheme, which it notes is now largely mitigated by descriptor wallets. Its authors proposed a scheme called SLIP-0039 as an intended successor.",
+          "claims": [
+            "versioning-successor"
+          ]
+        }
+      ]
+    }
+  ]
+}

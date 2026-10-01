@@ -1,0 +1,69 @@
+---
+/**
+ * Recipe dispatcher. Every registered recipe is listed here explicitly so
+ * Astro can statically see which components hydrate (client directives
+ * cannot be applied to dynamically chosen components).
+ */
+import {
+  AddressAnatomy,
+  AddressChecksumLab,
+  DerivationTree,
+  EntropyWordLab,
+  ExtendedKeyLayout,
+  MasterKeySplit,
+  MnemonicCard,
+  ProgramRegrouping,
+  PsbtEnvelope,
+  PsbtLayout,
+  UnknownFields,
+  RECIPE_MAP,
+  SeedDerivation,
+  TransactionAnatomy,
+  TwoSerializations,
+  WeightMeter,
+  type AddressFixture,
+  type BaseFixture,
+  type DerivedBip32Fixture,
+  type DerivedMnemonicFixture,
+  type DerivedPsbtCombineFixture,
+  type DerivedPsbtTraceFixture,
+  type DerivedTransactionFixture,
+} from "@bip-atlas/figures";
+import type { Figure } from "@bip-atlas/publication";
+import { deriveFixtures } from "../lib/derive";
+import Plate from "./Plate.astro";
+
+interface Props {
+  figure: Figure;
+  numbers: Map<string, number>;
+  fixtures: Map<string, BaseFixture>;
+}
+const { figure, numbers, fixtures } = Astro.props;
+const recipe = RECIPE_MAP.get(figure.recipe);
+if (!recipe) throw new Error(`No recipe ${figure.recipe}`);
+const picked = deriveFixtures(figure.fixtures.map((id) => fixtures.get(id)!));
+const figureId = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
+const address = picked as AddressFixture[];
+const mnemonic = picked as DerivedMnemonicFixture[];
+const hd = picked as DerivedBip32Fixture[];
+const tx = picked as DerivedTransactionFixture[];
+const trace = picked as DerivedPsbtTraceFixture[];
+const pair = picked as DerivedPsbtCombineFixture[];
+---
+<Plate figure={figure} numbers={numbers} interactive={recipe.interactive}>
+  {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
+  {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
+  {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
+  {figure.recipe === "mnemonic-card.v1" && <MnemonicCard fixture={mnemonic[0]} />}
+  {figure.recipe === "entropy-word-pipeline.v1" && <EntropyWordLab client:visible fixtures={mnemonic} figureId={figureId} />}
+  {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
+  {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
+  {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
+  {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
+  {figure.recipe === "two-serializations.v1" && <TwoSerializations fixture={tx[0]} />}
+  {figure.recipe === "transaction-anatomy.v1" && <TransactionAnatomy client:visible fixtures={tx} figureId={figureId} />}
+  {figure.recipe === "weight-meter.v1" && <WeightMeter fixtures={tx} />}
+  {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
+  {figure.recipe === "psbt-envelope.v1" && <PsbtEnvelope client:visible fixture={trace[0]} figureId={figureId} />}
+  {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
+</Plate>

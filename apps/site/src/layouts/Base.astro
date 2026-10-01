@@ -1,0 +1,42 @@
+---
+import "../styles/atlas.css";
+
+interface Props {
+  title: string;
+  description: string;
+  current?: "contents" | "methodology" | "chapter";
+}
+const { title, description, current } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title}</title>
+  </head>
+  <body class="manual">
+    <a class="atlas-skip" href="#main">Skip to content</a>
+    <header class="manual-page manual-masthead">
+      <a class="manual-wordmark" href="/" aria-label="BIP Atlas, contents">BIP ATLAS</a>
+      <nav class="atlas-nav" aria-label="Site">
+        <a href="/" aria-current={current === "contents" ? "page" : undefined}>Contents</a>
+        <a href="/methodology/" aria-current={current === "methodology" ? "page" : undefined}>Methodology</a>
+      </nav>
+    </header>
+    <div class="manual-page"><hr class="manual-dither-rule" /></div>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="manual-page atlas-footer">
+      <p>
+        BIP Atlas is an independently written explainer. It is not the official text of any proposal, not a normative
+        implementation reference, and not affiliated with bips.dev or the BIP authors. Every address shown is public test
+        material; never send funds to it.
+      </p>
+    </footer>
+  </body>
+</html>

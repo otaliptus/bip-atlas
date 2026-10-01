@@ -1,0 +1,239 @@
+/* Blueprint Editorial v1 — proposed design values, not extracted site CSS.
+   No fonts are bundled. Load independently licensed fonts in your application.
+   Component selectors are starter contracts, not a finished application. */
+@layer manual.tokens, manual.base, manual.components, manual.utilities;
+
+@layer manual.tokens {
+  :root {
+    color-scheme: light;
+    --manual-paper: #fafafc;
+    --manual-surface: #ffffff;
+    --manual-ink: #222225;
+    --manual-muted: #62626c;
+    --manual-blue: #2945f5;
+    --manual-blue-dark: #1934c6;
+    --manual-rule: #d9d9e2;
+    --manual-grid: #e6e8fa;
+    --manual-blue-wash: #eef0ff;
+    --manual-blue-fill: #d5dcff;
+    --manual-focus: #1934c6;
+    --manual-error: #9b2525;
+    --manual-success: #235f44;
+    --manual-warning: #79531b;
+
+    --manual-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --manual-pixel: "Departure Mono", "Courier New", monospace;
+    --manual-code: ui-monospace, "SFMono-Regular", Consolas, monospace;
+    --manual-ui: system-ui, sans-serif;
+
+    --manual-space-1: 0.25rem;
+    --manual-space-2: 0.5rem;
+    --manual-space-3: 0.75rem;
+    --manual-space-4: 1rem;
+    --manual-space-5: 1.5rem;
+    --manual-space-6: 2rem;
+    --manual-space-7: 3rem;
+    --manual-space-8: 4rem;
+    --manual-space-9: 6rem;
+
+    --manual-page-max: 76rem;
+    --manual-reader-max: 90rem;
+    --manual-prose-max: 66ch;
+    --manual-wide-max: 60rem;
+    --manual-gutter: clamp(1.25rem, 4vw, 4rem);
+    --manual-gap: clamp(1.5rem, 3vw, 3rem);
+    --manual-sticky-offset: 4.5rem;
+    --manual-radius: 0.125rem;
+    --manual-line: 1px;
+    --manual-fast: 140ms;
+    --manual-normal: 220ms;
+    --manual-reveal: 700ms;
+    --manual-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+@layer manual.base {
+  .manual, .manual *, .manual *::before, .manual *::after { box-sizing: border-box; }
+  .manual {
+    margin: 0;
+    background: var(--manual-paper);
+    color: var(--manual-ink);
+    font-family: var(--manual-serif);
+    font-optical-sizing: auto;
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+  .manual :where(h1, h2, h3, p, figure) { margin: 0; }
+  .manual :where(h1, h2, h3) {
+    font-weight: 400;
+    text-wrap: balance;
+    scroll-margin-block-start: var(--manual-sticky-offset);
+  }
+  .manual h1 { font-size: clamp(2.125rem, 4vw, 3rem); line-height: 1.12; }
+  .manual h2 { font-size: clamp(1.625rem, 2.5vw, 2rem); line-height: 1.25; }
+  .manual h3 { font-size: 1.375rem; line-height: 1.35; }
+  .manual a { color: var(--manual-blue-dark); text-underline-offset: 0.18em; }
+  .manual a:hover { text-decoration-thickness: 2px; }
+  .manual :focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 4px; }
+  .manual :where(button, input, select, textarea) { font: inherit; }
+  .manual :where(button, [role="button"], input, select) { min-block-size: 2.75rem; }
+  .manual :where(img, video, canvas, svg) { max-inline-size: 100%; }
+  .manual :where(pre, code) { font-family: var(--manual-code); }
+  .manual pre { overflow-x: auto; font-size: 0.875rem; }
+  .manual [hidden] { display: none !important; }
+  .manual ::selection { background: var(--manual-blue-fill); color: var(--manual-ink); }
+}
+
+@layer manual.components {
+  .manual-page {
+    inline-size: min(calc(100% - 2 * var(--manual-gutter)), var(--manual-page-max));
+    margin-inline: auto;
+  }
+  .manual-masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--manual-space-5);
+    padding-block: var(--manual-space-6) var(--manual-space-5);
+  }
+  .manual-wordmark {
+    color: var(--manual-blue);
+    font-family: var(--manual-pixel);
+    font-size: 3.4375rem; /* 55px at a 16px root; wrap rather than shrink arbitrarily. */
+    line-height: 1.12;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    text-decoration: none;
+  }
+  .manual-masthead-dek { max-inline-size: 34ch; font-size: 0.9375rem; line-height: 1.4; }
+  .manual-rule { border: 0; border-block-start: 1px solid var(--manual-rule); }
+  .manual-dither-rule {
+    block-size: 6px;
+    border: 0;
+    background-image: repeating-linear-gradient(90deg, var(--manual-rule) 0 2px, transparent 2px 6px);
+    opacity: 0.75;
+    margin-block: 0 var(--manual-space-7);
+  }
+  .manual-cover-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--manual-gap);
+    align-items: start;
+  }
+  .manual-cover-hero { grid-column: 5 / -1; grid-row: 1; min-inline-size: 0; }
+  .manual-cover-intro { grid-column: 1 / 5; grid-row: 1; min-inline-size: 0; }
+  .manual-cover-column { grid-column: span 4; min-inline-size: 0; }
+  .manual-prose { max-inline-size: var(--manual-prose-max); text-align: start; }
+  .manual-prose > * + * { margin-block-start: var(--manual-space-5); }
+  .manual-prose :where(h2, h3) { margin-block-start: var(--manual-space-8); }
+  .manual-prose :where(h2, h3) + * { margin-block-start: var(--manual-space-4); }
+  .manual-prose a, .manual-prose p { overflow-wrap: break-word; }
+  .manual-dropcap::first-letter {
+    float: left;
+    font-size: 3.4em;
+    line-height: 0.85;
+    margin-inline-end: 0.08em;
+    margin-block-start: 0.06em;
+  }
+  .manual-reader {
+    inline-size: min(calc(100% - 2 * var(--manual-gutter)), var(--manual-reader-max));
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    gap: var(--manual-gap);
+  }
+  .manual-reader-main { min-inline-size: 0; }
+  .manual-reader-main > .manual-prose { margin-inline: auto; }
+  .manual-toc { align-self: start; position: sticky; inset-block-start: var(--manual-sticky-offset); }
+  .manual-toc nav { max-block-size: calc(100dvh - 6rem); overflow-y: auto; }
+  .manual-meta { font-family: var(--manual-code); font-size: 0.8125rem; line-height: 1.5; color: var(--manual-muted); }
+  .manual-plate {
+    position: relative;
+    margin-block: var(--manual-space-7);
+    min-inline-size: 0;
+    overflow: visible; /* Do not hide overflowing labels to conceal a layout failure. */
+  }
+  .manual-plate-stage {
+    position: relative;
+    padding: var(--manual-space-5);
+    background-color: var(--manual-surface);
+    background-image: radial-gradient(var(--manual-grid) 0.65px, transparent 0.8px);
+    background-size: 6px 6px;
+    min-inline-size: 0;
+  }
+  .manual-plate-stage > svg { display: block; inline-size: 100%; block-size: auto; }
+  .manual-plate-code {
+    font-family: var(--manual-pixel);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--manual-muted);
+    letter-spacing: 0.025em;
+  }
+  .manual-plate-caption { margin-block-start: var(--manual-space-3); font-size: 0.9375rem; line-height: 1.5; }
+  .manual-plate-label { font-family: var(--manual-code); font-size: 0.875rem; color: var(--manual-blue-dark); line-height: 1.3; }
+  .manual-plate-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--manual-space-4); padding-block-start: var(--manual-space-4); }
+  .manual-plate-controls label { font-family: var(--manual-code); font-size: 0.875rem; }
+  .manual-plate-controls input[type="range"] { inline-size: min(18rem, 100%); }
+  .manual-plate-button {
+    border: 1px solid var(--manual-rule);
+    border-radius: var(--manual-radius);
+    background: var(--manual-surface);
+    color: var(--manual-ink);
+    padding: 0.5rem 0.875rem;
+    font-family: var(--manual-code);
+    font-size: 0.875rem;
+  }
+  .manual-plate-button:hover { border-color: var(--manual-blue); }
+  .manual-note { border-inline-start: 1px solid var(--manual-rule); padding-inline-start: var(--manual-space-4); font-size: 1rem; }
+  .manual-code-block { border-block: 1px solid var(--manual-rule); padding-block: var(--manual-space-5); }
+  .manual-table { border-collapse: collapse; inline-size: 100%; font-size: 1rem; }
+  .manual-table :where(th, td) { text-align: start; padding: 0.75rem 0.5rem; border-block-end: 1px solid var(--manual-rule); vertical-align: top; }
+  .manual-table th { font-family: var(--manual-code); font-weight: 400; font-size: 0.8125rem; }
+}
+
+@layer manual.utilities {
+  .manual-sr-only {
+    position: absolute; inline-size: 1px; block-size: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  .manual-stroke { stroke: var(--manual-blue); stroke-width: 1.5; fill: none; vector-effect: non-scaling-stroke; }
+  .manual-construction { stroke: var(--manual-blue); stroke-width: 1; stroke-dasharray: 5 4; fill: none; vector-effect: non-scaling-stroke; }
+  .manual-object-fill { fill: var(--manual-blue-wash); }
+  .manual-active-fill { fill: var(--manual-blue-fill); }
+}
+
+@media (max-width: 63.99rem) {
+  .manual-reader { grid-template-columns: minmax(0, 1fr); }
+  .manual-toc { position: static; }
+  .manual-toc nav { max-block-size: none; }
+  .manual-wordmark { font-size: 2.75rem; }
+}
+@media (max-width: 47.99rem) {
+  .manual-wordmark { font-size: 2.0625rem; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+  .manual-masthead { align-items: flex-start; }
+  .manual-cover-grid { grid-template-columns: minmax(0, 1fr); }
+  .manual-cover-hero, .manual-cover-intro, .manual-cover-column { grid-column: 1; grid-row: auto; }
+  /* DOM order must be hero then intro, matching this mobile sequence. */
+  .manual-cover-hero { order: 0; }
+  .manual-cover-intro { order: 1; }
+  .manual-cover-column { order: 2; }
+  .manual-plate-stage { padding: var(--manual-space-4); }
+  .manual-dropcap::first-letter { float: none; font-size: inherit; line-height: inherit; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manual { --manual-fast: 0ms; --manual-normal: 0ms; --manual-reveal: 0ms; }
+  .manual :where([data-decorative-motion]) { animation: none !important; transition: none !important; }
+  .manual :where([data-smooth-scroll]) { scroll-behavior: auto !important; }
+  /* Runtime must also stop requestAnimationFrame loops and set a meaningful final state. */
+}
+@media print {
+  .manual { background: white; color: black; font-size: 11pt; }
+  .manual-reader, .manual-cover-grid { display: block; }
+  .manual :where(.manual-toc, .manual-plate-controls, [data-studio-ui]) { display: none !important; }
+  .manual-plate-stage { background-image: none; }
+  .manual-plate { break-inside: avoid; }
+  .manual a { color: inherit; }
+  .manual [data-print-only] { display: block !important; }
+}

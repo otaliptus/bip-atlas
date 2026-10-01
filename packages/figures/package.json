@@ -1,0 +1,9 @@
+{
+  "name": "@bip-atlas/figures",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts", "./*": "./src/*" },
+  "dependencies": { "@bip-atlas/models": "workspace:*" },
+  "peerDependencies": { "preact": "^10.27.0" }
+}

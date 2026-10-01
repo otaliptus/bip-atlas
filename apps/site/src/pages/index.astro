@@ -1,0 +1,41 @@
+---
+import Base from "../layouts/Base.astro";
+import { listChapterIds, loadCatalog, loadChapter, shortCommit } from "../lib/content";
+
+const catalog = loadCatalog();
+const available = new Map(listChapterIds().map((id) => [id, loadChapter(id)]));
+const chapters = [...catalog.chapters].sort((a, b) => a.readingOrder - b.readingOrder);
+---
+<Base title="BIP Atlas" description="An illustrated field guide to selected Bitcoin Improvement Proposals." current="contents">
+  <div class="manual-page atlas-cover">
+    <div class="atlas-cover__intro">
+      <p class="atlas-lede">
+        A field guide to a few Bitcoin Improvement Proposals: what each one changes, why, and where its explanation
+        deliberately stops. Read the idea, manipulate the mechanism, inspect the evidence.
+      </p>
+      <p class="atlas-small">
+        Explanations are written independently from the proposals, pinned to an exact revision of
+        <code>bitcoin/bips</code>, and checked against the proposals’ own test vectors. This is an early draft:
+        {available.size} of {chapters.length} chapters exist.
+      </p>
+    </div>
+    <ol class="atlas-contents" aria-label="Chapters, in reading order">
+      {chapters.map((ch) => {
+        const loaded = available.get(ch.id);
+        return (
+          <li class="atlas-contents__item" data-available={loaded ? "true" : "false"}>
+            <span class="atlas-contents__bips">BIP {ch.primaryBips.map((n) => String(n).padStart(4, "0")).join(" + ")}</span>
+            {loaded ? (
+              <a class="atlas-contents__title" href={`/learn/${ch.id}/`}>{ch.questionTitle}</a>
+            ) : (
+              <span class="atlas-contents__title">{ch.questionTitle}</span>
+            )}
+            <span class="atlas-contents__state">
+              {loaded ? `Draft · source ${shortCommit(loaded.lock.commit)} · ${loaded.publication.reviewState === "in-review" ? "technical review applied" : loaded.publication.reviewState === "approved" ? "signed off" : "not yet reviewed"}` : `Not yet written · phase ${ch.phase}`}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</Base>

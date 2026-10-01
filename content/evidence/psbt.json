@@ -1,0 +1,732 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "psbt",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files. The registry claim cites bip-0174/type-registry.mediawiki.",
+  "claims": [
+    {
+      "id": "preamble-dates",
+      "statement": "BIP174 was assigned in 2017; its preamble records the status Deployed and document version 1.4.4.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "Assigned: 2017-07-12"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            8,
+            8
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            12,
+            12
+          ],
+          "quote": "Version: 1.4.4"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "A PSBT carries the information a signer needs, holds signatures for an input until it has a complete set, and lets the signer be offline.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            19,
+            23
+          ],
+          "quote": "This document proposes a binary transaction format which contains the information necessary for a signer to produce signatures for the transaction and holds the signatures for an input while the input does not have a complete set of signatures. The signer can be offline as all necessary information will be provided in the transaction."
+        }
+      ]
+    },
+    {
+      "id": "generic-v0",
+      "statement": "BIP174 describes the generic format and the specification for version 0.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            25,
+            26
+          ],
+          "quote": "The generic format is described here in addition to the specification for version 0 of this format."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "Passing partially signed transactions between signers was implementation dependent; BIP174 aims for a standard, extensible format, and lets offline signers such as hardware wallets sign without direct UTXO access.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            34,
+            38
+          ],
+          "quote": "Creating unsigned or partially signed transactions to be passed around to multiple signers is currently implementation dependent, making it hard for people who use different wallet software from being able to easily do so."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            42,
+            45
+          ],
+          "quote": "This transaction format will allow offline signers such as air-gapped wallets and hardware wallets to be able to sign transactions without needing direct access to the UTXO set and without risk of being defrauded."
+        }
+      ]
+    },
+    {
+      "id": "maps",
+      "statement": "A PSBT is magic bytes, a global map, then one map per input and per output; each map is a sequence of key-value records ended by 0x00.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            49,
+            50
+          ],
+          "quote": "The Partially Signed Bitcoin Transaction (PSBT) format consists of key-value maps. Each map consists of a sequence of key-value records, terminated by a <tt>0x00</tt> byte"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "<psbt> := <magic> <global-map> <input-map>* <output-map>*"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "<magic> := 0x70 0x73 0x62 0x74 0xFF"
+        }
+      ]
+    },
+    {
+      "id": "unsigned-tx",
+      "statement": "The global unsigned transaction must have empty scriptSigs and witnesses and use the old serialization without witnesses; version 0 PSBTs must include it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            102,
+            102
+          ],
+          "quote": "The scriptSigs and witnesses for each input must be empty. The transaction must be in the old serialization format (without witnesses)."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            390,
+            390
+          ],
+          "quote": "Version 0 PSBTs must include PSBT_GLOBAL_UNSIGNED_TX, if omitted, the PSBT is invalid."
+        }
+      ]
+    },
+    {
+      "id": "no-duplicates",
+      "statement": "Keys within a map must be unique; PSBTs with duplicate keys are invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            363,
+            363
+          ],
+          "quote": "Keys within each scope should never be duplicated; all keys in the format are unique. PSBTs containing duplicate keys are invalid."
+        }
+      ]
+    },
+    {
+      "id": "roles-entities",
+      "statement": "PSBT defines specialized roles; one entity can handle several of them.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            394,
+            394
+          ],
+          "quote": "Multiple roles can be handled by a single entity, but each role is specialized in what it should be capable of doing."
+        }
+      ]
+    },
+    {
+      "id": "creator",
+      "statement": "The Creator puts the unsigned transaction into a new PSBT with empty input and output fields.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            398,
+            399
+          ],
+          "quote": "The Creator creates a new PSBT. It must create an unsigned transaction and place it in the PSBT. The Creator must create empty input and output fields."
+        }
+      ]
+    },
+    {
+      "id": "updater",
+      "statement": "The Updater adds information it has: UTXOs, redeem and witness scripts, and BIP32 derivation paths.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            404,
+            405
+          ],
+          "quote": "If it has the UTXO for an input, it should add it to the PSBT. The Updater should also add redeemScripts, witnessScripts, and BIP 32 derivation paths to the input and output data if it knows them."
+        }
+      ]
+    },
+    {
+      "id": "signer",
+      "statement": "The Signer uses only the UTXOs in the PSBT, only adds data, and records each signature as a Partial Signature on its input.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            412,
+            412
+          ],
+          "quote": "The Signer must only use the UTXOs provided in the PSBT to produce signatures for inputs."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            417,
+            418
+          ],
+          "quote": "The Signer must only add data to a PSBT. Any signatures created by the Signer must be added as a \"Partial Signature\" key-value pair for the respective input it relates to."
+        }
+      ]
+    },
+    {
+      "id": "signer-display",
+      "statement": "A Signer can compute the addresses, values and fee being sent and show them to the user as confirmation of intent.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            421,
+            421
+          ],
+          "quote": "The Signer can additionally compute the addresses and values being sent, and the transaction fee,  optionally showing this data to the user as a confirmation of intent and the consequences of signing the PSBT."
+        }
+      ]
+    },
+    {
+      "id": "signer-scope",
+      "statement": "Signers do not need to sign for every input type.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            423,
+            423
+          ],
+          "quote": "Signers do not need to sign for all possible input types. For example, a signer may choose to only sign Segwit inputs."
+        }
+      ]
+    },
+    {
+      "id": "bip143-fee-issue",
+      "statement": "Because BIP143 signatures commit only to their own input's amount, an attacker who gets a user to sign repeatedly can redirect funds to fees by altering other inputs' witness UTXO amounts; many wallets therefore require the full previous transaction.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            415,
+            415
+          ],
+          "quote": "The sighash algorithm for Segwit specified in BIP 143 is known to have an issue where an attacker could trick a user to sending Bitcoin to fees if they are able to convince the user to sign a malicious transaction multiple times. This is possible because the amounts in <tt>PSBT_IN_WITNESS_UTXO</tt> of other segwit inputs can be modified without effecting the signature for a particular input."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            415,
+            415
+          ],
+          "quote": "many wallets are requiring that the full previous transaction (i.e. <tt>PSBT_IN_NON_WITNESS_UTXO</tt>) be provided to ensure that the amounts of other inputs are not being tampered with."
+        }
+      ]
+    },
+    {
+      "id": "combiner",
+      "statement": "The Combiner merges PSBTs for the same transaction into one containing all their key-value pairs, and must not combine different PSBTs.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            500,
+            501
+          ],
+          "quote": "The Combiner must merge them into one PSBT (if possible), or fail. The resulting PSBT must contain all of the key-value pairs from each of the PSBTs."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            503,
+            503
+          ],
+          "quote": "A Combiner must not combine two different PSBTs."
+        }
+      ]
+    },
+    {
+      "id": "combine-order",
+      "statement": "Combining independent additions is equivalent to applying them in sequence, in either order, unless fields conflict.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            509,
+            509
+          ],
+          "quote": "Combine(fA(psbt), fB(psbt)) == fA(fB(psbt)) == fB(fA(psbt))"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            510,
+            510
+          ],
+          "quote": "Combining two PSBTs is commutative unless the PSBTs have conflicting fields"
+        }
+      ]
+    },
+    {
+      "id": "finalizer",
+      "statement": "The Input Finalizer builds the final scriptSig and/or scriptWitness for inputs that have enough data (leaving an empty one unset); in that input's map, everything except the UTXO and unknown fields should then be cleared.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            520,
+            520
+          ],
+          "quote": "If it does, it must construct the <tt>0x07</tt> Finalized scriptSig and <tt>0x08</tt> Finalized scriptWitness and place them into the input key-value map."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            523,
+            523
+          ],
+          "quote": "All other data except the UTXO and unknown fields (including <tt>PSBT_IN_PROPRIETARY</tt> fields the Input Finalizer does not understand) in the input key-value map should be cleared from the PSBT."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            521,
+            522
+          ],
+          "quote": "If scriptSig is empty for an input, <tt>0x07</tt> should remain unset rather than assigned an empty array. Likewise, if no scriptWitness exists for an input, <tt>0x08</tt> should remain unset rather than assigned an empty array."
+        }
+      ]
+    },
+    {
+      "id": "extractor",
+      "statement": "The Transaction Extractor turns a fully finalized PSBT into a network-serialized transaction; otherwise it must not modify the PSBT.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            527,
+            529
+          ],
+          "quote": "If they do, the Transaction Extractor should construct complete scriptSigs and scriptWitnesses and encode them into network serialized transactions. Otherwise the Extractor must not modify the PSBT. The Extractor should produce a fully valid, network serialized transaction if all inputs are complete."
+        }
+      ]
+    },
+    {
+      "id": "passthrough",
+      "statement": "Signers must pass through key-value pairs they do not understand when re-serializing; this keeps the format extensible.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            351,
+            352
+          ],
+          "quote": "If the signer encounters key-value pairs that it does not understand, it must pass those key-value pairs through when re-serializing the transaction."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            544,
+            546
+          ],
+          "quote": "Backwards compatibility will still be maintained as those new types will be ignored and passed-through by signers which do not know about them."
+        }
+      ]
+    },
+    {
+      "id": "encoding",
+      "statement": "A PSBT can be a binary file or a Base64 string.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            537,
+            537
+          ],
+          "quote": "A PSBT can be represented in two ways: in binary (as a file) or as a Base64 string"
+        }
+      ]
+    },
+    {
+      "id": "examples-workflows",
+      "statement": "BIP174 illustrates example workflows, such as a manual CoinJoin and a 2-of-3 multisig; these are examples, not a mandated sequence.",
+      "scope": "author-rationale",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            582,
+            582
+          ],
+          "quote": "===Manual CoinJoin Workflow==="
+        },
+        {
+          "bip": 174,
+          "lines": [
+            586,
+            586
+          ],
+          "quote": "===2-of-3 Multisig Workflow==="
+        }
+      ]
+    },
+    {
+      "id": "trace-published",
+      "statement": "BIP174's test vectors publish one PSBT per role in a full trace, from creation to the extracted network transaction.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            763,
+            763
+          ],
+          "quote": "A creator creating a PSBT for a transaction which creates the following outputs:"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            821,
+            821
+          ],
+          "quote": "Given both of the above PSBTs, a combiner must create this PSBT."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            831,
+            831
+          ],
+          "quote": "Given the above PSBT, a transaction extractor must create this Bitcoin transaction:"
+        }
+      ]
+    },
+    {
+      "id": "trace-reproduced",
+      "statement": "The tested model parses every state of the published trace, reproduces the combiner output byte for byte from the two signers' PSBTs in either order, and reproduces the extracted transaction.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            821,
+            821
+          ],
+          "quote": "A combiner must produce the given result for any order of its inputs"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            833,
+            833
+          ],
+          "quote": "* Bytes in Hex: <pre>0200000000010258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd7500000000da00473044022074018ad4180097b873323c0015720b3684cc8123891048e7dbcd9b55ad679c99022073d369b740e3eb53dcefa33823c8070514ca55a7dd9544f157c167913261118c01483045022100f61038b308dc1da865a34852746f015772934208c6d24454393cd99bdf2217770220056e675a675a6d0a02b85b14e5e29074d8a25a9b5760bea2816f661910a006ea01475221029583bf39ae0a609747ad199addd634fa6108559d6c5cd39b4c2183f1ab96e07f2102dab61ff49a14db6a7d02b0cd1fbb78fc4b18312b5b4e54dae4dba2fbfef536d752aeffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d01000000232200208c2353173743b595dfb4a07b72ba8e42e3797da74e87fe7d9d7497e3b2028903ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f000400473044022062eb7a556107a7c73f45ac4ab5a1dddf6f7075fb1275969a7f383efff784bcb202200c05dbb7470dbf2f08557dd356c7325c1ed30913e996cd3840945db12228da5f01473044022065f45ba5998b59a27ffe1a7bed016af1f1f90d54b3aa8f7450aa5f56a25103bd02207f724703ad1edb96680b284b56d4ffcb88f7fb759eabbe08aa30f29b851383d20147522103089dc10c7ac6db54f91329af617333db388cead0c231f723379d1b99030b02dc21023add904f3d6dcf59ddb906b0dee23529b7ffb9ed50e5e86151926860221f0e7352ae00000000</pre>"
+        }
+      ]
+    },
+    {
+      "id": "vectors-invalid",
+      "statement": "BIP174 lists invalid PSBTs (duplicate keys, a filled scriptSig, a witness-serialized unsigned transaction, and twelve keys or values that do not match their type's format); the tested parser rejects all twenty and accepts all ten listed valid ones.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            616,
+            616
+          ],
+          "quote": "The following are invalid PSBTs:"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            634,
+            634
+          ],
+          "quote": "* Case: PSBT with duplicate keys in an input"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            698,
+            698
+          ],
+          "quote": "The following are valid PSBTs:"
+        }
+      ]
+    },
+    {
+      "id": "unknown-combine",
+      "statement": "BIP174's vectors include two PSBTs with unknown key-value pairs and the combined PSBT, which keeps all of them; the tested combiner reproduces it.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            835,
+            835
+          ],
+          "quote": "Given these two PSBTs with unknown key-value pairs:"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            842,
+            842
+          ],
+          "quote": "A combiner which orders keys lexicographically must produce the following PSBT:"
+        }
+      ]
+    },
+    {
+      "id": "registry",
+      "statement": "A type registry collects PSBT fields from every BIP that defines them, naming each field's parent BIP; version 2 and Taproot fields come from other BIPs, not BIP174.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            1,
+            1
+          ],
+          "quote": "This document collects the fields and types used in PSBTs of any version from all BIPs that define PSBT fields to help coordinate and prevent key collisions.",
+          "file": "bip-0174/type-registry.mediawiki"
+        },
+        {
+          "bip": 174,
+          "file": "bip-0174/type-registry.mediawiki",
+          "lines": [
+            19,
+            20
+          ],
+          "quote": "<tt>PSBT_GLOBAL_TX_VERSION = 0x02</tt> | [[../bip-0370.mediawiki|370]]"
+        },
+        {
+          "bip": 174,
+          "file": "bip-0174/type-registry.mediawiki",
+          "lines": [
+            143,
+            144
+          ],
+          "quote": "<tt>PSBT_IN_TAP_KEY_SIG = 0x13</tt> | [[../bip-0371.mediawiki|371]]"
+        }
+      ]
+    },
+    {
+      "id": "key-structure",
+      "statement": "A record's key is its type plus optional key data; several records can share a type in one map, but each full key must be unique.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "<key> := <keylen> <keytype> <keydata>"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            69,
+            69
+          ],
+          "quote": "There can be multiple entries with the same <tt><keytype></tt> within a specific <tt><map></tt>, but the <tt><key></tt> must be unique."
+        }
+      ]
+    },
+    {
+      "id": "signer-txid-check",
+      "statement": "Before signing a non-witness input, the Signer must verify that the non-witness UTXO's TXID matches the one in the unsigned transaction.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            413,
+            413
+          ],
+          "quote": "Before signing a non-witness input, the Signer must verify that the TXID of the non-witness UTXO matches the TXID specified in the unsigned transaction."
+        }
+      ]
+    },
+    {
+      "id": "change-detection",
+      "statement": "Signers may hide change outputs from users; they can detect change using the BIP32 derivation paths in inputs and outputs and the global extended public keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            483,
+            484
+          ],
+          "quote": "In such displays, signers may wish to identify which outputs are change outputs in order to omit them to avoid additional user confusion. In order to detect change, a signer can use the BIP 32 derivation paths provided in inputs and outputs as well as the extended public keys provided globally."
+        }
+      ]
+    },
+    {
+      "id": "combined-roles",
+      "statement": "One entity is likely to be both Creator and Updater, and likewise both Signer and Updater.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            407,
+            407
+          ],
+          "quote": "A single entity is likely to be both a Creator and Updater."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            425,
+            425
+          ],
+          "quote": "A single entity is likely to be both a Signer and an Updater as it can update a PSBT with necessary information prior to signing it."
+        }
+      ]
+    },
+    {
+      "id": "version-exit",
+      "statement": "A parser that meets a PSBT version number it does not recognize should stop, because the PSBT contains types it cannot safely ignore.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            551,
+            551
+          ],
+          "quote": "If a parser encounters a version number it does not recognize, it should exit immediately as this indicates that the PSBT will contain types that it does not know about and cannot be ignored."
+        }
+      ]
+    },
+    {
+      "id": "finalizer-sighash",
+      "statement": "If an input specifies a sighash type, the Input Finalizer must not finalize it when any signature uses a different type.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            520,
+            520
+          ],
+          "quote": "If the input has a <tt>PSBT_IN_SIGHASH_TYPE</tt> field, the Input Finalizer must fail to finalize that input if any signature does not match the specified sighash type."
+        }
+      ]
+    },
+    {
+      "id": "format-rule",
+      "statement": "Every key must carry the data its type specifies; if any key or value does not match its type's format, the PSBT must be considered invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            354,
+            357
+          ],
+          "quote": "All keys must have the data that they specify. If any key or value does not match the specified format for that type, the PSBT must be considered invalid."
+        }
+      ]
+    }
+  ]
+}

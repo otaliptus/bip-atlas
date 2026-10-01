@@ -1,0 +1,59 @@
+---
+import type { BaseFixture } from "@bip-atlas/figures";
+import type { Block } from "@bip-atlas/publication";
+import Inline from "./Inline.astro";
+import ClaimRefs from "./ClaimRefs.astro";
+import Figure from "./Figure.astro";
+import FixtureTable from "./FixtureTable.astro";
+
+interface Props {
+  blocks: Block[];
+  numbers: Map<string, number>;
+  fixtures: Map<string, BaseFixture>;
+}
+const { blocks, numbers, fixtures } = Astro.props;
+const pick = (ids: string[]) => ids.map((id) => fixtures.get(id)!);
+const Self = Astro.self;
+---
+{blocks.map((block) => {
+  switch (block.type) {
+    case "paragraph":
+      return <p><Inline text={block.text} /><ClaimRefs claims={block.claims} numbers={numbers} /></p>;
+    case "list":
+      return (
+        <ul>
+          {block.items.map((item, i) => (
+            <li><Inline text={item} />{i === block.items.length - 1 && <ClaimRefs claims={block.claims} numbers={numbers} />}</li>
+          ))}
+        </ul>
+      );
+    case "callout":
+      return (
+        <aside class="manual-note atlas-callout" data-label={block.label}>
+          <span class="atlas-callout__label">{block.label}</span>
+          <p><Inline text={block.text} /><ClaimRefs claims={block.claims} numbers={numbers} /></p>
+        </aside>
+      );
+    case "table":
+      return (
+        <div class="atlas-table-wrap" tabindex="0" role="region" aria-label={block.caption}>
+          <table class="manual-table">
+            <caption><Inline text={block.caption} /><ClaimRefs claims={block.claims} numbers={numbers} /></caption>
+            <thead><tr>{block.columns.map((c) => <th scope="col">{c}</th>)}</tr></thead>
+            <tbody>{block.rows.map((row) => <tr>{row.map((cell, i) => i === 0 ? <th scope="row"><Inline text={cell} /></th> : <td><Inline text={cell} /></td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      );
+    case "fixture-table":
+      return <FixtureTable fixtures={pick(block.fixtures)} caption={block.caption} />;
+    case "details":
+      return (
+        <details class="atlas-details">
+          <summary><Inline text={block.summary} /></summary>
+          <div class="atlas-details__body manual-prose"><Self blocks={block.blocks} numbers={numbers} fixtures={fixtures} /></div>
+        </details>
+      );
+    case "figure":
+      return <Figure figure={block} numbers={numbers} fixtures={fixtures} />;
+  }
+})}

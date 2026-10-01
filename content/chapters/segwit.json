@@ -1,0 +1,318 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "segwit",
+  "primaryBips": [
+    141,
+    143
+  ],
+  "specimenLabel": "BIP 0141 + 0143",
+  "title": "Why does a Bitcoin transaction have two identifiers?",
+  "dek": "SegWit separates what a transaction does from the proof that it is allowed, and gives the transaction a second name that also covers the proof. Signing and block space changed along the way.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-10-01",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Every transaction is known by a hash of its bytes. Before SegWit, those bytes included the signatures, so a change in how a transaction was signed could change its identifier without changing anything it did.",
+        "claims": [
+          "effects",
+          "malleability"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 141, a consensus soft fork assigned in 2015 and recorded as deployed, separates the data that decides what a transaction does from the data that proves it is allowed. Each transaction now has two identifiers. BIP 143, its companion, changes what a SegWit signature commits to. This chapter takes a transaction published in BIP 143 apart to see both.",
+        "claims": [
+          "preamble-dates",
+          "abstract",
+          "two-ids"
+        ]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A03.1",
+      "recipe": "two-serializations.v1",
+      "title": "One transaction, two serializations",
+      "fixtures": [
+        "native-p2wpkh"
+      ],
+      "caption": "The txid covers only the bytes a pre-SegWit node would see. The wtxid covers everything, including the marker, flag and witness. Hashes are shown in the byte order they are computed.",
+      "claims": [
+        "two-ids",
+        "block-weight",
+        "examples-published"
+      ],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "effects",
+      "heading": "What a transaction does, and what proves it",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 141 starts from a distinction. A transaction’s effects are fully determined by which outputs it spends and which new outputs it creates. Signatures, and the other data used to check that a spend is allowed, are needed to validate the chain, not to determine its resulting state.",
+          "claims": [
+            "effects"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "SegWit moves that validation data, in particular scripts and signatures, into a new structure called the *witness*. Blocks commit to it separately from the transaction tree, through a commitment placed in the coinbase transaction.",
+          "claims": [
+            "abstract",
+            "committed"
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "The witness is not taken off the blockchain. Blocks with witness data commit to it, and any node that validates a transaction needs it. Only a peer that merely checks that a transaction exists can skip downloading it.",
+          "claims": [
+            "committed",
+            "optional-transmission"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "two-ids",
+      "heading": "Two serializations, two hashes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The txid is defined exactly as before: the double SHA-256 of nVersion, the inputs, the outputs and nLockTime. The wtxid is the double SHA-256 of a longer serialization: the same fields plus a marker byte `0x00` and a flag byte `0x01` after the version, and the witness data just before nLockTime.",
+          "claims": [
+            "two-ids",
+            "marker-flag"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Each input gets one witness field: a count of stack items, then each item preceded by its length. An input that does not spend a witness program still gets a field, an empty one written as the single byte `0x00`. When no input has witness data, the wtxid equals the txid.",
+          "claims": [
+            "witness-format",
+            "empty-witness"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Why have a second identifier at all? Because blocks that contain witness data must commit to it too. BIP 141 adds a rule requiring a commitment to the wtxids of a block’s transactions, built like the existing merkle root and recorded in an output of the coinbase transaction. The coinbase’s own wtxid is simply taken to be all zeros.",
+          "claims": [
+            "wtxid-commitment"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The figure below shows the native P2WPKH example from BIP 143, a transaction with one ordinary input and one SegWit input. Switch lenses to see which bytes each identifier covers.",
+          "claims": [
+            "examples-published",
+            "fixture-inputs"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A03.2",
+          "recipe": "transaction-anatomy.v1",
+          "title": "Which bytes each hash covers",
+          "fixtures": [
+            "native-p2wpkh",
+            "p2sh-p2wpkh"
+          ],
+          "caption": "Through the txid lens, the marker, flag and witness fields drop out, and with them the SegWit input’s signature. The ordinary input’s signature sits in its scriptSig, so the txid still covers it.",
+          "claims": [
+            "two-ids",
+            "empty-witness",
+            "p2wpkh",
+            "fixture-inputs"
+          ],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "malleability",
+      "heading": "Why a stable name matters",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Because the signature data of SegWit inputs is no longer part of the txid, changing how such an input was signed no longer changes the transaction’s identifier. BIP 141 presents this as the end of nonintentional malleability, under conditions: every input must be a witness input signed with at least one CHECKSIG or CHECKMULTISIG, and a multisig spend can still be changed if enough of its key holders agree.",
+          "claims": [
+            "malleability"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Stable identifiers matter when one transaction spends another before either is confirmed. BIP 141 names the benefit directly: chains of unconfirmed transactions without counterparty risk, which it calls important for off-chain protocols such as the Lightning Network.",
+          "claims": [
+            "dependency-chains"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The mixed example also shows where the protection stops. Its first input is an ordinary pay-to-public-key spend, so that input’s signature is still in the scriptSig and still part of the txid.",
+          "claims": [
+            "fixture-inputs",
+            "two-ids"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "witness-items",
+      "heading": "Not every witness item is a signature",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "For a P2WPKH input, the witness must be exactly two items: a signature, and a public key whose HASH160 matches the 20-byte program. A P2WSH input’s witness is different again: the stack items its script needs, followed by the script itself. BIP 141 says witness data is not script: the items are data, even when one of them is a serialized witness script. Nor are they all signatures.",
+          "claims": [
+            "p2wpkh",
+            "p2wsh",
+            "witness-format"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The second example in the figure wraps a witness program inside an older P2SH script. Its scriptSig carries the redeem script that contains the program, so that single input has both a scriptSig and a witness.",
+          "claims": [
+            "p2sh-nested",
+            "fixture-inputs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weight",
+      "heading": "Weight instead of bytes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Separating the witness had a second purpose. BIP 141’s motivation notes that moving data into a structure older nodes do not know about lets a soft fork discount it when calculating block size.",
+          "claims": [
+            "soft-fork-discount"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "When BIP 141 was written, blocks were limited to 1,000,000 bytes. It replaced that rule with *block weight*: three times the base size plus the total size, at most 4,000,000. Base size counts the bytes a pre-SegWit node would see; total size counts everything, witness included.",
+          "claims": [
+            "old-limit",
+            "block-weight"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Written another way, every base byte costs four weight units, and every witness-related byte, including the marker and flag, costs one. BIP 141 explains why it chose a single combined limit rather than two separate ones: separate limits would make mining and fee estimation nearly impossible.",
+          "claims": [
+            "weight-units",
+            "weight-rationale"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Weight is therefore not a byte count. Since base bytes count four times, no more than 1,000,000 of them fit in a block, as before. A block can exceed that many bytes in total only through its witness data.",
+          "claims": [
+            "base-cap",
+            "block-weight"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A03.3",
+          "recipe": "weight-meter.v1",
+          "title": "Weight of the two examples",
+          "fixtures": [
+            "native-p2wpkh",
+            "p2sh-p2wpkh"
+          ],
+          "caption": "Each base byte counts four times; each witness-related byte, marker and flag included, counts once. The totals are computed from the parsed transactions, not estimated.",
+          "claims": [
+            "weight-units",
+            "tx-weight",
+            "examples-published",
+            "examples-reproduced"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 141 defines transaction weight the same way, and virtual size as weight divided by four, rounded up. For the mixed example that is 233 base bytes and 343 bytes in total: 3 × 233 + 343 = 1,042 weight units, or 261 virtual bytes. These per-transaction terms are suggested vocabulary; the consensus limit applies to blocks.",
+          "claims": [
+            "tx-weight",
+            "fixture-sizes",
+            "block-weight"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "signing",
+      "heading": "Going deeper: what a SegWit signature signs",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 143 changes what a signature in a version 0 witness program commits to. Under the original algorithm, each signature hashed data in proportion to the size of the whole transaction, so total hashing grew with the square of the number of signature checks. BIP 143 instead builds a preimage with a fixed structure of ten items, three of which are summary hashes that can be reused across inputs.",
+          "claims": [
+            "bip143-abstract",
+            "quadratic",
+            "ten-items",
+            "hash-reuse"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For SIGHASH_ALL, the three summary hashes cover every input’s outpoint, every input’s nSequence and every output. They are computed once and reused for each input that is signed, which is where the saving comes from.",
+          "claims": [
+            "summary-hashes",
+            "hash-reuse"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The sixth item matters most to small signing devices: the amount of the output being spent. That amount is not in the transaction at all. Without it, an offline signer cannot work out how much is being spent or what fee is being paid. BIP 143 makes each signature commit to its own input’s amount, so if a device is told a wrong amount for that input, the signature is invalid and, in the BIP’s words, no funding might be lost. That protects only the input being signed: knowing the fee needs a trustworthy amount for every input.",
+          "claims": [
+            "amount",
+            "cold-wallet"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Use the BIP 143 lens in the figure to see where each item comes from. For a P2WPKH input the scriptCode is a standard pay-to-public-key-hash script built from the 20-byte program. The page reproduces the published preimage and digest of both examples byte for byte.",
+          "claims": [
+            "scriptcode-p2wpkh",
+            "examples-published",
+            "examples-reproduced"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "All of this applies only to version 0 witness programs. Each signature covers its own input’s amount. In the mixed example, the first input is an ordinary spend signed with the original algorithm, which does not involve the amount at all.",
+          "claims": [
+            "only-v0",
+            "amount",
+            "original-no-amount",
+            "fixture-inputs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "two-names",
+      "heading": "Two names, two kinds of content",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every transaction has two identifiers, equal when it carries no witness data. The txid names what the transaction does, what it spends and what it creates, plus any proof still kept in scriptSigs. The wtxid adds the witness: the rest of the evidence that the spending was allowed.",
+          "claims": [
+            "effects",
+            "two-ids"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "BIP_ATLAS_SPEC.md": "080af57979681db200ada66c81dd5f66400edd54a09066a2eee382b6797c0abf",
+  "README.md": "5cd3c36cd51ac621091a18d6cb0dc0a10facb0cd9580e2b011c67decb54d7bac",
+  "VALIDATION.md": "3169061bdbf95bb64bf69c5fd1d534aae59b178a0cb5b6ec95b7b80153da67af",
+  "catalog.json": "fc5fe948871ceb4453df762600131bf02b11b74681cf0b9c0f6bd97dab02cb85",
+  "design-tokens.css": "ffbf4b26b69db9dde944f75ba68bc73ab2d47c1fd75db5d0f4d48d394a1aa00a",
+  "examples/address-fixtures.json": "9ed0671f2cdf40635bf32325da6e3809590a14e5546b9b859252a173d809aeb9",
+  "prompts/BUILD_AND_COMPILER_PROMPTS.md": "2dc965bbd142a80ede8d18a8543c2d95c5cca7cb3a744fa1046fe2239ffa25d8",
+  "scripts/demo_models.py": "62c31bf46cee032017e116bec7f8b0274451b03fd1b72faa86dc47782f576ce9",
+  "scripts/snapshot_sources.py": "8b9fb7f233f61c425e51c3a84626234fd5c5a47d845910a53f686d6be547c861",
+  "tests/last-run.txt": "b8fd29ee5751a9d7d03812976ac5799b88a7f5d63a62b9e88c3dca53462dea7e",
+  "tests/test_starter.py": "ac036e5f83a214bce0b9e583d187e47a7850f207c9aaae24eed48d42ac19b6bd"
+}

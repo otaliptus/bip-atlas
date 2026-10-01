@@ -1,0 +1,5 @@
+# Cloudflare Pages project for the static site. Deploys happen from CI
+# (.github/workflows/deploy.yml) or locally with `pnpm deploy`.
+name = "bip-atlas"
+pages_build_output_dir = "apps/site/dist"
+compatibility_date = "2026-10-01"

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "bip-atlas.external-sources.v1",
+  "retrievedAt": "2026-10-01",
+  "note": "External fixture files referenced by pinned BIP text, fetched at an explicit commit. Public test material only.",
+  "files": [
+    {
+      "file": "trezor-python-mnemonic-vectors.json",
+      "repository": "https://github.com/trezor/python-mnemonic",
+      "commit": "b57a5ad77a981e743f4167ab2f7927a55c1e82a8",
+      "path": "vectors.json",
+      "sha256": "fa3b937b7cff9c9b8ecd3aa011faeb8d6dd67993174b72326e83f4de8fdb30f8",
+      "bytes": 152400,
+      "citedBy": {
+        "bip": 39,
+        "line": 133
+      },
+      "license": "see upstream repository"
+    },
+    {
+      "file": "bip32JP-test_JP_BIP39.json",
+      "repository": "https://github.com/bip32JP/bip32JP.github.io",
+      "commit": "5a43706289c55473c120e552244f6de348d0035b",
+      "path": "test_JP_BIP39.json",
+      "sha256": "780d6a5f21827e5b455fdad35703e2c60ed9dfd47c625daaf50c01600dc4c9e2",
+      "bytes": 17066,
+      "citedBy": {
+        "bip": 39,
+        "line": 135
+      },
+      "license": "see upstream repository"
+    }
+  ]
+}

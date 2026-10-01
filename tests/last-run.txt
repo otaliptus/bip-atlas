@@ -1,0 +1,41 @@
+test_eight_chapters (test_starter.CatalogTests.test_eight_chapters) ... ok
+test_phase_one_is_five_chapters_seven_bips (test_starter.CatalogTests.test_phase_one_is_five_chapters_seven_bips) ... ok
+test_primary_and_supporting_count (test_starter.CatalogTests.test_primary_and_supporting_count) ... ok
+test_ten_primary_bips (test_starter.CatalogTests.test_ten_primary_bips) ... ok
+test_unique_build_order (test_starter.CatalogTests.test_unique_build_order) ... ok
+test_12_word_layout (test_starter.ModelTests.test_12_word_layout) ... ok
+test_24_word_layout (test_starter.ModelTests.test_24_word_layout) ... ok
+test_all_word_counts (test_starter.ModelTests.test_all_word_counts) ... ok
+test_bad_checksum (test_starter.ModelTests.test_bad_checksum) ... ok
+test_entropy_rejection (test_starter.ModelTests.test_entropy_rejection) ... ok
+test_generic_bech32 (test_starter.ModelTests.test_generic_bech32) ... ok
+test_generic_bech32m (test_starter.ModelTests.test_generic_bech32m) ... ok
+test_invalid_program_length (test_starter.ModelTests.test_invalid_program_length) ... ok
+test_invalid_v0_program_length (test_starter.ModelTests.test_invalid_v0_program_length) ... ok
+test_invalid_version (test_starter.ModelTests.test_invalid_version) ... ok
+test_mixed_case (test_starter.ModelTests.test_mixed_case) ... ok
+test_padding_rejection (test_starter.ModelTests.test_padding_rejection) ... ok
+test_public_zero_entropy_indices (test_starter.ModelTests.test_public_zero_entropy_indices) ... ok
+test_v0_vector (test_starter.ModelTests.test_v0_vector) ... ok
+test_v16_encoding_is_not_spendability_claim (test_starter.ModelTests.test_v16_encoding_is_not_spendability_claim) ... ok
+test_v1_vector (test_starter.ModelTests.test_v1_vector) ... ok
+test_weight_ceiling (test_starter.ModelTests.test_weight_ceiling) ... ok
+test_weight_formula (test_starter.ModelTests.test_weight_formula) ... ok
+test_weight_rejection (test_starter.ModelTests.test_weight_rejection) ... ok
+test_wrong_family_v0 (test_starter.ModelTests.test_wrong_family_v0) ... ok
+test_wrong_family_v1 (test_starter.ModelTests.test_wrong_family_v1) ... ok
+test_wrong_network (test_starter.ModelTests.test_wrong_network) ... ok
+test_continuation_and_unknown_fields (test_starter.ParserTests.test_continuation_and_unknown_fields) ... ok
+test_duplicate_header (test_starter.ParserTests.test_duplicate_header) ... ok
+test_heading (test_starter.ParserTests.test_heading) ... ok
+test_markdown_header (test_starter.ParserTests.test_markdown_header) ... ok
+test_path_validation (test_starter.ParserTests.test_path_validation) ... ok
+test_pinned_git_snapshot_ignores_dirty_worktree (test_starter.ParserTests.test_pinned_git_snapshot_ignores_dirty_worktree) ... ok
+test_revision_validation (test_starter.ParserTests.test_revision_validation) ... ok
+test_unknown_status_preserved (test_starter.ParserTests.test_unknown_status_preserved) ... ok
+test_wrong_id (test_starter.ParserTests.test_wrong_id) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.075s
+
+OK

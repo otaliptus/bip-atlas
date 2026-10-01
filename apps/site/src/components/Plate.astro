@@ -1,0 +1,27 @@
+---
+import Inline from "./Inline.astro";
+import ClaimRefs from "./ClaimRefs.astro";
+import type { Figure } from "@bip-atlas/publication";
+
+interface Props {
+  figure: Figure;
+  numbers: Map<string, number>;
+  interactive?: boolean;
+}
+const { figure, numbers, interactive = false } = Astro.props;
+const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
+---
+<figure class:list={["manual-plate", "atlas-plate", `atlas-plate--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`}>
+  <div class="atlas-plate__head">
+    <span class="manual-plate-code">FIG. {figure.figure}</span>
+    <span class="atlas-plate__title" id={`${id}-title`}>{figure.title}</span>
+    {interactive && <span class="atlas-plate__kind">Interactive</span>}
+  </div>
+  <div class="manual-plate-stage">
+    <span class="atlas-plate__code" aria-hidden="true">FIG. {figure.figure}</span>
+    <slot />
+  </div>
+  <figcaption class="manual-plate-caption">
+    <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} />
+  </figcaption>
+</figure>

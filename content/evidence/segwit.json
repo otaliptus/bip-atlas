@@ -1,0 +1,889 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "segwit",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files.",
+  "claims": [
+    {
+      "id": "preamble-dates",
+      "statement": "BIP141 (assigned 2015) and BIP143 (assigned 2016) are consensus soft-fork proposals whose preambles record the status Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            10,
+            10
+          ],
+          "quote": "Assigned: 2015-12-21"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            3,
+            3
+          ],
+          "quote": "Layer: Consensus (soft fork)"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            8,
+            8
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            9,
+            9
+          ],
+          "quote": "Assigned: 2016-01-03"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            7,
+            7
+          ],
+          "quote": "Status: Deployed"
+        }
+      ]
+    },
+    {
+      "id": "effects",
+      "statement": "A transaction's effects are determined by the outputs it spends and creates; signatures are only needed to validate the chain state, not to determine it.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "The entirety of the transaction's effects are determined by output consumption (spends) and new output creation. Other transaction data, and signatures in particular, are only required to validate the blockchain state, not to determine it."
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP141 defines a witness structure, committed to blocks separately from the transaction merkle tree, holding data needed to check validity but not to determine effects; scripts and signatures move into it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "This BIP defines a new structure called a \"witness\" that is committed to blocks separately from the transaction merkle tree. This structure contains data required to check transaction validity but not required to determine transaction effects. In particular, scripts and signatures are moved into this new structure."
+        }
+      ]
+    },
+    {
+      "id": "committed",
+      "statement": "The witness is committed in a tree nested into the block's merkle root via the coinbase; the commitment is required when a block has witness data and optional otherwise.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            18,
+            18
+          ],
+          "quote": "The witness is committed in a tree that is nested into the block's existing merkle root via the coinbase transaction"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "A new block rule is added which requires a commitment to the <code>wtxid</code>."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "If all transactions in a block do not have witness data, the commitment is optional."
+        }
+      ]
+    },
+    {
+      "id": "optional-transmission",
+      "statement": "Transmitting witness data is needed only for a peer that validates a transaction, not one that only checks its existence.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            31,
+            31
+          ],
+          "quote": "It is needed only if a peer is trying to validate a transaction instead of just checking its existence."
+        }
+      ]
+    },
+    {
+      "id": "malleability",
+      "statement": "Signature data in the witness no longer affects the txid; BIP141 states this prevents involuntary malleability when all inputs are signed with at least one CHECKSIG or CHECKMULTISIG, while an m-of-n multisig spend remains malleable with agreement of m key holders.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "Since signature data is no longer part of the transaction hash, changes to how the transaction was signed are no longer relevant to transaction identification."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "as long as all inputs are signed (with at least one CHECKSIG or CHECKMULTISIG operation)"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            28,
+            28
+          ],
+          "quote": "In the case of an m-of-n CHECKMULTISIG script, a transaction is malleable only with agreement of m private key holders"
+        }
+      ]
+    },
+    {
+      "id": "dependency-chains",
+      "statement": "BIP141 says this allows unconfirmed transaction dependency chains without counterparty risk, important for off-chain protocols such as the Lightning Network.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            30,
+            30
+          ],
+          "quote": "It allows creation of unconfirmed transaction dependency chains without counterparty risk, an important feature for offchain protocols such as the Lightning Network"
+        }
+      ]
+    },
+    {
+      "id": "two-ids",
+      "statement": "Each transaction has two IDs: the txid is the double SHA256 of [nVersion][txins][txouts][nLockTime]; the wtxid is the double SHA256 of [nVersion][marker][flag][txins][txouts][witness][nLockTime].",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            41,
+            41
+          ],
+          "quote": "Each transaction will have 2 IDs."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            43,
+            43
+          ],
+          "quote": "Definition of <code>txid</code> remains unchanged: the double SHA256 of the traditional serialization format:"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            45,
+            45
+          ],
+          "quote": "[nVersion][txins][txouts][nLockTime]"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            47,
+            47
+          ],
+          "quote": "A new <code>wtxid</code> is defined: the double SHA256 of the new serialization with witness data:"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            49,
+            49
+          ],
+          "quote": "[nVersion][marker][flag][txins][txouts][witness][nLockTime]"
+        }
+      ]
+    },
+    {
+      "id": "marker-flag",
+      "statement": "The marker must be 0x00 and the flag a non-zero byte, currently 0x01.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            53,
+            53
+          ],
+          "quote": "The <code>marker</code> MUST be a 1-byte zero value: <code>0x00</code>."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            55,
+            55
+          ],
+          "quote": "The <code>flag</code> MUST be a 1-byte non-zero value. Currently, <code>0x01</code> MUST be used."
+        }
+      ]
+    },
+    {
+      "id": "witness-format",
+      "statement": "Each input has a witness field: a var_int count of stack items, then each item with a var_int length. Witness data is not script.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            57,
+            57
+          ],
+          "quote": "Each txin is associated with a witness field. A witness field starts with a <code>var_int</code> to indicate the number of stack items for the txin. It is followed by stack items, with each item starts with a <code>var_int</code> to indicate the length. Witness data is NOT script."
+        }
+      ]
+    },
+    {
+      "id": "empty-witness",
+      "statement": "A non-witness-program input must have an empty witness field, written 0x00; if no input is a witness program, wtxid equals txid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "A non-witness program (defined hereinafter) txin MUST be associated with an empty witness field, represented by a <code>0x00</code>. If all txins are not witness program, a transaction's <code>wtxid</code> is equal to its <code>txid</code>."
+        }
+      ]
+    },
+    {
+      "id": "p2wpkh",
+      "statement": "A version 0, 20-byte program is P2WPKH: the witness is exactly two items, a signature and a public key whose HASH160 matches the program.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            95,
+            95
+          ],
+          "quote": "It is interpreted as a pay-to-witness-public-key-hash (P2WPKH) program."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            96,
+            96
+          ],
+          "quote": "The witness must consist of exactly 2 items (≤ 520 bytes each). The first one a signature, and the second one a public key."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            97,
+            97
+          ],
+          "quote": "The HASH160 of the public key must match the 20-byte witness program."
+        }
+      ]
+    },
+    {
+      "id": "p2wsh",
+      "statement": "A version 0, 32-byte program is P2WSH: the witness is an input stack for the script followed by the serialized script itself.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            101,
+            101
+          ],
+          "quote": "It is interpreted as a pay-to-witness-script-hash (P2WSH) program."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            102,
+            102
+          ],
+          "quote": "The witness must consist of an input stack to feed to the script, followed by a serialized script (<code>witnessScript</code>)."
+        }
+      ]
+    },
+    {
+      "id": "p2sh-nested",
+      "statement": "Witness validation is also triggered when a P2SH redeemScript pushed in the scriptSig is exactly a version byte plus a witness program.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "Triggered when a <code>scriptPubKey</code> is a P2SH script, and the BIP16 <code>redeemScript</code> pushed in the <code>scriptSig</code> is exactly a push of a version byte plus a push of a witness program."
+        }
+      ]
+    },
+    {
+      "id": "old-limit",
+      "statement": "When BIP141 was written, blocks were limited to 1,000,000 bytes total size.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            115,
+            115
+          ],
+          "quote": "Blocks are currently limited to 1,000,000 bytes (1MB) total size."
+        }
+      ]
+    },
+    {
+      "id": "block-weight",
+      "statement": "Block weight is base size × 3 + total size, and must be at most 4,000,000; base size excludes witness-related data as a non-upgraded node sees it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "''Block weight'' is defined as ''Base size'' * 3 + ''Total size''."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            119,
+            119
+          ],
+          "quote": "''Base size'' is the block size in bytes with the original transaction serialization without any witness-related data, as seen by a non-upgraded node."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            123,
+            123
+          ],
+          "quote": "The new rule is ''block weight'' ≤ 4,000,000."
+        }
+      ]
+    },
+    {
+      "id": "weight-rationale",
+      "statement": "BIP141 chose one composite limit because two separate limits would make mining and fee estimation nearly impossible.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "Using two separate limits would make mining and fee estimation nearly impossible."
+        }
+      ]
+    },
+    {
+      "id": "weight-units",
+      "statement": "Since weight = 3 × base + total = 4 × base + (total − base), each base byte adds 4 weight units and each witness-related byte (marker, flag, witness) adds 1.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "''Block weight'' is defined as ''Base size'' * 3 + ''Total size''."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            121,
+            121
+          ],
+          "quote": "including base data and witness data."
+        }
+      ]
+    },
+    {
+      "id": "tx-weight",
+      "statement": "Transaction weight is defined the same way, and virtual size is weight / 4 rounded up; these are suggested terms, not consensus limits.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            136,
+            136
+          ],
+          "quote": "The following definitions are not used for consensus limits, but are suggested to provide language consistent with the terminology introduced above."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "''Transaction weight'' is defined as ''Base transaction size'' * 3 + ''Total transaction size''"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "''Virtual transaction size'' is defined as ''Transaction weight'' / 4 (rounded up to the next integer)."
+        }
+      ]
+    },
+    {
+      "id": "examples-published",
+      "statement": "BIP143 publishes complete example transactions with their preimages and sighashes, and asks developers to test against them.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            137,
+            137
+          ],
+          "quote": "developers should test their implementations against all the tests below."
+        },
+        {
+          "bip": 143,
+          "lines": [
+            190,
+            190
+          ],
+          "quote": "The serialized signed transaction is:"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            250,
+            250
+          ],
+          "quote": "The serialized signed transaction is:"
+        }
+      ]
+    },
+    {
+      "id": "fixture-sizes",
+      "statement": "Parsed, the native P2WPKH example has 233 base bytes and 343 bytes in total: weight 1,042, virtual size 261.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            190,
+            190
+          ],
+          "quote": "The serialized signed transaction is:"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "''Transaction weight'' is defined as ''Base transaction size'' * 3 + ''Total transaction size''"
+        }
+      ]
+    },
+    {
+      "id": "fixture-inputs",
+      "statement": "The native P2WPKH example spends one ordinary P2PK output and one P2WPKH output; the P2SH-P2WPKH example spends one P2SH-wrapped witness program.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "The first input comes from an ordinary P2PK:"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            155,
+            155
+          ],
+          "quote": "The second input comes from a P2WPKH witness program:"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            214,
+            214
+          ],
+          "quote": "The input comes from a P2SH-P2WPKH witness program:"
+        }
+      ]
+    },
+    {
+      "id": "bip143-abstract",
+      "statement": "BIP143 defines a new digest for signatures in version 0 witness programs, to minimize redundant hashing and to cover the input value.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            14,
+            14
+          ],
+          "quote": "This proposal defines a new transaction digest algorithm for signature verification in version 0 witness program, in order to minimize redundant data hashing in verification, and to cover the input value by the signature."
+        }
+      ]
+    },
+    {
+      "id": "only-v0",
+      "statement": "The BIP143 digest applies only to sigops in version 0 witness programs.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            27,
+            27
+          ],
+          "quote": "A new transaction digest algorithm is defined, but only applicable to sigops in version 0 witness program:"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            152,
+            152
+          ],
+          "quote": "a new transaction digest algorithm for signature verification in version 0 witness program."
+        }
+      ]
+    },
+    {
+      "id": "quadratic",
+      "statement": "With the original digest, hashing per signature grows with transaction size, so total hashing grows as O(n^2) in the number of sigops.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            21,
+            21
+          ],
+          "quote": "For the verification of each signature, the amount of data hashing is proportional to the size of the transaction. Therefore, data hashing grows in O(n<sup>2</sup>) as the number of sigops in a transaction increases."
+        }
+      ]
+    },
+    {
+      "id": "ten-items",
+      "statement": "The BIP143 preimage has ten items: nVersion, hashPrevouts, hashSequence, outpoint, scriptCode, amount, nSequence, hashOutputs, nLocktime and sighash type.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            29,
+            29
+          ],
+          "quote": "1. nVersion of the transaction (4-byte little endian)"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            34,
+            34
+          ],
+          "quote": "6. value of the output spent by this input (8-byte little endian)"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "10. sighash type of the signature (4-byte little endian)"
+        }
+      ]
+    },
+    {
+      "id": "hash-reuse",
+      "statement": "hashPrevouts, hashSequence and hashOutputs can be reused across inputs, reducing total hashing from O(n^2) to O(n).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            70,
+            70
+          ],
+          "quote": "may be reused in other inputs of the same transaction, so that the time complexity of the whole hashing process reduces from O(n<sup>2</sup>) to O(n)."
+        }
+      ]
+    },
+    {
+      "id": "amount",
+      "statement": "Every BIP143 sighash type commits to the amount spent by the signed input; item 6 is that 8-byte amount.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "All sighash types commit to the amount being spent by the signed input;"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            55,
+            55
+          ],
+          "quote": "The item 6 is a 8-byte value of the amount of bitcoin spent in this input."
+        }
+      ]
+    },
+    {
+      "id": "original-no-amount",
+      "statement": "The original signature digest does not involve the amount being spent by the input.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "The algorithm does not involve the amount of Bitcoin being spent by the input."
+        }
+      ]
+    },
+    {
+      "id": "cold-wallet",
+      "statement": "Without the amount, an offline signer cannot compute the amount spent or the fee; with the input's amount in its digest, a wrong value makes that signature invalid and no funding might be lost.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "For an offline transaction signing device (\"cold wallet\"), however, the unknowing of input amount makes it impossible to calculate the exact amount being spent and the transaction fee."
+        },
+        {
+          "bip": 143,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "In the case that a wrong value is provided and signed, the signature would be invalid and no funding might be lost."
+        }
+      ]
+    },
+    {
+      "id": "scriptcode-p2wpkh",
+      "statement": "For P2WPKH the scriptCode is 0x1976a914{20-byte-pubkey-hash}88ac.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            50,
+            50
+          ],
+          "quote": "For <code>P2WPKH</code> witness program, the <code>scriptCode</code> is <code>0x1976a914{20-byte-pubkey-hash}88ac</code>."
+        }
+      ]
+    },
+    {
+      "id": "wtxid-commitment",
+      "statement": "Blocks containing witness data must commit to the wtxids; the witness root is built like the merkle root, recorded in a coinbase output, and the coinbase's own wtxid is taken as all zeros.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "A new block rule is added which requires a commitment to the <code>wtxid</code>. The <code>wtxid</code> of coinbase transaction is assumed to be <code>0x0000....0000</code>."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "A <code>witness root hash</code> is calculated with all those <code>wtxid</code> as leaves, in a way similar to the <code>hashMerkleRoot</code> in the block header."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            67,
+            67
+          ],
+          "quote": "The commitment is recorded in a <code>scriptPubKey</code> of the coinbase transaction."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "If all transactions in a block do not have witness data, the commitment is optional."
+        }
+      ]
+    },
+    {
+      "id": "soft-fork-discount",
+      "statement": "BIP141's motivation lists that moving data into a structure unknown to old nodes lets a soft fork discount witness size when calculating block size.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            32,
+            33
+          ],
+          "quote": "'''Some constraints could be bypassed with a soft fork''' by moving part of the transaction data to a structure unknown to current protocol, for example: #* Size of witness could be ignored / discounted when calculating the block size, effectively increasing the block size to some extent"
+        }
+      ]
+    },
+    {
+      "id": "base-cap",
+      "statement": "Because weight = 4 × base + witness ≤ 4,000,000, a block's base data cannot exceed 1,000,000 bytes; only witness data lets its total size exceed that.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "''Block weight'' is defined as ''Base size'' * 3 + ''Total size''."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            123,
+            123
+          ],
+          "quote": "The new rule is ''block weight'' ≤ 4,000,000."
+        }
+      ]
+    },
+    {
+      "id": "summary-hashes",
+      "statement": "Without ANYONECANPAY, hashPrevouts is the double SHA256 of all input outpoints; for SIGHASH_ALL, hashSequence covers all nSequence values and hashOutputs all outputs.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "If the <code>ANYONECANPAY</code> flag is not set, <code>hashPrevouts</code> is the double SHA256 of the serialization of all input outpoints;"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "If none of the <code>ANYONECANPAY</code>, <code>SINGLE</code>, <code>NONE</code> sighash type is set, <code>hashSequence</code> is the double SHA256 of the serialization of <code>nSequence</code> of all inputs;"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "If the sighash type is neither <code>SINGLE</code> nor <code>NONE</code>, <code>hashOutputs</code> is the double SHA256 of the serialization of all output amount (8-byte little endian) with <code>scriptPubKey</code> (serialized as scripts inside CTxOuts);"
+        }
+      ]
+    },
+    {
+      "id": "examples-reproduced",
+      "statement": "The tested model reproduces both published examples' serializations, preimages and sighashes byte for byte, and computes their sizes and weights.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            174,
+            174
+          ],
+          "quote": "hash preimage:"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            187,
+            187
+          ],
+          "quote": "sigHash:"
+        }
+      ]
+    }
+  ]
+}

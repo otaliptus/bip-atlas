@@ -1,0 +1,12 @@
+# Cloudflare Pages headers.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  X-Frame-Options: DENY
+  # All chapters are drafts awaiting human sign-off: keep them out of search
+  # engines until the first release. Remove this line to allow indexing.
+  X-Robots-Tag: noindex
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

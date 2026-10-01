@@ -1,0 +1,721 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "hd-wallets",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-10-01",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim source text (MediaWiki markup kept); lines refer to the pinned raw files.",
+  "claims": [
+    {
+      "id": "preamble-dates",
+      "statement": "BIP32 was assigned in 2012; its preamble records the type Informational and the status Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "Assigned: 2012-02-11"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            14,
+            14
+          ],
+          "quote": "Status: Deployed"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            15,
+            15
+          ],
+          "quote": "Type: Informational"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "HD wallets can be shared partially or entirely with different systems, each with or without the ability to spend.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "wallets which can be shared partially or entirely with different systems, each with or without the ability to spend coins."
+        }
+      ]
+    },
+    {
+      "id": "two-parts",
+      "statement": "BIP32 first specifies deriving a tree of keypairs from a single seed, then a wallet structure on top of the tree.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "In the first part, a system for deriving a tree of keypairs from a single seed is presented. The second part demonstrates how to build a wallet structure on top of such a tree."
+        }
+      ]
+    },
+    {
+      "id": "random-keys-history",
+      "statement": "When BIP32 was written, the reference client used randomly generated keys and cached 100 reserve keys to avoid a backup after every transaction.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            34,
+            34
+          ],
+          "quote": "The Bitcoin reference client uses randomly generated keys. In order to avoid the necessity for a backup after every transaction, (by default) 100 keys are cached in a pool of reserve keys."
+        }
+      ]
+    },
+    {
+      "id": "webshop",
+      "statement": "Elliptic-curve maths lets a webshop server generate fresh addresses without access to the private keys needed to spend.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "This permits for example a webshop business to let its webserver generate fresh addresses (public key hashes) for each order or for each customer, without giving the webserver access to the corresponding private keys (which are required for spending the received funds)."
+        }
+      ]
+    },
+    {
+      "id": "chain-code",
+      "statement": "Both private and public keys are extended with a 32-byte chain code, identical for corresponding private and public keys, so children do not depend solely on the key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            62,
+            62
+          ],
+          "quote": "In order to prevent these from depending solely on the key itself, we extend both private and public keys first with an extra 256 bits of entropy. This extension, called the chain code, is identical for corresponding private and public keys, and consists of 32 bytes."
+        }
+      ]
+    },
+    {
+      "id": "extended-key",
+      "statement": "An extended private key is (k, c); an extended public key is (K, c) with K = point(k).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "We represent an extended private key as (k, c), with k the normal private key, and c the chain code. An extended public key is represented as (K, c), with K = point(k) and c the chain code."
+        }
+      ]
+    },
+    {
+      "id": "indices",
+      "statement": "Each extended key has 2^31 normal children (indices 0 to 2^31−1) and 2^31 hardened children (2^31 to 2^32−1).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "Each extended key has 2<sup>31</sup> normal child keys, and 2<sup>31</sup> hardened child keys."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            66,
+            66
+          ],
+          "quote": "The hardened child keys use indices 2<sup>31</sup> through 2<sup>32</sup>-1."
+        }
+      ]
+    },
+    {
+      "id": "ckdpriv-hardened",
+      "statement": "For a hardened child, the HMAC data is 0x00 || the parent private key || the index.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            76,
+            76
+          ],
+          "quote": "If so (hardened child): let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = 0x00 || ser<sub>256</sub>(k<sub>par</sub>) || ser<sub>32</sub>(i))."
+        }
+      ]
+    },
+    {
+      "id": "ckdpriv-normal",
+      "statement": "For a normal child, the HMAC data is the parent public key || the index.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            77,
+            77
+          ],
+          "quote": "If not (normal child): let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = ser<sub>P</sub>(point(k<sub>par</sub>)) || ser<sub>32</sub>(i))."
+        }
+      ]
+    },
+    {
+      "id": "split",
+      "statement": "I splits into I_L and I_R; the child private key is I_L + k_par (mod n) and the child chain code is I_R.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            78,
+            78
+          ],
+          "quote": "Split I into two 32-byte sequences, I<sub>L</sub> and I<sub>R</sub>."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "The returned child key k<sub>i</sub> is parse<sub>256</sub>(I<sub>L</sub>) + k<sub>par</sub> (mod n)."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            80,
+            80
+          ],
+          "quote": "The returned chain code c<sub>i</sub> is I<sub>R</sub>."
+        }
+      ]
+    },
+    {
+      "id": "ckdpub",
+      "statement": "CKDpub is only defined for non-hardened children; the child public key is point(I_L) + K_par.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            87,
+            87
+          ],
+          "quote": "It is only defined for non-hardened child keys."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            89,
+            89
+          ],
+          "quote": "If so (hardened child): return failure"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "The returned child key K<sub>i</sub> is point(parse<sub>256</sub>(I<sub>L</sub>)) + K<sub>par</sub>."
+        }
+      ]
+    },
+    {
+      "id": "neuter",
+      "statement": "N() gives the extended public key of an extended private key; it removes the ability to sign transactions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            98,
+            98
+          ],
+          "quote": "the \"neutered\" version, as it removes the ability to sign transactions"
+        }
+      ]
+    },
+    {
+      "id": "equivalence",
+      "statement": "Computing a normal child's public key from the private or the public parent gives the same result; this is what makes non-hardened keys useful.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            105,
+            105
+          ],
+          "quote": "The fact that they are equivalent is what makes non-hardened keys useful (one can derive child public keys of a given parent key without knowing any private key)"
+        }
+      ]
+    },
+    {
+      "id": "pub-to-priv",
+      "statement": "Deriving a private child from a public parent is not possible.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            107,
+            109
+          ],
+          "quote": "====Public parent key &rarr; private child key==== This is not possible."
+        }
+      ]
+    },
+    {
+      "id": "notation",
+      "statement": "Paths are written m/3H/2/5 for successive CKDpriv steps, with H marking a hardened index.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            115,
+            115
+          ],
+          "quote": "we will write CKDpriv(CKDpriv(CKDpriv(m,3<sub>H</sub>),2),5) as m/3<sub>H</sub>/2/5."
+        }
+      ]
+    },
+    {
+      "id": "not-rewritable",
+      "statement": "N(m/aH) cannot be rewritten as N(m)/aH, because the latter is not possible.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            118,
+            118
+          ],
+          "quote": "However, N(m/a<sub>H</sub>) cannot be rewritten as N(m)/a<sub>H</sub>, as the latter is not possible."
+        }
+      ]
+    },
+    {
+      "id": "reconstruction",
+      "statement": "An extended private key reconstructs all descendant keys; an extended public key reconstructs all descendant non-hardened public keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            120,
+            120
+          ],
+          "quote": "knowing an extended private key allows reconstruction of all descendant private keys and public keys, and knowing an extended public key allows reconstruction of all descendant non-hardened public keys."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            116,
+            117
+          ],
+          "quote": "N(m/a/b/c) = N(m/a/b)/c = N(m/a)/b/c = N(m)/a/b/c = M/a/b/c."
+        }
+      ]
+    },
+    {
+      "id": "identifier",
+      "statement": "A key is identified by the Hash160 of its public key; the first 32 bits are its fingerprint.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            124,
+            124
+          ],
+          "quote": "Extended keys can be identified by the Hash160 (RIPEMD160 after SHA256) of the serialized ECDSA public key K, ignoring the chain code."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            126,
+            126
+          ],
+          "quote": "The first 32 bits of the identifier are called the key fingerprint."
+        }
+      ]
+    },
+    {
+      "id": "fingerprint-collisions",
+      "statement": "The parent fingerprint is only a fast way to detect parents and children; software must be willing to deal with collisions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            140,
+            140
+          ],
+          "quote": "Note that the fingerprint of the parent only serves as a fast way to detect parent and child nodes in software, and software must be willing to deal with collisions."
+        }
+      ]
+    },
+    {
+      "id": "serialization",
+      "statement": "An extended key serializes to 78 bytes (version, depth, parent fingerprint, child number, chain code, key data); Base58Check adds 32 checksum bits for exactly 111 characters starting xpub or xprv on mainnet.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            131,
+            131
+          ],
+          "quote": "4 bytes: version bytes (mainnet: 0x0488B21E public, 0x0488ADE4 private; testnet: 0x043587CF public, 0x04358394 private)"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            136,
+            136
+          ],
+          "quote": "33 bytes: the public key or private key data (ser<sub>P</sub>(K) for public keys, 0x00 || ser<sub>256</sub>(k) for private keys)"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            138,
+            138
+          ],
+          "quote": "This 78 byte structure can be encoded like other Bitcoin data in Base58, by first adding 32 checksum bits (derived from the double SHA-256 checksum), and then converting to the Base58 representation. This results in a Base58-encoded string of exactly 111 characters."
+        }
+      ]
+    },
+    {
+      "id": "verify-point",
+      "statement": "When importing an extended public key, implementations must verify that its X coordinate is on the curve.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            142,
+            142
+          ],
+          "quote": "When importing a serialized extended public key, implementations must verify whether the X coordinate in the public key data corresponds to a point on the curve. If not, the extended public key is invalid."
+        }
+      ]
+    },
+    {
+      "id": "master",
+      "statement": "The seed is 128 to 512 bits from a (P)RNG, 256 advised; I = HMAC-SHA512(\"Bitcoin seed\", S); I_L is the master secret key and I_R the master chain code.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            148,
+            148
+          ],
+          "quote": "Generate a seed byte sequence S of a chosen length (between 128 and 512 bits; 256 bits is advised) from a (P)RNG."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            149,
+            149
+          ],
+          "quote": "Calculate I = HMAC-SHA512(Key = \"Bitcoin seed\", Data = S)"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            151,
+            151
+          ],
+          "quote": "Use parse<sub>256</sub>(I<sub>L</sub>) as master secret key, and I<sub>R</sub> as master chain code."
+        }
+      ]
+    },
+    {
+      "id": "invalid-rare",
+      "statement": "A derived key can be invalid, in which case the next index is used; this has probability lower than 1 in 2^127.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            81,
+            81
+          ],
+          "quote": "In case parse<sub>256</sub>(I<sub>L</sub>) ≥ n or k<sub>i</sub> = 0, the resulting key is invalid, and one should proceed with the next value for i. (Note: this has probability lower than 1 in 2<sup>127</sup>.)"
+        }
+      ]
+    },
+    {
+      "id": "wallet-layout",
+      "statement": "BIP32's default layout uses hardened account nodes with an external chain (m/iH/0/k) and an internal chain (m/iH/1/k); it is a default and advisory, and implementations may deviate.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            158,
+            158
+          ],
+          "quote": "The layout defined in this section is a default only, though clients are encouraged to mimic it for compatibility, even if not all features are supported."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            165,
+            165
+          ],
+          "quote": "m/i<sub>H</sub>/0/k corresponds to the k'th keypair of the external chain of account number i of the HDW derived from master m."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            166,
+            166
+          ],
+          "quote": "m/i<sub>H</sub>/1/k corresponds to the k'th keypair of the internal chain of account number i of the HDW derived from master m."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            193,
+            193
+          ],
+          "quote": "However, implementations may deviate from it for specific needs; more complex applications may call for a more complex tree structure."
+        }
+      ]
+    },
+    {
+      "id": "webserver-breach",
+      "statement": "An attacker who obtains a webserver holding one account's external-chain xpub can at most see incoming payments, not steal them.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            189,
+            189
+          ],
+          "quote": "This means someone illegally obtaining access to the webserver can at most see all incoming payments but will not be able to steal the money"
+        }
+      ]
+    },
+    {
+      "id": "audits",
+      "statement": "Sharing account extended public keys lets an auditor see all transactions but not a single secret key.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            176,
+            176
+          ],
+          "quote": "This will allow the auditor to see all transactions from and to the wallet, in all accounts, but not a single secret key."
+        }
+      ]
+    },
+    {
+      "id": "leak-privacy",
+      "statement": "Leaking a private key means access to coins; leaking a public key can mean loss of privacy.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            208,
+            208
+          ],
+          "quote": "Leaking a private key means access to coins - leaking a public key can mean loss of privacy."
+        }
+      ]
+    },
+    {
+      "id": "weakness",
+      "statement": "A parent extended public key plus the private key of any descendant reached from it by non-hardened steps is equivalent to the parent extended private key; extended public keys must be treated more carefully than regular public keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            212,
+            212
+          ],
+          "quote": "knowledge of a parent extended public key plus any non-hardened private key descending from it is equivalent to knowing the parent extended private key (and thus every private and public key descending from it). This means that extended public keys must be treated more carefully than regular public keys."
+        }
+      ]
+    },
+    {
+      "id": "hardened-reason",
+      "statement": "This weakness is why hardened keys exist and are used at the account level, so a leak of account-level or lower private keys never compromises the master or other accounts.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            213,
+            213
+          ],
+          "quote": "It is also the reason for the existence of hardened keys, and why they are used for the account level in the tree. This way, a leak of account-specific (or below) private keys never risks compromising the master or other accounts."
+        }
+      ]
+    },
+    {
+      "id": "recovery-computed",
+      "statement": "From test vector 1's xpub for m/0H and the private key of m/0H/1, the tested implementation recomputes m/0H's private key exactly.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            212,
+            212
+          ],
+          "quote": "knowledge of a parent extended public key plus any non-hardened private key descending from it is equivalent to knowing the parent extended private key"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            225,
+            225
+          ],
+          "quote": "ext pub: xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            229,
+            229
+          ],
+          "quote": "ext prv: xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs"
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "BIP32 embeds test vectors, including vectors for leading zeros and a list of invalid extended keys; the tested implementation reproduces all 17 valid chains and rejects all 16 invalid keys.",
+      "scope": "computed-fixture",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            220,
+            220
+          ],
+          "quote": "Seed (hex): 000102030405060708090a0b0c0d0e0f"
+        },
+        {
+          "bip": 32,
+          "lines": [
+            264,
+            264
+          ],
+          "quote": "These vectors test for the retention of leading zeros."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            291,
+            291
+          ],
+          "quote": "These vectors test that invalid extended keys are recognized as invalid."
+        }
+      ]
+    },
+    {
+      "id": "bip39-handoff",
+      "statement": "BIP39 seeds feed BIP32. The trezor vector file referenced by BIP39 also lists each seed's master extended key; the tested implementation reproduces all 24 English entries.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 39,
+          "lines": [
+            99,
+            100
+          ],
+          "quote": "This seed can be later used to generate deterministic wallets using BIP-0032 or similar methods."
+        },
+        {
+          "bip": 39,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "https://github.com/trezor/python-mnemonic/blob/master/vectors.json"
+        }
+      ]
+    },
+    {
+      "id": "b2b",
+      "statement": "A business partner can receive the extended public key of one account's external chain and use it as a kind of super address.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            184,
+            184
+          ],
+          "quote": "one can use the extended public key for the external chain of a specific account (M/i h/0) as a sort of \"super address\", allowing frequent transactions that cannot (easily) be associated, but without needing to request a new address for each payment."
+        }
+      ]
+    }
+  ]
+}

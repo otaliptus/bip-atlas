@@ -1,0 +1,400 @@
+{
+  "schemaVersion": "bip-atlas.catalog.v1",
+  "projectName": "BIP Atlas (working name)",
+  "sourceRepository": "bitcoin/bips",
+  "observedResearchCommit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "observedResearchCommitDate": "2026-09-28T15:24:34Z",
+  "researchedAt": "2026-10-01",
+  "researchNote": "Commit observed with GitHub connector; local source snapshot not included. Snapshot script reads an independently obtained checkout. Re-resolve upstream before an intentional refresh.",
+  "primaryBipCount": 10,
+  "chapterCount": 8,
+  "supportingBips": [
+    3,
+    16,
+    144,
+    370,
+    371
+  ],
+  "supportingNote": "Context only; no separate launch chapters. These are not a complete formal dependency closure.",
+  "readerAudience": "Technically curious reader; no cryptographic implementation experience assumed.",
+  "rendering": "static HTML plus local interactive islands",
+  "publicationPolicy": {
+    "initialHumanReview": true,
+    "semanticChangeHumanReview": true,
+    "mechanicalOnlyAutoPublish": false,
+    "maxRepairAttempts": 2
+  },
+  "secretsPolicy": {
+    "acceptUserSeeds": false,
+    "acceptPrivateKeys": false,
+    "acceptUserPsbt": false,
+    "allowBroadcast": false,
+    "fixturesOnly": true
+  },
+  "chapters": [
+    {
+      "id": "mnemonics",
+      "primaryBips": [
+        39
+      ],
+      "phase": 1,
+      "readingOrder": 1,
+      "buildOrder": 2,
+      "questionTitle": "How can a wallet backup become a list of words?",
+      "heroRecipe": "entropy-word-pipeline.v1",
+      "primitiveFamilies": [
+        "bit-ribbon",
+        "word-grid",
+        "pipeline"
+      ],
+      "allowedControls": [
+        "Choose public fixture",
+        "Toggle 128/256-bit fixture",
+        "Reveal 11-bit groups"
+      ],
+      "misconceptionChecklist": [
+        "Mnemonic is not a private key",
+        "The final word is not purely checksum",
+        "Never accept real recovery phrases"
+      ],
+      "requiredTestFamilies": [
+        "Entropy/word-count fixtures",
+        "Published wordlist indices",
+        "Pinned BIP39 reference vectors and Unicode cases"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/39/"
+      ]
+    },
+    {
+      "id": "hd-wallets",
+      "primaryBips": [
+        32
+      ],
+      "phase": 1,
+      "readingOrder": 2,
+      "buildOrder": 3,
+      "questionTitle": "How can one seed grow an entire wallet?",
+      "heroRecipe": "derivation-tree.v1",
+      "primitiveFamilies": [
+        "tree",
+        "key-pair",
+        "capability-boundary"
+      ],
+      "allowedControls": [
+        "Expand a branch",
+        "Switch public/private view",
+        "Toggle hardened boundary"
+      ],
+      "misconceptionChecklist": [
+        "An xpub cannot derive hardened children",
+        "Chain code is not optional",
+        "Paths like BIP44 are not defined by BIP32 alone"
+      ],
+      "requiredTestFamilies": [
+        "Embedded BIP32 derivation vectors",
+        "Leading-zero cases",
+        "Invalid extended-key cases"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/32/"
+      ]
+    },
+    {
+      "id": "segwit",
+      "primaryBips": [
+        141,
+        143
+      ],
+      "phase": 1,
+      "readingOrder": 3,
+      "buildOrder": 4,
+      "questionTitle": "Why does a Bitcoin transaction have two identifiers?",
+      "heroRecipe": "transaction-anatomy.v1",
+      "primitiveFamilies": [
+        "byte-ribbon",
+        "hash-lens",
+        "weight-meter"
+      ],
+      "allowedControls": [
+        "Switch txid/wtxid preimage view",
+        "Select a public transaction fixture",
+        "Inspect BIP143 signing preimage"
+      ],
+      "misconceptionChecklist": [
+        "Witness remains part of blockchain data",
+        "BIP143 is for witness version 0",
+        "Do not call weight a fixed byte-size limit"
+      ],
+      "requiredTestFamilies": [
+        "Serialization/hash fixtures",
+        "Exact base/total sizes",
+        "BIP143 published sighash examples"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/141/",
+        "https://bips.dev/143/"
+      ]
+    },
+    {
+      "id": "addresses",
+      "primaryBips": [
+        173,
+        350
+      ],
+      "phase": 1,
+      "readingOrder": 4,
+      "buildOrder": 1,
+      "questionTitle": "How does an address notice a typing mistake?",
+      "heroRecipe": "address-checksum-lab.v1",
+      "primitiveFamilies": [
+        "character-ribbon",
+        "byte-ribbon",
+        "comparison"
+      ],
+      "allowedControls": [
+        "Choose public address fixture",
+        "Change one character",
+        "Compare checksum families"
+      ],
+      "misconceptionChecklist": [
+        "Bech32 for v0; Bech32m for v1\u201316",
+        "Encoding validity does not mean spendability",
+        "Never auto-correct a destination"
+      ],
+      "requiredTestFamilies": [
+        "Both BIPs generic checksum vectors",
+        "BIP350 witness-address vectors",
+        "Mixed case, padding, length, and wrong-family rejection"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/173/",
+        "https://bips.dev/350/"
+      ]
+    },
+    {
+      "id": "psbt",
+      "primaryBips": [
+        174
+      ],
+      "phase": 1,
+      "readingOrder": 5,
+      "buildOrder": 5,
+      "questionTitle": "How can separate devices help sign one transaction?",
+      "heroRecipe": "psbt-envelope.v1",
+      "primitiveFamilies": [
+        "envelope",
+        "role-flow",
+        "key-value-map"
+      ],
+      "allowedControls": [
+        "Advance through a reviewed trace",
+        "Inspect added fields",
+        "Compare partial/final states"
+      ],
+      "misconceptionChecklist": [
+        "PSBT is a container, not the final wire transaction",
+        "BIP174 v0 is not PSBTv2",
+        "Do not imply Taproot PSBT fields are defined here"
+      ],
+      "requiredTestFamilies": [
+        "BIP174 valid/invalid fixtures",
+        "Unknown-field preservation",
+        "Map uniqueness and trace transitions"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/174/"
+      ]
+    },
+    {
+      "id": "schnorr",
+      "primaryBips": [
+        340
+      ],
+      "phase": 2,
+      "readingOrder": 6,
+      "buildOrder": 6,
+      "questionTitle": "What does a signature verifier actually check?",
+      "heroRecipe": "schnorr-verification.v1",
+      "primitiveFamilies": [
+        "equation-flow",
+        "byte-ribbon",
+        "verification-trace"
+      ],
+      "allowedControls": [
+        "Choose public valid/invalid vector",
+        "Change a message fixture",
+        "Reveal verifier stages"
+      ],
+      "misconceptionChecklist": [
+        "BIP340 does not by itself specify a multiparty signing protocol",
+        "Do not require only 32-byte messages",
+        "Do not present real-number drawings as secp256k1 arithmetic"
+      ],
+      "requiredTestFamilies": [
+        "Pinned BIP340 CSV vectors",
+        "Public-key lift and range checks",
+        "Arbitrary-length message cases"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/340/"
+      ]
+    },
+    {
+      "id": "taproot",
+      "primaryBips": [
+        341
+      ],
+      "phase": 2,
+      "readingOrder": 7,
+      "buildOrder": 7,
+      "questionTitle": "How can an output commit to several ways of spending?",
+      "heroRecipe": "taproot-commitment.v1",
+      "primitiveFamilies": [
+        "tree",
+        "commitment-lens",
+        "reveal-mask"
+      ],
+      "allowedControls": [
+        "Switch key/script path",
+        "Select a leaf",
+        "Reveal only the proof material"
+      ],
+      "misconceptionChecklist": [
+        "Internal key differs from output key",
+        "Script-path spending reveals proof data",
+        "Do not promise universal anonymity"
+      ],
+      "requiredTestFamilies": [
+        "BIP341 wallet-test-vectors.json",
+        "Leaf/branch/tweak and control-block checks",
+        "Byte-order and parity checks"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/341/"
+      ]
+    },
+    {
+      "id": "tapscript",
+      "primaryBips": [
+        342
+      ],
+      "phase": 2,
+      "readingOrder": 8,
+      "buildOrder": 8,
+      "questionTitle": "What changes when Bitcoin runs a Taproot script?",
+      "heroRecipe": "tapscript-trace.v1",
+      "primitiveFamilies": [
+        "stack",
+        "opcode-ribbon",
+        "trace-player"
+      ],
+      "allowedControls": [
+        "Step a reviewed trace",
+        "Compare success/failure fixtures",
+        "Inspect signature count"
+      ],
+      "misconceptionChecklist": [
+        "A recorded trace is not a general interpreter",
+        "Do not apply legacy CHECKMULTISIG behavior",
+        "Unsupported rules must not silently succeed"
+      ],
+      "requiredTestFamilies": [
+        "Pinned BIP341-linked Core validation fixtures",
+        "Reviewed trace assertions",
+        "Out-of-scope input rejection"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 1100,
+        "max": 1800
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 1,
+        "supportingMax": 2
+      },
+      "sourceLinks": [
+        "https://bips.dev/342/"
+      ]
+    }
+  ]
+}

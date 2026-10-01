@@ -1,0 +1,9 @@
+---
+import { parseInline } from "@bip-atlas/publication";
+
+interface Props {
+  text: string;
+}
+const segments = parseInline(Astro.props.text);
+---
+{segments.map((s) => (s.kind === "code" ? <code>{s.value}</code> : s.kind === "em" ? <em>{s.value}</em> : s.value))}

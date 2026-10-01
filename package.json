@@ -1,0 +1,22 @@
+{
+  "name": "bip-atlas",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @bip-atlas/site dev",
+    "build": "pnpm --filter @bip-atlas/site build",
+    "preview": "pnpm --filter @bip-atlas/site preview",
+    "test": "vitest run && python3 -m unittest discover -s tests",
+    "check": "tsc -p tsconfig.json",
+    "deploy": "pnpm build && wrangler pages deploy apps/site/dist --project-name bip-atlas"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.0"
+  },
+  "packageManager": "pnpm@9.12.1",
+  "engines": {
+    "node": ">=20"
+  }
+}
