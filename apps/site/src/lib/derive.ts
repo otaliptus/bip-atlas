@@ -28,6 +28,8 @@ import {
   parseWordlist,
   serialize,
   serializeRaw,
+  parseBip340Csv,
+  verifyTrace,
 } from "@bip-atlas/models";
 import { sha256 } from "@noble/hashes/sha2.js";
 import type {
@@ -43,6 +45,9 @@ import type {
   PsbtRecordView,
   PsbtTraceFixture,
   TransactionFixture,
+  DerivedSchnorrFixture,
+  SchnorrDerived,
+  SchnorrVectorFixture,
 } from "@bip-atlas/figures";
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
@@ -276,8 +281,51 @@ function derivePsbtCombine(f: PsbtCombineFixture): DerivedPsbtCombineFixture {
   };
 }
 
+let bip340: ReturnType<typeof parseBip340Csv> | null = null;
+const bip340Vectors = () => (bip340 ??= parseBip340Csv(pinnedText("bip-0340/test-vectors.csv")));
+
+/**
+ * A BIP340 vector, checked field by field against the pinned CSV, traced
+ * against its own message and against every other message in the same figure.
+ */
+function deriveSchnorr(f: SchnorrVectorFixture, group: SchnorrVectorFixture[]): DerivedSchnorrFixture {
+  const v = bip340Vectors().find((x) => x.line === f.source.line);
+  if (
+    !v || v.index !== f.vectorIndex || v.publicKeyHex !== f.publicKeyHex || v.messageHex !== f.messageHex ||
+    v.signatureHex !== f.signatureHex || v.result !== f.expected || v.comment !== f.comment
+  ) {
+    throw new Error(`${f.id}: fixture differs from test-vectors.csv line ${f.source.line}`);
+  }
+  const messages: SchnorrDerived["messages"] = [];
+  for (const g of group) {
+    if (!messages.some((m) => m.hex === g.messageHex)) {
+      messages.push({ key: `m${g.vectorIndex}`, fromVector: g.vectorIndex, hex: g.messageHex, bytes: g.messageHex.length / 2 });
+    }
+  }
+  const traces: SchnorrDerived["traces"] = {};
+  for (const m of messages) {
+    const t = verifyTrace(f.publicKeyHex, m.hex, f.signatureHex);
+    traces[m.key] = { valid: t.valid, failedStage: t.failedStage, steps: t.steps };
+  }
+  const ownMessage = messages.find((m) => m.hex === f.messageHex)!.key;
+  if (traces[ownMessage].valid !== f.expected) throw new Error(`${f.id}: model verdict differs from the published result`);
+  const own = verifyTrace(f.publicKeyHex, f.messageHex, f.signatureHex);
+  return {
+    ...f,
+    derived: {
+      messages,
+      ownMessage,
+      traces,
+      challengeTagHex: bytesToHex(sha256(new TextEncoder().encode("BIP0340/challenge"))),
+      challengeHashHex: own.steps.find((s) => s.stage === "challenge")?.values.hash ?? null,
+    },
+  };
+}
+
 export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
+  const schnorrGroup = fixtures.filter((f) => f.kind === "schnorr-vector") as unknown as SchnorrVectorFixture[];
   return fixtures.map((f) => {
+    if (f.kind === "schnorr-vector") return deriveSchnorr(f as unknown as SchnorrVectorFixture, schnorrGroup) as unknown as T;
     if (f.kind === "mnemonic") return deriveMnemonic(f as unknown as MnemonicFixture) as unknown as T;
     if (f.kind === "bip32-seed") return deriveBip32(f as unknown as Bip32SeedFixture) as unknown as T;
     if (f.kind === "transaction") return deriveTransaction(f as unknown as TransactionFixture) as unknown as T;

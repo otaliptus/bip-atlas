@@ -655,3 +655,52 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 }
 .atlas-unknown .atlas-env__record { grid-template-columns: 4.5rem minmax(0, auto) auto; }
 .atlas-method li, .atlas-method p { overflow-wrap: anywhere; }
+
+/* ---------- schnorr (BIP 340) ---------- */
+.atlas-stage[data-status="pending"] { border: 1px dashed var(--manual-grid); background: transparent; }
+.atlas-stage[data-status="pending"] :is(.atlas-stage__label, .atlas-stage__status, .atlas-stage__number) { color: var(--manual-muted); }
+.atlas-sig-lab__controls { align-items: flex-start; }
+.atlas-sig-lab__inputs { display: grid; gap: var(--manual-space-2); margin: 0; }
+.atlas-sig-lab__inputs > div { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--manual-space-3); align-items: baseline; }
+.atlas-sig-lab__inputs dt { font-family: var(--manual-code); font-size: 0.875rem; font-weight: 500; }
+.atlas-sig-lab__inputs dt small { display: block; font-weight: 400; font-size: 0.75rem; color: var(--manual-muted); }
+.atlas-sig-lab__inputs dd { margin: 0; min-inline-size: 0; font-size: 0.8125rem; }
+.atlas-sig-lab__sig { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; }
+.atlas-sig-lab__sig code { flex: 1 1 18rem; padding: 0.15rem 0.35rem; border: 1px solid var(--manual-ink); }
+.atlas-sig-lab__sig code[data-part="r"] { background: var(--manual-blue-wash); }
+.atlas-sig-lab__sig code[data-part="s"] { background: var(--atlas-hatch), var(--manual-surface); }
+.atlas-sig-lab__stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.atlas-sig-lab__values { display: grid; gap: 0.25rem; }
+.atlas-sig-lab__value { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.5rem; font-size: 0.75rem; align-items: baseline; }
+.atlas-sig-lab__value > span { font-family: var(--manual-code); color: var(--manual-muted); }
+.atlas-sig-lab__value code { font-size: 0.75rem !important; }
+
+.atlas-sig-layout { display: grid; gap: var(--manual-space-4); }
+.atlas-sig-layout__row { display: grid; gap: 0.35rem; }
+.atlas-sig-layout__head { display: flex; gap: 0.75rem; align-items: baseline; margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; color: var(--manual-muted); }
+.atlas-sig-layout__name { font-size: 0.9375rem; font-weight: 500; color: var(--manual-ink); }
+.atlas-sig-layout__cells { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--manual-ink); }
+.atlas-sig-layout__cells[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.atlas-sig-layout__cell { display: grid; gap: 0.25rem; padding: 0.5rem 0.6rem; min-inline-size: 0; font-size: 0.8125rem; }
+.atlas-sig-layout__cell + .atlas-sig-layout__cell { border-inline-start: 1px solid var(--manual-ink); }
+.atlas-sig-layout__cell small { font-size: 0.75rem; color: var(--manual-muted); }
+.atlas-sig-layout__cell[data-part="pk"] { background: var(--manual-surface); }
+.atlas-sig-layout__cell[data-part="r"] { background: var(--manual-blue-wash); }
+.atlas-sig-layout__cell[data-part="s"] { background: var(--atlas-hatch), var(--manual-surface); }
+.atlas-sig-layout__tag { font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.atlas-sig-layout__aside { margin: 0; font-size: 0.875rem; color: var(--manual-muted); }
+
+.atlas-challenge__tag, .atlas-challenge__hash { margin: 0; font-size: 0.8125rem; }
+.atlas-challenge__hash small { color: var(--manual-muted); }
+.atlas-ser__seg[data-group="sig-tag"], .atlas-ser__key[data-group="sig-tag"] { background: var(--manual-blue-fill); }
+.atlas-ser__seg[data-group="sig-r"], .atlas-ser__key[data-group="sig-r"] { background: var(--manual-blue-wash); }
+.atlas-ser__seg[data-group="sig-p"], .atlas-ser__key[data-group="sig-p"] { background: var(--manual-surface); }
+.atlas-ser__seg[data-group="sig-m"], .atlas-ser__key[data-group="sig-m"] { background: var(--atlas-hatch), var(--manual-surface); }
+
+@media (max-width: 47.99rem) {
+  .atlas-sig-lab__inputs > div { grid-template-columns: minmax(0, 1fr); gap: 0.15rem; }
+  .atlas-sig-lab__stages { grid-template-columns: minmax(0, 1fr); }
+  .atlas-sig-lab__value { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .atlas-sig-layout__cells[data-cols="2"] { grid-template-columns: minmax(0, 1fr); }
+  .atlas-sig-layout__cell + .atlas-sig-layout__cell { border-inline-start: 0; border-block-start: 1px solid var(--manual-ink); }
+}

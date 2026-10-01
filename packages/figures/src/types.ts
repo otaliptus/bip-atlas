@@ -5,6 +5,8 @@ export interface FixtureSource {
   bip?: number;
   line?: number;
   section?: string;
+  /** Auxiliary file in the BIP's directory (e.g. "bip-0340/test-vectors.csv"); defaults to the BIP itself. */
+  file?: string;
   /** Verbatim text that must appear on the cited BIP line. */
   quote?: string;
   /** File name in sources/external/external.lock.json. */
@@ -171,3 +173,37 @@ export interface PsbtCombineDerived {
 }
 
 export type DerivedPsbtCombineFixture = PsbtCombineFixture & { derived: PsbtCombineDerived };
+
+export interface SchnorrVectorFixture extends BaseFixture {
+  kind: "schnorr-vector";
+  vectorIndex: number;
+  publicKeyHex: string;
+  messageHex: string;
+  signatureHex: string;
+  /** The CSV's "verification result" column. */
+  expected: boolean;
+  /** The CSV's comment column, verbatim. */
+  comment: string;
+}
+
+export type SchnorrStageId = "lift-x" | "r-range" | "s-range" | "challenge" | "compute-r" | "infinity" | "even-y" | "x-match";
+
+export interface SchnorrTraceView {
+  valid: boolean;
+  failedStage: SchnorrStageId | null;
+  steps: Array<{ stage: SchnorrStageId; ok: boolean; values: Record<string, string> }>;
+}
+
+export interface SchnorrDerived {
+  /** Messages available in this figure: each comes from one of its fixtures. */
+  messages: Array<{ key: string; fromVector: number; hex: string; bytes: number }>;
+  /** Key of this vector's own message in `messages`. */
+  ownMessage: string;
+  /** Verification trace of this vector's key and signature against each message. */
+  traces: Record<string, SchnorrTraceView>;
+  /** SHA256("BIP0340/challenge"), the tag half of the challenge prefix. */
+  challengeTagHex: string;
+  challengeHashHex: string | null;
+}
+
+export type DerivedSchnorrFixture = SchnorrVectorFixture & { derived: SchnorrDerived };

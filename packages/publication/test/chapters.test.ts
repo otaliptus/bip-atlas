@@ -26,7 +26,7 @@ const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
 interface Fixture {
   id: string;
   kind: string;
-  source: { bip?: number; line?: number; quote?: string; external?: string; pointer?: string };
+  source: { bip?: number; file?: string; line?: number; quote?: string; external?: string; pointer?: string };
 }
 
 /** Resolve a pointer such as `english[3]` or `[5].seed` inside parsed JSON. */
@@ -114,7 +114,7 @@ for (const id of chapterIds) {
           expect(resolvePointer(data, f.source.pointer!), `${f.id} pointer`).toBeDefined();
         } else {
           expect(f.source.quote, `${f.id} quote`).toBeTruthy();
-          expect(sourceLines(f.source.bip!)[f.source.line! - 1], f.id).toContain(f.source.quote);
+          expect(sourceLines(f.source.bip!, f.source.file)[f.source.line! - 1], f.id).toContain(f.source.quote);
         }
       }
     });

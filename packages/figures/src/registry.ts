@@ -149,6 +149,33 @@ export const RECIPES: readonly RecipeDefinition[] = [
     controls: [],
     fixtureKind: "psbt-combine",
   },
+  {
+    id: "schnorr-signature-layout.v1",
+    description: "A 32-byte x-only public key, a message, and a 64-byte signature split into r and s.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "schnorr-vector",
+  },
+  {
+    id: "schnorr-verification.v1",
+    description: "BIP 340 Verify run step by step on published valid and invalid vectors.",
+    minFixtures: 2,
+    maxFixtures: 12,
+    interactive: true,
+    controls: ["Choose public valid/invalid vector", "Change a message fixture", "Reveal verifier stages"],
+    fixtureKind: "schnorr-vector",
+  },
+  {
+    id: "challenge-preimage.v1",
+    description: "The tagged challenge-hash input for messages of several lengths, to scale.",
+    minFixtures: 2,
+    maxFixtures: 6,
+    interactive: false,
+    controls: [],
+    fixtureKind: "schnorr-vector",
+  },
 ];
 
 export const RECIPE_MAP = new Map(RECIPES.map((r) => [r.id, r]));
