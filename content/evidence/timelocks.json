@@ -407,7 +407,7 @@
     },
     {
       "id": "bip68-age",
-      "statement": "A relative lock n allows inclusion n blocks, or 512 × n seconds, after the output being spent was mined.",
+      "statement": "A block-based relative lock n allows inclusion at the confirmation height plus n or later. A time-based lock allows inclusion when the candidate block’s parent MTP is at least the MTP of the block immediately before the coin’s confirmation plus 512 × n seconds.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -426,6 +426,14 @@
             46
           ],
           "quote": "More generally, a relative time-based lock-time n can be included into any block produced 512 * n seconds after the mining date of the output it is spending"
+        },
+        {
+          "bip": 68,
+          "lines": [
+            47,
+            49
+          ],
+          "quote": "The mining date of the output is equal to the median-time-past of the previous block which mined it.  The block produced time is equal to the median-time-past of its previous block."
         }
       ]
     },

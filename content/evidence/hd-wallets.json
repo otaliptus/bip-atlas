@@ -535,7 +535,7 @@
     },
     {
       "id": "webserver-breach",
-      "statement": "An attacker who obtains a webserver holding one account's external-chain xpub can at most see incoming payments, not steal them.",
+      "statement": "BIP 32’s webshop rationale says that exposing the external-chain xpub reveals incoming payments without giving the private keys needed to spend the received funds; this is the limitation of xpub disclosure alone.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -714,6 +714,22 @@
             184
           ],
           "quote": "one can use the extended public key for the external chain of a specific account (M/i h/0) as a sort of \"super address\", allowing frequent transactions that cannot (easily) be associated, but without needing to request a new address for each payment."
+        }
+      ]
+    },
+    {
+      "id": "server-address-substitution",
+      "statement": "Our operational inference: control of a server that presents receiving addresses can let an attacker substitute their own addresses and divert future payments without deriving the merchant’s private keys. This is separate from disclosure of the xpub alone.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 32,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "Deterministic wallets do not require such frequent backups, and elliptic curve mathematics permit schemes where one can calculate the public keys without revealing the private keys. This permits for example a webshop business to let its webserver generate fresh addresses (public key hashes) for each order or for each customer, without giving the webserver access to the corresponding private keys (which are required for spending the received funds)."
         }
       ]
     }

@@ -70,6 +70,25 @@ export function listChapterIds(): string[] {
   return loadCatalog().chapters.filter((c) => present.has(c.id)).sort((a, b) => a.readingOrder - b.readingOrder).map((c) => c.id);
 }
 
+export interface ModelCoverage {
+  name: string;
+  published: string;
+  additional: string;
+  limits: string;
+}
+
+/** Methodology must document every published chapter, including its model's limits. */
+export function loadModelCoverage(): Record<string, ModelCoverage> {
+  const coverage = readJson<Record<string, ModelCoverage>>("content/model-coverage.json");
+  for (const id of listChapterIds()) {
+    const entry = coverage[id];
+    if (!entry || [entry.name, entry.published, entry.additional, entry.limits].some((s) => !s?.trim())) {
+      throw new Error(`Chapter ${id} needs a complete methodology coverage entry`);
+    }
+  }
+  return coverage;
+}
+
 /** Anchor id for the citation marker of the block at `path` (a walkBlocks path). */
 export const citeAnchor = (path: string) => `cite-${path.replace(/[^A-Za-z0-9]+/g, "-").replace(/-$/, "")}`;
 

@@ -252,11 +252,12 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Only the condition actually used is published. A key path spend shows a key and a signature and nothing else, so an observer cannot tell whether a script tree existed at all. The BIP calls this the ideal case. The authors argue it can be the usual one: assuming most outputs could be spent by everyone involved agreeing, Schnorr key aggregation lets several people control one key that looks like anyone else’s.",
+     "text": "Only the condition actually used is published. The output key is already visible in the spent output. A key path witness supplies a signature, plus an optional annex; it reveals neither the internal key nor the script tree, so an observer cannot tell whether a tree existed at all. The BIP calls this the ideal case. The authors argue it can be the usual one: assuming most outputs could be spent by everyone involved agreeing, Schnorr key aggregation lets several people control one key that looks like anyone else’s.",
      "claims": [
       "privacy",
       "key-or-script",
-      "aggregation"
+      "aggregation",
+      "key-path-rule"
      ]
     },
     {
@@ -283,10 +284,11 @@
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "A key path spend shows a key and a signature. A script path spend shows one script, the proof for it, and its depth.",
+     "caption": "The output key is already visible in the spent output. A key path witness supplies the signature, plus an optional annex, without revealing the internal key or script tree. A script path witness reveals one script, its proof and depth.",
      "claims": [
       "privacy",
-      "key-or-script"
+      "key-or-script",
+      "key-path-rule"
      ],
      "layout": "wide"
     },

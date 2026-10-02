@@ -127,6 +127,17 @@ describe("segwit chapter fixtures", () => {
 });
 
 describe("segwit chapter prose numbers", () => {
+  it("accounts for both opcodes in the nested redeem script", () => {
+    const tx = parseTransaction(examples[1].signed);
+    const scriptSig = tx.inputs[0].scriptSigHex;
+    expect(scriptSig.slice(0, 6)).toBe("160014"); // outer push, OP_0, push 20 bytes
+    const redeemScript = scriptSig.slice(2);
+    expect([redeemScript.length / 2, redeemScript.slice(4).length / 2]).toEqual([22, 20]);
+    expect(lines[215]).toContain(`redeemScript : ${redeemScript}`);
+    const text = readFileSync(new URL("content/chapters/segwit.json", root), "utf8");
+    expect(text).toContain("OP_0 (hex 00), the one-byte push-length opcode (hex 14), and the 20-byte witness program");
+  });
+
   it("matches the parsed mixed example", () => {
     const m = measureTransaction(parseTransaction(examples[0].signed));
     expect([m.baseSize, m.totalSize, m.weight, m.vsize]).toEqual([233, 343, 1042, 261]);

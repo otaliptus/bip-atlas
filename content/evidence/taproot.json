@@ -311,7 +311,7 @@
     },
     {
       "id": "key-path-rule",
-      "statement": "In a key path spend the single witness element is a signature that must be valid for the output key q.",
+      "statement": "The output key q is the witness program already published in the spent output. After removing an optional annex, a key path witness has one element: a signature valid for q; it does not reveal the internal key or script tree.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -322,6 +322,30 @@
             65
           ],
           "quote": "The single witness stack element is interpreted as the signature and must be valid (see the next section) for the public key ''q''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            61,
+            61
+          ],
+          "quote": "* Let ''q'' be the 32-byte array containing the witness program (the second push in the scriptPubKey) which represents a public key according to [[bip-0340.mediawiki#design|BIP340]]."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            64
+          ],
+          "quote": "this last element is called ''annex'' ''a''"
+        },
+        {
+          "bip": 341,
+          "lines": [
+            63,
+            63
+          ],
+          "quote": "and is removed from the witness stack."
         }
       ]
     },

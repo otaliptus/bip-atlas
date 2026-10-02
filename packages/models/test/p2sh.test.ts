@@ -145,10 +145,14 @@ describe("p2sh chapter prose numbers", () => {
     expect([4 * 218 + 0, 4 * 35 + 218]).toEqual([872, 358]);
     expect(text).toContain("The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes.");
     expect(text).toContain("those bytes come to 872 weight units against 358");
-    expect(traceP2sh(p2wpkhTx, 0, p2wpkhSpk, 1_000_000_000n).redeemScriptHex.length / 2).toBe(22);
-    expect(traceP2sh(extracted, 1, wrappedSpk, wrappedAmount).redeemScriptHex.length / 2).toBe(34);
-    expect(text).toContain("the redeem script is a 22-byte program");
-    expect(text).toContain("the redeem script is a 34-byte program");
+    const keyHashScript = traceP2sh(p2wpkhTx, 0, p2wpkhSpk, 1_000_000_000n).redeemScriptHex;
+    const scriptHashScript = traceP2sh(extracted, 1, wrappedSpk, wrappedAmount).redeemScriptHex;
+    expect([keyHashScript.length / 2, keyHashScript.slice(4).length / 2]).toEqual([22, 20]);
+    expect([scriptHashScript.length / 2, scriptHashScript.slice(4).length / 2]).toEqual([34, 32]);
+    expect(keyHashScript.slice(0, 4)).toBe("0014");
+    expect(scriptHashScript.slice(0, 4)).toBe("0020");
+    expect(text).toContain("the 22-byte redeem script wraps a 20-byte key-hash witness program");
+    expect(text).toContain("the 34-byte redeem script wraps a 32-byte script-hash witness program");
   });
 
   it("restates the BIP's limits correctly", () => {

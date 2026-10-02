@@ -351,7 +351,7 @@
     },
     {
       "id": "p2sh-witness",
-      "statement": "Under BIP 141, if the redeemScript is exactly a witness version byte plus a witness program, it is a P2SH witness program: the scriptSig must be exactly a push of the redeemScript, and the witness carries the rest; a native witness program instead requires an exactly empty scriptSig. Signatures in version 0 witness programs use BIP 143's digest.",
+      "statement": "Under BIP 141, if the redeemScript is exactly a version push opcode, a one-byte push-length opcode and the witness-program bytes, it is a P2SH witness program: the scriptSig must be exactly a push of the redeemScript, and the witness carries the rest; a native witness program instead requires an exactly empty scriptSig. Signatures in version 0 witness programs use BIP 143's digest.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -378,6 +378,14 @@
             27
           ],
           "quote": "A new transaction digest algorithm is defined, but only applicable to sigops in version 0 witness program:"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            86,
+            88
+          ],
+          "quote": "* First, byte 0x00 (<code>OP_0</code>) or any byte between 0x51 (<code>OP_1</code>) and 0x60 (<code>OP_16</code>) inclusive (the version byte). * Then, a byte ''L'' between 0x02 (push of 2 bytes) and 0x28 (push of 40 bytes) inclusive. * Finally, ''L'' arbitrary bytes (the witness program)."
         }
       ]
     },

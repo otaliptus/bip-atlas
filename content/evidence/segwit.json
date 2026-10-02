@@ -343,7 +343,7 @@
     },
     {
       "id": "p2sh-nested",
-      "statement": "Witness validation is also triggered when a P2SH redeemScript pushed in the scriptSig is exactly a version byte plus a witness program.",
+      "statement": "Witness validation is also triggered when a P2SH redeemScript pushed in the scriptSig consists exactly of a version push opcode, a one-byte push-length opcode and the witness-program bytes.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -354,6 +354,14 @@
             92
           ],
           "quote": "Triggered when a <code>scriptPubKey</code> is a P2SH script, and the BIP16 <code>redeemScript</code> pushed in the <code>scriptSig</code> is exactly a push of a version byte plus a push of a witness program."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            86,
+            88
+          ],
+          "quote": "* First, byte 0x00 (<code>OP_0</code>) or any byte between 0x51 (<code>OP_1</code>) and 0x60 (<code>OP_16</code>) inclusive (the version byte). * Then, a byte ''L'' between 0x02 (push of 2 bytes) and 0x28 (push of 40 bytes) inclusive. * Finally, ''L'' arbitrary bytes (the witness program)."
         }
       ]
     },

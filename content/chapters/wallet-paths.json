@@ -84,11 +84,12 @@
         },
         {
           "type": "paragraph",
-          "text": "Restoring a wallet means finding where coins went. BIP 44 describes how: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. BIP 44 scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains.",
+          "text": "BIP 44’s account-discovery procedure finds which accounts have been used: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. For account discovery, BIP 44 scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains. External-chain history determines which accounts are discovered; recovering their funds also requires finding their internal/change outputs.",
           "claims": [
             "discovery",
             "account",
-            "gap-limit"
+            "gap-limit",
+            "recovery-change"
           ]
         },
         {

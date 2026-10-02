@@ -71,7 +71,7 @@
     },
     {
       "id": "compact-private",
-      "statement": "The authors argue a MuSig2 output is essentially one key and one signature, more compact and cheaper to verify than an n-of-n OP_CHECKSIGADD policy, with no consensus limit on n, and indistinguishable on chain from a single-signer Taproot output.",
+      "statement": "The authors argue a MuSig2 Taproot output publishes one key, and spending it requires one cooperatively produced signature, more compact and cheaper to verify than an n-of-n OP_CHECKSIGADD policy, with no consensus limit on n, and indistinguishable on chain from a single-signer Taproot output.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [

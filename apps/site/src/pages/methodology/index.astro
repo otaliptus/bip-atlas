@@ -1,11 +1,17 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { formatDate, listChapterIds, loadExternalLock, loadChapter, shortCommit } from "../../lib/content";
+import { formatDate, listChapterIds, loadExternalLock, loadChapter, loadModelCoverage, shortCommit } from "../../lib/content";
 
 const chapters = listChapterIds().map((id) => ({ id, ...loadChapter(id) }));
 const { lock } = chapters[0];
 const claimCount = chapters.reduce((n, c) => n + c.ledger.claims.length, 0);
 const external = loadExternalLock();
+const coverage = loadModelCoverage();
+// Excerpt descriptions in the lock's path field are labels, not GitHub paths.
+const excerptPaths: Record<string, string[]> = {
+  "core-script-assets-excerpt.json": ["unit_test_data/script_assets_test.json"],
+  "core-locktime-cases-excerpt.json": ["src/test/data/tx_valid.json", "src/test/data/tx_invalid.json", "src/script/script.h"],
+};
 ---
 <Base title="Methodology · BIP Atlas" description="Sources, checks and limits behind BIP Atlas." current="methodology">
   <div class="manual-page atlas-flow atlas-method">
@@ -22,23 +28,47 @@ const external = loadExternalLock();
     </p>
     <ul>
       {external.files.map((f) => (
-        <li><a href={`${f.repository}/blob/${f.commit}/${f.path}`}>{f.repository.replace("https://github.com/", "")}/{f.path}</a> at <code>{shortCommit(f.commit)}</code>, cited by BIP {f.citedBy.bip}</li>
+        <li>
+          {(excerptPaths[f.file] ?? [f.path]).map((path, i) => <>{i > 0 && "; "}<a href={`${f.repository}/blob/${f.commit}/${path}`}>{f.repository.replace("https://github.com/", "")}/{path}</a></>)}
+          {excerptPaths[f.file] && " (pinned excerpt)"} at <code>{shortCommit(f.commit)}</code>, cited by BIP {f.citedBy.bip}
+        </li>
       ))}
     </ul>
     <h2>What has been checked</h2>
     <p>
       Each chapter’s figures draw only reviewed recipes, and every exact value they show comes from a tested model,
-      computed at build time or in your browser. The models use the audited <code>@noble</code> libraries for hashing and
-      elliptic-curve arithmetic. The tests check them against the proposals’ own vectors:
+      computed at build time or in your browser. The models use <code>@noble</code> libraries for hashing,
+      elliptic-curve arithmetic and ciphers; the block-filter model uses the <code>siphash</code> package for SipHash.
+      The <a href="https://github.com/otaliptus/bip-atlas/tree/main/packages/models/test">model tests</a>
+      and <a href="https://github.com/otaliptus/bip-atlas/tree/main/packages/figures/test">figure tests</a>
+      compare published material with the implementation and add selected edge cases. The table separates reference
+      vectors and replayed traces from synthetic checks, unsupported cases and values supplied externally.
+      Passing these checks is narrower than full protocol conformance.
     </p>
-    <ul>
-      <li><strong>BIP 39:</strong> all 24 English and 24 Japanese reference vectors, from entropy to words to seed, and the pinned wordlist’s hash.</li>
-      <li><strong>BIP 32:</strong> all 17 derivation chains embedded in the BIP, all 16 invalid extended keys (each for its stated reason), and the master keys of all 24 BIP 39 English vectors.</li>
-      <li><strong>BIPs 141 and 143:</strong> the two SIGHASH_ALL witness examples, byte for byte: serialization, signing preimage and digest.</li>
-      <li><strong>BIPs 173 and 350:</strong> every Bech32, Bech32m and SegWit address vector, including the stage at which each invalid one is stopped.</li>
-      <li><strong>BIP 174:</strong> all 20 invalid and 10 valid PSBTs, the published role trace (combining in either order, extraction) and unknown-field preservation.</li>
-      <li>All {claimCount} evidence quotes across {chapters.length} chapters appear verbatim at their cited lines, and every sample is tied to a pinned source line or vector file.</li>
-    </ul>
+    <div class="atlas-table-wrap atlas-coverage" tabindex="0" role="region" aria-label="Model coverage by chapter">
+      <table class="manual-table">
+        <caption>Coverage and limits for all {chapters.length} chapters. On narrow screens, scroll the table horizontally to read every column.</caption>
+        <thead>
+          <tr><th scope="col">Chapter</th><th scope="col">Published material</th><th scope="col">Additional checks</th><th scope="col">Limits and supplied values</th></tr>
+        </thead>
+        <tbody>
+          {chapters.map((c) => {
+            const entry = coverage[c.id];
+            return <tr>
+              <th scope="row"><a href={`/learn/${c.id}/`}>{entry.name}</a><br /><small>BIPs {c.publication.primaryBips.join(", ")}</small></th>
+              <td>{entry.published}</td><td>{entry.additional}</td><td>{entry.limits}</td>
+            </tr>;
+          })}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      All {claimCount} evidence claims across {chapters.length} chapters have their supporting quotes checked
+      verbatim at the cited source lines. Validation also checks citation presence, agreement between ledger and
+      source-snapshot commits, fixture provenance and external-vector file hashes. Quotation fidelity establishes
+      what the pinned source says; it does not prove that an editorial inference follows from it. Inferences are
+      identified in the evidence ledger and still require review.
+    </p>
     <h2>What has not</h2>
     <ul>
       <li>Every chapter is hand-authored. Each has had one independent technical review whose findings were applied, but none has formal sign-off; all are marked as drafts.</li>

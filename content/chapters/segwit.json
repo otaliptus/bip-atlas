@@ -227,7 +227,7 @@
           "fixtures": [
             "p2sh-p2wpkh"
           ],
-          "caption": "The P2SH-P2WPKH example’s only input. Its scriptSig pushes a 22-byte redeem script: a version byte and a 20-byte witness program. The witness holds the signature and the key.",
+          "caption": "The P2SH-P2WPKH example’s only input. Its scriptSig pushes a 22-byte redeem script: OP_0 (hex 00), the one-byte push-length opcode (hex 14), and the 20-byte witness program. The witness holds the signature and the public key.",
           "claims": [
             "p2sh-nested",
             "p2wpkh",

@@ -252,7 +252,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A relative lock of n then allows the spend n blocks, or 512 × n seconds, after the coin being spent was mined. The coinbase input is exempt.",
+          "text": "A block-based relative lock of n allows inclusion at the coin’s confirmation height plus n, or later. A time-based lock uses median time past (MTP), not elapsed wall-clock time: the MTP of the candidate spending block’s parent must be at least the MTP of the coin’s confirmation block’s parent plus 512 × n seconds. The starting anchor is the block immediately before the coin confirmed. The coinbase input is exempt.",
           "claims": [
             "bip68-age",
             "bip68-coinbase"

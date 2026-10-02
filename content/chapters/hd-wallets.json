@@ -201,10 +201,11 @@
         },
         {
           "type": "paragraph",
-          "text": "Its own example is a webshop. The shop’s server can hold one extended public key and generate a fresh address for every order, without ever holding a key that could spend the payments. If the server is broken into, BIP 32 says the attacker can at most see the incoming payments.",
+          "text": "Its own example is a webshop. The shop’s server can hold one extended public key and generate a fresh address for every order, without ever holding a key that could spend the payments. Disclosure of that xpub alone reveals incoming payments but does not enable spending the wallet’s existing outputs. Our operational caution is that control of the server can still let an attacker replace the receiving addresses it displays and divert future payments, without deriving a private key.",
           "claims": [
             "webshop",
-            "webserver-breach"
+            "webserver-breach",
+            "server-address-substitution"
           ]
         },
         {

@@ -1,0 +1,110 @@
+{
+  "mnemonics": {
+    "name": "Mnemonics",
+    "published": "All 24 English and 24 Japanese BIP 39 reference vectors, from entropy through words to seed; the pinned wordlist hash.",
+    "additional": "Checksum failures, entropy sizes and Unicode normalization cases.",
+    "limits": "Public examples only; passing vectors does not establish the safety of a recovery phrase or wallet."
+  },
+  "hd-wallets": {
+    "name": "HD wallets",
+    "published": "All 17 BIP 32 derivation chains and 16 invalid extended keys; master keys from the 24 English BIP 39 vectors.",
+    "additional": "Public/private derivation agreement, hardened boundaries and parent-key recovery from a non-hardened child secret.",
+    "limits": "Key derivation and disclosure demonstrations; no payment-server security or wallet recovery audit."
+  },
+  "segwit": {
+    "name": "SegWit",
+    "published": "The two BIP 143 SIGHASH_ALL witness examples: transaction serialization, signing preimages and digests.",
+    "additional": "Byte layout, transaction IDs, weight and virtual-size arithmetic, and rejection of unsupported signature-hash modes.",
+    "limits": "Selected witness-v0 examples, not every signature-hash mode or full transaction validation."
+  },
+  "addresses": {
+    "name": "Addresses",
+    "published": "Every Bech32, Bech32m and SegWit address vector in BIPs 173 and 350, including invalid-case rejection stages.",
+    "additional": "Checksum edits, witness-version and program-length boundaries, and encoding round trips.",
+    "limits": "Encoding validity does not establish ownership, balance or a safe destination."
+  },
+  "psbt": {
+    "name": "PSBT",
+    "published": "All 20 invalid and 10 valid BIP 174 PSBTs and its published role trace, through combination and extraction.",
+    "additional": "Unknown-field preservation, combination order, rejection of different transactions, and fee arithmetic in the figures.",
+    "limits": "A replay of the supplied PSBT v0 workflow; no live signing or complete signer-policy validation."
+  },
+  "schnorr": {
+    "name": "Schnorr",
+    "published": "All 19 BIP 340 CSV vectors, with verification results cross-checked against noble; test-only signing reproduces vectors that supply secrets.",
+    "additional": "Curve and scalar boundaries, input lengths, changed messages and tagged hashes.",
+    "limits": "Verification demonstrations do not audit a signer’s randomness or nonce handling."
+  },
+  "taproot": {
+    "name": "Taproot",
+    "published": "All seven BIP 341 scriptPubKey cases and seven key-path inputs: tree hashes, tweaks, keys, control blocks, signature messages and signatures.",
+    "additional": "Changed leaves, control-block parity and length, sibling ordering, and signature-hash boundaries.",
+    "limits": "Wallet construction and key-path checks; arbitrary script execution belongs to the separately scoped Tapscript recorder."
+  },
+  "tapscript": {
+    "name": "Tapscript",
+    "published": "Success and failure witnesses for six pinned Bitcoin Core script-assets cases, replayed through reviewed opcode traces.",
+    "additional": "Commitment failures, signature budgets, changed transactions, OP_SUCCESS decoding and unsupported-scope rejection.",
+    "limits": "A narrow trace recorder. The optional full Core-file sweep is skipped unless that pinned file is supplied; arbitrary scripts are not covered."
+  },
+  "p2sh": {
+    "name": "P2SH",
+    "published": "Three spends from BIPs 143 and 174: legacy 2-of-2, wrapped P2WPKH and wrapped P2WSH, replayed with signature checks.",
+    "additional": "Redeem-script mutations, push-only rules, signature order, witness-stack rules and sigop limits.",
+    "limits": "Reviewed script forms and signature-hash modes only; unsupported opcodes and witness forms raise scope errors."
+  },
+  "timelocks": {
+    "name": "Timelocks",
+    "published": "All 51 one-input cases in the pinned Bitcoin Core locktime excerpt, plus field examples from BIPs 68, 143 and 174.",
+    "additional": "Synthetic height and MTP boundaries, sequence flags and units, opcode-check order and median computation.",
+    "limits": "Narrow opcode forms and supplied chain anchors; the site does not query the chain or establish live spendability."
+  },
+  "version-bits": {
+    "name": "Version bits",
+    "published": "Parameters and recorded deployments from the pinned BIP 9 assignments table, cross-checked against BIPs 68 and 141; BIP 8 rules from its text.",
+    "additional": "Synthetic signalling periods exercise thresholds, timeout precedence, MUST_SIGNAL and minimum activation heights.",
+    "limits": "A rule simulation, not a replay of historical block headers or a live deployment monitor."
+  },
+  "wallet-paths": {
+    "name": "Wallet paths",
+    "published": "BIP 44’s 16 example paths and BIPs 84 and 86 root, account, receiving and change-address vectors.",
+    "additional": "Invalid path conventions, derivation from account xpubs, and an explicitly illustrative account-discovery storyboard.",
+    "limits": "Derivation conventions and a discovery illustration; no chain scan or complete recovery of account funds."
+  },
+  "descriptors": {
+    "name": "Descriptors",
+    "published": "BIP 380 checksum and key-expression cases, and BIPs 381–386 valid script expansions and invalid descriptors.",
+    "additional": "Checksum substitutions, key types, context rules, hardened derivation and script-size boundaries.",
+    "limits": "Supported descriptor forms only. Miniscript and later extensions are outside scope; valid but unsupported forms raise scope errors."
+  },
+  "musig2": {
+    "name": "MuSig2",
+    "published": "The eight BIP 327 JSON vector files, including error cases; aggregated signatures are checked with BIP 340 verification.",
+    "additional": "Key-order and coefficient checks, and rejection of reuse after the model wipes a secret nonce.",
+    "limits": "Public test sessions; no audit of a real signer’s nonce storage, randomness or coordination."
+  },
+  "silent-payments": {
+    "name": "Silent payments",
+    "published": "All 28 BIP 352 send-and-receive vector cases, including labelled outputs and input eligibility.",
+    "additional": "Malformed addresses, compressed-key rules, scanning eligibility and output-search limits.",
+    "limits": "Supplied transaction examples and labels; no continuous blockchain scanning or live wallet recovery."
+  },
+  "block-filters": {
+    "name": "Block filters",
+    "published": "All ten BIP 158 testnet block filters and headers, rebuilt from blocks and supplied spent-output scripts; its Golomb-Rice examples and a SipHash reference vector.",
+    "additional": "Encoding round trips, duplicate removal, empty filters, included-item matches and non-member searches.",
+    "limits": "Spent-output scripts come from vectors. No BIP 157 peer exchange, chain validation or proof that a remote filter is complete."
+  },
+  "v2-transport": {
+    "name": "v2 transport",
+    "published": "All seven BIP 324 packet-encoding vectors: shared secrets, derived keys, framing and published ciphertext checks.",
+    "additional": "Encryption/decryption round trips, changed ciphertext, associated-data failures and rekeying boundaries.",
+    "limits": "Decoded peer X coordinates are supplied by the vectors; ElligatorSwift encoding and decoding are not implemented. No live peer handshake is tested."
+  },
+  "message-signing": {
+    "name": "Message signing",
+    "published": "BIP 322 basic and generated vectors: message and virtual-transaction hashes, every simple and full signature case, and published error cases.",
+    "additional": "Reviewed interpreter rules, changed messages and addresses, commitment checks and unsupported spend shapes.",
+    "limits": "A partial verifier: committed scripts or spend shapes outside its reviewed set and proof-of-funds PSBTs can be inconclusive; earlier invalidity still takes precedence."
+  }
+}

@@ -227,6 +227,10 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .atlas-contents__item[data-available="false"] .atlas-contents__title { color: var(--manual-muted); }
 .atlas-contents__item[data-available="false"] .atlas-contents__bips { color: var(--manual-muted); }
 .atlas-method h1 { font-size: clamp(2.125rem, 4vw, 3rem); }
+.atlas-method > .atlas-coverage { max-inline-size: var(--manual-wide-max); }
+.atlas-coverage .manual-table { min-inline-size: 56rem; table-layout: fixed; }
+.atlas-coverage th:first-child { inline-size: 9rem; }
+.atlas-coverage th, .atlas-coverage td { vertical-align: top; overflow-wrap: anywhere; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 63.99rem) {

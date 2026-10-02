@@ -126,6 +126,16 @@ for (const id of chapterIds) {
 }
 
 describe("shared contracts", () => {
+  it("documents reference coverage, additional checks and limits for every chapter", () => {
+    const coverage = read("content/model-coverage.json");
+    expect(Object.keys(coverage).sort()).toEqual([...chapterIds].sort());
+    for (const entry of Object.values(coverage) as Array<Record<string, string>>) {
+      for (const field of ["name", "published", "additional", "limits"]) {
+        expect(entry[field]?.trim()).toBeTruthy();
+      }
+    }
+  });
+
   it("pins external vector files by hash", () => {
     for (const entry of externalLock.files) {
       const bytes = readFileSync(new URL(`sources/external/${entry.file}`, root));

@@ -217,7 +217,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Two of the figure’s spends work this way. In the P2SH-wrapped P2WPKH from BIP 143, the redeem script is a 22-byte program naming a key hash; the witness holds a signature and the key. In the P2SH-wrapped P2WSH from BIP 174, the redeem script is a 34-byte program naming a script hash, and the witness holds the 2-of-2 script itself. Their signatures commit to the BIP 143 digest, not the original one.",
+          "text": "Two of the figure’s spends work this way. In the P2SH-wrapped P2WPKH from BIP 143, the 22-byte redeem script wraps a 20-byte key-hash witness program; the witness holds a signature and the key. In the P2SH-wrapped P2WSH from BIP 174, the 34-byte redeem script wraps a 32-byte script-hash witness program, and the witness holds the signatures and the 2-of-2 script itself. Both redeem scripts begin with OP_0 and a one-byte push-length opcode: 14 for 20 bytes, 20 for 32 bytes, in hexadecimal. Their signatures commit to the BIP 143 digest, not the original one.",
           "claims": [
             "p2sh-witness",
             "trace-spends",

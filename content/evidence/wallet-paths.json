@@ -247,7 +247,7 @@
     },
     {
       "id": "gap-limit",
-      "statement": "BIP 44 gives the address gap limit as 20 at the time of writing: after 20 unused addresses in a row, software stops scanning that chain. It scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains, and wallet software should warn a user who tries to exceed the limit.",
+      "statement": "BIP 44 gives the address gap limit as 20 at the time of writing: after 20 unused addresses in a row, software stops scanning that chain. For account discovery, it scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains, and wallet software should warn a user who tries to exceed the limit.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -602,6 +602,30 @@
             59
           ],
           "quote": "Additional registered version bytes are listed in [[https://github.com/satoshilabs/slips/blob/master/slip-0132.md|SLIP-0132]]."
+        }
+      ]
+    },
+    {
+      "id": "recovery-change",
+      "statement": "External-chain history determines which accounts BIP 44 discovers; recovering those accounts’ funds must also include their internal/change outputs. The recovery distinction is an inference from the account-discovery procedure and the internal chain’s stated use for returning change.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 44,
+          "lines": [
+            88,
+            94
+          ],
+          "quote": "Constant 0 is used for external chain and constant 1 for internal chain (also known as change addresses). External chain is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal chain is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change.  Public derivation is used at this level."
+        },
+        {
+          "bip": 44,
+          "lines": [
+            108,
+            112
+          ],
+          "quote": "# derive the first account's node (index = 0) # derive the external chain node of this account # scan addresses of the external chain; respect the gap limit described below # if no transactions are found on the external chain, stop discovery # if there are some transactions, increase the account index and go to step 1"
         }
       ]
     }

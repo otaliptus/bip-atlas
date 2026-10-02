@@ -383,7 +383,7 @@
     },
     {
       "id": "scope-of-miss",
-      "statement": "A filter holds scripts only; a missing match rules out an output paying to, or an input spending from, that script in the block, and says nothing about data outside the element set (txids, OP_RETURN outputs).",
+      "statement": "A correctly constructed basic filter holds its specified set of scripts; a miss rules out a matching included output or spent-output script, but says nothing about excluded items (empty scripts and OP_RETURN outputs) or other data such as transaction IDs.",
       "scope": "editorial-analysis",
       "support": "inference",
       "evidence": [
@@ -391,9 +391,9 @@
           "bip": 158,
           "lines": [
             270,
-            273
+            275
           ],
-          "quote": "A basic filter MUST contain exactly the following items for each transaction in a block: * The previous output script (the script being spent) for each input, except for the coinbase transaction. * The scriptPubKey of each output, aside from all <code>OP_RETURN</code> output scripts."
+          "quote": "sync a regular Bitcoin wallet. A basic filter MUST contain exactly the following items for each transaction in a block: * The previous output script (the script being spent) for each input, except for the coinbase transaction. * The scriptPubKey of each output, aside from all <code>OP_RETURN</code> output scripts.  Any \"nil\" items MUST NOT be included into the final set of filter elements."
         },
         {
           "bip": 158,

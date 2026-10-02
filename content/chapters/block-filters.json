@@ -96,7 +96,7 @@
         },
         {
           "type": "paragraph",
-          "text": "So the filter answers one question about one block: does any output pay to this script, or any input spend from it? It holds scripts and nothing else. A wallet that watches its own scripts can ask that question; a miss tells it nothing about anything outside the set, such as a transaction ID or an OP_RETURN output.",
+          "text": "For scripts covered by the basic filter, it answers one question about one block: does an included output pay to this script, or an input spend from it? It holds scripts and nothing else. A wallet that watches its own scripts can ask that question; a miss tells it nothing about anything outside the set, such as a transaction ID, an empty script or an OP_RETURN output.",
           "claims": [
             "scope-of-miss",
             "contents"
@@ -262,7 +262,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A miss is firmer. Every item in the set matches with probability 1, so if the filter does not match a script, no output in that block pays to it and no input spends from it, provided the filter is the right one, which is what filter headers are for. In the figure, each block’s own scripts all match its filter, and the scripts taken from other blocks, as expected, do not.",
+          "text": "A miss is firmer, within the included set. Every item in the set matches with probability 1, so a miss in a correctly constructed basic filter rules out a matching included output or spent-output script. It says nothing about excluded items, including empty scripts and outputs beginning with OP_RETURN. In the figure, each block’s included scripts all match its filter, and the scripts taken from other blocks, as expected, do not.",
           "claims": [
             "gcs-def",
             "scope-of-miss",

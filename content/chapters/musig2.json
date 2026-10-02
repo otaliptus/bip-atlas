@@ -40,7 +40,7 @@
    "fixtures": [
     "sig-agg-0"
    ],
-   "caption": "BIP 327’s first signature-aggregation vector, as a key path spend would show it: one key and one 64-byte signature, which plain BIP 340 verification accepts; nothing shows how many signed.",
+   "caption": "BIP 327’s first signature-aggregation vector illustrates a key path spend: the key is already visible in the spent output, while the witness supplies the signature. This 64-byte test signature passes plain BIP 340 verification; nothing shows how many signed.",
    "claims": [
     "compact-private",
     "bip340-compat",
