@@ -727,6 +727,30 @@
           "quote": "All keys must have the data that they specify. If any key or value does not match the specified format for that type, the PSBT must be considered invalid."
         }
       ]
+    },
+    {
+      "id": "signer-view",
+      "statement": "Read by the tested model from the Updater's published PSBT: input 0's non-witness UTXO hashes to the txid its prevout names (printed reversed in BIP 174's trace), and the UTXO records give the amounts each input spends; with the published outputs that fixes the fee, though input 1's amount is only stated by a witness UTXO record.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            770,
+            770
+          ],
+          "quote": "TXID: <tt>75ddabb27b8845f5247975c8a5ba7c6f336c4570708ebe230caf6db5217ae858</tt>, Index: <tt>0</tt>"
+        },
+        {
+          "bip": 174,
+          "lines": [
+            765,
+            765
+          ],
+          "quote": "Amount: <tt>1.49990000</tt>"
+        }
+      ]
     }
   ]
 }

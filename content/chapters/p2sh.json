@@ -38,7 +38,7 @@
       "fixtures": [
         "bip174-legacy"
       ],
-      "caption": "The 2-of-2 multisig spend from BIP 174’s published trace. The output holds only a hash; the spend supplies the script, and the two must agree.",
+      "caption": "The 2-of-2 multisig spend from BIP 174’s published trace. The output’s lock is only a hash; the spend supplies the script, and its HASH160 must give the lock back.",
       "claims": [
         "template",
         "scriptsig-form",
@@ -63,6 +63,24 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A09.2",
+          "recipe": "p2sh-shape.v1",
+          "title": "Three scripts, one output shape",
+          "fixtures": [
+            "bip174-legacy",
+            "bip174-p2sh-p2wsh",
+            "bip143-p2sh-p2wpkh"
+          ],
+          "caption": "The three pinned spends: redeem scripts of 71, 34 and 22 bytes, each behind the same 23-byte output.",
+          "claims": [
+            "template",
+            "scriptsig-form",
+            "spends-verified"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The BIP’s own example is the simplest case: a script that checks one signature against one key. The output holds the 20-byte hash of that script, and the spending scriptSig holds a signature and the script. Nothing in the output says what kind of script it is, or how many keys it has.",
           "claims": [
@@ -81,7 +99,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and the figure above recomputes it for real spends and compares it with the output byte for byte.",
+          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and Fig. A09.1 recomputes it for a real spend and compares it with the output byte for byte.",
           "claims": [
             "template",
             "spends-verified"
@@ -108,6 +126,22 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A09.3",
+          "recipe": "p2sh-stack-story.v1",
+          "title": "The stack, step by step",
+          "fixtures": [
+            "bip174-legacy"
+          ],
+          "caption": "The legacy 2-of-2 spend as the model recorded it: the same pushed bytes hashed once as data, then run as a program.",
+          "claims": [
+            "rules",
+            "multisig-order",
+            "spends-verified"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Step through the three published spends below. In the legacy 2-of-2, the redeem script is a CHECKMULTISIG over two keys, and each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
           "claims": [
@@ -117,7 +151,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.2",
+          "figure": "A09.4",
           "recipe": "p2sh-two-stage.v1",
           "title": "One push, two evaluations",
           "fixtures": [
@@ -125,7 +159,7 @@
             "bip174-p2sh-p2wsh",
             "bip143-p2sh-p2wpkh"
           ],
-          "caption": "Three spends published in BIP 174 and BIP 143, replayed stage by stage. Signatures are checked against digests computed at build time; every one verifies.",
+          "caption": "Three spends published in BIP 174 and BIP 143, replayed stage by stage. Before the spend only the lock is known; signatures are checked against digests computed at build time, and every one verifies.",
           "claims": [
             "rules",
             "spends-verified",
@@ -142,6 +176,22 @@
             "tamper",
             "rules"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A09.5",
+          "recipe": "p2sh-failures.v1",
+          "title": "Three ways to fail",
+          "fixtures": [
+            "bip174-legacy"
+          ],
+          "caption": "The legacy spend broken three ways and re-run through the same model; each fails at a different stage.",
+          "claims": [
+            "tamper",
+            "rules",
+            "multisig-order"
+          ],
+          "layout": "prose"
         },
         {
           "type": "callout",
@@ -176,7 +226,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, that comes to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
+          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, those bytes come to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
           "claims": [
             "sizes",
             "weight"
@@ -184,7 +234,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.3",
+          "figure": "A09.6",
           "recipe": "p2sh-wrapped.v1",
           "title": "Where the signatures live",
           "fixtures": [
@@ -192,7 +242,7 @@
             "bip174-p2sh-p2wsh",
             "bip143-p2sh-p2wpkh"
           ],
-          "caption": "scriptSig and witness sizes of the three pinned spends. Wrapping leaves only the program in the scriptSig.",
+          "caption": "scriptSig and witness of the three pinned spends, to one byte scale, with their weight. Wrapping leaves only the redeem script in the scriptSig and moves the signatures into the witness.",
           "claims": [
             "sizes",
             "weight",
@@ -228,6 +278,21 @@
           "claims": [
             "limit-520"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A09.7",
+          "recipe": "p2sh-limit.v1",
+          "title": "Why fifteen keys",
+          "fixtures": [
+            "bip174-legacy"
+          ],
+          "caption": "A redeem script is pushed data, so 520 bytes at most: three bytes plus 34 per 33-byte key stops at fifteen keys.",
+          "claims": [
+            "limit-520",
+            "spends-verified"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

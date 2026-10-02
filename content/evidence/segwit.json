@@ -751,7 +751,7 @@
     },
     {
       "id": "wtxid-commitment",
-      "statement": "Blocks containing witness data must commit to the wtxids; the witness root is built like the merkle root, recorded in a coinbase output, and the coinbase's own wtxid is taken as all zeros.",
+      "statement": "Blocks containing witness data must commit to the wtxids; the witness root is built like the merkle root, the commitment hash is the double SHA-256 of that root and a witness reserved value (carried in the coinbase input's witness), it is recorded in a coinbase output, and the coinbase's own wtxid is taken as all zeros.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -778,6 +778,22 @@
             67
           ],
           "quote": "The commitment is recorded in a <code>scriptPubKey</code> of the coinbase transaction."
+        },
+        {
+          "bip": 141,
+          "lines": [
+            72,
+            72
+          ],
+          "quote": "32-byte - Commitment hash: Double-SHA256(witness root hash|witness reserved value)"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            76,
+            76
+          ],
+          "quote": "the coinbase's input's witness must consist of a single 32-byte array for the <code>witness reserved value</code>."
         },
         {
           "bip": 141,

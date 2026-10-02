@@ -244,7 +244,7 @@ export function checkSequenceVerify(argument: bigint, f: LockFields, index: numb
   // Only the low 32 bits can carry flags; the argument may be up to 5 bytes.
   const arg32 = Number(argument & 0xffffffffn) >>> 0;
   if ((arg32 & SEQUENCE_LOCKTIME_DISABLE_FLAG) !== 0) {
-    add({ id: "arg-disabled", label: "The argument's disable flag is clear", ok: true, stopsHere: true, detail: "bit 31 is set, so the opcode does nothing (left for future soft forks)" });
+    add({ id: "arg-disabled", label: "The argument's disable flag is set: no lock", ok: true, stopsHere: true, detail: "bit 31 is set, so the opcode does nothing (left for future soft forks)" });
     return done();
   }
   add({ id: "arg-disabled", label: "The argument's disable flag is clear", ok: true, detail: "bit 31 is clear" });
