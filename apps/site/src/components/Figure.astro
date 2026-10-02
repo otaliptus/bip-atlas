@@ -20,6 +20,10 @@ import {
   SeedDerivation,
   EntropyBits,
   ChecksumStory,
+  WordlistIndex,
+  LastWordOdds,
+  PassphraseSeeds,
+  MnemonicChain,
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
@@ -174,6 +178,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
   {figure.recipe === "entropy-bits.v1" && <EntropyBits fixture={mnemonic[0]} />}
   {figure.recipe === "checksum-storyboard.v1" && <ChecksumStory fixture={mnemonic[0]} />}
+  {figure.recipe === "wordlist-index.v1" && <WordlistIndex fixture={mnemonic[0]} />}
+  {figure.recipe === "last-word-odds.v1" && <LastWordOdds fixture={mnemonic[0]} />}
+  {figure.recipe === "passphrase-seeds.v1" && <PassphraseSeeds fixture={mnemonic[0]} />}
+  {figure.recipe === "mnemonic-chain.v1" && <MnemonicChain fixture={mnemonic[0]} />}
   {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
   {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}

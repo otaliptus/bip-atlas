@@ -1,62 +1,37 @@
+import { PBKDF2_ITERATIONS } from "@bip-atlas/models/bip39";
+import { Arrow, Bracket, Cells, Drawing, Machine, Value, idsFor } from "../kit";
 import type { DerivedMnemonicFixture } from "../types";
 
-const groupHex = (hex: string) => hex.match(/.{1,8}/g)!.join(" ");
-const shortHex = (hex: string) => `${hex.slice(0, 16)}…${hex.slice(-8)}`;
-
-/**
- * seed-derivation.v1 — static. Mnemonic and passphrase into PBKDF2, out comes a
- * 64-byte seed. Seeds are computed by the tested model; the vector seed is also
- * checked against the pinned file at build and test time.
- */
+/** seed-derivation.v1 — static. Sentence and salt into PBKDF2, 2,048 rounds, out comes the 64-byte seed (published vector). */
 export function SeedDerivation({ fixture }: { fixture: DerivedMnemonicFixture }) {
-  const { seeds } = fixture.derived;
+  const seed = fixture.derived.seeds.find((s) => s.origin === "vector")!;
+  const bytes = seed.seedHex.match(/.{2}/g)!;
+  const ids = idsFor("a01-seed");
+  const head = fixture.mnemonic.split(" ").slice(0, 3).join(" ");
+  const rounds = PBKDF2_ITERATIONS.toLocaleString("en-US");
   return (
-    <div class="atlas-seed">
-      <p class="atlas-card__stamp">Public test values · never use for funds</p>
-      <div class="atlas-seed__inputs">
-        <div class="atlas-seed__box">
-          <span class="atlas-seed__role">Password</span>
-          <span class="atlas-seed__value">
-            the sentence, <em>{fixture.mnemonic.split(" ").slice(0, 3).join(" ")} …</em>
-          </span>
-          <span class="atlas-seed__note">UTF-8, NFKD-normalized</span>
-        </div>
-        <div class="atlas-seed__box">
-          <span class="atlas-seed__role">Salt</span>
-          <span class="atlas-seed__value"><code>"mnemonic"</code> + passphrase</span>
-          <span class="atlas-seed__note">UTF-8, NFKD-normalized</span>
-        </div>
-      </div>
-      <div class="atlas-seed__arrow" aria-hidden="true">↓</div>
-      <div class="atlas-seed__box atlas-seed__kdf">
-        <span class="atlas-seed__role">PBKDF2</span>
-        <span class="atlas-seed__value">HMAC-SHA512 · 2,048 iterations · 64-byte output</span>
-      </div>
-      <div class="atlas-seed__arrow" aria-hidden="true">↓</div>
-      <ul class="atlas-seed__outputs">
-        {seeds.map((s) => (
-          <li class="atlas-seed__out">
-            <span class="atlas-seed__role">
-              Passphrase {s.passphrase ? <code>"{s.passphrase}"</code> : <>empty <code>""</code></>}
-            </span>
-            <code class="atlas-seed__hex" aria-label={`Seed ${s.seedHex}`}>{shortHex(s.seedHex)}</code>
-            <span class="atlas-seed__note">
-              {s.origin === "vector" ? "Matches the published test vector" : "Computed by the tested implementation"}
-            </span>
-          </li>
-        ))}
-      </ul>
-      <details class="atlas-disclosure">
-        <summary>Exact seeds, all 64 bytes</summary>
-        <dl class="atlas-hexlist">
-          {seeds.map((s) => (
-            <>
-              <dt>Passphrase {s.passphrase ? `"${s.passphrase}"` : `"" (empty)`}</dt>
-              <dd><code>{groupHex(s.seedHex)}</code></dd>
-            </>
-          ))}
-        </dl>
-      </details>
-    </div>
+    <Drawing
+      id="a01-seed"
+      width={340}
+      height={446}
+      title="Words and passphrase to seed"
+      desc={`PBKDF2 with HMAC-SHA512 runs ${rounds} times. Its password is the sentence (“${head} …”) and its salt is the text “mnemonic” followed by the passphrase “${seed.passphrase}”. The result is the 64-byte seed ${seed.seedHex}, which matches the published vector.`}
+    >
+      <rect class="k-outline k-fill--secret" x="14" y="14" width="150" height="34" />
+      <Value at={[22, 28]} text="PASSWORD" size={8} cls="k-value--muted" />
+      <Value at={[22, 42]} text={`${head} …`} size={10} />
+      <rect class="k-outline k-fill--secret" x="176" y="14" width="150" height="34" />
+      <Value at={[184, 28]} text="SALT" size={8} cls="k-value--muted" />
+      <Value at={[184, 42]} text={`"mnemonic" + "${seed.passphrase}"`} size={10} />
+      <Arrow d="M89 48 V70 H138" ids={ids} />
+      <Arrow d="M251 48 V70 H206" ids={ids} />
+      <Machine at={[170, 96]} w={80} d={44} h={36} label="PBKDF2" sub="HMAC-SHA512" />
+      <path class="k-leader" d="M252 118 a12 8 0 1 1 0.1 0" marker-end={ids.arrow} />
+      <Value at={[270, 122]} text={`× ${rounds}`} size={11} />
+      <Arrow d="M194 166 V192" ids={ids} />
+      <Cells x={114} y={200} values={bytes} size={20} perRow={8} rowGap={0} roleOf={() => "secret"} />
+      <Bracket x1={114} x2={114 + 8 * 20} y={200 + 8 * 20 + 4} text="seed · 64 bytes = 512 bits" />
+      <Value at={[194, 412]} text="MATCHES THE PUBLISHED VECTOR" anchor="middle" size={9} cls="k-value--muted" />
+    </Drawing>
   );
 }

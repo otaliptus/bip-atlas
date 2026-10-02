@@ -1525,3 +1525,9 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-engrave--n { fill: var(--manual-muted) !important; font-size: 8.5px !important; }
 .k-label-flat { font-size: 8px !important; letter-spacing: 0.08em; }
 .k-plate .k-face--top { fill: #f1f1f4; }
+.k-first4 { font-weight: 600; text-decoration: underline; text-decoration-color: var(--atlas-c-check); text-underline-offset: 2px; }
+.k-engrave--word { font-size: 12px !important; font-weight: 500; }
+.k-value--label { letter-spacing: 0.06em; }
+.k-dot { stroke: var(--manual-rule); stroke-width: 0.25; }
+.k-ring { fill: none; stroke: var(--atlas-ink); stroke-width: 1.25; vector-effect: non-scaling-stroke; }
+.k-faded { opacity: 0.45; }
