@@ -54,7 +54,11 @@ import {
   WalletPathWalk,
   WalletPathLevels,
   WalletPathSchemes,
-  WalletPathWorked,
+  WalletDiscovery,
+  WalletExamples,
+  WalletXpubReach,
+  WalletP2trStory,
+  WalletSpendLayouts,
   DescriptorAnatomy,
   DescriptorChecksum,
   DescriptorIndex,
@@ -231,6 +235,11 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
   {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
   {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
+  {figure.recipe === "wallet-discovery.v1" && <WalletDiscovery fixture={wallet[0]} />}
+  {figure.recipe === "wallet-path-examples.v1" && <WalletExamples fixture={wallet[0]} />}
+  {figure.recipe === "wallet-xpub-reach.v1" && <WalletXpubReach fixture={wallet[0]} />}
+  {figure.recipe === "wallet-p2tr-story.v1" && <WalletP2trStory fixture={wallet[0]} />}
+  {figure.recipe === "wallet-spend-layouts.v1" && <WalletSpendLayouts />}
   {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
   {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
   {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
@@ -259,7 +268,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
-      {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}

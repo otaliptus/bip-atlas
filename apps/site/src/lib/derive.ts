@@ -882,6 +882,25 @@ function walletMaster() {
   return abandonMaster;
 }
 
+/** BIP 44's examples table (coin, account, chain, address, path per row) and its gap limit, from the pinned text. */
+function bip44Tables(lines: string[]) {
+  const start = lines.indexOf("==Examples==");
+  if (start < 0) throw new Error("BIP 44 examples table moved");
+  const examples: Array<{ coin: string; account: string; chain: string; address: string; path: string; line: number }> = [];
+  for (let i = start; i < lines.length && !lines[i].startsWith("|}"); i++) {
+    if (!lines[i].startsWith("|m / 44'")) continue;
+    const [coin, account, chain, address] = lines.slice(i - 4, i).map((l) => l.slice(1).trim());
+    const path = lines[i].slice(1).replace(/ /g, "");
+    parseWalletPath(path);
+    examples.push({ coin, account, chain, address, path, line: i + 1 });
+  }
+  if (examples.length !== 16) throw new Error(`BIP 44 examples table has ${examples.length} paths, expected 16`);
+  const gapAt = lines.findIndex((l) => l.startsWith("Address gap limit is currently set to "));
+  const gap = gapAt >= 0 ? /set to (\d+)\./.exec(lines[gapAt]) : null;
+  if (!gap) throw new Error("BIP 44 gap limit line moved");
+  return { examples, gapLimit: Number(gap[1]), gapLine: gapAt + 1 };
+}
+
 function deriveWalletPath(f: WalletPathVectorFixture): DerivedWalletPathFixture {
   const lines = pinnedText(`bip-${String(f.source.bip).padStart(4, "0")}.mediawiki`, SNAPSHOT_PHASE3).split("\n");
   const value = (n: number) => lines[n - 1].split("=").slice(1).join("=").trim();
@@ -948,7 +967,7 @@ function deriveWalletPath(f: WalletPathVectorFixture): DerivedWalletPathFixture 
   const account = walkPath(master, `${f.account.path}/0/0`)[3].key;
   return {
     ...f,
-    derived: { scheme: f.scheme, accountPath: f.account.path, accountXpub: ser(account, "public"), accountXpubPublished: f.account.pubLine !== null, addresses },
+    derived: { scheme: f.scheme, accountPath: f.account.path, accountXpub: ser(account, "public"), accountXpubPublished: f.account.pubLine !== null, addresses, bip44: f.scheme === 44 ? bip44Tables(lines) : null },
   };
 }
 

@@ -40,7 +40,7 @@
       "fixtures": [
         "bip44-paths"
       ],
-      "caption": "BIP 44’s path: three hardened levels that pick a convention, a coin and an account, then two public levels that number the addresses.",
+      "caption": "BIP 44’s first example path. Three hardened levels pick a convention, a coin and an account; below the account line, two public levels number the addresses.",
       "claims": [
         "levels",
         "purpose",
@@ -49,7 +49,7 @@
         "change",
         "index"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -92,12 +92,45 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A12.2",
+          "recipe": "wallet-discovery.v1",
+          "title": "Finding the accounts again",
+          "fixtures": [
+            "bip44-paths"
+          ],
+          "caption": "How a restored wallet finds its accounts, as BIP 44 describes it. Which addresses are used is made up for the drawing; the gap limit is BIP 44’s.",
+          "claims": [
+            "discovery",
+            "gap-limit",
+            "account"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "BIP 44’s own examples make the pattern concrete. Its table lists 16 paths: the first and second address on the external and change chains, for the first and second account, on Bitcoin and on testnet. The first Bitcoin receiving address of the first account is m/44′/0′/0′/0/0; its first change address is m/44′/0′/0′/1/0.",
           "claims": [
             "examples",
             "change"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A12.3",
+          "recipe": "wallet-path-examples.v1",
+          "title": "BIP 44’s examples, as a tree",
+          "fixtures": [
+            "bip44-paths"
+          ],
+          "caption": "All the paths in BIP 44’s examples table: two coins, two accounts, two chains, two addresses. The two paths named above are drawn heavy.",
+          "claims": [
+            "examples",
+            "coin-type",
+            "account",
+            "change"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -114,7 +147,7 @@
         },
         {
           "type": "figure",
-          "figure": "A12.2",
+          "figure": "A12.4",
           "recipe": "wallet-path-walk.v1",
           "title": "One level at a time",
           "fixtures": [
@@ -148,6 +181,21 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A12.5",
+          "recipe": "wallet-xpub-reach.v1",
+          "title": "What one account xpub reaches",
+          "fixtures": [
+            "bip84-vectors"
+          ],
+          "caption": "BIP 84’s account extended public key and every address its test vectors publish below it, receiving and change, each re-derived from the xpub alone.",
+          "claims": [
+            "xpub-exposure",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The published values make each step checkable. For BIP 84’s first receiving address, the walk ends at a compressed public key; hashing it gives the 20 bytes that go into the output, and the address is those bytes in bech32. For BIP 86, the same position yields a key whose x coordinate becomes the internal key, and the tweak turns it into the output key the address encodes. Either way the spend is short: BIP 84 expects a signature and the public key in the witness, BIP 86 a signature alone, and both leave the scriptSig empty.",
           "claims": [
@@ -156,6 +204,33 @@
             "b86",
             "spend-layouts"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A12.6",
+          "recipe": "wallet-p2tr-story.v1",
+          "title": "From key to Taproot address",
+          "fixtures": [
+            "bip86-vectors"
+          ],
+          "caption": "BIP 86’s first receiving path, from the derived key to the address. Every value matches BIP 86’s published vector.",
+          "claims": [
+            "b86",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A12.7",
+          "recipe": "wallet-spend-layouts.v1",
+          "title": "What a spend carries",
+          "fixtures": [],
+          "caption": "Both outputs are spent with an empty scriptSig. BIP 84’s witness carries a signature and the public key; BIP 86’s carries only a signature.",
+          "claims": [
+            "spend-layouts"
+          ],
+          "layout": "wide"
         },
         {
           "type": "callout",
@@ -199,7 +274,7 @@
         },
         {
           "type": "figure",
-          "figure": "A12.3",
+          "figure": "A12.8",
           "recipe": "wallet-path-schemes.v1",
           "title": "Same shape, three purposes",
           "fixtures": [
@@ -207,14 +282,16 @@
             "bip84-vectors",
             "bip86-vectors"
           ],
-          "caption": "The first receiving path under each purpose, and what each BIP fixes beyond the path.",
+          "caption": "The same tower under three purposes. Only the purpose at the top and what comes out at the bottom differ, and the first receiving key under each is unrelated to the others.",
           "claims": [
             "script-by-purpose",
             "b84",
             "b86",
+            "b84-versions",
+            "same-seed",
             "vectors"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",

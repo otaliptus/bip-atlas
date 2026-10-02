@@ -882,6 +882,8 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-iso--em .k-face { stroke-width: 2; }
 .k-engrave--big { font-size: 14px !important; font-weight: 500; }
 .k-wp-named { stroke-width: 2.25 !important; }
+/* The status names a full address: let it wrap on a phone. */
+.atlas-chapter[data-chapter="wallet-paths"] .atlas-hero__status { overflow-wrap: anywhere; }
 
 /* ---------- Descriptors (BIPs 380–386) ---------- */
 .atlas-chapter[data-chapter="descriptors"] { --atlas-accent: #8a3b12; }

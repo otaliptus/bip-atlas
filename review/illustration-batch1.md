@@ -45,3 +45,18 @@ A fresh read-only subagent recomputed every drawn value in pure Python (its own 
 | 7–12 | nits | "LISTED ON" lines; the K ‖ i bar all green; "m · SAFE"; the breach line dropped BIP 32's "at most"; the serialization title sat far from its rows; the chain-code engraving was hidden. | "IN THE XPUB AND XPRV ON …"; K and index split; "m · NOT RECOVERABLE"; "AT MOST SEES INCOMING PAYMENTS"; row labels beside each packet; engraving moved. |
 | 13 | nit | The hero caption describes the M view while the hero opens in the m view. | Kept: the caption names the state ("Holding M, …") and the first strip switches to it. |
 | 14 | note | The island's props carry every node's private key, as the m view needs them. | Recorded here. All of it is BIP 32 test vector 1, public test material. |
+
+## Wallet paths (A12) — plan
+
+| Fig. | Recipe | Kind | Drawing | Data | Claims |
+|---|---|---|---|---|---|
+| A12.1 | `wallet-path-levels.v1` (redraw) | static, opening | BIP 44's first example as a ribbon of six segments: m pink, three hardened (gate mark), two public (green); "HARDENED / PUBLIC" brackets and the account line; level names on staggered leaders; the table's own reading of the path. | `bip44-paths` (examples table parsed in derive) | levels, purpose, coin-type, account, change, index |
+| A12.2 | `wallet-discovery.v1` **new** | storyboard, 3 frames, illustrative | Account discovery: scan account 0′'s external chain; stop a chain after the gap limit of unused addresses; account 1′ has no history → stop. Used addresses are made up and labelled so. | gap limit read from BIP 44 line 124 | discovery, gap-limit, account |
+| A12.3 | `wallet-path-examples.v1` **new** | static | All 16 paths of BIP 44's examples table as the tree they form; the two paths the prose names drawn heavy; words from the table's columns. | `bip44-paths` examples | examples, coin-type, account, change |
+| A12.4 | `wallet-path-walk.v1` (hero, redraw) | interactive | The path as an exploded stack of six plates; a stepper lights one plate at a time and the last step builds the address (P2WPKH, P2TR, or "BIP 44 names no script"). Strips: scheme (BIP 84 / 86 / 44), receive 0 / receive 1 / change 0. | 3 fixtures | vectors, levels, xpub-exposure, script-by-purpose |
+| A12.5 | `wallet-xpub-reach.v1` **new** | static | BIP 84's account xpub and its two public chains, every published address re-derived from the xpub alone, each with its BIP line. | `bip84-vectors` (`fromXpubMatches`, derive throws otherwise) | xpub-exposure, vectors |
+| A12.6 | `wallet-p2tr-story.v1` **new** (worked tab → storyboard) | storyboard, 4 frames | BIP 86: 33-byte key → drop the parity byte → TapTweak with no scripts → 5120 ‖ Q and the bech32m address (line 100). | `bip86-vectors` | b86, vectors |
+| A12.7 | `wallet-spend-layouts.v1` **new** | static, schematic | Empty scriptSig; witness plates: signature + public key (BIP 84), signature alone (BIP 86). | none | spend-layouts |
+| A12.8 | `wallet-path-schemes.v1` (redraw) | static | Three identical towers under 44′, 84′, 86′; at the bottom what each BIP fixes (script, version bytes) and the first receiving key, unrelated under each purpose. | 3 fixtures | script-by-purpose, b84, b86, b84-versions, same-seed, vectors |
+
+Retired: `WalletPathWorked`; its content is A12.6. Added to `deriveWalletPath`: BIP 44's examples table (throws unless it has 16 parseable paths) and its gap limit (throws if the line moves).

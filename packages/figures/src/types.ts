@@ -536,6 +536,12 @@ export interface WalletPathDerived {
   accountXpub: string;
   accountXpubPublished: boolean;
   addresses: WalletAddressView[];
+  /** BIP 44 only: its examples table and its gap limit, read from the pinned text (null for 84 and 86). */
+  bip44: null | {
+    examples: Array<{ coin: string; account: string; chain: string; address: string; path: string; line: number }>;
+    gapLimit: number;
+    gapLine: number;
+  };
 }
 export type DerivedWalletPathFixture = WalletPathVectorFixture & { derived: WalletPathDerived };
 
