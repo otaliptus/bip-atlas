@@ -153,15 +153,13 @@ describe("shared contracts", () => {
     expect(problems).toMatch(/unknown fixture nope/);
   });
 
-  it("gives every card-style interactive recipe a worked-example tab, and drawing-style heroes none", () => {
-    // Decision D3: drawing-style heroes carry their worked example as static storyboard figures instead.
+  it("draws every interactive recipe in the illustration kit, with no worked-example tab", () => {
+    // Decision D3: heroes carry their worked example as static storyboard figures; the tab code is gone.
+    for (const r of RECIPE_MAP.values()) if (r.interactive) expect(r.drawing, r.id).toBe(true);
     const dispatcher = readFileSync(new URL("apps/site/src/components/Figure.astro", root), "utf8");
-    const worked = dispatcher.slice(dispatcher.indexOf('slot="worked"'));
-    for (const r of RECIPE_MAP.values()) {
-      if (!r.interactive) continue;
-      if (r.drawing) expect(worked, r.id).not.toContain(`"${r.id}"`);
-      else expect(worked, r.id).toContain(`"${r.id}"`);
-    }
+    const plate = readFileSync(new URL("apps/site/src/components/Plate.astro", root), "utf8");
+    expect(dispatcher).not.toContain('slot="worked"');
+    expect(plate).not.toContain('name="worked"');
   });
 
   it("parses only code and emphasis marks", () => {

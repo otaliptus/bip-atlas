@@ -1,6 +1,6 @@
 {
   "hero": 1,
-  "supportingMin": 1,
+  "supportingMin": 3,
   "supportingMax": 12,
-  "decision": "D1 in review/decisions.md: the user raised the static-figure budget on 2 October 2026 so chapters can use Making Software-style storyboards. supportingMin stays 1 until every chapter is migrated, then becomes 3."
+  "decision": "D1 in review/decisions.md: the user raised the static-figure budget on 2 October 2026 so chapters can use Making Software-style storyboards. supportingMin rose from 1 to 3 once every chapter was migrated (all 18 are drawn)."
 }
