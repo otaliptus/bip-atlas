@@ -61,7 +61,10 @@ import {
   SpDerivation,
   SpAddress,
   SpEligibility,
-  SpWorked,
+  EcdhStory,
+  DeriveStory,
+  ScanLoop,
+  SpLabels,
   GcsFilter,
   BfGolomb,
   BfChain,
@@ -256,6 +259,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
   {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
   {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
+  {figure.recipe === "sp-ecdh.v1" && <EcdhStory />}
+  {figure.recipe === "sp-derive-story.v1" && <DeriveStory fixture={sp[0]} />}
+  {figure.recipe === "sp-scan-loop.v1" && <ScanLoop fixture={sp[0]} />}
+  {figure.recipe === "sp-labels.v1" && <SpLabels fixture={sp[0]} />}
   {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
   {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
   {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
@@ -276,7 +283,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
-      {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
       {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
       {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
       {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}

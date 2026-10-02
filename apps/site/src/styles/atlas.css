@@ -978,44 +978,6 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 
 /* ---------- Silent payments (BIP 352) ---------- */
 .atlas-chapter[data-chapter="silent-payments"] { --atlas-accent: #6a3d7a; }
-.atlas-sp-lab, .atlas-sp-lab > * { min-inline-size: 0; }
-.atlas-sp-steps { display: inline-flex; gap: 0.5rem; align-items: center; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-sp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
-.atlas-sp-list li { display: grid; grid-template-columns: 7.5rem minmax(0, 0.8fr) minmax(0, 1.4fr); gap: 0.5rem; align-items: baseline; padding: 0.35rem 0.5rem; border: 1px solid var(--atlas-accent); background: var(--atlas-accent-wash); font-size: 0.8125rem; }
-.atlas-sp-elig .atlas-sp-list li { grid-template-columns: 7.5rem minmax(0, 1fr); }
-.atlas-sp-list li[data-counts="false"] { border-style: dashed; border-color: var(--manual-rule); background: var(--atlas-hatch), var(--manual-surface); }
-.atlas-sp-list__kind { font-family: var(--manual-code); font-weight: 700; font-size: 0.75rem; }
-.atlas-sp-list em { color: var(--manual-muted); }
-.atlas-sp-flow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--manual-space-3); }
-@media (max-width: 79.99rem) { .atlas-sp-flow { grid-template-columns: minmax(0, 1fr); } }
-.atlas-sp-dl { display: grid; gap: 0.3rem; margin: 0.4rem 0 0; }
-.atlas-sp-dl > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
-.atlas-sp-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-sp-dl dd { margin: 0; min-inline-size: 0; overflow-wrap: anywhere; }
-.atlas-sp-dl small { color: var(--manual-success); }
-.atlas-sp-outs, .atlas-sp-scan { list-style: none; margin: 0.4rem 0 0; padding: 0; display: grid; gap: 0.3rem; font-size: 0.8125rem; }
-.atlas-sp-outs li { display: grid; gap: 0.15rem; padding: 0.35rem 0.5rem; border: 1px solid var(--manual-rule); }
-.atlas-sp-outs li > span { font-family: var(--manual-code); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--manual-muted); }
-.atlas-sp-outs li[data-mine="true"] { border: 2px solid var(--atlas-accent); background: var(--atlas-accent-wash); }
-.atlas-sp-outs li[data-mine="true"] > span { color: var(--atlas-accent); }
-.atlas-sp-scan li[data-matched="false"] { color: var(--manual-muted); }
-.atlas-sp-addr { display: grid; gap: var(--manual-space-3); }
-.atlas-sp-addr__ribbon { margin: 0; padding: 0.6rem; border: 1px solid var(--manual-ink); font-family: var(--manual-code); font-size: 0.875rem; overflow-wrap: anywhere; word-break: break-all; line-height: 1.8; }
-.atlas-sp-addr__ribbon span[data-role="hrp"], .atlas-sp-addr__ribbon span[data-role="ver"] { background: var(--atlas-accent); color: #ffffff; padding-inline: 0.1rem; }
-.atlas-sp-addr__ribbon span[data-role="data"] { background: var(--atlas-accent-wash); }
-.atlas-sp-addr__ribbon span[data-role="check"] { border-block-end: 2px solid var(--manual-ink); }
-.atlas-sp-addr__key { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.8125rem; }
-.atlas-sp-addr__key strong { font-family: var(--manual-code); }
-.atlas-sp-addr__keys { margin: 0; font-size: 0.8125rem; overflow-wrap: anywhere; }
-.atlas-sp-elig { display: grid; gap: var(--manual-space-3); }
-.atlas-sp-elig__head { margin: 0 0 0.3rem; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--atlas-accent); }
-@media (max-width: 47.99rem) {
-  .atlas-sp-list li, .atlas-sp-elig .atlas-sp-list li { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
-  .atlas-sp-flow { grid-template-columns: minmax(0, 1fr); }
-  .atlas-sp-dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
-}
-.atlas-sp-lab .atlas-panel__title { text-transform: none; letter-spacing: 0; }
-.atlas-sp-dl small.atlas-sp-differ { color: var(--manual-muted); }
 
 /* ---------- Block filters (BIPs 157/158) ---------- */
 .atlas-chapter[data-chapter="block-filters"] { --atlas-accent: #2f5f3a; }

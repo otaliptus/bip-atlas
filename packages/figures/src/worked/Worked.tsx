@@ -18,7 +18,6 @@ import type {
   DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
   DerivedDescriptorFixture,
-  DerivedSpFixture,
   DerivedBfBlockFixture,
   DerivedV2Fixture,
   DerivedBip322Fixture,
@@ -365,28 +364,6 @@ export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixt
       steps={steps}
       label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
       source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
-    />
-  );
-}
-
-/* ---------- BIP 352 ---------- */
-export function SpWorked({ fixtures }: { fixtures: DerivedSpFixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const mine = d.txOutputs.find((o) => o.mine);
-  const steps: WorkedStep[] = [
-    { title: "The receiver publishes one static address", values: [{ label: "address", value: d.receiver.address }, { label: "B_scan", value: d.receiver.Bscan }, { label: "B_spend", value: d.receiver.Bspend }], layer: { size: 0.9, tone: "plain", cells: 2 } },
-    { title: "The sender's eligible inputs give A", values: [...d.inputs.filter((i) => i.pubkey).map((i, n) => ({ label: `input ${n + 1} key`, value: i.pubkey! })), { label: "A = sum", value: d.A }], layer: { size: 0.7, tone: "wash", cells: d.inputs.length } },
-    { title: "Input hash over the smallest outpoint and A", values: [{ label: "smallest outpoint", value: d.smallestOutpoint }, { label: "input_hash", value: d.inputHash }], layer: { size: 0.55, tone: "hatch", cells: 1 } },
-    { title: "Both sides reach the same ECDH secret", values: [{ label: "input_hash·a·B_scan = input_hash·b_scan·A", value: d.sharedSecret }], note: d.secretsAgree ? "The sender used the inputs' private keys; the receiver used b_scan and the public A. Same point." : "", layer: { size: 0.6, tone: "accent", cells: 1 } },
-    { title: "Output P₀ = B_spend + t₀·G, found by the receiver's scan", values: [{ label: "output key", value: mine?.key ?? "—" }], note: "The output is an ordinary taproot key; only the sender and whoever holds b_scan can recognise it.", layer: { size: 0.8, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 352’s first send-and-receive vector, “{d.comment}”: from a static address to an output only the receiver can recognise.</>}
-      steps={steps}
-      label="Address, input keys, input hash, shared secret and output, drawn as stacked layers."
-      source={<>Source: BIP 352 send_and_receive_test_vectors.json (line {f.source.line}); recomputed by the tested model and checked against the vector.</>}
     />
   );
 }
