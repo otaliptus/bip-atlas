@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
-import { Arrow, Bracket, Cells, Drawing, IsoBox, IsoTopGrid, Label, Machine, Magnifier, Responsive, Storyboard, boxPoints, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
+import { Arrow, Boundary, Bracket, Cells, Computer, Drawing, KeyGlyph, Packet, packetSize, IsoBox, IsoTopGrid, Label, Machine, Magnifier, Responsive, Storyboard, boxPoints, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
 
 const html = (node: preact.VNode<any>) => render(node);
 const count = (s: string, needle: string) => s.split(needle).length - 1;
@@ -122,5 +122,38 @@ describe("Storyboard", () => {
     expect(s).toContain("Checksum, step 2 of 3");
     expect(s).toContain("Note 3");
     expect(s).toContain('id="sb-2-t"');
+  });
+});
+
+describe("glyphs", () => {
+  it("KeyGlyph carries its role and optional label", () => {
+    const s = html(h("svg", {}, h(KeyGlyph, { at: [0, 0], role: "public", label: "internal key P" })));
+    expect(s).toContain('data-role="public"');
+    expect(s).toContain("INTERNAL KEY P");
+  });
+  it("Computer is labelled", () => expect(html(h("svg", {}, h(Computer, { at: [0, 0], label: "observer" })))).toContain("OBSERVER"));
+  it("Boundary is a dashed line with a label", () => {
+    const s = html(h("svg", {}, h(Boundary, { x: 50, y1: 0, y2: 100, label: "what the chain sees" })));
+    expect(s).toContain("k-boundary");
+    expect(s).toContain("WHAT THE CHAIN SEES");
+  });
+});
+
+describe("Packet", () => {
+  const fields = [
+    { id: "a", label: "hash_type", bytes: 12, role: "sig" as const },
+    { id: "b", label: "nVersion", bytes: 4 },
+    { id: "c", label: "sha_prevouts", bytes: 32, role: "hash" as const },
+  ];
+  it("wraps fields across rows and repeats the label of a continued field", () => {
+    const s = html(h("svg", {}, h(Packet, { x: 0, y: 0, fields, perRow: 16, unit: 10 })));
+    expect(s).toContain(">hash_type<");
+    expect(s).toContain("sha_prevouts …cont");
+    expect(packetSize(fields, 16, 10, 22).rows).toBe(3);
+  });
+  it("draws a byte ruler", () => {
+    const s = html(h("svg", {}, h(Packet, { x: 0, y: 0, fields, perRow: 16, unit: 10, ruler: true })));
+    expect(s).toContain(">0<");
+    expect(s).toContain(">8<");
   });
 });

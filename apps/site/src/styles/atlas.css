@@ -1482,3 +1482,6 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-hero__status { margin: 0; font-size: 0.9375rem; text-align: center; min-block-size: 3em; }
 .atlas-hero__source { margin: 0; font-family: var(--manual-code); font-size: 0.6875rem; color: var(--manual-muted); text-align: center; }
 .atlas-hero .k-drawing { max-inline-size: 100%; }
+.k-key__t, .k-actor__t, .k-boundary__t, .k-packet__ruler { font-size: 9px !important; letter-spacing: 0.06em; }
+.k-packet__t { font-size: 9px !important; }
+.k-boundary__line { stroke: var(--atlas-ink); stroke-width: 0.75; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
