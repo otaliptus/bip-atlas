@@ -1,140 +1,184 @@
 import { useEffect, useState } from "preact/hooks";
-import type { DerivedSpFixture } from "../types";
+import { holdFocus } from "../focus";
+import { Computer, Drawing, Lamp, Responsive, Strip, Value, idsFor } from "../kit";
+import type { Role } from "../kit";
+import type { DerivedSpFixture, SpDerived } from "../types";
+import { Chip, kindOf, short } from "./common";
 
 interface Props {
   fixtures: DerivedSpFixture[];
   figureId: string;
 }
 
-const short = (hex: string) => (hex.length > 20 ? `${hex.slice(0, 10)}…${hex.slice(-6)}` : hex);
-const KIND: Record<string, string> = { p2pkh: "P2PKH", "p2sh-p2wpkh": "P2SH-P2WPKH", p2wpkh: "P2WPKH", p2tr: "P2TR", other: "other" };
+export type SpView = "sender" | "receiver" | "observer";
+interface Row { role: Role; text: string; dashed?: boolean; lamp?: "on" | "off" }
+
+const sub = (k: number) => String(k).split("").map((c) => "₀₁₂₃₄₅₆₇₈₉"[Number(c)]).join("");
+const VIEW_NAME: Record<SpView, string> = { sender: "the sender", receiver: "the receiver", observer: "an outside observer" };
 
 /**
- * silent-payment-derivation.v1 — the Silent payments chapter's hero figure.
+ * What each party knows, as rows of chips. Pure: the drawing, the text
+ * equivalent and the tests all use it, so they cannot disagree. Secret keys
+ * are never given a value; a panel that is not the viewer's is not built.
+ */
+export function spPanels(d: SpDerived, view: SpView, steps: boolean) {
+  if (new Set(d.paidTo.map((p) => p.Bscan)).size !== 1) throw new Error("the hero numbers outputs for one paid scan key only");
+  const foundAt = (k: number) => {
+    const o = d.txOutputs.find((x) => x.k === k);
+    if (!o) throw new Error(`no output found at k = ${k}`);
+    return o.key;
+  };
+  const chain: Row[] = d.inputs.map((i) => (i.pubkey ? { role: "public" as Role, text: `in ${kindOf(i)} · ${short(i.pubkey)}` } : { role: "plain" as Role, text: `in ${kindOf(i)} · skipped`, dashed: true }));
+  if (steps) chain.push({ role: "public", text: `A = Σ keys · ${short(d.A)}` }, { role: "hash", text: `input_hash · ${short(d.inputHash)}` }, { role: "public", text: `input_hash·A · ${short(d.tweak)}` });
+  for (const o of d.txOutputs) {
+    const note =
+      view === "observer" ? "owner unknown"
+      : view === "sender" ? (d.senderOutputs.includes(o.key) ? `silent payment P${sub(d.senderOutputs.indexOf(o.key))}` : "another output")
+      : o.mine ? `mine, k = ${o.k}${o.label !== null ? `, label ${o.label}` : ""}` : "not mine";
+    chain.push({ role: "public", text: `out ${short(o.key)} · ${note}` });
+  }
+  const sender: Row[] | null = view !== "sender" ? null : [
+    { role: "secret", text: "a = Σ aᵢ · secret, no value", dashed: true },
+    ...d.paidTo.flatMap((p) => [
+      { role: "public" as Role, text: `pays B_scan ${short(p.Bscan)}` },
+      { role: "public" as Role, text: `B_m ${short(p.Bm)}` },
+    ]),
+    ...(steps ? [{ role: "secret" as Role, text: `secret ${short(d.senderSecret)}` }] : []),
+    ...d.senderOutputs.map((o, k) => ({ role: "public" as Role, text: `makes P${sub(k)} ${short(o)}` })),
+  ];
+  const receiver: Row[] | null = view !== "receiver" ? null : [
+    { role: "secret", text: "b_scan · secret, no value", dashed: true },
+    { role: "public", text: `B_scan ${short(d.receiver.Bscan)}` },
+    { role: "public", text: `B_spend ${short(d.receiver.Bspend)}` },
+    ...(d.receiver.labels.length ? [{ role: "plain" as Role, text: `labels ${d.receiver.labels.join(", ")}` }] : []),
+    ...(steps ? [{ role: "secret" as Role, text: `secret ${short(d.sharedSecret)}` }] : []),
+    ...(steps
+      ? d.steps.map((s) => ({ role: "public" as Role, text: s.via && s.via !== "direct" ? `k=${s.k} via a label → ${short(foundAt(s.k))}` : `k=${s.k} P ${short(s.Pk)}`, lamp: (s.matched ? "on" : "off") as "on" | "off" }))
+      : [{ role: "plain" as Role, text: `${d.txOutputs.filter((o) => o.mine).length} output(s) found` }]),
+  ];
+  return { chain, sender, receiver };
+}
+
+/** The text equivalent of one view: everything drawn, exact. */
+export function describeView(d: SpDerived, view: SpView, steps: boolean): string {
+  const parts = [`Vector “${d.comment}”, seen by ${VIEW_NAME[view]}.`];
+  parts.push(`On chain: inputs ${d.inputs.map((i) => (i.pubkey ? `${kindOf(i)} with key ${i.pubkey}` : `${kindOf(i)}, skipped (${i.skipped})`)).join("; ")}.`);
+  if (steps) parts.push(`Anyone can compute A = ${d.A}, input_hash = ${d.inputHash} and input_hash·A = ${d.tweak} from them.`);
+  parts.push(`Taproot outputs: ${d.txOutputs.map((o) => o.key).join(", ")}.`);
+  if (view === "sender") {
+    parts.push(`The sender knows its input keys' secrets (not shown) and pays ${d.paidTo.map((p) => p.address).join(", ")}.`);
+    if (steps) parts.push(`Its shared secret with that scan key is ${d.senderSecret}.`);
+    parts.push(`It creates ${d.senderOutputs.join(", ")}.`);
+  } else if (view === "receiver") {
+    parts.push(`The receiver knows b_scan (not shown) and its address ${d.receiver.address}${d.receiver.labels.length ? `, with labels ${d.receiver.labels.join(", ")}` : ""}.`);
+    if (steps) parts.push(`It computes the shared secret ${d.sharedSecret}; ${d.steps.map((s) => `k = ${s.k}, P = ${s.Pk}, ${!s.matched ? "not found" : s.via && s.via !== "direct" ? "found via a label: the output is P plus the label point" : "found"}`).join("; ")}.`);
+    parts.push(`Outputs that are its own: ${d.txOutputs.filter((o) => o.mine).map((o) => o.key).join(", ") || "none"}.`);
+  } else {
+    parts.push("The observer has neither a nor b_scan, so it cannot compute any shared secret or tell which address, if any, an output pays.");
+  }
+  return parts.join(" ");
+}
+
+function Panel({ x, y, w, title, rows, hidden, hatch, who }: { x: number; y: number; w: number; title: string; rows: Row[] | null; hidden: string; hatch: string; who?: string }) {
+  return (
+    <g>
+      {who ? <Computer at={[x, y - 2]} /> : null}
+      <Value at={[x + (who ? 32 : 0), y + 8]} text={title} size={8.5} cls="k-value--label" />
+      {rows ? (
+        rows.map((r, k) => (
+          <g>
+            <Chip x={x} y={y + 28 + k * 17} w={w - (r.lamp ? 18 : 0)} role={r.role} text={r.text} dashed={r.dashed} />
+            {r.lamp ? <Lamp at={[x + w - 6, y + 35 + k * 17]} state={r.lamp} r={4} /> : null}
+          </g>
+        ))
+      ) : (
+        <>
+          <rect class="k-outline" x={x} y={y + 28} width={w} height="16" style={`fill:${hatch}`} />
+          <Value at={[x, y + 56]} text={hidden} size={8} cls="k-value--muted" />
+        </>
+      )}
+    </g>
+  );
+}
+
+const panelH = (rows: Row[] | null) => (rows ? 30 + rows.length * 17 : 62);
+
+/**
+ * silent-payment-derivation.v1 — the Silent payments chapter's hero (drawing-first).
  *
- * Published BIP 352 send-and-receive vectors, recomputed at build time by the
- * tested model: input keys, input hash, ECDH secret, outputs, and the
- * receiver's scan. The build fails unless the sender's outputs, the
- * receiver's shared secret and the outputs it finds all match the vector.
- * The browser only switches views.
+ * Sender and receiver as computers either side of the published
+ * transaction, which an outside observer can also read. Switch whose view it
+ * is: each side shows only what that party knows, the other side is
+ * hatched, and the observer sees no shared secret and no ownership. Values
+ * are recomputed at build time by the tested model and checked against the
+ * BIP 352 vectors; secret keys are never drawn.
  */
 export function SpDerivation({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const [id, setId] = useState(fixtures[0].id);
-  const [view, setView] = useState<"sender" | "receiver">("sender");
-  const [steps, setSteps] = useState(false);
+  const [view, setView] = useState<SpView>("sender");
+  const [steps, setSteps] = useState(true);
   const f = fixtures.find((x) => x.id === id)!;
   const d = f.derived;
-  const showSteps = hydrated ? steps : true;
-  const v = hydrated ? view : "sender";
+  const v: SpView = hydrated ? view : "sender";
+  const st = hydrated ? steps : true;
+  const p = spPanels(d, v, st);
+  const status =
+    v === "sender"
+      ? `The sender's view: it sums its input keys' secrets, combines them with the scan key of the address it pays into a shared secret, and creates ${d.senderOutputs.length} taproot output${d.senderOutputs.length === 1 ? "" : "s"}.`
+      : v === "receiver"
+        ? `The receiver's view: from the public input keys and its secret b_scan it computes a shared secret and finds ${d.txOutputs.filter((o) => o.mine).length} output${d.txOutputs.filter((o) => o.mine).length === 1 ? "" : "s"} of its own.`
+        : "An outside observer's view: the same transaction, with no shared secret and no way to tell whom the outputs pay.";
+
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const did = `${figureId}-${w}`;
+    const ids = idsFor(did);
+    const hidden = `HIDDEN: NOT KNOWN TO ${VIEW_NAME[v].toUpperCase()}`;
+    if (wide) {
+      const H = 24 + Math.max(panelH(p.sender), panelH(p.chain), panelH(p.receiver)) + 10;
+      return (
+        <Drawing id={did} width={640} height={H} title="One payment, seen from each side" desc={describeView(d, v, st)}>
+          <Panel x={10} y={12} w={190} title="SENDER" who="sender" rows={p.sender} hidden={hidden} hatch={ids.hatch} />
+          <line class="k-boundary__line" x1="212" y1="4" x2="212" y2={H - 4} />
+          <Panel x={224} y={12} w={192} title="THE TRANSACTION · PUBLIC" rows={p.chain} hidden="" hatch={ids.hatch} />
+          <line class="k-boundary__line" x1="428" y1="4" x2="428" y2={H - 4} />
+          <Panel x={440} y={12} w={190} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hidden} hatch={ids.hatch} />
+        </Drawing>
+      );
+    }
+    const y1 = 12, y2 = y1 + panelH(p.sender) + 14, y3 = y2 + panelH(p.chain) + 14;
+    const H = y3 + panelH(p.receiver) + 6;
+    return (
+      <Drawing id={did} width={330} height={H} title="One payment, seen from each side" desc={describeView(d, v, st)}>
+        <Panel x={10} y={y1} w={310} title="SENDER" who="sender" rows={p.sender} hidden={hidden} hatch={ids.hatch} />
+        <line class="k-boundary__line" x1="4" y1={y2 - 8} x2="326" y2={y2 - 8} />
+        <Panel x={10} y={y2} w={310} title="THE TRANSACTION · PUBLIC" rows={p.chain} hidden="" hatch={ids.hatch} />
+        <line class="k-boundary__line" x1="4" y1={y3 - 8} x2="326" y2={y3 - 8} />
+        <Panel x={10} y={y3} w={310} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hidden} hatch={ids.hatch} />
+      </Drawing>
+    );
+  };
 
   return (
-    <div class="atlas-lab atlas-sp-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-lab__samples">
-            <legend>Published vector</legend>
-            {fixtures.map((x) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-case`} checked={x.id === id} onChange={() => setId(x.id)} />
-                <span>{x.label}<small>{x.shortLabel}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-segmented">
-            <legend>View</legend>
-            {(["sender", "receiver"] as const).map((w) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-view`} checked={view === w} onChange={() => setView(w)} />
-                <span>{w === "sender" ? "Sender" : "Receiver"}<small>{w === "sender" ? "knows the input keys’ secrets" : "knows b_scan, sees only the transaction"}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <label class="atlas-sp-steps">
-            <input type="checkbox" checked={steps} onChange={(e) => setSteps((e.target as HTMLInputElement).checked)} />
-            Reveal shared-secret steps
-          </label>
+        <div class="atlas-hero__controls">
+          <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={setId} />
+          <Strip label="Switch sender/receiver view" name={`${figureId}-view`} options={[{ value: "sender", text: "Sender" }, { value: "receiver", text: "Receiver" }, { value: "observer", text: "Outside observer" }]} current={view} onPick={(x) => setView(x as SpView)} />
+          <Strip label="Reveal shared-secret steps" name={`${figureId}-steps`} options={[{ value: "no", text: "Result only" }, { value: "yes", text: "Every step" }]} current={steps ? "yes" : "no"} onPick={(x) => setSteps(x === "yes")} />
         </div>
       ) : (
-        <p class="atlas-lab__static-note">Static view: the sender’s side of the first vector, with every step shown. With JavaScript you can switch to the receiver, pick other vectors and hide the intermediate steps.</p>
+        <p class="atlas-hero__static">Static view: the sender’s side of the first vector, every step shown. With JavaScript you can switch to the receiver or an outside observer, pick other vectors and hide the intermediate steps.</p>
       )}
-
-      <section class="atlas-panel atlas-sp-inputs" aria-label="Transaction inputs">
-        <h3 class="atlas-panel__title">Inputs: which keys count</h3>
-        <ol class="atlas-sp-list">
-          {d.inputs.map((i) => (
-            <li data-counts={i.pubkey ? "true" : "false"}>
-              <span class="atlas-sp-list__kind">{KIND[i.kind]}</span>
-              <code>{i.outpoint}</code>
-              <span>{i.pubkey ? <>key <code>{short(i.pubkey)}</code>{i.kind === "p2tr" ? <small> (x-only, read as even y)</small> : null}</> : <em>skipped: {i.skipped}</em>}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <div class="atlas-sp-flow" data-view={v}>
-        <section class="atlas-panel" aria-live="polite" aria-label={v === "sender" ? "Sender's computation" : "Receiver's computation"}>
-          <h3 class="atlas-panel__title">{v === "sender" ? "Sender: a = Σ aᵢ, secret = input_hash · a · B_scan" : "Receiver: A = Σ Aᵢ, secret = input_hash · b_scan · A"}</h3>
-          <dl class="atlas-sp-dl">
-            {v === "sender"
-              ? d.paidTo.map((p) => (
-                  <>
-                    <div><dt>{p.ours ? "address paid" : "address paid (not the scanning wallet below)"}</dt><dd><code class="atlas-break">{p.address}</code></dd></div>
-                    <div><dt>its B_scan · B_m</dt><dd><code>{short(p.Bscan)}</code> · <code>{short(p.Bm)}</code></dd></div>
-                  </>
-                ))
-              : (
-                <>
-                  <div><dt>wallet’s own address</dt><dd><code class="atlas-break">{d.receiver.address}</code>{d.receiver.labels.length ? <small class="atlas-sp-differ"> (this vector also scans for labels {d.receiver.labels.join(", ")})</small> : null}</dd></div>
-                  <div><dt>wallet’s B_scan · B_spend</dt><dd><code>{short(d.receiver.Bscan)}</code> · <code>{short(d.receiver.Bspend)}</code></dd></div>
-                </>
-              )}
-            {showSteps ? (
-              <>
-                <div><dt>{v === "sender" ? "A = a·G (sum of input keys)" : "A (sum of input keys)"}</dt><dd><code>{short(d.A)}</code></dd></div>
-                <div><dt>smallest outpoint</dt><dd><code>{short(d.smallestOutpoint)}</code></dd></div>
-                <div><dt>input_hash</dt><dd><code>{short(d.inputHash)}</code></dd></div>
-                {v === "receiver" ? <div><dt>tweak = input_hash · A</dt><dd><code>{short(d.tweak)}</code></dd></div> : null}
-              </>
-            ) : null}
-            <div><dt>shared secret</dt><dd><code>{short(v === "sender" ? d.senderSecret : d.sharedSecret)}</code>{d.secretsAgree ? <small> (sender and receiver compute the same point)</small> : <small class="atlas-sp-differ"> ({v === "sender" ? "with the paid address’s scan key" : "no P_k matches any output: nothing here is for this wallet"})</small>}</dd></div>
-          </dl>
-        </section>
-
-        {v === "sender" ? (
-          <section class="atlas-panel" aria-label="Outputs the sender creates">
-            <h3 class="atlas-panel__title">Outputs created: P_k = B_m + t_k·G</h3>
-            <ol class="atlas-sp-outs">
-              {d.senderOutputs.map((o) => <li><span>taproot key</span> <code class="atlas-break">{o}</code></li>)}
-            </ol>
-            <p class="atlas-panel__scope">t_k is a tagged hash of the shared secret and k. Each output is an ordinary taproot output; nothing in it mentions the address.</p>
-          </section>
-        ) : (
-          <section class="atlas-panel" aria-label="Receiver's scan">
-            <h3 class="atlas-panel__title">Scan: compute P_k and look for it</h3>
-            {showSteps ? (
-              <ol class="atlas-sp-scan">
-                {d.steps.map((s) => (
-                  <li data-matched={s.matched ? "true" : "false"}>
-                    k = {s.k}: P_k = <code>{short(s.Pk)}</code> {s.matched ? <strong>found{s.via && s.via !== "direct" ? " (via a label)" : ""}</strong> : <em>not found, stop</em>}
-                  </li>
-                ))}
-              </ol>
-            ) : null}
-            <ol class="atlas-sp-outs">
-              {d.txOutputs.map((o) => (
-                <li data-mine={o.mine ? "true" : "false"}>
-                  <span>{o.mine ? `mine${o.label !== null ? `, label ${o.label}` : ""}` : "not mine"}</span> <code class="atlas-break">{o.key}</code>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-      </div>
-      <p class="atlas-lab__source">
-        Source: BIP 352 send_and_receive_test_vectors.json, “{d.comment}” (line {f.source.line}). Recomputed at build time by the tested model and checked against the vector’s outputs, shared secret and found outputs.
-      </p>
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this view</summary>
+        <p class="atlas-hexlist" style="overflow-wrap:anywhere">{describeView(d, v, st)}</p>
+      </details>
+      <p class="atlas-hero__source">BIP 352 send_and_receive_test_vectors.json, “{d.comment}” (line {f.source.line}). Recomputed at build time by the tested model and checked against the vector’s outputs, shared secret and found outputs.</p>
     </div>
   );
 }

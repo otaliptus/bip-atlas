@@ -157,3 +157,46 @@ describe("Packet", () => {
     expect(s).toContain(">8<");
   });
 });
+
+describe("Lamp and wrapLines (batch 3)", () => {
+  it("lights with rays and a tick, darkens with a cross, waits dashed", async () => {
+    const { Lamp } = await import("../src/kit");
+    const on = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "on", label: "TRUE" })));
+    expect(on).toContain('data-state="on"');
+    expect(on).toContain("✓");
+    expect(on).toContain("TRUE");
+    expect(count(on, "k-leader")).toBe(8);
+    const off = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "off" })));
+    expect(off).toContain("✕");
+    expect(off).not.toContain("k-leader");
+    const idle = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "idle" })));
+    expect(idle).toContain("k-dashed");
+    expect(idle).not.toContain("✓");
+    expect(idle).not.toContain("✕");
+  });
+  it("wraps words greedily without splitting them", async () => {
+    const { wrapLines } = await import("../src/kit");
+    expect(wrapLines("Wrong signature (which is equal to the negation)", 16)).toEqual(["Wrong signature", "(which is equal", "to the negation)"]);
+    expect(wrapLines("supercalifragilistic x", 5)).toEqual(["supercalifragilistic", "x"]);
+    expect(wrapLines("", 5)).toEqual([]);
+  });
+});
+
+describe("Strip and Scrub (batch 3)", () => {
+  it("Strip is a labelled radiogroup; a terse option gets an accessible name", async () => {
+    const { Strip } = await import("../src/kit");
+    const s = html(h(Strip, { label: "Vector", name: "v", current: "b", onPick: () => {}, options: [{ value: "a", text: "A" }, { value: "b", text: "V7 ✕", aria: "Vector 7, invalid" }] }));
+    expect(s).toContain('role="radiogroup" aria-label="Vector"');
+    expect(s).toContain('aria-label="Vector 7, invalid"');
+    expect(count(s, 'type="radio"')).toBe(2);
+    expect(count(s, "checked")).toBe(1);
+  });
+  it("Scrub disables the ends and names its buttons by unit", async () => {
+    const { Scrub } = await import("../src/kit");
+    const s = html(h(Scrub, { label: "Steps", value: 0, max: 3, unit: "step", valueText: "start", onSet: () => {} }));
+    expect(s).toContain('aria-label="Previous step"');
+    expect(s).toContain('aria-label="Next step"');
+    expect(s).toContain('aria-valuetext="start"');
+    expect(count(s, "disabled")).toBe(1);
+  });
+});

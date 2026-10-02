@@ -1,58 +1,42 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import type { DerivedSchnorrFixture, SchnorrStageId, SchnorrTraceView } from "../types";
+import { Arrow, Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor, wrapLines } from "../kit";
+import type { DerivedSchnorrFixture, SchnorrTraceView } from "../types";
+import { SCHNORR_STAGES, short, stageNote } from "./stages";
 
 interface Props {
   fixtures: DerivedSchnorrFixture[];
   figureId: string;
 }
 
-/** The eight steps of Verify(pk, m, sig), in the order BIP 340 lists them. */
-export const SCHNORR_STAGES: ReadonlyArray<{ id: SchnorrStageId; label: string; question: string }> = [
-  { id: "lift-x", label: "Lift the key", question: "Is pk a valid x coordinate (below p, with a curve point)? Take the point P with even y." },
-  { id: "r-range", label: "Read r", question: "r = first 32 bytes of the signature. Is r below the field size p?" },
-  { id: "s-range", label: "Read s", question: "s = last 32 bytes. Is s below the group order n?" },
-  { id: "challenge", label: "Hash the challenge", question: "e = hash tagged “BIP0340/challenge” of r ‖ P ‖ m, reduced mod n." },
-  { id: "compute-r", label: "Compute R", question: "R = s⋅G − e⋅P, using secp256k1 point arithmetic." },
-  { id: "infinity", label: "R is not infinity", question: "Fail if R is the point at infinity." },
-  { id: "even-y", label: "R has even y", question: "Fail if the y coordinate of R is odd." },
-  { id: "x-match", label: "x(R) equals r", question: "Fail unless the x coordinate of R equals r." },
-];
-
 type Status = "pass" | "fail" | "not-reached" | "pending";
+const STATUS_WORD: Record<Status, string> = { pass: "passes", fail: "fails", "not-reached": "not reached", pending: "not revealed yet" };
+const VALUE_NAMES: Record<string, string> = { x: "x", y: "y", r: "r", s: "s", hash: "hash", e: "e", xR: "x(R)" };
+const N = SCHNORR_STAGES.length;
 
-function stageNote(id: SchnorrStageId, values: Record<string, string>, ok: boolean): string | null {
-  switch (id) {
-    case "lift-x": return ok ? `P has even y. x(P) = pk.` : `Stops here: ${values.reason}.`;
-    case "r-range": return ok ? "r < p" : "r is not below p.";
-    case "s-range": return ok ? "s < n" : "s is not below n.";
-    case "challenge": return values.hash === values.e ? "The hash is already below n, so e equals it." : "The hash was reduced mod n.";
-    case "compute-r": return values.R ? "R is the point at infinity." : `y(R) is ${BigInt(`0x${values.y}`) % 2n === 0n ? "even" : "odd"}.`;
-    case "infinity": return ok ? "R is an ordinary point." : "Stops here: no coordinates to compare.";
-    case "even-y": return ok ? "y(R) is even." : "Stops here: y(R) is odd.";
-    case "x-match": return ok ? "x(R) = r: the signature verifies." : "Stops here: x(R) differs from r.";
-  }
+/** Hex values a stage produced, in display order (the lifted key's x is pk itself, so it is not repeated). */
+function stageHex(stageIndex: number, values: Record<string, string>): Array<[string, string]> {
+  return Object.entries(values).filter(([k, v]) => k in VALUE_NAMES && /^[0-9a-f]{64}$/.test(v) && !(stageIndex === 0 && k === "x"));
 }
 
-const hexValueLabels: Record<string, string> = { x: "x", y: "y", r: "r", s: "s", hash: "challenge hash", e: "e", xR: "x(R)" };
-
 /**
- * schnorr-verification.v1 — the Schnorr chapter's hero figure.
+ * schnorr-verification.v1 — the Schnorr chapter's hero (drawing-first).
  *
- * Every value comes from the tested model run at build time on published
- * BIP 340 CSV vectors (cross-checked against noble's verifier). The reader
- * chooses a vector and one of the figure's fixture messages; nothing here
- * accepts a key, message or signature typed by the reader, and nothing signs.
+ * The verifier drawn as a track: the three inputs feed eight numbered gates
+ * in BIP 340's order, ending in a lamp. Passed gates are ticked; the gate
+ * that stops a run is crossed; gates after it are drawn as never reached.
+ * A readout under the current gate shows what it computed. Every value comes
+ * from the tested model run at build time on published CSV vectors
+ * (cross-checked against noble); nothing here signs or accepts typed input.
  */
 export function SchnorrVerifier({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
-
   const [fixtureId, setFixtureId] = useState(fixtures[0].id);
   const fixture = fixtures.find((f) => f.id === fixtureId)!;
   const [messageKey, setMessageKey] = useState(fixture.derived.ownMessage);
-  const [revealed, setRevealed] = useState(SCHNORR_STAGES.length);
-  const shown = hydrated ? revealed : SCHNORR_STAGES.length;
+  const [revealed, setRevealed] = useState(N);
+  const shown = hydrated ? revealed : N;
 
   const chooseFixture = (id: string) => {
     const next = fixtures.find((f) => f.id === id)!;
@@ -63,135 +47,145 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
   const message = fixture.derived.messages.find((m) => m.key === messageKey)!;
   const own = messageKey === fixture.derived.ownMessage;
   const trace: SchnorrTraceView = fixture.derived.traces[messageKey];
-  const r = fixture.signatureHex.slice(0, 64);
-  const s = fixture.signatureHex.slice(64);
-  const lastRun = trace.steps.length;
-
-  const statusOf = (i: number): Status => {
-    if (i >= shown) return "pending";
-    if (i >= lastRun) return "not-reached";
-    return trace.steps[i].ok ? "pass" : "fail";
-  };
-  const allShown = shown >= SCHNORR_STAGES.length;
+  const r = fixture.signatureHex.slice(0, 64), s = fixture.signatureHex.slice(64);
+  const statusOf = (i: number): Status => (i >= shown ? "pending" : i >= trace.steps.length ? "not-reached" : trace.steps[i].ok ? "pass" : "fail");
   const failedAt = trace.failedStage ? SCHNORR_STAGES.findIndex((st) => st.id === trace.failedStage) : -1;
+  // The gate in focus: the last one revealed, or, once all are shown, the one that stopped the run.
+  const cur = shown >= N && failedAt >= 0 ? failedAt : shown - 1;
+  const curStep = trace.steps[cur] ?? null;
+  const lamp = shown < N && (failedAt < 0 || cur < failedAt) ? "idle" : trace.valid ? "on" : "off";
+  const msgName = own ? `its own ${message.bytes}-byte message` : `the ${message.bytes}-byte message of vector ${message.fromVector}`;
 
-  return (
-    <div class="atlas-lab atlas-sig-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-lab__controls atlas-sig-lab__controls">
-          <fieldset class="atlas-lab__samples">
-            <legend>Public BIP 340 vector</legend>
-            {fixtures.map((f) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-vector`} checked={f.id === fixtureId} onChange={() => chooseFixture(f.id)} />
-                <span>
-                  {f.expected ? "✓ " : "✕ "}
-                  {f.label}
-                  <small>{f.shortLabel}</small>
-                </span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-lab__samples">
-            <legend>Message (from the figure’s fixtures)</legend>
-            {fixture.derived.messages.map((m) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-message`} checked={m.key === messageKey} onChange={() => setMessageKey(m.key)} />
-                <span>
-                  {m.key === fixture.derived.ownMessage ? "Signed message" : `Message of vector ${m.fromVector}`}
-                  <small>{m.bytes} {m.bytes === 1 ? "byte" : "bytes"}</small>
-                </span>
-              </label>
-            ))}
-          </fieldset>
-        </div>
-      ) : (
-        <p class="atlas-lab__static-note">
-          Static view: the first vector checked against its own message, every stage shown. With JavaScript you can
-          choose any of the {fixtures.length} published vectors, swap in another fixture’s message, and reveal the
-          verifier’s stages one at a time.
-        </p>
-      )}
+  const verdict = trace.valid
+    ? "Every gate passes: Verify succeeds."
+    : `Verify stops at gate ${failedAt + 1} (${SCHNORR_STAGES[failedAt].label}): ${stageNote(trace.steps[failedAt].stage, trace.steps[failedAt].values, false)}; later gates never run.`;
+  const published = own
+    ? `Published result for vector ${fixture.vectorIndex}: ${fixture.expected ? "TRUE" : "FALSE"}.`
+    : `This pairing of vector ${fixture.vectorIndex}'s key and signature with vector ${message.fromVector}'s message is not itself a published vector; the tested model computes the result.`;
+  const status =
+    shown >= N
+      ? `Vector ${fixture.vectorIndex} with ${msgName}. ${verdict} ${published}`
+      : `Gate ${shown} of ${N} (${SCHNORR_STAGES[cur].label}): ${STATUS_WORD[statusOf(cur)]}${curStep && statusOf(cur) !== "not-reached" ? ` (${stageNote(curStep.stage, curStep.values, curStep.ok)})` : ""}.`;
 
-      <dl class="atlas-sig-lab__inputs" aria-label="Verifier inputs">
-        <div>
-          <dt>pk <small>32 bytes</small></dt>
-          <dd><code class="atlas-break">{fixture.publicKeyHex}</code></dd>
-        </div>
-        <div>
-          <dt>m <small>{message.bytes} {message.bytes === 1 ? "byte" : "bytes"}{own ? "" : `, from vector ${message.fromVector}`}</small></dt>
-          <dd>{message.bytes ? <code class="atlas-break">{message.hex}</code> : <em>empty message</em>}</dd>
-        </div>
-        <div>
-          <dt>sig <small>64 bytes = r ‖ s</small></dt>
-          <dd class="atlas-sig-lab__sig">
-            <code class="atlas-break" data-part="r">{r}</code>
-            <code class="atlas-break" data-part="s">{s}</code>
-          </dd>
-        </div>
-      </dl>
+  const describe = () =>
+    `Verify for vector ${fixture.vectorIndex}: public key ${fixture.publicKeyHex}, ${msgName} ${message.hex || "(empty)"}, signature r = ${r}, s = ${s}. ` +
+    SCHNORR_STAGES.map((st, i) => {
+      const k = statusOf(i);
+      const step = trace.steps[i];
+      const vals = step && k !== "pending" ? stageHex(i, step.values).map(([n, v]) => `${VALUE_NAMES[n]} = ${v}`).join(", ") : "";
+      return `Gate ${i + 1}, ${st.label}: ${STATUS_WORD[k]}${step && (k === "pass" || k === "fail") ? `, ${stageNote(step.stage, step.values, step.ok)}` : ""}${vals ? ` (${vals})` : ""}.`;
+    }).join(" ") +
+    (shown >= N ? ` The lamp shows ${trace.valid ? "true" : "false"}.` : "");
 
-      {hydrated ? (
-        <div class="atlas-lab__buttons" role="group" aria-label="Reveal verifier stages">
-          <button type="button" class="manual-plate-button" onClick={() => setRevealed((n) => Math.max(1, n - 1))} disabled={revealed <= 1}>← Previous stage</button>
-          <button type="button" class="manual-plate-button" onClick={() => setRevealed((n) => Math.min(SCHNORR_STAGES.length, n + 1))} disabled={allShown}>Next stage →</button>
-          <button type="button" class="manual-plate-button" onClick={() => setRevealed(allShown ? 1 : SCHNORR_STAGES.length)}>{allShown ? "Start over" : "Show all stages"}</button>
-        </div>
-      ) : null}
-
-      <ol class="atlas-pipeline atlas-sig-lab__stages" aria-label="Verify(pk, m, sig), step by step">
-        {SCHNORR_STAGES.map((stage, i) => {
-          const status = statusOf(i);
-          const step = trace.steps[i];
-          const values = status === "pass" || status === "fail" ? step.values : null;
-          const note = values ? stageNote(stage.id, values, step.ok) : null;
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const W = wide ? 640 : 330;
+    // Gate centres: one row of eight (wide) or two rows of four (narrow).
+    const row1 = wide ? 104 : 150, row2 = 236;
+    const gateAt = (i: number): [number, number] =>
+      wide ? [48 + i * 66, row1] : [34 + (i % 4) * 68, i < 4 ? row1 : row2];
+    const lampAt: [number, number] = wide ? [600, row1] : [298, row2];
+    const readY = (wide ? row1 : row2) + 58;
+    const H = readY + 60;
+    const inputs = (
+      <g>
+        <Value at={[14, 18]} text="PK · 32 B" size={8.5} cls="k-value--label" />
+        <rect class="k-outline k-fill--public" x="14" y="24" width={wide ? 120 : 104} height="20" />
+        <Value at={[20, 38]} text={short(fixture.publicKeyHex)} size={9} />
+        <Value at={[wide ? 150 : 128, 18]} text={`M · ${message.bytes} B${own ? "" : ` · FROM V${message.fromVector}`}`} size={8.5} cls="k-value--label" />
+        <rect class={`k-outline k-fill--plain${own ? "" : " k-cell--em"}`} x={wide ? 150 : 128} y="24" width={wide ? 120 : 104} height="20" />
+        <Value at={[wide ? 156 : 134, 38]} text={message.bytes ? short(message.hex) : "(empty)"} size={9} />
+        <Value at={[wide ? 286 : 14, wide ? 18 : 62]} text="SIG · 64 B = r ‖ s" size={8.5} cls="k-value--label" />
+        <rect class="k-outline k-fill--sig" x={wide ? 286 : 14} y={wide ? 24 : 68} width={wide ? 120 : 104} height="20" />
+        <Value at={[wide ? 292 : 20, wide ? 38 : 82]} text={`r ${short(r)}`} size={9} />
+        <rect class="k-outline k-fill--sig" x={wide ? 406 : 118} y={wide ? 24 : 68} width={wide ? 120 : 104} height="20" />
+        <Value at={[wide ? 412 : 124, wide ? 38 : 82]} text={`s ${short(s)}`} size={9} />
+      </g>
+    );
+    const track = wide
+      ? `M14 ${row1} H${lampAt[0] - 12}`
+      : `M14 ${row1} H316 V${(row1 + row2) / 2} H14 V${row2} H${lampAt[0] - 12}`;
+    const curStatus = statusOf(cur);
+    const readLines: string[] = [];
+    if (curStatus === "pending" || curStatus === "not-reached") readLines.push(curStatus === "not-reached" ? "Never runs: an earlier gate stopped the run." : "");
+    else if (curStep) readLines.push(...wrapLines(stageNote(curStep.stage, curStep.values, curStep.ok), wide ? 90 : 52));
+    const hexes = curStep && (curStatus === "pass" || curStatus === "fail") ? stageHex(cur, curStep.values) : [];
+    return (
+      <Drawing id={id} width={W} height={H} title="Verify, gate by gate" desc={describe()}>
+        {inputs}
+        {wide ? <path class="k-leader" d="M14 48 V52 H526 V48" /> : <path class="k-leader" d="M10 34 H14 M10 34 V78 H14 M118 34 H128" />}
+        <Arrow d={`M${wide ? 24 : 10} ${wide ? 52 : 78} V${row1 - 4}`} ids={ids} />
+        <path class="k-ring" d={track} />
+        {SCHNORR_STAGES.map((st, i) => {
+          const [x, y] = gateAt(i);
+          const k = statusOf(i);
           return (
-            <li class="atlas-stage" data-status={status}>
-              <span class="atlas-stage__head">
-                <span class="atlas-stage__number">{String(i + 1).padStart(2, "0")}</span>
-                <span class="atlas-stage__label">{stage.label}</span>
-                <span class="atlas-stage__mark" aria-hidden="true">{status === "pass" ? "✓" : status === "fail" ? "✕" : ""}</span>
-              </span>
-              <span class="atlas-stage__status">
-                {status === "pass" ? "passes" : status === "fail" ? "fails" : status === "not-reached" ? "not reached" : "not revealed"}
-              </span>
-              <span class="atlas-stage__question">{stage.question}</span>
-              {values ? (
-                <span class="atlas-sig-lab__values">
-                  {Object.entries(values)
-                    .filter(([k]) => k in hexValueLabels && !(stage.id === "lift-x" && k === "x"))
-                    .map(([k, v]) => (
-                      <span class="atlas-sig-lab__value">
-                        <span>{hexValueLabels[k]}</span>
-                        <code class="atlas-break">{v}</code>
-                      </span>
-                    ))}
-                </span>
+            <g class={`k-gate${k === "not-reached" ? " k-faded" : ""}`} data-status={k} data-current={i === cur ? "true" : undefined}>
+              <rect class={`k-outline k-fill--plain${k === "fail" || i === cur ? " k-cell--em" : ""}${k === "pending" || k === "not-reached" ? " k-dashed" : ""}`} x={x - 13} y={y - 17} width="26" height="34" />
+              <Value at={[x, y - 23]} text={String(i + 1)} size={8.5} anchor="middle" cls="k-value--label" />
+              <Value at={[x, y + 30]} text={i === cur ? `▲ ${st.gate}` : st.gate} size={8} anchor="middle" cls={k === "pass" || k === "fail" ? "" : "k-value--muted"} />
+              {k === "pass" ? <text class="k-lamp__m k-value--ok" x={x} y={y + 4} text-anchor="middle">✓</text> : null}
+              {k === "fail" ? (
+                <>
+                  <text class="k-lamp__m" x={x} y={y + 4} text-anchor="middle">✕</text>
+                  <path class="k-leader" d={`M${x} ${y + 36} V${y + 44}`} marker-end={ids.arrow} />
+                </>
               ) : null}
-              {note ? <span class="atlas-stage__note">{note}</span> : null}
-            </li>
+            </g>
           );
         })}
-      </ol>
-
-      <p class="atlas-lab__status" aria-live="polite">
-        {allShown ? (
+        <Lamp at={lampAt} state={lamp} label={lamp === "idle" ? "" : trace.valid ? "TRUE" : "FALSE"} />
+        {shown > 0 ? (
           <>
-            <span class="atlas-lab__verdict" data-valid={trace.valid ? "true" : "false"}>{trace.valid ? "✓ success" : "✕ failure"}</span>{" "}
-            {trace.valid
-              ? "Every check passed."
-              : `Verification stops at stage ${failedAt + 1} (“${SCHNORR_STAGES[failedAt].label}”); later stages never run.`}{" "}
-            {own
-              ? <>Published result for vector {fixture.vectorIndex}: <strong>{fixture.expected ? "TRUE" : "FALSE"}</strong>{fixture.comment ? <> (“{fixture.comment}”)</> : null}.</>
-              : <>This pairing of vector {fixture.vectorIndex}’s key and signature with vector {message.fromVector}’s message is not itself a published vector; the result is computed by the tested model.</>}
+            <Value at={[14, readY]} text={`GATE ${cur + 1} · ${SCHNORR_STAGES[cur].label} · ${STATUS_WORD[curStatus]}`} size={9} cls="k-value--label" />
+            {readLines.map((l, i) => <Value at={[14, readY + 15 + i * 13]} text={l} size={9.5} />)}
+            {hexes.map(([n, v], i) => (
+              <Value at={[14 + (wide ? (i % 3) * 200 : (i % 2) * 150), readY + 15 + readLines.length * 13 + Math.floor(i / (wide ? 3 : 2)) * 13]} text={`${VALUE_NAMES[n]} ${short(v)}`} size={9.5} cls={n === "hash" || n === "e" ? "k-value--hash" : ""} />
+            ))}
           </>
-        ) : (
-          <>Stage {shown} of {SCHNORR_STAGES.length} revealed: {SCHNORR_STAGES[shown - 1].label}, {{ pass: "passes", fail: "fails", "not-reached": "not reached", pending: "not revealed" }[statusOf(shown - 1)]}.</>
-        )}
-      </p>
-      <p class="atlas-lab__source">
-        Source: BIP 340 test-vectors.csv line {fixture.source.line}. Arithmetic: @noble/curves; every result shown is cross-checked against noble’s own verifier. Hex is shown most significant byte first.
-      </p>
+        ) : null}
+      </Drawing>
+    );
+  };
+
+  return (
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
+      {hydrated ? (
+        <div class="atlas-hero__controls">
+          {Strip({ label: "Public BIP 340 vector", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}: ${f.expected ? "" : "invalid, "}${f.label}` })) })}
+          {Strip({ label: "Message", name: `${figureId}-message`, current: messageKey, onPick: setMessageKey, options: fixture.derived.messages.map((m) => ({
+            value: m.key,
+            text: m.key === fixture.derived.ownMessage ? `Own m · ${m.bytes} B` : `m of V${m.fromVector} · ${m.bytes} B`,
+            aria: m.key === fixture.derived.ownMessage ? `Its own message, ${m.bytes} bytes` : `The message of vector ${m.fromVector}, ${m.bytes} bytes`,
+          })) })}
+        </div>
+      ) : (
+        <p class="atlas-hero__static">Static view: vector {fixtures[0].vectorIndex} checked against its own message, every gate shown. With JavaScript you can choose any of the {fixtures.length} published vectors, swap in another vector’s message, and step through the gates.</p>
+      )}
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      {hydrated ? (
+        <Scrub label="Reveal verifier stages" value={revealed} min={1} max={N} unit="gate" valueText={`gate ${revealed} of ${N}: ${SCHNORR_STAGES[revealed - 1].label}, ${STATUS_WORD[statusOf(revealed - 1)]}`} onSet={setRevealed} />
+      ) : null}
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this view</summary>
+        <dl class="atlas-hexlist">
+          <dt>pk (32 bytes)</dt><dd><code class="atlas-break">{fixture.publicKeyHex}</code></dd>
+          <dt>m ({message.bytes} bytes{own ? "" : `, from vector ${message.fromVector}`})</dt><dd><code class="atlas-break">{message.hex || "(empty)"}</code></dd>
+          <dt>r</dt><dd><code class="atlas-break">{r}</code></dd>
+          <dt>s</dt><dd><code class="atlas-break">{s}</code></dd>
+          {trace.steps.slice(0, shown).flatMap((step, i) =>
+            stageHex(i, step.values).map(([n, v]) => (
+              <>
+                <dt>Gate {i + 1}: {VALUE_NAMES[n]}</dt><dd><code class="atlas-break">{v}</code></dd>
+              </>
+            )),
+          )}
+        </dl>
+      </details>
+      <p class="atlas-hero__source">BIP 340 test-vectors.csv line {fixture.source.line}{fixture.comment ? ` (“${fixture.comment}”)` : ""}. Arithmetic by @noble/curves; every result is cross-checked against noble’s own verifier.</p>
     </div>
   );
 }

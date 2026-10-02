@@ -1,199 +1,161 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
+import { Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor } from "../kit";
 import type { DerivedTapscriptFixture, TapscriptTraceView } from "../types";
+import { StackPlates, stackHeight } from "./common";
 
 interface Props {
   fixtures: DerivedTapscriptFixture[];
   figureId: string;
 }
 
-const shortHex = (hex: string) => (hex.length > 16 ? `${hex.slice(0, 8)}…${hex.slice(-4)}` : hex || "—");
-
+type Which = "success" | "failure";
 const CHECK_TEXT: Record<string, string> = {
   valid: "valid BIP 340 signature",
-  invalid: "invalid signature: script fails",
-  empty: "empty signature: not checked, not counted",
-  "unknown-key-type": "unknown key type: not checked, counted as success",
+  invalid: "invalid signature",
+  empty: "empty signature, not checked",
+  "unknown-key-type": "unknown key type, not checked",
 };
 
-function Stack({ ids, view, label }: { ids: number[]; view: TapscriptTraceView; label: string }) {
-  return (
-    <div class="atlas-ts-stack">
-      <span class="atlas-ts-stack__label">{label}</span>
-      {ids.length ? (
-        <ol class="atlas-ts-stack__items" reversed aria-label={`${label}, top first`}>
-          {[...ids].reverse().map((i) => {
-            const e = view.elements[i];
-            return (
-              <li data-empty={e.bytes === 0 ? "true" : undefined}>
-                <span>{e.label}</span>
-                <code>{shortHex(e.hex)}</code>
-              </li>
-            );
-          })}
-        </ol>
-      ) : (
-        <p class="atlas-ts-stack__empty">empty stack</p>
-      )}
-    </div>
-  );
-}
+/** Opcode cell states on the script tape. */
+type Cell = "ahead" | "current" | "done" | "skipped" | "failed" | "never" | "exit";
 
 /**
- * tapscript-trace.v1 — the Tapscript chapter's hero figure.
+ * tapscript-trace.v1 — the Tapscript chapter's hero (drawing-first).
  *
- * A player for recorded traces, not an interpreter. Each scenario is a spend
- * copied from Bitcoin Core's script_assets_test.json; the traces were recorded
- * at build time by a recorder that refuses opcodes outside its reviewed set,
- * and the build fails unless every recorded verdict matches Core's label.
+ * A player for recorded runs, not an interpreter. The script is a tape of
+ * opcode cells with a read head; the stack is drawn as plates; the signature
+ * budget is a fuel gauge that drains by 50 per checked signature; a lamp
+ * gives the verdict at the end. Each run was recorded at build time from a
+ * Bitcoin Core test case by a recorder that refuses unreviewed opcodes, and
+ * the build fails unless every verdict matches Core's label.
  */
 export function TapscriptTrace({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const [fixtureId, setFixtureId] = useState(fixtures[0].id);
-  const [which, setWhich] = useState<"success" | "failure">("success");
-  const fixture = fixtures.find((f) => f.id === fixtureId)!;
-  const view = fixture.derived[which];
-  const last = view.steps.length; // step index `last` = final verdict
+  const [which, setWhich] = useState<Which>("success");
   const [at, setAt] = useState(0);
-  const shown = hydrated ? Math.min(at, last) : last;
-
-  const choose = (id: string) => {
-    setFixtureId(id);
-    setAt(0);
+  const fixture = fixtures.find((f) => f.id === fixtureId)!;
+  const v: TapscriptTraceView = fixture.derived[which];
+  const L = v.steps.length;
+  // Without JavaScript the run is shown played to the end; hydrated, it starts before the first opcode.
+  const p = hydrated ? Math.min(at, L) : L;
+  const done = v.steps.slice(0, p);
+  const step = p > 0 ? v.steps[p - 1] : null;
+  const stack = step ? (step.failed ? step.before : step.after) : v.initialStack;
+  const sigs = done.filter((s) => s.sig);
+  const budget = sigs.length ? sigs[sigs.length - 1].sig!.budgetAfter : v.budgetStart;
+  // The budget base (50 in BIP 342) as the recording computed it: start minus witness size.
+  const base = v.budgetStart - v.witness.totalBytes;
+  // Non-empty signatures counted against the budget so far ("Inspect signature count").
+  const counted = sigs.filter((s) => s.sig!.check !== "empty").length;
+  const atEnd = p === L;
+  const lamp = atEnd ? (v.valid ? "on" : "off") : "idle";
+  const stepOfPos = new Map(v.steps.map((s, i) => [s.position, i]));
+  const cellOf = (position: number): Cell => {
+    const i = stepOfPos.get(position);
+    // Before the end, an opcode not yet run is just ahead: the drawing must not show where a run will stop.
+    if (i === undefined) return !atEnd ? "ahead" : v.opSuccess !== null ? "exit" : "never";
+    if (i >= p) return "ahead";
+    const s = v.steps[i];
+    if (s.failed) return "failed";
+    if (i === p - 1) return "current";
+    return s.executed ? "done" : "skipped";
   };
-  const flip = (w: "success" | "failure") => {
-    setWhich(w);
-    setAt(0);
-  };
+  const list = (ids: number[]) => (ids.length ? [...ids].reverse().map((i) => v.elements[i].label).join(", ") : "empty");
+  const verdict = `${v.valid ? "Valid" : "Invalid"}: ${v.reason}. Bitcoin Core labels this witness ${v.expected === "success" ? "valid" : "invalid"}; the recording agrees.`;
+  const status =
+    p === 0
+      ? L === 0
+        ? verdict
+        : `Start: the stack, top first, is ${list(v.initialStack)}. Budget ${base} + ${v.witness.totalBytes} witness bytes = ${v.budgetStart}.`
+      : atEnd && step!.failed
+        ? `Step ${p} of ${L}, ${step!.name}. ${verdict}`
+        : `Step ${p} of ${L}, ${step!.name}: ${step!.note}.${step!.sig ? ` ${CHECK_TEXT[step!.sig.check]}; budget ${step!.sig.budgetAfter}; ${counted} signature${counted === 1 ? "" : "s"} counted so far.` : ""}${atEnd ? ` ${verdict}` : ""}`;
+  const describe = () =>
+    `Bitcoin Core test case ${fixture.caseIndex}, ${which} witness. Script: ${v.ops.map((o) => o.name).join(" ")}. Initial stack, top first: ${list(v.initialStack)}. Budget ${v.budgetStart}. ` +
+    done.map((s, i) => `Step ${i + 1}, ${s.name}: ${s.note}; stack ${s.failed ? "when it failed" : "after"}, top first: ${list(s.failed ? s.before : s.after)}${s.sig ? `; budget ${s.sig.budgetAfter}` : ""}.`).join(" ") +
+    (atEnd ? ` ${verdict}` : ` ${L - p} step${L - p === 1 ? "" : "s"} not yet shown.`);
 
-  const step = shown < last ? view.steps[shown] : null;
-  const atEnd = shown >= last;
-  const finalStack = last ? view.steps[last - 1].failed ? view.steps[last - 1].before : view.steps[last - 1].after : view.initialStack;
-  const sigSoFar = view.steps.slice(0, atEnd ? last : shown + 1).filter((s) => s.sig);
-  const budgetNow = sigSoFar.length ? sigSoFar[sigSoFar.length - 1].sig!.budgetAfter : view.budgetStart;
-  const currentPos = step?.position ?? -1;
-  const stepOfPos = new Map(view.steps.map((s, i) => [s.position, i]));
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const W = wide ? 640 : 330;
+    // The tape: one cell per opcode, wrapping.
+    const cells: Array<{ x: number; y: number; w: number; name: string; state: Cell }> = [];
+    let cx = 14, cy = 34;
+    for (const o of v.ops) {
+      const cw = o.name.length * 5.6 + 12;
+      if (cx + cw > W - 14) {
+        cx = 14;
+        cy += 30;
+      }
+      cells.push({ x: cx, y: cy, w: cw, name: o.name, state: cellOf(o.position) });
+      cx += cw + 4;
+    }
+    const tapeEnd = (cells.length ? cells[cells.length - 1].y : cy) + 22;
+    const top = tapeEnd + 34;
+    const sh = Math.max(stackHeight(stack.length), 40);
+    const gaugeX = wide ? 330 : 230, gaugeH = 96;
+    const level = Math.max(0, budget) / v.budgetStart;
+    const H = Math.max(top + sh + 24, top + gaugeH + 40);
+    return (
+      <Drawing id={id} width={W} height={H} title="A recorded tapscript run" desc={describe()}>
+        <Value at={[14, 16]} text={`SCRIPT · CORE CASE ${fixture.caseIndex} · ${which.toUpperCase()} WITNESS`} size={8.5} cls="k-value--label" />
+        {cells.map((c) => (
+          <g class="k-op" data-state={c.state}>
+            <rect class={`k-outline k-fill--plain${c.state === "current" || c.state === "failed" ? " k-cell--em" : ""}${c.state === "skipped" || c.state === "never" ? " k-dashed" : ""}`} x={c.x} y={c.y} width={c.w} height="22" />
+            <text class={`k-value${c.state === "ahead" || c.state === "never" || c.state === "skipped" ? " k-value--muted" : ""}`} x={c.x + 6} y={c.y + 14.5} style="font-size:8.5px">{c.state === "failed" ? `✕ ${c.name}` : c.name}</text>
+            {c.state === "current" || c.state === "failed" ? <path class="k-outline k-mark--plain" d={`M${c.x + c.w / 2 - 4} ${c.y - 8} h8 l-4 5 Z`} /> : null}
+            {c.state === "exit" ? <Value at={[c.x + c.w + 6, c.y + 15]} text="TRAPDOOR: VALID, NOTHING RUNS" size={8} cls="k-value--label" /> : null}
+            {c.state === "skipped" ? <line class="k-leader" x1={c.x + 4} y1={c.y + 11} x2={c.x + c.w - 4} y2={c.y + 11} /> : null}
+          </g>
+        ))}
+        <Value at={[14, top - 12]} text={step?.failed ? "STACK WHEN IT FAILED, TOP HIGHEST" : "STACK, TOP HIGHEST"} size={8.5} cls="k-value--label" />
+        <StackPlates x={36} y={top + 6} ids={stack} view={v} hatch={ids.hatch} />
+        {/* Fuel gauge: the signature budget. */}
+        <Value at={[gaugeX, top - 12]} text={v.opSuccess ? "BUDGET · NOT IN FORCE" : "BUDGET"} size={8.5} cls="k-value--label" />
+        <rect class="k-outline k-fill--plain" x={gaugeX} y={top} width="30" height={gaugeH} />
+        <rect class={v.opSuccess ? "k-fill--plain" : "k-fuel"} x={gaugeX} y={top + gaugeH * (1 - level)} width="30" height={gaugeH * level} />
+        <rect class="k-outline" x={gaugeX} y={top} width="30" height={gaugeH} fill="none" />
+        <Value at={[gaugeX + 36, top + gaugeH * (1 - level) + 4]} text={`${budget}`} size={9} />
+        <Value at={[gaugeX, top + gaugeH + 14]} text={`OF ${v.budgetStart}`} size={8} cls="k-value--muted" />
+        <Value at={[gaugeX, top + gaugeH + 26]} text={`${counted} SIG${counted === 1 ? "" : "S"} COUNTED`} size={8} cls="k-value--muted" />
+        <Lamp at={[wide ? 440 : 300, top + 40]} state={lamp} label={lamp === "idle" ? "" : v.valid ? "VALID" : "INVALID"} />
+      </Drawing>
+    );
+  };
 
   return (
-    <div class="atlas-lab atlas-ts-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      <p class="atlas-ts-badge">Recorded, verified example · not a general interpreter</p>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-lab__samples">
-            <legend>Reviewed scenario (Bitcoin Core test case)</legend>
-            {fixtures.map((f) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-case`} checked={f.id === fixtureId} onChange={() => choose(f.id)} />
-                <span>{f.label}<small>{f.shortLabel}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-segmented">
-            <legend>Witness</legend>
-            {(["success", "failure"] as const).map((w) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-witness`} checked={which === w} onChange={() => flip(w)} />
-                <span>{w === "success" ? "✓ Success fixture" : "✕ Failure fixture"}<small>{w === "success" ? "Core: valid" : "Core: invalid"}</small></span>
-              </label>
-            ))}
-          </fieldset>
+        <div class="atlas-hero__controls">
+          <Strip label="Bitcoin Core test case" name={`${figureId}-case`} options={fixtures.map((f) => ({ value: f.id, text: f.label }))} current={fixtureId} onPick={(id) => (setFixtureId(id), setAt(0))} />
+          <Strip label="Compare success/failure fixtures" name={`${figureId}-witness`} options={[{ value: "success", text: "✓ Success witness" }, { value: "failure", text: "✕ Failure witness" }]} current={which} onPick={(w) => (setWhich(w as Which), setAt(0))} />
         </div>
       ) : (
-        <p class="atlas-lab__static-note">
-          Static view: the success witness of the first scenario, played to the end. With JavaScript you can step through each of the
-          {" "}{fixtures.length} scenarios, compare the success and failure witnesses, and watch the signature budget.
-        </p>
+        <p class="atlas-hero__static">Static view: the success witness of the first case, played to the end. With JavaScript you can step through each of the {fixtures.length} cases opcode by opcode, compare the success and failure witnesses, and watch the budget.</p>
       )}
-
-      <ol class="atlas-ts-script" aria-label="Tapscript, opcode by opcode">
-        {view.ops.map((o) => {
-          const i = stepOfPos.get(o.position);
-          const s = i === undefined ? null : view.steps[i];
-          const state = o.position === currentPos ? "current" : s === null ? "never" : !s.executed ? "skipped" : i! < shown || atEnd ? (s.failed ? "failed" : "done") : "ahead";
-          return (
-            <li data-state={state}>
-              <code>{o.name}</code>
-            </li>
-          );
-        })}
-      </ol>
-
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       {hydrated ? (
-        <div class="atlas-lab__buttons" role="group" aria-label="Step through the trace">
-          <button type="button" class="manual-plate-button" onClick={() => setAt((n) => Math.max(0, n - 1))} disabled={shown <= 0}>← Previous step</button>
-          <button type="button" class="manual-plate-button" onClick={() => setAt((n) => Math.min(last, n + 1))} disabled={atEnd}>Next step →</button>
-          <button type="button" class="manual-plate-button" onClick={() => setAt(atEnd ? 0 : last)}>{atEnd ? "Back to start" : "Play to the end"}</button>
-        </div>
+        <Scrub label="Step a reviewed trace" value={p} max={L} unit="step" valueText={p === 0 ? "start, nothing run" : `step ${p} of ${L}: ${v.steps[p - 1].name}`} onSet={setAt} />
       ) : null}
-
-      <div class="atlas-ts-body">
-        <section class="atlas-panel atlas-ts-step" aria-live="polite" aria-label="Current step">
-          {step ? (
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this witness</summary>
+        <dl class="atlas-hexlist">
+          <dt>Script</dt><dd><code class="atlas-break">{v.scriptHex}</code></dd>
+          {v.elements.map((e) => (
             <>
-              <h3 class="atlas-panel__title">Step {shown + 1} of {last} · {step.name}</h3>
-              <p class="atlas-ts-step__note" data-failed={step.failed ? "true" : undefined}>{step.failed ? "✕ " : ""}{step.note}</p>
-              <div class="atlas-ts-stacks">
-                <Stack ids={step.before} view={view} label="Stack before" />
-                {step.failed ? (
-                  <div class="atlas-ts-stack"><span class="atlas-ts-stack__label">After</span><p class="atlas-ts-stack__empty" data-failed="true">script fails here</p></div>
-                ) : (
-                  <Stack ids={step.after} view={view} label="Stack after" />
-                )}
-              </div>
+              <dt>{e.label}</dt><dd><code class="atlas-break">{e.hex || "(empty)"}</code></dd>
             </>
-          ) : (
-            <>
-              <h3 class="atlas-panel__title">Result</h3>
-              <p class="atlas-lab__status">
-                <span class="atlas-lab__verdict" data-valid={view.valid ? "true" : "false"}>{view.valid ? "✓ valid" : "✕ invalid"}</span>{" "}
-                {view.reason}. Bitcoin Core labels this witness <strong>{view.expected === "success" ? "valid" : "invalid"}</strong>; the recording agrees.
-              </p>
-              {view.steps.length ? <Stack ids={finalStack} view={view} label={view.steps[last - 1].failed ? "Stack when the script failed" : "Final stack"} /> : null}
-            </>
-          )}
-          {shown === 0 && !atEnd && hydrated ? <Stack ids={view.initialStack} view={view} label="Initial stack from the witness" /> : null}
-        </section>
-
-        <section class="atlas-panel atlas-ts-budget" aria-label="Signature checks and budget">
-          <h3 class="atlas-panel__title">Signature checks</h3>
-          <p class="atlas-ts-budget__start">
-            Budget = 50 + {view.witness.totalBytes} witness bytes = <strong>{view.budgetStart}</strong>
-          </p>
-          {sigSoFar.length ? (
-            <ol class="atlas-ts-budget__list">
-              {sigSoFar.map((s) => (
-                <li data-check={s.sig!.check}>
-                  <code>{s.name}</code> · {s.sig!.keyBytes}-byte key · {CHECK_TEXT[s.sig!.check]} → budget {s.sig!.budgetAfter}
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <p class="atlas-panel__empty">No signature opcode has run yet.</p>
-          )}
-          <p class="atlas-ts-budget__now">
-            Remaining: <strong>{budgetNow}</strong> · non-empty signatures counted: {sigSoFar.filter((s) => s.sig!.check !== "empty" && s.sig!.check !== "invalid").length}
-          </p>
-          <p class="atlas-panel__scope">
-            Witness: {view.witness.totalBytes} bytes serialized = 1 (item count) + initial stack {view.witness.stackBytes} + script {view.witness.scriptBytes} + control block {view.witness.controlBytes}
-            {view.witness.annexBytes ? ` + annex ${view.witness.annexBytes}` : ""}, each part with its length prefix. The control block was checked against the output key, as in Fig. A07.2.
-          </p>
-        </section>
-      </div>
-
-      <details class="atlas-tap-exact">
-        <summary>Exact values</summary>
-        <dl>
-          <div><dt>script</dt><dd><code class="atlas-break">{view.scriptHex}</code></dd></div>
-          {view.elements.filter((e) => e.bytes > 8).map((e) => (
-            <div><dt>{e.label}</dt><dd><code class="atlas-break">{e.hex}</code></dd></div>
           ))}
+          <dt>Witness size</dt><dd>{v.witness.totalBytes} bytes = 1 (item count) + initial stack {v.witness.stackBytes} + script {v.witness.scriptBytes} + control block {v.witness.controlBytes}{v.witness.annexBytes ? ` + annex ${v.witness.annexBytes}` : ""}, each with its length prefix</dd>
         </dl>
       </details>
-      <p class="atlas-lab__source">
-        Source: Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit; linked from BIP 341’s test-vector section.
-        Signature checks use the BIP 341 signature message with the BIP 342 extension.
-      </p>
+      <p class="atlas-hero__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit and linked from BIP 341. Each control block was checked against its output key first, as in Fig. A07.4.</p>
     </div>
   );
 }

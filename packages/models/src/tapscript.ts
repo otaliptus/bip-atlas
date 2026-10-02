@@ -17,6 +17,9 @@ import { SigMsgError, checkControlBlock, compactSize, sigMsg, tapLeafHash, tapro
 
 export class TraceScopeError extends Error {}
 
+import { BUDGET_BASE, SIGOP_COST } from "./tapscript-budget";
+export { BUDGET_BASE, SIGOP_COST };
+
 const OP = {
   OP_0: 0x00, OP_PUSHDATA1: 0x4c, OP_PUSHDATA2: 0x4d, OP_PUSHDATA4: 0x4e, OP_1NEGATE: 0x4f,
   OP_NOP: 0x61, OP_IF: 0x63, OP_NOTIF: 0x64, OP_ELSE: 0x67, OP_ENDIF: 0x68, OP_VERIFY: 0x69, OP_RETURN: 0x6a,
@@ -191,7 +194,7 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
   if (leafVersion !== 0xc0) throw new TraceScopeError("leaf version is not 0xc0");
   const commitmentOk = checkControlBlock(spk.slice(4), scriptHex, control).ok;
   const scriptSigEmpty = (c[which]!.scriptSig ?? "") === "";
-  const budgetStart = 50 + witnessSize(w);
+  const budgetStart = BUDGET_BASE + witnessSize(w);
   const base = { scriptHex, leafVersion, initialStack: stack0, annexHex, witnessBytes: witnessSize(w), budgetStart, commitmentOk };
   const steps: TraceStep[] = [];
   let sigOpsCounted = 0;
@@ -345,7 +348,7 @@ export function traceTapscript(c: ScriptAssetCase, which: "success" | "failure")
         return fail(`${o.name}: signature fails BIP 340 verification against the 32-byte key`);
       }
       if (sig !== "") {
-        budget -= 50;
+        budget -= SIGOP_COST;
         sigOpsCounted++;
         if (budget < 0) {
           step.sig = { check, budgetAfter: budget, keyBytes: key.length / 2 };

@@ -1,48 +1,71 @@
+import { Arrow, Bracket, Cells, Drawing, KeyGlyph, Lamp, Machine, Value, idsFor } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
+import { ownTrace, short } from "./stages";
+
+const PK_BYTES = 32;
+const SIG_BYTES = 64;
 
 /**
- * schnorr-signature-layout.v1 — static. The byte shapes BIP 340 fixes: a
- * 32-byte x-only public key, a message of any length, and a 64-byte signature
- * made of r (an x coordinate) and s (a scalar). Values are one published vector.
+ * schnorr-signature-layout.v1 — static. The verifier as a machine with three
+ * input slots of fixed shape: a 32-byte x-only key, a message of any length
+ * and a 64-byte signature (r ‖ s), and a lamp for its yes-or-no answer. One
+ * published vector; exact values in the disclosure.
  */
 export function SignatureLayout({ fixture }: { fixture: DerivedSchnorrFixture }) {
-  const r = fixture.signatureHex.slice(0, 64);
-  const s = fixture.signatureHex.slice(64);
-  const msgBytes = fixture.messageHex.length / 2;
+  const pk = fixture.publicKeyHex, m = fixture.messageHex, sig = fixture.signatureHex;
+  if (pk.length / 2 !== PK_BYTES || sig.length / 2 !== SIG_BYTES) throw new Error(`${fixture.id}: not a 32-byte key and 64-byte signature`);
+  const r = sig.slice(0, 64), s = sig.slice(64);
+  const mBytes = m.length / 2;
+  const valid = ownTrace(fixture).valid;
+  if (valid !== fixture.expected) throw new Error(`${fixture.id}: verdict differs from the published result`);
+  const ids = idsFor("a06-inputs");
+  const cell = 5;
+  const msgShown = Math.min(mBytes, 32);
+  const desc =
+    `Vector ${fixture.vectorIndex} from the BIP 340 CSV goes into the verifier. Public key pk, 32 bytes: ${pk}. ` +
+    `Message m, ${mBytes} bytes here, though any length is allowed: ${m || "(empty)"}. Signature, 64 bytes: r = ${r}, then s = ${s}. ` +
+    `No secret key goes in. The verifier answers ${valid ? "true" : "false"}, as the CSV says.`;
   return (
-    <div class="atlas-sig-layout">
-      <div class="atlas-sig-layout__row">
-        <p class="atlas-sig-layout__head"><span class="atlas-sig-layout__name">pk</span><span>public key · 32 bytes</span></p>
-        <div class="atlas-sig-layout__cells" data-cols="1">
-          <span class="atlas-sig-layout__cell" data-part="pk">
-            <code class="atlas-break">{fixture.publicKeyHex}</code>
-            <small>x coordinate of P; its y is taken to be the even one</small>
-          </span>
-        </div>
-        <p class="atlas-sig-layout__aside">Same point as the 33-byte compressed key <code>02</code> ‖ pk.</p>
-      </div>
-      <div class="atlas-sig-layout__row">
-        <p class="atlas-sig-layout__head"><span class="atlas-sig-layout__name">m</span><span>message · any length, here {msgBytes} bytes</span></p>
-        <div class="atlas-sig-layout__cells" data-cols="1">
-          <span class="atlas-sig-layout__cell" data-part="m"><code class="atlas-break">{fixture.messageHex}</code></span>
-        </div>
-      </div>
-      <div class="atlas-sig-layout__row">
-        <p class="atlas-sig-layout__head"><span class="atlas-sig-layout__name">sig</span><span>signature · 64 bytes</span></p>
-        <div class="atlas-sig-layout__cells" data-cols="2">
-          <span class="atlas-sig-layout__cell" data-part="r">
-            <span class="atlas-sig-layout__tag">r · bytes 0–31</span>
-            <code class="atlas-break">{r}</code>
-            <small>x coordinate of a point R with even y; must be below p</small>
-          </span>
-          <span class="atlas-sig-layout__cell" data-part="s">
-            <span class="atlas-sig-layout__tag">s · bytes 32–63</span>
-            <code class="atlas-break">{s}</code>
-            <small>a number; must be below n</small>
-          </span>
-        </div>
-      </div>
-      <p class="atlas-lab__source">BIP 340 test-vectors.csv line {fixture.source.line} (vector {fixture.vectorIndex}). Hex most significant byte first.</p>
-    </div>
+    <>
+      <Drawing id="a06-inputs" width={344} height={282} title="Three inputs, one answer" desc={desc}>
+        <KeyGlyph at={[14, 14]} role="public" scale={0.8} />
+        <Value at={[44, 23]} text={`PK · PUBLIC KEY · ${PK_BYTES} BYTES`} size={9} cls="k-value--label" />
+        <Cells x={14} y={32} values={Array.from({ length: PK_BYTES }, () => "")} size={cell} text={false} roleOf={() => "public"} />
+        <Value at={[14 + PK_BYTES * cell + 8, 40]} text={short(pk)} size={9.5} />
+
+        <Value at={[14, 66]} text={`M · MESSAGE · ANY LENGTH, HERE ${mBytes} BYTES`} size={9} cls="k-value--label" />
+        <Cells x={14} y={74} values={Array.from({ length: msgShown }, () => "")} size={cell} text={false} roleOf={() => "plain"} />
+        <rect class="k-outline k-fill--plain k-dashed" x={14 + msgShown * cell} y={74} width={34} height={cell} />
+        <Value at={[14 + msgShown * cell + 42, 82]} text={mBytes ? short(m) : "(empty)"} size={9.5} />
+
+        <Value at={[14, 108]} text={`SIG · SIGNATURE · ${SIG_BYTES} BYTES = r ‖ s`} size={9} cls="k-value--label" />
+        <Cells x={14} y={116} values={Array.from({ length: SIG_BYTES }, () => "")} size={cell} text={false} roleOf={() => "sig"} cutBefore={(i) => i === 32} />
+        <Bracket x1={14} x2={14 + 32 * cell} y={124} text="bytes 0–31" />
+        <Bracket x1={14 + 32 * cell} x2={14 + 64 * cell} y={124} text="bytes 32–63" />
+        <Value at={[14 + 16 * cell, 160]} text={`r = ${short(r)}`} size={9} anchor="middle" />
+        <Value at={[14 + 48 * cell, 160]} text={`s = ${short(s)}`} size={9} anchor="middle" />
+        <Value at={[14 + 16 * cell, 172]} text="x of a point R" size={8.5} anchor="middle" cls="k-value--muted" />
+        <Value at={[14 + 48 * cell, 172]} text="a number below n" size={8.5} anchor="middle" cls="k-value--muted" />
+
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
+        <Arrow d="M174 140 V182 H150 V194" ids={ids} />
+        <Machine at={[118, 198]} w={72} d={30} h={26} label="Verify" sub="BIP 340" />
+        <Arrow d="M186 228 H266" ids={ids} />
+        <Lamp at={[284, 228]} state={valid ? "on" : "off"} label={valid ? "TRUE" : "FALSE"} />
+        <Value at={[14, 262]} text="NO SECRET KEY GOES IN" size={8.5} cls="k-value--muted" />
+        <Value at={[14, 274]} text={`VECTOR ${fixture.vectorIndex} · BIP 340 CSV LINE ${fixture.source.line}`} size={8.5} cls="k-value--muted" />
+      </Drawing>
+      <details class="atlas-disclosure">
+        <summary>Exact values</summary>
+        <dl class="atlas-hexlist">
+          <dt>pk (32 bytes)</dt><dd><code class="atlas-break">{pk}</code></dd>
+          <dt>m ({mBytes} bytes)</dt><dd><code class="atlas-break">{m || "(empty)"}</code></dd>
+          <dt>r (signature bytes 0–31)</dt><dd><code class="atlas-break">{r}</code></dd>
+          <dt>s (signature bytes 32–63)</dt><dd><code class="atlas-break">{s}</code></dd>
+        </dl>
+      </details>
+    </>
   );
 }

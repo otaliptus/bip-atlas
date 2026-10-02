@@ -31,8 +31,6 @@ import {
   TxWorked,
   AddressWorked,
   PsbtWorked,
-  SchnorrWorked,
-  TapscriptWorked,
   P2shWorked,
   P2shTwoStage,
   P2shCommitment,
@@ -56,11 +54,17 @@ import {
   Musig2Rounds,
   Musig2KeyAgg,
   Musig2PsigChecks,
-  Musig2Worked,
+  ChainView,
+  Coefficients,
+  RoundStory,
+  NonceOnce,
   SpDerivation,
   SpAddress,
   SpEligibility,
-  SpWorked,
+  EcdhStory,
+  DeriveStory,
+  ScanLoop,
+  SpLabels,
   GcsFilter,
   BfGolomb,
   BfChain,
@@ -99,6 +103,11 @@ import {
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
+  ByteSizes,
+  Equation,
+  VerifyStory,
+  FailGates,
+  EvenY,
   TaprootTweak,
   TaprootCommitment,
   SigMsgLayout,
@@ -109,6 +118,13 @@ import {
   TapscriptWitness,
   TapscriptTrace,
   SigopsBudget,
+  TapscriptOrder,
+  SigRules,
+  MultisigChain,
+  StackStory,
+  SigPays,
+  OpSuccess,
+  MinimalIf,
   type DerivedTapscriptFixture,
   type DerivedTaprootTreeFixture,
   type DerivedTaprootKeyspendFixture,
@@ -196,6 +212,11 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
   {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
   {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
+  {figure.recipe === "schnorr-byte-sizes.v1" && <ByteSizes fixture={sig[0]} />}
+  {figure.recipe === "schnorr-equation.v1" && <Equation fixture={sig[0]} />}
+  {figure.recipe === "schnorr-verify-story.v1" && <VerifyStory fixture={sig[0]} />}
+  {figure.recipe === "schnorr-fail-gates.v1" && <FailGates fixtures={sig} />}
+  {figure.recipe === "schnorr-even-y.v1" && <EvenY fixtures={sig} />}
   {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
   {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
   {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
@@ -206,6 +227,13 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {figure.recipe === "tapscript-order.v1" && <TapscriptOrder fixtures={ts} />}
+  {figure.recipe === "tapscript-sig-rules.v1" && <SigRules fixtures={ts} />}
+  {figure.recipe === "tapscript-multisig.v1" && <MultisigChain fixture={ts[0]} />}
+  {figure.recipe === "tapscript-stack-story.v1" && <StackStory fixture={ts[0]} />}
+  {figure.recipe === "tapscript-sig-pays.v1" && <SigPays fixtures={ts} />}
+  {figure.recipe === "tapscript-op-success.v1" && <OpSuccess fixture={ts[0]} />}
+  {figure.recipe === "tapscript-minimalif.v1" && <MinimalIf fixture={ts[0]} />}
   {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
   {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
@@ -224,9 +252,17 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
   {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
   {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
+  {figure.recipe === "musig2-chain-view.v1" && <ChainView fixture={musig[0]} />}
+  {figure.recipe === "musig2-coefficients.v1" && <Coefficients fixture={musig[0]} />}
+  {figure.recipe === "musig2-round-story.v1" && <RoundStory fixture={musig[0]} />}
+  {figure.recipe === "musig2-nonce-once.v1" && <NonceOnce fixture={musig[0]} />}
   {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
   {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
   {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
+  {figure.recipe === "sp-ecdh.v1" && <EcdhStory />}
+  {figure.recipe === "sp-derive-story.v1" && <DeriveStory fixture={sp[0]} />}
+  {figure.recipe === "sp-scan-loop.v1" && <ScanLoop fixture={sp[0]} />}
+  {figure.recipe === "sp-labels.v1" && <SpLabels fixture={sp[0]} />}
   {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
   {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
   {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
@@ -242,15 +278,11 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
-      {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
-      {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
-      {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
-      {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
       {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
       {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
       {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}

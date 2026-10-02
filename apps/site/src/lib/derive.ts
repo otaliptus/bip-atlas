@@ -38,6 +38,7 @@ import {
   taprootSighash,
   verifyKeyPath,
   decodeNum,
+  decodeTapscript,
   traceTapscript,
   traceP2sh,
   decodeScript,
@@ -645,6 +646,17 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
     return i;
   };
   const initialStack = t.initialStack.map(idx);
+  const steps = t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null }));
+  // A value a signature opcode popped as its key is a key of an unknown type unless it is 32 bytes (BIP 342).
+  for (const s of steps) {
+    if (!s.sig) continue;
+    const key = elements[s.before[s.before.length - 1]];
+    if (key.bytes !== 32 && key.bytes !== 0) key.label = `${key.bytes}-byte key, unknown type`;
+  }
+  // An OP_SUCCESSx met while decoding ends validation as valid before anything runs (BIP 342).
+  const dec = decodeTapscript(t.scriptHex);
+  const opSuccess = dec.kind === "op-success" ? dec.at.name : null;
+  if (opSuccess !== null && (!t.valid || t.steps.length > 0)) throw new Error(`case ${c.comment}: ${opSuccess} found, but the trace is not an immediate success`);
   const size = (e: string) => (e.length / 2 < 253 ? 1 : 3) + e.length / 2;
   const control = w[w.length - (t.annexHex ? 2 : 1)];
   return {
@@ -664,10 +676,12 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
       annexBytes: t.annexHex ? size(t.annexHex) : 0,
       totalBytes: t.witnessBytes,
       siblings: (control.length / 2 - 33) / 32,
+      controlHex: control,
     },
     budgetStart: t.budgetStart,
     sigOpsCounted: t.sigOpsCounted,
-    steps: t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null })),
+    opSuccess,
+    steps,
   };
 }
 
@@ -1141,12 +1155,12 @@ function deriveMusig2PsigChecks(f: Musig2PsigChecksFixture): DerivedMusig2PsigCh
   const v0 = d.valid_test_cases[0];
   const ok = partialSigVerify(hx(v0.expected), v0.nonce_indices.map((i: number) => P[i]), v0.key_indices.map((i: number) => X[i]), [], [], M[v0.msg_index], v0.signer_index);
   if (!ok) throw new Error(`${f.id}: the valid partial signature does not verify`);
-  rows.push({ label: "Published valid partial signature", signer: v0.signer_index, psig: v0.expected.toLowerCase(), verdict: "valid", detail: "s·G = Re + e·a·g·P holds" });
+  rows.push({ label: "Published valid partial signature", signer: v0.signer_index, psig: v0.expected.toLowerCase(), verdict: "valid", detail: "s·G = Re + e·a·g′·P holds" });
   for (const c of d.verify_fail_test_cases) {
     const r = partialSigVerify(hx(c.sig), c.nonce_indices.map((i: number) => P[i]), c.key_indices.map((i: number) => X[i]), [], [], M[c.msg_index], c.signer_index);
     if (r) throw new Error(`${f.id}: "${c.comment}" verifies but should not`);
     const s = BigInt(`0x${c.sig}`);
-    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "invalid", detail: s >= 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n ? "s is not below the group order n" : "s·G = Re + e·a·g·P does not hold" });
+    rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: "invalid", detail: s >= 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n ? "s is not below the group order n" : "s·G = Re + e·a·g′·P does not hold" });
   }
   for (const c of d.verify_error_test_cases) {
     let caught: unknown = null;
@@ -1190,6 +1204,8 @@ function deriveSp(f: SpVectorFixture): DerivedSpFixture {
   const dec = spDecodeAddress(addrs[0]);
   const senderSecret = send.sharedSecrets.find((x) => x.Bscan === dec.Bscan)?.secret ?? null;
   const paidScan = spDecodeAddress(s.given.recipients[0].address).Bscan;
+  const paidSecret = send.sharedSecrets.find((x) => x.Bscan === paidScan)?.secret;
+  if (!paidSecret) throw new Error(`${f.id}: the sender has no shared secret for the scan key it pays`);
   return {
     ...f,
     derived: {
@@ -1201,7 +1217,7 @@ function deriveSp(f: SpVectorFixture): DerivedSpFixture {
       tweak: res.tweak!,
       sharedSecret: res.sharedSecret!,
       secretsAgree: senderSecret === res.sharedSecret,
-      senderSecret: send.sharedSecrets.find((x) => x.Bscan === paidScan)?.secret ?? "",
+      senderSecret: paidSecret,
       receiver: { address: addrs[0], Bscan: dec.Bscan, Bspend: dec.Bm, labels: g.labels, labeledAddresses: addrs.slice(1) },
       paidTo: [...new Set<string>(s.given.recipients.map((x: any) => x.address))].map((a) => {
         const i = addrs.indexOf(a);

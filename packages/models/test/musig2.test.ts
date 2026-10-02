@@ -208,7 +208,7 @@ describe("musig2 chapter prose numbers", () => {
     expect(s.valid_test_cases.length).toBe(4);
     expect(text).toContain("The four signature-aggregation vectors published with BIP 327");
     expect(s.valid_test_cases.filter((c: { tweak_indices: number[] }) => c.tweak_indices.length > 0).length).toBe(2);
-    expect(text).toContain("Two of the figure’s vectors carry tweaks");
+    expect(text).toContain("Two of the vectors in Fig. A14.4 carry tweaks");
     const v = vec("sign_verify_vectors");
     expect(v.verify_fail_test_cases.length).toBe(3);
     expect(v.verify_error_test_cases.length).toBe(2);

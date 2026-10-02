@@ -10,9 +10,7 @@ import type {
   DerivedBip32Fixture,
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
-  DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
-  DerivedTapscriptFixture,
   DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
@@ -20,8 +18,6 @@ import type {
   DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
   DerivedDescriptorFixture,
-  DerivedMusig2SessionFixture,
-  DerivedSpFixture,
   DerivedBfBlockFixture,
   DerivedV2Fixture,
   DerivedBip322Fixture,
@@ -172,56 +168,6 @@ export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture })
       steps={steps}
       label="Each published PSBT state stacked in order, growing as roles add records."
       source={<>Source: BIP 174 lines {f.steps[0].line}–{f.extracted.line}; parsed and combined by the tested PSBT model.</>}
-    />
-  );
-}
-
-/* ---------- BIP 340 ---------- */
-export function SchnorrWorked({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
-  const f = fixtures.find((x) => x.expected) ?? fixtures[0];
-  const t = f.derived.traces[f.derived.ownMessage];
-  const v = (stage: string) => t.steps.find((s) => s.stage === stage)?.values ?? {};
-  const steps: WorkedStep[] = [
-    { title: "Lift the key to the point P with even y", values: [{ label: "pk = x(P)", value: f.publicKeyHex }, { label: "y(P)", value: v("lift-x").y }], layer: { size: 0.6, tone: "plain" } },
-    { title: "Split the signature and check r < p and s < n", values: [{ label: "r", value: v("r-range").r }, { label: "s", value: v("s-range").s }], layer: { tone: "wash", cells: 2 } },
-    { title: "Hash r ‖ P ‖ m with the BIP0340/challenge tag", values: [{ label: "m", value: f.messageHex || "(empty)" }, { label: "e", value: v("challenge").e }], layer: { size: 0.8, tone: "wash", cells: 3 } },
-    { title: "Compute R = s⋅G − e⋅P", values: [{ label: "x(R)", value: v("compute-r").x }, { label: "y(R)", value: v("compute-r").y }], note: "Checked: R is not the point at infinity, and y(R) is even.", layer: { size: 0.6, tone: "wash" } },
-    { title: "Compare x(R) with r", note: t.valid ? "Equal: the signature verifies, as the CSV says." : "Different: verification fails.", layer: { size: 0.45, tone: t.valid ? "accent" : "fail" } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>Published vector {f.vectorIndex} from the BIP 340 CSV, checked step by step.</>}
-      steps={steps}
-      label="The five stages of verifying one valid signature, drawn as stacked layers."
-      source={<>Source: BIP 340 test-vectors.csv line {f.source.line}; arithmetic by @noble/curves.</>}
-    />
-  );
-}
-
-export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
-  const f = fixtures.find((x) => x.caseIndex === 1109) ?? fixtures[0];
-  const v = f.derived.success;
-  const label = (ids: number[]) => (ids.length ? [...ids].reverse().map((i) => v.elements[i].label).join(" / ") : "empty");
-  const steps: WorkedStep[] = [
-    {
-      title: "Start from the witness, minus the script and control block",
-      values: [{ label: "stack, top first", value: label(v.initialStack) }],
-      note: `Sigops budget: 50 + ${v.witness.totalBytes} witness bytes = ${v.budgetStart}; each checked signature costs 50.`,
-      layer: { size: 0.35, tone: "plain", cells: v.initialStack.length },
-    },
-    ...v.steps.map((s): WorkedStep => ({
-      title: s.name,
-      values: [{ label: "stack, top first", value: label(s.after) }],
-      note: s.note + (s.sig ? `; budget now ${s.sig.budgetAfter}` : ""),
-      layer: { size: 0.3 + 0.15 * s.after.length, tone: s.sig ? "accent" : "wash", cells: s.after.length },
-    })),
-  ];
-  return (
-    <WorkedExample
-      intro={<>Bitcoin Core test case {f.caseIndex} ({f.label}), success witness: the starting stack, then one opcode per layer. Cells are stack elements.</>}
-      steps={steps}
-      label="The stack after each opcode of one recorded tapscript run."
-      source={<>Source: Core script_assets_test.json case {f.caseIndex}, pinned; recorded at build time and matched to Core’s label.</>}
     />
   );
 }
@@ -418,50 +364,6 @@ export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixt
       steps={steps}
       label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
       source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
-    />
-  );
-}
-
-/* ---------- BIP 327 ---------- */
-export function Musig2Worked({ fixtures }: { fixtures: DerivedMusig2SessionFixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const steps: WorkedStep[] = [
-    { title: `${d.signers.length} plain public keys, each with a coefficient`, values: d.signers.map((s, i) => ({ label: `signer ${i + 1} key · a`, value: `${s.pubkey} · ${s.secondKey ? "1" : s.coefficient}` })), note: "a = H(L ‖ key) mod n, except the second distinct key, which gets 1.", layer: { size: 0.7, tone: "plain", cells: d.signers.length } },
-    { title: "Aggregate key Q = Σ aᵢ·Pᵢ", values: [{ label: "Q (x-only)", value: d.aggXonly }], note: "One BIP 340 public key; nothing in it shows how many signers there are.", layer: { size: 0.55, tone: "accent", cells: 1 } },
-    { title: "Round 1: two-point nonces, summed", values: [...d.signers.map((s, i) => ({ label: `signer ${i + 1} nonce`, value: `${s.pubnonce[0]} ${s.pubnonce[1]}` })), { label: "aggregate nonce", value: `${d.aggnonce[0]} ${d.aggnonce[1]}` }], layer: { tone: "wash", cells: 2 * d.signers.length } },
-    { title: "Session: b, R = R₁ + b·R₂, challenge e", values: [{ label: "b", value: d.b }, { label: "R", value: d.R }, { label: "e", value: d.e }], layer: { size: 0.6, tone: "hatch", cells: 3 } },
-    { title: "Round 2: partial signatures, each verified", values: d.signers.map((s, i) => ({ label: `signer ${i + 1} s`, value: `${s.psig} ${s.psigVerifies ? "✓" : "✕"}` })), layer: { size: 0.8, tone: "plain", cells: d.signers.length } },
-    { title: "Sum them: an ordinary BIP 340 signature", values: [{ label: "signature", value: d.signature }], note: d.signatureVerifies ? "BIP 340 verification accepts it for Q and the message." : "Verification fails.", layer: { size: 0.9, tone: d.signatureVerifies ? "accent" : "fail", cells: 2 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 327’s first signature-aggregation vector: {d.signers.length} signers, one message, from public keys to a single signature.</>}
-      steps={steps}
-      label="Key aggregation, nonce round, session values, partial signatures and the final signature, drawn as stacked layers."
-      source={<>Source: BIP 327 sig_agg_vectors.json, case {f.caseIndex}; recomputed by the tested MuSig2 model and verified with noble.</>}
-    />
-  );
-}
-
-/* ---------- BIP 352 ---------- */
-export function SpWorked({ fixtures }: { fixtures: DerivedSpFixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const mine = d.txOutputs.find((o) => o.mine);
-  const steps: WorkedStep[] = [
-    { title: "The receiver publishes one static address", values: [{ label: "address", value: d.receiver.address }, { label: "B_scan", value: d.receiver.Bscan }, { label: "B_spend", value: d.receiver.Bspend }], layer: { size: 0.9, tone: "plain", cells: 2 } },
-    { title: "The sender's eligible inputs give A", values: [...d.inputs.filter((i) => i.pubkey).map((i, n) => ({ label: `input ${n + 1} key`, value: i.pubkey! })), { label: "A = sum", value: d.A }], layer: { size: 0.7, tone: "wash", cells: d.inputs.length } },
-    { title: "Input hash over the smallest outpoint and A", values: [{ label: "smallest outpoint", value: d.smallestOutpoint }, { label: "input_hash", value: d.inputHash }], layer: { size: 0.55, tone: "hatch", cells: 1 } },
-    { title: "Both sides reach the same ECDH secret", values: [{ label: "input_hash·a·B_scan = input_hash·b_scan·A", value: d.sharedSecret }], note: d.secretsAgree ? "The sender used the inputs' private keys; the receiver used b_scan and the public A. Same point." : "", layer: { size: 0.6, tone: "accent", cells: 1 } },
-    { title: "Output P₀ = B_spend + t₀·G, found by the receiver's scan", values: [{ label: "output key", value: mine?.key ?? "—" }], note: "The output is an ordinary taproot key; only the sender and whoever holds b_scan can recognise it.", layer: { size: 0.8, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 352’s first send-and-receive vector, “{d.comment}”: from a static address to an output only the receiver can recognise.</>}
-      steps={steps}
-      label="Address, input keys, input hash, shared secret and output, drawn as stacked layers."
-      source={<>Source: BIP 352 send_and_receive_test_vectors.json (line {f.source.line}); recomputed by the tested model and checked against the vector.</>}
     />
   );
 }
