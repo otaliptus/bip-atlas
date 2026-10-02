@@ -17,7 +17,7 @@ export function BfQueryStory({ fixture }: { fixture: DerivedBfBlockFixture }) {
   const tests = 100 * 10_000;
   const fp = Math.round(expectedFalsePositives(tests) * 10) / 10;
   const M = group(BASIC_M.toString());
-  const scene = (ids: DrawingIds, p: BfProbe) => {
+  const scene = (_: DrawingIds, p: BfProbe) => {
     const tx = along(p.target, d.F, 14, 200);
     return (
       <>
@@ -26,12 +26,12 @@ export function BfQueryStory({ fixture }: { fixture: DerivedBfBlockFixture }) {
         <Value at={[116, 23.5]} text={p.from === "this block" ? "FROM THIS BLOCK" : `FROM ${fromText(p.from).toUpperCase()}`} size={8} cls="k-value--muted" />
         <line class="k-line" x1="14" y1="66" x2="200" y2="66" />
         {d.values.map((v, i) => (
-          <rect class={`k-cell${i < p.steps.length ? " k-mark--hash" : ""}`} x={along(v, d.F, 14, 200) - 3} y={63} width="6" height="6" style={i < p.steps.length ? undefined : `fill:${ids.hatch}`} data-decoded={String(i < p.steps.length)} />
+          <rect class={`k-cell ${i < p.steps.length ? "k-mark--hash" : "k-fill--plain k-dashed"}`} x={along(v, d.F, 14, 200) - 3} y={63} width="6" height="6" data-decoded={String(i < p.steps.length)} />
         ))}
         <path class="k-bf-target" d={`M${tx} 84 V72 M${tx - 4} 77 L${tx} 71 L${tx + 4} 77`} />
         <Computer at={[236, 44]} label="client" />
         <Value at={[249, 104]} text={p.matched ? "FETCH BLOCK" : "SKIP BLOCK"} size={8.5} anchor="middle" cls="k-value--label" />
-        <Value at={[14, 104]} text={p.matched ? `VALUE ${p.steps.length} = TARGET` : `VALUE ${p.steps.length} > TARGET`} size={8.5} cls="k-value--label" />
+        <Value at={[14, 104]} text={p.matched ? `VALUE ${p.steps.length} = TARGET` : p.steps.at(-1)?.outcome === "greater" ? `VALUE ${p.steps.length} > TARGET` : "ALL VALUES < TARGET"} size={8.5} cls="k-value--label" />
       </>
     );
   };
@@ -43,7 +43,7 @@ export function BfQueryStory({ fixture }: { fixture: DerivedBfBlockFixture }) {
     },
     {
       note: `A script from ${fromText(miss.from)} does not. Given the right filter, no output here pays to it and no input spends it: skip.`,
-      desc: `The script ${miss.script} hashes to ${miss.target}; decoding stops at value ${miss.steps.length}, which passes it. No match: the client skips the block. Values it never decoded are hatched.`,
+      desc: `The script ${miss.script} hashes to ${miss.target}; decoding stops at value ${miss.steps.length}, which passes it. No match: the client skips the block. Values it never decoded are drawn empty.`,
       draw: (ids) => scene(ids, miss),
     },
     {

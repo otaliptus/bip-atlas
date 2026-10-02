@@ -48,7 +48,7 @@ export function BfSieve({ fixture }: { fixture: DerivedBfBlockFixture }) {
       {outs.map((e, i) => card(e, y1 + i * rowH))}
       <Value at={[x0, y2 - 4]} text={`SPENT SCRIPTS · ${spent.length}`} size={8} cls="k-value--muted" />
       {spent.map((e, i) => card(e, y2 + i * rowH))}
-      <path class="k-line" d={`M${x0 + cw + 46} ${ly + 30} H${lx - 6}`} marker-end={ids.arrow} />
+      <path class="k-line" d={`M${x0 + cw * 0.62 + 60} ${ly + 30} H${lx - 6}`} marker-end={ids.arrow} />
       <Value at={[lx, ly - 22]} text={`THE SET · ${d.N} SCRIPTS`} size={8.5} cls="k-value--label" />
       <Value at={[lx, ly - 10]} text="EACH ONE ONCE" size={8} cls="k-value--muted" />
       {/* A parking lot: painted bay lines, one script per bay. */}

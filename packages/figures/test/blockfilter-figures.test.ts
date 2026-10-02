@@ -126,10 +126,11 @@ describe("block-filter figures", () => {
   it("A16.5 compares the floor, the filter and fixed width for two blocks", () => {
     const s = html(h(BfSize, { fixtures: [b180, b926] }));
     expect(s).toContain("FLOOR 260");
-    expect(s).toContain("FILTER 280 · 21.5/EL");
+    expect(s).toContain("CODED 272 · 20.9/EL");
+    expect(s).toContain("FIXED 312 · 24/EL");
     expect(s).toContain("FLOOR 180");
-    expect(s).toContain("FILTER 200 · 22.2/EL");
-    expect(s).toMatch(/FIXED 303 · 23\.3\/EL/);
+    expect(s).toContain("CODED 192 · 21.3/EL");
+    expect(s).toContain("FIXED 207 · 23/EL");
   });
 
   it("A16.7 shows a match, a miss, and the model's false-positive arithmetic", () => {
@@ -174,6 +175,16 @@ describe("block-filter hero", () => {
     // two compositions
     expect(s.split('data-decoded="true"').length - 1).toBe(2 * read);
     expect(s.split('data-decoded="false"').length - 1).toBe(2 * (fx[0].derived.N - read));
+  });
+  it("says 'all values are below it' when decoding runs out, not 'passes it'", () => {
+    const f987 = fx.find((f) => f.derived.height === 987876)!;
+    const p = f987.derived.probes.find((q) => q.from !== "this block" && q.steps.at(-1)?.outcome === "less");
+    expect(p).toBeDefined();
+    const s = html(h(GcsFilter, { fixtures: [f987, ...fx.filter((f) => f !== f987)], figureId: "x" }));
+    expect(s).not.toContain("passes it");
+    const empty = html(h(GcsFilter, { fixtures: [fx.find((f) => f.derived.N === 0)!], figureId: "y" }));
+    expect(empty).toContain("N = 0: nothing can match");
+    expect(empty).not.toContain("hashes to");
   });
   it("every foreign script misses and every own script matches", () => {
     for (const f of fx) for (const p of f.derived.probes) expect(p.matched).toBe(p.from === "this block");

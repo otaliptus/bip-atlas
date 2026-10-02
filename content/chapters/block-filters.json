@@ -170,7 +170,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against about 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
+          "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
           "claims": [
             "min-size",
             "size-computed"
@@ -185,7 +185,7 @@
             "bf-block-180480",
             "bf-block-926485"
           ],
-          "caption": "Two published filters, in bits: the floor of P + 1 bits per element, the filter itself, and each hashed value written at fixed width.",
+          "caption": "Two published filters, in bits after the N byte: the floor of P + 1 bits per element, the coded filter, and each hashed value written at fixed width.",
           "claims": [
             "min-size",
             "size-computed"
@@ -205,12 +205,18 @@
             "bf-block-987876",
             "bf-block-1414221"
           ],
-          "caption": "Six of BIP 158’s testnet blocks. Each filter is rebuilt from the block and the scripts it spends, and equals the published bytes; test scripts come from the block itself and from other vector blocks. Values the client never decodes are hatched.",
+          "caption": "Six of BIP 158’s testnet blocks. Each filter is rebuilt from the block and the scripts it spends, and equals the published bytes; test scripts come from the block itself and from other vector blocks. Values the client never reads are drawn empty.",
           "claims": [
             "vectors",
             "contents",
             "query",
-            "gr-coding"
+            "gr-coding",
+            "siphash",
+            "key",
+            "gcs-steps",
+            "serialize",
+            "gcs-def",
+            "scope-of-miss"
           ],
           "layout": "wide"
         },
@@ -321,7 +327,8 @@
             "client-sync",
             "headers-why",
             "honest-peer",
-            "filter-check"
+            "filter-check",
+            "block-not-enough"
           ],
           "layout": "prose"
         },

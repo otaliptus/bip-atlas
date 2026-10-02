@@ -37,25 +37,28 @@ export function BfPeerStory() {
       ),
     },
     {
-      note: "It downloads that one block and builds the filter itself, then the header from it and H2.",
-      desc: "Schematic. The client downloads the block at the first disagreement, computes its filter, and from the filter hash and the agreed header H2 computes the third header itself.",
+      note: "It downloads that block, gets the scripts its inputs spend, and builds the filter and the header from H2 itself.",
+      desc: "Schematic. The client downloads the block at the first disagreement and obtains the scripts its inputs spend, which the block does not contain; it computes the filter, and from the filter hash and the agreed header H2 the third header.",
       draw: (ids) => (
         <>
           <Computer at={[14, 40]} label="client" />
-          <rect class="k-outline k-fill--plain" x="60" y="40" width="40" height="28" />
-          <Value at={[80, 58]} text="BLOCK" size={8} anchor="middle" cls="k-value--label" />
-          <path class="k-line" d="M104 54 H124" marker-end={ids.arrow} />
-          <Machine at={[160, 76]} w={56} d={30} h={24} label="build" role="hash" />
-          <Value at={[240, 78]} text="FROM THE FILTER" size={8} cls="k-value--muted" />
-          <Value at={[240, 89]} text="HASH AND H2" size={8} cls="k-value--muted" />
-          <path class="k-line" d="M214 54 H234" marker-end={ids.arrow} />
+          <rect class="k-outline k-fill--plain" x="56" y="20" width="58" height="22" />
+          <Value at={[85, 35]} text="BLOCK" size={8.5} anchor="middle" cls="k-value--label" />
+          <rect class="k-outline k-fill--plain k-dashed" x="56" y="50" width="58" height="22" />
+          <Value at={[85, 65]} text="SPENT" size={8.5} anchor="middle" cls="k-value--label" />
+          <Value at={[56, 86]} text="SCRIPTS: NOT IN THE BLOCK" size={8} cls="k-value--muted" />
+          <path class="k-line" d="M116 31 H140 V46 H150" marker-end={ids.arrow} />
+          <path class="k-line" d="M116 61 H140 V50 H150" />
+          <Machine at={[180, 74]} w={52} d={28} h={22} label="filter" role="hash" />
+          <path class="k-line" d="M226 54 H236" marker-end={ids.arrow} />
+          <Value at={[280, 80]} text="+ H2" size={8.5} anchor="end" cls="k-value--muted" />
           <rect class="k-cell k-fill--hash k-cell--em" x="240" y="45" width="40" height="18" />
           <text class="k-bf-gap" x="260" y="57" text-anchor="middle">H3</text>
         </>
       ),
     },
     {
-      note: "Peer B's header does not match the block, so the client should ban it. One honest peer is enough.",
+      note: "Peer B's header does not match the block, so the client should ban it. With one honest peer, the authors argue, it can find the right filters.",
       desc: "Schematic. The client's own third header equals peer A's H3 and not peer B's H3′, so it bans peer B. With at least one honest peer the client can identify the correct filters.",
       draw: (ids) => (
         <>

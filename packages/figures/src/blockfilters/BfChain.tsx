@@ -16,7 +16,7 @@ export function BfChain({ fixture }: { fixture: DerivedBfChainFixture }) {
   let y = 40;
   const placed = rows.map((r, i) => {
     const gap = i > 0 && r.height !== rows[i - 1].height + 1;
-    if (gap) y += 26;
+    if (gap) y += 18;
     const at = y;
     y += rowH;
     return { r, at, gap };
@@ -41,9 +41,9 @@ export function BfChain({ fixture }: { fixture: DerivedBfChainFixture }) {
           return (
             <g data-height={r.height}>
               {gap ? <Value at={[x0, at - 8]} text={`BLOCK ${r.height - 1} IS NOT IN THE VECTORS`} size={8} cls="k-value--muted" /> : null}
-              <Value at={[x0, at + 10]} text={`BLOCK ${r.height} · FILTER ${r.filterHex}`} size={8.5} cls="k-value--label" />
+              <Value at={[x0, at + 10]} text={`BLOCK ${r.height}${i === 0 && r.linksToPrevious ? " (GENESIS)" : ""} · FILTER ${r.filterHex}`} size={8.5} cls="k-value--label" />
               {box(x0, at + 18, 100, prevLabel, short(r.prevHeader), i === 0 ? "k-fill--plain" : "k-fill--hash", gap)}
-              <text class="k-bf-gap" x={x0 + 106} y={at + 35}>‖</text>
+              <text class="k-bf-big" x={x0 + 107} y={at + 36}>+</text>
               {box(x0 + 114, at + 18, 92, "FILTER HASH", short(r.filterHash))}
               <path class="k-line" d={`M${x0 + 210} ${at + 31} H${x0 + 232}`} marker-end={ids.arrow} />
               <rect class="k-cell k-fill--hash k-cell--em" x={x0 + 236} y={at + 18} width={94} height={26} />

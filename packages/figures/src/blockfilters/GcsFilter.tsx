@@ -33,9 +33,12 @@ export function GcsFilter({ fixtures, figureId }: Props) {
   const showBits = hydrated ? bits : true;
   const read = p.steps.length;
   const last = p.steps[read - 1];
-  const verdict = d.N === 0 ? "The filter is empty, one zero byte: nothing can match." : p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : `Value ${read} passes it: no match, so no output pays to it and no input spends it here.`;
-  const status = `${p.from === "this block" ? "A script from this block" : `A script from ${fromText(p.from)}`} hashes to ${group(p.target)}. ${verdict}`;
-  const desc = `Testnet block ${d.height}: ${d.N} scripts hashed onto 0 to F = ${group(d.F)}: ${d.values.map(group).join(", ") || "none"}. ${status} Decoded: ${p.steps.map((s) => group(s.value)).join(", ") || "nothing"}.${showBits && d.N ? ` The filter, ${d.filterBytes} bytes, starts with N = ${d.N}, then the codes ${d.codes.map((c) => `${c.unary} ${c.remainder}`).join(", ")}${d.codes.length < d.N ? ", and more" : ""}.` : ""}`;
+  const past = last?.outcome === "greater";
+  const miss = "no match: given the right filter, no output here pays to this script and no input spends an output with it.";
+  const verdict = p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : past ? `Value ${read} passes it: ${miss}` : `All ${d.N} values are below it: ${miss}`;
+  const who = p.from === "this block" ? "A script from this block" : `A script from ${fromText(p.from)}`;
+  const status = d.N === 0 ? `The filter is one zero byte, N = 0: nothing can match. ${who} is not even hashed.` : `${who} hashes to ${group(p.target)}. ${verdict}`;
+  const desc = `Testnet block ${d.height}: ${d.N} scripts hashed onto 0 to F = ${group(d.F)}: ${d.values.map(group).join(", ") || "none"}. ${status} Decoded: ${p.steps.map((s) => group(s.value)).join(", ") || "nothing"}; values not read are drawn empty.${showBits && d.N ? ` The filter, ${d.filterBytes} bytes, starts with N = ${d.N}, then the codes ${d.codes.map((c) => `${c.unary} ${c.remainder}`).join(", ")}${d.codes.length < d.N ? ", and more" : ""}.` : ""}`;
 
   const draw = (wide: boolean) => {
     const W = wide ? 640 : 330, x0 = 18, x1 = W - 18;
@@ -47,7 +50,8 @@ export function GcsFilter({ fixtures, figureId }: Props) {
     const by = ly + 64;
     return (
       <Drawing id={`${figureId}-${wide ? "w" : "n"}`} width={W} height={showBits && d.N ? by + 54 : ly + 48} title="A filter, built and queried" desc={desc}>
-        {/* The query: script → SipHash → target */}
+        {/* The query: script → SipHash → target (none for an empty filter) */}
+        {d.N ? <g>
         <rect class="k-outline k-fill--plain" x={x0} y={18} width={112} height={24} />
         <text class="k-bf-hex" x={x0 + 6} y={33.5}>{shortHex(p.script, 7)}</text>
         <Value at={[x0, 12]} text={p.from === "this block" ? "TEST SCRIPT · FROM THIS BLOCK" : `TEST SCRIPT · FROM ${fromText(p.from).toUpperCase()}`} size={8} cls="k-value--label" />
@@ -55,34 +59,38 @@ export function GcsFilter({ fixtures, figureId }: Props) {
         <Machine at={wide ? [x0 + 200, 44] : [x0 + 30, 96]} w={58} d={30} h={24} label="SipHash" role="hash" />
         <Value at={wide ? [x0 + 290, 34] : [x0 + 120, 92]} text={`→ ${group(p.target)}`} size={10} />
         <Value at={wide ? [x0 + 290, 46] : [x0 + 120, 104]} text="TARGET IN [0, F)" size={8.5} cls="k-value--muted" />
-        <Value at={wide ? [x0 + 290, 60] : [x0 + 120, 116]} text="KEY: THE BLOCK HASH" size={8.5} cls="k-value--muted" />
+        <Value at={wide ? [x0 + 290, 60] : [x0 + 120, 116]} text="KEY: FIRST 16 B OF THE BLOCK HASH" size={8.5} cls="k-value--muted" />
+        </g> : <Value at={[x0, 40]} text="N = 0 · THE FILTER IS ONE ZERO BYTE" size={9} cls="k-value--label" />}
         {/* The line [0, F): decoded values solid, undecoded hatched */}
         <line class="k-line" x1={x0} y1={ly} x2={x1} y2={ly} />
         <Value at={[x0, ly + 16]} text="0" size={8.5} cls="k-value--muted" />
         <Value at={[x1, ly + 16]} text={`F = N·M = ${group(d.F)}`} size={8.5} anchor="end" cls="k-value--muted" />
-        {d.values.map((v, i) => {
+        {/* Values not read yet first, so decoded ones sit on top. */}
+        {[...d.values.keys()].sort((a, b) => Number(a < read) - Number(b < read)).map((i) => {
+          const v = d.values[i];
           const x = along(v, d.F, x0, x1), px = i === 0 ? x0 : along(d.values[i - 1], d.F, x0, x1);
           const seen = i < read;
           return (
             <g data-decoded={String(seen)}>
-              {seen ? <path class="k-leader" d={`M${px} ${ly} Q${(px + x) / 2} ${ly - 30} ${x} ${ly}`} /> : null}
-              <rect class={`k-cell ${seen ? "k-mark--hash" : ""}`} x={x - 3.5} y={ly - 3.5} width="7" height="7" style={seen ? undefined : `fill:${ids.hatch}`} />
+              {seen && x - px > 4 ? <path class="k-leader" d={`M${px} ${ly} Q${(px + x) / 2} ${ly - 30} ${x} ${ly}`} /> : null}
+              <rect class={`k-cell ${seen ? "k-mark--hash" : "k-fill--plain k-dashed"}`} x={x - 3.5} y={ly - 3.5} width="7" height="7" />
             </g>
           );
         })}
         <path class="k-bf-target" d={`M${tx} ${ly + 22} V${ly + 6} M${tx - 4} ${ly + 11} L${tx} ${ly + 5} L${tx + 4} ${ly + 11}`} />
         <Value at={[Math.min(Math.max(tx, x0 + 40), x1 - 40), ly + 34]} text={d.N === 0 ? "EMPTY" : p.matched ? "MATCH · MAYBE" : "NO MATCH"} size={9} anchor="middle" cls="k-value--label" />
-        {last && !p.matched ? <Value at={[along(last.value, d.F, x0, x1), ly - 34]} text="PASSED: STOP" size={8} anchor="middle" cls="k-value--muted" /> : null}
+        {last && !p.matched ? <Value at={[along(last.value, d.F, x0, x1), ly - 34]} text={past ? "PASSED: STOP" : "END OF FILTER"} size={8.5} anchor="middle" cls="k-value--muted" /> : null}
+        {d.N ? <Value at={[x1, ly + 30]} text="EMPTY MARK: IN THE FILTER, NOT READ" size={8.5} anchor="end" cls="k-value--muted" /> : null}
         {showBits && d.N ? (
           <g>
             <Value at={[x0, by - 8]} text={`THE FILTER'S FIRST BITS · ${d.filterBytes} BYTES IN ALL`} size={8} cls="k-value--label" />
-            <Cells x={x0} y={by} values={[...d.N.toString(2).padStart(8, "0")]} size={cs} />
+            <Cells x={x0} y={by} values={[...d.N.toString(2).padStart(8, "0")]} size={cs} text={false} strong={(k) => d.N.toString(2).padStart(8, "0")[k] === "1"} />
             {codes.map((c, i) => {
               const start = x0 + 8 * cs + 4 + codes.slice(0, i).reduce((n, k) => n + (k.unary.length + k.remainder.length) * cs + 4, 0);
               return (
                 <g>
-                  <Cells x={start} y={by} values={[...c.unary]} size={cs} strong={(k) => c.unary[k] === "1"} />
-                  <g class="k-bf-rem"><Cells x={start + c.unary.length * cs} y={by} values={[...c.remainder]} size={cs} /></g>
+                  <Cells x={start} y={by} values={[...c.unary]} size={cs} text={false} strong={(k) => c.unary[k] === "1"} />
+                  <g class="k-bf-rem"><Cells x={start + c.unary.length * cs + 2} y={by} values={[...c.remainder]} size={cs} text={false} strong={(k) => c.remainder[k] === "1"} /></g>
                   <text class="k-bf-gap" x={start} y={by + cs + 11}>{`GAP ${group(c.delta)}`}</text>
                 </g>
               );
