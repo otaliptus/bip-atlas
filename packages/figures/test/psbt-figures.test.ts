@@ -52,6 +52,9 @@ describe("PsbtEnvelope (hero, static renders)", () => {
     const removed = trace.derived.states[fi].maps.reduce((n, m) => n + m.removed.length, 0);
     expect((wideOnly(fin).match(/data-mark="removed"/g) ?? []).length).toBe(removed);
   });
+  it("no state uses the attribute names HeroStates.astro selects on (the drawing's data-step once swallowed the stepper)", () => {
+    for (const st of psbtHeroSpec(trace).states) expect(r(st.state)).not.toMatch(/data-(scrub-step|range|live|toggle|strip|nojs|js)=/);
+  });
   it("Signer B is said to start from the second Updater's PSBT", () => {
     const b = trace.derived.states.findIndex((x) => x.id === "signer-b");
     expect(r({ step: b, compare: "step" })).toContain("It starts from the PSBT of updater 2, not of signer A");

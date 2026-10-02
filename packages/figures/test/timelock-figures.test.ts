@@ -48,7 +48,28 @@ describe("TimelockFields (hero, pre-rendered states)", () => {
       expect(s).toContain(v.valid ? "THE SPEND IS VALID" : "THE SPEND IS INVALID");
       expect(s.includes("CHANGED")).toBe(st.state.edit !== "core");
       expect(s).not.toContain("aria-live");
+      expect(s).not.toMatch(/data-(scrub-step|range|live|toggle|strip|nojs|js)=/);
     }
+  });
+});
+
+describe("TimelockFields (review fixes)", () => {
+  const r = (caseId: string, edit = "core") => html(h(TimelockFields, { fixtures: cases, figureId: "t", initial: { caseId, edit } }));
+  it("an argument with bit 31 set is drawn as a no-op, not as a passed 'flag is clear' check", () => {
+    const s = r("core-valid-131");
+    expect(s).toContain("disable flag is set: no lock");
+    expect(s).not.toContain("disable flag is clear");
+    expect(s).toContain("so the opcode does nothing");
+  });
+  it("the unit layer says BIP 68 gives no meaning at version 1", () => {
+    const rel = cases.find((f) => f.lock === "relative" && f.derived.version >= 2)!;
+    const v1 = r(rel.id, "version");
+    expect(v1).toContain("VERSION 1: BIP 68 GIVES THIS nSEQUENCE");
+    expect(v1).not.toContain("LOW 16 BITS AS BLOCKS");
+    expect(v1).toContain("CHANGED: VERSION 1 · NOT A CORE CASE");
+  });
+  it("the CLTV ruler says its halves have different scales", () => {
+    expect(r("core-valid-99")).toContain("HALVES NOT TO ONE SCALE");
   });
 });
 
@@ -67,6 +88,8 @@ describe("Static timelock drawings", () => {
     const s = html(h(TimelockPinned, { fixtures: txs }));
     expect(s).toContain("NO BLOCK BELOW HEIGHT 18");
     expect(s).toContain("EVERY INPUT FINAL");
+    expect(s).toContain("VERSION 1: NO BIP 68 MEANING");
+    expect(s).toContain("BIP 68: BIT 31 SET ON EVERY INPUT, NO RELATIVE LOCK");
   });
   it("A10.5: BIP 68's two encodings as bits", () => {
     const s = html(h(TimelockSequenceBits, { fixture: enc }));
@@ -78,6 +101,9 @@ describe("Static timelock drawings", () => {
     const f = cases.find((x) => x.id === "core-valid-127")!;
     const s = html(h(TimelockCsvStory, { fixture: f }));
     expect(s.split('class="k-story__frame"').length - 1).toBe(f.derived.checks.length);
+    // Focus is an outline, never dimming (a dimmed 1 reads as a 0).
+    expect(s).not.toContain("opacity:0.25");
+    expect(s).toContain('data-focus="31-31"');
   });
   it("A10.7: the median is the sixth of eleven", () => {
     const s = html(h(TimelockMtp, {}));

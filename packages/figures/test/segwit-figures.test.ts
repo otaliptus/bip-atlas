@@ -72,6 +72,7 @@ describe("TransactionAnatomy (hero, static renders)", () => {
     expect(spec.states).toHaveLength(6);
     const s = r(spec.states.find((x) => x.id === spec.noJsId)!.state);
     expect(s).not.toContain("aria-live");
+    expect(s).not.toMatch(/data-(scrub-step|range|live|toggle|strip|nojs|js)=/);
     const wide = wideOnly(s);
     const hatched = [...new Set(wide.match(/data-field="([^"]+)" data-hatched="true"/g)!.map((x) => x.split('"')[1]))];
     const expected = txFields(native.derived).filter((f) => f.part !== "base").map((f) => f.id);

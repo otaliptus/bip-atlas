@@ -181,7 +181,7 @@ describe("the opcodes against Bitcoin Core's pinned cases", () => {
     expect(b112[280]).toContain("CHECKSEQUENCEVERIFY behaves as a NOP");
     const r = checkSequenceVerify(2n ** 31n, { version: 1, nLockTime: 0, sequences: [0xffffffff] }, 0);
     expect(r.ok).toBe(true);
-    expect(r.checks.at(-1)).toMatchObject({ id: "arg-disabled", stopsHere: true });
+    expect(r.checks.at(-1)).toMatchObject({ id: "arg-disabled", stopsHere: true, label: "The argument's disable flag is set: no lock" });
   });
 
   it("fails CSV when the input's own disable flag is set", () => {

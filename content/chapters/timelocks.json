@@ -169,7 +169,7 @@
             "core-invalid-118",
             "core-invalid-128"
           ],
-          "caption": "Twelve one-input transactions from Bitcoin Core’s test suite, each locked by just an argument and the opcode. The field changes are run through the same tested model at build time; they are not Core cases.",
+          "caption": "Twelve one-input transactions from Bitcoin Core’s test suite, each locked by an argument and the opcode (some push a 1 after it). The field changes are run through the same tested model at build time; they are not Core cases.",
           "claims": [
             "core-cases",
             "cltv-rules",

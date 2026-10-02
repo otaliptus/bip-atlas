@@ -1,7 +1,7 @@
 import { checkSpec, combos, type HeroSpec } from "../heroStates";
 import { Drawing, Value, idsFor } from "../kit";
 import type { DerivedTimelockCaseFixture, TimelockCheckView } from "../types";
-import { LOCKTIME_THRESHOLD as THRESHOLD, SEQUENCE_LOCKTIME_TYPE_FLAG } from "@bip-atlas/models/timelock";
+import { LOCKTIME_THRESHOLD as THRESHOLD, SEQUENCE_LOCKTIME_DISABLE_FLAG, SEQUENCE_LOCKTIME_TYPE_FLAG } from "@bip-atlas/models/timelock";
 import { BitRow } from "./bits";
 
 export interface TimelockHeroState { caseId: string; edit: string }
@@ -27,7 +27,7 @@ export function timelockHeroSpec(fixtures: DerivedTimelockCaseFixture[]): HeroSp
     ...abs.flatMap((f, i) => ea.map((e) => ({ id: `${f.id}-${e}`, keys: all.filter((k) => { const [l, a, , x] = k.split("|"); return l === "absolute" && a === `c${i}` && x === e; }), state: { caseId: f.id, edit: e } }))),
     ...rel.flatMap((f, i) => er.map((e) => ({ id: `${f.id}-${e}`, keys: all.filter((k) => { const [l, , r, , y] = k.split("|"); return l === "relative" && r === `c${i}` && y === e; }), state: { caseId: f.id, edit: e } }))),
   ];
-  const editText = (f: DerivedTimelockCaseFixture, e: string) => (e === "core" ? "As in Core" : e === "final" ? "Flip input final" : e === "bit31" ? "Flip bit 31" : e === "version" ? "Flip the version" : f.derived.edits.find((x) => x.id === e)!.label);
+  const editText = (f: DerivedTimelockCaseFixture, e: string) => (e === "core" ? "As in Core" : e === "final" ? "Flip input final" : e === "bit31" ? "Flip input bit 31" : e === "version" ? "Flip the version" : f.derived.edits.find((x) => x.id === e)!.label);
   return checkSpec({
     controls: [
       { kind: "strip", name: "lock", label: "Lock", options: [{ value: "absolute", text: "Absolute · nLockTime" }, { value: "relative", text: "Relative · nSequence" }] },
@@ -75,16 +75,26 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
   const asm = d.asm.replace(/(CHECKLOCKTIMEVERIFY|CHECKSEQUENCEVERIFY)/, "OP_$1");
   const status =
     `${f.label}${e ? `, with ${e.label}` : ""}: ` +
-    (v.valid ? "every check passes and the script continues" : `fails at “${v.checks.find((c) => !c.ok)?.label ?? "the final stack"}”`) +
+    (v.valid && v.checks.some((c) => c.stopsHere) ? "the argument's disable flag is set, so the opcode does nothing and the script continues" : v.valid ? "every check passes and the script continues" : `fails at “${v.checks.find((c) => !c.ok)?.label ?? "the final stack"}”`) +
     (e ? ". Not a Core test case: the tested model's verdict." : `. Bitcoin Core labels it ${f.expected}; the model agrees.`);
   const field = (x: number, w: number, name: string, text: string, role: string, changed: boolean) => (
     <g data-field={name}>
       <rect class={`k-cell k-fill--${role}${changed ? " k-cell--em" : ""}`} x={x} y={112} width={w} height="26" />
       <text class="k-card__name" x={x + 5} y={123}>{name.toUpperCase()}</text>
       <text class="k-value" x={x + 5} y={134.5} style="font-size:9.5px">{text}</text>
-      {changed ? <text class="k-card__tag" x={x + w - 4} y={123} text-anchor="end">CHANGED</text> : null}
+      {changed ? <text class="k-card__tag" x={x + w - 4} y={134.5} text-anchor="end">CHANGED</text> : null}
     </g>
   );
+  // The unit comparison layer (toggle) in words, so the description carries it in every state.
+  // BIP 68 gives nSequence a meaning only from version 2 on and with bit 31 clear.
+  const noMeaning = v.version < 2 ? `VERSION ${v.version}` : v.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG ? "BIT 31 SET" : null;
+  const units = cltv
+    ? `nLockTime ${num(v.nLockTime)} read as a height is block ${num(v.nLockTime)}, read as a time ${utc(v.nLockTimeIso)}; it is read as a ${v.nLockTime < THRESHOLD ? "height" : "time"}.`
+    : noMeaning
+      ? `With ${noMeaning === "BIT 31 SET" ? "bit 31 set" : `version ${v.version}`}, BIP 68 gives input 0's nSequence no meaning as a relative lock.`
+      : `nSequence's low 16 bits, ${num(v.value16)}, would be ${num(v.value16)} blocks or ${num(v.value16Seconds)} seconds; bit 22 is ${v.nSequence & SEQUENCE_LOCKTIME_TYPE_FLAG ? "set (512-second units)" : "clear (blocks)"}.`;
+  // Ruler labels flip to the right of their marker near the left edge.
+  const tag = (px: number) => (px - x0 < 50 ? { x: px + 6, anchor: "start" } : { x: px - 6, anchor: "end" });
   // CLTV ruler: heights on the left half, times on the right half, each scaled within its half.
   const pos = (n: number) => (n < THRESHOLD ? x0 + (n / THRESHOLD) * 150 : x0 + 166 + ((n - THRESHOLD) / (2 ** 32 - THRESHOLD)) * 150);
   return (
@@ -94,10 +104,10 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
         width={344}
         height={H}
         title="The gate a spend has to pass"
-        desc={`${status} The locking script is ${asm}. The spending transaction has version ${v.version}, input 0 nSequence ${hex32(v.nSequence)} and nLockTime ${num(v.nLockTime)}. Checks in order: ${v.checks.map((c) => `${c.label}: ${c.ok ? "yes" : "no"} (${c.detail})`).join("; ")}.`}
+        desc={`${status} The locking script is ${asm}. The spending transaction has version ${v.version}, input 0 nSequence ${hex32(v.nSequence)} and nLockTime ${num(v.nLockTime)}. Checks in order: ${v.checks.map((c) => `${c.label}: ${c.ok ? "yes" : "no"} (${c.detail})`).join("; ")}. ${units}`}
       >
         <Value at={[x0, 14]} text={`${f.label.toUpperCase()}`} size={9} cls="k-value--label" />
-        <Value at={[x0, 27]} text={e ? "CHANGED: NOT A CORE CASE" : `BITCOIN CORE ${f.coreFile} #${f.coreIndex} · ${f.expected.toUpperCase()}`} size={8.5} cls="k-value--muted" />
+        <Value at={[x0, 27]} text={e ? `CHANGED: ${e.label.toUpperCase()} · NOT A CORE CASE` : `BITCOIN CORE ${f.coreFile} #${f.coreIndex} · ${f.expected.toUpperCase()}`} size={8.5} cls="k-value--muted" />
         <Value at={[x0, 46]} text="THE COIN'S LOCK (SPENT OUTPUT SCRIPT)" size={9} cls="k-value--muted" />
         <rect class="k-outline k-fill--time" x={x0} y={52} width="316" height="24" />
         <text class="k-value" x={x0 + 6} y={68} style="font-size:9.5px">{asm}</text>
@@ -110,18 +120,19 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
           <g class="k-ruler">
             <rect class="k-cell k-fill--plain" x={x0} y={168} width="150" height="12" />
             <rect class="k-cell k-fill--plain" x={x0 + 166} y={168} width="150" height="12" />
-            <text class="k-card__type" x={x0} y={194}>HEIGHTS · 0</text>
-            <text class="k-card__type" x={x0 + 316} y={194} text-anchor="end">TIMES · 2³² − 1</text>
+            <text class="k-card__type" x={x0} y={199}>HEIGHTS · 0</text>
+            <text class="k-card__type" x={x0 + 316} y={199} text-anchor="end">TIMES · 2³² − 1</text>
             <line class="k-cut" x1={x0 + 158} y1={160} x2={x0 + 158} y2={186} />
             <text class="k-card__type" x={x0 + 162} y={156}>{num(THRESHOLD)}</text>
             {arg >= 0n ? (
               <g>
                 <path class="k-outline k-mark--plain" d={`M${pos(Number(arg))} 166 l-4 -6 h8 z`} />
-                <text class="k-card__name" x={pos(Number(arg)) - 6} y={160} text-anchor="end">ARG</text>
+                <text class="k-card__name" x={tag(pos(Number(arg))).x} y={160} text-anchor={tag(pos(Number(arg))).anchor}>ARG</text>
               </g>
             ) : null}
             <path class="k-outline k-mark--time" d={`M${pos(v.nLockTime)} 182 l-4 6 h8 z`} />
-            <text class="k-card__name" x={pos(v.nLockTime) - 6} y={208} text-anchor="end">nLockTime</text>
+            <text class="k-card__name" x={tag(pos(v.nLockTime)).x} y={212} text-anchor={tag(pos(v.nLockTime)).anchor}>nLockTime</text>
+            <text class="k-card__type" x={x0 + 158} y={199} text-anchor="middle">HALVES NOT TO ONE SCALE</text>
             <g class="k-compare">
               <text class="k-card__name" x={x0} y={226}>{`AS A HEIGHT: BLOCK ${num(v.nLockTime)}${v.nLockTime < THRESHOLD ? " ← READ THIS WAY" : ""}`}</text>
               <text class="k-card__name" x={x0} y={240}>{`AS A TIME: ${utc(v.nLockTimeIso)}${v.nLockTime >= THRESHOLD ? " ← READ THIS WAY" : ""}`}</text>
@@ -131,11 +142,18 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
           <g>
             <BitRow x={x0} y={166} n={Number(arg & 0xffffffffn) >>> 0} label="ARGUMENT" ids={ids} ruler />
             <BitRow x={x0} y={200} n={v.nSequence} label="INPUT 0 nSEQUENCE" ids={ids} />
-            <g class="k-compare">
-              <text class="k-card__name" x={x0} y={240}>{`LOW 16 BITS AS BLOCKS: ${num(v.value16)} BLOCKS`}</text>
-              <text class="k-card__name" x={x0} y={254}>{`AS 512-SECOND UNITS: ${num(v.value16)} × 512 = ${num(v.value16Seconds)} S`}</text>
-              <text class="k-card__name" x={x0} y={268}>{`BIT 22 IS ${v.nSequence & SEQUENCE_LOCKTIME_TYPE_FLAG ? "SET: 512-SECOND UNITS" : "CLEAR: BLOCKS"}`}</text>
-            </g>
+            {noMeaning ? (
+              <g class="k-compare">
+                <text class="k-card__name" x={x0} y={240}>{`${noMeaning}: BIP 68 GIVES THIS nSEQUENCE`}</text>
+                <text class="k-card__name" x={x0} y={254}>NO MEANING AS A RELATIVE LOCK</text>
+              </g>
+            ) : (
+              <g class="k-compare">
+                <text class="k-card__name" x={x0} y={240}>{`LOW 16 BITS AS BLOCKS: ${num(v.value16)} BLOCKS`}</text>
+                <text class="k-card__name" x={x0} y={254}>{`AS 512-SECOND UNITS: ${num(v.value16)} × 512 = ${num(v.value16Seconds)} S`}</text>
+                <text class="k-card__name" x={x0} y={268}>{`BIT 22 IS ${v.nSequence & SEQUENCE_LOCKTIME_TYPE_FLAG ? "SET: 512-SECOND UNITS" : "CLEAR: BLOCKS"}`}</text>
+              </g>
+            )}
           </g>
         )}
         <Value at={[x0, checksY - 6]} text={cltv ? "BIP 65'S CHECKS, IN ORDER" : "BIP 112'S CHECKS, IN ORDER"} size={9} cls="k-value--muted" />
@@ -144,7 +162,7 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
           return (
             <g data-check={c.id} data-ok={c.ok ? "true" : "false"}>
               <rect class={`k-cell ${c.ok ? "k-fill--plain" : "k-mark--plain"}`} x={x0} y={y} width="20" height="20" />
-              <text class={`k-cell__t${c.ok ? "" : " k-cell__t--on"}`} x={x0 + 10} y={y + 13.5} text-anchor="middle">{c.ok ? "✓" : "✗"}</text>
+              <text class={`k-cell__t${c.ok ? "" : " k-cell__t--on"}`} x={x0 + 10} y={y + 13.5} text-anchor="middle">{c.stopsHere ? "—" : c.ok ? "✓" : "✗"}</text>
               <text class="k-card__name" x={x0 + 28} y={y + 9}>{`${i + 1} ${c.label}`}</text>
               <text class="k-card__type" x={x0 + 28} y={y + 19.5}>{c.detail.length > 52 ? `${c.detail.slice(0, 51)}…` : c.detail}</text>
             </g>
@@ -166,7 +184,7 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
           ))}
         </dl>
       </details>
-      <p class="atlas-hero__source">Bitcoin Core v29.0 {f.coreFile}, entry {f.coreIndex} (“{f.comment}”), pinned by commit and hash; one-input transactions with no signatures. Every check run by the tested model at build time.</p>
+      <p class="atlas-hero__source">Bitcoin Core v29.0 {f.coreFile}, entry {f.coreIndex} (Core’s comment for its group: “{f.comment}”), pinned by commit and hash; one-input transactions with no signatures. Every check run by the tested model at build time.</p>
     </>
   );
 }

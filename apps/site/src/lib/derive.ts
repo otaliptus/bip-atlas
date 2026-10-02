@@ -902,7 +902,7 @@ function deriveTimelockCase(f: TimelockCaseFixture): DerivedTimelockCaseFixture 
         ]
       : [
           variant("version", `version ${fields.version >= 2 ? 1 : 2}`, "version", { version: fields.version >= 2 ? 1 : 2 }),
-          variant("bit31", `bit 31 ${seq0 & 0x80000000 ? "cleared" : "set"}`, "nSequence", { sequences: [(seq0 ^ 0x80000000) >>> 0] }),
+          variant("bit31", `the input's bit 31 ${seq0 & 0x80000000 ? "cleared" : "set"}`, "nSequence", { sequences: [(seq0 ^ 0x80000000) >>> 0] }),
         ];
   if (fields.nLockTime >= 0xffffffff) throw new Error(`${f.id}: nLockTime + 1 would overflow`);
   return {

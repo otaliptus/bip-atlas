@@ -1,4 +1,4 @@
-import { MEDIAN_TIME_SPAN, medianTimePast } from "@bip-atlas/models/timelock";
+import { MEDIAN_TIME_SPAN, SEQUENCE_LOCKTIME_DISABLE_FLAG, SEQUENCE_LOCKTIME_MASK, medianTimePast } from "@bip-atlas/models/timelock";
 import { Arrow, Drawing, IsoBox, Storyboard, Value, type Frame } from "../kit";
 import type { DerivedTimelockBipTxFixture, DerivedTimelockCaseFixture, DerivedTimelockEncodingFixture, TimelockCheckView } from "../types";
 import { BitRow, CELL, bitRole } from "./bits";
@@ -6,6 +6,9 @@ import { BitRow, CELL, bitRole } from "./bits";
 const num = (n: number) => n.toLocaleString("en-US");
 const hex32 = (n: number) => `0x${(n >>> 0).toString(16).padStart(8, "0")}`;
 const day = (iso: string) => iso.slice(0, 10);
+/** Bitcoin's 600-second block target, used here only to put the two units on one wall-clock scale. */
+const BLOCK_SECONDS = 600;
+const years = (seconds: number) => (seconds / (365.25 * 86400)).toFixed(2);
 
 /**
  * timelock-ranges.v1 — static. nLockTime's 32 bits on one ruler, split at
@@ -18,7 +21,7 @@ export function TimelockRanges({ fixture }: { fixture: DerivedTimelockEncodingFi
   const MAX = 2 ** 32 - 1;
   const x0 = 14, w = 316;
   const split = x0 + (d.threshold / MAX) * w;
-  const blockSeconds = d.maxBlocks * 600;
+  const blockSeconds = d.maxBlocks * BLOCK_SECONDS;
   const unit = w / blockSeconds;
   return (
     <Drawing
@@ -38,10 +41,10 @@ export function TimelockRanges({ fixture }: { fixture: DerivedTimelockEncodingFi
       <Value at={[x0 + w, 86]} text={`${num(MAX)} = ${day(d.maxLockTimeIso)}`} size={9} anchor="end" cls="k-value--muted" />
       <Value at={[x0, 112]} text="nSEQUENCE · LOW 16 BITS, IN WALL-CLOCK TIME" size={9} cls="k-value--label" />
       <rect class="k-cell k-fill--time" x={x0} y={120} width={blockSeconds * unit} height="16" />
-      <text class="k-card__name" x={x0 + 5} y={131.5}>{`BIT 22 CLEAR: ${num(d.maxBlocks)} BLOCKS (≈ 1.25 YEARS)`}</text>
+      <text class="k-card__name" x={x0 + 5} y={131.5}>{`BIT 22 CLEAR: ${num(d.maxBlocks)} BLOCKS (≈ ${years(blockSeconds)} YEARS)`}</text>
       <rect class="k-cell k-mark--time" x={x0} y={144} width={d.maxTimeSeconds * unit} height="16" />
-      <text class="k-card__name k-card__name--on" x={x0 + 5} y={155.5}>{`BIT 22 SET: ${num(d.maxTimeUnits)} × 512 S (≈ 1.06 YEARS)`}</text>
-      <Value at={[x0, 180]} text={`= ${num(d.maxTimeSeconds)} S · BARS AT 600 S A BLOCK`} size={9} cls="k-value--muted" />
+      <text class="k-card__name k-card__name--on" x={x0 + 5} y={155.5}>{`BIT 22 SET: ${num(d.maxTimeUnits)} × 512 S (≈ ${years(d.maxTimeSeconds)} YEARS)`}</text>
+      <Value at={[x0, 180]} text={`= ${num(d.maxTimeSeconds)} S · BARS AT ${BLOCK_SECONDS} S A BLOCK`} size={9} cls="k-value--muted" />
     </Drawing>
   );
 }
@@ -70,8 +73,8 @@ export function TimelockNotALock() {
   );
   const frames: Frame[] = [
     {
-      note: "A signed transaction with a future nLockTime cannot be mined yet: it proves the coin can be spent later.",
-      desc: "A coin, and a signed transaction A spending it whose nLockTime is in the future, so no block can include A yet.",
+      note: "A signed transaction with a future nLockTime (and an input that is not final) cannot be mined yet: it proves the coin can be spent later.",
+      desc: "A coin, and a signed transaction A spending it whose nLockTime is in the future and whose input is not final, so no block can include A yet.",
       draw: (ids) => (
         <>
           {coin("THE COIN")}
@@ -91,7 +94,7 @@ export function TimelockNotALock() {
           {tx(24, "TRANSACTION A", "nLockTime: LATER", "k-faded")}
           <Arrow d="M92 70 H136" ids={ids} />
           {tx(64, "TRANSACTION B", "nLockTime: 0")}
-          <Value at={[140, 116]} text="MINEABLE NOW ✓" size={9} cls="k-value--fail" />
+          <Value at={[140, 116]} text="MINEABLE NOW" size={9} cls="k-value--label" />
         </>
       ),
     },
@@ -118,7 +121,13 @@ export function TimelockNotALock() {
  * published in BIPs 143 and 174, as cells, with how consensus reads them.
  */
 export function TimelockPinned({ fixtures }: { fixtures: DerivedTimelockBipTxFixture[] }) {
-  const rowH = 74;
+  const rowH = 82;
+  // BIP 68 reads nSequence as a relative lock only from version 2 on, and only with bit 31 clear.
+  const bip68 = (d: DerivedTimelockBipTxFixture["derived"]) => {
+    if (d.version < 2) return { draw: `VERSION ${d.version}: NO BIP 68 MEANING`, say: `Version ${d.version}, so BIP 68 gives nSequence no meaning.` };
+    if (d.inputs.some((i) => (i.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG) === 0)) throw new Error("timelock-pinned-fields: a relative lock is outside this figure");
+    return { draw: "BIP 68: BIT 31 SET ON EVERY INPUT, NO RELATIVE LOCK", say: "Bit 31 is set on every input, so BIP 68 reads no relative lock." };
+  };
   return (
     <Drawing
       id="a10-pinned"
@@ -128,7 +137,7 @@ export function TimelockPinned({ fixtures }: { fixtures: DerivedTimelockBipTxFix
       desc={fixtures
         .map((f) => {
           const d = f.derived;
-          return `${f.label} (${f.shortLabel}, line ${f.source.line}): version ${d.version}, nLockTime ${num(d.nLockTime)}, inputs ${d.inputs.map((i) => `${hex32(i.nSequence)}${i.final ? " final" : ""}`).join(", ")}. ${d.enforced ? (d.lockKind === "height" ? `nLockTime enforced: no block before height ${num(d.firstHeight!)}.` : "nLockTime enforced as a time.") : "Every input is final, so nLockTime is not enforced."}`;
+          return `${f.label} (${f.shortLabel}, line ${f.source.line}): version ${d.version}, nLockTime ${num(d.nLockTime)}, inputs ${d.inputs.map((i) => `${hex32(i.nSequence)}${i.final ? " final" : ""}`).join(", ")}. ${d.enforced ? (d.lockKind === "height" ? `nLockTime enforced: no block before height ${num(d.firstHeight!)}.` : "nLockTime enforced as a time.") : "Every input is final, so nLockTime is not enforced."} ${bip68(d).say}`;
         })
         .join(" ")}
     >
@@ -158,6 +167,7 @@ export function TimelockPinned({ fixtures }: { fixtures: DerivedTimelockBipTxFix
               size={9}
               cls={d.enforced ? "k-value--label" : "k-value--muted"}
             />
+            <Value at={[14, y + 63]} text={bip68(d).draw} size={9} cls="k-value--muted" />
           </g>
         );
       })}
@@ -181,7 +191,7 @@ export function TimelockSequenceBits({ fixture }: { fixture: DerivedTimelockEnco
     <Drawing
       id="a10-bits"
       width={344}
-      height={192}
+      height={206}
       title="Thirty-two bits, three jobs"
       desc={`nSequence under BIP 68, bit 31 on the left. Bit 31 is the disable flag; bit 22 picks the unit; bits 0 to 15 hold the value; the rest have no meaning. ${num(d.maxBlocks)} blocks is ${hex32(blocks)}; ${num(d.maxTimeUnits)} units of 512 seconds is ${hex32(time)}.`}
     >
@@ -195,8 +205,9 @@ export function TimelockSequenceBits({ fixture }: { fixture: DerivedTimelockEnco
       <BitRow x={x0} y={62} n={blocks} label={`${num(d.maxBlocks)} BLOCKS = ${hex32(blocks)}`} />
       <BitRow x={x0} y={104} n={time} label={`${num(d.maxTimeUnits)} × 512 S = ${hex32(time)}`} />
       <path class="k-leader" d={`M${at(15) - CELL / 2} 150 V156 H${at(0) + CELL / 2} V150`} />
-      <text class="k-card__name" x={at(15) - CELL / 2} y={168}>VALUE · BITS 0–15 · MASK 0x0000ffff</text>
-      <Value at={[x0, 184]} text="FADED: NO MEANING UNDER BIP 68" size={8.5} cls="k-value--muted" />
+      <text class="k-card__name" x={at(15) - CELL / 2} y={168}>VALUE · BITS 0–15</text>
+      <text class="k-card__name" x={at(15) - CELL / 2} y={180}>{`MASK ${hex32(SEQUENCE_LOCKTIME_MASK)}`}</text>
+      <Value at={[x0, 198]} text="FADED: NO MEANING UNDER BIP 68" size={8.5} cls="k-value--muted" />
     </Drawing>
   );
 }
@@ -223,14 +234,14 @@ export function TimelockCsvStory({ fixture: f }: { fixture: DerivedTimelockCaseF
             <rect class="k-cell k-fill--plain k-cell--em" x="8" y="30" width="80" height="26" />
             <text class="k-card__type" x="12" y="40">nVERSION</text>
             <text class="k-value" x="12" y="52">{d.version}</text>
-            <Value at={[104, 47]} text={`${d.version} ≥ 2`} size={9.5} />
+            <Value at={[104, 47]} text={`${d.version} ${c.ok ? "≥" : "<"} 2`} size={9.5} />
           </>
         ) : c.id === "stack" || c.id === "negative" ? (
           <>
             <rect class="k-cell k-fill--time k-cell--em" x="8" y="30" width="120" height="26" />
             <text class="k-card__type" x="12" y="40">TOP OF THE STACK</text>
-            <text class="k-value" x="12" y="52">{d.argument}</text>
-            <Value at={[138, 47]} text={c.id === "negative" ? `${d.argument} ≥ 0` : "PRESENT"} size={9.5} />
+            <text class="k-value" x="12" y="52">{BigInt(d.argument).toLocaleString("en-US")}</text>
+            <Value at={[138, 47]} text={c.id === "negative" ? c.detail : c.ok ? "ON THE STACK" : "EMPTY STACK"} size={9.5} />
           </>
         ) : (
           <>
