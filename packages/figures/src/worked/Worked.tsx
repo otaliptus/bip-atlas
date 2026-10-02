@@ -13,7 +13,6 @@ import type {
   DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
   DerivedTapscriptFixture,
-  DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
   DerivedVersionbitsDeploymentFixture,
@@ -53,46 +52,6 @@ export function Bip32Worked({ fixture: f }: { fixture: DerivedBip32Fixture }) {
       steps={steps}
       label="Seed, master node and three child derivations, drawn as stacked layers."
       source={<>Source: BIP 32 test vector 1; every xpub matches the vector where the BIP lists it.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 141/143 ---------- */
-export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture }) {
-  const segs = f.derived.segments;
-  const sum = (test: (s: (typeof segs)[number]) => boolean) => segs.filter(test).reduce((n, s) => n + s.hex.length / 2, 0);
-  const m = f.derived.measures;
-  const groups = [
-    { title: "nVersion", test: (s: (typeof segs)[number]) => s.id === "version", tone: "plain" as const },
-    { title: "marker and flag (SegWit only)", test: (s: (typeof segs)[number]) => s.part === "marker", tone: "hatch" as const },
-    { title: "inputs", test: (s: (typeof segs)[number]) => s.id.startsWith("input"), tone: "wash" as const },
-    { title: "outputs", test: (s: (typeof segs)[number]) => s.id.startsWith("output"), tone: "wash" as const },
-    { title: "witness", test: (s: (typeof segs)[number]) => s.part === "witness", tone: "hatch" as const },
-    { title: "nLockTime", test: (s: (typeof segs)[number]) => s.id === "locktime", tone: "plain" as const },
-  ];
-  const present = groups.filter((g) => sum(g.test) > 0);
-  const max = Math.max(...present.map((g) => sum(g.test)));
-  const steps: WorkedStep[] = [
-    ...present.map((g): WorkedStep => {
-      const b = sum(g.test);
-      return {
-        title: `${g.title} · ${b} bytes${g.tone === "hatch" ? " · not in the txid" : ""}`,
-        layer: { size: 0.3 + 0.7 * (b / max), tone: g.tone },
-      };
-    }),
-    {
-      title: "Two identifiers",
-      values: [{ label: `txid (${m.baseSize} bytes hashed)`, value: m.txidHex }, { label: `wtxid (${m.totalSize} bytes hashed)`, value: m.wtxidHex }],
-      note: `Hashes in the byte order they are computed. Weight 3 × ${m.baseSize} + ${m.totalSize} = ${m.weight}; ${m.vsize} virtual bytes.`,
-      layer: { size: 0.5, tone: "accent", cells: 2 },
-    },
-  ];
-  return (
-    <WorkedExample
-      intro={<>The published example <strong>{f.label}</strong>, layer by layer. Hatched layers are left out of the txid.</>}
-      steps={steps}
-      label="A serialized transaction exploded into its fields, then its two identifiers."
-      source={<>Source: BIP 143 line {f.source.line}; sizes and hashes from the tested transaction model.</>}
     />
   );
 }

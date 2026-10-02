@@ -125,6 +125,26 @@ export interface TransactionDerived {
     items: Array<{ id: string; label: string; hex: string; from: string[]; note: string }>;
     sighashHex: string;
   };
+  /**
+   * Each input's scriptSig and witness, classified at build time from the
+   * fixture's reviewed input kind and checked structurally (derive throws on
+   * any mismatch): a P2PK scriptSig is one signature push, a nested program
+   * push is 0x00 0x14 + 20 bytes, a P2WPKH witness is [signature, key] with
+   * HASH160(key) equal to the 20-byte program.
+   */
+  inputs: TxInputView[];
+  /** The signed input's spent amount (BIP 143 item 6), in BTC, from the fixture's published value. */
+  amountBtc: string;
+}
+
+export interface TxInputView {
+  kind: string;
+  scriptSigHex: string;
+  scriptSig: "signature-push" | "program-push" | "empty";
+  witness: string[];
+  witnessKind: "p2wpkh" | "empty";
+  /** The 20-byte witness program (key hash) of a P2WPKH input, nested or native. */
+  programHex: string | null;
 }
 
 export type DerivedTransactionFixture = TransactionFixture & { derived: TransactionDerived };

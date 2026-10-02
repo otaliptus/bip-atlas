@@ -479,67 +479,21 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .atlas-ser__legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
 .atlas-ser__key { display: inline-block; inline-size: 0.75rem; block-size: 0.75rem; border: 1px solid var(--manual-ink); margin-inline-end: 0.35rem; vertical-align: -0.1em; }
 
-/* ---------- FIG A03.2 transaction anatomy ---------- */
+/* ---------- FIG A03.x segwit drawings ---------- */
+/* .atlas-ser above is still used by other chapters' card figures; .atlas-tx-lab and .atlas-num by the PSBT hero until it is redrawn. */
 .atlas-tx-lab__body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--manual-space-5); align-items: start; }
-.atlas-bytes-map { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.atlas-bytes-map__row { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 3rem 5.5rem; gap: 0.6rem; align-items: start; padding: 0.35rem 0.5rem; background: var(--manual-surface); border-inline-start: 3px solid var(--manual-blue); font-size: 0.8125rem; }
-.atlas-bytes-map__row[data-part="marker"] { border-inline-start-color: var(--manual-ink); }
-.atlas-bytes-map__row[data-part="witness"] { border-inline-start-color: var(--manual-ink); background: var(--atlas-hatch), var(--manual-surface); }
-.atlas-bytes-map__row[data-on="false"] { opacity: 0.45; border-inline-start-style: dashed; }
-.atlas-bytes-map__row[data-on="false"] .atlas-bytes-map__hex { text-decoration: line-through; text-decoration-color: var(--manual-muted); }
-.atlas-bytes-map__row[data-signed="true"] { outline: 2px solid var(--manual-ink); outline-offset: -2px; }
-.atlas-bytes-map__row[data-focus="true"] { background: var(--manual-blue-fill); }
-.atlas-bytes-map__label { font-family: var(--manual-code); font-size: 0.75rem; }
-.atlas-bytes-map__label em { display: block; font-style: normal; color: var(--manual-muted); }
-.atlas-bytes-map__hex { font-size: 0.75rem !important; background: none !important; padding: 0 !important; overflow-wrap: anywhere; word-break: break-all; line-height: 1.45; }
-.atlas-bytes-map__size { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); text-align: end; }
-.atlas-bytes-map__tag { font-family: var(--manual-code); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; text-align: end; color: var(--manual-blue-dark); }
-.atlas-bytes-map__row[data-on="false"] .atlas-bytes-map__tag { color: var(--atlas-edit); }
 .atlas-num { display: inline-grid; place-items: center; min-inline-size: 1.25rem; block-size: 1.25rem; padding-inline: 0.2rem; margin-inline-start: 0.15rem; font-family: var(--manual-code); font-size: 0.6875rem; background: var(--manual-ink); color: var(--manual-paper); border-radius: 0.625rem; }
 .atlas-tx-lab__panel { position: sticky; inset-block-start: 1rem; }
-.atlas-tx-lab__hash { display: block; font-size: 0.9375rem !important; overflow-wrap: anywhere; word-break: break-all; background: var(--manual-blue-wash) !important; padding: 0.5rem !important; }
-.atlas-tx-lab__other { font-size: 0.8125rem; color: var(--manual-muted); margin-block: var(--manual-space-2) !important; }
-.atlas-tx-lab__sizes { display: grid; gap: 0.2rem; margin: var(--manual-space-3) 0; font-size: 0.875rem; }
-.atlas-tx-lab__sizes div { display: grid; grid-template-columns: 7rem 1fr; }
-.atlas-tx-lab__sizes dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); padding-block-start: 0.15em; }
-.atlas-tx-lab__sizes dd { margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-preimage { list-style: none; padding: 0; margin: 0 0 var(--manual-space-3); display: grid; gap: 2px; }
-.atlas-preimage__item { display: grid; grid-template-columns: 1.6rem 7rem minmax(0, 1fr); gap: 0.1rem 0.5rem; align-items: baseline; inline-size: 100%; padding: 0.35rem 0.4rem; background: var(--manual-surface); border: 1px solid var(--manual-grid); text-align: start; font: inherit; color: inherit; cursor: pointer; min-block-size: 2.75rem; }
-.atlas-preimage__item:disabled { cursor: default; }
-.atlas-preimage__item[aria-pressed="true"] { border: 2px solid var(--manual-ink); background: var(--manual-blue-wash); }
-.atlas-preimage__item .atlas-num { margin: 0; }
-.atlas-preimage__label { font-family: var(--manual-code); font-size: 0.75rem; font-weight: 500; }
-.atlas-preimage__item code { font-size: 0.75rem !important; background: none !important; padding: 0 !important; overflow-wrap: anywhere; }
-.atlas-preimage__note { grid-column: 2 / -1; font-size: 0.8125rem; color: var(--manual-muted); }
-.atlas-preimage li[data-external="true"] .atlas-preimage__item { border-style: dashed; border-color: var(--manual-warning); }
-.atlas-preimage li[data-external="true"] .atlas-preimage__note { color: var(--manual-warning); }
-.atlas-tx-lab__sighash { display: grid; gap: 0.2rem; }
-.atlas-tx-lab__sighash span, .atlas-tx-lab__sighash small { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-tx-lab__sighash code { font-size: 0.8125rem !important; overflow-wrap: anywhere; word-break: break-all; }
-
-/* ---------- FIG A03.3 weight ---------- */
-.atlas-weight { display: grid; gap: var(--manual-space-5); }
-.atlas-weight__row { display: grid; gap: 0.35rem; }
-.atlas-weight__name { font-size: 1rem; }
-.atlas-weight__name span { color: var(--manual-muted); font-size: 0.875rem; }
-.atlas-weight__track { display: flex; block-size: 2.25rem; border: 1px solid var(--manual-ink); }
-.atlas-weight__base, .atlas-weight__wit { display: flex; align-items: center; padding-inline: 0.5rem; font-family: var(--manual-code); font-size: 0.75rem; white-space: nowrap; overflow: hidden; }
-.atlas-weight__base { background: var(--manual-blue); color: #fff; }
-.atlas-weight__wit { background: var(--atlas-hatch), var(--manual-surface); border-inline-start: 1px solid var(--manual-ink); }
-.atlas-weight__sum { font-size: 0.875rem; color: var(--manual-muted); }
-
-/* Side by side only when the byte map keeps a usable hex column: below 80rem the
-   plate is too narrow (at 1024 px the hex column was 5 px, one character per line). */
 @media (max-width: 79.99rem) {
   .atlas-tx-lab__body { grid-template-columns: minmax(0, 1fr); }
   .atlas-tx-lab__panel { position: static; }
 }
-@media (max-width: 47.99rem) {
-  .atlas-bytes-map__row { grid-template-columns: minmax(0, 1fr) auto; }
-  .atlas-bytes-map__hex { grid-column: 1 / -1; grid-row: 2; }
-  .atlas-bytes-map__size { display: none; }
-  .atlas-tx-lab__lenses { flex-direction: column; inline-size: 100%; }
-}
+.k-badge text, .k-badge__t { font-size: 7px !important; font-weight: 600; }
+.k-legend__t { font-size: 8.5px !important; letter-spacing: 0.06em; }
+.k-proj { fill: var(--manual-grid); fill-opacity: 0.35; stroke: var(--atlas-ink); stroke-width: 0.5; vector-effect: non-scaling-stroke; }
+.k-proj--wit { fill: none; stroke-dasharray: 2 2; }
+.k-wit { fill: #f1f1f4 !important; stroke-dasharray: 2 1.5; }
+.k-value--fail { fill: var(--atlas-ink) !important; font-weight: 600; }
 
 /* ---------- PSBT envelope ---------- */
 .atlas-env { display: grid; gap: var(--manual-space-2); padding: var(--manual-space-3); border: 2px solid var(--manual-ink); background: var(--manual-surface); position: relative; }

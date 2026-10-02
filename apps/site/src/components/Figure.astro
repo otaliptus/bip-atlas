@@ -27,8 +27,13 @@ import {
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
+  WitnessField,
+  WitnessCommitment,
+  NestedInput,
+  SighashReuse,
+  Bip143Preimage,
+  AmountStory,
   Bip32Worked,
-  TxWorked,
   AddressWorked,
   PsbtWorked,
   SchnorrWorked,
@@ -190,6 +195,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "two-serializations.v1" && <TwoSerializations fixture={tx[0]} />}
   {figure.recipe === "transaction-anatomy.v1" && <TransactionAnatomy client:visible fixtures={tx} figureId={figureId} />}
   {figure.recipe === "weight-meter.v1" && <WeightMeter fixtures={tx} />}
+  {figure.recipe === "witness-field.v1" && <WitnessField fixture={tx[0]} />}
+  {figure.recipe === "witness-commitment.v1" && <WitnessCommitment fixture={tx[0]} />}
+  {figure.recipe === "nested-input.v1" && <NestedInput fixture={tx[0]} />}
+  {figure.recipe === "sighash-reuse.v1" && <SighashReuse />}
+  {figure.recipe === "bip143-preimage.v1" && <Bip143Preimage fixture={tx[0]} />}
+  {figure.recipe === "amount-storyboard.v1" && <AmountStory fixture={tx[0]} />}
   {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
   {figure.recipe === "psbt-envelope.v1" && <PsbtEnvelope client:visible fixture={trace[0]} figureId={figureId} />}
   {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
@@ -240,7 +251,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
-      {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}

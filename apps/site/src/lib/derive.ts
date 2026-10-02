@@ -157,6 +157,7 @@ import type {
   PsbtRecordView,
   PsbtTraceFixture,
   TransactionFixture,
+  TxInputView,
   DerivedSchnorrFixture,
   SchnorrDerived,
   TaprootTreeDerived,
@@ -315,12 +316,44 @@ function deriveTransaction(f: TransactionFixture): DerivedTransactionFixture {
     locktime: { from: ["locktime"], note: "copied from the transaction" },
     hashType: { from: [], note: "SIGHASH_ALL, chosen by the signer" },
   };
+  // Per-input view for the drawings, from the reviewed input kinds, checked structurally.
+  const program = s.scriptCodeHex.match(/^1976a914([0-9a-f]{40})88ac$/)?.[1];
+  if (!program) throw new Error(`${f.id}: scriptCode is not the P2WPKH template`);
+  if (f.inputKinds.length !== tx.inputs.length) throw new Error(`${f.id}: one input kind per input expected`);
+  const inputs = tx.inputs.map((inp, k): TxInputView => {
+    const kind = f.inputKinds[k];
+    const witness = tx.witnesses[k] ?? [];
+    const sig = inp.scriptSigHex;
+    const p2wpkh = () => {
+      if (witness.length !== 2) throw new Error(`${f.id}: input ${k} P2WPKH witness must have two items`);
+      if (k !== s.inputIndex || bytesToHex(hash160(hexToBytes(witness[1]))) !== program) throw new Error(`${f.id}: input ${k} key does not hash to the program`);
+    };
+    if (kind.startsWith("P2PK (legacy)")) {
+      const n = parseInt(sig.slice(0, 2), 16);
+      if (!(n >= 1 && n <= 75 && sig.length === 2 + 2 * n) || witness.length) throw new Error(`${f.id}: input ${k} is not a single-push P2PK spend`);
+      return { kind, scriptSigHex: sig, scriptSig: "signature-push", witness, witnessKind: "empty", programHex: null };
+    }
+    if (kind.startsWith("P2WPKH")) {
+      if (sig !== "") throw new Error(`${f.id}: native input ${k} must have an empty scriptSig`);
+      p2wpkh();
+      return { kind, scriptSigHex: sig, scriptSig: "empty", witness, witnessKind: "p2wpkh", programHex: program };
+    }
+    if (kind.startsWith("P2SH-P2WPKH")) {
+      if (sig !== `160014${program}`) throw new Error(`${f.id}: input ${k} scriptSig is not a push of the 22-byte program`);
+      p2wpkh();
+      return { kind, scriptSigHex: sig, scriptSig: "program-push", witness, witnessKind: "p2wpkh", programHex: program };
+    }
+    throw new Error(`${f.id}: input kind "${kind}" is outside the reviewed set`);
+  });
+  const sats = BigInt(s.amountSats);
   return {
     ...f,
     derived: {
       segments: tx.segments,
       measures: measureTransaction(tx),
       digest: { items: digest.items.map((it) => ({ ...it, ...sources[it.id] })), sighashHex: digest.sighashHex },
+      inputs,
+      amountBtc: btc(sats),
     },
   };
 }

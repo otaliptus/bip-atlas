@@ -1,156 +1,227 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
+import { Arrow, Cells, Drawing, Machine, Magnifier, Responsive, Value, idsFor } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
+import { BytePacket, bytesHeight, layoutBytes, type ByteField } from "./BytePacket";
+
+import { preimageRole, shortHex, txFields } from "./fields";
+
+type Lens = "txid" | "wtxid" | "bip143";
 
 interface Props {
   fixtures: DerivedTransactionFixture[];
   figureId: string;
+  /** Starting state; the no-JS render uses it too. Defaults to the first example through the txid lens. */
+  initial?: { fixtureId: string; lens: Lens };
 }
 
-type Lens = "txid" | "wtxid" | "bip143";
-
-const LENSES: Array<{ id: Lens; label: string; note: string }> = [
-  { id: "txid", label: "txid preimage", note: "witness stripped" },
-  { id: "wtxid", label: "wtxid preimage", note: "everything" },
-  { id: "bip143", label: "BIP 143 signing preimage", note: "one input" },
+const LENSES: Array<{ id: Lens; text: string }> = [
+  { id: "txid", text: "txid" },
+  { id: "wtxid", text: "wtxid" },
+  { id: "bip143", text: "BIP 143 preimage" },
 ];
 
-const groupHex = (hex: string) => hex.match(/.{1,8}/g)?.join(" ") ?? "";
-const short = (hex: string) => `${hex.slice(0, 16)}…${hex.slice(-8)}`;
+const LEGEND: Array<{ role: string; text: string }> = [
+  { role: "hash", text: "previous txid" },
+  { role: "sig", text: "signature" },
+  { role: "public", text: "public key" },
+  { role: "time", text: "nSequence · nLockTime" },
+];
 
 /**
- * transaction-anatomy.v1 — the SegWit chapter's hero figure.
+ * transaction-anatomy.v1 — the SegWit chapter's hero (drawing-first).
  *
- * Serialization only: every byte, hash and size comes from parsing a published
- * BIP 143 example with the tested model, and the signing digest was checked
- * against the published preimage at build time. Nothing here edits bytes or
- * claims a transaction is valid.
+ * A published BIP 143 transaction drawn as a packet diagram on a byte grid,
+ * every field from the tested model. Through the txid lens the marker, flag
+ * and witness are hatched out and the rest goes into a double SHA-256
+ * machine; through the wtxid lens everything does. The BIP 143 lens numbers
+ * the bytes that feed each of the ten preimage items, draws the preimage,
+ * dashes the items that come from outside the transaction, and gives the
+ * published sighash. Controls: an example strip and a lens strip.
  */
-export function TransactionAnatomy({ fixtures, figureId }: Props) {
+export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
-
-  const [fixtureId, setFixtureId] = useState(fixtures[0].id);
-  const [lens, setLens] = useState<Lens>("txid");
-  const [item, setItem] = useState<string | null>(null);
-  const fixture = fixtures.find((f) => f.id === fixtureId)!;
-  const { segments, measures, digest } = fixture.derived;
+  const start = initial ?? { fixtureId: fixtures[0].id, lens: "txid" as Lens };
+  const [fixtureId, setFixtureId] = useState(start.fixtureId);
+  const [lens, setLens] = useState<Lens>(start.lens);
+  const fixture = fixtures.find((f) => f.id === fixtureId);
+  if (!fixture) throw new Error(`transaction-anatomy: no fixture ${fixtureId}`);
+  const d = fixture.derived;
+  const m = d.measures;
   const signed = fixture.sighash.inputIndex;
-
-  // For the BIP 143 lens: which preimage item(s) each segment feeds.
+  const fields = txFields(d);
+  const items = d.digest.items;
   const feeds = new Map<string, number[]>();
-  digest.items.forEach((it, n) => it.from.forEach((id) => feeds.set(id, [...(feeds.get(id) ?? []), n + 1])));
-  const focus = item ? digest.items.find((it) => it.id === item) ?? null : null;
+  items.forEach((it, n) => it.from.forEach((seg) => feeds.set(seg, [...(feeds.get(seg) ?? []), n + 1])));
+  const preimageBytes = items.reduce((n, it) => n + it.hex.length / 2, 0);
+  const outside = items.filter((it) => it.from.length === 0);
+  const witnessBytes = m.totalSize - m.baseSize;
 
-  const included = (part: string, id: string) => {
-    if (lens === "wtxid") return true;
-    if (lens === "txid") return part === "base";
-    return feeds.has(id);
+  const drawn: ByteField[] = fields.map((f) => ({
+    id: f.id,
+    short: f.short,
+    bytes: f.bytes,
+    role: f.role,
+    hatched: lens === "txid" && f.part !== "base",
+    faded: lens === "bip143" && !feeds.has(f.seg),
+    // Badge each segment once, on its first drawn field.
+    badges: lens === "bip143" && feeds.has(f.seg) && fields.find((g) => g.seg === f.seg) === f ? feeds.get(f.seg) : undefined,
+  }));
+  const preimage: ByteField[] = items.map((it, n) => ({
+    id: `pre-${it.id}`,
+    short: it.label,
+    bytes: it.hex.length / 2,
+    role: preimageRole(it.id),
+    outside: it.from.length === 0,
+    em: it.id === "amount",
+    badges: [n + 1],
+  }));
+
+  const hashName = lens === "txid" ? "txid" : "wtxid";
+  const hashHex = lens === "txid" ? m.txidHex : m.wtxidHex;
+  const status =
+    lens === "txid"
+      ? `txid: double SHA-256 of the ${m.baseSize} bytes a pre-SegWit node sees. The marker, flag and witness (${witnessBytes} bytes) are left out.`
+      : lens === "wtxid"
+        ? `wtxid: double SHA-256 of all ${m.totalSize} bytes, marker, flag and witness included.`
+        : `BIP 143 preimage for input ${signed}: ten items, ${preimageBytes} bytes. Numbered bytes feed the item with that number; ${outside.map((o) => o.label).join(", ").replace(/, ([^,]*)$/, " and $1")} come from outside the transaction.`;
+  const describe = () =>
+    `${fixture.label}: a serialized transaction of ${m.totalSize} bytes. Fields in order: ${fields.map((f) => `${f.label}, ${f.bytes} byte${f.bytes === 1 ? "" : "s"}`).join("; ")}. ` +
+    (lens === "bip143"
+      ? `Preimage items for input ${signed}: ${items.map((it, n) => `${n + 1} ${it.label}, ${it.hex.length / 2} bytes, ${it.note}`).join("; ")}. Its double SHA-256, the sighash, is ${d.digest.sighashHex}, as published.`
+      : `${status} Result: ${hashHex}.`);
+
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const W = wide ? 640 : 330;
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const perRow = wide ? 40 : 30, unit = 10, rowH = 20, gap = 4;
+    const x0 = wide ? 24 : 15, y0 = 124;
+    const segs = layoutBytes(drawn, perRow, x0, y0, unit, rowH, gap);
+    const pH = bytesHeight(m.totalSize, perRow, rowH, gap);
+    const pEnd = y0 + pH;
+    const marker = segs.find((s) => s.field.id === "marker");
+    const flagHex = fields.find((f) => f.id === "flag")?.hex;
+    const markerHex = fields.find((f) => f.id === "marker")?.hex;
+    // Preimage (BIP 143 lens), below the transaction.
+    const preY = pEnd + 44;
+    const preSegs = layoutBytes(preimage, perRow, x0, preY, unit, rowH, gap);
+    const preEnd = preY + bytesHeight(preimageBytes, perRow, rowH, gap);
+    // The machine: right column when wide, below when narrow.
+    const mx = wide ? 520 : 110;
+    const my = lens === "bip143" ? (wide ? preY + 40 : preEnd + 62) : wide ? 214 : pEnd + 62;
+    const resX = wide ? 470 : 190;
+    const resY = wide ? my + 86 : my - 4;
+    const legendY = Math.max(lens === "bip143" ? preEnd : pEnd, resY + 30, my + 40) + 34;
+    const per = wide ? 4 : 2;
+    const H = legendY + Math.ceil((LEGEND.length + (lens === "txid" ? 1 : 0)) / per) * 16 + 6;
+    const legend = [...LEGEND, ...(lens === "txid" ? [{ role: "hatch", text: "not in the txid" }] : [])];
+    return (
+      <Drawing id={id} width={W} height={H} title="Which bytes each hash covers" desc={describe()}>
+        <Value at={[x0, 16]} text={`${fixture.label.toUpperCase()} · ${m.totalSize} BYTES`} size={9} cls="k-value--label" />
+        {lens !== "bip143" && marker && markerHex && flagHex ? (
+          <>
+            <Magnifier id={`${id}-mag`} from={[marker.x + 10, marker.y + rowH / 2]} fromR={13} at={[wide ? 210 : 140, 64]} r={34}>
+              <Cells x={(wide ? 210 : 140) - 22} y={53} values={[markerHex, flagHex]} size={22} roleOf={() => "plain"} />
+            </Magnifier>
+            {lens === "txid" ? (
+              <rect x={(wide ? 210 : 140) - 22} y={53} width="44" height="22" style={`fill:${ids.hatch};opacity:0.55`} />
+            ) : null}
+            <Value at={[(wide ? 210 : 140) + 44, 56]} text="MARKER · FLAG" size={8.5} cls="k-value--label" />
+            <Value at={[(wide ? 210 : 140) + 44, 70]} text={lens === "txid" ? "NOT IN THE TXID" : "HASHED INTO THE WTXID"} size={8.5} cls="k-value--muted" />
+          </>
+        ) : null}
+        {lens === "bip143" ? (
+          <>
+            <circle class="k-outline k-fill--plain" cx={x0 + 5} cy={56} r="5" />
+            <text class="k-badge__t" x={x0 + 5} y={58.6} text-anchor="middle">n</text>
+            <Value at={[x0 + 16, 59]} text={wide ? "BYTES THAT FEED PREIMAGE ITEM n; FADED BYTES ARE NOT USED" : "FEEDS PREIMAGE ITEM n"} size={8.5} cls="k-value--label" />
+            <rect class="k-cell k-fill--plain k-dashed" x={x0} y={72} width="10" height="10" />
+            <Value at={[x0 + 16, 81]} text="DASHED: NOT IN THE TRANSACTION" size={8.5} cls="k-value--label" />
+          </>
+        ) : null}
+        <BytePacket segs={segs} hatch={ids.hatch} ruler perRow={perRow} unit={unit} x={x0} y={y0} rowH={rowH} />
+        {lens === "bip143" ? (
+          <>
+            <Value at={[x0, preY - 14]} text={`BIP 143 PREIMAGE · INPUT ${signed} · ${preimageBytes} BYTES`} size={9} cls="k-value--label" />
+            <BytePacket segs={preSegs} hatch={ids.hatch} perRow={perRow} unit={unit} x={x0} y={preY} rowH={rowH} />
+            {wide ? <Arrow d={`M${x0 + perRow * unit + 6} ${preY + 30} H${mx - 40}`} ids={ids} /> : <Arrow d={`M${mx + 20} ${preEnd + 6} V${my - 34}`} ids={ids} />}
+          </>
+        ) : wide ? (
+          <Arrow d={`M${x0 + perRow * unit + 6} ${y0 + pH / 2} H${mx - 40}`} ids={ids} />
+        ) : (
+          <Arrow d={`M${mx + 20} ${pEnd + 6} V${my - 34}`} ids={ids} />
+        )}
+        <Machine at={[mx, my]} w={70} d={36} h={30} label="SHA-256" sub="twice" role="hash" />
+        <Value at={[resX, resY]} text={lens === "bip143" ? "SIGHASH" : hashName.toUpperCase()} size={8.5} cls="k-value--label" />
+        <Value at={[resX, resY + 13]} text={shortHex(lens === "bip143" ? d.digest.sighashHex : hashHex, 16)} size={9.5} cls="k-value--hash" />
+        <Value
+          at={[resX, resY + 26]}
+          text={lens === "bip143" ? `= BIP 143 LINE ${fixture.sighash.sighashLine}` : lens === "txid" ? `${m.baseSize} OF ${m.totalSize} BYTES` : `ALL ${m.totalSize} BYTES`}
+          size={8}
+          cls="k-value--muted"
+        />
+        {legend.map((l, k) => {
+          const lx = x0 + (k % per) * (wide ? 150 : 150);
+          const ly = legendY + Math.floor(k / per) * 16;
+          return (
+            <g>
+              <rect class={`k-cell k-fill--${l.role === "hatch" ? "plain" : l.role}`} x={lx} y={ly - 8} width="10" height="10" style={l.role === "hatch" ? `fill:${ids.hatch}` : undefined} />
+              <text class="k-legend__t" x={lx + 15} y={ly + 0.5}>{l.text.toUpperCase()}</text>
+            </g>
+          );
+        })}
+      </Drawing>
+    );
   };
 
+  const strip = (label: string, name: string, options: Array<{ value: string; text: string }>, current: string, set: (v: string) => void) => (
+    <div class="atlas-strip" role="radiogroup" aria-label={label}>
+      {options.map((o) => (
+        <label class="atlas-strip__opt">
+          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} onChange={() => set(o.value)} />
+          <span>{o.text}</span>
+        </label>
+      ))}
+    </div>
+  );
+
   return (
-    <div class="atlas-lab atlas-tx-lab" data-hydrated={hydrated ? "true" : "false"} data-lens={lens}>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-lab__samples">
-            <legend>Public example from BIP 143</legend>
-            {fixtures.map((f) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-tx`} checked={f.id === fixtureId} onChange={() => { setFixtureId(f.id); setItem(null); }} />
-                <span>{f.label}<small>{f.shortLabel}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-segmented atlas-tx-lab__lenses">
-            <legend>Lens</legend>
-            {LENSES.map((l) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-lens`} checked={lens === l.id} onChange={() => setLens(l.id)} />
-                <span>{l.label}<small>{l.note}</small></span>
-              </label>
-            ))}
-          </fieldset>
+        <div class="atlas-hero__controls">
+          {strip("Published example", "tx", fixtures.map((f) => ({ value: f.id, text: f.shortLabel ?? f.label })), fixtureId, setFixtureId)}
+          {strip("Lens", "lens", LENSES.map((l) => ({ value: l.id, text: l.text })), lens, (v) => setLens(v as Lens))}
         </div>
       ) : (
-        <p class="atlas-lab__static-note">
-          Static view of the first example through the txid lens: bytes the txid does not cover are marked. With
-          JavaScript you can switch to the wtxid and BIP 143 signing lenses and to the second example.
-        </p>
+        <p class="atlas-hero__static">Static view: the first example through the txid lens. With JavaScript you can switch to the wtxid and BIP 143 lenses and to the second example.</p>
       )}
-
-      <div class="atlas-tx-lab__body">
-        <ol class="atlas-bytes-map" aria-label={`Serialized transaction, ${measures.totalSize} bytes, by field`}>
-          {segments.map((s) => {
-            const on = included(s.part, s.id);
-            const marks = lens === "bip143" ? feeds.get(s.id) ?? [] : [];
-            const focused = focus ? focus.from.includes(s.id) : false;
-            return (
-              <li
-                class="atlas-bytes-map__row"
-                data-part={s.part}
-                data-on={on ? "true" : "false"}
-                data-focus={focused ? "true" : undefined}
-                data-signed={lens === "bip143" && s.index === signed && s.id.startsWith("input") ? "true" : undefined}
-              >
-                <span class="atlas-bytes-map__label">
-                  {s.label}
-                  {s.part === "witness" ? <em> witness</em> : s.part === "marker" ? <em> segwit marker</em> : null}
-                </span>
-                <code class="atlas-bytes-map__hex">{groupHex(s.hex)}</code>
-                <span class="atlas-bytes-map__size">{s.hex.length / 2} B</span>
-                <span class="atlas-bytes-map__tag">
-                  {lens === "bip143"
-                    ? marks.length ? marks.map((n) => <span class="atlas-num">{n}</span>) : "not used"
-                    : on ? "hashed" : "not in txid"}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-
-        <section class="atlas-panel atlas-tx-lab__panel" aria-live="polite" aria-label="Lens result">
-          {lens !== "bip143" ? (
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this view</summary>
+        <dl class="atlas-hexlist">
+          {lens === "bip143" ? (
             <>
-              <h3 class="atlas-panel__title">{lens === "txid" ? "txid" : "wtxid"} = double SHA-256 of the {lens === "txid" ? measures.baseSize : measures.totalSize} marked bytes</h3>
-              <code class="atlas-tx-lab__hash">{lens === "txid" ? measures.txidHex : measures.wtxidHex}</code>
-              <p class="atlas-tx-lab__other">
-                {lens === "txid" ? "wtxid" : "txid"}: <code>{short(lens === "txid" ? measures.wtxidHex : measures.txidHex)}</code>
-              </p>
-              <dl class="atlas-tx-lab__sizes">
-                <div><dt>Base size</dt><dd>{measures.baseSize} bytes</dd></div>
-                <div><dt>Total size</dt><dd>{measures.totalSize} bytes</dd></div>
-                <div><dt>Weight</dt><dd>3 × {measures.baseSize} + {measures.totalSize} = {measures.weight}</dd></div>
-                <div><dt>Virtual size</dt><dd>⌈{measures.weight} ÷ 4⌉ = {measures.vsize} vbytes</dd></div>
-              </dl>
-              <p class="atlas-panel__scope">Hashes are shown in the byte order they are computed. Inputs: {fixture.inputKinds.join("; ")}.</p>
+              {items.map((it, n) => (
+                <>
+                  <dt>{n + 1}. {it.label} ({it.note})</dt>
+                  <dd><code class="atlas-break">{it.hex}</code></dd>
+                </>
+              ))}
+              <dt>Sighash (double SHA-256 of the preimage)</dt><dd><code class="atlas-break">{d.digest.sighashHex}</code></dd>
             </>
           ) : (
             <>
-              <h3 class="atlas-panel__title">Signing input {signed} · SIGHASH_ALL · 10 items</h3>
-              <ol class="atlas-preimage">
-                {digest.items.map((it, n) => (
-                  <li data-external={it.from.length === 0 ? "true" : undefined} data-focus={item === it.id ? "true" : undefined}>
-                    <button type="button" class="atlas-preimage__item" onClick={() => setItem(item === it.id ? null : it.id)} aria-pressed={item === it.id} disabled={!hydrated}>
-                      <span class="atlas-num">{n + 1}</span>
-                      <span class="atlas-preimage__label">{it.label}</span>
-                      <code>{it.hex.length > 24 ? short(it.hex) : it.hex}</code>
-                      <span class="atlas-preimage__note">{it.note}</span>
-                    </button>
-                  </li>
-                ))}
-              </ol>
-              <p class="atlas-tx-lab__sighash">
-                <span>double SHA-256 → sighash</span>
-                <code>{digest.sighashHex}</code>
-                <small>matches BIP 143 line {fixture.sighash.sighashLine}</small>
-              </p>
+              <dt>{hashName} (byte order as computed)</dt><dd><code class="atlas-break">{hashHex}</code></dd>
+              <dt>Base size · total size</dt><dd>{m.baseSize} bytes · {m.totalSize} bytes</dd>
             </>
           )}
-        </section>
-      </div>
-      <p class="atlas-lab__source">
-        Transaction: BIP 143, line {fixture.source.line} ({fixture.source.section}). Serialization view only; this page does not
-        check signatures or scripts.
-      </p>
+        </dl>
+      </details>
+      <p class="atlas-hero__source">BIP 143 line {fixture.source.line} ({fixture.source.section}). Parsed and hashed by the tested model; the preimage and sighash match the published ones. Serialization only: nothing here checks signatures.</p>
     </div>
   );
 }
