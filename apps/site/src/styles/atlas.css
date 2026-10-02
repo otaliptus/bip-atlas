@@ -596,7 +596,9 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .atlas-weight__wit { background: var(--atlas-hatch), var(--manual-surface); border-inline-start: 1px solid var(--manual-ink); }
 .atlas-weight__sum { font-size: 0.875rem; color: var(--manual-muted); }
 
-@media (max-width: 63.99rem) {
+/* Side by side only when the byte map keeps a usable hex column: below 80rem the
+   plate is too narrow (at 1024 px the hex column was 5 px, one character per line). */
+@media (max-width: 79.99rem) {
   .atlas-tx-lab__body { grid-template-columns: minmax(0, 1fr); }
   .atlas-tx-lab__panel { position: static; }
 }
@@ -784,7 +786,8 @@ button.atlas-env__record:hover { border-color: var(--manual-blue); }
 .atlas-sigmsg__note { font-size: 0.8125rem; color: var(--manual-muted); }
 .atlas-sigmsg__result { margin: 0; font-size: 0.8125rem; }
 
-@media (max-width: 63.99rem) {
+/* Tablet check: at 64–80rem the plate sits beside the contents rail and is narrower than at 768 px. */
+@media (max-width: 79.99rem) {
   .atlas-tap-lab__body { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 47.99rem) {
@@ -1083,6 +1086,8 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-vb-field__bit[data-kind="free"] { background: var(--atlas-hatch), var(--manual-surface); }
 .atlas-vb-field__v { font-size: 0.75rem; min-block-size: 1em; }
 .atlas-vb-field__n { font-size: 0.5625rem; color: inherit; opacity: 0.8; }
+/* 64–80rem: in the chapter head's narrow column 32 cells were 7–9 px wide and their numbers overlapped. */
+@media (min-width: 64rem) and (max-width: 79.99rem) { .atlas-vb-field__bits { grid-template-columns: repeat(16, minmax(0, 1fr)); } }
 .atlas-vb-field__notes { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: 0.25rem; font-size: 0.875rem; }
 .atlas-vb-record-fig { display: grid; gap: var(--manual-space-4); }
 .atlas-vb-record-fig > * { min-inline-size: 0; }
@@ -1123,6 +1128,8 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-wp-levels__seg { font-family: var(--manual-code); font-size: 0.8125rem; font-weight: 600; overflow-wrap: anywhere; }
 .atlas-wp-levels__what { font-size: 0.8125rem; }
 .atlas-wp-levels__how { font-family: var(--manual-code); font-size: 0.6875rem; color: var(--manual-muted); }
+/* 64–80rem: the figure sits in the chapter head's narrow column; six cells in one row clipped their words. */
+@media (min-width: 64rem) and (max-width: 79.99rem) { .atlas-wp-levels__row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .atlas-wp-levels__split { display: flex; justify-content: space-between; gap: 1rem; margin: 0; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
 .atlas-wp-levels__examples { margin: 0; font-size: 0.875rem; }
 .atlas-wp-schemes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--manual-space-3); }
@@ -1171,6 +1178,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-ds-legend span[data-role="range"] { color: #ffffff; background: var(--atlas-accent); padding-inline: 0.2rem; }
 .atlas-ds-legend span[data-role="checksum"] { border-block-end: 2px solid var(--manual-ink); }
 .atlas-ds-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--manual-space-3); }
+@media (max-width: 79.99rem) { .atlas-ds-body { grid-template-columns: minmax(0, 1fr); } }
 .atlas-ds-dl { display: grid; gap: 0.3rem; margin: 0.4rem 0 0; }
 .atlas-ds-dl > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
 .atlas-ds-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
@@ -1236,7 +1244,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-mu-ka__col[data-kind="naive"] { border-style: dashed; background: var(--atlas-hatch), var(--manual-surface); }
 .atlas-mu-ka__head { margin: 0; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--atlas-accent); }
 .atlas-mu-ka__terms { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-mu-ka__terms li { display: flex; gap: 0.35rem; }
+.atlas-mu-ka__terms li { display: flex; flex-wrap: wrap; gap: 0 0.35rem; }
 .atlas-mu-ka__a { color: var(--manual-muted); }
 .atlas-mu-ka__p { font-weight: 700; }
 .atlas-mu-ka__terms-flat { margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; }
@@ -1271,6 +1279,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-sp-list__kind { font-family: var(--manual-code); font-weight: 700; font-size: 0.75rem; }
 .atlas-sp-list em { color: var(--manual-muted); }
 .atlas-sp-flow { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--manual-space-3); }
+@media (max-width: 79.99rem) { .atlas-sp-flow { grid-template-columns: minmax(0, 1fr); } }
 .atlas-sp-dl { display: grid; gap: 0.3rem; margin: 0.4rem 0 0; }
 .atlas-sp-dl > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
 .atlas-sp-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
@@ -1359,6 +1368,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-v2-lab .atlas-panel__title { text-transform: none; letter-spacing: 0; }
 .atlas-v2-compare { display: inline-flex; gap: 0.5rem; align-items: center; font-family: var(--manual-code); font-size: 0.8125rem; }
 .atlas-v2-lanes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--manual-space-3); }
+@media (max-width: 79.99rem) { .atlas-v2-lanes { grid-template-columns: minmax(0, 1fr); } }
 .atlas-v2-dl { display: grid; gap: 0.3rem; margin: 0.4rem 0 0; font-size: 0.8125rem; }
 .atlas-v2-dl > div { display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
 .atlas-v2-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedV2Fixture } from "../types";
 
 interface Props {
@@ -39,7 +40,7 @@ export function V2Handshake({ fixtures, figureId }: Props) {
   const p = d.packet;
 
   return (
-    <div class="atlas-lab atlas-v2-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-v2-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-lab__samples">

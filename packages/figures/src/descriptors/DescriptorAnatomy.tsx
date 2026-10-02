@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedDescriptorFixture } from "../types";
 
 interface Props {
@@ -50,7 +51,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
   }
 
   return (
-    <div class="atlas-lab atlas-ds-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-ds-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-lab__samples">
@@ -72,7 +73,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
         {d.ranged ? <span data-flag="ranged">Ranged: one script per child index</span> : null}
       </p>
 
-      <p class="atlas-ds-ribbon" aria-label="The descriptor, by part">
+      <p class="atlas-ds-ribbon" role="group" aria-label="The descriptor, by part">
         {groups.map((g) =>
           g.key !== null && hydrated && d.keys.length > 1 ? (
             <button type="button" class="atlas-ds-keybtn" data-active={g.key === keySel ? "true" : undefined} aria-pressed={g.key === keySel} onClick={() => setKeySel(g.key!)} aria-label={`Key ${g.key + 1}`}>
@@ -134,7 +135,7 @@ export function DescriptorAnatomy({ fixtures, figureId }: Props) {
         </section>
       </div>
 
-      <section class="atlas-panel atlas-ds-check" aria-live="polite" aria-label="Checksum">
+      <section class="atlas-panel atlas-ds-check" aria-live="polite" aria-label="Checksum" tabIndex={-1} data-focus-home>
         <h3 class="atlas-panel__title">Checksum</h3>
         {hydrated && !checked ? (
           <button type="button" class="manual-plate-button" onClick={() => setChecked(true)}>Check the descriptor checksum</button>

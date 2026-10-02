@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
+import { holdFocus } from "./focus";
 import {
   BECH32M_CONST,
   BECH32_CONST,
@@ -88,7 +89,7 @@ export function AddressChecksumLab({ fixtures, figureId }: Props) {
   const cursorRole = ROLE_LABELS[roles[cursor]].toLowerCase();
 
   return (
-    <div class="atlas-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <fieldset class="atlas-lab__samples">
           <legend>Public sample</legend>
@@ -120,7 +121,7 @@ export function AddressChecksumLab({ fixtures, figureId }: Props) {
           class="atlas-ribbon"
           role={hydrated ? "group" : undefined}
           tabIndex={hydrated ? 0 : undefined}
-          aria-label={hydrated ? `Address characters. Cursor at position ${cursor + 1}, ${cursorRole}.` : undefined}
+          aria-label={hydrated ? "Address characters, one editable at a time" : undefined}
           aria-describedby={hydrated ? ids.ribbonHelp : undefined}
           onKeyDown={hydrated ? onRibbonKey : undefined}
         >
@@ -149,6 +150,8 @@ export function AddressChecksumLab({ fixtures, figureId }: Props) {
           ))}
         </div>
         <p class="manual-sr-only">Current string: {text}</p>
+        {/* The cells are hidden from assistive technology, so the cursor's position and character are announced here. */}
+        {hydrated ? <p class="manual-sr-only" aria-live="polite">Position {cursor + 1} of {original.length}, {cursorRole}: “{chars[cursor]}”.</p> : null}
       </div>
 
       {hydrated ? (

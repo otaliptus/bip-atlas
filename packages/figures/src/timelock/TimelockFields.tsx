@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import {
   checkLockTimeVerify,
   checkSequenceVerify,
@@ -109,7 +110,7 @@ export function TimelockFields({ fixtures, figureId }: Props) {
   const relActive = e.version >= 2 && (e.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG) === 0;
 
   return (
-    <div class="atlas-lab atlas-tl-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-tl-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-segmented">

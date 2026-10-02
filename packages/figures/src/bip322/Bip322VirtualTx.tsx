@@ -69,7 +69,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         </dl>
       </section>
 
-      <div class="atlas-b322-txs" aria-live="polite">
+      <div class="atlas-b322-txs">
         {views.includes("to_spend") ? (
           <section class="atlas-panel" aria-label="to_spend">
             <h3 class="atlas-panel__title">to_spend <small>not meant to be broadcast</small></h3>
@@ -103,7 +103,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         ) : null}
       </div>
 
-      <p class="atlas-b322-verdict" data-state={d.verdict.state}>
+      <p class="atlas-b322-verdict" data-state={d.verdict.state} aria-live="polite">
         <strong>{STATE[d.verdict.state]}</strong>
         {d.verdict.state === "valid" ? ` at time T = ${d.verdict.time} and age S = ${d.verdict.age}. The signature satisfies the address’s script for this message.` : `: ${d.verdict.reason}.`}
         {" "}<small>Checked by the model: {d.checked}.</small>

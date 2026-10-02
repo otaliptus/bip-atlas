@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedTapscriptFixture, TapscriptTraceView } from "../types";
 
 interface Props {
@@ -75,7 +76,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
   const stepOfPos = new Map(view.steps.map((s, i) => [s.position, i]));
 
   return (
-    <div class="atlas-lab atlas-ts-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-ts-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       <p class="atlas-ts-badge">Recorded, verified example · not a general interpreter</p>
       {hydrated ? (
         <div class="atlas-lab__controls">

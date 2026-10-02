@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedP2shFixture } from "../types";
 
 const short = (hex: string) => (hex === "" ? "(empty)" : hex.length > 18 ? `${hex.slice(0, 8)}…${hex.slice(-6)}` : hex);
@@ -23,7 +24,7 @@ export function P2shTwoStage({ fixtures, figureId }: { fixtures: DerivedP2shFixt
   const current = hydrated ? Math.min(stage, d.stages.length - 1) : d.stages.length - 1;
 
   return (
-    <div class="atlas-lab atlas-p2sh-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-p2sh-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-lab__samples">
@@ -67,12 +68,20 @@ export function P2shTwoStage({ fixtures, figureId }: { fixtures: DerivedP2shFixt
         </div>
       ) : null}
 
+      {/* One persistent, short live region: the stage list itself is long, and a region inserted with its content is not reliably announced. */}
+      {hydrated ? (
+        <p class="manual-sr-only" aria-live="polite">
+          {!shownReveal
+            ? "Redeem script hidden: only the output's 20-byte hash is visible."
+            : `Stage ${current + 1} of ${d.stages.length}, ${d.stages[current].title}: ${d.stages[current].ok ? "passes" : "fails"}.`}
+        </p>
+      ) : null}
       {!shownReveal ? (
-        <p class="atlas-p2sh-lab__before" aria-live="polite">
+        <p class="atlas-p2sh-lab__before">
           Before the spend, the output is all anyone can see: nothing below it can be checked yet. Choose Revealed, or press Next stage, to replay the spend.
         </p>
       ) : (
-      <ol class="atlas-p2sh-lab__stages" aria-live="polite">
+      <ol class="atlas-p2sh-lab__stages">
         {d.stages.map((s, i) => (
           <li class="atlas-stage" data-status={i > current ? "pending" : s.ok ? "pass" : "fail"}>
             <span class="atlas-stage__head">

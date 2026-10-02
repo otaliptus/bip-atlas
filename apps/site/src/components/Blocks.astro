@@ -32,10 +32,10 @@ const Self = Astro.self;
       );
     case "callout":
       return (
-        <aside class="manual-note atlas-callout" data-label={block.label}>
+        <div class="manual-note atlas-callout" role="note" data-label={block.label}>
           <span class="atlas-callout__label">{block.label}</span>
           <p><Inline text={block.text} /><ClaimRefs claims={block.claims} numbers={numbers} at={at} /></p>
-        </aside>
+        </div>
       );
     case "table":
       return (

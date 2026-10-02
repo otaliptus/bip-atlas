@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedMusig2SessionFixture } from "../types";
 
 interface Props {
@@ -39,7 +40,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
   const reached = (sid: string) => stages.findIndex((s) => s.id === sid) <= step;
 
   return (
-    <div class="atlas-lab atlas-mu-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-mu-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-lab__samples">

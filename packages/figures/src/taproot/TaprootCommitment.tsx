@@ -131,7 +131,7 @@ export function TaprootCommitment({ fixture, figureId }: Props) {
       )}
 
       <div class="atlas-tap-lab__body">
-        <div class="atlas-tap-lab__structure" aria-label="Commitment structure">
+        <div class="atlas-tap-lab__structure" role="group" aria-label="Commitment structure">
           <div class="atlas-tap-out">
             <span class="atlas-tap-out__label">Output · witness v1 program</span>
             <code class="atlas-break">{d.outputKeyHex}</code>

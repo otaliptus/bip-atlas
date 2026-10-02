@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
 import type { DerivedMnemonicFixture } from "../types";
 
 interface Props {
@@ -67,7 +68,7 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
         : `${g.entropyBitCount} entropy bits and ${g.checksumBitCount} checksum bits.`);
 
   return (
-    <div class="atlas-lab atlas-mnemonic-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-lab atlas-mnemonic-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-lab__controls">
           <fieldset class="atlas-segmented">
