@@ -60,3 +60,19 @@ A fresh read-only subagent recomputed every drawn value in pure Python (its own 
 | A12.8 | `wallet-path-schemes.v1` (redraw) | static | Three identical towers under 44′, 84′, 86′; at the bottom what each BIP fixes (script, version bytes) and the first receiving key, unrelated under each purpose. | 3 fixtures | script-by-purpose, b84, b86, b84-versions, same-seed, vectors |
 
 Retired: `WalletPathWorked`; its content is A12.6. Added to `deriveWalletPath`: BIP 44's examples table (throws unless it has 16 parseable paths) and its gap limit (throws if the line moves).
+
+## Descriptors (A13) — plan
+
+| Fig. | Recipe | Kind | Drawing | Data | Claims |
+|---|---|---|---|---|---|
+| A13.1 | `descriptor-sentence.v1` **new** (opening) | static | BIP 382's ranged wpkh() as a sentence of parts, each named on a leader: script expression, key origin (yellow: a fingerprint), key (green), derivation, range, and the optional `#`. | `bip382-wpkh-ranged` tokens | structure, key-expr, ranged, solution |
+| A13.2 | `descriptor-nesting.v1` **new** | static | sh(wpkh(xprv…)) as boxes inside boxes with each template, read outside in; pink xprv flagged as a secret; the child-0 P2SH script. | `bip382-sh-wpkh-xprv` | script-expr, b381, b382, secret-or-not |
+| A13.3 | `descriptor-template.v1` **new** | static | pkh(): key → HASH160 → the one slot of the template; template rows beside the published bytes (76 a9 14 … 88 ac). | `bip381-pkh-origin` | templates, b381, expansion-tested |
+| A13.4 | `descriptor-spellings.v1` **new** | static | Three BIP 381 spellings (' or h; WIF or public key) converge on one script. | `bip381-pkh-origin-wif` (**new fixture**, line 78), `bip381-pkh-origin` (80), `bip381-pkh-origin-h` (**new fixture**, line 82) | origin-no-effect, key-expr |
+| A13.5 | `descriptor-anatomy.v1` (hero, redraw) | interactive | The descriptor as nested boxes (one per script expression and script tree), keys split into origin / key / derivation / range; output scripts beside it; strips for descriptor and key, a button to check the checksum. | 8 fixtures | expansion-tested, key-expr, ranged, structure, secret-or-not, not-authentication |
+| A13.6 | `descriptor-read-story.v1` **new** (worked tab → storyboard) | storyboard, 4 frames | Template → origin → xpub/1/2/* fanning to three child keys → three scripts as BIP 382 lists them. | `bip382-wpkh-ranged` | ranged, expansion-tested, templates |
+| A13.7 | `descriptor-checksum.v1` (redraw, moved from the opening to the checksum section) | static | raw(deadbeef): characters shaded by group with their positions, lines into the symbol row (group symbols outlined), POLYMOD machine, #89f8spxm. | `bip380-raw-valid` | checksum-expand, charset, checksum-tested |
+| A13.8 | `descriptor-typo-forgery.v1` **new** | static | Valid vector; the one-letter typo rejected; the same typo with a recomputed checksum, which passes: no key involved. | `bip380-raw-valid`, `bip380-raw-typo` | checksum-tested, not-authentication, checksum-cases |
+| A13.9 | `descriptor-expressions.v1` (redraw) | static | BIP 380's index as a map: expressions × contexts (top, in sh(), in wsh(), in tr()), a mark where the model allows it; BIPs 390/392 rows hatched. | `bip380-index` | index, b381–b386 |
+
+Retired: `DescriptorWorked`; its content is A13.6. Prose change: "The figure checks BIP 380's own example…" → "Fig. A13.8 below checks…", because the checksum figures moved. New fixtures are copied from BIP 381 lines 78 and 82; the build re-checks each quote and expansion.

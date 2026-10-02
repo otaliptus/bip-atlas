@@ -1,30 +1,56 @@
+import { Drawing, Value } from "../kit";
 import type { DerivedDescriptorIndexFixture } from "../types";
 
-const CTX: Record<string, string> = { top: "top level", sh: "in sh()", wsh: "in wsh()", tr: "in a tr() tree" };
+const CTX = [
+  { id: "top", label: "TOP" },
+  { id: "sh", label: "IN sh()" },
+  { id: "wsh", label: "IN wsh()" },
+  { id: "tr", label: "IN tr()" },
+] as const;
 
-/** descriptor-expressions.v1 — static. BIP 380's index of script expressions, with where each may appear. */
+/**
+ * descriptor-expressions.v1 — static. BIP 380's index of script
+ * expressions as a map of where each may appear: one row per expression, one
+ * column per context, a filled mark where the tested model allows it.
+ * Expressions outside this chapter's sources are drawn hatched.
+ */
 export function DescriptorIndex({ fixture }: { fixture: DerivedDescriptorIndexFixture }) {
+  const rows = fixture.derived.rows;
+  const RH = 19, X0 = 120, CW = 50, Y0 = 34;
+  const desc =
+    `BIP 380's index of script expressions (lines ${fixture.tableFrom}–${fixture.tableTo}): ` +
+    rows.map((r) => `${r.expression}, BIP ${r.bip}: ${r.contexts ? `allowed ${r.contexts.map((c) => (c === "top" ? "at the top level" : `inside ${c}()`)).join(", ")}` : "outside this chapter's sources"}`).join("; ") + ".";
   return (
-    <div class="atlas-ds-index">
-      <div class="atlas-table-wrap" tabindex={0} role="region" aria-label="Script expressions">
-        <table class="manual-table atlas-ds-index__table">
-          <caption class="manual-sr-only">Script expressions, the BIP that defines each, where it may appear and what it produces</caption>
-          <thead>
-            <tr><th scope="col">Expression</th><th scope="col">BIP</th><th scope="col">May appear</th><th scope="col">Produces</th></tr>
-          </thead>
-          <tbody>
-            {fixture.derived.rows.map((r) => (
-              <tr data-scope={r.contexts ? "in" : "out"}>
-                <th scope="row"><code>{r.expression}</code></th>
-                <td>{r.bip}</td>
-                <td>{r.contexts ? r.contexts.map((c) => CTX[c]).join(", ") : "not covered here"}</td>
-                <td>{r.template ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="atlas-lab__source">Rows from BIP 380’s Appendix B (lines {fixture.tableFrom}–{fixture.tableTo}); placement rules from BIPs 381–386 as the tested model enforces them. BIPs 390 and 392 are outside this chapter’s pinned sources.</p>
-    </div>
+    <>
+      <Drawing id="a13-index" width={344} height={Y0 + rows.length * RH + 40} title="Where each expression may go" desc={desc}>
+        {CTX.map((c, j) => <Value at={[X0 + j * CW + CW / 2, Y0 - 10]} text={c.label} anchor="middle" size={9} cls="k-value--label" />)}
+        {rows.map((r, i) => {
+          const y = Y0 + i * RH;
+          return (
+            <g>
+              <Value at={[8, y + 13]} text={r.expression.length > 15 ? `${r.expression.slice(0, 14)}…` : r.expression} size={9.5} />
+              <Value at={[X0 - 6, y + 13]} text={String(r.bip)} anchor="end" size={9} cls="k-value--muted" />
+              {CTX.map((c, j) => {
+                const ok = r.contexts?.includes(c.id) ?? false;
+                return (
+                  <g>
+                    <rect class="k-cell k-fill--plain" x={X0 + j * CW} y={y} width={CW} height={RH} style={r.contexts ? undefined : "fill:url(#a13-index-hatch)"} />
+                    {ok ? <circle class="k-mark--plain" cx={X0 + j * CW + CW / 2} cy={y + RH / 2} r="4.5" /> : null}
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })}
+        <circle class="k-mark--plain" cx="12" cy={Y0 + rows.length * RH + 20} r="4.5" />
+        <Value at={[22, Y0 + rows.length * RH + 23]} text="ALLOWED · HATCHED: NOT COVERED HERE" size={9} cls="k-value--label" />
+      </Drawing>
+      <details class="atlas-disclosure">
+        <summary>What each expression produces</summary>
+        <dl class="atlas-hexlist atlas-hexlist--case">
+          {rows.map((r) => <><dt>{r.expression} · BIP {r.bip}</dt><dd>{r.template ?? "outside this chapter’s sources"}</dd></>)}
+        </dl>
+      </details>
+    </>
   );
 }

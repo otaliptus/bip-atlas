@@ -62,7 +62,12 @@ import {
   DescriptorAnatomy,
   DescriptorChecksum,
   DescriptorIndex,
-  DescriptorWorked,
+  DescriptorSentence,
+  DescriptorNesting,
+  DescriptorTemplate,
+  DescriptorSpellings,
+  DescriptorReadStory,
+  DescriptorTypo,
   Musig2Rounds,
   Musig2KeyAgg,
   Musig2PsigChecks,
@@ -243,6 +248,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
   {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
   {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
+  {figure.recipe === "descriptor-sentence.v1" && <DescriptorSentence fixture={desc[0]} />}
+  {figure.recipe === "descriptor-nesting.v1" && <DescriptorNesting fixture={desc[0]} />}
+  {figure.recipe === "descriptor-template.v1" && <DescriptorTemplate fixture={desc[0]} />}
+  {figure.recipe === "descriptor-spellings.v1" && <DescriptorSpellings fixtures={desc} />}
+  {figure.recipe === "descriptor-read-story.v1" && <DescriptorReadStory fixture={desc[0]} />}
+  {figure.recipe === "descriptor-typo-forgery.v1" && <DescriptorTypo fixtures={desc} />}
   {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
   {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
   {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
@@ -268,7 +279,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
-      {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
       {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
