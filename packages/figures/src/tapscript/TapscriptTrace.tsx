@@ -48,12 +48,15 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
   const budget = sigs.length ? sigs[sigs.length - 1].sig!.budgetAfter : v.budgetStart;
   // The budget base (50 in BIP 342) as the recording computed it: start minus witness size.
   const base = v.budgetStart - v.witness.totalBytes;
+  // Non-empty signatures counted against the budget so far ("Inspect signature count").
+  const counted = sigs.filter((s) => s.sig!.check !== "empty").length;
   const atEnd = p === L;
   const lamp = atEnd ? (v.valid ? "on" : "off") : "idle";
   const stepOfPos = new Map(v.steps.map((s, i) => [s.position, i]));
   const cellOf = (position: number): Cell => {
     const i = stepOfPos.get(position);
-    if (i === undefined) return v.opSuccess !== null && atEnd ? "exit" : "never";
+    // Before the end, an opcode not yet run is just ahead: the drawing must not show where a run will stop.
+    if (i === undefined) return !atEnd ? "ahead" : v.opSuccess !== null ? "exit" : "never";
     if (i >= p) return "ahead";
     const s = v.steps[i];
     if (s.failed) return "failed";
@@ -69,7 +72,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
         : `Start: the stack, top first, is ${list(v.initialStack)}. Budget ${base} + ${v.witness.totalBytes} witness bytes = ${v.budgetStart}.`
       : atEnd && step!.failed
         ? `Step ${p} of ${L}, ${step!.name}. ${verdict}`
-        : `Step ${p} of ${L}, ${step!.name}: ${step!.note}.${step!.sig ? ` ${CHECK_TEXT[step!.sig.check]}; budget ${step!.sig.budgetAfter}.` : ""}${atEnd ? ` ${verdict}` : ""}`;
+        : `Step ${p} of ${L}, ${step!.name}: ${step!.note}.${step!.sig ? ` ${CHECK_TEXT[step!.sig.check]}; budget ${step!.sig.budgetAfter}; ${counted} signature${counted === 1 ? "" : "s"} counted so far.` : ""}${atEnd ? ` ${verdict}` : ""}`;
   const describe = () =>
     `Bitcoin Core test case ${fixture.caseIndex}, ${which} witness. Script: ${v.ops.map((o) => o.name).join(" ")}. Initial stack, top first: ${list(v.initialStack)}. Budget ${v.budgetStart}. ` +
     done.map((s, i) => `Step ${i + 1}, ${s.name}: ${s.note}; stack ${s.failed ? "when it failed" : "after"}, top first: ${list(s.failed ? s.before : s.after)}${s.sig ? `; budget ${s.sig.budgetAfter}` : ""}.`).join(" ") +
@@ -113,13 +116,13 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
         <Value at={[14, top - 12]} text={step?.failed ? "STACK WHEN IT FAILED, TOP HIGHEST" : "STACK, TOP HIGHEST"} size={8.5} cls="k-value--label" />
         <StackPlates x={36} y={top + 6} ids={stack} view={v} hatch={ids.hatch} />
         {/* Fuel gauge: the signature budget. */}
-        <Value at={[gaugeX, top - 12]} text="BUDGET" size={8.5} cls="k-value--label" />
+        <Value at={[gaugeX, top - 12]} text={v.opSuccess ? "BUDGET · NOT IN FORCE" : "BUDGET"} size={8.5} cls="k-value--label" />
         <rect class="k-outline k-fill--plain" x={gaugeX} y={top} width="30" height={gaugeH} />
-        <rect class="k-fuel" x={gaugeX} y={top + gaugeH * (1 - level)} width="30" height={gaugeH * level} />
+        <rect class={v.opSuccess ? "k-fill--plain" : "k-fuel"} x={gaugeX} y={top + gaugeH * (1 - level)} width="30" height={gaugeH * level} />
         <rect class="k-outline" x={gaugeX} y={top} width="30" height={gaugeH} fill="none" />
         <Value at={[gaugeX + 36, top + gaugeH * (1 - level) + 4]} text={`${budget}`} size={9} />
         <Value at={[gaugeX, top + gaugeH + 14]} text={`OF ${v.budgetStart}`} size={8} cls="k-value--muted" />
-        <Value at={[gaugeX, top + gaugeH + 26]} text={`${v.budgetStart - budget} SPENT`} size={8} cls="k-value--muted" />
+        <Value at={[gaugeX, top + gaugeH + 26]} text={`${counted} SIG${counted === 1 ? "" : "S"} COUNTED`} size={8} cls="k-value--muted" />
         <Lamp at={[wide ? 440 : 300, top + 40]} state={lamp} label={lamp === "idle" ? "" : v.valid ? "VALID" : "INVALID"} />
       </Drawing>
     );
@@ -141,7 +144,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
       {hydrated ? (
         <div class="atlas-hero__controls">
           {strip("Bitcoin Core test case", "case", fixtures.map((f) => ({ value: f.id, text: f.label })), fixtureId, (id) => (setFixtureId(id), setAt(0)))}
-          {strip("Witness", "witness", [{ value: "success", text: "✓ Success witness" }, { value: "failure", text: "✕ Failure witness" }], which, (w) => (setWhich(w as Which), setAt(0)))}
+          {strip("Compare success/failure fixtures", "witness", [{ value: "success", text: "✓ Success witness" }, { value: "failure", text: "✕ Failure witness" }], which, (w) => (setWhich(w as Which), setAt(0)))}
         </div>
       ) : (
         <p class="atlas-hero__static">Static view: the success witness of the first case, played to the end. With JavaScript you can step through each of the {fixtures.length} cases opcode by opcode, compare the success and failure witnesses, and watch the budget.</p>
@@ -176,7 +179,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
           <dt>Witness size</dt><dd>{v.witness.totalBytes} bytes = 1 (item count) + initial stack {v.witness.stackBytes} + script {v.witness.scriptBytes} + control block {v.witness.controlBytes}{v.witness.annexBytes ? ` + annex ${v.witness.annexBytes}` : ""}, each with its length prefix</dd>
         </dl>
       </details>
-      <p class="atlas-hero__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit and linked from BIP 341. Each control block was checked against its output key first, as in Fig. A07.2.</p>
+      <p class="atlas-hero__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit and linked from BIP 341. Each control block was checked against its output key first, as in Fig. A07.4.</p>
     </div>
   );
 }

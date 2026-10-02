@@ -1,4 +1,4 @@
-import { Drawing, Value, idsFor, wrapLines } from "../kit";
+import { Drawing, Value, wrapLines } from "../kit";
 import type { DerivedTapscriptFixture } from "../types";
 import { elementRole } from "./common";
 
@@ -12,7 +12,8 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
   const v = fixture.derived.success;
   if (v.witness.annexBytes) throw new Error(`${fixture.id}: the figure draws a witness without an annex`);
   const scriptBytes = v.scriptHex.length / 2;
-  const cbBytes = 33 + 32 * v.witness.siblings;
+  const cbBytes = v.witness.controlHex.length / 2;
+  if (cbBytes !== 33 + 32 * v.witness.siblings) throw new Error(`${fixture.id}: control block size does not match its sibling count`);
   const rows = [
     ...v.initialStack.map((id, n) => {
       const e = v.elements[id];
@@ -34,7 +35,7 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
   return (
     <>
       <Drawing id="a08-witness" width={344} height={H} title="Two specifications, one witness" desc={desc}>
-        <Value at={[x, 12]} text={`WITNESS · CORE CASE ${fixture.caseIndex} · ${v.witness.items} ITEMS, FIRST ON TOP`} size={8.5} cls="k-value--label" />
+        <Value at={[x, 12]} text={`WITNESS · CORE CASE ${fixture.caseIndex} · ${v.witness.items} ITEMS · ITEM 0 IS THE STACK BOTTOM`} size={8.5} cls="k-value--label" />
         {rows.map((r, i) =>
           r.kind === "control" ? (
             <g>
@@ -75,6 +76,7 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
             </>
           ))}
           <dt>Item {v.initialStack.length}: script</dt><dd><code class="atlas-break">{v.scriptHex}</code></dd>
+          <dt>Item {v.initialStack.length + 1}: control block</dt><dd><code class="atlas-break">{v.witness.controlHex}</code></dd>
         </dl>
       </details>
     </>

@@ -6,10 +6,10 @@ type Bin = "empty-key" | "empty" | "valid" | "invalid" | "unknown-key-type";
 
 /** BIP 342's rules for a signature opcode, one tray per shape of key and signature. */
 const TRAYS: Array<{ bins: Bin[]; head: string; body: string; cost: string }> = [
-  { bins: ["empty-key"], head: "EMPTY KEY", body: "The script fails at once.", cost: "MUST FAIL" },
-  { bins: ["empty"], head: "EMPTY SIG", body: "Not checked. CHECKSIG pushes empty, CHECKSIGADD pushes n, VERIFY fails.", cost: "COSTS 0" },
-  { bins: ["valid", "invalid"], head: "32-BYTE KEY", body: "BIP 340 check. Valid: push 1 or n + 1. Invalid: the script fails.", cost: `COSTS ${SIGOP_COST}` },
-  { bins: ["unknown-key-type"], head: "OTHER KEY", body: "Unknown key type: not checked, counts as a success.", cost: `COSTS ${SIGOP_COST}` },
+  { bins: ["empty-key"], head: "BAD ARGS", body: "Empty key, too few items, or n over 4 bytes.", cost: "MUST FAIL" },
+  { bins: ["empty"], head: "EMPTY SIG", body: "Not checked. CHECKSIG pushes empty, CHECKSIGADD pushes n, CHECKSIGVERIFY MUST fail.", cost: "COSTS 0" },
+  { bins: ["valid", "invalid"], head: "32-B KEY, SIG", body: "BIP 340 check. Valid: push 1, push n + 1, or carry on. Invalid: the script fails.", cost: `COSTS ${SIGOP_COST}` },
+  { bins: ["unknown-key-type"], head: "OTHER KEY, SIG", body: "Unknown key type: not checked, counts as a success.", cost: `COSTS ${SIGOP_COST}` },
 ];
 
 /**
@@ -27,7 +27,7 @@ export function SigRules({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) 
       const tag = `${f.caseIndex} ${which === "success" ? "✓" : "✕"}`;
       for (const s of v.steps) {
         if (s.sig) note(s.sig.check as Bin, tag);
-        else if (s.failed && /public key is empty/.test(s.note)) note("empty-key", tag);
+        else if (s.failed && /public key is empty|larger than 4|fewer than/.test(s.note)) note("empty-key", tag);
       }
     }
   }
@@ -36,7 +36,7 @@ export function SigRules({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) 
   const desc =
     `A signature opcode pops a public key and a signature (CHECKSIGADD also pops a number n). ` +
     TRAYS.map((t) => `${t.head.toLowerCase()}: ${t.body} ${t.cost.toLowerCase()}; recorded witnesses here: ${t.bins.flatMap((b) => seen.get(b) ?? []).join(", ") || "none"}.`).join(" ") +
-    ` Too few stack elements, or an n longer than 4 bytes, also fail the script.`;
+    ` The last three trays apply to a non-empty signature.`;
   return (
     <Drawing id="a08-sigrules" width={344} height={top + 168 + Math.max(...TRAYS.map((t) => t.bins.flatMap((b) => seen.get(b) ?? []).length)) * 11} title="What a signature opcode does" desc={desc}>
       <Value at={[172, 14]} text="POP A KEY AND A SIGNATURE" size={9} anchor="middle" cls="k-value--label" />

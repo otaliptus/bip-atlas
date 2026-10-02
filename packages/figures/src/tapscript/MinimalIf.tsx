@@ -34,13 +34,13 @@ export function MinimalIf({ fixture }: { fixture: DerivedTapscriptFixture }) {
         <rect class={`k-outline k-fill--plain k-dashed${fits && hex === "" ? " k-cell--em" : ""}`} x="162" y={y + 10} width="40" height="22" />
         <Value at={[182, y + 25]} text="empty" size={8} anchor="middle" cls="k-value--muted" />
         <rect class={`k-outline k-fill--plain${fits && hex === "01" ? " k-cell--em" : ""}`} x="210" y={y + 10} width="40" height="22" />
-        <Value at={[230, y + 25]} text="01" size={9.5} anchor="middle" />
+        <Value at={[230, y + 25]} text="0x01" size={9} anchor="middle" />
         <Lamp at={[300, y + 21]} state={fits ? "on" : "off"} label={fits ? "FITS" : "STOPS"} />
       </g>
     );
   };
   return (
-    <Drawing id="a08-minimalif" width={344} height={150} title="OP_IF takes 0x01 or nothing" desc={desc}>
+    <Drawing id="a08-minimalif" width={344} height={150} title="OP_IF takes 0x01 or the empty vector" desc={desc}>
       <Value at={[154, 16]} text="THE ONLY SHAPES OP_IF TAKES" size={8.5} cls="k-value--label" />
       {row(40, ok.e.hex, true, "SUCCESS WITNESS")}
       {row(100, bad.e.hex, false, "FAILURE WITNESS")}

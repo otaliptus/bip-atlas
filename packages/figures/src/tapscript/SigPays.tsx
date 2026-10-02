@@ -32,7 +32,7 @@ export function SigPays({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
     { name: `${valid.e.bytes}-BYTE SIGNATURE`, src: `case ${valid.f.caseIndex}`, adds: itemSize(valid.e.bytes), costs: SIGOP_COST, role: "sig" },
     { name: "EMPTY SIGNATURE", src: `case ${empty.f.caseIndex}`, adds: itemSize(0), costs: 0, role: "plain" },
   ];
-  const desc = rows.map((r) => `A ${r.name.toLowerCase()} (as in Core ${r.src}) adds ${r.adds} serialized witness bytes, so ${r.adds} to the budget, and its check costs ${r.costs}: net ${r.adds - r.costs >= 0 ? "+" : ""}${r.adds - r.costs}.`).join(" ");
+  const desc = rows.map((r) => `${r.costs ? "A" : "An"} ${r.name.toLowerCase()} (as in Core ${r.src}) adds ${r.adds} serialized witness byte${r.adds === 1 ? "" : "s"}, so ${r.adds} to the budget; ${r.costs ? `its check costs ${r.costs}` : "it is not checked and costs nothing"}: net +${r.adds - r.costs}.`).join(" ");
   return (
     <Drawing id="a08-pays" width={344} height={186} title="A signature pays its own way" desc={desc}>
       {rows.map((r, i) => {

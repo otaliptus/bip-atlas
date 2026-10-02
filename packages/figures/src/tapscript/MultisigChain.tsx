@@ -32,13 +32,13 @@ export function MultisigChain({ fixture }: { fixture: DerivedTapscriptFixture })
   return (
     <Drawing id="a08-multisig" width={344} height={300} title="Counting signatures, old and new" desc={desc}>
       <Value at={[14, 16]} text="OLD · OP_CHECKMULTISIG" size={9} cls="k-value--label" />
-      <IsoBox at={[44, 40]} w={70} d={30} h={26} role="plain" />
-      <path class="k-ring" d="M30 30 L110 92 M110 30 L30 92" />
+      <IsoBox at={[44, 50]} w={70} d={30} h={26} role="plain" />
+      <path class="k-ring" d="M24 34 L104 104 M104 34 L24 104" />
       <Value at={[150, 40]} text="DISABLED IN TAPSCRIPT:" size={8.5} cls="k-value--label" />
       <Value at={[150, 52]} text="FAILS AS SOON AS IT RUNS" size={8.5} cls="k-value--label" />
       <Value at={[150, 72]} text={`CORE CASE ${fixture.caseIndex}, FAILURE WITNESS:`} size={8} cls="k-value--muted" />
       {script.map((l, i) => <Value at={[150, 84 + i * 11]} text={l} size={8} />)}
-      <Value at={[150, 84 + script.length * 11 + 4]} text={`✕ AT OP_CHECKMULTISIG, AFTER ${before} OPCODES`} size={8} cls="k-value--label" />
+      <Value at={[150, 84 + script.length * 11 + 4]} text={`✕ AFTER ${before} OPCODES`} size={8} cls="k-value--label" />
       <line class="k-sep k-leader" x1="14" y1="136" x2="330" y2="136" />
 
       <Value at={[14, 156]} text="NEW · A CHAIN OF OP_CHECKSIGADD (SYMBOLIC)" size={9} cls="k-value--label" />
@@ -64,8 +64,8 @@ export function MultisigChain({ fixture }: { fixture: DerivedTapscriptFixture })
         );
       })}
       <Value at={[14, 248]} text="WITNESS: ONE SLOT PER KEY, A SIGNATURE OR EMPTY" size={8} cls="k-value--muted" />
-      <Value at={[14, 266]} text="TOTAL: +1 PER SIGNATURE, +0 PER EMPTY SLOT;" size={8.5} cls="k-value--label" />
-      <Value at={[14, 278]} text="NUMEQUAL CHECKS THE TOTAL AGAINST k" size={8.5} cls="k-value--label" />
+      <Value at={[14, 266]} text="TOTAL: +1 PER VALID SIGNATURE, +0 PER EMPTY;" size={8.5} cls="k-value--label" />
+      <Value at={[14, 278]} text="AN INVALID ONE FAILS THE SCRIPT; NUMEQUAL ≟ k" size={8.5} cls="k-value--label" />
     </Drawing>
   );
 }

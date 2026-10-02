@@ -646,6 +646,13 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
     return i;
   };
   const initialStack = t.initialStack.map(idx);
+  const steps = t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null }));
+  // A value a signature opcode popped as its key is a key of an unknown type unless it is 32 bytes (BIP 342).
+  for (const s of steps) {
+    if (!s.sig) continue;
+    const key = elements[s.before[s.before.length - 1]];
+    if (key.bytes !== 32 && key.bytes !== 0) key.label = `${key.bytes}-byte key, unknown type`;
+  }
   // An OP_SUCCESSx met while decoding ends validation as valid before anything runs (BIP 342).
   const dec = decodeTapscript(t.scriptHex);
   const opSuccess = dec.kind === "op-success" ? dec.at.name : null;
@@ -669,11 +676,12 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
       annexBytes: t.annexHex ? size(t.annexHex) : 0,
       totalBytes: t.witnessBytes,
       siblings: (control.length / 2 - 33) / 32,
+      controlHex: control,
     },
     budgetStart: t.budgetStart,
     sigOpsCounted: t.sigOpsCounted,
     opSuccess,
-    steps: t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null })),
+    steps,
   };
 }
 

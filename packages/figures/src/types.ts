@@ -312,7 +312,7 @@ export interface TapscriptTraceView {
   /** Indices into `elements`, bottom of stack first. */
   initialStack: number[];
   /** Serialized sizes, each including its length prefix; totalBytes adds the item-count prefix. */
-  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number; siblings: number };
+  witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number; siblings: number; controlHex: string };
   budgetStart: number;
   sigOpsCounted: number;
   /** Name of the OP_SUCCESSx the decoder met (validation then succeeds without running), or null. */

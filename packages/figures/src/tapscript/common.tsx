@@ -11,7 +11,7 @@ export const itemSize = (bytes: number) => (bytes < 253 ? 1 : 3) + bytes;
 /** Colour role of a stack element, from its reading: signatures blue, 32-byte keys green, the rest plain. */
 export function elementRole(e: TapscriptElement): Role {
   if (e.label.endsWith("signature")) return "sig";
-  if (e.label === "32-byte key") return "public";
+  if (e.label === "32-byte key" || e.label.includes("key, unknown type")) return "public";
   return "plain";
 }
 

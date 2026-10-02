@@ -41,6 +41,12 @@ function view(c: ScriptAssetCase, which: "success" | "failure"): TapscriptTraceV
     return i;
   };
   const initialStack = t.initialStack.map(idx);
+  const steps = t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null }));
+  for (const s of steps) {
+    if (!s.sig) continue;
+    const key = elements[s.before[s.before.length - 1]];
+    if (key.bytes !== 32 && key.bytes !== 0) key.label = `${key.bytes}-byte key, unknown type`;
+  }
   const size = (e: string) => (e.length / 2 < 253 ? 1 : 3) + e.length / 2;
   const control = w[w.length - (t.annexHex ? 2 : 1)];
   const dec = decodeTapscript(t.scriptHex);
@@ -48,9 +54,9 @@ function view(c: ScriptAssetCase, which: "success" | "failure"): TapscriptTraceV
     expected: which, valid: t.valid, failStage: t.failStage, reason: t.reason, scriptHex: t.scriptHex,
     ops: t.ops.map((o) => ({ position: o.position, name: o.dataHex !== null ? `<${o.dataHex.length / 2}-byte push>` : o.name, dataBytes: o.dataHex === null ? null : o.dataHex.length / 2 })),
     elements, initialStack,
-    witness: { items: w.length, stackBytes: t.initialStack.reduce((n, e) => n + size(e), 0), scriptBytes: size(t.scriptHex), controlBytes: size(control), annexBytes: t.annexHex ? size(t.annexHex) : 0, totalBytes: t.witnessBytes, siblings: (control.length / 2 - 33) / 32 },
+    witness: { items: w.length, stackBytes: t.initialStack.reduce((n, e) => n + size(e), 0), scriptBytes: size(t.scriptHex), controlBytes: size(control), annexBytes: t.annexHex ? size(t.annexHex) : 0, totalBytes: t.witnessBytes, siblings: (control.length / 2 - 33) / 32, controlHex: control },
     budgetStart: t.budgetStart, sigOpsCounted: t.sigOpsCounted, opSuccess: dec.kind === "op-success" ? dec.at.name : null,
-    steps: t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null })),
+    steps,
   };
 }
 function derived(id: string): DerivedTapscriptFixture {
@@ -83,7 +89,8 @@ describe("A08.1 witness", () => {
     expect(s).toContain("item 0 · empty");
     expect(s).toContain("item 1 · 64-byte signature");
     expect(s).toContain(`item 2 · script · ${d.derived.success.scriptHex.length / 2} B`);
-    expect(s).toContain(`control block · ${33 + 32 * d.derived.success.witness.siblings} B`);
+    expect(s).toContain(`control block · ${d.derived.success.witness.controlHex.length / 2} B`);
+    expect(s).toContain(`>${d.derived.success.witness.controlHex}</code>`);
     expect(s).toContain("BIP 341");
     expect(s).toContain(`>${d.derived.success.scriptHex}</code>`);
   });
@@ -105,9 +112,11 @@ describe("A08.3 signature rules", () => {
     const s = html(h(SigRules, { fixtures: all("tapscript-sig-rules.v1") }));
     const tray = (bins: string) => s.slice(s.indexOf(`data-tray="${bins}"`), s.indexOf("</g>", s.indexOf(`data-tray="${bins}"`) + 900));
     expect(tray("empty-key")).toContain("case 1135 ✕");
+    expect(tray("empty-key")).toContain("case 1109 ✕");
     expect(tray("empty")).toContain("case 1135 ✓");
     expect(tray("unknown-key-type")).toContain("case 824 ✓");
     expect(tray("valid invalid")).toContain("case 824 ✕");
+    expect(s).toContain("CHECKSIGVERIFY MUST");
     expect(s).toContain(`COSTS ${SIGOP_COST}`);
   });
 });
@@ -116,6 +125,7 @@ describe("A08.4 multisig", () => {
   it("shows case 804's failure stopping at CHECKMULTISIG", () => {
     const s = html(h(MultisigChain, { fixture: derived("core-case-804") }));
     expect(s).toContain("AFTER 5 OPCODES");
+    expect(derived("core-case-824").derived.success.elements.map((e) => e.label)).toContain("33-byte key, unknown type");
     expect(s).toContain("CHECKSIGADD");
     expect(s).toContain("SYMBOLIC");
   });
@@ -159,7 +169,7 @@ describe("A08.7 and A08.8 budget", () => {
   it("draws each success witness's budget as 50 + witness size", () => {
     const fx = all("sigops-budget.v1");
     const s = html(h(SigopsBudget, { fixtures: fx }));
-    for (const f of fx) expect(s).toContain(`${BUDGET_BASE} + ${f.derived.success.witness.totalBytes} = ${f.derived.success.budgetStart}`);
+    for (const f of fx) expect(s).toContain(f.derived.success.opSuccess ? "NO BUDGET IN FORCE" : `${BUDGET_BASE} + ${f.derived.success.witness.totalBytes} = ${f.derived.success.budgetStart}`);
   });
 });
 

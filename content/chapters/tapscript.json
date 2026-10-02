@@ -73,7 +73,7 @@
       "core-case-662",
       "core-case-50"
      ],
-     "caption": "Every recorded witness of this chapter, run through BIP 342’s order. Most pass or stop at the run itself; the OP_SUCCESS case leaves early through the decoder, valid.",
+     "caption": "Every recorded witness of this chapter, run through BIP 342’s steps, numbered as the BIP numbers them. Most pass or stop while running; the OP_SUCCESS case leaves early at decoding, valid.",
      "claims": [
       "scope",
       "order",
@@ -105,7 +105,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The opcodes pop a public key and a signature, and the BIP spells out each case; the failure cases use MUST. Too few stack elements, or an empty public key, make the script fail immediately. A 32-byte key with a non-empty signature means a real BIP 340 check, and a failed check ends the script at once rather than pushing false.",
+     "text": "The opcodes pop a public key and a signature, and the BIP spells out each case: for too few elements, a long n and an empty key, the script MUST fail. Too few stack elements, or an empty public key, make the script fail immediately. A 32-byte key with a non-empty signature means a real BIP 340 check, and a failed check ends the script at once rather than pushing false.",
      "claims": [
       "sig-pops",
       "sig-known"
@@ -193,7 +193,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The figures below replay six spends from Bitcoin Core’s validation tests, each with a witness Core accepts and one it rejects. Step through them opcode by opcode. In one, a valid signature turns 23 into 24 and the script compares the result; in its failing twin, n is five bytes long, and the BIP says that MUST fail. Another hands OP_CHECKSIGADD an empty signature and pays nothing for it, while its failure witness offers an empty key instead.",
+     "text": "The figures below replay six spends from Bitcoin Core’s validation tests, each with a witness Core accepts and one it rejects. Step through them opcode by opcode. In one, a valid signature turns 23 into 24 and the script compares the result; in its failing twin, n is five bytes long, and the BIP says that MUST fail. Another hands OP_CHECKSIGADD an empty signature and pays nothing for it, while its failure script hands it an empty key instead.",
      "claims": [
       "traces-agree",
       "case-checksigadd",
@@ -267,7 +267,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The effect is that signatures are paid for in witness bytes. A signature checked against a 32-byte key must be 64 or 65 bytes, and with its length prefix it raises the budget by more than the 50 its check costs. Empty signatures are free. Unknown key types are not: they skip verification but are still charged, whatever the signature’s length.",
+     "text": "The effect is that signatures are paid for in witness bytes. A signature checked against a 32-byte key must be 64 or 65 bytes, and with its length prefix it raises the budget by more than the 50 its check costs. Empty signatures are free. Unknown key types are not: they skip verification but are still charged, whatever the length of a non-empty signature.",
      "claims": [
       "budget",
       "budget-arith",
@@ -309,7 +309,7 @@
       "core-case-662",
       "core-case-50"
      ],
-     "caption": "Budgets of the six recorded success witnesses. Large control blocks from deep test trees make most budgets generous; the spent share is what their signature opcodes used.",
+     "caption": "Budgets of the six recorded success witnesses, drawn to scale. The dashed part is what their signature checks spent; the OP_SUCCESS spend ends validation before any budget applies.",
      "claims": [
       "budget",
       "traces-agree"
@@ -366,7 +366,7 @@
      "type": "figure",
      "figure": "A08.10",
      "recipe": "tapscript-minimalif.v1",
-     "title": "OP_IF takes 0x01 or nothing",
+     "title": "OP_IF takes 0x01 or the empty vector",
      "fixtures": [
       "core-case-662"
      ],

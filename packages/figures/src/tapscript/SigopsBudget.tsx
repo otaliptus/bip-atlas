@@ -29,10 +29,10 @@ export function SigopsBudget({ fixtures }: { fixtures: DerivedTapscriptFixture[]
         return (
           <g data-case={r.f.caseIndex}>
             <Value at={[14, y + 8]} text={`${r.f.caseIndex} · ${r.f.label}`} size={8.5} cls="k-value--label" />
-            <rect class="k-fuel" x="14" y={y + 14} width={leftW} height="14" />
+            <rect class={r.v.opSuccess ? "k-outline k-fill--plain k-dashed" : "k-fuel"} x="14" y={y + 14} width={leftW} height="14" />
             {r.spent ? <rect class="k-outline k-fill--plain k-dashed" x={14 + leftW} y={y + 14} width={full - leftW} height="14" /> : null}
             <rect class="k-outline" x="14" y={y + 14} width={full} height="14" rx="3" fill="none" />
-            <Value at={[14, y + 40]} text={`${BUDGET_BASE} + ${r.v.witness.totalBytes} = ${r.v.budgetStart} · ${r.v.sigOpsCounted} × ${SIGOP_COST} spent · ${r.left} left`} size={8.5} cls="k-value--muted" />
+            <Value at={[14, y + 40]} text={r.v.opSuccess ? `NO BUDGET IN FORCE: ${r.v.opSuccess} ENDS VALIDATION FIRST` : `${BUDGET_BASE} + ${r.v.witness.totalBytes} = ${r.v.budgetStart} · ${r.v.sigOpsCounted} × ${SIGOP_COST} spent · ${r.left} left`} size={8.5} cls="k-value--muted" />
           </g>
         );
       })}

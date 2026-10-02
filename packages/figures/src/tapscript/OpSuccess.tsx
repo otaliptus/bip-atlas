@@ -12,7 +12,10 @@ export function OpSuccess({ fixture }: { fixture: DerivedTapscriptFixture }) {
   const s = fixture.derived.success, f = fixture.derived.failure;
   if (s.opSuccess === null || !s.valid || s.steps.length) throw new Error(`${fixture.id}: the success witness must end at an OP_SUCCESS opcode`);
   if (f.opSuccess !== null || f.valid) throw new Error(`${fixture.id}: the failure witness must run and fail`);
-  const byte = (hex: string) => `0x${hex.slice(0, 2)}`;
+  if (s.scriptHex.length !== 2 || f.scriptHex.length !== 2) throw new Error(`${fixture.id}: both scripts must be one byte`);
+  const lastF = f.steps[f.steps.length - 1];
+  if (!lastF || lastF.after.length !== 0) throw new Error(`${fixture.id}: the failure script must leave an empty stack`);
+  const byte = (hex: string) => `0x${hex}`;
   const frames: Frame[] = [
     {
       note: `Success witness: the script is the byte ${byte(s.scriptHex)}, ${s.opSuccess}. The decoder stops there and the spend is valid; nothing runs.`,
