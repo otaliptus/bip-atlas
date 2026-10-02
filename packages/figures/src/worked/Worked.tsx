@@ -20,7 +20,6 @@ import type {
   DerivedDescriptorFixture,
   DerivedMusig2SessionFixture,
   DerivedSpFixture,
-  DerivedBfBlockFixture,
   DerivedV2Fixture,
   DerivedBip322Fixture,
 } from "../types";
@@ -415,29 +414,6 @@ export function SpWorked({ fixtures }: { fixtures: DerivedSpFixture[] }) {
 }
 
 /* ---------- BIPs 157/158 ---------- */
-export function BfWorked({ fixtures }: { fixtures: DerivedBfBlockFixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const hit = d.probes.find((p) => p.matched);
-  const miss = d.probes.find((p) => !p.matched);
-  const c = d.codes[0];
-  const steps: WorkedStep[] = [
-    { title: `Collect the elements: ${d.N} distinct scripts`, values: d.elements.filter((e) => e.included).slice(0, 3).map((e, i) => ({ label: `${e.from} ${i + 1}`, value: e.script })), note: `${d.elements.length - d.N} of ${d.elements.length} scripts are left out (OP_RETURN, empty or repeated).`, layer: { size: 0.95, tone: "plain", cells: Math.min(d.N, 8) } },
-    { title: "Hash each into [0, N·M) with SipHash keyed by the block hash", values: [{ label: "F = N · 784931", value: d.F }, { label: "smallest value", value: d.values[0] ?? "—" }], layer: { size: 0.75, tone: "wash", cells: Math.min(d.N, 8) } },
-    { title: "Sort, take the gaps, Golomb-Rice code them", values: c ? [{ label: `first gap ${c.delta}`, value: `${c.unary} ${c.remainder}` }] : [], note: `${d.bitsTotal} bits plus ${d.paddingBits} of padding.`, layer: { size: 0.55, tone: "hatch", cells: 1 } },
-    { title: "Prefix N and serialize", values: [{ label: `filter, ${d.filterBytes} bytes`, value: d.filterHex }], layer: { size: 0.6, tone: "accent", cells: 1 } },
-    { title: "Query: hash the script the same way and walk the values", values: [...(hit ? [{ label: "script in the block", value: `${hit.script.slice(0, 24)}… → match` }] : []), ...(miss ? [{ label: `script from ${miss.from}`, value: `${miss.script.slice(0, 24)}… → no match` }] : [])], note: "A match means “possibly”; no match means “not among the elements”.", layer: { size: 0.8, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 158’s testnet block {d.height}{d.notes ? ` (“${d.notes}”)` : ""}: from the block’s scripts to the published filter, then two queries.</>}
-      steps={steps}
-      label="Elements, hashed values, Golomb-Rice codes, the serialized filter and a query, drawn as stacked layers."
-      source={<>Source: BIP 158 testnet-19.json (line {f.source.line}); rebuilt by the tested model and checked against the vector.</>}
-    />
-  );
-}
-
 /* ---------- BIP 324 ---------- */
 export function V2Worked({ fixtures }: { fixtures: DerivedV2Fixture[] }) {
   const f = fixtures[0];

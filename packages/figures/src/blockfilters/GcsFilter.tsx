@@ -1,138 +1,133 @@
 import { useEffect, useState } from "preact/hooks";
+import { holdFocus } from "../focus";
+import { Cells, Drawing, Machine, Responsive, Value, idsFor } from "../kit";
 import type { DerivedBfBlockFixture } from "../types";
+import { along, fromText, group, shortHex } from "./parts";
 
 interface Props {
   fixtures: DerivedBfBlockFixture[];
   figureId: string;
 }
 
-const short = (hex: string) => (hex.length > 24 ? `${hex.slice(0, 12)}…${hex.slice(-8)}` : hex === "" ? "(empty)" : hex);
-const pct = (v: string, F: string) => (F === "0" ? 0 : Number((BigInt(v) * 10000n) / BigInt(F)) / 100);
-const group = (n: string) => n.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const probeName = (from: string, i: number) => (from === "this block" ? `own ${i + 1}` : fromText(from).replace("block ", "from "));
 
 /**
- * gcs-filter.v1 — the Block filters chapter's hero figure.
+ * gcs-filter.v1 — the Block filters chapter's hero (drawing-first).
  *
- * Published BIP 158 testnet blocks. At build time the tested model rebuilds
- * each basic filter from the block and its spent scripts and the build fails
- * unless the filter bytes and filter header equal the vector's. Queries are
- * precomputed too: the browser only chooses what to show.
+ * A published BIP 158 testnet block's filter drawn as its hashed values on
+ * the line [0, F). A test script goes through SipHash to a target; the
+ * client decodes values left to right until one equals the target (match)
+ * or passes it (no match). Values it never decodes stay hatched. "Bits"
+ * shows the filter's first codes. Everything was computed at build time by
+ * the tested model and checked against the vector; the browser only picks.
  */
 export function GcsFilter({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const [id, setId] = useState(fixtures[0].id);
-  const [probeAt, setProbeAt] = useState(0);
-  const [coding, setCoding] = useState(false);
+  const [pi, setPi] = useState(0);
+  const [bits, setBits] = useState(false);
   const f = fixtures.find((x) => x.id === id)!;
   const d = f.derived;
-  const probe = d.probes[Math.min(probeAt, d.probes.length - 1)];
-  const showCoding = hydrated ? coding : true;
+  const p = d.probes[Math.min(pi, d.probes.length - 1)];
+  const showBits = hydrated ? bits : true;
+  const read = p.steps.length;
+  const last = p.steps[read - 1];
+  const verdict = d.N === 0 ? "The filter is empty, one zero byte: nothing can match." : p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : `Value ${read} passes it: no match, so no output pays to it and no input spends it here.`;
+  const status = `${p.from === "this block" ? "A script from this block" : `A script from ${fromText(p.from)}`} hashes to ${group(p.target)}. ${verdict}`;
+  const desc = `Testnet block ${d.height}: ${d.N} scripts hashed onto 0 to F = ${group(d.F)}: ${d.values.map(group).join(", ") || "none"}. ${status} Decoded: ${p.steps.map((s) => group(s.value)).join(", ") || "nothing"}.${showBits && d.N ? ` The filter, ${d.filterBytes} bytes, starts with N = ${d.N}, then the codes ${d.codes.map((c) => `${c.unary} ${c.remainder}`).join(", ")}${d.codes.length < d.N ? ", and more" : ""}.` : ""}`;
+
+  const draw = (wide: boolean) => {
+    const W = wide ? 640 : 330, x0 = 18, x1 = W - 18;
+    const ids = idsFor(`${figureId}-${wide ? "w" : "n"}`);
+    const ly = wide ? 128 : 186;
+    const tx = along(p.target, d.F, x0, x1);
+    const codes = d.codes.slice(0, wide ? 3 : 2);
+    const cs = wide ? 7 : 6.5;
+    const by = ly + 64;
+    return (
+      <Drawing id={`${figureId}-${wide ? "w" : "n"}`} width={W} height={showBits && d.N ? by + 54 : ly + 48} title="A filter, built and queried" desc={desc}>
+        {/* The query: script → SipHash → target */}
+        <rect class="k-outline k-fill--plain" x={x0} y={18} width={112} height={24} />
+        <text class="k-bf-hex" x={x0 + 6} y={33.5}>{shortHex(p.script, 7)}</text>
+        <Value at={[x0, 12]} text={p.from === "this block" ? "TEST SCRIPT · FROM THIS BLOCK" : `TEST SCRIPT · FROM ${fromText(p.from).toUpperCase()}`} size={8} cls="k-value--label" />
+        <path class="k-line" d={wide ? `M${x0 + 116} 30 H${x0 + 160}` : `M${x0 + 56} 46 V64`} marker-end={ids.arrow} />
+        <Machine at={wide ? [x0 + 200, 44] : [x0 + 30, 96]} w={58} d={30} h={24} label="SipHash" role="hash" />
+        <Value at={wide ? [x0 + 290, 34] : [x0 + 120, 92]} text={`→ ${group(p.target)}`} size={10} />
+        <Value at={wide ? [x0 + 290, 46] : [x0 + 120, 104]} text="TARGET IN [0, F)" size={8.5} cls="k-value--muted" />
+        <Value at={wide ? [x0 + 290, 60] : [x0 + 120, 116]} text="KEY: THE BLOCK HASH" size={8.5} cls="k-value--muted" />
+        {/* The line [0, F): decoded values solid, undecoded hatched */}
+        <line class="k-line" x1={x0} y1={ly} x2={x1} y2={ly} />
+        <Value at={[x0, ly + 16]} text="0" size={8.5} cls="k-value--muted" />
+        <Value at={[x1, ly + 16]} text={`F = N·M = ${group(d.F)}`} size={8.5} anchor="end" cls="k-value--muted" />
+        {d.values.map((v, i) => {
+          const x = along(v, d.F, x0, x1), px = i === 0 ? x0 : along(d.values[i - 1], d.F, x0, x1);
+          const seen = i < read;
+          return (
+            <g data-decoded={String(seen)}>
+              {seen ? <path class="k-leader" d={`M${px} ${ly} Q${(px + x) / 2} ${ly - 30} ${x} ${ly}`} /> : null}
+              <rect class={`k-cell ${seen ? "k-mark--hash" : ""}`} x={x - 3.5} y={ly - 3.5} width="7" height="7" style={seen ? undefined : `fill:${ids.hatch}`} />
+            </g>
+          );
+        })}
+        <path class="k-bf-target" d={`M${tx} ${ly + 22} V${ly + 6} M${tx - 4} ${ly + 11} L${tx} ${ly + 5} L${tx + 4} ${ly + 11}`} />
+        <Value at={[Math.min(Math.max(tx, x0 + 40), x1 - 40), ly + 34]} text={d.N === 0 ? "EMPTY" : p.matched ? "MATCH · MAYBE" : "NO MATCH"} size={9} anchor="middle" cls="k-value--label" />
+        {last && !p.matched ? <Value at={[along(last.value, d.F, x0, x1), ly - 34]} text="PASSED: STOP" size={8} anchor="middle" cls="k-value--muted" /> : null}
+        {showBits && d.N ? (
+          <g>
+            <Value at={[x0, by - 8]} text={`THE FILTER'S FIRST BITS · ${d.filterBytes} BYTES IN ALL`} size={8} cls="k-value--label" />
+            <Cells x={x0} y={by} values={[...d.N.toString(2).padStart(8, "0")]} size={cs} />
+            {codes.map((c, i) => {
+              const start = x0 + 8 * cs + 4 + codes.slice(0, i).reduce((n, k) => n + (k.unary.length + k.remainder.length) * cs + 4, 0);
+              return (
+                <g>
+                  <Cells x={start} y={by} values={[...c.unary]} size={cs} strong={(k) => c.unary[k] === "1"} />
+                  <g class="k-bf-rem"><Cells x={start + c.unary.length * cs} y={by} values={[...c.remainder]} size={cs} /></g>
+                  <text class="k-bf-gap" x={start} y={by + cs + 11}>{`GAP ${group(c.delta)}`}</text>
+                </g>
+              );
+            })}
+            <text class="k-bf-gap" x={x0} y={by + cs + 11}>N</text>
+            {d.N > codes.length ? <text class="k-bf-gap" x={x1} y={by + cs - 1} text-anchor="end">…</text> : null}
+          </g>
+        ) : null}
+      </Drawing>
+    );
+  };
+
+  const strip = (label: string, name: string, opts: Array<[string, string]>, cur: string, set: (v: string) => void) => (
+    <div class="atlas-strip" role="radiogroup" aria-label={label}>
+      {opts.map(([v, t]) => (
+        <label class="atlas-strip__opt">
+          <input type="radio" name={`${figureId}-${name}`} checked={cur === v} onChange={() => set(v)} />
+          <span>{t}</span>
+        </label>
+      ))}
+    </div>
+  );
 
   return (
-    <div class="atlas-lab atlas-bf-lab" data-hydrated={hydrated ? "true" : "false"}>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-lab__samples">
-            <legend>Published block</legend>
-            {fixtures.map((x) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-block`} checked={x.id === id} onChange={() => (setId(x.id), setProbeAt(0))} />
-                <span>{x.label}<small>{x.shortLabel}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <label class="atlas-bf-coding">
-            <input type="checkbox" checked={coding} onChange={(e) => setCoding((e.target as HTMLInputElement).checked)} />
-            Reveal Golomb-Rice coding
-          </label>
+        <div class="atlas-hero__controls">
+          {strip("Published block", "block", fixtures.map((x) => [x.id, group(x.derived.height)]), id, (v) => (setId(v), setPi(0)))}
+          {d.probes.length ? strip("Test script", "probe", d.probes.map((q, i) => [String(i), probeName(q.from, i)]), String(pi), (v) => setPi(Number(v))) : null}
+          {strip("Show", "bits", [["values", "Values"], ["bits", "Bits"]], bits ? "bits" : "values", (v) => setBits(v === "bits"))}
         </div>
       ) : (
-        <p class="atlas-lab__static-note">Static view: the first block, its first query and its coding. With JavaScript you can choose among {fixtures.length} published blocks and test other scripts.</p>
+        <p class="atlas-hero__static">Static view: the first block, its first test script and the filter's first bits. With JavaScript you can choose among {fixtures.length} published blocks and test other scripts.</p>
       )}
-
-      <section class="atlas-panel" aria-label="Filter elements">
-        <h3 class="atlas-panel__title">Block {group(String(d.height))}: {d.txCount} transaction{d.txCount === 1 ? "" : "s"}, {d.N} element{d.N === 1 ? "" : "s"} in the filter</h3>
-        <ul class="atlas-bf-elems">
-          {d.elements.map((e) => (
-            <li data-included={e.included ? "true" : "false"}>
-              <span class="atlas-bf-elems__from">{e.from === "output" ? "output script" : "spent script"}</span>
-              <code>{short(e.script)}</code>
-              {e.included ? null : <em>left out: {e.reason}</em>}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section class="atlas-panel atlas-bf-query" aria-label="Test a script against the filter">
-        <h3 class="atlas-panel__title">Test a script against the filter</h3>
-        {d.probes.length === 0 || d.N === 0 ? null : hydrated ? (
-          <fieldset class="atlas-bf-probes">
-            <legend>Fixture script</legend>
-            {d.probes.map((p, i) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-probe`} checked={i === probeAt} onChange={() => setProbeAt(i)} />
-                <span><code>{short(p.script)}</code><small>from {p.from}</small></span>
-              </label>
-            ))}
-          </fieldset>
-        ) : <p>Script <code>{short(probe.script)}</code>, from {probe.from}.</p>}
-        {d.N === 0 ? (
-          <p class="atlas-bf-verdict" data-matched="false">N = 0: the filter is empty, so no script can match and there is nothing to hash or decode.</p>
-        ) : probe ? (
-          <>
-            <svg class="atlas-bf-line" viewBox="0 0 1000 60" role="img" aria-label={`The ${d.N} hashed values on the range 0 to F, with the queried script's value marked.`}>
-              <line x1="10" y1="30" x2="990" y2="30" class="atlas-bf-line__axis" />
-              {d.values.map((v) => <circle cx={10 + pct(v, d.F) * 9.8} cy="30" r="6" class="atlas-bf-line__dot" />)}
-              <line x1={10 + pct(probe.target, d.F) * 9.8} x2={10 + pct(probe.target, d.F) * 9.8} y1="8" y2="52" class="atlas-bf-line__target" />
-              <text x="10" y="58" class="atlas-bf-line__label">0</text>
-              <text x="990" y="58" text-anchor="end" class="atlas-bf-line__label">F = N·M</text>
-            </svg>
-            <p class="atlas-bf-target">Hashed into [0, F): <code>{group(probe.target)}</code> of F = <code>{group(d.F)}</code></p>
-            <ol class="atlas-bf-steps" aria-live="polite">
-              {probe.steps.map((s, i) => (
-                <li data-outcome={s.outcome}>
-                  value {i + 1}: <code>{group(s.value)}</code> {s.outcome === "equal" ? "equals the target" : s.outcome === "greater" ? "is past the target: stop" : "is below the target: keep decoding"}
-                </li>
-              ))}
-            </ol>
-            <p class="atlas-bf-verdict" data-matched={probe.matched ? "true" : "false"}>
-              {probe.matched
-                ? "Match: the block may concern this script. A match can be a false positive, so the client downloads the block to find out."
-                : "No match: if this is the correct filter, no output in this block pays to this script and no input spends from it. That certainty covers only what the filter holds: OP_RETURN outputs, for one, are left out."}
-            </p>
-          </>
-        ) : null}
-      </section>
-
-      <section class="atlas-panel" aria-label="Golomb-Rice coding">
-        <h3 class="atlas-panel__title">The filter on the wire: {d.filterBytes} byte{d.filterBytes === 1 ? "" : "s"}</h3>
-        {!showCoding ? (
-          <p class="atlas-panel__empty">Hidden. Tick “Reveal Golomb-Rice coding” to see how the sorted values become bits.</p>
-        ) : (
-          <>
-            <p class="atlas-bf-hex"><code class="atlas-break">{d.filterHex}</code></p>
-            {d.N === 0 ? <p>N = 0: a filter with no elements is written as one zero byte.</p> : (
-              <>
-                <p>First byte{d.filterHex.length > 2 && d.N >= 0xfd ? "s" : ""}: N = {d.N} as a CompactSize. Then each gap between sorted values, as q ones, a zero, and 19 remainder bits:</p>
-                <ol class="atlas-bf-codes">
-                  {d.codes.map((c) => (
-                    <li>
-                      <span class="atlas-bf-codes__delta">gap {group(c.delta)}</span>
-                      <code><span data-part="unary">{c.unary}</span><span data-part="rem">{c.remainder}</span></code>
-                      <small>q = {c.q}, r = {group(c.r)}</small>
-                    </li>
-                  ))}
-                </ol>
-                <p class="atlas-panel__scope">{d.codes.length < d.N ? `${d.N - d.codes.length} more codes follow. ` : ""}{d.bitsTotal} bits of codes, then {d.paddingBits} zero bit{d.paddingBits === 1 ? "" : "s"} of padding to the byte boundary.</p>
-              </>
-            )}
-          </>
-        )}
-      </section>
-      <p class="atlas-lab__source">
-        Source: BIP 158 testnet-19.json, block {group(String(d.height))}{d.notes ? ` (“${d.notes}”)` : ""}, line {f.source.line}. Rebuilt at build time by the tested model; the filter bytes and the filter header equal the vector’s.
-      </p>
+      <Responsive wide={draw(true)} narrow={draw(false)} />
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this view</summary>
+        <dl class="atlas-hexlist">
+          <dt>Test script</dt><dd><code class="atlas-break">{p.script || "(empty)"}</code></dd>
+          <dt>Filter ({d.filterBytes} bytes)</dt><dd><code class="atlas-break">{d.filterHex}</code></dd>
+          <dt>Hashed values</dt><dd>{d.values.map(group).join(", ") || "none"}</dd>
+        </dl>
+      </details>
+      <p class="atlas-hero__source">BIP 158 testnet-19.json, block {group(d.height)}{d.notes ? ` (“${d.notes}”)` : ""}. Filter and header rebuilt by the tested model and equal to the vector.</p>
     </div>
   );
 }

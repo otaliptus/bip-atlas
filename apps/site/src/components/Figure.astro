@@ -69,7 +69,12 @@ import {
   GcsFilter,
   BfGolomb,
   BfChain,
-  BfWorked,
+  BfDirections,
+  BfSieve,
+  BfBuildStory,
+  BfSize,
+  BfQueryStory,
+  BfPeerStory,
   V2Handshake,
   V2Framing,
   V2Rekey,
@@ -242,6 +247,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
   {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
   {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
+  {figure.recipe === "bf-two-directions.v1" && <BfDirections fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-element-sieve.v1" && <BfSieve fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-build-story.v1" && <BfBuildStory fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-size.v1" && <BfSize fixtures={bfBlocks} />}
+  {figure.recipe === "bf-query-story.v1" && <BfQueryStory fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-peer-check.v1" && <BfPeerStory />}
   {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
   {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
   {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
@@ -262,7 +273,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
-      {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
       {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
       {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
