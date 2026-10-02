@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
-import { Arrow, Bracket, Cells, Drawing, Label, Responsive, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
+import { Arrow, Bracket, Cells, Drawing, IsoBox, IsoTopGrid, Label, Machine, Magnifier, Responsive, Storyboard, boxPoints, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
 
 const html = (node: preact.VNode<any>) => render(node);
 const count = (s: string, needle: string) => s.split(needle).length - 1;
@@ -79,5 +79,48 @@ describe("Arrow", () => {
   it("uses the drawing's arrow marker", () => {
     const s = html(h("svg", {}, h(Arrow, { d: "M0 0 H10", ids: idsFor("z") })));
     expect(s).toContain('marker-end="url(#z-arrow)"');
+  });
+});
+
+describe("isometric objects", () => {
+  it("IsoBox draws three faces carrying its role", () => {
+    const s = html(h("svg", {}, h(IsoBox, { at: [100, 20], w: 40, d: 20, h: 10, role: "hash" })));
+    expect(count(s, "<polygon")).toBe(3);
+    expect(s).toContain('data-role="hash"');
+    expect(s).toContain("k-face--top");
+  });
+  it("boxPoints puts the top face's front corner below its back corner", () => {
+    const b = boxPoints({ at: [100, 20], w: 40, d: 20, h: 10 });
+    expect(b.topFront[1]).toBeGreaterThan(b.top[1]);
+    expect(b.bottomFront[1] - b.topFront[1]).toBeCloseTo(10, 5);
+  });
+  it("IsoTopGrid draws rows × cols cells", () => {
+    const s = html(h("svg", {}, h(IsoTopGrid, { at: [0, 0], w: 40, d: 20, h: 5, cols: 4, rows: 2 })));
+    expect(count(s, "<polygon")).toBe(8);
+  });
+  it("Machine names its function on the box", () => {
+    const s = html(h("svg", {}, h(Machine, { at: [50, 10], label: "sha-256", sub: "hash" })));
+    expect(s).toContain("SHA-256");
+    expect(s).toContain(">hash<");
+  });
+});
+
+describe("Magnifier", () => {
+  it("clips its content to the lens", () => {
+    const s = html(h("svg", {}, h(Magnifier, { id: "m", from: [10, 10], at: [80, 40], r: 20 }, h("rect", { width: 5, height: 5 }))));
+    expect(s).toContain('<clipPath id="m-clip">');
+    expect(s).toContain('clip-path="url(#m-clip)"');
+  });
+});
+
+describe("Storyboard", () => {
+  it("renders an ordered list of titled frames with notes", () => {
+    const frames = [1, 2, 3].map((n) => ({ note: `Note ${n}`, desc: `Desc ${n}`, draw: () => h("rect", {}) }));
+    const s = html(h(Storyboard, { id: "sb", title: "Checksum", width: 300, height: 150, frames }));
+    expect(s.startsWith('<ol class="k-story"')).toBe(true);
+    expect(count(s, '<li class="k-story__frame">')).toBe(3);
+    expect(s).toContain("Checksum, step 2 of 3");
+    expect(s).toContain("Note 3");
+    expect(s).toContain('id="sb-2-t"');
   });
 });
