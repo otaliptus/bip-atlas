@@ -37,7 +37,7 @@ export function MnemonicCard({ fixture }: { fixture: DerivedMnemonicFixture }) {
         </g>
       ))}
       <Label at={P(W, D - 4, 0)} side="down" len={26} text={`${layout.wordCount} words · ${layout.entropyBits} + ${layout.checksumBits} bits`} />
-      <Label at={P(12, 44, H)} side="left" len={12} text={`index ${first.index}`} />
+      <Label at={P(12, 44, H)} side="left" len={20} text={`index ${first.index}`} />
     </Drawing>
   );
 }

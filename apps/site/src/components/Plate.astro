@@ -18,7 +18,7 @@ const tabbed = interactive && !drawing && Astro.slots.has("worked");
 {drawing ? (
 <figure class:list={["atlas-fig", `atlas-fig--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`} data-interactive={interactive ? "true" : undefined}>
   <span class="atlas-fig__code" aria-hidden="true">FIG. {figure.figure}</span>
-  <p class="atlas-fig__title" id={`${id}-title`}><span class="atlas-fig__num">Fig. {figure.figure}</span> {figure.title}</p>
+  <p class="atlas-fig__title" id={`${id}-title`}><span class="atlas-fig__num">{`Fig. ${figure.figure} `}</span>{figure.title}</p>
   <div class="atlas-fig__stage"><slot /></div>
   <figcaption class="atlas-fig__caption">
     <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />

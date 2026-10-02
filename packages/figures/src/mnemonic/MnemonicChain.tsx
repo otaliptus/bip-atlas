@@ -9,7 +9,7 @@ export function MnemonicChain({ fixture }: { fixture: DerivedMnemonicFixture }) 
   const seed = fixture.derived.seeds.find((s) => s.origin === "vector")!;
   const desc = `Three steps, each producing a different secret. Encode: the ${fixture.derived.layout.entropyBits}-bit entropy becomes ${words.length} words. Stretch: PBKDF2 turns the words and passphrase into a 64-byte seed beginning ${seed.seedHex.slice(0, 8)}. Derive: BIP 32, the next chapter, grows keys from the seed.`;
   const parts = (ids: DrawingIds, horizontal: boolean) => {
-    const at = (i: number): [number, number] => (horizontal ? [20 + i * 160, 40] : [40, 20 + i * 118]);
+    const at = (i: number): [number, number] => (horizontal ? [20 + i * 160, 40] : [70, 20 + i * 118]);
     return (
       <>
         <g transform={`translate(${at(0)[0]} ${at(0)[1]})`}>

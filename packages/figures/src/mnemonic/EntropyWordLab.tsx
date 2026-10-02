@@ -39,7 +39,7 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
   const status = sel
     ? `Word ${sel.position + 1} of ${layout.wordCount}: bits ${sel.bits} are ${sel.index}, “${sel.word}”.` +
       (sel.checksumBitCount ? ` ${sel.entropyBitCount} entropy bits and ${sel.checksumBitCount} checksum bits.` : "")
-    : `${layout.entropyBits} entropy bits and ${layout.checksumBits} checksum bits, not yet cut. Move the slider to cut them into groups of 11.`;
+    : `${fixture.label}: ${layout.entropyBits} entropy bits and ${layout.checksumBits} checksum bits, not yet cut. Move the slider to cut them into groups of 11.`;
 
   const draw = (w: "wide" | "narrow") => {
     const wide = w === "wide";
