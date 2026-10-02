@@ -1,6 +1,7 @@
 import { Bracket, Drawing, Value } from "../kit";
 import { PartsRow, placeParts } from "../tx/PartsRow";
 import type { DerivedPsbtTraceFixture, PsbtRecordView } from "../types";
+import { hex2 } from "./cards";
 
 const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
 const len = (hex: string) => (hex.length / 2).toString(16).padStart(2, "0");
@@ -29,7 +30,7 @@ export function PsbtRecords({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
       [
         { kind: "byte", hex: (1 + r.keyDataHex.length / 2).toString(16).padStart(2, "0") },
         { kind: "byte", hex: r.keyType.toString(16).padStart(2, "0") },
-        { kind: "block", bytes: r.keyDataHex.length / 2, role: "public", text: `key ${r.keyDataHex.length / 2} B` },
+        { kind: "block", bytes: r.keyDataHex.length / 2, role: "public", text: "pubkey" },
         { kind: "byte", hex: len(r.valueHex) },
         { kind: "block", bytes: r.valueHex.length / 2, role: "sig", text: `signature · ${r.valueHex.length / 2} B` },
       ],
@@ -44,16 +45,16 @@ export function PsbtRecords({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
         width={344}
         height={50 + rows.length * 92}
         title="Two keys of one type"
-        desc={`Input ${input.index} of the Combiner's PSBT holds ${sigs.length} partial signature records. ${rows.map((x) => `From ${x.role}: key = type 0x02 followed by the ${x.r.keyDataHex.length / 2}-byte public key ${x.r.keyDataHex}; value = a ${x.r.valueHex.length / 2}-byte signature.`).join(" ")} The type is the same, the key data differs, so the full keys are different and both records may sit in one map.`}
+        desc={`Input ${input.index} of the Combiner's PSBT holds ${sigs.length} partial signature records. ${rows.map((x) => `From ${x.role}: key = type ${hex2(x.r.keyType)} followed by the ${x.r.keyDataHex.length / 2}-byte public key ${x.r.keyDataHex}; value = a ${x.r.valueHex.length / 2}-byte signature.`).join(" ")} The type is the same, the key data differs, so the full keys are different and both records may sit in one map.`}
       >
         <Value at={[14, 14]} text={`INPUT ${input.index} MAP · ${sigs.length} PARTIAL SIGNATURES`} size={9} cls="k-value--label" />
         {rows.map((x) => (
           <g>
             <Value at={[14, x.y - 18]} text={`FROM ${x.role.toUpperCase()}`} size={9} cls="k-value--muted" />
             <PartsRow placed={x.placed} y={x.y} />
-            <Bracket x1={x.placed[1].x} x2={x.placed[2].x + x.placed[2].w} y={x.y + 24} text={`key · ${1 + x.r.keyDataHex.length / 2} B`} align="start" />
-            <Bracket x1={x.placed[4].x} x2={x.placed[4].x + x.placed[4].w} y={x.y + 24} text={`value · ${x.r.valueHex.length / 2} B`} align="start" />
-            <Value at={[x.placed[1].x, x.y + 58]} text={`02 + ${x.r.keyDataHex.slice(0, 10)}…`} size={9} cls="k-value--muted" />
+            <Bracket x1={x.placed[1].x} x2={x.placed[2].x + x.placed[2].w} y={x.y + 24} text="type + key data" align="start" />
+            <Bracket x1={x.placed[4].x} x2={x.placed[4].x + x.placed[4].w} y={x.y + 24} text={`value · ${x.r.valueHex.length / 2} B`} />
+            <Value at={[x.placed[1].x, x.y + 58]} text={`${x.r.keyType.toString(16).padStart(2, "0")} + ${x.r.keyDataHex.slice(0, 10)}…`} size={9} cls="k-value--muted" />
           </g>
         ))}
       </Drawing>

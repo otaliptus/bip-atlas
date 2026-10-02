@@ -38,7 +38,7 @@ describe("PsbtEnvelope (hero, static renders)", () => {
     const s = r();
     expect(s).toContain('data-hydrated="false"');
     const comb = trace.derived.states.find((x) => x.basedOn.length > 1)!;
-    expect(s).toContain(`${comb.bytes} BYTES`);
+    expect(s).toContain(`THIS PSBT: ${comb.bytes} B`);
     expect((wideOnly(s).match(/data-record="Partial Signature"/g) ?? []).length).toBe(4);
   });
   it("the Updater step marks its additions; the finalizer step hatches what it cleared", () => {
@@ -66,12 +66,13 @@ describe("Static PSBT drawings", () => {
     const s = html(h(PsbtRecords, { fixture: trace }));
     expect(s).toContain("FROM SIGNER A");
     expect(s).toContain("FROM SIGNER B");
-    expect(s).toContain("KEY · 34 B");
+    expect(s).toContain("TYPE + KEY DATA");
   });
   it("A05.4 storyboard: one frame per state plus the extractor", () => {
     const s = html(h(PsbtRoleStory, { fixture: trace }));
     expect(s.split('class="k-story__frame"').length - 1).toBe(trace.derived.states.length + 1);
-    expect(s).toContain(trace.derived.extracted.txidHex);
+    expect(s).toContain(trace.derived.extracted.txidDisplayHex);
+    expect(trace.derived.extracted.txidDisplayHex).toBe(trace.derived.extracted.txidHex.match(/../g)!.reverse().join(""));
   });
   it("A05.5: amounts and fee from the model", () => {
     const a = trace.derived.amounts;

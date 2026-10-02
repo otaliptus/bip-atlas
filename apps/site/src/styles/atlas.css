@@ -492,6 +492,7 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .k-card__type, .k-card__empty { font-size: 9px !important; fill: var(--manual-muted) !important; }
 .k-card__name { font-size: 9px !important; }
 .k-card__type--on { fill: #ffffff !important; font-weight: 500; }
+.k-strike { stroke: var(--atlas-ink); stroke-width: 1.25; vector-effect: non-scaling-stroke; }
 .k-card__tag { font-size: 9px !important; fill: var(--manual-muted) !important; letter-spacing: 0.04em; }
 .atlas-method li, .atlas-method p { overflow-wrap: anywhere; }
 

@@ -1,7 +1,7 @@
 import { Drawing, Value, idsFor } from "../kit";
 import { BytePacket, bytesHeight, layoutBytes, type ByteField } from "../tx/BytePacket";
 import type { DerivedPsbtTraceFixture, PsbtStateView } from "../types";
-import { mapTitle, recordRole, shortName } from "./cards";
+import { hex2, mapTitle, recordRole, shortName } from "./cards";
 
 const one = (n: number) => {
   if (n >= 0xfd) throw new Error("psbt-layout: multi-byte lengths are outside this drawing");
@@ -46,7 +46,10 @@ export function PsbtLayout({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
   const segs = layoutBytes(fields, perRow, x0, y0, unit, rowH, gap);
   const end = y0 + bytesHeight(state.bytes, perRow, rowH, gap);
   const first = (id: string) => segs.find((s) => s.field.id === id && s.first)!;
-  const topLabels = [["magic", "magic · 70 73 62 74 ff"], ["global.0.keylen", "key length"], ["global.0.type", "key type 0x00"], ["global.0.vallen", "value length"]] as const;
+  const magic = fixture.derived.magicHex.match(/../g)!.join(" ");
+  const rec = state.maps[0].records[0];
+  if (!rec) throw new Error("psbt-layout: the Creator's global map is empty");
+  const topLabels = [["magic", `magic · ${magic}`], ["global.0.keylen", "key length"], ["global.0.type", `key type ${hex2(rec.keyType)}`], ["global.0.vallen", "value length"]] as const;
   const seps = state.maps.map((m) => ({ id: `${mapTitle(m.scope, m.index)}.sep`, text: m.records.length ? `${mapTitle(m.scope, m.index)} map ends` : `${mapTitle(m.scope, m.index)} map · empty` }));
   const H = end + 18 + seps.length * 12 + 16;
   return (
@@ -55,7 +58,7 @@ export function PsbtLayout({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
       width={344}
       height={H}
       title="A newly created PSBT, byte by byte"
-      desc={`The Creator's PSBT from BIP 174 line ${state.line}, ${state.bytes} bytes: the magic bytes 70 73 62 74 ff, then the global map with one record (key length, key type 0x00, value length, and the ${state.maps[0].records[0]?.valueHex.length / 2}-byte unsigned transaction), ended by 0x00; then ${state.maps.length - 1} input and output maps, each empty and so just its 0x00 separator.`}
+      desc={`The Creator's PSBT from BIP 174 line ${state.line}, ${state.bytes} bytes: the magic bytes ${magic}, then the global map with one record (key length, key type ${hex2(rec.keyType)}, value length, and the ${rec.valueHex.length / 2}-byte ${rec.name.toLowerCase()}), ended by 0x00; then ${state.maps.length - 1} input and output maps, each empty and so just its 0x00 separator.`}
     >
       <Value at={[x0, 14]} text={`CREATED PSBT · ${state.bytes} BYTES · BIP 174 LINE ${state.line}`} size={9} cls="k-value--label" />
       <BytePacket segs={segs} hatch={ids.hatch} ruler perRow={perRow} unit={unit} x={x0} y={y0} rowH={rowH} />

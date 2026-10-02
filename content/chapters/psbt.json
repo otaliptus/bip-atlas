@@ -195,7 +195,7 @@
           "fixtures": [
             "bip174-trace"
           ],
-          "caption": "One frame per published state, one cell per record in each map. Outlined cells are new in that state; hatched ones were cleared.",
+          "caption": "One frame per published state, one cell per record in each map: blue for partial signatures, green for BIP 32 paths. Outlined cells are new in that state; struck-through ones were cleared.",
           "claims": [
             "creator",
             "updater",
@@ -231,12 +231,12 @@
           "fixtures": [
             "bip174-trace"
           ],
-          "caption": "Amounts read from the updated PSBT. Input 0’s comes from its full previous transaction; input 1’s only from a witness UTXO record, which states it.",
+          "caption": "Amounts read from the updated PSBT. Input 0’s comes from its full previous transaction; input 1’s only from a witness UTXO record, which states it, so the fee rests on that claim too.",
           "claims": [
             "signer-display",
             "bip143-fee-issue",
             "updater",
-            "trace-reproduced"
+            "signer-view"
           ],
           "layout": "prose"
         },
@@ -245,7 +245,8 @@
           "text": "Some checks come before any signature. For an input that spends a pre-SegWit output, the Signer must confirm that the full previous transaction it was given really hashes to the transaction ID named in the unsigned transaction. The figure below shows that check passing for the first input of the published trace.",
           "claims": [
             "signer-txid-check",
-            "trace-reproduced"
+            "trace-reproduced",
+            "signer-view"
           ]
         },
         {
@@ -256,10 +257,10 @@
           "fixtures": [
             "bip174-trace"
           ],
-          "caption": "The previous transaction carried for input 0, hashed: it is the one the unsigned transaction names.",
+          "caption": "The previous transaction carried for input 0, hashed: it is the one the unsigned transaction names. Both are drawn as serialized; BIP 174 prints the same txid byte-reversed.",
           "claims": [
             "signer-txid-check",
-            "trace-reproduced"
+            "signer-view"
           ],
           "layout": "prose"
         },
@@ -312,7 +313,7 @@
           "fixtures": [
             "bip174-trace"
           ],
-          "caption": "Each input keeps the output it spends and gains its final scripts; the signatures, scripts and paths are cleared.",
+          "caption": "Each input keeps its UTXO record and gains its final scripts; everything else, signatures, sighash type, scripts and paths, is struck from the map.",
           "claims": [
             "finalizer",
             "trace-reproduced"
@@ -334,7 +335,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 174 keeps the format extensible by requiring that new types be ignored and passed through by signers that do not know them. A signer that meets a field it does not understand must pass it through when it writes the PSBT back out, and the Input Finalizer keeps such fields too.",
+          "text": "BIP 174 keeps the format extensible by requiring that new types be ignored and passed through by signers that do not know them. A signer that meets a field it does not understand must pass it through when it writes the PSBT back out, and the Input Finalizer is told to leave them when it clears the rest.",
           "claims": [
             "passthrough"
           ]

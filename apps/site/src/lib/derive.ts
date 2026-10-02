@@ -418,6 +418,13 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
   if (combiner && serializePsbt(combinePsbts(combiner.basedOn.map((id) => parsed.get(id)!))) !== combiner.hex) {
     throw new Error(`${f.id}: combining ${combiner.basedOn.join(" + ")} does not reproduce line ${combiner.line}`);
   }
+  // The figures say either order gives the same bytes: check the other order too.
+  if (combiner && serializePsbt(combinePsbts([...combiner.basedOn].reverse().map((id) => parsed.get(id)!))) !== combiner.hex) {
+    throw new Error(`${f.id}: combining in the reverse order does not reproduce line ${combiner.line}`);
+  }
+  const magicHex = f.steps[0].hex.slice(0, 10);
+  if (f.steps.some((s) => s.hex.slice(0, 10) !== magicHex) || magicHex !== "70736274ff") throw new Error(`${f.id}: a state does not start with the PSBT magic`);
+  const reversed = (hex: string) => hex.match(/../g)!.reverse().join("");
   const last = f.steps.at(-1)!;
   if (extractTransaction(parsed.get(last.id)!) !== f.extracted.hex) throw new Error(`${f.id}: extraction differs from line ${f.extracted.line}`);
   const sig = (r: { scope: string; index: number; keyType: number; keyDataHex: string; valueHex: string }) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
@@ -457,13 +464,14 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
       if (computed !== prevout.slice(0, 64)) throw new Error(`${f.id}: input ${i} non-witness UTXO does not hash to its prevout`);
       const out = prev.outputs[vout];
       if (!out) throw new Error(`${f.id}: input ${i} prevout index ${vout} is not in its UTXO`);
-      return { index: i, sats: out.valueSats, from: "non-witness-utxo" as const, check: { inputIndex: i, utxoBytes: full.valueHex.length / 2, computedTxidHex: computed, prevoutTxidHex: prevout.slice(0, 64), vout } };
+      return { index: i, sats: out.valueSats, from: "non-witness-utxo" as const, check: { inputIndex: i, utxoBytes: full.valueHex.length / 2, computedTxidHex: computed, prevoutTxidHex: prevout.slice(0, 64), vout, displayTxidHex: reversed(computed) } };
     }
     const wit = inp.find((r) => r.keyType === 0x01)!;
     return { index: i, sats: BigInt(`0x${wit.valueHex.slice(0, 16).match(/../g)!.reverse().join("")}`), from: "witness-utxo" as const, check: null };
   });
   const utxoCheck = ins.find((x) => x.check)?.check;
   if (!utxoCheck) throw new Error(`${f.id}: no input carries a non-witness UTXO`);
+  if (!pinnedText("bip-0174.mediawiki").includes(`TXID: <tt>${utxoCheck.displayTxidHex}</tt>`)) throw new Error(`${f.id}: the checked txid is not the one BIP 174 lists`);
   const outSats = withUtxos.unsignedTx.outputs.reduce((n, o) => n + o.valueSats, 0n);
   const fee = ins.reduce((n, x) => n + x.sats, 0n) - outSats;
   if (fee < 0n) throw new Error(`${f.id}: outputs exceed inputs`);
@@ -471,7 +479,8 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
     ...f,
     derived: {
       states,
-      extracted: { bytes: f.extracted.hex.length / 2, txidHex: m.txidHex, wtxidHex: m.wtxidHex, inputs: tx.inputs.length, outputs: tx.outputs.length },
+      extracted: { bytes: f.extracted.hex.length / 2, txidHex: m.txidHex, wtxidHex: m.wtxidHex, inputs: tx.inputs.length, outputs: tx.outputs.length, txidDisplayHex: reversed(m.txidHex) },
+      magicHex,
       outputsBtc: tx.outputs.map((o) => btc(o.valueSats)),
       utxoCheck,
       amounts: { inputs: ins.map((x) => ({ index: x.index, btc: btc(x.sats), from: x.from })), outputsBtc: withUtxos.unsignedTx.outputs.map((o) => btc(o.valueSats)), feeBtc: btc(fee) },

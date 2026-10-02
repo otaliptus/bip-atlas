@@ -1,6 +1,6 @@
 import { Arrow, Drawing, Machine, Value, idsFor } from "../kit";
 import type { DerivedPsbtCombineFixture, DerivedPsbtTraceFixture, PsbtRecordView } from "../types";
-import { MapCard, cardHeight, mapTitle, shortRole, type CardRow } from "./cards";
+import { MapCard, cardHeight, hex2, mapTitle, shortRole, type CardRow } from "./cards";
 
 const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
 
@@ -83,7 +83,7 @@ export function PsbtFinalize({ fixture }: { fixture: DerivedPsbtTraceFixture }) 
       {inputs.map((m, k) => <MapCard x={14 + k * 162} y={30} w={154} title={mapTitle(m.scope, m.index)} rows={rowsOf(m)} hatch={ids.hatch} />)}
       <rect class="k-cell k-mark--plain" x="14" y={H - 27} width="10" height="10" />
       <Value at={[30, H - 18]} text="NEW" size={9} cls="k-value--label" />
-      <rect class="k-cell k-dashed" x="70" y={H - 27} width="10" height="10" style={`fill:${ids.hatch}`} />
+      <line class="k-strike" x1="70" y1={H - 22} x2="84" y2={H - 22} />
       <Value at={[86, H - 18]} text="CLEARED" size={9} cls="k-value--label" />
     </Drawing>
   );
@@ -114,7 +114,7 @@ export function UnknownFields({ fixture }: { fixture: DerivedPsbtCombineFixture 
         title="Unknown fields survive combining"
         desc={`${parts.map((p, k) => `PSBT ${k + 1} (BIP 174 line ${p.line}): ${p.records.length} records, ${unknown(p.records)} of an unknown type`).join("; ")}. Combined (line ${combined.line}): ${combined.records.length} records, all ${unknown(combined.records)} unknown ones kept, because their keys differ in the key data.`}
       >
-        <Value at={[14, 14]} text="TYPE 0xF0 IS IN NO REGISTRY THIS DECODER READS" size={9} cls="k-value--label" />
+        <Value at={[14, 14]} text={`TYPE ${[...new Set(combined.records.filter((r) => !r.constant).map((r) => hex2(r.keyType).toUpperCase().replace("0X", "0x")))].join(", ")}: NOT IN THE PSBT TYPE REGISTRY`} size={9} cls="k-value--label" />
         {parts.map((p, k) => (
           <>
             <Value at={[14 + k * 166, top - 4]} text={`PSBT ${k + 1} · LINE ${p.line}`} size={9} cls="k-value--muted" />

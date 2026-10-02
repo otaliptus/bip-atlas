@@ -187,14 +187,16 @@ export interface PsbtStateView {
 
 export interface PsbtTraceDerived {
   states: PsbtStateView[];
-  extracted: { bytes: number; txidHex: string; wtxidHex: string; inputs: number; outputs: number };
+  extracted: { bytes: number; txidHex: string; wtxidHex: string; inputs: number; outputs: number; /** The txid in the byte order BIP 174 and block explorers print (reversed). */ txidDisplayHex: string };
+  /** The five magic bytes every state starts with (derive checks each state). */
+  magicHex: string;
   outputsBtc: string[];
   /**
    * The signer's pre-signing check for the first input with a non-witness
    * UTXO: the double SHA-256 of that previous transaction equals the txid in
    * the input's prevout (derive throws otherwise).
    */
-  utxoCheck: { inputIndex: number; utxoBytes: number; computedTxidHex: string; prevoutTxidHex: string; vout: number };
+  utxoCheck: { inputIndex: number; utxoBytes: number; computedTxidHex: string; prevoutTxidHex: string; vout: number; /** The same txid in display (reversed) byte order, as BIP 174 prints it. */ displayTxidHex: string };
   /** What a signer can display, read from the updated PSBT's UTXO records; derive throws on a negative fee. */
   amounts: { inputs: Array<{ index: number; btc: string; from: "non-witness-utxo" | "witness-utxo" }>; outputsBtc: string[]; feeBtc: string };
 }

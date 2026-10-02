@@ -44,10 +44,11 @@ export const cardHeight = (rows: number) => 16 + Math.max(rows, 1) * ROW + 4;
 /**
  * One key-value map drawn as a card: a title tab, then one row per record
  * (type byte, then the record's name). New records get a heavy outline and a
- * filled dot; removed ones are hatched and dashed; an empty map shows its
- * lone 0x00 separator.
+ * black type chip; cleared ones are struck through and faded (their names
+ * stay: they are known, just gone); records of an unknown type are dashed;
+ * an empty map shows its lone 0x00 separator.
  */
-export function MapCard({ x, y, w, title, rows, hatch }: { x: number; y: number; w: number; title: string; rows: CardRow[]; hatch: string }) {
+export function MapCard({ x, y, w, title, rows }: { x: number; y: number; w: number; title: string; rows: CardRow[]; hatch?: string }) {
   const h = cardHeight(rows.length);
   return (
     <g class="k-mapcard" data-map={title}>
@@ -60,18 +61,12 @@ export function MapCard({ x, y, w, title, rows, hatch }: { x: number; y: number;
         const role = recordRole(r);
         const hot = mark === "new" || mark === "unique";
         return (
-          <g data-record={r.name} data-mark={mark}>
-            <rect class={`k-cell ${hot ? "k-mark--plain" : "k-fill--plain"}${removed ? " k-dashed" : ""}`} x={x + 4} y={ry} width="20" height={ROW - 2} style={removed ? `fill:${hatch}` : undefined} />
+          <g data-record={r.name} data-mark={mark} class={removed ? "k-faded" : undefined}>
+            <rect class={`k-cell ${hot ? "k-mark--plain" : "k-fill--plain"}`} x={x + 4} y={ry} width="20" height={ROW - 2} />
             <text class={`k-card__type${hot ? " k-card__type--on" : ""}`} x={x + 14} y={ry + 9.6} text-anchor="middle">{r.keyType.toString(16).padStart(2, "0")}</text>
-            <rect
-              class={`k-cell k-fill--${role}${mark === "new" || mark === "unique" ? " k-cell--em" : ""}${removed || !r.constant ? " k-dashed" : ""}`}
-              x={x + 24}
-              y={ry}
-              width={w - 28}
-              height={ROW - 2}
-              style={removed ? `fill:${hatch}` : undefined}
-            />
+            <rect class={`k-cell k-fill--${removed ? "plain" : role}${hot ? " k-cell--em" : ""}${!r.constant ? " k-dashed" : ""}`} x={x + 24} y={ry} width={w - 28} height={ROW - 2} />
             <text class="k-card__name" x={x + 28} y={ry + 9.6}>{shortName(r)}</text>
+            {removed ? <line class="k-strike" x1={x + 6} y1={ry + 6.5} x2={x + w - 6} y2={ry + 6.5} /> : null}
             {tag ? <text class="k-card__tag" x={x + w - 7} y={ry + 9.6} text-anchor="end">{tag}</text> : null}
           </g>
         );

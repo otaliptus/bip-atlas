@@ -14,7 +14,6 @@ interface Props {
 type Compare = "step" | "creator";
 
 const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
-const MAGIC = ["70", "73", "62", "74", "ff"];
 
 /**
  * psbt-envelope.v1 — the PSBT chapter's hero (drawing-first).
@@ -22,8 +21,8 @@ const MAGIC = ["70", "73", "62", "74", "ff"];
  * The roles of BIP 174's published trace drawn as computers in a row (the
  * two signers both start from the second Updater's PSBT), and below them the
  * envelope itself: the magic bytes and one card per key-value map. A stepper
- * moves the envelope from hand to hand; records a role added are outlined
- * and dotted, records the finalizer cleared are hatched. A strip compares
+ * moves the envelope from hand to hand; records a role added get a black
+ * type chip, records the finalizer cleared are struck through. A strip compares
  * with the previous state or with the Creator's. Every state is a published
  * PSBT parsed by the tested model; nothing is signed or broadcast.
  */
@@ -63,43 +62,62 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
   const describe = () =>
     `${status} ` +
     (isExtract
-      ? `Network transaction: ${extracted.inputs} inputs, ${extracted.outputs} outputs, txid ${extracted.txidHex}.`
+      ? `Network transaction: ${extracted.inputs} inputs, ${extracted.outputs} outputs, txid ${extracted.txidDisplayHex} (display order).`
       : `Maps: ${state.maps.map((m) => `${mapTitle(m.scope, m.index)}: ${rowsOf(m).map(({ r, mark }) => `${shortName(r)}${mark === "new" ? " (new)" : mark === "removed" ? " (cleared)" : ""}`).join(", ") || "empty"}`).join("; ")}.`);
 
-  /** The role track: computers left to right, signers side by side, the fork drawn as arcs. */
+  /** Every step the current state descends from (itself included): the others are drawn faded. */
+  const ancestors = (() => {
+    const out = new Set<string>();
+    const walk = (id: string) => {
+      if (out.has(id)) return;
+      out.add(id);
+      const st = states.find((x) => x.id === id);
+      const from = st ? st.basedOn : id === "extractor" ? [states[states.length - 1].id] : [];
+      from.forEach(walk);
+    };
+    walk(steps[at].id);
+    return out;
+  })();
+
+  /** The role track: computers left to right; the signers' fork drawn as one arc above and one below. */
   const track = (ids: DrawingIds, wide: boolean) => {
     const per = wide ? steps.length : 4;
     const dx = wide ? 76 : 80;
     const x0 = wide ? 20 : 18;
-    const pos = (i: number) => ({ x: x0 + (i % per) * dx, y: (wide ? 22 : 8) + Math.floor(i / per) * 56 });
+    const pos = (i: number) => ({ x: x0 + (i % per) * dx, y: (wide ? 22 : 8) + Math.floor(i / per) * 80 });
     const idx = (id: string) => steps.findIndex((s) => s.id === id);
+    const edges = steps.slice(1).flatMap((_, j) => {
+      const k = j + 1;
+      const st = states[k];
+      return (st ? st.basedOn.map(idx) : [k - 1]).map((f) => ({ f, k }));
+    });
+    let skip = 0;
     return (
       <g class="k-track">
         {steps.map((s, i) => {
           const p = pos(i);
           const cur = i === at;
           return (
-            <g data-step={s.id} data-current={cur ? "true" : undefined} class={i > at ? "k-faded" : undefined}>
+            <g data-step={s.id} data-current={cur ? "true" : undefined} class={ancestors.has(s.id) ? undefined : "k-faded"}>
               {cur ? <rect class="k-outline k-cell--em" x={p.x - 14} y={p.y - 5} width="54" height="52" style="fill:none" /> : null}
               <Computer at={[p.x, p.y]} label={shortRole(s.id, s.role)} />
             </g>
           );
         })}
-        {wide
-          ? steps.slice(1).map((s, i) => {
-              const k = i + 1;
-              const st = states[k];
-              const from = st ? st.basedOn.map(idx) : [k - 1];
-              return from.map((f) => {
-                const a = pos(f), b = pos(k);
-                return b.x - a.x === dx ? (
-                  <Arrow d={`M${a.x + 30} ${a.y + 10} H${b.x - 4}`} ids={ids} />
-                ) : (
-                  <Arrow d={`M${a.x + 13} ${a.y - 2} C${a.x + 13} ${a.y - 14}, ${b.x + 13} ${b.y - 14}, ${b.x + 13} ${b.y - 4}`} ids={ids} />
-                );
-              });
-            })
-          : null}
+        {edges.map(({ f, k }) => {
+          const a = pos(f), b = pos(k);
+          const on = ancestors.has(steps[f].id) && ancestors.has(steps[k].id);
+          let d: string;
+          if (a.y === b.y && b.x - a.x === dx) d = `M${a.x + 30} ${a.y + 10} H${b.x - 4}`;
+          else if (a.y === b.y) {
+            // A skip along the row: the first arcs over the computers, the next under their labels, so they never cross.
+            const up = skip++ % 2 === 0;
+            d = up
+              ? `M${a.x + 13} ${a.y - 2} C${a.x + 13} ${a.y - 16}, ${b.x + 13} ${b.y - 16}, ${b.x + 13} ${b.y - 4}`
+              : `M${a.x + 13} ${a.y + 44} C${a.x + 13} ${a.y + 58}, ${b.x + 13} ${b.y + 58}, ${b.x + 13} ${b.y + 46}`;
+          } else d = `M${a.x + 13} ${a.y + 44} L${b.x + 13} ${b.y - 4}`;
+          return <g class={on ? undefined : "k-faded"}><Arrow d={d} ids={ids} /></g>;
+        })}
       </g>
     );
   };
@@ -109,7 +127,7 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
     const W = wide ? 640 : 330;
     const id = `${figureId}-${w}`;
     const ids = idsFor(id);
-    const top = wide ? 96 : 132;
+    const top = wide ? 96 : 144;
     const x0 = wide ? 20 : 15;
     const maps = state.maps;
     // Card placement: wide, one row of five; narrow, global on top, then inputs, then outputs in pairs.
@@ -128,35 +146,35 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
         })();
     const bottom = Math.max(...maps.map((m, k) => place[k].y + cardHeight(rowsOf(m).length)));
     const footY = bottom + 22;
-    const H = footY + (isExtract ? 52 : 28);
+    const H = footY + (isExtract ? 52 : wide ? 28 : 44);
     return (
       <Drawing id={id} width={W} height={H} title="One envelope, many hands" desc={describe()}>
         {track(ids, wide)}
         <g class={isExtract ? "k-faded" : undefined}>
-          <Cells x={x0} y={top} values={MAGIC} size={16} />
-          <Value at={[x0 + 86, top + 12]} text={`MAGIC “psbt” + 0xff · ${state.bytes} BYTES`} size={9} cls="k-value--label" />
+          <Cells x={x0} y={top} values={fixture.derived.magicHex.match(/../g)!} size={16} />
+          <Value at={[x0 + 86, top + 12]} text={wide ? `MAGIC “psbt” + 0xff · THIS PSBT: ${state.bytes} B` : `MAGIC · THIS PSBT: ${state.bytes} B`} size={9} cls="k-value--label" />
           {maps.map((m, k) => <MapCard x={place[k].x} y={place[k].y} w={place[k].w} title={mapTitle(m.scope, m.index)} rows={rowsOf(m)} hatch={ids.hatch} />)}
         </g>
         {isExtract ? (
           <>
             <rect class="k-cell k-fill--plain k-cell--em" x={x0} y={footY - 14} width={wide ? 600 : 300} height="20" />
             <Value at={[x0 + 6, footY]} text={`NETWORK TRANSACTION · ${extracted.bytes} B · ${extracted.inputs} IN · ${extracted.outputs} OUT`} size={9} cls="k-value--label" />
-            <Value at={[x0, footY + 24]} text={`txid ${extracted.txidHex.slice(0, 16)}…`} size={9.5} cls="k-value--hash" />
+            <Value at={[x0, footY + 24]} text={`txid ${extracted.txidDisplayHex.slice(0, 16)}… (display order)`} size={9.5} cls="k-value--hash" />
           </>
         ) : (
           <g>
             <rect class="k-cell k-mark--plain" x={x0} y={footY - 9} width="10" height="10" />
             <Value at={[x0 + 16, footY]} text={compare === "creator" ? "NEW SINCE THE CREATOR" : "NEW IN THIS STEP"} size={9} cls="k-value--label" />
-            <rect class="k-cell k-dashed" x={x0 + (wide ? 170 : 150)} y={footY - 9} width="10" height="10" style={`fill:${ids.hatch}`} />
-            <Value at={[x0 + (wide ? 186 : 166), footY]} text="CLEARED BY THIS STEP" size={9} cls="k-value--label" />
-            {wide ? (
+            {compare === "step" ? (
               <>
-                <rect class="k-cell k-fill--sig" x={x0 + 350} y={footY - 9} width="10" height="10" />
-                <Value at={[x0 + 366, footY]} text="SIGNATURE" size={9} cls="k-value--label" />
-                <rect class="k-cell k-fill--public" x={x0 + 450} y={footY - 9} width="10" height="10" />
-                <Value at={[x0 + 466, footY]} text="KEYED BY A PUBLIC KEY" size={9} cls="k-value--label" />
+                <line class="k-strike" x1={x0 + (wide ? 168 : 150)} y1={footY - 4} x2={x0 + (wide ? 182 : 164)} y2={footY - 4} />
+                <Value at={[x0 + (wide ? 188 : 170), footY]} text="CLEARED" size={9} cls="k-value--label" />
               </>
             ) : null}
+            <rect class="k-cell k-fill--sig" x={x0 + (wide ? 270 : 0)} y={footY - 9 + (wide ? 0 : 16)} width="10" height="10" />
+            <Value at={[x0 + (wide ? 286 : 16), footY + (wide ? 0 : 16)]} text="PARTIAL SIGNATURE" size={9} cls="k-value--label" />
+            <rect class="k-cell k-fill--public" x={x0 + (wide ? 420 : 150)} y={footY - 9 + (wide ? 0 : 16)} width="10" height="10" />
+            <Value at={[x0 + (wide ? 436 : 166), footY + (wide ? 0 : 16)]} text="BIP 32 PATH" size={9} cls="k-value--label" />
           </g>
         )}
       </Drawing>
@@ -180,7 +198,7 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
           </div>
         </div>
       ) : (
-        <p class="atlas-hero__static">Static view: the Combiner’s PSBT, where every field is present at once. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.</p>
+        <p class="atlas-hero__static">Static view: the Combiner’s PSBT, which holds every update and both signers’ signatures. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       {hydrated ? (
@@ -200,15 +218,16 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">
-        <summary>{isExtract ? "Exact identifiers" : `Exact fields marked new (${newRecs.length})`}</summary>
+        <summary>{isExtract ? "Exact identifiers" : newRecs.length ? `Exact fields marked new (${newRecs.length})` : `Exact fields of this PSBT (${all.length})`}</summary>
         <dl class="atlas-hexlist">
           {isExtract ? (
             <>
+              <dt>txid (display order, as BIP 174 and explorers print it)</dt><dd><code class="atlas-break">{extracted.txidDisplayHex}</code></dd>
               <dt>txid (byte order as computed)</dt><dd><code class="atlas-break">{extracted.txidHex}</code></dd>
-              <dt>wtxid</dt><dd><code class="atlas-break">{extracted.wtxidHex}</code></dd>
+              <dt>wtxid (byte order as computed)</dt><dd><code class="atlas-break">{extracted.wtxidHex}</code></dd>
             </>
           ) : (
-            newRecs.map((r) => (
+            (newRecs.length ? newRecs : all).map((r) => (
               <>
                 <dt>{mapTitle(r.scope, r.index)} · {hex2(r.keyType)} {r.name}{r.parentBip ? ` (BIP ${r.parentBip})` : ""}{r.reading ? `: ${r.reading}` : ""}</dt>
                 <dd>key data <code class="atlas-break">{r.keyDataHex || "none"}</code><br />value <code class="atlas-break">{r.valueHex}</code></dd>
