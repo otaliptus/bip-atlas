@@ -46,12 +46,9 @@ describe("full signatures", () => {
   for (const v of gen.full) {
     it(`${v.type}`, () => {
       const r = verify(v.address, v.message, v.bip322_signatures[0]);
-      if (CHECKED.includes(v.type)) {
-        expect(r.state, (r as { reason?: string }).reason).toBe("valid");
-        if (r.state === "valid") expect([r.time, r.age]).toEqual([Number(v.lock_time), Number(v.sequence)]);
-      } else {
-        expect(r.state).toBe("inconclusive");
-      }
+      expect(CHECKED).toContain(v.type);
+      expect(r.state, (r as { reason?: string }).reason).toBe("valid");
+      if (r.state === "valid") expect([r.time, r.age]).toEqual([Number(v.lock_time), Number(v.sequence)]);
       const d = decodeSignature(v.bip322_signatures[0]);
       expect(parseInt(d.tx!.versionHex.slice(0, 2), 16)).toBe(Number(v.tx_version));
     });
@@ -61,15 +58,9 @@ describe("full signatures", () => {
 describe("error vectors", () => {
   for (const v of [...basic.error, ...gen.error]) {
     it(v.description, () => {
-      const type = (gen.full.concat(gen.simple, basic.simple) as { address: string; type: string; bip322_signatures: string[] }[]).find((x) => x.bip322_signatures.includes(v.signature))?.type;
       const r = verify(v.address, v.message, v.signature);
-      if (!type || CHECKED.includes(type) || /base64|short|prefix|full variant/.test(v.error_substr)) {
-        expect(r.state).toBe("invalid");
-        if (r.state === "invalid" && !/invalid signature/.test(v.error_substr)) expect(r.reason).toContain(v.error_substr);
-      } else {
-        // Not verifiable here, but a wrong message or address changes to_spend, so the structural check already fails.
-        expect(r).toMatchObject({ state: "invalid", reason: "to_sign does not spend to_spend:0" });
-      }
+      expect(r.state).toBe("invalid");
+      if (r.state === "invalid" && !/invalid signature/.test(v.error_substr)) expect(r.reason).toContain(v.error_substr);
     });
   }
 });

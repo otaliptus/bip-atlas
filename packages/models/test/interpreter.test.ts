@@ -68,6 +68,7 @@ describe("edits to published vectors (no re-signing)", () => {
         }
       });
       expect(r.state, v.type).toBe("invalid");
+      expect((r as { reason: string }).reason, v.type).toMatch(/^invalid signature: (NULLFAIL|Schnorr signature does not verify|signature is not strict DER|LOW_S)/);
     }
   });
 
@@ -79,7 +80,7 @@ describe("edits to published vectors (no re-signing)", () => {
     }
   });
 
-  it("CSV: version 1 is invalid (a required failure, reported before the version rule)", () => {
+  it("CSV: version 1 is invalid (a consensus failure, BIP 322 step 1, so it beats the upgradeable version rule)", () => {
     const r = edited("p2wsh-time-lock", (tx) => { tx.versionHex = le32(1); });
     expect(r).toMatchObject({ state: "invalid", reason: "invalid signature: CHECKSEQUENCEVERIFY failed: transaction version is at least 2" });
   });
@@ -135,7 +136,17 @@ describe("edits to published vectors (no re-signing)", () => {
 
   it("P2SH-P2WPKH: the redeem script pushed with OP_PUSHDATA1 is invalid", () => {
     const r = edited("p2sh-p2wpkh", (tx) => { tx.inputs[0].scriptSigHex = "4c" + tx.inputs[0].scriptSigHex; });
-    expect(r.state).toBe("invalid");
+    expect(r).toMatchObject({ state: "invalid", reason: "invalid signature: MINIMALDATA: push is not minimally encoded" });
+  });
+
+  it("P2SH-P2WPKH: an extra push before the redeem script is invalid", () => {
+    const r = edited("p2sh-p2wpkh", (tx) => { tx.inputs[0].scriptSigHex = "00" + tx.inputs[0].scriptSigHex; });
+    expect(r).toMatchObject({ state: "invalid", reason: "invalid signature: P2SH-wrapped SegWit: scriptSig must be exactly one push of the redeem script" });
+  });
+
+  it("a non-push scriptSig: invalid for P2SH (consensus), inconclusive for P2PKH (outside the model)", () => {
+    expect(edited("p2sh-multisig-2of2", (tx) => { tx.inputs[0].scriptSigHex += "61"; })).toMatchObject({ state: "invalid", reason: "invalid signature: P2SH: the scriptSig must be push-only" });
+    expect(edited("p2pkh", (tx) => { tx.inputs[0].scriptSigHex += "61"; })).toMatchObject({ state: "inconclusive", reason: "scriptSigs with non-push opcodes are outside this model" });
   });
 });
 
@@ -152,7 +163,8 @@ function signP2wsh(ws: string, stack: (sig: string) => string[]): { address: str
   const address = p2wshAddress(ws);
   const spend = toSpend(messageHash(MSG), addressScript(address).spk);
   const tx = parseTransaction(toSign(spend.txid, { witness: ["00"] }).witnessHex);
-  const digest = bip143Digest(tx, 0, push(ws), 0n).sighashHex;
+  // BIP 143 scriptCode: the witness script with a compact-size length prefix (not a push opcode).
+  const digest = bip143Digest(tx, 0, cs(ws.length / 2) + ws, 0n).sighashHex;
   const sig = bytesToHex(secp256k1.sign(hexToBytes(digest), SK, { prehash: false, lowS: true, format: "der" })) + "01";
   return { address, signature: smp(stack(sig)) };
 }
@@ -230,10 +242,10 @@ describe("tapscript OP_CHECKSIGADD (test-only 2-of-2)", () => {
     expect(verify(address, MSG, smp([s2, s1, leaf, out.controlBlocks[0]]))).toMatchObject({ state: "valid", checked: "p2tr script path" });
   });
   it("second signature empty: the count is 1, so invalid", () => {
-    expect(verify(address, MSG, smp(["", s1, leaf, out.controlBlocks[0]])).state).toBe("invalid");
+    expect(verify(address, MSG, smp(["", s1, leaf, out.controlBlocks[0]]))).toMatchObject({ state: "invalid", reason: "invalid signature: tapscript must leave exactly one true item" });
   });
   it("SIGHASH_NONE is rejected by BIP 322's required rule", () => {
-    expect(verify(address, MSG, smp([s2, s1 + "02", leaf, out.controlBlocks[0]])).state).toBe("invalid");
+    expect(verify(address, MSG, smp([s2, s1 + "02", leaf, out.controlBlocks[0]]))).toMatchObject({ state: "invalid", reason: "invalid signature: BIP 322 requires SIGHASH_ALL or SIGHASH_DEFAULT" });
   });
 });
 
@@ -247,5 +259,110 @@ describe("strict DER (BIP 66)", () => {
     const padded = Uint8Array.from([0x30, b[1] + 1, 0x02, lenR + 1, 0x00, ...b.slice(4)]);
     expect(strictDer(padded)).toBe(false);
     expect(strictDer(Uint8Array.from([b[0], b[1] + 1, ...b.slice(2)]))).toBe(false);
+  });
+});
+
+/* Review follow-ups: scope after commitment, every scope route, and the consensus limits. */
+const x1 = bytesToHex(schnorr.getPublicKey(SK));
+/** A one-leaf taproot output for `leaf`, and a signer over that leaf's BIP 342 sighash with SK. */
+function tapLeaf(leaf: string, leafVersion = 0xc0) {
+  const out = taprootOutput(x1, { id: 0, script: leaf, leafVersion });
+  const address = bech32m.encode("bc", [1, ...bech32m.toWords(hexToBytes(out.tweak.outputKeyHex))]);
+  const spend = toSpend(messageHash(MSG), out.scriptPubKeyHex);
+  const tx = parseTransaction(toSign(spend.txid, { witness: ["00"] }).witnessHex);
+  const ext = out.leaves[0].leafHash + "00" + "ffffffff";
+  const sig = bytesToHex(schnorr.sign(hexToBytes(taprootSighash(sigMsg(tx, [{ scriptPubKeyHex: out.scriptPubKeyHex, amountSats: 0n }], 0, 0, 1), ext)), SK, new Uint8Array(32)));
+  return { address, cb: out.controlBlocks[0], sig };
+}
+
+describe("tapscript details", () => {
+  it("OP_0 inside a tapscript is an ordinary push, not out of scope", () => {
+    const leaf = "00" + "75" + "20" + x1 + "ac"; // OP_0 OP_DROP <x1> OP_CHECKSIG
+    const t = tapLeaf(leaf);
+    expect(verify(t.address, MSG, smp([t.sig, leaf, t.cb]))).toMatchObject({ state: "valid", checked: "p2tr script path" });
+  });
+  it("the signature-operation budget runs out", () => {
+    const leaf = ("76" + "20" + x1 + "ad").repeat(12) + "51"; // (DUP <x1> CHECKSIGVERIFY) × 12, OP_1
+    const t = tapLeaf(leaf);
+    expect(verify(t.address, MSG, smp([t.sig, leaf, t.cb]))).toMatchObject({ state: "invalid", reason: "invalid signature: tapscript signature-operation budget exceeded" });
+  });
+});
+
+describe("scope routes (inconclusive)", () => {
+  it("an annex", () => {
+    const v = gen.simple.find((x: { type: string }) => x.type === "p2tr");
+    const w = decodeSignature(v.bip322_signatures[0]).witness;
+    expect(verify(v.address, v.message, smp([...w, "50aa"]))).toMatchObject({ state: "inconclusive", reason: "an annex is outside this model" });
+  });
+  it("a committed leaf with a leaf version other than 0xc0", () => {
+    const leaf = "20" + x1 + "ac";
+    const t = tapLeaf(leaf, 0xc2);
+    expect(verify(t.address, MSG, smp([t.sig, leaf, t.cb]))).toMatchObject({ state: "inconclusive", reason: "taproot leaf versions other than 0xc0 are outside this model" });
+  });
+  it("OP_SUCCESSx in a committed leaf", () => {
+    const leaf = "50";
+    const t = tapLeaf(leaf);
+    expect(verify(t.address, MSG, smp([leaf, t.cb])).state).toBe("inconclusive");
+  });
+  it("a tapscript public key that is not 32 bytes", () => {
+    const leaf = push(PK) + "ac"; // 33-byte key
+    const t = tapLeaf(leaf);
+    expect(verify(t.address, MSG, smp([t.sig, leaf, t.cb]))).toMatchObject({ state: "inconclusive", reason: "tapscript public keys other than 32 bytes are outside this model" });
+  });
+  it("P2SH-wrapped witness version 1", () => {
+    const redeem = "5120" + x1;
+    const address = createBase58check(sha256).encode(Uint8Array.of(0x05, ...hash160(hexToBytes(redeem))));
+    const spend = toSpend(messageHash(MSG), addressScript(address).spk);
+    expect(verify(address, MSG, ful(toSign(spend.txid, { scriptSig: push(redeem) }).hex))).toMatchObject({ state: "inconclusive", reason: "P2SH-wrapped witness version 1 or higher is outside this model" });
+  });
+  it("a witness v1 program that is not 32 bytes", () => {
+    const address = bech32m.encode("bc", [1, ...bech32m.toWords(new Uint8Array(20).fill(9))]);
+    expect(verify(address, MSG, "smpAA==")).toMatchObject({ state: "inconclusive", reason: "this witness program shape is outside this model" });
+  });
+});
+
+describe("scope is decided after the commitment", () => {
+  it("an uncommitted witness script with an unknown opcode is invalid, not inconclusive", () => {
+    const address = p2wshAddress("51");
+    expect(verify(address, MSG, smp(["00", "a8"]))).toMatchObject({ state: "invalid", reason: "invalid signature: witness script does not match the program" });
+  });
+  it("an uncommitted tapleaf with OP_SUCCESS is invalid", () => {
+    const t = tapLeaf("20" + x1 + "ac");
+    expect(verify(t.address, MSG, smp(["50", t.cb])).state).toBe("invalid");
+  });
+  it("native SegWit with a scriptSig is invalid before any scope check", () => {
+    const ws = "a851"; // OP_SHA256 OP_1: committed, but outside the reviewed set
+    const address = p2wshAddress(ws);
+    const spend = toSpend(messageHash(MSG), addressScript(address).spk);
+    expect(verify(address, MSG, ful(toSign(spend.txid, { scriptSig: "51", witness: [ws] }).witnessHex))).toMatchObject({ state: "invalid", reason: "invalid signature: native SegWit requires an empty scriptSig" });
+  });
+  it("a truncated OP_PUSHDATA1 is invalid (undecodable), not out of scope", () => {
+    const ws = "514c";
+    expect(verify(p2wshAddress(ws), MSG, smp([ws]))).toMatchObject({ state: "invalid", reason: "invalid signature: a push runs past the end of the script" });
+  });
+  it("a redeem script pushed as a small integer is checked, then run", () => {
+    const redeem = "81"; // pushed by OP_1NEGATE; 0x81 is OP_RIGHT, a disabled opcode outside the reviewed set
+    const address = createBase58check(sha256).encode(Uint8Array.of(0x05, ...hash160(hexToBytes(redeem))));
+    const spend = toSpend(messageHash(MSG), addressScript(address).spk);
+    expect(verify(address, MSG, ful(toSign(spend.txid, { scriptSig: "4f" }).hex))).toMatchObject({ state: "inconclusive", reason: "opcode 0x81 is outside this interpreter's reviewed set" });
+  });
+});
+
+describe("consensus limits", () => {
+  it("more than 201 counted opcodes", () => {
+    const ws = "61".repeat(202) + CHECKSIG;
+    const { address, signature } = signP2wsh(ws, (s) => [s, ws]);
+    expect(verify(address, MSG, signature)).toMatchObject({ state: "invalid", reason: "invalid signature: more than 201 opcodes" });
+  });
+  it("a witness element larger than 520 bytes", () => {
+    const ws = "7551"; // OP_DROP OP_1
+    expect(verify(p2wshAddress(ws), MSG, smp(["00".repeat(521), ws]))).toMatchObject({ state: "invalid", reason: "invalid signature: witness element larger than 520 bytes" });
+  });
+  it("a hybrid public key fails STRICTENC", () => {
+    const u = bytesToHex(secp256k1.getPublicKey(SK, false));
+    const hybrid = (parseInt(u.slice(-2), 16) % 2 ? "07" : "06") + u.slice(2);
+    const ws = push(hybrid) + "ac";
+    const { address, signature } = signP2wsh(ws, (s) => [s, ws]);
+    expect(verify(address, MSG, signature)).toMatchObject({ state: "invalid", reason: "invalid signature: public key is not strictly encoded" });
   });
 });

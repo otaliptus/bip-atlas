@@ -15,7 +15,10 @@
  *   the taproot key path); no OP_CODESEPARATOR, and no signature that
  *   FindAndDelete would remove from a legacy scriptCode; strict DER, low S and
  *   strict public-key encoding (STRICTENC); NULLFAIL; MINIMALDATA; CLEANSTACK;
- *   MINIMALIF. These apply in every script version. A failure is a script error.
+ *   MINIMALIF. These apply in every script version, which is stricter than
+ *   Bitcoin Core's flags (Core applies MINIMALIF only to witness v0, as policy,
+ *   and tapscript, as consensus); BIP 322 states the rules without that limit.
+ *   A failure is a script error.
  * - BIP 322's upgradeable rules: reserved NOPs and witness versions above 1 do
  *   not fail the script; they are reported in `upgradeable` so the caller can
  *   output "inconclusive" after the required rules have passed, as the BIP
@@ -24,6 +27,11 @@
  * Consensus limits enforced: 520-byte elements, 1,000 stack items, 10,000-byte
  * legacy and v0 scripts, 201 counted opcodes, NULLDUMMY, the witness v0 and
  * tapscript clean stack, and the tapscript signature-operation budget.
+ *
+ * Scope is decided after the commitments: a script is checked against REVIEWED
+ * only once it is known to be the committed one (the HASH160 of a redeem script,
+ * the SHA-256 of a witness script, the control block of a tapleaf). A script that
+ * does not match its commitment is simply invalid, whatever it contains.
  *
  * Out of scope (InterpreterScopeError): any opcode not in REVIEWED, OP_SUCCESSx,
  * taproot leaf versions other than 0xc0, annexes, tapscript public keys that are
@@ -38,7 +46,7 @@ import { hash160 } from "./bip32";
 import { bytesToHex, hexToBytes } from "./hex";
 import { decodeScript, legacySighash, witnessProgram } from "./p2sh";
 import { SigMsgError, checkControlBlock, compactSize, sigMsg, tapLeafHash, taprootSighash, type SpentOutput } from "./taproot";
-import { castToBool, decodeTapscript, encodeNum, isOpSuccess } from "./tapscript";
+import { castToBool, decodeTapscript, encodeNum } from "./tapscript";
 import { checkLockTimeVerify, checkSequenceVerify, lockFieldsOf } from "./timelock";
 import { bip143Digest, type Transaction } from "./tx";
 
@@ -83,13 +91,34 @@ const MAX_ELEMENT = 520, MAX_STACK = 1000, MAX_SCRIPT = 10_000, MAX_OPS = 201, M
 
 interface Op { op: number; dataHex: string | null }
 
+/** True if every push's length bytes and data fit inside the script (Core's GetOp would succeed throughout). */
+function wellFormed(scriptHex: string): boolean {
+  const b = hexToBytes(scriptHex);
+  for (let i = 0; i < b.length; ) {
+    const op = b[i++];
+    let len = 0;
+    if (op >= 1 && op <= 0x4b) len = op;
+    else if (op === 0x4c || op === 0x4d || op === 0x4e) {
+      const n = op === 0x4c ? 1 : op === 0x4d ? 2 : 4;
+      if (i + n > b.length) return false;
+      for (let k = n - 1; k >= 0; k--) len = len * 256 + b[i + k];
+      i += n;
+    }
+    if (i + len > b.length) return false;
+    i += len;
+  }
+  return true;
+}
+
 /** Decode a script for `sv`. Returns null if a push runs past the end (a script error when executed). */
 function decode(scriptHex: string, sv: SigVersion): Op[] | null {
   if (sv === "tapscript") {
     const d = decodeTapscript(scriptHex);
     if (d.kind === "op-success") throw new InterpreterScopeError(`${d.at.name} makes tapscript succeed unconditionally; this model does not judge it`);
-    return d.kind === "ok" ? d.ops : null;
+    // The tapscript decoder reports OP_0 without data; it pushes the empty vector like any other OP_0.
+    return d.kind === "ok" ? d.ops.map((o) => (o.op === OP.OP_0 && o.dataHex === null ? { ...o, dataHex: "" } : o)) : null;
   }
+  if (!wellFormed(scriptHex)) return null;
   try { return decodeScript(scriptHex); } catch { return null; }
 }
 
@@ -159,7 +188,12 @@ export interface InputResult {
 
 interface Exec { ctx: InputContext; upgradeable: string[]; sv: SigVersion; scriptHex: string; budget: number; tapleafHash: string; annexHex: string | null }
 
-/** CONST_SCRIPTCODE: in a legacy script, a push equal to the signature (OP_0 for an empty one) is what FindAndDelete would remove. */
+/**
+ * CONST_SCRIPTCODE: in a legacy script, a push equal to the signature (OP_0 for
+ * an empty one) is what FindAndDelete would remove. This matches pushes by data
+ * whatever their opcode, a superset of Core's byte-pattern match: it can only
+ * over-reject, never miss one.
+ */
 function assertNoFindAndDelete(e: Exec, sigHex: string) {
   if (e.sv === "base" && decode(e.scriptHex, "base")?.some((o) => o.dataHex === sigHex)) throw new ScriptError("BIP 322 forbids FindAndDelete: the signature appears in the scriptCode");
 }
@@ -332,32 +366,47 @@ const witnessSize = (w: string[]) => compactSize(w.length).length + w.reduce((n,
 interface Plan { scripts: { hex: string; sv: SigVersion }[] }
 
 /** Scripts the spend will execute, found before anything runs, so scope is decided first. */
+/** The stack item a push-only opcode leaves (data, OP_1NEGATE, OP_1…OP_16). */
+const pushedItem = (o: Op) => o.dataHex ?? encodeNum(o.op === OP.OP_1NEGATE ? -1n : BigInt(o.op - 0x50));
+
 function plan(scriptSigHex: string, spkHex: string, witness: string[]): Plan {
   const scripts: Plan["scripts"] = [{ hex: scriptSigHex, sv: "base" }, { hex: spkHex, sv: "base" }];
+  const native = witnessProgram(spkHex);
+  // BIP 322 step 1 (consensus) before step 2 (scope): a native SegWit spend with a scriptSig is invalid outright.
+  if (native && scriptSigHex !== "") throw new ScriptError("native SegWit requires an empty scriptSig");
   const sigOps = decode(scriptSigHex, "base");
   const p2sh = /^a914[0-9a-f]{40}87$/.test(spkHex);
   if (sigOps && !sigOps.every(isPush)) {
     if (p2sh) throw new ScriptError("P2SH: the scriptSig must be push-only");
     throw new InterpreterScopeError("scriptSigs with non-push opcodes are outside this model");
   }
-  let program = witnessProgram(spkHex);
+  let program = native;
   if (p2sh && sigOps?.length) {
-    const redeem = sigOps[sigOps.length - 1].dataHex;
-    if (redeem !== null) {
+    const redeem = pushedItem(sigOps[sigOps.length - 1]);
+    // Only the committed redeem script is "being satisfied"; anything else fails at OP_EQUAL.
+    if (bytesToHex(hash160(hexToBytes(redeem))) === spkHex.slice(4, 44)) {
       scripts.push({ hex: redeem, sv: "base" });
       program = witnessProgram(redeem);
       if (program && program.version >= 1) throw new InterpreterScopeError("P2SH-wrapped witness version 1 or higher is outside this model");
     }
   }
-  if (program?.version === 0 && program.programHex.length === 64 && witness.length) scripts.push({ hex: witness[witness.length - 1], sv: "witness_v0" });
-  if (program?.version === 1 && program.programHex.length === 64) {
+  if (program?.version === 0 && program.programHex.length === 64 && witness.length) {
+    const ws = witness[witness.length - 1];
+    if (bytesToHex(sha256(hexToBytes(ws))) === program.programHex) scripts.push({ hex: ws, sv: "witness_v0" });
+  }
+  if (program?.version === 1 && program.programHex.length === 64 && !p2sh) {
     const w = [...witness];
     if (w.length >= 2 && w[w.length - 1].startsWith("50")) throw new InterpreterScopeError("an annex is outside this model");
     if (w.length >= 2) {
-      if ((parseInt(w[w.length - 1].slice(0, 2), 16) & 0xfe) !== 0xc0) throw new InterpreterScopeError("taproot leaf versions other than 0xc0 are outside this model");
-      scripts.push({ hex: w[w.length - 2], sv: "tapscript" });
+      const control = w[w.length - 1], leaf = w[w.length - 2];
+      // Judge the leaf only once the control block commits to it; otherwise the spend is simply invalid.
+      if (checkControlBlock(program.programHex, leaf, control).ok) {
+        if ((parseInt(control.slice(0, 2), 16) & 0xfe) !== 0xc0) throw new InterpreterScopeError("taproot leaf versions other than 0xc0 are outside this model");
+        scripts.push({ hex: leaf, sv: "tapscript" });
+      }
     }
   }
+  if (program && program.version === 1 && program.programHex.length !== 64) throw new InterpreterScopeError("this witness program shape is outside this model");
   for (const s of scripts) assertInScope(s.hex, s.sv);
   return { scripts };
 }
@@ -444,7 +493,8 @@ export function verifyInput(ctx: InputContext): InputResult {
     if (!stack.length || !castToBool(stack[stack.length - 1])) throw new ScriptError("redeem script left false on the stack");
     const wrapped = witnessProgram(redeem);
     if (wrapped) {
-      if (input.scriptSigHex !== bytesToHex(compactSize(redeem.length / 2)) + redeem || redeem.length / 2 > 75) throw new ScriptError("P2SH-wrapped SegWit: scriptSig must be exactly one push of the redeem script");
+      // Witness programs are at most 42 bytes, so the single push is always a direct push.
+      if (input.scriptSigHex !== bytesToHex(compactSize(redeem.length / 2)) + redeem) throw new ScriptError("P2SH-wrapped SegWit: scriptSig must be exactly one push of the redeem script");
       path += " → ";
       witnessRun(wrapped, true);
     }
