@@ -18,8 +18,10 @@ export function V2Eavesdropper() {
           <Computer at={[141, 22]} label="attacker" />
           <path class="k-line" d="M38 38 H137" marker-end={ids.arrow} />
           <path class="k-line" d="M171 38 H262" marker-end={ids.arrow} />
-          <Value at={[8, 86]} text="SESSION ID A" size={8.5} cls="k-value--label" />
-          <Value at={[292, 86]} text="SESSION ID B" size={8.5} anchor="end" cls="k-value--label" />
+          <Value at={[8, 78]} text="SESSION" size={8.5} cls="k-value--label" />
+          <Value at={[8, 90]} text="ID A" size={8.5} cls="k-value--label" />
+          <Value at={[292, 78]} text="SESSION" size={8.5} anchor="end" cls="k-value--label" />
+          <Value at={[292, 90]} text="ID B" size={8.5} anchor="end" cls="k-value--label" />
           <Value at={[154, 92]} text="A ≠ B" size={10} anchor="middle" cls="k-value--label" />
           <Value at={[154, 106]} text="COMPARED OUT OF BAND" size={8.5} anchor="middle" cls="k-value--muted" />
         </>
@@ -36,8 +38,9 @@ export function V2Eavesdropper() {
           )}
           <line class="k-leader k-dashed" x1="150" y1="44" x2="150" y2="68" />
           <Computer at={[137, 70]} />
-          <Value at={[176, 82]} text={wire === "v1" ? "READS IT ALL" : "SEES RANDOM"} size={8.5} cls="k-value--label" />
-          <Value at={[176, 94]} text={wire === "v1" ? "AND WHEN" : "BYTES ONLY"} size={8.5} cls="k-value--label" />
+          {wire === "v2" ? <Value at={[176, 106]} text="TIMING STILL SHOW" size={8.5} cls="k-value--label" /> : null}
+          <Value at={[176, 82]} text={wire === "v1" ? "READS IT ALL" : "RANDOM-LOOKING"} size={8.5} cls="k-value--label" />
+          <Value at={[176, 94]} text={wire === "v1" ? "AND WHEN" : "BYTES; SIZES AND"} size={8.5} cls="k-value--label" />
         </>
       )}
     </>
@@ -49,8 +52,8 @@ export function V2Eavesdropper() {
       draw: (ids) => scene(ids, "v1"),
     },
     {
-      note: "v2: the same listener sees only bytes that look random. Passive reading no longer works.",
-      desc: "Schematic. The same path carries v2 traffic: every byte looks random to the listener, who learns no message contents.",
+      note: "v2: the same listener sees bytes that look random. Passive reading no longer works, though sizes and timing still show.",
+      desc: "Schematic. The same path carries v2 traffic: every byte looks random to the listener, who learns no message contents, though packet sizes and timing remain visible.",
       draw: (ids) => scene(ids, "v2"),
     },
     {

@@ -1,4 +1,4 @@
-import { HEADER_LEN, LENGTH_FIELD_LEN, TAG_LEN } from "@bip-atlas/models/v2transport";
+import { HEADER_LEN, LENGTH_FIELD_LEN, TAG_LEN } from "@bip-atlas/models/v2constants";
 import { Bracket, Cells, Drawing, Value } from "../kit";
 import type { DerivedV2Fixture } from "../types";
 
@@ -32,6 +32,7 @@ export function V2PacketBytes({ fixture }: { fixture: DerivedV2Fixture }) {
         <Cells x={x0} y={36} values={wire} size={cs} roleOf={() => "net"} />
         <Bracket x1={at(0)} x2={at(LENGTH_FIELD_LEN)} y={36 + cs + 3} text="length" align="start" />
         <Bracket x1={at(LENGTH_FIELD_LEN)} x2={at(LENGTH_FIELD_LEN + body)} y={36 + cs + 3} text="" />
+        <Value at={[at(LENGTH_FIELD_LEN) + (body * cs) / 2, 36 + cs + 30]} text="HDR+C" size={8} anchor="middle" cls="k-value--label" />
         <Bracket x1={at(LENGTH_FIELD_LEN + body)} x2={at(p.totalLen)} y={36 + cs + 3} text={`tag · ${TAG_LEN} B`} />
         <Value at={[x0, 92]} text="LENGTH: OWN CHACHA20 STREAM, NOT IN THE TAG" size={8} cls="k-value--muted" />
         <Value at={[x0, 103]} text={`HEADER + CONTENTS (${body} B): CHACHA20-POLY1305`} size={8} cls="k-value--muted" />

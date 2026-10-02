@@ -20,13 +20,8 @@ const enc = (s: string) => new TextEncoder().encode(s);
 const concat = (...a: Uint8Array[]) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
 const le = (n: number, len: number) => { const o = new Uint8Array(len); for (let i = 0; i < len; i++) o[i] = Math.floor(n / 256 ** i) % 256; return o; };
 
-export const MAINNET_MAGIC = "f9beb4d9";
-export const V1_PREFIX = MAINNET_MAGIC + bytesToHex(enc("version")) + "0000000000";
-export const REKEY_INTERVAL = 224;
-export const LENGTH_FIELD_LEN = 3;
-export const HEADER_LEN = 1;
-export const TAG_LEN = 16;
-export const MAX_GARBAGE = 4095;
+import { HEADER_LEN, LENGTH_FIELD_LEN, MAINNET_MAGIC, REKEY_INTERVAL, TAG_LEN } from "./v2constants";
+export { MAINNET_MAGIC, V1_PREFIX, REKEY_INTERVAL, LENGTH_FIELD_LEN, HEADER_LEN, TAG_LEN, MAX_GARBAGE, V2_OVERHEAD, V1_HEADER } from "./v2constants";
 
 export class V2Error extends Error {}
 
@@ -164,9 +159,6 @@ export function decPacket(r: Sender, packet: Uint8Array, aad: Uint8Array = new U
   return { length, header: pt[0], contents: pt.slice(1) };
 }
 
-/** Overhead per message: v2 adds 3 + 1 + 16 bytes to the contents; v1 has a 24-byte header. */
-export const V2_OVERHEAD = LENGTH_FIELD_LEN + HEADER_LEN + TAG_LEN;
-export const V1_HEADER = 24;
 /** v2 contents for an application message: a 1-byte short ID, or 0x00 plus a 12-byte ASCII type. */
 export const v2MessageTypeBytes = (shortId: boolean) => (shortId ? 1 : 13);
 

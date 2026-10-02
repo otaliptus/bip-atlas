@@ -1,4 +1,4 @@
-import { MAINNET_MAGIC, V1_PREFIX } from "@bip-atlas/models/v2transport";
+import { MAINNET_MAGIC, V1_PREFIX } from "@bip-atlas/models/v2constants";
 import { Bracket, Cells, Drawing, Value } from "../kit";
 import type { DerivedV2Fixture } from "../types";
 

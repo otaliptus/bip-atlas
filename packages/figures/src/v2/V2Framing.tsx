@@ -1,4 +1,4 @@
-import { V1_HEADER, V2_OVERHEAD } from "@bip-atlas/models/v2transport";
+import { V1_HEADER, V2_OVERHEAD } from "@bip-atlas/models/v2constants";
 import { Drawing, Value } from "../kit";
 import type { DerivedV2FramingFixture } from "../types";
 

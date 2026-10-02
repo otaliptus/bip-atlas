@@ -1,4 +1,4 @@
-import { REKEY_INTERVAL } from "@bip-atlas/models/v2transport";
+import { REKEY_INTERVAL } from "@bip-atlas/models/v2constants";
 import { Arrow, Cells, Drawing, KeyGlyph, Value, idsFor } from "../kit";
 import type { DerivedV2RekeyFixture } from "../types";
 

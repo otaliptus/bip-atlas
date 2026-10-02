@@ -89,3 +89,21 @@ Was 3 figures (framing bars, a card-style hero with a worked-example tab, a reke
 | A17.7 | `v2-terminator.v1` **new** | Garbage then the 16-byte terminator under a sliding window; "at most 4,095 + 16 = 4,111 B read". | `v2-packet-0` | terminator-why, garbage, terminator-aad |
 | A17.8 | `v2-packet-bytes.v1` **new** | All 21 bytes of packet 1 on a byte ruler with what protects each part, and what the endpoints recover. | `v2-packet-1` | packet-format, length-unauth, vectors |
 | A17.9 | `v2-rekey.v1` (redrawn) | A ring of 224 packet slots, the nonce on both sides of the boundary, and the key chain epoch 0 → 1 → 2 (secret keys). | `v2-rekey` | rekey, vectors |
+
+### v2 transport: independent review
+
+A fresh read-only subagent checked BIP 324, the ledger, model, components, tests and screenshots. It confirmed that ElligatorSwift is never implied to be decoded (every x is labelled as computed or as the vector's decoding), the tagged hash order and HKDF salt and outputs, terminators and AAD, packet format and what the tag covers, framing sizes, the rekey nonce layout and key derivation, and that nothing in the listener's panel, A17.2, the status or aria text leaks a secret, key, session ID or plaintext (a test enforces this). Findings and changes:
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| 1 | must-fix | The hero's "v1 equivalent" read the vectors' random test contents as application messages (and miscounted packet 448 by 12 bytes). | Replaced by a general "v1 framing" view: a 24-byte cleartext header plus payload, labelled as not about the vector; the desc says so. |
+| 2 | must-fix | A17.7's two top labels overlapped. | Terminator label right-aligned on its own. |
+| 3 | should-fix | Step 4 omitted decoys before the version packet. | "optional decoys, then a version packet. The first one authenticates its garbage." |
+| 4 | should-fix | The listener's first line left out the garbage. | "KEYS + GARBAGE: RANDOM". |
+| 5 | should-fix | Hero claims too narrow. | Added terminator-aad, version-packet, garbage, decoys, traffic-analysis, framing-computed. |
+| 6 | should-fix | A17.2 frame 2 said "random bytes only", although sizes and timing still show. | Says sizes and timing still show; traffic-analysis cited. |
+| 7 | should-fix | Session-ID labels in A17.2 and the side labels in the narrow hero crossed the boundary lines. | Stacked labels; boundaries at a third; shorter side labels at narrow width. |
+| 8 | should-fix | Terminators drawn in three colours. | Cyan (wire bytes) everywhere. |
+| 9–14 | nits | A17.5 frame 2 suggested x is hashed first, had no arrow and no tag name; unlabelled small packet segment; A17.8 bracket without text; hard-coded secret colour; empty space in A17.3. | Encodings first, arrow to the secret, tag `bip324_ellswift_xonly_ecdh` named; "HDR+C" labels; secret text colour from the token; A17.3 trimmed. |
+
+To keep crypto out of the client bundle, the BIP 324 constants moved to an import-free `packages/models/src/v2constants.ts`, re-exported by `v2transport.ts`; drawing code imports the constants module (importing `v2transport` from a static figure pulled `@noble/curves` into the island bundle, +16 KB).

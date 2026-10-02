@@ -80,7 +80,8 @@
             "aim",
             "forces-active",
             "session-id",
-            "no-auth"
+            "no-auth",
+            "traffic-analysis"
           ],
           "layout": "prose"
         },
@@ -205,13 +206,19 @@
             "v2-packet-448",
             "v2-packet-999"
           ],
-          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener's panel shows only what crosses the wire. Every value is recomputed by the tested model and equals the vector's; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector's own.",
+          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener's panel shows only what crosses the wire; the v1 view is a general comparison, not about the vector. Every value is recomputed by the tested model and equals the vector's; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector's own.",
           "claims": [
             "vectors",
             "ecdh",
             "hkdf",
             "packet-format",
-            "rekey"
+            "rekey",
+            "terminator-aad",
+            "version-packet",
+            "garbage",
+            "decoys",
+            "traffic-analysis",
+            "framing-computed"
           ],
           "layout": "wide"
         },

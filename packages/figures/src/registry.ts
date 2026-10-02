@@ -398,7 +398,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-field.v1",
-    description: "A block's nVersion as BIP 9 reads it: 32 bit cells, top bits 001, and the deployments' bits lit.",
+    description: "nVersion as 32 bit cells.",
     minFixtures: 1,
     maxFixtures: 4,
     interactive: false,
@@ -408,7 +408,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-top-bits.v1",
-    description: "The version space as eight drawers, one per top-bit pattern; 001 is BIP 9's signalling range.",
+    description: "Top-bit patterns as drawers.",
     minFixtures: 0,
     maxFixtures: 0,
     interactive: false,
@@ -418,7 +418,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-bit-reuse.v1",
-    description: "Schematic: one deployment bit over time, a window, a pause, and a later deployment on the same bit.",
+    description: "Schematic: reusing a bit.",
     minFixtures: 0,
     maxFixtures: 0,
     interactive: false,
@@ -428,7 +428,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-threshold.v1",
-    description: "Lock-in thresholds to scale on one 2,016-block period: BIP 9 mainnet and testnet, BIP 8's suggestion.",
+    description: "Thresholds to scale.",
     minFixtures: 2,
     maxFixtures: 2,
     interactive: false,
@@ -438,7 +438,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-boundary.v1",
-    description: "Storyboard: a STARTED deployment at a period boundary as a railway junction, timeout checked before the count.",
+    description: "Storyboard: a period boundary.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -448,7 +448,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-state-machine.v1",
-    description: "BIP 9 and BIP 8 deployment states over a schematic run of retarget periods, with pinned parameters and hypothetical signalling.",
+    description: "BIP 9/8 states over a run of periods.",
     minFixtures: 1,
     maxFixtures: 4,
     interactive: true,
@@ -458,7 +458,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-lifecycle.v1",
-    description: "Storyboard: one recorded deployment from its parameters to ACTIVE, read back from its activation height.",
+    description: "Storyboard: one deployment's life.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -468,7 +468,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-record.v1",
-    description: "BIP 9's recorded deployments: cross-checked windows and the lock-in periods their activation heights imply.",
+    description: "Recorded deployments, read back.",
     minFixtures: 1,
     maxFixtures: 4,
     interactive: false,
@@ -478,7 +478,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "versionbits-bip8.v1",
-    description: "BIP 8's suggested parameters with no period reaching the threshold, lockinontimeout false and true, and the MUST_SIGNAL rule.",
+    description: "BIP 8's two endings.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -596,7 +596,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-two-directions.v1",
-    description: "Who sends what: BIP 37's Bloom filter to a node versus BIP 157/158's per-block filter served to the client.",
+    description: "BIP 37 vs BIP 157/158.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -606,7 +606,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-element-sieve.v1",
-    description: "A vector block's scripts sieved into the basic filter's set: OP_RETURN, empty and repeated scripts left out.",
+    description: "A block's scripts sieved into the set.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -616,7 +616,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "golomb-rice-code.v1",
-    description: "BIP 158's Golomb-Rice table for P = 2, recomputed, and one P = 19 code from a published filter.",
+    description: "Golomb-Rice codes.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -626,7 +626,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-build-story.v1",
-    description: "Storyboard: a vector block's filter built step by step, SipHash to serialized bytes.",
+    description: "Storyboard: building a filter.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -636,7 +636,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-size.v1",
-    description: "Filter sizes to scale: the N(P + 1) floor, the published filter, fixed-width values.",
+    description: "Filter sizes to scale.",
     minFixtures: 1,
     maxFixtures: 3,
     interactive: false,
@@ -646,7 +646,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "gcs-filter.v1",
-    description: "BIP 158 basic filters of published testnet blocks: elements, hashed values, Golomb-Rice coding and membership queries.",
+    description: "A filter, built and queried.",
     minFixtures: 1,
     maxFixtures: 8,
     interactive: true,
@@ -656,7 +656,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-query-story.v1",
-    description: "Storyboard: a match means maybe, a miss means skip, and how often an unrelated script matches.",
+    description: "Storyboard: match, miss, false match.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -666,7 +666,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "filter-header-chain.v1",
-    description: "BIP 157 filter hashes and headers of published blocks, each header committing to the previous one.",
+    description: "Filter headers, linked.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -676,7 +676,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "bf-peer-check.v1",
-    description: "Schematic storyboard: two peers disagree about filter headers and the client checks the block itself.",
+    description: "Schematic: peers disagree.",
     minFixtures: 0,
     maxFixtures: 0,
     interactive: false,
@@ -686,7 +686,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v1-v2-framing.v1",
-    description: "Per-message overhead of v1 and v2 framing, as two packet diagrams.",
+    description: "v1 and v2 framing.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -696,7 +696,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-eavesdropper.v1",
-    description: "Schematic storyboard: a passive listener on v1 and v2, and an active attacker with mismatched session IDs.",
+    description: "Schematic: listeners on v1 and v2.",
     minFixtures: 0,
     maxFixtures: 0,
     interactive: false,
@@ -706,7 +706,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-ellswift.v1",
-    description: "One side's 64-byte ElligatorSwift key from a published vector, and the optional garbage after it.",
+    description: "A 64-byte ElligatorSwift key.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -716,7 +716,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-detect.v1",
-    description: "The 16 bytes a v1 peer always sends first, against the start of a v2 initiator's key.",
+    description: "v1 prefix vs v2 key.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -726,7 +726,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-key-story.v1",
-    description: "Storyboard: a published vector from two keys to its first packet, with the garbage as associated data.",
+    description: "Storyboard: keys to a packet.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -736,7 +736,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-handshake.v1",
-    description: "BIP 324 packet vectors: key exchange, key schedule and one encrypted packet, step by step.",
+    description: "The BIP 324 handshake, step by step.",
     minFixtures: 1,
     maxFixtures: 8,
     interactive: true,
@@ -746,7 +746,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-terminator.v1",
-    description: "The garbage terminator: a 16-byte window scanned for, at most 4,111 bytes in.",
+    description: "The garbage terminator.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -756,7 +756,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-packet-bytes.v1",
-    description: "Every byte of a short published packet, with what protects each part.",
+    description: "One packet, byte by byte.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,
@@ -766,7 +766,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
   },
   {
     id: "v2-rekey.v1",
-    description: "FSChaCha20Poly1305 nonces and keys across the 224-packet rekey boundary.",
+    description: "Nonces and keys across a rekey.",
     minFixtures: 1,
     maxFixtures: 1,
     interactive: false,

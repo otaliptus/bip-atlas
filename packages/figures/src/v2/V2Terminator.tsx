@@ -1,4 +1,4 @@
-import { MAX_GARBAGE } from "@bip-atlas/models/v2transport";
+import { MAX_GARBAGE } from "@bip-atlas/models/v2constants";
 import { Bracket, Cells, Drawing, Value } from "../kit";
 import type { DerivedV2Fixture } from "../types";
 
@@ -29,7 +29,7 @@ export function V2Terminator({ fixture }: { fixture: DerivedV2Fixture }) {
         <Value at={[330, 16]} text={`TERMINATOR · ${term.length} B`} size={8.5} anchor="end" cls="k-value--label" />
         <Cells x={x0} y={y0} values={Array(gcells).fill("")} size={cs} roleOf={() => "plain"} text={false} />
         <text class="k-v2-t" x={x0 + gcells * cs + 6} y={y0 + 10}>…</text>
-        <Cells x={tx} y={y0} values={term.slice(0, 7)} size={cs + 14} roleOf={() => "plain"} emphasis={() => true} />
+        <Cells x={tx} y={y0} values={term.slice(0, 7)} size={cs + 14} roleOf={() => "net"} emphasis={() => true} />
         <text class="k-v2-t" x={tx + 7 * (cs + 14) + 4} y={y0 + 10}>…</text>
         <rect class="k-v2-window" x={tx - 3} y={y0 - 6} width={7 * (cs + 14) + 18} height={40} />
         <Value at={[tx, y0 - 12]} text="16-BYTE WINDOW = EXPECTED TERMINATOR" size={8} cls="k-value--muted" />

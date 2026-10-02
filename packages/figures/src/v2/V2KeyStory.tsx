@@ -1,4 +1,4 @@
-import { MAINNET_MAGIC } from "@bip-atlas/models/v2transport";
+import { MAINNET_MAGIC } from "@bip-atlas/models/v2constants";
 import { Arrow, Cells, Machine, Storyboard, Value, type Frame } from "../kit";
 import type { DerivedV2Fixture } from "../types";
 
@@ -42,11 +42,12 @@ export function V2KeyStory({ fixture }: { fixture: DerivedV2Fixture }) {
       desc: `X-only ECDH gives ${d.xShared}; hashed with both 64-byte encodings, initiator's first, it gives the shared secret ${d.sharedSecret}.`,
       draw: (ids) => (
         <>
-          {box(12, 14, 110, "X-ONLY ECDH", s8(d.xShared), "secret")}
-          {box(12, 46, 110, "BOTH ENCODINGS", "initiator's first", "net")}
+          {box(12, 14, 110, "BOTH ENCODINGS", "initiator's first", "net")}
+          {box(12, 46, 110, "THEN X-ONLY ECDH", s8(d.xShared), "secret")}
           <Arrow d="M126 42 H156" ids={ids} />
           <Machine at={[190, 40]} w={44} d={24} h={20} label="hash" role="hash" />
-          <Value at={[244, 30]} text="TAGGED" size={8} cls="k-value--muted" />
+          <Value at={[150, 11]} text="TAG bip324_ellswift_xonly_ecdh" size={8} cls="k-value--muted" />
+          <Arrow d="M212 64 V84" ids={ids} />
           {box(150, 88, 130, "SHARED SECRET", s8(d.sharedSecret), "secret")}
         </>
       ),
@@ -57,7 +58,7 @@ export function V2KeyStory({ fixture }: { fixture: DerivedV2Fixture }) {
       draw: () => (
         <>
           {keys.map(([n, v], i) => box(12 + (i % 2) * 140, 8 + Math.floor(i / 2) * 28, 134, n, s8(v), "secret"))}
-          {box(12, 66, 134, "TERMINATORS · 16 B", `${s8(d.sendTerminator)} ${d.recvTerminator.slice(0, 4)}…`, "plain")}
+          {box(12, 66, 134, "TERMINATORS · SENT", `${s8(d.sendTerminator)} ${d.recvTerminator.slice(0, 4)}…`, "net")}
           {box(152, 66, 134, "SESSION ID", s8(d.sessionId), "hash")}
           <Value at={[12, 110]} text={`SALT "bitcoin_v2_shared_secret" ‖ ${MAINNET_MAGIC}`} size={8} cls="k-value--muted" />
         </>

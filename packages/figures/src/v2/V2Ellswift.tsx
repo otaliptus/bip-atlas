@@ -1,4 +1,4 @@
-import { MAX_GARBAGE } from "@bip-atlas/models/v2transport";
+import { MAX_GARBAGE } from "@bip-atlas/models/v2constants";
 import { Bracket, Cells, Drawing, Value } from "../kit";
 import type { DerivedV2Fixture } from "../types";
 
@@ -20,7 +20,7 @@ export function V2Ellswift({ fixture }: { fixture: DerivedV2Fixture }) {
       <Drawing
         id="a17-ell"
         width={344}
-        height={276}
+        height={244}
         title="64 bytes that look random"
         desc={`The ${side}'s first message in BIP 324 vector ${fixture.label}: a 64-byte ElligatorSwift encoding of its ephemeral public key, ${d.ellOurs}, in two 32-byte halves u and t, optionally followed by up to ${MAX_GARBAGE} bytes of garbage. Every 64-byte string encodes some point, so a uniformly chosen encoding looks like random bytes. The key's x coordinate is ${d.xOurs}, computed from the vector's private key; this site does not implement ElligatorSwift decoding, so that the 64 bytes decode to it is the vector's claim.`}
       >

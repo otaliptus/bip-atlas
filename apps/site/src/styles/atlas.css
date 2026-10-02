@@ -1162,7 +1162,7 @@ button.atlas-tl-bit:focus-visible { outline: 2px solid var(--manual-focus); outl
 .k-v2-t { font-size: 9px !important; letter-spacing: 0.05em; }
 .k-v2-b { font-size: 8.5px !important; letter-spacing: 0.04em; }
 .k-v2-hex { font-size: 8.5px !important; }
-.k-v2-sec { fill: #b0153a !important; letter-spacing: 0.04em; }
+.k-v2-sec { fill: color-mix(in srgb, var(--atlas-c-secret) 75%, var(--atlas-ink)) !important; letter-spacing: 0.04em; }
 .k-v2-window { fill: none; stroke: var(--atlas-ink); stroke-width: 1.5; stroke-dasharray: 4 2; vector-effect: non-scaling-stroke; }
 
 /* ---------- Message signing (BIP 322) ---------- */
