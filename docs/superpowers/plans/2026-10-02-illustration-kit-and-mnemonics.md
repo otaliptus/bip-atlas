@@ -1798,9 +1798,10 @@ describe("EntropyWordLab (static render)", () => {
     for (const g of fx[0].derived.groups) expect(s).toContain(`>${g.word}<`);
   });
   it("cuts the wide ribbon into word groups", () => {
-    // Rows are a multiple of 11 bits wide (44 wide, 22 narrow), so every cut falls inside a row.
+    // Rows are 44 bits wide, a multiple of 11: a group boundary that falls at a row start needs no cut mark.
     const wide = s.split("k-resp__narrow")[0];
-    expect(count(wide, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - 1);
+    const rows = Math.ceil(fx[0].derived.layout.totalBits / 44);
+    expect(count(wide, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - rows);
   });
   it("colours entropy and checksum bits differently", () => {
     expect(count(s, "k-fill--check") + count(s, "k-mark--check")).toBeGreaterThanOrEqual(fx[0].derived.layout.checksumBits);
