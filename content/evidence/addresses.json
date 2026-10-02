@@ -223,7 +223,7 @@
     },
     {
       "id": "substitution-guarantee",
-      "statement": "BIP350's analysis restates the firm guarantee as substitutions: Bech32 always detects up to four substituted characters, and Bech32m keeps that property.",
+      "statement": "BIP350's analysis restates the firm guarantee as substitutions: Bech32 always detects up to four substituted characters, and Bech32m keeps that property. Its detection table reports the result for each code checked by its own verifier (Bech32m/Bech32m and Bech32/Bech32: 100% of patterns of up to four substitutions have failure probability 0).",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -242,6 +242,22 @@
             218
           ],
           "quote": "For Bech32m, we aim to retain Bech32's guarantees for substitution errors"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            252,
+            252
+          ],
+          "quote": "| &leq; 4 || only subst. || any || rowspan=\"6\" | Bech32m/Bech32m || 100.00%|| colspan=\"5\" | none"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            264,
+            264
+          ],
+          "quote": "| &leq; 4 || only subst. || any || rowspan=\"6\" | Bech32/Bech32 || 100.00%|| colspan=\"5\" | none"
         }
       ]
     },
