@@ -5,13 +5,23 @@
     322
   ],
   "specimenLabel": "BIP 0322",
-  "title": "How do you prove you control an address?",
+  "title": "How can a wallet sign messages for different address types?",
   "dek": "A message signature shows that someone could satisfy an address’s spending conditions for that message. It does not establish their identity or a lasting balance.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Legacy Bitcoin message signing was specified only for P2PKH addresses. It could not express the spending conditions of other address types. BIP 322 uses Bitcoin Script itself, so message signing can cover SegWit, Taproot and multisignature scripts as well.",
+        "claims": [
+          "legacy-limits",
+          "abstract",
+          "full",
+          "signature-def"
+        ]
+      },
       {
         "type": "paragraph",
         "text": "Someone asks you to prove you can use a Bitcoin address. Sending a payment would demonstrate a spend, but it would also move coins. BIP 322 instead builds a pair of virtual transactions around a message and asks for the data that would satisfy the address’s script.",
@@ -285,7 +295,7 @@
         },
         {
           "type": "details",
-          "summary": "Why BIP 322 replaced legacy message signing",
+          "summary": "Legacy signatures and the proposal’s history",
           "blocks": [
             {
               "type": "paragraph",

@@ -154,11 +154,11 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {Strip({ label: "Public BIP 340 vector", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}: ${f.expected ? "" : "invalid, "}${f.label}` })) })}
+          {Strip({ label: "Signature example", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: f.label, aria: `${f.label}, vector ${f.vectorIndex}${f.expected ? "" : ", invalid"}` })) })}
           {Strip({ label: "Message", name: `${figureId}-message`, current: messageKey, onPick: setMessageKey, options: fixture.derived.messages.map((m) => ({
             value: m.key,
-            text: m.key === fixture.derived.ownMessage ? `Own m · ${m.bytes} B` : `m of V${m.fromVector} · ${m.bytes} B`,
-            aria: m.key === fixture.derived.ownMessage ? `Its own message, ${m.bytes} bytes` : `The message of vector ${m.fromVector}, ${m.bytes} bytes`,
+            text: m.key === fixture.derived.ownMessage ? `Original message · ${m.bytes} B` : `Different message · ${m.bytes} B`,
+            aria: m.key === fixture.derived.ownMessage ? `Original message, ${m.bytes} bytes` : `Different message, ${m.bytes} bytes, from vector ${m.fromVector}`,
           })) })}
         </div>
       ) : (

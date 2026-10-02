@@ -1,7 +1,7 @@
 import { h, type VNode } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
-import { checkLockTimeVerify, checkSequenceVerify, LOCKTIME_THRESHOLD } from "@bip-atlas/models/timelock";
+import { absoluteSatisfied, checkLockTimeVerify, checkSequenceVerify, LOCKTIME_THRESHOLD } from "@bip-atlas/models/timelock";
 import { TimelockFields, timelockHeroSpec } from "../src/timelock/TimelockFields";
 import { TimelockCsvStory, TimelockMtp, TimelockNotALock, TimelockPinned, TimelockRanges, TimelockSequenceBits } from "../src/timelock/TimelockStatics";
 import type { DerivedTimelockBipTxFixture, DerivedTimelockCaseFixture, DerivedTimelockEncodingFixture } from "../src/types";
@@ -45,7 +45,9 @@ describe("TimelockFields (hero, pre-rendered states)", () => {
       const f = cases.find((x) => x.id === st.state.caseId)!;
       const v = st.state.edit === "core" ? f.derived : f.derived.edits.find((e) => e.id === st.state.edit)!;
       expect((s.match(/data-check=/g) ?? []).length).toBe(v.checks.length);
-      expect(s).toContain(v.valid ? "THE SPEND IS VALID" : "THE SPEND IS INVALID");
+      expect(s).toContain(v.valid ? "THIS SCRIPT CHECK PASSES" : "THIS SCRIPT CHECK FAILS");
+      expect(s).toContain("BLOCK ELIGIBILITY IS NOT CHECKED HERE");
+      expect(s).not.toContain("THE SPEND IS VALID");
       expect(s.includes("CHANGED")).toBe(st.state.edit !== "core");
       expect(s).not.toContain("aria-live");
       expect(s).not.toMatch(/data-(scrub-step|range|live|toggle|strip|nojs|js)=/);
@@ -55,6 +57,17 @@ describe("TimelockFields (hero, pre-rendered states)", () => {
 
 describe("TimelockFields (review fixes)", () => {
   const r = (caseId: string, edit = "core") => html(h(TimelockFields, { fixtures: cases, figureId: "t", initial: { caseId, edit } }));
+  it("a passing CLTV script can still be too early for block inclusion", () => {
+    const d = cases.find((f) => f.id === "core-valid-99")!.derived;
+    const fields = { version: d.version, nLockTime: d.nLockTime, sequences: [d.nSequence] };
+    expect(checkLockTimeVerify(BigInt(d.argument), fields, 0).checks.every((c) => c.ok)).toBe(true);
+    expect(absoluteSatisfied(fields, d.nLockTime, 0)).toBe(false);
+    expect(absoluteSatisfied(fields, d.nLockTime + 1, 0)).toBe(true);
+    const s = r("core-valid-99");
+    expect(s).toContain("THIS SCRIPT CHECK PASSES");
+    expect(s).toContain("BLOCK ELIGIBILITY IS NOT CHECKED HERE");
+    expect(s).toContain("HEIGHT > L");
+  });
   it("an argument with bit 31 set is drawn as a no-op, not as a passed 'flag is clear' check", () => {
     const s = r("core-valid-131");
     expect(s).toContain("disable flag is set: no lock");

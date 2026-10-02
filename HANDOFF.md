@@ -1,6 +1,6 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 2 October 2026, after the clarity revision. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 2 October 2026, after the BIP relevance revision. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
@@ -24,6 +24,7 @@ Last updated: 2 October 2026, after the clarity revision. If you were asked to *
   - Each chapter had an independent technical review before the editorial revisions. Seventeen chapters are now `draft-unreviewed`, pending a fresh review; SegWit remains `in-review`. No chapter is marked approved.
   - **Editorial revisions:** fourteen chapters have tighter prose and fewer repeated figures. Detailed rules remain in disclosures, and all evidence claims remain cited. Records and screenshots: `review/editorial-four-chapters.md`, `review/editorial-descriptors.md`, and `review/editorial-nine-chapters.md`. These author and automated checks do not replace an independent technical review.
   - **Clarity revision:** nine chapters now use more literal wording, shorter explanations, and clearer terminology. Timelocks has explicit condition lists. See `review/editorial-clarity.md` for scope and checks.
+  - **BIP relevance revision:** seven chapters have clearer proposal framing. Compact Filters leads with the wallet workflow; Timelocks separates script checks from block eligibility; P2SH centers its original spend; Schnorr leads with motivation. Titles and the BIP 322 opening were corrected. See `review/bip-relevance.md`. Editorial titles live in `content/title-policy.json`; the kit catalog remains frozen.
 - **Phase-three sources:**
   - Snapshot: `sources/research-2026-10-01-phase3`, the same `bitcoin/bips` commit, including each BIP's auxiliary vector files.
   - External pinned files: `sources/external/` holds Bitcoin Core v29.0 locktime cases (an excerpt; `tools/extract-locktime-cases.mjs` rebuilds it).

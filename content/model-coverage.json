@@ -93,7 +93,7 @@
     "name": "Block filters",
     "published": "All ten BIP 158 testnet block filters and headers, rebuilt from blocks and supplied spent-output scripts; its Golomb-Rice examples and a SipHash reference vector.",
     "additional": "Encoding round trips, duplicate removal, empty filters, included-item matches and non-member searches.",
-    "limits": "Spent-output scripts come from vectors. No BIP 157 peer exchange, chain validation or proof that a remote filter is complete."
+    "limits": "Spent-output scripts come from vectors. The wallet workflow and false-positive branch are schematic; match and miss use tested probes. No BIP 157 peer exchange, chain validation or proof that a remote filter is complete."
   },
   "v2-transport": {
     "name": "v2 transport",

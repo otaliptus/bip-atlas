@@ -168,9 +168,26 @@ export function TimelockFields({ fixtures, figureId, initial }: { fixtures: Deri
             </g>
           );
         })}
-        <Value at={[x0, H - 22]} text={v.valid ? "✓ THE SCRIPT CONTINUES: THE SPEND IS VALID" : "✗ THE SCRIPT FAILS: THE SPEND IS INVALID"} size={9.5} cls={v.valid ? "k-value--ok" : "k-value--fail"} />
+        <Value at={[x0, H - 22]} text={v.valid ? "✓ THIS SCRIPT CHECK PASSES" : "✗ THIS SCRIPT CHECK FAILS"} size={9.5} cls={v.valid ? "k-value--ok" : "k-value--fail"} />
+        <Value at={[x0, H - 7]} text="BLOCK ELIGIBILITY IS NOT CHECKED HERE" size={8.5} cls="k-value--muted" />
       </Drawing>
       <p class="atlas-hero__status" data-status>{status}</p>
+      <Drawing id={`${id}-chain`} width={344} height={152} title="The separate chain check" desc={cltv
+        ? "Schematic for an active absolute lock L. The script checks the transaction fields first. Block inclusion also requires candidate height greater than L, or for a time lock, the previous block's median time past greater than L. All other transaction rules still apply. This is not live chain data."
+        : "Schematic for an active relative lock. The age starts at coin confirmation for block locks, or the median time past before confirmation for time locks. The candidate height, or candidate parent's median time past, must reach the starting value plus the required delay. All other transaction rules still apply. This is not live chain data."}>
+        <Value at={[14, 16]} text="CHAIN CHECK · SCHEMATIC, NOT CHAIN DATA" size={8.5} cls="k-value--label" />
+        <Value at={[14, 37]} text={cltv ? "ACTIVE ABSOLUTE LOCK: nLockTime = L" : "ACTIVE RELATIVE LOCK: WAIT FROM CONFIRMATION"} size={8.5} />
+        <path class="k-line" d="M24 65 H320" marker-end={idsFor(`${id}-chain`).arrow} />
+        <path class="k-cut" d="M186 55 V75" />
+        <Value at={[24, 88]} text="TOO EARLY" size={8.5} cls="k-value--muted" />
+        <Value at={[186, 50]} text={cltv ? "L" : "START + DELAY"} size={8.5} anchor="middle" />
+        <Value at={[320, 88]} text={cltv ? "AFTER L" : "AT OR AFTER"} size={8.5} anchor="end" />
+        <Value at={[14, 113]} text={cltv ? "HEIGHT > L · OR PARENT MTP > L" : "HEIGHT OR PARENT MTP ≥ START + DELAY"} size={9} />
+        <Value at={[14, 137]} text="PASSING THIS RULE DOES NOT CHECK THE REST OF A SPEND" size={8} cls="k-value--muted" />
+      </Drawing>
+      <p>{cltv
+        ? "For an active absolute lock, the candidate block’s height must exceed nLockTime. A time-based lock instead uses the previous block’s median time past (MTP). If every input is final, nLockTime is not enforced."
+        : "For a block-based relative lock, start at the coin’s confirmation height. For a time-based lock, start at the MTP before confirmation and compare it with the candidate block’s parent MTP. BIP 68 applies only with transaction version 2 or higher and the input’s disable flag clear."}</p>
       <details class="atlas-disclosure">
         <summary>Exact checks and fields</summary>
         <dl class="atlas-hexlist">

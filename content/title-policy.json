@@ -1,0 +1,11 @@
+{
+  "reason": "BIP relevance revision requested 2 October 2026. These titles describe each proposal’s purpose more precisely; the original kit catalog remains unchanged.",
+  "chapterTitles": {
+    "block-filters": "How can a wallet find the blocks it needs?",
+    "p2sh": "How can a sender pay without knowing the spending rules?",
+    "schnorr": "Why did Bitcoin add Schnorr signatures?",
+    "descriptors": "How do you describe the output scripts a wallet should watch?",
+    "silent-payments": "How can one reusable address receive payments at fresh outputs?",
+    "message-signing": "How can a wallet sign messages for different address types?"
+  }
+}

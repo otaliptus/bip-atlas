@@ -22,7 +22,7 @@ export function P2shShape({ fixtures }: { fixtures: DerivedP2shFixture[] }) {
         id="a09-shape"
         width={344}
         height={24 + fixtures.length * rowH}
-        title="Three scripts, one output shape"
+        title="A fixed output shape"
         desc={fixtures.map((f) => `${f.label}: a ${f.derived.redeemScriptHex.length / 2}-byte redeem script (${f.derived.redeemAsm}) gives a ${f.derived.scriptPubKeyHex.length / 2}-byte output, OP_HASH160, the hash ${f.derived.committedHashHex}, OP_EQUAL.`).join(" ")}
       >
         <Value at={[14, 12]} text="REDEEM SCRIPT, TO SCALE" size={9} cls="k-value--muted" />

@@ -13,6 +13,7 @@ import { BfQueryStory } from "../src/blockfilters/BfQueryStory";
 import { BfSieve } from "../src/blockfilters/BfSieve";
 import { BfSize } from "../src/blockfilters/BfSize";
 import { GcsFilter } from "../src/blockfilters/GcsFilter";
+import { BfWalletFlow, walletFilterOutcome } from "../src/blockfilters/BfWalletFlow";
 import { group } from "../src/blockfilters/parts";
 import type { BfCode, DerivedBfBlockFixture, DerivedBfChainFixture, DerivedBfGolombFixture } from "../src/types";
 
@@ -188,6 +189,30 @@ describe("block-filter hero", () => {
   });
   it("every foreign script misses and every own script matches", () => {
     for (const f of fx) for (const p of f.derived.probes) expect(p.matched).toBe(p.from === "this block");
+  });
+});
+
+describe("wallet workflow", () => {
+  it("makes download decisions from the published filter, without treating a match as proof", () => {
+    for (const scenario of ["hit", "miss"] as const) {
+      const result = walletFilterOutcome(b926, scenario);
+      expect(result.schematic).toBe(false);
+      const probe = result.probe!;
+      const checked = matchFilter(hexToBytes(b926.derived.filterHex), hexToBytes(probe.script), filterKey(b926.derived.hash));
+      expect(result.matched).toBe(checked.matched);
+      const s = html(h(BfWalletFlow, { fixture: b926, figureId: "wallet", hydrated: false, initialScenario: scenario }));
+      expect(s).toContain(result.matched ? "REQUEST THE FULL BLOCK" : "NO BLOCK REQUEST NEEDED");
+      expect(s).toContain("With a correctly constructed filter");
+    }
+  });
+  it("a schematic false positive still fetches the block, then finds nothing relevant", () => {
+    const result = walletFilterOutcome(b926, "false-positive");
+    expect(result).toEqual({ matched: true, relevant: false, schematic: true, probe: null });
+    const s = html(h(BfWalletFlow, { fixture: b926, figureId: "wallet", hydrated: false, initialScenario: "false-positive" }));
+    expect(s).toContain("REQUEST THE FULL BLOCK");
+    expect(s).toContain("Nothing relevant: it was a false positive");
+    expect(s).toContain("not a published test case");
+    expect(s).not.toContain(b926.derived.filterHex);
   });
 });
 

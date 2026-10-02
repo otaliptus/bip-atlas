@@ -27,6 +27,18 @@ export function SignatureLayout({ fixture }: { fixture: DerivedSchnorrFixture })
     `No secret key goes in. The verifier answers ${valid ? "true" : "false"}, as the CSV says.`;
   return (
     <>
+      <Drawing id="a06-signing" width={344} height={160} title="The signing handoff" desc="Schematic: a signer keeps the secret key private and combines it with the message and auxiliary random data to produce a signature. The verifier receives the public key, message and signature. No signing runs on this page.">
+        <Value at={[14, 14]} text="SIGNER · SCHEMATIC" size={9} cls="k-value--label" />
+        <rect class="k-outline k-fill--secret" x={14} y={24} width={128} height={30} />
+        <Value at={[20, 43]} text="SECRET KEY STAYS HERE" size={8.5} />
+        <Value at={[14, 70]} text="MESSAGE + AUXILIARY RANDOM DATA" size={8.5} />
+        <Arrow d="M152 40 H204" ids={idsFor("a06-signing")} />
+        <rect class="k-outline k-fill--sig" x={212} y={24} width={118} height={30} />
+        <Value at={[220, 43]} text="SIGNATURE" size={9} />
+        <Value at={[14, 103]} text="VERIFIER RECEIVES" size={9} cls="k-value--label" />
+        <Value at={[14, 123]} text="PUBLIC KEY + MESSAGE + SIGNATURE" size={9} />
+        <Value at={[14, 147]} text="ONLY PUBLIC INPUTS ENTER THE CHECK BELOW ↓" size={8.5} cls="k-value--muted" />
+      </Drawing>
       <Drawing id="a06-inputs" width={344} height={282} title="Three inputs, one answer" desc={desc}>
         <KeyGlyph at={[14, 14]} role="public" scale={0.8} />
         <Value at={[44, 23]} text={`PK · PUBLIC KEY · ${PK_BYTES} BYTES`} size={9} cls="k-value--label" />

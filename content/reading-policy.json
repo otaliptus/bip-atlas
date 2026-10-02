@@ -1,5 +1,5 @@
 {
-  "reason": "Editorial revision requested 2 October 2026: these chapters use shorter main narratives, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum.",
+  "reason": "Editorial revision requested 2 October 2026: these chapters use shorter main narratives, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum. The BIP relevance revision moves P2SH’s later SegWit details off the main reading path.",
   "chapterRanges": {
     "psbt": {
       "min": 900,
@@ -50,8 +50,8 @@
       "max": 1400
     },
     "p2sh": {
-      "min": 850,
-      "max": 1400
+      "min": 550,
+      "max": 1100
     },
     "hd-wallets": {
       "min": 900,

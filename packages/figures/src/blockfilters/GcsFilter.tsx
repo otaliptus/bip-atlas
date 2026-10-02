@@ -3,6 +3,7 @@ import { holdFocus } from "../focus";
 import { Cells, Drawing, Machine, Responsive, Value, idsFor } from "../kit";
 import type { DerivedBfBlockFixture } from "../types";
 import { along, fromText, group, shortHex } from "./parts";
+import { BfWalletFlow } from "./BfWalletFlow";
 
 interface Props {
   fixtures: DerivedBfBlockFixture[];
@@ -14,7 +15,9 @@ const probeName = (from: string, i: number) => (from === "this block" ? `Include
 /**
  * gcs-filter.v1 — the Block filters chapter's hero (drawing-first).
  *
- * A published BIP 158 testnet block's filter drawn as its hashed values on
+ * The main view follows a wallet's match, miss or schematic false positive.
+ * A disclosure retains the BIP 158 encoding explorer below:
+ * a published testnet block's filter drawn as its hashed values on
  * the line [0, F). A test script goes through SipHash to a target; the
  * client decodes values left to right until one equals the target (match)
  * or passes it (no match). Values it never decodes stay hatched. "Bits"
@@ -29,6 +32,7 @@ export function GcsFilter({ fixtures, figureId }: Props) {
   const [bits, setBits] = useState(false);
   const f = fixtures.find((x) => x.id === id)!;
   const d = f.derived;
+  const walletFixture = fixtures.find((f) => f.derived.probes.some((p) => p.from === "this block" && p.matched) && f.derived.probes.some((p) => p.from !== "this block" && !p.matched));
   const p = d.probes[Math.min(pi, d.probes.length - 1)];
   const showBits = hydrated ? bits : true;
   const read = p.steps.length;
@@ -125,26 +129,30 @@ export function GcsFilter({ fixtures, figureId }: Props) {
 
   return (
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-hero__controls">
-          {strip("Published block", "block", fixtures.map((x) => [x.id, x.shortLabel ?? `Block ${group(x.derived.height)}`]), id, (v) => (setId(v), setPi(0)))}
-          {d.probes.length ? strip("Test script", "probe", d.probes.map((q, i) => [String(i), probeName(q.from, i)]), String(pi), (v) => setPi(Number(v))) : null}
-          {strip("Show", "bits", [["values", "Values"], ["bits", "Bits"]], bits ? "bits" : "values", (v) => setBits(v === "bits"))}
-        </div>
-      ) : (
-        <p class="atlas-hero__static">Static view: the first block, its first test script and the filter's first bits. With JavaScript you can choose among {fixtures.length} published blocks and test other scripts.</p>
-      )}
-      <Responsive wide={draw(true)} narrow={draw(false)} />
-      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      {walletFixture ? <BfWalletFlow fixture={walletFixture} figureId={figureId} hydrated={hydrated} /> : null}
       <details class="atlas-disclosure">
-        <summary>Exact values for this view</summary>
-        <dl class="atlas-hexlist">
-          <dt>Test script</dt><dd><code class="atlas-break">{p.script || "(empty)"}</code></dd>
-          <dt>Filter ({d.filterBytes} bytes)</dt><dd><code class="atlas-break">{d.filterHex}</code></dd>
-          <dt>Hashed values</dt><dd>{d.values.map(group).join(", ") || "none"}</dd>
-        </dl>
+        <summary>How the filter is encoded: explore published blocks</summary>
+        {hydrated ? (
+          <div class="atlas-hero__controls">
+            {strip("Published block", "block", fixtures.map((x) => [x.id, x.shortLabel ?? `Block ${group(x.derived.height)}`]), id, (v) => (setId(v), setPi(0)))}
+            {d.probes.length ? strip("Test script", "probe", d.probes.map((q, i) => [String(i), probeName(q.from, i)]), String(pi), (v) => setPi(Number(v))) : null}
+            {strip("Show", "bits", [["values", "Values"], ["bits", "Bits"]], bits ? "bits" : "values", (v) => setBits(v === "bits"))}
+          </div>
+        ) : (
+          <p class="atlas-hero__static">Static view: the first block, its first test script and the filter's first bits. With JavaScript you can choose among {fixtures.length} published blocks and test other scripts.</p>
+        )}
+        <Responsive wide={draw(true)} narrow={draw(false)} />
+        <p class="atlas-hero__status" aria-live="polite">{status}</p>
+        <details class="atlas-disclosure">
+          <summary>Exact values for this view</summary>
+          <dl class="atlas-hexlist">
+            <dt>Test script</dt><dd><code class="atlas-break">{p.script || "(empty)"}</code></dd>
+            <dt>Filter ({d.filterBytes} bytes)</dt><dd><code class="atlas-break">{d.filterHex}</code></dd>
+            <dt>Hashed values</dt><dd>{d.values.map(group).join(", ") || "none"}</dd>
+          </dl>
+        </details>
+        <p class="atlas-hero__source">BIP 158 testnet-19.json, block {group(d.height)}{d.notes ? ` (“${d.notes}”)` : ""}. Filter and header rebuilt by the tested model and equal to the vector.</p>
       </details>
-      <p class="atlas-hero__source">BIP 158 testnet-19.json, block {group(d.height)}{d.notes ? ` (“${d.notes}”)` : ""}. Filter and header rebuilt by the tested model and equal to the vector.</p>
     </div>
   );
 }

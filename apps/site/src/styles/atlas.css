@@ -603,6 +603,8 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 
 /* ---------- drawing-first heroes ---------- */
 .atlas-hero { display: grid; gap: var(--manual-space-4); }
+.atlas-wallet-flow { display: grid; gap: var(--manual-space-4); }
+.atlas-hero .atlas-wallet-flow > .k-drawing { max-inline-size: 464px; }
 .atlas-hero__controls { display: flex; flex-wrap: wrap; gap: var(--manual-space-3) var(--manual-space-5); }
 .atlas-strip { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--atlas-ink); }
 .atlas-strip__opt { position: relative; }

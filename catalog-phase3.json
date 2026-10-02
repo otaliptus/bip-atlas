@@ -368,6 +368,8 @@
     "verification-trace"
    ],
    "allowedControls": [
+    "Choose a wallet outcome",
+    "Step through the wallet workflow",
     "Choose a published block",
     "Test a fixture script against the filter",
     "Reveal Golomb-Rice coding"

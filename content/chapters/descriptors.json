@@ -11,7 +11,7 @@
     386
   ],
   "specimenLabel": "BIPs 0380–0386",
-  "title": "How do you describe a wallet in one line?",
+  "title": "How do you describe the output scripts a wallet should watch?",
   "dek": "The keys are only part of a wallet backup. A descriptor records how to turn them into the outputs the wallet should look for.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",

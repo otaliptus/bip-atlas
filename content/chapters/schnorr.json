@@ -5,8 +5,8 @@
     340
   ],
   "specimenLabel": "BIP 0340",
-  "title": "What does a signature verifier actually check?",
-  "dek": "A BIP 340 verifier checks a public key, a message and a 64-byte signature. It accepts the signature only if every required check passes.",
+  "title": "Why did Bitcoin add Schnorr signatures?",
+  "dek": "BIP 340 gives Bitcoin a compact, precisely specified signature scheme. Its structure supports batch verification and protocols that combine several signers into one signature.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
@@ -14,18 +14,32 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A signature verifier is a function that checks a public key, a message and a signature. It returns success or failure. It does not receive a secret key or identify the person who requested the signature. Its job is to check the mathematical relationship between the three inputs.",
+        "text": "Bitcoin already had ECDSA signatures. BIP 340 standardizes Schnorr signatures over the same curve, secp256k1. Its authors point to security proofs under established assumptions and non-malleability: a third party cannot turn a valid signature into a different valid signature for the same key and message under those assumptions.",
         "claims": [
-          "verify-inputs",
-          "verify-steps"
+          "abstract",
+          "security-rationale",
+          "non-malleable"
         ]
       },
       {
         "type": "paragraph",
-        "text": "BIP 340, assigned in 2020 and recorded as deployed, specifies 64-byte Schnorr signatures over secp256k1, the same curve Bitcoin already used for ECDSA. This chapter follows its verifier one check at a time, using the BIP’s own published test vectors, valid and invalid.",
+        "text": "The format also has practical benefits: fixed-size signatures, smaller public keys and efficient verification of many signatures together. Schnorr’s linear structure supports protocols in which several people cooperate to produce one signature. BIP 340 supplies the signature scheme; a protocol such as MuSig2 supplies the coordination between signers.",
         "claims": [
-          "preamble",
-          "abstract",
+          "encodings",
+          "r-variant",
+          "batch",
+          "linearity",
+          "multisig-scope",
+          "verifier-view"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "The signer uses a secret key and a message to produce a signature. The verifier receives the public key, the message and that signature, and checks their mathematical relationship. The secret key stays with the signer. The overview below shows that handoff; the interactive example then follows the verifier using published test vectors.",
+        "claims": [
+          "signing-overview",
+          "verify-inputs",
+          "verify-steps",
           "reference-demo"
         ]
       }
@@ -34,15 +48,17 @@
       "type": "figure",
       "figure": "A06.1",
       "recipe": "schnorr-signature-layout.v1",
-      "title": "Three inputs, one answer",
+      "title": "From signing to verification",
       "fixtures": [
         "bip340-v1"
       ],
-      "caption": "Vector 1 from the BIP’s CSV goes into the verifier. The key is a bare x coordinate, the signature is two 32-byte numbers, and only the message has no fixed length. No secret key goes in.",
+      "caption": "The signing handoff is schematic; this page does not sign. Below it, published vector 1 enters the verifier: an x-only public key, a message and a signature. No secret key enters the verifier.",
       "claims": [
         "verify-inputs",
         "final-scheme",
-        "implicit-y"
+        "implicit-y",
+        "signing-overview",
+        "correctness"
       ],
       "layout": "prose"
     }
@@ -379,12 +395,13 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "Signing is the one part this page leaves alone. The BIP specifies a default signer, but signatures are not unique: other ways of generating its random value produce different, equally valid signatures, and however that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
+              "text": "BIP 340 was assigned in 2020 and is recorded as deployed. This page explains the signing handoff but does not implement a signer. The BIP specifies a default signer, but signatures are not unique: other ways of generating its random value produce different, equally valid signatures, and however that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
               "claims": [
                 "not-unique",
                 "correctness",
                 "reference-demo",
-                "vectors-reproduced"
+                "vectors-reproduced",
+                "preamble"
               ]
             }
           ]

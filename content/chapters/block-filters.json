@@ -6,7 +6,7 @@
     158
   ],
   "specimenLabel": "BIP 0157 · 0158",
-  "title": "How can a light client ask whether a block concerns it?",
+  "title": "How can a wallet find the blocks it needs?",
   "dek": "Download a small filter, test it locally, and fetch the block only if it might contain a payment you care about. A match is a reason to look closer.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
@@ -29,6 +29,17 @@
           "reverse",
           "gcs-def",
           "scope-of-miss"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "The two proposals have different jobs. BIP 158 defines what goes into a filter and how it is compressed. BIP 157 defines how peers serve filters and how a wallet checks them before relying on their answers.",
+        "claims": [
+          "contents",
+          "gcs-steps",
+          "client-sync",
+          "filter-check",
+          "service-bit"
         ]
       }
     ],
@@ -67,7 +78,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A miss is firmer, within the included set. Every item in the set matches with probability 1, so a miss in a correctly constructed basic filter rules out a matching included output or spent-output script. It says nothing about excluded items, including empty scripts and outputs beginning with OP_RETURN. In the figure, each block’s included scripts all match its filter, and the scripts taken from other blocks, as expected, do not.",
+          "text": "A miss is firmer, within the included set. Every item in the set matches with probability 1, so a miss in a correctly constructed basic filter rules out a matching included output or spent-output script. It says nothing about excluded items, including empty scripts and outputs beginning with OP_RETURN.",
           "claims": [
             "gcs-def",
             "scope-of-miss",
@@ -78,7 +89,7 @@
           "type": "figure",
           "figure": "A16.2",
           "recipe": "gcs-filter.v1",
-          "title": "Try a script that is present, then one that is absent",
+          "title": "Follow the wallet: skip, fetch, or find a false alarm",
           "fixtures": [
             "bf-block-926485",
             "bf-block-1263442",
@@ -87,7 +98,7 @@
             "bf-block-987876",
             "bf-block-1414221"
           ],
-          "caption": "Choose a block and a test script. A match is a candidate; a miss rules out that script only within the basic filter’s included set.",
+          "caption": "The wallet tests its watched script locally. A miss skips the block; a match leads to a block download and a transaction check. Match and miss use published test data. The false-positive branch is schematic, not a published vector.",
           "claims": [
             "vectors",
             "contents",
@@ -98,7 +109,10 @@
             "gcs-steps",
             "serialize",
             "gcs-def",
-            "scope-of-miss"
+            "scope-of-miss",
+            "reverse",
+            "privacy-any-source",
+            "random-peers"
           ],
           "layout": "wide"
         },

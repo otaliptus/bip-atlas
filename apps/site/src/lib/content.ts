@@ -55,7 +55,10 @@ export const CATALOG_FILES = ["catalog.json", "catalog-phase3.json"] as const;
 
 export function loadCatalog(): Catalog {
   const [base, ...extensions] = CATALOG_FILES.map((f) => readJson<Catalog>(f));
-  return { ...base, chapters: [...base.chapters, ...extensions.flatMap((e) => e.chapters)] };
+  const { chapterTitles } = readJson<{ chapterTitles: Record<string, string> }>("content/title-policy.json");
+  return { ...base, chapters: [...base.chapters, ...extensions.flatMap((e) => e.chapters)].map((c) => ({
+    ...c, questionTitle: chapterTitles[c.id] ?? c.questionTitle,
+  })) };
 }
 
 export function loadExternalLock(): ExternalLock {

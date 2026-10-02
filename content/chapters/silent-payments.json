@@ -5,7 +5,7 @@
   352
  ],
  "specimenLabel": "BIP 0352",
- "title": "Can you receive without handing out an address?",
+ "title": "How can one reusable address receive payments at fresh outputs?",
  "dek": "Publish an address once. Receive at fresh outputs. Your wallet does the work of finding which payments belong to you.",
  "authorship": "hand-authored",
  "reviewState": "draft-unreviewed",

@@ -23,7 +23,7 @@ export function p2shHeroSpec(fixtures: DerivedP2shFixture[]): HeroSpec<P2shHeroS
   const stages = Array.from({ length: n }, (_, k) => String(k));
   return checkSpec({
     controls: [
-      { kind: "strip", name: "spend", label: "Pinned spend", options: fixtures.map((f, i) => ({ value: `s${i}`, text: f.shortLabel ?? `spend ${i + 1}`, resets: ["stage"] })) },
+      { kind: "strip", name: "spend", label: "Example", options: fixtures.map((f, i) => ({ value: `s${i}`, text: fixtures.length === 1 ? "Published spend" : f.shortLabel ?? `spend ${i + 1}`, resets: ["stage"] })) },
       { kind: "strip", name: "reveal", label: "Redeem script", options: [{ value: "hidden", text: "Before the spend", resets: ["stage"] }, { value: "shown", text: "Revealed by the spend" }] },
       { kind: "stepper", name: "stage", label: "Stage", options: stages.map((k) => ({ value: k, text: k })), sets: { reveal: "shown" }, prevLabel: "Previous stage", nextLabel: "Next stage" },
     ],
@@ -33,7 +33,7 @@ export function p2shHeroSpec(fixtures: DerivedP2shFixture[]): HeroSpec<P2shHeroS
     ]),
     initialKey: "s0|hidden|0",
     noJsId: `s0-${n - 1}`,
-    staticNote: "Static view: the first spend at its last stage. With JavaScript you can hide the redeem script, switch spends and step through each check.",
+    staticNote: "Static view: the published spend at its last stage. With JavaScript you can hide the redeem script and step through each check.",
   });
 }
 

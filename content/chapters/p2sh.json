@@ -5,8 +5,8 @@
     16
   ],
   "specimenLabel": "BIP 0016",
-  "title": "How can a script hide behind a hash?",
-  "dek": "A pay-to-script-hash output commits to a 20-byte hash. The conditions behind it stay off chain until someone spends the coin, and then they have to match exactly.",
+  "title": "How can a sender pay without knowing the spending rules?",
+  "dek": "The recipient chooses the spending conditions. The sender pays to their script hash. The spender later reveals the script and satisfies its rules.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -14,10 +14,11 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Suppose a coin should need two signatures out of two keys. Someone has to write those conditions into the output that receives it, and without P2SH that someone is the sender. The alternative BIP 16 weighed was simply giving the sender the complete script.",
+        "text": "Suppose a recipient wants two signatures to spend a payment. Without P2SH, the sender would have to understand that arrangement and put the complete spending script in the output. BIP 16 lets the recipient supply a script hash instead, so the sender can use the same payment form for different spending conditions.",
         "claims": [
           "motivation",
-          "scriptsig-form"
+          "scriptsig-form",
+          "template"
         ]
       },
       {
@@ -66,13 +67,11 @@
           "type": "figure",
           "figure": "A09.2",
           "recipe": "p2sh-shape.v1",
-          "title": "Three scripts, one output shape",
+          "title": "A script behind a fixed-size output",
           "fixtures": [
-            "bip174-legacy",
-            "bip174-p2sh-p2wsh",
-            "bip143-p2sh-p2wpkh"
+            "bip174-legacy"
           ],
-          "caption": "The three pinned spends: redeem scripts of 71, 34 and 22 bytes, each behind the same 23-byte output.",
+          "caption": "The published legacy spend reveals a 71-byte redeem script behind a 23-byte P2SH output.",
           "claims": [
             "template",
             "scriptsig-form",
@@ -133,7 +132,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Step through the three published spends below. In the legacy 2-of-2, the redeem script is a CHECKMULTISIG over two keys, and each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
+          "text": "Step through the legacy P2SH spend below. Its redeem script requires both keys to sign. Each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
           "claims": [
             "multisig-order",
             "spends-verified"
@@ -145,16 +144,13 @@
           "recipe": "p2sh-two-stage.v1",
           "title": "One push, two evaluations",
           "fixtures": [
-            "bip174-legacy",
-            "bip174-p2sh-p2wsh",
-            "bip143-p2sh-p2wpkh"
+            "bip174-legacy"
           ],
-          "caption": "Three spends published in BIP 174 and BIP 143, replayed stage by stage. Before the spend only the lock is known; signatures are checked against digests computed at build time, and every one verifies.",
+          "caption": "A legacy P2SH spend from BIP 174’s published trace demonstrates BIP 16’s rules. First check the script hash, then run the revealed script. The signature digests are computed at build time and both signatures verify.",
           "claims": [
             "rules",
             "spends-verified",
             "multisig-order",
-            "p2sh-witness",
             "trace-spends"
           ],
           "layout": "wide"
@@ -196,29 +192,14 @@
     },
     {
       "id": "wrapped",
-      "heading": "A wrapper for SegWit",
+      "heading": "A later use: compatibility with SegWit",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "When SegWit arrived, BIP 141 reused this envelope. If the redeem script is exactly a witness version and a witness program, the output is a P2SH witness program: the scriptSig must hold nothing but that one push, and the real conditions move into the witness.",
+          "text": "BIP 141 later reused P2SH so that older wallets could pay SegWit recipients through an address they already understood. This is an application of BIP 16’s fixed payment form. The witness rules and weight savings come from SegWit.",
           "claims": [
-            "p2sh-witness"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Two of the figure’s spends work this way. In the P2SH-wrapped P2WPKH from BIP 143, the 22-byte redeem script wraps a 20-byte key-hash witness program; the witness holds a signature and the key. In the P2SH-wrapped P2WSH from BIP 174, the 34-byte redeem script wraps a 32-byte script-hash witness program, and the witness holds the signatures and the 2-of-2 script itself. Both redeem scripts begin with OP_0 and a one-byte push-length opcode: 14 for 20 bytes, 20 for 32 bytes, in hexadecimal. Their signatures commit to the BIP 143 digest, not the original one.",
-          "claims": [
+            "wrapped-compat",
             "p2sh-witness",
-            "trace-spends",
-            "spends-verified"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, those bytes come to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
-          "claims": [
-            "sizes",
             "weight"
           ]
         },
@@ -241,19 +222,49 @@
           "layout": "prose"
         },
         {
-          "type": "paragraph",
-          "text": "The wrapper had a practical reason. BIP 141 lists, among the things a wallet that never upgraded can still do, sending bitcoin to upgraded wallets using a P2SH address. The payer sees an ordinary P2SH output; only the spender has to understand the witness.",
-          "claims": [
-            "wrapped-compat",
-            "p2sh-witness"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Wrapped SegWit is still not native SegWit. The output is an ordinary 23-byte P2SH output and the scriptSig is not empty. BIP 141 notes that native P2WSH outputs use 34 bytes instead, and its authors chose the longer hash for better resistance to collision attacks.",
-          "claims": [
-            "p2wsh-size",
-            "p2sh-witness"
+          "type": "details",
+          "summary": "Later SegWit wrappers: scripts, signatures and weight",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "When SegWit arrived, BIP 141 reused this envelope. If the redeem script is exactly a witness version and a witness program, the output is a P2SH witness program: the scriptSig must hold nothing but that one push, and the real conditions move into the witness.",
+              "claims": [
+                "p2sh-witness"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The later comparison below shows two wrapped spends. In the P2SH-wrapped P2WPKH from BIP 143, the 22-byte redeem script wraps a 20-byte key-hash witness program; the witness holds a signature and the key. In the P2SH-wrapped P2WSH from BIP 174, the 34-byte redeem script wraps a 32-byte script-hash witness program, and the witness holds the signatures and the 2-of-2 script itself. Both redeem scripts begin with OP_0 and a one-byte push-length opcode: 14 for 20 bytes, 20 for 32 bytes, in hexadecimal. Their signatures commit to the BIP 143 digest, not the original one.",
+              "claims": [
+                "p2sh-witness",
+                "trace-spends",
+                "spends-verified"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, those bytes come to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
+              "claims": [
+                "sizes",
+                "weight"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The wrapper had a practical reason. BIP 141 lists, among the things a wallet that never upgraded can still do, sending bitcoin to upgraded wallets using a P2SH address. The payer sees an ordinary P2SH output; only the spender has to understand the witness.",
+              "claims": [
+                "wrapped-compat",
+                "p2sh-witness"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Wrapped SegWit is still not native SegWit. The output is an ordinary 23-byte P2SH output and the scriptSig is not empty. BIP 141 notes that native P2WSH outputs use 34 bytes instead, and its authors chose the longer hash for better resistance to collision attacks.",
+              "claims": [
+                "p2wsh-size",
+                "p2sh-witness"
+              ]
+            }
           ]
         }
       ]
