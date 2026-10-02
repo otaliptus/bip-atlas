@@ -155,7 +155,7 @@
             "bip86-vectors",
             "bip44-paths"
           ],
-          "caption": "Published paths from BIPs 84, 86 and 44, stepped from the master key down to the address. Hatched levels are hardened.",
+          "caption": "Published paths from BIPs 84, 86 and 44, stepped from the master key down to the address. A black tab marks a hardened level.",
           "claims": [
             "vectors",
             "levels",
@@ -282,7 +282,7 @@
             "bip84-vectors",
             "bip86-vectors"
           ],
-          "caption": "The same tower under three purposes. Only the purpose at the top and what comes out at the bottom differ, and the first receiving key under each is unrelated to the others.",
+          "caption": "The same levels under three purposes. Only the purpose and the output each BIP builds differ; because the purpose is hardened, every key below it is unrelated to the others.",
           "claims": [
             "script-by-purpose",
             "b84",

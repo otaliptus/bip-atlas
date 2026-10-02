@@ -5,10 +5,10 @@ const short = (s: string, n: number) => `${s.slice(0, n)}…`;
 const PW = 56, PD = 34, PH = 5, GAP = 15, COL = 112;
 
 /** What each BIP fixes beyond the path (words from the BIPs; addresses from the vectors). */
-const SAYS: Record<number, { script: string; keys: string }> = {
-  44: { script: "NO SCRIPT NAMED", keys: "NO NEW VERSION BYTES" },
-  84: { script: "P2WPKH", keys: "zpub / zprv" },
-  86: { script: "P2TR KEY PATH", keys: "xpub / xprv: none new" },
+const SAYS: Record<number, { script: string; keys: string; keysNote: string }> = {
+  44: { script: "NO SCRIPT NAMED", keys: "—", keysNote: "NOT ADDRESSED" },
+  84: { script: "P2WPKH", keys: "zpub / zprv", keysNote: "NEW BYTES" },
+  86: { script: "P2TR KEY PATH", keys: "xpub / xprv", keysNote: "NONE NEW" },
 };
 
 /**
@@ -25,13 +25,13 @@ export function WalletPathSchemes({ fixtures }: { fixtures: DerivedWalletPathFix
     .map((f, i) => {
       const a = firsts[i];
       const o = a.output;
-      return `Purpose ${f.derived.scheme}′: the same five levels, first receiving path ${a.path}, key ${a.publicKeyHex}; ${o ? `${SAYS[f.derived.scheme].script} output, address ${o.address}` : "BIP 44 names no script type and no address format"}; extended keys print as ${SAYS[f.derived.scheme].keys}.`;
+      return `Purpose ${f.derived.scheme}′: the same five levels, first receiving path ${a.path}, key ${a.publicKeyHex}; ${o ? `${SAYS[f.derived.scheme].script} output, address ${o.address}` : "BIP 44 names no script type and no address format"}; extended-key version bytes: ${SAYS[f.derived.scheme].keys} (${SAYS[f.derived.scheme].keysNote.toLowerCase()})${f.derived.scheme === 44 ? "; BIP 44 publishes no keys, so its key is computed from BIP 84's test mnemonic" : ""}.`;
     })
     .join(" ");
   const towerH = 4 * GAP + (PW + PD) / 2 + PH;
   return (
     <>
-      <Drawing id="a12-schemes" width={344} height={towerH + 128} title="Same shape, three purposes" desc={desc}>
+      <Drawing id="a12-schemes" width={344} height={towerH + 150} title="Same shape, three purposes" desc={desc}>
         {cols.map((f, c) => {
           const a = firsts[c];
           const o = a.output;
@@ -48,6 +48,7 @@ export function WalletPathSchemes({ fixtures }: { fixtures: DerivedWalletPathFix
                   <g>
                     <IsoBox at={[ox, 12 + PH + k * GAP]} w={PW} d={PD} h={PH} role={n.hardened ? "plain" : "public"} cls={top ? "k-iso--em" : ""} />
                     {top ? <text class="k-engrave k-engrave--big" transform={onTop(P(10, PD - 10, PH))}>{`${n.index}′`}</text> : null}
+                    {n.hardened ? <rect class="k-outline k-mark--plain" transform={onTop(P(PW - 16, PD - 10, PH))} width="8" height="4" /> : null}
                   </g>
                 );
               })}
@@ -55,12 +56,14 @@ export function WalletPathSchemes({ fixtures }: { fixtures: DerivedWalletPathFix
               <Value at={[x, by + 15]} text={SAYS[f.derived.scheme].script} size={9} cls="k-value--label" />
               <Value at={[x, by + 30]} text={o ? short(o.address, 9) : "no address"} size={9} cls={o ? "" : "k-value--muted"} />
               <Value at={[x, by + 45]} text={SAYS[f.derived.scheme].keys} size={9} />
-              <Value at={[x, by + 64]} text={`key ${short(a.publicKeyHex, 6)}`} size={9} />
+              <Value at={[x, by + 57]} text={SAYS[f.derived.scheme].keysNote} size={9} cls="k-value--muted" />
+              <Value at={[x, by + 76]} text={`key ${short(a.publicKeyHex, 6)}${f.derived.scheme === 44 ? " *" : ""}`} size={9} />
             </g>
           );
         })}
-        <Value at={[8, towerH + 104]} text="ONE MNEMONIC, THREE PURPOSES: THE FIRST RECEIVING KEYS" size={9} cls="k-value--muted" />
-        <Value at={[8, towerH + 116]} text="ARE UNRELATED; THE TOWERS DIFFER ONLY AT TOP AND BOTTOM" size={9} cls="k-value--muted" />
+        <Value at={[8, towerH + 116]} text="SAME LEVELS AND INDICES; EVERY KEY BELOW THE" size={9} cls="k-value--muted" />
+        <Value at={[8, towerH + 128]} text="PURPOSE DIFFERS. * BIP 44 PUBLISHES NO KEYS:" size={9} cls="k-value--muted" />
+        <Value at={[8, towerH + 140]} text="COMPUTED FROM BIP 84'S TEST MNEMONIC" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values: first receiving key and address under each purpose</summary>

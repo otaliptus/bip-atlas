@@ -28,7 +28,7 @@ export function WalletPathLevels({ fixture }: { fixture: DerivedWalletPathFixtur
   return (
     <Drawing id="a12-levels" width={344} height={196} title="Five levels below the master key" desc={desc}>
       <Bracket x1={X0 + CW} x2={X0 + firstPublic * CW - 2} y={Y0 - 6} below={false} text="hardened" />
-      <Bracket x1={X0 + firstPublic * CW + 2} x2={X0 + nodes.length * CW} y={Y0 - 6} below={false} text="public" />
+      <Bracket x1={X0 + firstPublic * CW + 2} x2={X0 + nodes.length * CW} y={Y0 - 6} below={false} text="public derivation" />
       {nodes.map((n, k) => (
         <g>
           <rect class={`k-cell k-fill--${n.level === "m" ? "secret" : n.hardened ? "plain" : "public"}`} x={X0 + k * CW} y={Y0} width={CW} height={CH} />
@@ -37,6 +37,7 @@ export function WalletPathLevels({ fixture }: { fixture: DerivedWalletPathFixtur
         </g>
       ))}
       <line class="k-boundary__line" x1={X0 + firstPublic * CW} y1={Y0 - 14} x2={X0 + firstPublic * CW} y2={Y0 + CH + 12} />
+      <Value at={[X0 + firstPublic * CW - 4, Y0 - 24]} text="ACCOUNT LINE" anchor="end" size={9} cls="k-value--muted" />
       {nodes.map((n, k) => {
         const low = k % 2 === 0;
         const ly = Y0 + CH + (low ? 16 : 40);

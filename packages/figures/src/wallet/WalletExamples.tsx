@@ -48,7 +48,7 @@ export function WalletExamples({ fixture }: { fixture: DerivedWalletPathFixture 
     `coin types ${top[0].children.map((c) => `${c.seg} (${word("coin", c.seg, 2)})`).join(" and ")}; under each, accounts 0′ and 1′; under each, chains 0 (${chain("0")}) and 1 (${chain("1")}); under each, addresses 0 (${addr("0")}) and 1 (${addr("1")}). ` +
     `Drawn heavy: ${named.map((p) => `m${p}`).join(" and ")}.`;
   return (
-    <Drawing id="a12-examples" width={344} height={TOP + 4 * ROW + 84} title="BIP 44's examples, as a tree" desc={desc}>
+    <Drawing id="a12-examples" width={344} height={TOP + 4 * ROW + 96} title="BIP 44's examples, as a tree" desc={desc}>
       {all.map((n) => n.children.map((c) => (
         <line class={`k-line${onNamed(c.key) ? " k-wp-named" : ""}`} x1={n.x} y1={y(n.depth) + 4} x2={c.x} y2={y(c.depth) - 4} />
       )))}
@@ -58,7 +58,7 @@ export function WalletExamples({ fixture }: { fixture: DerivedWalletPathFixture 
         return (
           <g>
             <circle class={`k-outline ${onNamed(n.key) ? "k-mark--plain" : "k-fill--plain"}`} cx={n.x} cy={y(n.depth)} r="3.5" />
-            <Value at={[left ? n.x - 6 : n.x + 6, y(n.depth) - 5]} text={n.seg} anchor={left ? "end" : "start"} size={9} />
+            <Value at={n.depth === 4 ? [left ? n.x + 6 : n.x - 6, y(n.depth) - 2] : [left ? n.x - 6 : n.x + 6, y(n.depth) - 5]} text={n.seg} anchor={n.depth === 4 ? (left ? "start" : "end") : left ? "end" : "start"} size={9} />
           </g>
         );
       })}
@@ -71,8 +71,9 @@ export function WalletExamples({ fixture }: { fixture: DerivedWalletPathFixture 
       ))}
       <Bracket x1={X0} x2={X0 + leaves.length * LEAF} y={y(5) + 14} text={`${t.examples.length} paths in bip 44’s table`} />
       <Value at={[4, y(5) + 50]} text={`COIN 0′ = ${word("coin", "0′", 2).toUpperCase()}, 1′ = ${word("coin", "1′", 2).toUpperCase()}`} size={9} cls="k-value--muted" />
-      <Value at={[4, y(5) + 62]} text={`ACCOUNT 0′ = ${word("account", "0′", 3).toUpperCase()}, 1′ = ${word("account", "1′", 3).toUpperCase()} · CHAIN 0 = ${chain("0").toUpperCase()}, 1 = ${chain("1").toUpperCase()}`} size={9} cls="k-value--muted" />
-      <Value at={[4, y(5) + 74]} text={`ADDRESS 0 = ${addr("0").toUpperCase()}, 1 = ${addr("1").toUpperCase()}`} size={9} cls="k-value--muted" />
+      <Value at={[4, y(5) + 62]} text={`ACCOUNT 0′ = ${word("account", "0′", 3).toUpperCase()}, 1′ = ${word("account", "1′", 3).toUpperCase()}`} size={9} cls="k-value--muted" />
+      <Value at={[4, y(5) + 74]} text={`CHAIN 0 = ${chain("0").toUpperCase()}, 1 = ${chain("1").toUpperCase()}`} size={9} cls="k-value--muted" />
+      <Value at={[4, y(5) + 86]} text={`ADDRESS 0 = ${addr("0").toUpperCase()}, 1 = ${addr("1").toUpperCase()}`} size={9} cls="k-value--muted" />
     </Drawing>
   );
 }

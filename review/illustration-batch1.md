@@ -76,3 +76,23 @@ Retired: `WalletPathWorked`; its content is A12.6. Added to `deriveWalletPath`: 
 | A13.9 | `descriptor-expressions.v1` (redraw) | static | BIP 380's index as a map: expressions × contexts (top, in sh(), in wsh(), in tr()), a mark where the model allows it; BIPs 390/392 rows hatched. | `bip380-index` | index, b381–b386 |
 
 Retired: `DescriptorWorked`; its content is A13.6. Prose change: "The figure checks BIP 380's own example…" → "Fig. A13.8 below checks…", because the checksum figures moved. New fixtures are copied from BIP 381 lines 78 and 82; the build re-checks each quote and expansion.
+
+### Wallet paths — independent review
+
+A fresh read-only subagent recomputed, in pure Python from the "abandon … about" mnemonic, every root, account and leaf key, parent fingerprint, HASH160, TapTweak, output key, scriptPubKey and address of all nine paths, and the BIP 44 computed account xpub. **All values matched**; all 18 shortened values have an exact disclosure in their figure; no private key is in any island's props; 18 hero states were checked. (A first review attempt stopped on an API rate limit and was re-run.)
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| 1 | must-fix | The hero caption said "Hatched levels are hardened"; no plate is hatched (hatch means unknown). | "A black tab marks a hardened level." |
+| 2 | must-fix | A12.7 overflowed its viewBox; at 375 a plate overprinted the BIP 86 title. | Heights 184 (wide) and 324 (narrow); second stack moved down. |
+| 3 | must-fix | A12.8 text clipped ("none ne") and ran together. | The version-byte line split in two ("xpub / xprv" over "NONE NEW"; "—" over "NOT ADDRESSED"). |
+| 4 | must-fix | A12.3 legend clipped at 375. | One legend line per level. |
+| 5 | should-fix | A12.8 used colour alone for hardened vs public plates. | The same black tab as the hero and A12.1. |
+| 6 | should-fix | "The towers differ only at top and bottom" suggested shared coin/account nodes. | "Same levels and indices; every key below the purpose differs"; caption to match. |
+| 7 | should-fix | BIP 44's keys (from BIP 84's mnemonic) were disclosed only in the source line. | A12.8 marks the BIP 44 key with * and a footnote; the hero says so at every BIP 44 step and in the status. |
+| 8 | should-fix | Step 0 drew a pink key next to "public key …". | Always a green glyph there; the pink m plate already marks the master. |
+| 9 | should-fix | The gap limit was stated as a present rule. | "BIP 44 gave the gap limit as 20 …", "GAP LIMIT 20, AS BIP 44 GAVE IT". |
+| 10 | should-fix | "no scripts" / "P ONLY" could read as no script commitment. | "TapTweak of P alone"; "HASH OF P ALONE: AN UNSPENDABLE SCRIPT PATH"; status wording to match. |
+| 11–16 | nits | "P = x(key)"; the "32 B" bracket under the 0x20 byte; "PUBLIC" bracket and unlabelled account line; chain labels running together; "ACCOUNT XPUB" over a zpub; the narrow xpub label crowding a tag. | "P = lift_x(x)"; "PUSH 32"; "PUBLIC DERIVATION" and "ACCOUNT LINE"; chain labels inside each V; "ACCOUNT XPUB (ZPUB)"; the narrow label moved under the stack. |
+| 17 | nit | Some 9-unit labels render at 8.8 px at 375. | Kept: the spec sets labels at 9–9.5 units; same convention as the HD review. |
+| 18 | nit | Odd-length storyboards leave a gap at 1440. | Kit behaviour, not changed here. |

@@ -31,13 +31,13 @@ export function WalletSpendLayouts() {
   const parts = (ids: DrawingIds, wide: boolean) => (
     <>
       {stack(ids, 14, 16, "BIP 84 · P2WPKH", [{ role: "sig", label: "signature" }, { role: "public", label: "public key" }])}
-      {stack(ids, wide ? 320 : 14, wide ? 16 : 176, "BIP 86 · P2TR KEY PATH", [{ role: "sig", label: "signature" }])}
+      {stack(ids, wide ? 320 : 14, wide ? 16 : 204, "BIP 86 · P2TR KEY PATH", [{ role: "sig", label: "signature" }])}
     </>
   );
   return (
     <Responsive
-      wide={<Drawing id="a12-spend-w" width={600} height={160} title="What a spend carries" desc={desc}>{parts(idsFor("a12-spend-w"), true)}</Drawing>}
-      narrow={<Drawing id="a12-spend-n" width={300} height={290} title="What a spend carries" desc={desc}>{parts(idsFor("a12-spend-n"), false)}</Drawing>}
+      wide={<Drawing id="a12-spend-w" width={600} height={184} title="What a spend carries" desc={desc}>{parts(idsFor("a12-spend-w"), true)}</Drawing>}
+      narrow={<Drawing id="a12-spend-n" width={300} height={324} title="What a spend carries" desc={desc}>{parts(idsFor("a12-spend-n"), false)}</Drawing>}
     />
   );
 }

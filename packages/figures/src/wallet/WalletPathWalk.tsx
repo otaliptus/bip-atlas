@@ -54,13 +54,16 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
   const o = a.output;
 
   const lineOf = (n: WalletNodeView) => (n.level === "m" ? "the master key" : `${LEVEL_TEXT[n.level].name} ${seg(n)}`);
-  const status = node
+  const keysNote = d.scheme === 44 ? " (keys from BIP 84's test mnemonic: BIP 44 publishes none)" : "";
+  const statusCore = node
     ? `${f.label}, ${a.label}. Step ${step} of ${last}: ${lineOf(node)}${node.level === "m" ? "" : node.hardened ? ", hardened: it needs the parent’s private key" : ", public derivation: the account’s extended public key reaches it"}.`
     : o === null
       ? `${f.label}, ${a.label}: the walk ends at a key, ${short(a.publicKeyHex)}. BIP 44 names no script type, so there is no address.`
       : o.kind === "p2wpkh"
         ? `${f.label}, ${a.label}: HASH160 of the key goes into 0014 ‖ hash; the bech32 address is ${o.address}.`
-        : `${f.label}, ${a.label}: the key’s x coordinate is the internal key; tweaked with no script tree it gives the output key; the bech32m address is ${o.address}.`;
+        : `${f.label}, ${a.label}: the key’s x coordinate is the internal key; tweaked with a hash of that key alone it gives the output key; the bech32m address is ${o.address}.`;
+  const status = statusCore.replace(/\.$/, `${keysNote}.`);
+
   const describe = () =>
     `The path ${a.path} as a stack of six plates: ${a.nodes.map((n) => `${n.level === "m" ? "m" : `${LEVEL_TEXT[n.level].name} ${seg(n)}`}${n.level === "m" ? "" : n.hardened ? " (hardened)" : " (public derivation)"}`).join(", ")}. ` +
     `The account's extended public key reaches the two public levels below it. ${status}`;
@@ -78,7 +81,7 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
     const ox = sx + PD * COS30;
     const plateY = (k: number) => sy + PH + k * GAP;
     const stackBottom = plateY(a.nodes.length - 1) + (PW + PD) / 2;
-    const panel = wide ? { x: 360, y: 18, w: 266 } : { x: 14, y: stackBottom + 26, w: 302 };
+    const panel = wide ? { x: 360, y: 18, w: 266 } : { x: 14, y: stackBottom + 36, w: 302 };
     const W = wide ? 640 : 330;
     const H = wide ? Math.max(stackBottom + 16, panel.y + 200) : panel.y + 196;
     const accountK = a.nodes.findIndex((n) => n.level === "account");
@@ -108,7 +111,7 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
             <Value at={[266, lineY + 26]} text="REACHES BELOW" size={9} cls="k-value--label" />
           </>
         ) : (
-          <Value at={[316, lineY + 13]} text="ACCOUNT XPUB REACHES BELOW" anchor="end" size={9} cls="k-value--label" />
+          <Value at={[14, stackBottom + 12]} text="ACCOUNT XPUB REACHES EVERYTHING BELOW THE LINE" size={9} cls="k-value--label" />
         )}
         {panelView(ids, panel.x, panel.y, panel.w)}
       </Drawing>
@@ -128,9 +131,10 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
           {node.level === "m" ? null : (
             <Value at={[x, y + 98]} text={node.hardened ? "HARDENED: NEEDS THE PARENT’S PRIVATE KEY" : "PUBLIC: THE PARENT’S XPUB IS ENOUGH"} size={9} cls="k-value--label" />
           )}
-          <KeyGlyph at={[x, y + 114]} role={node.level === "m" ? "secret" : "public"} scale={0.8} />
+          <KeyGlyph at={[x, y + 114]} role="public" scale={0.8} />
           <Value at={[x + 32, y + 123]} text={`public key ${short(node.publicKeyHex)}`} size={9.5} />
           {node.level === "m" ? null : <Value at={[x, y + 146]} text={`parent fingerprint ${node.parentFingerprintHex}`} size={9} cls="k-value--muted" />}
+          {d.scheme === 44 && node.level !== "account" ? <Value at={[x, y + 184]} text="KEYS: BIP 84'S MNEMONIC · BIP 44 PUBLISHES NONE" size={9} cls="k-value--muted" /> : null}
           {node.level === "account" ? (
             <>
               <Value at={[x, y + 170]} text={`account xpub ${short(d.accountXpub, 12)}`} size={9.5} />
@@ -156,6 +160,7 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
             <rect class="k-outline k-dashed" x={x} y={y + 52} width={w} height="40" fill="none" />
             <Value at={[x + 8, y + 68]} text="BIP 44 NAMES NO SCRIPT TYPE" size={9} cls="k-value--label" />
             <Value at={[x + 8, y + 82]} text="AND NO ADDRESS FORMAT" size={9} cls="k-value--label" />
+            <Value at={[x, y + 110]} text="KEY FROM BIP 84'S MNEMONIC · BIP 44 PUBLISHES NONE" size={9} cls="k-value--muted" />
           </>
         ) : o.kind === "p2wpkh" ? (
           <>
@@ -170,9 +175,9 @@ export function WalletPathWalk({ fixtures, figureId, initial }: Props) {
         ) : (
           <>
             {arrow(y + 38)}
-            {box(x, y + 50, w, "public", `internal key P = x(key)  ${short(o.internalKeyHex, 6)}`)}
+            {box(x, y + 50, w, "public", `internal key P = lift_x(x)  ${short(o.internalKeyHex, 6)}`)}
             {arrow(y + 70)}
-            {box(x, y + 82, w, "hash", `TapTweak, no scripts  t ${short(o.tweakHex, 6)}`)}
+            {box(x, y + 82, w, "hash", `TapTweak of P alone  t ${short(o.tweakHex, 6)}`)}
             {arrow(y + 102)}
             {box(x, y + 114, w, "public", `output key Q = P + t·G  ${short(o.outputKeyHex, 6)}`)}
             {arrow(y + 134)}

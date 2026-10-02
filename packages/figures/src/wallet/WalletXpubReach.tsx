@@ -31,7 +31,7 @@ export function WalletXpubReach({ fixture }: { fixture: DerivedWalletPathFixture
     <>
       <Drawing id="a12-reach" width={344} height={H} title="What one account xpub reaches" desc={desc}>
         <KeyGlyph at={[14, 14]} role="public" />
-        <Value at={[52, 20]} text={`ACCOUNT XPUB · ${d.accountPath.replace(/'/g, "′")}`} size={9} cls="k-value--label" />
+        <Value at={[52, 20]} text={`ACCOUNT XPUB${d.scheme === 84 ? " (ZPUB)" : ""} · ${d.accountPath.replace(/'/g, "′")}`} size={9} cls="k-value--label" />
         <Value at={[52, 33]} text={short(d.accountXpub, 16)} size={9.5} />
         <Value at={[52, 46]} text={d.accountXpubPublished ? `PUBLISHED, BIP ${d.scheme} LINE ${fixture.account.pubLine}` : "COMPUTED"} size={9} cls="k-value--muted" />
         <line class="k-line" x1="29" y1="30" x2="29" y2={layout[1].top} />

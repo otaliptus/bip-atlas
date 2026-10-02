@@ -45,14 +45,14 @@ export function WalletDiscovery({ fixture }: { fixture: DerivedWalletPathFixture
       ),
     },
     {
-      note: `After ${gap} unused addresses in a row, stop scanning that chain.`,
+      note: `BIP 44 gave the gap limit as ${gap}: after ${gap} unused addresses in a row, it stops scanning that chain.`,
       desc: `The scan continues past the last used address, ${lastUsed}, until ${gap} unused addresses in a row have been checked, then stops. BIP 44 gives the gap limit as ${gap} (line ${t.gapLine}).`,
       draw: () => (
         <>
           <Value at={[14, 22]} text="ACCOUNT 0′ · EXTERNAL CHAIN" size={9} cls="k-value--label" />
           {row(14, 34, lastUsed + 1 + gap, (i) => usedA.has(i), cell)}
           <Bracket x1={14 + (lastUsed + 1) * cell} x2={14 + (lastUsed + 1 + gap) * cell} y={34 + cell + 3} text={`${gap} unused in a row`} />
-          <Value at={[14, 96]} text={`GAP LIMIT ${gap} · BIP 44 LINE ${t.gapLine}`} size={9} cls="k-value--muted" />
+          <Value at={[14, 96]} text={`GAP LIMIT ${gap}, AS BIP 44 GAVE IT · LINE ${t.gapLine}`} size={9} cls="k-value--muted" />
           <Value at={[286, 96]} text="STOP" anchor="end" size={9} cls="k-value--label" />
         </>
       ),

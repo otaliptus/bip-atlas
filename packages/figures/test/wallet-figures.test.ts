@@ -100,7 +100,7 @@ describe("WalletDiscovery", () => {
   const s = html(h(WalletDiscovery, { fixture: d44 }));
   it("uses the gap limit read from BIP 44 and says the history is illustrative", () => {
     expect(s).toContain("20 UNUSED IN A ROW");
-    expect(s).toContain("GAP LIMIT 20 · BIP 44 LINE 124");
+    expect(s).toContain("GAP LIMIT 20, AS BIP 44 GAVE IT · LINE 124");
     expect(s).toContain("ILLUSTRATIVE");
     expect(s.split('class="k-story__frame"').length - 1).toBe(3);
   });
@@ -141,6 +141,7 @@ describe("WalletPathWalk (hero)", () => {
     const s = at({ fixtureId: "bip44-paths", address: 0, step: 6 });
     expect(s).toContain("BIP 44 NAMES NO SCRIPT TYPE");
     expect(s).not.toMatch(/bc1[qp]/);
+    expect(s).toContain("BIP 44 publishes none");
   });
   it("BIP 86 builds the tweak chain to the published address", () => {
     const s = at({ fixtureId: "bip86-vectors", address: 0, step: 6 });

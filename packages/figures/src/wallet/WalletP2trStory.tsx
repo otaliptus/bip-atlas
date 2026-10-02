@@ -66,7 +66,7 @@ export function WalletP2trStory({ fixture }: { fixture: DerivedWalletPathFixture
           <Arrow d="M112 92 H136" ids={ids} />
           <Value at={[140, 96]} text={`t ${short(o.tweakHex, 6)}`} size={9.5} cls="k-value--hash" />
           {bar(140, 106, 150, "public", `Q = P + t·G ${short(o.outputKeyHex, 6)}`)}
-          <Value at={[14, 136]} text="NO SCRIPT TREE: P ONLY" size={9} cls="k-value--muted" />
+          <Value at={[14, 136]} text="HASH OF P ALONE: AN UNSPENDABLE SCRIPT PATH" size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -79,7 +79,7 @@ export function WalletP2trStory({ fixture }: { fixture: DerivedWalletPathFixture
           {bar(48, 14, 34, "plain", "20")}
           {bar(82, 14, 208, "public", `Q  ${short(o.outputKeyHex, 12)}`)}
           <Bracket x1={14} x2={48} y={36} text="op_1" align="start" />
-          <Bracket x1={48} x2={82} y={36} text="32 b" align="start" />
+          <Bracket x1={48} x2={82} y={36} text="push 32" align="start" />
           {bar(14, 82, 276, "plain", short(o.address, 26))}
           <Value at={[14, 122]} text={`BECH32M · MATCHES BIP 86 LINE ${L.address}`} size={9} cls="k-value--label" />
         </>
