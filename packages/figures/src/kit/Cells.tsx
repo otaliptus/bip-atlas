@@ -56,14 +56,15 @@ export function Cells({ x, y, values, size = 12, perRow = values.length, rowGap 
 }
 
 /** Square bracket under (or over) a range, with a centred uppercase label. */
-export function Bracket({ x1, x2, y, text, below = true }: { x1: number; x2: number; y: number; text: string; below?: boolean }) {
+export function Bracket({ x1, x2, y, text, below = true, align = "middle" }: { x1: number; x2: number; y: number; text: string; below?: boolean; align?: "start" | "middle" }) {
   const s = below ? 1 : -1;
   const t = y + s * 5;
   const mid = (x1 + x2) / 2;
+  const tx = align === "start" ? x1 : mid;
   return (
     <g class="k-label">
-      <path class="k-leader" d={`M${x1} ${y} V${t} H${x2} V${y} M${mid} ${t} V${t + s * 5}`} />
-      <text x={mid} y={below ? t + 17 : t - 9} text-anchor="middle">{text.toUpperCase()}</text>
+      <path class="k-leader" d={`M${x1} ${y} V${t} H${x2} V${y} M${tx === x1 ? x1 + 1 : mid} ${t} V${t + s * 5}`} />
+      <text x={tx} y={below ? t + 17 : t - 9} text-anchor={align}>{text.toUpperCase()}</text>
     </g>
   );
 }

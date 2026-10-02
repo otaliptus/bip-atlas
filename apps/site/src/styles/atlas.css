@@ -1517,7 +1517,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 }
 
 /* Storyboards. */
-.k-story { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--k-frame)), 1fr)); gap: var(--manual-space-5) var(--manual-space-4); }
+.k-story { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--k-frame) * 0.9)), 1fr)); gap: var(--manual-space-5) var(--manual-space-4); }
 .k-story__frame { margin: 0; min-inline-size: 0; }
 .k-story__frame .k-drawing { max-inline-size: 100%; }
 .k-story__note { margin: var(--manual-space-2) 0 0; font-size: 0.875rem; line-height: 1.45; }
