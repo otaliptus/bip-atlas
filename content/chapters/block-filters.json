@@ -157,7 +157,7 @@
           "fixtures": [
             "bf-block-1263442"
           ],
-          "caption": "Testnet block 1,263,442's filter, built from its three scripts by the tested model; it equals the published filter byte for byte. Exact values are listed below the frames.",
+          "caption": "Testnet block 1,263,442’s filter, built from its three scripts by the tested model; it equals the published filter byte for byte. Exact values are listed below the frames.",
           "claims": [
             "siphash",
             "key",

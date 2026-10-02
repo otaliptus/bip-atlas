@@ -1428,6 +1428,10 @@ function deriveBip322(f: Bip322VectorFixture): DerivedBip322Fixture {
   const le = (h: string) => parseInt(h.match(/../g)!.reverse().join(""), 16);
   const hash = bip322MessageHash(v.message);
   const { spk, kind } = bip322AddressScript(v.address);
+  // Error vectors name the failure they expect; published hashes, where given, must match.
+  if (f.group === "error" && (r.state !== "invalid" || !r.reason.includes(v.error_substr))) throw new Error(`${f.id}: model's reason does not contain "${v.error_substr}"`);
+  const pub = (b322Set(f.set).tx_hashes ?? []).find((x: any) => x.message === v.message && x.address === v.address);
+  if (pub && (pub.message_hash !== hash || pub.to_spend_tx_hash !== r.toSpend.txid || pub.to_sign_tx_hash !== r.toSign.txid)) throw new Error(`${f.id}: hashes differ from the published tx_hashes`);
   const out: DerivedBip322Fixture = {
     ...f,
     derived: {

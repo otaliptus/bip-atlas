@@ -39,7 +39,7 @@
       "fixtures": [
         "v2-framing"
       ],
-      "caption": "The bytes added to every message: v1's 24-byte cleartext header against v2's encrypted length, header byte, type ID and authentication tag, 21 bytes for a message with a short ID.",
+      "caption": "The bytes added to every message: v1’s 24-byte cleartext header against v2’s encrypted length, header byte, type ID and authentication tag, 21 bytes for a message with a short ID.",
       "claims": [
         "framing-computed",
         "packet-format",
@@ -131,7 +131,7 @@
           "fixtures": [
             "v2-packet-1"
           ],
-          "caption": "The initiator's opening bytes in one of BIP 324's vectors. This site does not decode ElligatorSwift; the vector supplies the decoding.",
+          "caption": "The initiator’s opening bytes in one of BIP 324’s vectors. This site does not decode ElligatorSwift; the vector supplies the decoding.",
           "claims": [
             "ellswift",
             "garbage",
@@ -155,7 +155,7 @@
           "fixtures": [
             "v2-packet-1"
           ],
-          "caption": "A v1 connection always opens with the same 16 bytes; a v2 initiator's key almost never does.",
+          "caption": "A v1 connection always opens with the same 16 bytes; a v2 initiator’s key almost never does.",
           "claims": [
             "v1-detect"
           ],
@@ -177,7 +177,7 @@
           "fixtures": [
             "v2-packet-0"
           ],
-          "caption": "BIP 324's vector for the initiator's packet 0, recomputed by the tested model step by step; exact values are listed below the frames.",
+          "caption": "BIP 324’s vector for the initiator’s packet 0, recomputed by the tested model step by step; exact values are listed below the frames.",
           "claims": [
             "ecdh",
             "hkdf",
@@ -206,7 +206,7 @@
             "v2-packet-448",
             "v2-packet-999"
           ],
-          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener's panel shows only what crosses the wire; the v1 view is a general comparison, not about the vector. Every value is recomputed by the tested model and equals the vector's; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector's own.",
+          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener’s panel shows only what crosses the wire; the v1 view is a general comparison, not about the vector. Every value is recomputed by the tested model and equals the vector’s; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector’s own.",
           "claims": [
             "vectors",
             "ecdh",

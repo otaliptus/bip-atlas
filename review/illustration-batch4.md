@@ -125,3 +125,21 @@ Was 3 figures (a formats table, a card-style hero with a worked-example tab, ver
 | A18.9 | `bip322-limits.v1` **new** (schematic) | A timeline: signed (when, who: hatched), presented, the coins later (unknown); T is a lock-time field, not a date. | none | no-proof, not-sender, no-timestamp |
 
 Derive now also returns the interpreter's reviewed opcode names (`reviewedOpName` added to `interpreter.ts`; the build throws if one has no name).
+
+### Message signing: independent review
+
+A fresh read-only subagent checked BIP 322, the vectors, ledger, models, components, tests and screenshots. It confirmed the to_spend and to_sign construction (and that the model's IDs match the published `tx_hashes`), the tag, the formats and their strengths, the encoding choice, the verification order, reported-not-enforced T and S, the three verdicts, and that nothing implies the model decodes proof-of-funds PSBTs or runs a full interpreter. Findings and changes:
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| 1 | must-fix | A18.2 was titled "One character, another hash", but its two messages differ by far more; the prose's "change one character" had no figure. | Title "Another message, another hash"; prose "Change the message, even by one character, …". |
+| 2 | must-fix | A18.8's long opcode tags overflowed. | Two columns. |
+| 3 | should-fix | For full signatures the whole signed to_sign is the signature, not its witness or scriptSig. | Hero labels the witness/scriptSig "part of the signature" and to_sign "= THE SIGNATURE" for ful; status and prose say so. |
+| 4 | should-fix | Whole witnesses and the ful transaction were filled signature blue, though they hold scripts, a dummy and keys. | Plain fills with labels; only A18.4's actual ECDSA signatures stay blue. |
+| 5 | should-fix | A18.8 listed CODESEPARATOR (always rejected) and tapscript CHECKMULTISIG (fails) as executed. | "CODESEPARATOR → INVALID", "CHECKMULTISIG FAILS" in tapscript; "recognises"; OP_1NEGATE in the heading. |
+| 6 | should-fix | "Verdict recorded for the vector": the vectors record no verdicts; derive ignored `error_substr` and never checked `tx_hashes`. | Caption and source say "expected outcome"; derive now throws unless an error vector's reason contains its `error_substr`, and checks message hash, to_spend and to_sign IDs against `tx_hashes` where published. |
+| 7 | should-fix | A18.6's lock time, sequence and T/S lacked the time-orange cue. | Orange text and a time bar under the stamp. |
+| 8 | should-fix | "CONSENSUS + REQUIRED RULES" overstated what the model checks. | "SCRIPT RULES + REQUIRED RULES". |
+| 9 | should-fix | A18.1's last text line sat on the envelope border. | Taller envelopes. |
+| 10 | should-fix | Prose dropped the MUST in "legacy … only for P2PKH". | "MAY still be used, but MUST be restricted to P2PKH addresses". |
+| 11–18 | nits | Upper-case MUST/MAY for the BIP's lower-case encoding rules; arrow start; ellipsis plus period; "104 B" meaning; orange IN row; message always truncated; "It applies when" (simple is permitted, not automatic); empty space in A18.9. | Lower case "must"/"may" and "has to come"; arrow from OUT 0; "B of items"; truncate only long messages; "It may be used only when"; A18.9 tightened. The IN row keeps one fill (orange only when T or S is set). |

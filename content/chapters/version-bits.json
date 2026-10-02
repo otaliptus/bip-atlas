@@ -173,7 +173,7 @@
           "fixtures": [
             "bip9-csv"
           ],
-          "caption": "Three trains at the same junction, routed by the tested model with csv's parameters; the counts are hypothetical. At or past the timeout, even a full count fails.",
+          "caption": "Three trains at the same junction, routed by the tested model with csv’s parameters; the counts are hypothetical. At or past the timeout, even a full count fails.",
           "claims": [
             "threshold",
             "precedence-why",
@@ -220,7 +220,7 @@
           "fixtures": [
             "bip9-csv"
           ],
-          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9's rules. The count that locked it in is not recorded; BIP 9's rules imply at least 1,916.",
+          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9’s rules. The count that locked it in is not recorded; BIP 9’s rules imply at least 1,916.",
           "claims": [
             "assignments",
             "implied",
@@ -271,7 +271,7 @@
             "bip9-csv",
             "bip9-segwit"
           ],
-          "caption": "The two deployments in BIP 9's table: each mainnet window matches the Unix times in its own BIP, and each activation height implies the two periods before it.",
+          "caption": "The two deployments in BIP 9’s table: each mainnet window matches the Unix times in its own BIP, and each activation height implies the two periods before it.",
           "claims": [
             "assignments",
             "crosscheck",
@@ -334,7 +334,7 @@
           "fixtures": [
             "bip8-guidelines"
           ],
-          "caption": "BIP 8's suggested parameters, run by the tested model with no STARTED period reaching the threshold. Only lockinontimeout differs.",
+          "caption": "BIP 8’s suggested parameters, run by the tested model with no STARTED period reaching the threshold. Only lockinontimeout differs.",
           "claims": [
             "bip8-must-signal",
             "bip8-fail",

@@ -88,7 +88,7 @@ describe("message-signing figures", () => {
   });
   it("A18.5 and A18.9 are schematic", () => {
     for (const s of [html(h(Bip322Choice, {})), html(h(Bip322Limits, {}))]) expect(s).not.toMatch(/[0-9a-f]{16}/);
-    expect(html(h(Bip322Choice, {}))).toContain("MUST · PSBT");
+    expect(html(h(Bip322Choice, {}))).toContain("must · PSBT");
   });
   it("A18.6 follows a valid full vector to T and S", () => {
     const f = vec("b322-p2wpkh-full");
@@ -108,6 +108,7 @@ describe("message-signing figures", () => {
     expect(s).toContain(">CHECKMULTISIG<");
     expect(s).toContain("TAPSCRIPT ALSO: CHECKSIGADD");
     expect(s).toContain(">NOP1, NOP4–10<");
+    expect(s).toContain(">CODESEPARATOR → INVALID<");
   });
 });
 

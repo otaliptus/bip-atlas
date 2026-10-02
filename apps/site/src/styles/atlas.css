@@ -1170,7 +1170,8 @@ button.atlas-tl-bit:focus-visible { outline: 2px solid var(--manual-focus); outl
 .k-b3-h { font-size: 9px !important; letter-spacing: 0.06em; font-weight: 500; }
 .k-b3-l { font-size: 8.5px !important; letter-spacing: 0.05em; fill: var(--manual-muted) !important; }
 .k-b3-v { font-size: 8.5px !important; }
-.k-b3-tag { font-size: 8px !important; letter-spacing: 0.02em; }
+.k-b3-tag { font-size: 8.5px !important; letter-spacing: 0.02em; }
+.k-b3-time { fill: #b4530a !important; letter-spacing: 0.04em; }
 .k-b3-rail { stroke: var(--atlas-ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
 .k-b3-stamp rect { fill: none; stroke: var(--atlas-ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
 .k-b3-stamp text { font-size: 11px !important; font-weight: 600; letter-spacing: 0.1em; }

@@ -20,7 +20,7 @@ export function wrap(text: string, n: number): string[] {
  */
 export function Bip322Formats({ fixture }: { fixture: DerivedBip322FormatsFixture }) {
   const rows = fixture.derived.rows;
-  const h = 72;
+  const h = 78;
   return (
     <>
       <Drawing

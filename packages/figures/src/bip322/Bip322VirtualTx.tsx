@@ -31,11 +31,12 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
   const show = hydrated ? reveal : true;
   const both = !hydrated;
   const n = t.witness.length;
-  const sig = n ? `${n} item${n === 1 ? "" : "s"} · ${t.witness.reduce((a, w) => a + w.length / 2, 0)} B` : `${t.scriptSig.length / 2} B`;
+  const sig = n ? `${n} item${n === 1 ? "" : "s"} · ${t.witness.reduce((a, w) => a + w.length / 2, 0)} B of items` : `${t.scriptSig.length / 2} B`;
+  const full = d.variant === "ful";
   const stamp = v.state === "valid" ? `VALID · T ${v.time} · S ${v.age}` : v.state.toUpperCase();
   const status = view === "to_spend" && !both
-    ? `to_spend for “${d.message}”: one input spending an output that does not exist, its scriptSig pushing ${show ? `the message hash ${s8(d.messageHash)}` : "the message hash"}, and one 0-satoshi output to the address's script. Its ID is ${s8(d.toSpend.txid)}.`
-    : `to_sign spends to_spend's output 0 and pays 0 satoshis to OP_RETURN. Its ${t.witness.length ? `witness, ${t.witness.length} item${t.witness.length === 1 ? "" : "s"},` : "scriptSig"} is the signature. Verdict: ${v.state}${v.state === "valid" ? ` at time ${v.time} and age ${v.age}` : `: ${v.reason}`}.`;
+    ? `to_spend for “${d.message}”: one input spending an output that does not exist, its scriptSig pushing ${show ? `the message hash ${s8(d.messageHash)}` : "the message hash"}, and one 0-satoshi output to the address's script. Its ID is ${s8(d.toSpend.txid)}`
+    : `to_sign spends to_spend's output 0 and pays 0 satoshis to OP_RETURN. ${full ? "In the full format the whole signed to_sign is the signature." : `Its witness, ${n} item${n === 1 ? "" : "s"}, is the signature.`} Verdict: ${v.state}${v.state === "valid" ? ` at time ${v.time} and age ${v.age}` : `: ${v.reason}`}.`;
   const desc = `BIP 322 vector ${f.label}, address ${d.address}, message “${d.message}”. Message hash ${show ? d.messageHash : "not shown"}. to_spend ${d.toSpend.txid}: input 000…000:0xFFFFFFFF, scriptSig OP_0 PUSH32 of the message hash, output 0 of 0 satoshis to ${d.toSpend.challenge}. to_sign ${t.txid}: version ${t.version}, lock time ${t.lockTime}, sequence ${t.sequence}, input to_spend:0, signature ${sig}, output 0 satoshis to OP_RETURN. ${status}`;
 
   const ticket = (x: number, y: number, w: number, which: View, ids: ReturnType<typeof idsFor>) => {
@@ -51,7 +52,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
     return (
       <g class={dim ? "k-faded" : undefined} data-ticket={which}>
         <rect class={`k-outline k-fill--plain${dim ? "" : " k-cell--em"}`} x={x} y={y} width={w} height={130} rx="3" />
-        <text class="k-b3-h" x={x + 8} y={y + 16}>{`${which.toUpperCase()} · ${s8(spend ? d.toSpend.txid : t.txid)}`}</text>
+        <text class="k-b3-h" x={x + 8} y={y + 16}>{`${which.toUpperCase()} · ${s8(spend ? d.toSpend.txid : t.txid)}${!spend && full ? " = THE SIGNATURE" : ""}`}</text>
         {spend ? (
           <>
             {row(0, "IN · 000…000:FFFFFFFF", "an output that does not exist", "k-fill--plain", true)}
@@ -65,7 +66,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         ) : (
           <>
             {row(0, "IN · TO_SPEND:0", `v${t.version} · lock time ${t.lockTime} · seq ${t.sequence}`, t.lockTime || t.sequence ? "k-fill--time" : "k-fill--plain")}
-            {row(1, t.witness.length ? "WITNESS = THE SIGNATURE" : "SCRIPTSIG = THE SIGNATURE", sig, "k-fill--sig")}
+            {row(1, full ? `${n ? "WITNESS" : "SCRIPTSIG"} · PART OF THE SIGNATURE` : "WITNESS = THE SIGNATURE", sig)}
             {row(2, "OUT 0 · 0 SAT TO", "OP_RETURN")}
           </>
         )}
@@ -85,10 +86,10 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
         {ticket(ax, ay, tw, "to_spend", ids)}
         {ticket(bx, by, tw, "to_sign", ids)}
         {/* to_sign's input spends to_spend's output 0 */}
-        <path class="k-line" d={wide ? `M${ax + tw - 8} ${ay + 121} H${ax + tw + 16} V${by + 39} H${bx + 8}` : `M${ax + tw - 30} ${ay + 134} V${by - 4}`} marker-end={ids.arrow} />
+        <path class="k-line" d={wide ? `M${ax + tw - 8} ${ay + 99} H${ax + tw + 16} V${by + 39} H${bx + 8}` : `M${ax + tw - 30} ${ay + 134} V${by - 4}`} marker-end={ids.arrow} />
         <g class="k-b3-stamp" data-state={v.state}>
-          <rect x={bx + tw - 150} y={by + 136} width="150" height="24" rx="3" />
-          <text x={bx + tw - 75} y={by + 152} text-anchor="middle">{stamp}</text>
+          <rect x={bx + tw - 196} y={by + 136} width="196" height="24" rx="3" />
+          <text x={bx + tw - 98} y={by + 152} text-anchor="middle">{stamp}</text>
         </g>
         <Value at={[ax, by + 152]} text="NEVER BROADCAST" size={8.5} cls="k-value--muted" />
       </Drawing>
@@ -136,7 +137,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
           <dt>Signature ({t.witness.length ? "witness items" : "scriptSig"})</dt><dd>{(t.witness.length ? t.witness : [t.scriptSig]).map((w) => <><code class="atlas-break">{w || "(empty)"}</code><br /></>)}</dd>
         </dl>
       </details>
-      <p class="atlas-hero__source">BIP 322 test vectors; to_spend, to_sign and the verdict rebuilt by the tested model, which fails the build if a verdict differs from the recorded one.</p>
+      <p class="atlas-hero__source">BIP 322 test vectors; to_spend, to_sign and the verdict rebuilt by the tested model, which fails the build if a verdict differs from the expected outcome.</p>
     </div>
   );
 }

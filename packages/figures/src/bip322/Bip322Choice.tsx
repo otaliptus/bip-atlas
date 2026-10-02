@@ -31,13 +31,13 @@ export function Bip322Choice() {
       {q(10, "ADDED INPUTS", "(UTXOS TO SHOW)?")}
       <path class="k-line" d="M176 32 H222" marker-end={ids.arrow} />
       <Value at={[182, 26]} text="YES" size={8.5} cls="k-value--label" />
-      {out(21, "pof", "MUST · PSBT")}
+      {out(21, "pof", "must · PSBT")}
       <path class="k-line" d="M96 54 V80" marker-end={ids.arrow} />
       <Value at={[102, 70]} text="NO" size={8.5} cls="k-value--label" />
       {q(84, "ALL DEFAULTS AND", "NATIVE SEGWIT?")}
       <path class="k-line" d="M176 106 H222" marker-end={ids.arrow} />
       <Value at={[182, 100]} text="YES" size={8.5} cls="k-value--label" />
-      {out(95, "smp", "MAY, OR ful")}
+      {out(95, "smp", "may, or ful")}
       <path class="k-line" d="M96 128 V160 H222" marker-end={ids.arrow} />
       <Value at={[102, 150]} text="NO" size={8.5} cls="k-value--label" />
       {out(149, "ful", "WHOLE TX")}

@@ -8,12 +8,12 @@ import { Drawing, Value, idsFor } from "../kit";
  */
 export function Bip322Limits() {
   const ids = idsFor("a18-limits");
-  const y = 70;
+  const y = 40;
   return (
     <Drawing
       id="a18-limits"
       width={344}
-      height={176}
+      height={146}
       title="What a signature does not prove"
       desc="Schematic timeline. A valid BIP 322 signature shows that, at some point before it was presented, someone could produce what the address's script demands for this exact message. It carries no date: T is a lock-time field, so freshness must come from the message, for example a challenge the verifier chose. It does not say who signed, that they sent any earlier transaction, whether they still control the address, or whether the coins are still there."
     >
@@ -27,7 +27,7 @@ export function Bip322Limits() {
       <Value at={[14, y + 32]} text="SHOWS: SOMEONE COULD SATISFY THE SCRIPT" size={8.5} cls="k-value--label" />
       <Value at={[14, y + 44]} text="FOR THIS MESSAGE, BEFORE IT WAS PRESENTED" size={8.5} cls="k-value--label" />
       <Value at={[14, y + 64]} text="T IS A LOCK-TIME FIELD, NOT A DATE: FRESHNESS" size={8.5} cls="k-value--muted" />
-      <Value at={[14, y + 76]} text="MUST COME FROM THE MESSAGE (A CHALLENGE)" size={8.5} cls="k-value--muted" />
+      <Value at={[14, y + 76]} text="HAS TO COME FROM THE MESSAGE (A CHALLENGE)" size={8.5} cls="k-value--muted" />
       <Value at={[14, y + 96]} text="SCHEMATIC" size={8} cls="k-value--muted" />
     </Drawing>
   );

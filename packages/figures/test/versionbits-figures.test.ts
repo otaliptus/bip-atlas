@@ -164,7 +164,7 @@ describe("version-bits captions", () => {
   const text = readFileSync(new URL("content/chapters/version-bits.json", root), "utf8");
   it("states only model numbers", () => {
     expect(text).toContain("One period of 2,016 blocks, to scale");
-    expect(text).toContain("BIP 9's rules imply at least 1,916");
+    expect(text).toContain("BIP 9’s rules imply at least 1,916");
     expect(text).toContain("010 and 011 are kept for two future mechanisms");
     expect(text).toContain("the other 29 are free for deployments");
     expect(PERIOD).toBe(2016);

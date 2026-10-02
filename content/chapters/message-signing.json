@@ -64,7 +64,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The message hash is a BIP 340 tagged hash with the tag BIP0322-signed-message, taken over the message exactly as given, with no length prefix and no terminator. Change one character of the message and the hash changes, and so does to_spend’s ID.",
+          "text": "The message hash is a BIP 340 tagged hash with the tag BIP0322-signed-message, taken over the message exactly as given, with no length prefix and no terminator. Change the message, even by one character, and the hash changes, and so does to_spend’s ID.",
           "claims": [
             "to-spend"
           ]
@@ -73,7 +73,7 @@
           "type": "figure",
           "figure": "A18.2",
           "recipe": "bip322-message-hash.v1",
-          "title": "One character, another hash",
+          "title": "Another message, another hash",
           "fixtures": [
             "b322-p2wpkh-hello",
             "b322-wrong-message"
@@ -87,7 +87,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
+          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. In the simple format that witness is the signature; in the full format, the whole signed to_sign is.",
           "claims": [
             "to-sign"
           ]
@@ -105,7 +105,7 @@
             "b322-p2pkh-full",
             "b322-wrong-message"
           ],
-          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the one recorded for that vector.",
+          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the expected outcome: valid for signature vectors, invalid for error vectors.",
           "claims": [
             "vectors",
             "to-spend",
@@ -154,7 +154,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The simple format, prefixed smp, carries only the witness stack. It applies when to_sign keeps all its defaults, nothing added and version, sequence and lock time left at 0, and the address is native SegWit: P2WPKH, P2WSH or P2TR. The verifier rebuilds both transactions itself.",
+          "text": "The simple format, prefixed smp, carries only the witness stack. It may be used only when to_sign keeps all its defaults, nothing added and version, sequence and lock time left at 0, and the address is native SegWit: P2WPKH, P2WSH or P2TR. The verifier rebuilds both transactions itself.",
           "claims": [
             "simple",
             "encode-choice"
@@ -186,7 +186,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Signers MUST put the prefix on. A verifier may still read an unprefixed signature as simple, for compatibility with implementations written before the BIP was finalized; one of the published vectors tests exactly that. The legacy format MAY still be used, but only for P2PKH addresses, and new proofs SHOULD use the new formats for every address type, P2PKH included.",
+          "text": "Signers MUST put the prefix on. A verifier may still read an unprefixed signature as simple, for compatibility with implementations written before the BIP was finalized; one of the published vectors tests exactly that. The legacy format MAY still be used, but MUST be restricted to P2PKH addresses, and new proofs SHOULD use the new formats for every address type, P2PKH included.",
           "claims": [
             "formats",
             "legacy-rules"
@@ -280,7 +280,7 @@
           "fixtures": [
             "b322-verdicts"
           ],
-          "caption": "The opcodes this site’s verifier executes, from the model’s reviewed set. A script with any other opcode is not judged: inconclusive.",
+          "caption": "The opcodes this site’s verifier recognises, from the model’s reviewed set. A script with any other opcode is not judged: inconclusive.",
           "claims": [
             "interpreter",
             "upgradeable-rules",
