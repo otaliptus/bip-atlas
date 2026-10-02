@@ -167,12 +167,47 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A07.3",
+     "recipe": "taproot-witness-stacks.v1",
+     "title": "Two witnesses",
+     "fixtures": [
+      "bip341-spk5"
+     ],
+     "caption": "Count the items after removing any annex: one means the key path, two or more the script path.",
+     "claims": [
+      "path-choice",
+      "key-path-rule",
+      "script-and-control",
+      "control-contents",
+      "vector5"
+     ],
+     "layout": "wide"
+    },
+    {
      "type": "paragraph",
      "text": "From those pieces the verifier rebuilds the commitment. It hashes the leaf, folds in each sibling hash in sorted order to reach a root, computes t from the internal key and that root, then Q = P + t⋅G. The spend is accepted only if Q’s x coordinate equals the output key and its y parity matches the control block’s bit. The authors keep that bit so the output key can be lifted to one exact point, which batch verification needs.",
      "claims": [
       "tweak-check",
       "parity-why"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A07.4",
+     "recipe": "taproot-verifier-story.v1",
+     "title": "Rebuilding the commitment",
+     "fixtures": [
+      "bip341-spk5"
+     ],
+     "caption": "The verifier’s recomputation for leaf B of vector 5, step by step; the exact values are listed under the frames.",
+     "claims": [
+      "tweak-check",
+      "parity-why",
+      "branch-order",
+      "vector5"
+     ],
+     "layout": "prose"
     },
     {
      "type": "paragraph",
@@ -241,6 +276,21 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A07.5",
+     "recipe": "taproot-reveals.v1",
+     "title": "What a spend gives away",
+     "fixtures": [
+      "bip341-spk5"
+     ],
+     "caption": "A key path spend shows a key and a signature. A script path spend shows one script, the proof for it, and its depth.",
+     "claims": [
+      "privacy",
+      "key-or-script"
+     ],
+     "layout": "wide"
+    },
+    {
      "type": "callout",
      "label": "Caveat",
      "text": "The tree in the figure is one published example, not a required layout, and the hashes shown are not the scripts themselves. Nothing on this page is a way to build or sign real outputs.",
@@ -248,6 +298,22 @@
       "tree-shape",
       "wallet-section"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A07.6",
+     "recipe": "taproot-depth.v1",
+     "title": "Depth is proof size",
+     "fixtures": [
+      "bip341-spk5"
+     ],
+     "caption": "Each level adds one 32-byte hash to the control block. This tree is one published example, not a required shape.",
+     "claims": [
+      "tree-shape",
+      "control-contents",
+      "privacy"
+     ],
+     "layout": "prose"
     }
    ]
   },
@@ -273,13 +339,13 @@
     },
     {
      "type": "figure",
-     "figure": "A07.3",
+     "figure": "A07.7",
      "recipe": "taproot-sigmsg.v1",
      "title": "What a key-path signature signs",
      "fixtures": [
       "bip341-keyspend-input4"
      ],
-     "caption": "The signature message for input 4 of the published key-path vector, the spend shown in the figure above. The two shaded items commit to every spent output’s amount and scriptPubKey.",
+     "caption": "The signature message for input 4 of the published key-path vector, the spend shown in Fig. A07.2. The two outlined items commit to every spent output’s amount and scriptPubKey.",
      "claims": [
       "sigmsg-commits",
       "signature-form",

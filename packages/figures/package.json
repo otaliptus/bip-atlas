@@ -3,7 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./*": "./src/*" },
-  "dependencies": { "@bip-atlas/models": "workspace:*" },
-  "peerDependencies": { "preact": "^10.27.0" }
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@bip-atlas/models": "workspace:*"
+  },
+  "peerDependencies": {
+    "preact": "^10.27.0"
+  },
+  "devDependencies": {
+    "preact": "10.29.8",
+    "preact-render-to-string": "6.8.0"
+  }
 }

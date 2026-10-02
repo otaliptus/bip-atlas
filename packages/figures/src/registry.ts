@@ -12,6 +12,11 @@ export interface RecipeDefinition {
   /** Fixture kind every fixture passed to this recipe must have. */
   /** Fixture kind the recipe draws; several allowed kinds are written "a|b". */
   fixtureKind: string;
+  /**
+   * Drawn in the illustration-kit style (decision D3): rendered without the
+   * figure card or the Interactive / Worked example tabs.
+   */
+  drawing?: boolean;
 }
 
 export const RECIPES: readonly RecipeDefinition[] = [
@@ -50,6 +55,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "entropy-word-pipeline.v1",
@@ -59,6 +65,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: true,
     controls: ["Choose public fixture", "Toggle 128/256-bit fixture", "Reveal 11-bit groups"],
     fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "seed-derivation.v1",
@@ -68,6 +75,67 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "entropy-bits.v1",
+    description: "The entropy of one public sample as a grid of bits beside its hexadecimal form.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "checksum-storyboard.v1",
+    description: "Storyboard: entropy into SHA-256, the first bits kept as the checksum, appended to make n × 11 bits.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "wordlist-index.v1",
+    description: "Eleven bits as a number that picks one card from a stack of 2,048, with the list's first entries.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "last-word-odds.v1",
+    description: "All 2,048 candidate last words for a fixed prefix, the valid ones filled.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "passphrase-seeds.v1",
+    description: "The same words with two passphrases: two unrelated 64-byte seeds.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
+  },
+  {
+    id: "mnemonic-chain.v1",
+    description: "Entropy, words, seed and keys as three separate steps.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "master-key-split.v1",
@@ -185,6 +253,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "taproot-tree",
+    drawing: true,
   },
   {
     id: "taproot-commitment.v1",
@@ -194,6 +263,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: true,
     controls: ["Switch key/script path", "Select a leaf", "Reveal only the proof material"],
     fixtureKind: "taproot-tree",
+    drawing: true,
   },
   {
     id: "taproot-sigmsg.v1",
@@ -203,6 +273,47 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "taproot-keyspend",
+    drawing: true,
+  },
+  {
+    id: "taproot-witness-stacks.v1",
+    description: "The key-path and script-path witnesses of one output as stacks of items.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-tree",
+    drawing: true,
+  },
+  {
+    id: "taproot-verifier-story.v1",
+    description: "Storyboard: the verifier rebuilds the commitment for one leaf, step by step.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-tree",
+    drawing: true,
+  },
+  {
+    id: "taproot-reveals.v1",
+    description: "What an observer of the chain sees of a key-path and a script-path spend.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-tree",
+    drawing: true,
+  },
+  {
+    id: "taproot-depth.v1",
+    description: "A published tree with each leaf's control block drawn to scale.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "taproot-tree",
+    drawing: true,
   },
   {
     id: "tapscript-witness.v1",

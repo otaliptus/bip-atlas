@@ -18,16 +18,20 @@ import {
   UnknownFields,
   RECIPE_MAP,
   SeedDerivation,
+  EntropyBits,
+  ChecksumStory,
+  WordlistIndex,
+  LastWordOdds,
+  PassphraseSeeds,
+  MnemonicChain,
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
-  MnemonicWorked,
   Bip32Worked,
   TxWorked,
   AddressWorked,
   PsbtWorked,
   SchnorrWorked,
-  TaprootWorked,
   TapscriptWorked,
   P2shWorked,
   P2shTwoStage,
@@ -98,6 +102,10 @@ import {
   TaprootTweak,
   TaprootCommitment,
   SigMsgLayout,
+  WitnessStacks,
+  VerifierStory,
+  SpendReveals,
+  DepthProof,
   TapscriptWitness,
   TapscriptTrace,
   SigopsBudget,
@@ -163,13 +171,19 @@ const b322 = picked as DerivedBip322Fixture[];
 const b322Formats = picked as DerivedBip322FormatsFixture[];
 const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
 ---
-<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
+<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} drawing={recipe.drawing === true} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
   {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
   {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
   {figure.recipe === "mnemonic-card.v1" && <MnemonicCard fixture={mnemonic[0]} />}
   {figure.recipe === "entropy-word-pipeline.v1" && <EntropyWordLab client:visible fixtures={mnemonic} figureId={figureId} />}
   {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
+  {figure.recipe === "entropy-bits.v1" && <EntropyBits fixture={mnemonic[0]} />}
+  {figure.recipe === "checksum-storyboard.v1" && <ChecksumStory fixture={mnemonic[0]} />}
+  {figure.recipe === "wordlist-index.v1" && <WordlistIndex fixture={mnemonic[0]} />}
+  {figure.recipe === "last-word-odds.v1" && <LastWordOdds fixture={mnemonic[0]} />}
+  {figure.recipe === "passphrase-seeds.v1" && <PassphraseSeeds fixture={mnemonic[0]} />}
+  {figure.recipe === "mnemonic-chain.v1" && <MnemonicChain fixture={mnemonic[0]} />}
   {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
   {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
@@ -185,6 +199,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
   {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
   {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
+  {figure.recipe === "taproot-witness-stacks.v1" && <WitnessStacks fixture={tap[0]} />}
+  {figure.recipe === "taproot-verifier-story.v1" && <VerifierStory fixture={tap[0]} />}
+  {figure.recipe === "taproot-reveals.v1" && <SpendReveals fixture={tap[0]} />}
+  {figure.recipe === "taproot-depth.v1" && <DepthProof fixture={tap[0]} />}
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
@@ -218,15 +236,13 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
   {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
-  {recipe.interactive && (
+  {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
-      {figure.recipe === "entropy-word-pipeline.v1" && <MnemonicWorked fixture={mnemonic[0]} />}
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
-      {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}

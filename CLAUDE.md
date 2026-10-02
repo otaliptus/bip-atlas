@@ -20,7 +20,7 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 |---|---|
 | `packages/models` | Tested teaching models. Phases one–two: `bech32`, `bip39`, `bip32`, `tx` (141/143), `psbt`, `schnorr` (340), `taproot` (341), `tapscript` (342: a narrow trace *recorder* that throws `TraceScopeError` outside its reviewed opcodes). Phase three: `p2sh` (16, also a recorder), `timelock` (65/68/112/113), `versionbits` (9/8), `walletpaths` (44/84/86), `descsum` + `descriptors` (380–386), `musig2` (327), `silentpayments` (352), `blockfilter` (157/158), `v2transport` (324; ElligatorSwift decodings taken from vectors, not implemented), `bip322` (verification only). Hashing, curves and ciphers come from audited `@noble/*` (SipHash from the `siphash` package); never hand-roll crypto. Test-only signing helpers live in `packages/models/test/`, never in `src/`. |
 | `packages/publication` | `bip-atlas.publication.v1` schema + validator; `test/chapters.test.ts` applies every content contract to every chapter. |
-| `packages/figures` | Recipe registry (`registry.ts`) and Preact figure components. Components only draw; exact values arrive precomputed. `worked/` holds the static "Worked example" tab for every interactive recipe (`IsoStack` exploded isometric drawing + numbered legend); a contract test requires one per interactive recipe. |
+| `packages/figures` | Recipe registry (`registry.ts`) and Preact figure components. Components only draw; exact values arrive precomputed. `kit/` is the illustration kit (isometric boxes, cells, labels, machines, storyboards, packets, glyphs) used by `drawing: true` recipes. `worked/` holds the old "Worked example" tabs for card-style heroes not yet redrawn. |
 | `apps/site` | Astro pages, `lib/content.ts` (load + validate), `lib/derive.ts` (build-time values from models; throws if a value differs from a published vector), `components/Figure.astro` (recipe dispatcher), `styles/atlas.css`. |
 | `content/chapters/<id>.json` | Hand-authored chapter: paragraphs with claim IDs, figures naming recipes + fixture IDs. |
 | `content/evidence/<id>.json` | Evidence ledger: each claim has scope, support, and verbatim quotes with line numbers in the pinned sources. |
@@ -33,7 +33,7 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 ## Rules that the tests enforce (keep them green)
 
 - Every paragraph cites at least one claim; every ledger claim is cited; every quote appears verbatim (whitespace-normalized) at its cited lines.
-- Chapter title, BIPs, hero recipe and its `controls` must match `catalog.json`; figure budget 1 interactive hero + 1–2 static supporting figures.
+- Chapter title, BIPs, hero recipe and its `controls` must match `catalog.json`; figure budget from `content/figure-policy.json` (1 interactive hero + up to 12 static figures, decision D1 in `review/decisions.md`; the catalog's own 1–2 is overridden).
 - Default reading path 1,100–1,800 words (`defaultPathWordCount`; details blocks, captions and tables excluded).
 - Every exact value shown comes from a model; numbers written in prose need a test that checks them (see `bip39.test.ts`, `tx.test.ts`).
 - Fixtures are copied from pinned sources, never invented or edited to make code pass.
@@ -48,9 +48,10 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 
 ## Figures and references
 
-- Interactive figures render as two tabs in `Plate.astro`: A, the island; B, a static worked example (no-JS: both shown, stacked). Chapter accent colours live in `atlas.css` under `[data-chapter=…]`; they are used by worked examples and tabs, not by prose.
+- **Drawing style (decisions D2–D3, `docs/superpowers/specs/2026-10-02-illustration-redesign-design.md`)**: recipes with `drawing: true` render unframed (`.atlas-fig`), with Making Software-style SVG from `packages/figures/src/kit/`. Fixed palette meanings (`--atlas-c-*`): secret pink, public green, hash yellow, signature blue, checksum purple, network cyan, time orange, hidden hatched; always add a second cue (label, bracket, pattern). Heroes are drawing-first with compact strips and one stepper/slider; their worked example becomes static storyboard figures. Static drawings compose at ≤ 344 units wide or ship a narrow composition via `Responsive`. Pilot chapters: Mnemonics, Taproot.
+- Card-style interactive figures (not yet redrawn) still render as two tabs in `Plate.astro`: A, the island; B, a static worked example (no-JS: both shown, stacked). A contract test requires a worked tab for card-style heroes and forbids one for drawing-style heroes.
 - Citation markers carry anchors from their `walkBlocks` path (`citeAnchor`); evidence entries link back (↩ a, b, …). Any new block type that cites claims must render `ClaimRefs` with its `at` path.
 
 ## Visual checks
 
-Screenshot desktop 1440 and mobile 375 of every chapter and key figure states; `document.documentElement.scrollWidth` must equal the viewport width. Islands must render a static equivalent without JS (`data-hydrated="false"` path). Client JS budget: < 60 KB gzipped (currently ~49 KB across all island bundles); client components must import `@bip-atlas/models/bech32` style subpaths, not the package index, or crypto gets bundled.
+Screenshot desktop 1440 and mobile 375 of every chapter and key figure states; `document.documentElement.scrollWidth` must equal the viewport width. Islands must render a static equivalent without JS (`data-hydrated="false"` path). Client JS budget: < 60 KB gzipped (currently ~52 KB across all island bundles); client components must import `@bip-atlas/models/bech32` style subpaths, not the package index, or crypto gets bundled.

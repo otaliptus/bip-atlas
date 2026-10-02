@@ -31,44 +31,6 @@ import { WorkedExample, type WorkedStep } from "./WorkedExample";
 const bits = (s: string) => s.match(/.{1,11}/g)?.join(" ") ?? s;
 
 /* ---------- BIP 39 ---------- */
-export function MnemonicWorked({ fixture: f }: { fixture: DerivedMnemonicFixture }) {
-  const d = f.derived;
-  const steps: WorkedStep[] = [
-    { title: `Start with ${d.layout.entropyBits} bits of entropy`, values: [{ label: "entropy (hex)", value: f.entropyHex }], layer: { size: 0.85, tone: "plain", cells: d.layout.entropyBits / 8 } },
-    {
-      title: `Hash it and keep the first ${d.layout.checksumBits} bits as the checksum`,
-      values: [{ label: "SHA-256", value: d.hashHex }, { label: "checksum bits", value: d.checksumBits }],
-      layer: { size: 0.3, tone: "hatch", cells: d.layout.checksumBits },
-    },
-    {
-      title: `Cut the ${d.layout.totalBits} bits into ${d.layout.wordCount} groups of 11`,
-      values: [{ label: "groups", value: bits(d.entropyBits + d.checksumBits) }],
-      note: `The last group holds ${d.layout.lastWordEntropyBits} entropy bits and the ${d.layout.checksumBits} checksum bits.`,
-      layer: { tone: "wash", cells: d.layout.wordCount, mark: [d.layout.wordCount - 1] },
-    },
-    {
-      title: "Look each group up in the 2,048-word list",
-      values: [{ label: "indices", value: d.groups.map((g) => g.index).join(", ") }, { label: "words", value: f.mnemonic }],
-      layer: { tone: "accent", cells: d.layout.wordCount },
-    },
-    {
-      title: "Stretch words and passphrase into a 64-byte seed",
-      values: [{ label: "passphrase", value: f.passphrase || "(empty)" }, { label: "seed", value: d.seeds[0].seedHex }],
-      note: "PBKDF2-HMAC-SHA512, 2,048 iterations; password the words, salt “mnemonic” + passphrase, both UTF-8 NFKD.",
-      layer: { size: 0.7, tone: "accent" },
-    },
-  ];
-  return (
-    <WorkedExample
-      intro={<>One published vector, end to end: <strong>{f.label}</strong>. The hatched layer is the checksum. A public test phrase — never use it for funds.</>}
-      steps={steps}
-      label={`Entropy, checksum, ${d.layout.wordCount} groups, words, then seed, drawn as stacked layers.`}
-      source={<>Source: {f.source.external ? `${f.source.external} ${f.source.pointer}` : `BIP 39 line ${f.source.line}`}; computed by the tested BIP 39 model.</>}
-    />
-  );
-}
-
-/* ---------- BIP 32 ---------- */
 export function Bip32Worked({ fixture: f }: { fixture: DerivedBip32Fixture }) {
   const chain = ["m", "m/0H", "m/0H/1", "m/0H/1/2H"];
   const nodes = chain.map((p) => f.derived.nodes.find((n) => n.path === p)).filter((n): n is NonNullable<typeof n> => !!n);
@@ -236,33 +198,6 @@ export function SchnorrWorked({ fixtures }: { fixtures: DerivedSchnorrFixture[] 
   );
 }
 
-/* ---------- BIP 341 ---------- */
-export function TaprootWorked({ fixture: f }: { fixture: DerivedTaprootTreeFixture }) {
-  const d = f.derived;
-  const leaf = [...d.leaves].sort((a, b) => b.path.length - a.path.length)[0];
-  const branches = leaf.check.filter((s) => s.id === "branch");
-  const tweak = leaf.check.find((s) => s.id === "tweak")!.values;
-  const steps: WorkedStep[] = [
-    { title: `Reveal one script (leaf ${String.fromCharCode(65 + leaf.id)}) and hash it with its leaf version 0x${leaf.leafVersion.toString(16)} and length`, values: [{ label: "script", value: leaf.scriptHex }, { label: "TapLeaf hash", value: leaf.leafHash }], layer: { size: 0.4, tone: "accent" } },
-    ...branches.map((b, j): WorkedStep => ({
-      title: `Fold in sibling hash ${j + 1}, smaller first`,
-      values: [{ label: "sibling", value: b.values.e }, { label: "TapBranch", value: b.values.next }],
-      layer: { size: 0.55 + 0.2 * j, tone: "wash", cells: 2 },
-    })),
-    { title: "Tweak the internal key with the root", values: [{ label: "internal key P", value: d.internalKeyHex }, { label: "t", value: tweak.t }], layer: { size: 0.9, tone: "wash", cells: 2 } },
-    { title: "Q = P + t⋅G must equal the output key", values: [{ label: "output key q", value: d.outputKeyHex }], note: `It does, and y(Q) is ${d.parity ? "odd" : "even"}, matching the control block’s parity bit: the output committed to this script all along.`, layer: { size: 0.6, tone: "accent" } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>Spending published vector {f.vectorIndex} through one of its deepest leaves: what the verifier rebuilds from the control block.</>}
-      steps={steps}
-      label="A leaf hash folded with sibling hashes up to the root, then tweaked into the output key."
-      source={<>Source: BIP 341 wallet-test-vectors.json, {f.source.pointer}; every value matched the vector at build time.</>}
-    />
-  );
-}
-
-/* ---------- BIP 342 ---------- */
 export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
   const f = fixtures.find((x) => x.caseIndex === 1109) ?? fixtures[0];
   const v = f.derived.success;

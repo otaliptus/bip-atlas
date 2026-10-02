@@ -18,7 +18,8 @@ const [outdir, ...only] = process.argv.slice(2);
 mkdirSync(outdir, { recursive: true });
 const chapters = only.length ? only : readdirSync(new URL("../content/chapters/", import.meta.url)).map((f) => f.replace(/\.json$/, "")).sort();
 const SIZES = [{ width: 768, height: 1024 }, { width: 1024, height: 768 }];
-const HERO = "figure.atlas-plate:has(.atlas-plate__kind)";
+// Card-style heroes carry an "Interactive" badge; drawing-style heroes (decision D3) mark the figure itself.
+const HERO = "figure.atlas-plate:has(.atlas-plate__kind), figure.atlas-fig[data-interactive=true]";
 
 const browser = await chromium.launch();
 const out = { base: BASE, generated: new Date().toISOString(), pages: [], heroes: [] };
@@ -52,7 +53,7 @@ function layoutProbe() {
     }
     if (el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 1) {
       if (cs.overflowX === "hidden" || cs.overflowX === "clip") clipped.push(name(el) + ` ${el.scrollWidth}>${el.clientWidth}`);
-      else if (cs.overflowX === "visible" && el.closest("figure") && cs.display !== "inline") spill.push(name(el) + ` ${el.scrollWidth}>${el.clientWidth}`);
+      else if (cs.overflowX === "visible" && el.closest("figure") && !el.closest("svg") && cs.display !== "inline") spill.push(name(el) + ` ${el.scrollWidth}>${el.clientWidth}`);
       else if (cs.overflowX === "auto" || cs.overflowX === "scroll") scrollers.push(name(el) + ` ${el.scrollWidth}>${el.clientWidth} focusable=${el.tabIndex >= 0}`);
     }
     if (el instanceof SVGTextElement) {
@@ -222,9 +223,9 @@ for (const ch of chapters) {
     const iw = await page.evaluate(() => innerWidth);
     const probe = await page.evaluate(layoutProbe);
     // every figure plate, for a look at static figures
-    const figs = await page.locator("figure.atlas-plate").count();
+    const figs = await page.locator("figure.atlas-plate, figure.atlas-fig").count();
     for (let i = 0; i < figs; i++) {
-      const f = page.locator("figure.atlas-plate").nth(i);
+      const f = page.locator("figure.atlas-plate, figure.atlas-fig").nth(i);
       const id = await f.getAttribute("id");
       if (sz.width === 768 && process.env.PLATES_DIR) await f.screenshot({ path: `${process.env.PLATES_DIR}/${ch}-768-${id}.png` });
     }

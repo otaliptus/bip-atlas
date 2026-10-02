@@ -7,12 +7,24 @@ interface Props {
   figure: Figure;
   numbers: Map<string, number>;
   interactive?: boolean;
+  /** Illustration-kit figure: no card, no tabs (decision D3). */
+  drawing?: boolean;
   path: string;
 }
-const { figure, numbers, interactive = false, path } = Astro.props;
+const { figure, numbers, interactive = false, drawing = false, path } = Astro.props;
 const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
-const tabbed = interactive && Astro.slots.has("worked");
+const tabbed = interactive && !drawing && Astro.slots.has("worked");
 ---
+{drawing ? (
+<figure class:list={["atlas-fig", `atlas-fig--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`} data-interactive={interactive ? "true" : undefined}>
+  <span class="atlas-fig__code" aria-hidden="true">FIG. {figure.figure}</span>
+  <p class="atlas-fig__title" id={`${id}-title`}><span class="atlas-fig__num">{`Fig. ${figure.figure} `}</span>{figure.title}</p>
+  <div class="atlas-fig__stage"><slot /></div>
+  <figcaption class="atlas-fig__caption">
+    <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
+  </figcaption>
+</figure>
+) : (
 <figure class:list={["manual-plate", "atlas-plate", `atlas-plate--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`}>
   <div class="atlas-plate__head">
     <span class="manual-plate-code">FIG. {figure.figure}</span>
@@ -46,6 +58,7 @@ const tabbed = interactive && Astro.slots.has("worked");
     <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
   </figcaption>
 </figure>
+)}
 
 <script>
   // Progressive enhancement: without JS both views stay visible, one after the other.
