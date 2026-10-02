@@ -253,6 +253,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "taproot-tree",
+    drawing: true,
   },
   {
     id: "taproot-commitment.v1",
@@ -271,6 +272,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "taproot-keyspend",
+    drawing: true,
   },
   {
     id: "tapscript-witness.v1",

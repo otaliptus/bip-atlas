@@ -1485,3 +1485,6 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-key__t, .k-actor__t, .k-boundary__t, .k-packet__ruler { font-size: 9px !important; letter-spacing: 0.06em; }
 .k-packet__t { font-size: 9px !important; }
 .k-boundary__line { stroke: var(--atlas-ink); stroke-width: 0.75; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.k-value--hash { fill: #9a7400 !important; font-weight: 500; }
+.k-dashed { stroke-dasharray: 3 2; }
+.k-sep { stroke: var(--manual-rule); }
