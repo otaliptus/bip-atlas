@@ -828,5 +828,9 @@ export interface Bip322FormatsDerived { rows: Array<{ name: string; scripts: str
 export type DerivedBip322FormatsFixture = Bip322FormatsFixture & { derived: Bip322FormatsDerived };
 
 export interface Bip322VerdictsFixture extends BaseFixture { kind: "bip322-verdicts"; cases: string[] }
-export interface Bip322VerdictsDerived { rows: Array<{ label: string; message: string; address: string; state: string; detail: string }> }
+export interface Bip322VerdictsDerived {
+  rows: Array<{ label: string; message: string; address: string; state: string; detail: string }>;
+  /** The interpreter's reviewed non-push opcodes, by script version (names without OP_). */
+  reviewed: Array<{ version: string; ops: string[] }>;
+}
 export type DerivedBip322VerdictsFixture = Bip322VerdictsFixture & { derived: Bip322VerdictsDerived };

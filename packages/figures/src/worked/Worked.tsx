@@ -20,7 +20,6 @@ import type {
   DerivedDescriptorFixture,
   DerivedMusig2SessionFixture,
   DerivedSpFixture,
-  DerivedBip322Fixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -408,29 +407,6 @@ export function SpWorked({ fixtures }: { fixtures: DerivedSpFixture[] }) {
       steps={steps}
       label="Address, input keys, input hash, shared secret and output, drawn as stacked layers."
       source={<>Source: BIP 352 send_and_receive_test_vectors.json (line {f.source.line}); recomputed by the tested model and checked against the vector.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 157/158 ---------- */
-/* ---------- BIP 324 ---------- */
-/* ---------- BIP 322 ---------- */
-export function Bip322Worked({ fixtures }: { fixtures: DerivedBip322Fixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const steps: WorkedStep[] = [
-    { title: "Hash the message with a tag", values: [{ label: "message", value: d.message || "(empty)" }, { label: "sha256_tag(\"BIP0322-signed-message\", m)", value: d.messageHash }], layer: { size: 0.6, tone: "wash", cells: 1 } },
-    { title: "to_spend commits to the hash and the address", values: [{ label: "scriptSig: OP_0 PUSH32", value: d.messageHash }, { label: "output script (the address)", value: d.toSpend.challenge }, { label: "to_spend txid", value: d.toSpend.txid }], note: "Its one input spends 000…000:FFFFFFFF, an output that does not exist; it is built only to be checked.", layer: { size: 0.9, tone: "plain", cells: 2 } },
-    { title: "to_sign spends it", values: [{ label: "input", value: `${d.toSpend.txid}:0` }, { label: "output", value: "0 sats to OP_RETURN" }], layer: { size: 0.8, tone: "hatch", cells: 2 } },
-    { title: "The signature is to_sign’s witness", values: d.toSign.witness.map((w, i) => ({ label: `witness item ${i + 1}`, value: w || "(empty)" })), layer: { size: 0.55, tone: "accent", cells: Math.max(1, d.toSign.witness.length) } },
-    { title: "Verify as if to_sign were spending a real coin", values: [{ label: "verdict", value: d.verdict.state === "valid" ? `valid at time ${d.verdict.time}, age ${d.verdict.age}` : `${d.verdict.state}: ${d.verdict.reason}` }], layer: { size: 0.7, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 322’s vector for the message “{d.message}”, signed for {d.address.slice(0, 14)}…: two transactions built only to be checked, not to be broadcast.</>}
-      steps={steps}
-      label="Message hash, to_spend, to_sign, witness and verdict, drawn as stacked layers."
-      source={<>Source: BIP 322 {f.source.file?.replace("bip-0322/", "")} (line {f.source.line}); rebuilt and verified by the tested model.</>}
     />
   );
 }

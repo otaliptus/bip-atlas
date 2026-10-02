@@ -39,7 +39,7 @@
       "fixtures": [
         "b322-formats"
       ],
-      "caption": "BIP 322’s formats from its table: legacy, which the BIP restricts to P2PKH; simple for native SegWit; full for anything; and full proof of funds.",
+      "caption": "BIP 322’s formats from its table, each envelope stamped with its prefix: legacy, which the BIP restricts to P2PKH; simple for native SegWit; full for anything; and full proof of funds.",
       "claims": [
         "formats",
         "legacy-rules",
@@ -47,7 +47,7 @@
         "full",
         "pof"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -70,6 +70,22 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A18.2",
+          "recipe": "bip322-message-hash.v1",
+          "title": "One character, another hash",
+          "fixtures": [
+            "b322-p2wpkh-hello",
+            "b322-wrong-message"
+          ],
+          "caption": "Two of BIP 322’s vectors for the same address with different messages: unrelated hashes, so different to_spend transactions.",
+          "claims": [
+            "to-spend",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
           "claims": [
@@ -78,7 +94,7 @@
         },
         {
           "type": "figure",
-          "figure": "A18.2",
+          "figure": "A18.3",
           "recipe": "bip322-virtual-tx.v1",
           "title": "to_spend and to_sign",
           "fixtures": [
@@ -113,6 +129,22 @@
             "consensus-valid",
             "signature-def"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.4",
+          "recipe": "bip322-witness.v1",
+          "title": "A signature that is a witness stack",
+          "fixtures": [
+            "b322-p2wsh-3of3"
+          ],
+          "caption": "The 3-of-3 multisig vector’s signature, item by item: an empty dummy, three ECDSA signatures and the witness script.",
+          "claims": [
+            "signature-def",
+            "consensus-valid",
+            "vectors"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -136,6 +168,21 @@
             "to-sign",
             "pof"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.5",
+          "recipe": "bip322-choice.v1",
+          "title": "Which format",
+          "fixtures": [],
+          "caption": "Schematic of BIP 322’s encoding rules: proof of funds when inputs were added; simple only with all defaults and a native SegWit address.",
+          "claims": [
+            "encode-choice",
+            "simple",
+            "full",
+            "pof"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -167,6 +214,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A18.6",
+          "recipe": "bip322-verify-story.v1",
+          "title": "A verifier’s steps",
+          "fixtures": [
+            "b322-p2wpkh-full"
+          ],
+          "caption": "One of BIP 322’s full-format vectors, checked by the tested model step by step; exact values are listed below the frames.",
+          "claims": [
+            "basic-validation",
+            "time-age",
+            "interpreter",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR and FindAndDelete are forbidden; ECDSA signatures must be strictly DER-encoded with a low S value, and a failing one must be empty; pushes must be minimal; IF arguments must be exactly 0x01 or empty; and only a single stack element may remain. Breaking any of these makes the signature invalid.",
           "claims": [
@@ -185,7 +249,7 @@
         },
         {
           "type": "figure",
-          "figure": "A18.3",
+          "figure": "A18.7",
           "recipe": "bip322-verdicts.v1",
           "title": "Three verdicts",
           "fixtures": [
@@ -207,6 +271,22 @@
             "vectors",
             "basic-validation"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.8",
+          "recipe": "bip322-interpreter.v1",
+          "title": "The reviewed opcodes",
+          "fixtures": [
+            "b322-verdicts"
+          ],
+          "caption": "The opcodes this site’s verifier executes, from the model’s reviewed set. A script with any other opcode is not judged: inconclusive.",
+          "claims": [
+            "interpreter",
+            "upgradeable-rules",
+            "vectors"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -237,6 +317,20 @@
             "not-sender",
             "no-timestamp"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.9",
+          "recipe": "bip322-limits.v1",
+          "title": "What a signature does not prove",
+          "fixtures": [],
+          "caption": "Schematic: one moment, one script, one message; no date, no signer and no promise about the coins now.",
+          "claims": [
+            "no-proof",
+            "not-sender",
+            "no-timestamp"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

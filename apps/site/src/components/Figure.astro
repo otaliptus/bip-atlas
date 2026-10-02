@@ -87,7 +87,12 @@ import {
   Bip322VirtualTx,
   Bip322Formats,
   Bip322Verdicts,
-  Bip322Worked,
+  Bip322Hash,
+  Bip322Witness,
+  Bip322Choice,
+  Bip322VerifyStory,
+  Bip322Rack,
+  Bip322Limits,
   type DerivedBip322Fixture,
   type DerivedBip322FormatsFixture,
   type DerivedBip322VerdictsFixture,
@@ -270,6 +275,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
   {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
+  {figure.recipe === "bip322-message-hash.v1" && <Bip322Hash fixtures={b322} />}
+  {figure.recipe === "bip322-witness.v1" && <Bip322Witness fixture={b322[0]} />}
+  {figure.recipe === "bip322-choice.v1" && <Bip322Choice />}
+  {figure.recipe === "bip322-verify-story.v1" && <Bip322VerifyStory fixture={b322[0]} />}
+  {figure.recipe === "bip322-interpreter.v1" && <Bip322Rack fixture={b322Verdicts[0]} />}
+  {figure.recipe === "bip322-limits.v1" && <Bip322Limits />}
   {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -284,7 +295,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
-      {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
   )}
 </Plate>

@@ -1167,34 +1167,14 @@ button.atlas-tl-bit:focus-visible { outline: 2px solid var(--manual-focus); outl
 
 /* ---------- Message signing (BIP 322) ---------- */
 .atlas-chapter[data-chapter="message-signing"] { --atlas-accent: #5a4a8a; }
-.atlas-b322-lab, .atlas-b322-lab > * { min-inline-size: 0; }
-.atlas-b322-lab .atlas-panel__title { text-transform: none; letter-spacing: 0; }
-.atlas-b322-lab .atlas-panel__title small { font-weight: 400; color: var(--manual-muted); margin-inline-start: 0.5rem; }
-.atlas-b322-reveal { display: inline-flex; gap: 0.5rem; align-items: center; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-b322-dl { display: grid; gap: 0.3rem; margin: 0; font-size: 0.8125rem; }
-.atlas-b322-dl > div { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
-.atlas-b322-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-b322-dl dd { margin: 0; min-inline-size: 0; overflow-wrap: anywhere; }
-.atlas-b322-dl small { color: var(--manual-muted); }
-.atlas-b322-txs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--manual-space-3); }
-.atlas-b322-tx { border-collapse: collapse; inline-size: 100%; font-size: 0.8125rem; }
-.atlas-b322-tx th { text-align: start; font-family: var(--manual-code); font-size: 0.75rem; font-weight: 400; color: var(--manual-muted); padding: 0.25rem 0.5rem 0.25rem 0; vertical-align: top; inline-size: 10rem; }
-.atlas-b322-tx td { padding: 0.25rem 0; border-block-end: 1px solid var(--manual-rule); overflow-wrap: anywhere; }
-.atlas-b322-wit { margin: 0; padding-inline-start: 1.2rem; }
-.atlas-b322-verdict { margin: 0; padding: 0.5rem 0.6rem; border-inline-start: 4px solid var(--atlas-accent); background: var(--atlas-accent-wash); font-size: 0.875rem; }
-.atlas-b322-verdict[data-state="invalid"] { border-inline-start-color: var(--manual-ink); background: var(--atlas-hatch), var(--manual-surface); }
-.atlas-b322-verdict[data-state="inconclusive"] { border-inline-start-style: dashed; background: var(--manual-surface); }
-.atlas-b322-verdict small { color: var(--manual-muted); }
-.atlas-b322-verdicts { display: grid; gap: var(--manual-space-2); }
-.atlas-b322-verdicts .atlas-b322-verdict p { margin: 0 0 0.2rem; }
-.atlas-b322-verdicts__state { font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--atlas-accent); }
-.atlas-b322-verdicts__detail { font-family: var(--manual-code); font-size: 0.75rem; overflow-wrap: anywhere; }
-.atlas-b322-formats tr[data-legacy="true"] { color: var(--manual-muted); }
-.atlas-b322-formats table { font-size: 0.8125rem; }
-@media (max-width: 47.99rem) {
-  .atlas-b322-dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
-  .atlas-b322-tx th { inline-size: 6.5rem; }
-}
+.k-b3-h { font-size: 9px !important; letter-spacing: 0.06em; font-weight: 500; }
+.k-b3-l { font-size: 8.5px !important; letter-spacing: 0.05em; fill: var(--manual-muted) !important; }
+.k-b3-v { font-size: 8.5px !important; }
+.k-b3-tag { font-size: 8px !important; letter-spacing: 0.02em; }
+.k-b3-rail { stroke: var(--atlas-ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.k-b3-stamp rect { fill: none; stroke: var(--atlas-ink); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.k-b3-stamp text { font-size: 11px !important; font-weight: 600; letter-spacing: 0.1em; }
+.k-b3-stamp[data-state="inconclusive"] rect { stroke-dasharray: 5 3; }
 
 /* ==========================================================================
    Illustration kit (decisions D2–D3). Making Software-style drawings:

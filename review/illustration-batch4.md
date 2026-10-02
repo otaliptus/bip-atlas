@@ -107,3 +107,21 @@ A fresh read-only subagent checked BIP 324, the ledger, model, components, tests
 | 9–14 | nits | A17.5 frame 2 suggested x is hashed first, had no arrow and no tag name; unlabelled small packet segment; A17.8 bracket without text; hard-coded secret colour; empty space in A17.3. | Encodings first, arrow to the secret, tag `bip324_ellswift_xonly_ecdh` named; "HDR+C" labels; secret text colour from the token; A17.3 trimmed. |
 
 To keep crypto out of the client bundle, the BIP 324 constants moved to an import-free `packages/models/src/v2constants.ts`, re-exported by `v2transport.ts`; drawing code imports the constants module (importing `v2transport` from a static figure pulled `@noble/curves` into the island bundle, +16 KB).
+
+## Message signing (A18)
+
+Was 3 figures (a formats table, a card-style hero with a worked-example tab, verdict cards). Now 1 drawing-first hero and 8 static drawings. The worked example (one vector from message hash to verdict) becomes A18.6.
+
+| Fig. | Recipe | Drawing | Data | Claims |
+|---|---|---|---|---|
+| A18.1 | `bip322-formats.v1` (opening, redrawn) | The four formats as envelopes stamped with their prefix (legacy dashed, no prefix), text from BIP 322's table. | `b322-formats` | formats, legacy-rules, simple, full, pof |
+| A18.2 | `bip322-message-hash.v1` **new** | Two messages for one address through the tagged-hash machine: unrelated hashes, different to_spend IDs. | `b322-p2wpkh-hello`, `b322-wrong-message` | to-spend, vectors |
+| A18.3 | `bip322-virtual-tx.v1` (hero, redrawn) | to_spend and to_sign as two linked tickets (to_sign's input spends to_spend's output 0), the message hash hatched until revealed, a verdict stamp, "never broadcast". Strips: vector, to_spend/to_sign, hash hidden/revealed. | six `b322-*` vectors | vectors, to-spend, to-sign, verdicts |
+| A18.4 | `bip322-witness.v1` **new** | The 3-of-3 signature as a witness stack of plates: dummy, three ECDSA signatures, the script. | `b322-p2wsh-3of3` | signature-def, consensus-valid, vectors |
+| A18.5 | `bip322-choice.v1` **new** (schematic) | Which envelope: two questions, three outcomes (pof MUST, smp MAY, otherwise ful). | none | encode-choice, simple, full, pof |
+| A18.6 | `bip322-verify-story.v1` **new** (storyboard, 4 frames; was the worked example) | A verifier on a full vector: rebuild to_spend, decode to_sign and check the link, run the interpreter, stamp VALID at T and S. | `b322-p2wpkh-full` | basic-validation, time-age, interpreter, vectors |
+| A18.7 | `bip322-verdicts.v1` (redrawn) | Three stamps: solid valid, crossed invalid, dashed inconclusive, each with its vector and the model's reason. | `b322-verdicts` | verdicts, time-age, interpreter, vectors |
+| A18.8 | `bip322-interpreter.v1` **new** | The interpreter's reviewed opcodes as tags on a rack; tapscript adds CHECKSIGADD; any other opcode → inconclusive. List from the model's `REVIEWED` via derive. | `b322-verdicts` | interpreter, upgradeable-rules, vectors |
+| A18.9 | `bip322-limits.v1` **new** (schematic) | A timeline: signed (when, who: hatched), presented, the coins later (unknown); T is a lock-time field, not a date. | none | no-proof, not-sender, no-timestamp |
+
+Derive now also returns the interpreter's reviewed opcode names (`reviewedOpName` added to `interpreter.ts`; the build throws if one has no name).
