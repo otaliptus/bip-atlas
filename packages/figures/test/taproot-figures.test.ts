@@ -6,6 +6,10 @@ import { checkControlBlock, sigMsg, taprootOutput, taprootSighash } from "@bip-a
 import { parseTransaction } from "@bip-atlas/models/tx";
 import { SigMsgLayout } from "../src/taproot/SigMsgLayout";
 import { TaprootCommitment } from "../src/taproot/TaprootCommitment";
+import { DepthProof } from "../src/taproot/DepthProof";
+import { SpendReveals } from "../src/taproot/SpendReveals";
+import { VerifierStory } from "../src/taproot/VerifierStory";
+import { WitnessStacks } from "../src/taproot/WitnessStacks";
 import { TaprootTweak } from "../src/taproot/TaprootTweak";
 import { layoutTree, seenMap } from "../src/taproot/treeLayout";
 import type { DerivedTaprootKeyspendFixture, DerivedTaprootTreeFixture, TaprootKeyspendFixture, TaprootTreeFixture } from "../src/types";
@@ -167,5 +171,36 @@ describe("TaprootCommitment (static renders)", () => {
     const b = d.leaves.find((l) => l.id === 1)!;
     expect(s).toContain(`33 + 32 × ${b.path.length} = ${b.controlBlockHex.length / 2} B`);
     expect(33 + 32 * b.path.length).toBe(b.controlBlockHex.length / 2);
+  });
+});
+
+describe("Taproot static drawings", () => {
+  const f = derived("bip341-spk5");
+  const d = f.derived;
+  const b = d.leaves.find((l) => l.id === 1)!;
+  it("WitnessStacks: sizes from the model", () => {
+    const s = html(h(WitnessStacks, { fixture: f }));
+    expect(s).toContain(`signature · ${d.keySpend!.signatureHex.length / 2} B`);
+    expect(s).toContain(`control block · ${b.controlBlockHex.length / 2} B`);
+    expect(s).toContain(`script · ${b.scriptHex.length / 2} B`);
+  });
+  it("VerifierStory: one frame per recomputation step, values from the check", () => {
+    const s = html(h(VerifierStory, { fixture: f }));
+    const branches = b.check.filter((c) => c.id === "branch").length;
+    expect(count(s, '<li class="k-story__frame">')).toBe(4 + branches);
+    for (const c of b.check.filter((c) => c.id === "branch")) expect(s).toContain(c.values.next.slice(0, 8));
+    expect(s).toContain("MATCH");
+  });
+  it("SpendReveals: the key-path panel names no internal key or tree hash", () => {
+    const s = html(h(SpendReveals, { fixture: f }));
+    const wide = s.split("k-resp__narrow")[0];
+    const keyPanel = wide.slice(0, wide.indexOf("SCRIPT PATH SPEND"));
+    expect(keyPanel).not.toContain(d.internalKeyHex.slice(0, 8));
+    for (const l of d.leaves) expect(keyPanel).not.toContain(l.leafHash.slice(0, 8));
+    expect(wide).toContain(`DEPTH ${b.path.length}`);
+  });
+  it("DepthProof: control-block sizes per leaf", () => {
+    const s = html(h(DepthProof, { fixture: f }));
+    for (const l of d.leaves) expect(s).toContain(`>${l.controlBlockHex.length / 2} B<`);
   });
 });

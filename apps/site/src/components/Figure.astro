@@ -102,6 +102,10 @@ import {
   TaprootTweak,
   TaprootCommitment,
   SigMsgLayout,
+  WitnessStacks,
+  VerifierStory,
+  SpendReveals,
+  DepthProof,
   TapscriptWitness,
   TapscriptTrace,
   SigopsBudget,
@@ -195,6 +199,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
   {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
   {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
+  {figure.recipe === "taproot-witness-stacks.v1" && <WitnessStacks fixture={tap[0]} />}
+  {figure.recipe === "taproot-verifier-story.v1" && <VerifierStory fixture={tap[0]} />}
+  {figure.recipe === "taproot-reveals.v1" && <SpendReveals fixture={tap[0]} />}
+  {figure.recipe === "taproot-depth.v1" && <DepthProof fixture={tap[0]} />}
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
