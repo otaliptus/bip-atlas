@@ -315,6 +315,8 @@ export interface TapscriptTraceView {
   witness: { items: number; stackBytes: number; scriptBytes: number; controlBytes: number; annexBytes: number; totalBytes: number; siblings: number };
   budgetStart: number;
   sigOpsCounted: number;
+  /** Name of the OP_SUCCESSx the decoder met (validation then succeeds without running), or null. */
+  opSuccess: string | null;
   steps: Array<{
     position: number;
     name: string;

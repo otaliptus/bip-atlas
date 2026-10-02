@@ -28,7 +28,7 @@ export function VerifyStory({ fixture }: { fixture: DerivedSchnorrFixture }) {
   if (!even(lift.y) || !even(R.y)) throw new Error(`${fixture.id}: a valid trace must have even y for P and R`);
   const m = fixture.messageHex.length / 2;
   // r ‖ P ‖ m to scale (1.1 units per byte); an empty message still gets a sliver so it can be named.
-  const preimage = [{ bytes: 32, role: "sig", t: "r" }, { bytes: 32, role: "public", t: "P" }, { bytes: Math.max(m, 4), role: "plain", t: "m" }].map((p, i, all) => ({
+  const preimage = [{ bytes: 32, role: "sig", t: "r" }, { bytes: 32, role: "public", t: "P" }, { bytes: m, role: "plain", t: m ? "m" : "" }].map((p, i, all) => ({
     ...p,
     w: p.bytes * 1.1,
     x: 14 + all.slice(0, i).reduce((n, q) => n + q.bytes * 1.1, 0),
@@ -39,10 +39,11 @@ export function VerifyStory({ fixture }: { fixture: DerivedSchnorrFixture }) {
       desc: `The 32-byte key ${fixture.publicKeyHex} is lifted to the point P with x = ${lift.x} and even y = ${lift.y}.`,
       draw: (ids) => (
         <>
-          <KeyGlyph at={[14, 40]} role="public" label="pk" />
+          <KeyGlyph at={[14, 40]} role="public" />
+          <Value at={[29, 64]} text="pk" size={9.5} anchor="middle" />
           <Value at={[14, 82]} text={short(fixture.publicKeyHex)} size={9} />
           <Arrow d="M52 46 H86" ids={ids} />
-          <Machine at={[112, 58]} w={56} d={28} h={22} label="lift_x" />
+          <Machine at={[112, 58]} w={56} d={28} h={22} label="lift" sub="lift_x" />
           <Arrow d="M178 46 H206" ids={ids} />
           <Value at={[214, 40]} text="POINT P" size={8.5} cls="k-value--label" />
           <Value at={[214, 54]} text={`x ${short(lift.x)}`} size={9} />

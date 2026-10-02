@@ -39,7 +39,7 @@ export function EvenY({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
           <KeyGlyph at={[168, 60]} role="public" scale={0.7} />
         </g>
         <Value at={[196, 68]} text="other y = p − y · ODD" size={9} cls="k-value--muted" />
-        <Value at={[196, 80]} text="NEVER USED" size={8.5} cls="k-value--muted" />
+        <Value at={[196, 80]} text="NOT USED BY VERIFY" size={8.5} cls="k-value--muted" />
         <line class="k-sep k-leader" x1="14" y1="100" x2="330" y2="100" />
 
         <Value at={[14, 122]} text={`R · VECTOR ${oddF.vectorIndex}`} size={9} cls="k-value--label" />
@@ -59,7 +59,8 @@ export function EvenY({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
         <Value at={[29, 306]} text="n − sk" size={9.5} anchor="middle" />
         <Arrow d="M50 242 H120 V262 H150" ids={ids} />
         <Arrow d="M50 288 H120 V266 H150" ids={ids} />
-        <KeyGlyph at={[160, 258]} role="public" label="same pk" />
+        <KeyGlyph at={[160, 258]} role="public" />
+        <Value at={[175, 284]} text="the same pk" size={9.5} anchor="middle" />
         <Value at={[206, 268]} text="NO VALUES: SECRET" size={8} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">

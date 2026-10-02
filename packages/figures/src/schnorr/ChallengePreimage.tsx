@@ -48,8 +48,8 @@ export function ChallengePreimage({ fixtures }: { fixtures: DerivedSchnorrFixtur
         <Machine at={[130, 108]} w={64} d={28} h={22} label="SHA-256" role="hash" />
         <Arrow d="M192 98 H222" ids={ids} />
         <IsoBox at={[236, 104]} w={16} d={16} h={10} role="hash" />
-        <Value at={[256, 96]} text="HASH, MOD n" size={8.5} cls="k-value--label" />
-        <Value at={[256, 108]} text="= e" size={9.5} />
+        <Value at={[256, 96]} text="HASH;" size={8.5} cls="k-value--label" />
+        <Value at={[256, 108]} text="e = HASH mod n" size={9.5} />
 
         {rows.map((r, i) => {
           const y = top + i * rowH;
@@ -63,7 +63,7 @@ export function ChallengePreimage({ fixtures }: { fixtures: DerivedSchnorrFixtur
                 x += p.bytes * unit;
                 return p.bytes ? <rect class={`k-cell k-fill--${p.role}`} x={px} y={y + 13} width={p.bytes * unit} height={12} /> : null;
               })}
-              <Value at={[14, y + 37]} text={`→ ${short(r.hash)}`} size={9} cls="k-value--hash" />
+              <Value at={[14, y + 37]} text={`hash → ${short(r.hash)}`} size={9} cls="k-value--hash" />
             </g>
           );
         })}

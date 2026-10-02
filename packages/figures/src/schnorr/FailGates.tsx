@@ -1,9 +1,9 @@
-import { Drawing, Lamp, Responsive, Value } from "../kit";
+import { Drawing, Responsive, Value } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
 import { SCHNORR_STAGES, gateStatuses, ownTrace } from "./stages";
 
 /** The lane name: the CSV comment (how the vector was made) when it has one, else the site's label. */
-const laneText = (f: DerivedSchnorrFixture) => f.comment || f.label;
+const laneText = (f: DerivedSchnorrFixture) => f.comment || `(no comment) ${f.label}`;
 const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
 /**
@@ -22,7 +22,7 @@ export function FailGates({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
   const desc = lanes
     .map(({ f, t }) => {
       const at = SCHNORR_STAGES.findIndex((s) => s.id === t.failedStage);
-      return `Vector ${f.vectorIndex}${f.comment ? ` (CSV comment: “${f.comment}”)` : ""}: ${t.valid ? "passes all eight gates; true" : `stops at gate ${at + 1}, ${SCHNORR_STAGES[at].label.toLowerCase()}; later gates are not reached`}.`;
+      return `Vector ${f.vectorIndex}${f.comment ? ` (CSV comment: “${f.comment}”)` : ""}: ${t.valid ? "passes all eight gates; true" : `stops at gate ${at + 1} (${SCHNORR_STAGES[at].label}); later gates are not reached`}.`;
     })
     .join(" ");
 
@@ -36,7 +36,7 @@ export function FailGates({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
     const W = wide ? 640 : 330;
     const gx = (i: number) => x0 + i * gateW + gateW / 2;
     const lampX = x0 + 8 * gateW + 18;
-    const H = top + lanes.length * rowH + (wide ? 18 : 18 + 4 * 13 + 10);
+    const H = top + lanes.length * rowH + (wide ? 18 : 18 + 5 * 13 + 10);
     return (
       <Drawing id={id} width={W} height={H} title="Where each vector stops" desc={desc}>
         {SCHNORR_STAGES.map((st, i) => (
@@ -64,14 +64,17 @@ export function FailGates({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
                   </g>
                 ) : null,
               )}
-              {t.valid ? <Lamp at={[lampX, y]} state="on" r={5} /> : null}
+              {t.valid ? <text class="k-lamp__m k-value--ok" x={lampX} y={y + 3.6} text-anchor="middle">✓</text> : null}
             </g>
           );
         })}
         {wide ? (
-          <Value at={[10, H - 6]} text="● PASSED   ✕ STOPPED HERE   NOTHING AFTER: NOT REACHED" size={8} cls="k-value--muted" />
+          <Value at={[10, H - 6]} text="● PASSED · ✕ STOPPED HERE · NOTHING AFTER IT: NOT REACHED · ✓ TRUE" size={8} cls="k-value--muted" />
         ) : (
           <g>
+            <Value at={[10, top + lanes.length * rowH + 18 + 4 * 13]} text="● PASSED · ✕ STOPPED · BLANK: NOT REACHED" size={8} cls="k-value--muted" />
+            <Value at={[10, top + lanes.length * rowH + 18 + 4 * 13]} text="● PASSED · ✕ STOPPED · BLANK: NOT REACHED" size={8} cls="k-value--muted" />
+            <Value at={[10, top + lanes.length * rowH + 18 + 4 * 13]} text="● PASSED · ✕ STOPPED · BLANK: NOT REACHED" size={8} cls="k-value--muted" />
             {SCHNORR_STAGES.map((st, i) => (
               <Value at={[10 + (i % 2) * 160, top + lanes.length * rowH + 18 + Math.floor(i / 2) * 13]} text={`${i + 1} ${st.gate}`} size={8.5} cls="k-value--muted" />
             ))}

@@ -40,7 +40,7 @@ export function ByteSizes({ fixture }: { fixture: DerivedSchnorrFixture }) {
 
         <Value at={[x0, y(3) + 8]} text={`BIP 340 KEY · ${pkBytes} B · x ONLY, y TAKEN EVEN`} size={8.5} cls="k-value--label" />
         <Packet x={x0 + unit} y={y(3) + 14} perRow={DER_MAX_BYTES} unit={unit} rowH={20} fields={[{ id: "pk", label: `x = ${short(pk)}`, bytes: 32, role: "public" }]} />
-        <Value at={[x0 + 33 * unit + 10, y(3) + 28]} text="SAME x AS ABOVE" size={8} cls="k-value--muted" />
+        <Value at={[x0 + 33 * unit + 10, y(3) + 28]} text="THE SAME x, DRAWN UNDER IT" size={8} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>

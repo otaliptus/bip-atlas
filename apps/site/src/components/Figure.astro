@@ -31,7 +31,6 @@ import {
   TxWorked,
   AddressWorked,
   PsbtWorked,
-  TapscriptWorked,
   P2shWorked,
   P2shTwoStage,
   P2shCommitment,
@@ -113,6 +112,13 @@ import {
   TapscriptWitness,
   TapscriptTrace,
   SigopsBudget,
+  TapscriptOrder,
+  SigRules,
+  MultisigChain,
+  StackStory,
+  SigPays,
+  OpSuccess,
+  MinimalIf,
   type DerivedTapscriptFixture,
   type DerivedTaprootTreeFixture,
   type DerivedTaprootKeyspendFixture,
@@ -215,6 +221,13 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
+  {figure.recipe === "tapscript-order.v1" && <TapscriptOrder fixtures={ts} />}
+  {figure.recipe === "tapscript-sig-rules.v1" && <SigRules fixtures={ts} />}
+  {figure.recipe === "tapscript-multisig.v1" && <MultisigChain fixture={ts[0]} />}
+  {figure.recipe === "tapscript-stack-story.v1" && <StackStory fixture={ts[0]} />}
+  {figure.recipe === "tapscript-sig-pays.v1" && <SigPays fixtures={ts} />}
+  {figure.recipe === "tapscript-op-success.v1" && <OpSuccess fixture={ts[0]} />}
+  {figure.recipe === "tapscript-minimalif.v1" && <MinimalIf fixture={ts[0]} />}
   {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
   {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
@@ -251,7 +264,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
-      {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}

@@ -29,7 +29,7 @@ export function Equation({ fixture }: { fixture: DerivedSchnorrFixture }) {
   const legend: Array<{ t: string; role: Role; text: string }> = [
     { t: "s", role: "sig", text: `SIGNATURE BYTES 32–63 · ${short(s)}` },
     { t: "G", role: "plain", text: "THE CURVE'S FIXED BASE POINT" },
-    { t: "R", role: "public", text: `x = r, BYTES 0–31 · ${short(r)} · EVEN y` },
+    { t: "R", role: "public", text: `x(R) = r, SIGNATURE BYTES 0–31 · ${short(r)}` },
     { t: "e", role: "hash", text: `HASH OF r ‖ P ‖ m, MOD n · ${short(e)}` },
     { t: "P", role: "public", text: "THE KEY pk, LIFTED WITH EVEN y" },
   ];
@@ -61,7 +61,7 @@ export function Equation({ fixture }: { fixture: DerivedSchnorrFixture }) {
             <Value at={[40, 182 + i * 20]} text={l.text} size={8.5} />
           </g>
         ))}
-        <Value at={[14, 280]} text="VERIFY REARRANGES IT: R = s·G − e·P, THEN CHECKS x(R) = r" size={8} cls="k-value--muted" />
+        <Value at={[14, 280]} text="VERIFY COMPUTES R = s·G − e·P, THEN THE CHECKS ON R" size={8} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>

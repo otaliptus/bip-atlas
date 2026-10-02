@@ -38,6 +38,7 @@ import {
   taprootSighash,
   verifyKeyPath,
   decodeNum,
+  decodeTapscript,
   traceTapscript,
   traceP2sh,
   decodeScript,
@@ -645,6 +646,10 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
     return i;
   };
   const initialStack = t.initialStack.map(idx);
+  // An OP_SUCCESSx met while decoding ends validation as valid before anything runs (BIP 342).
+  const dec = decodeTapscript(t.scriptHex);
+  const opSuccess = dec.kind === "op-success" ? dec.at.name : null;
+  if (opSuccess !== null && (!t.valid || t.steps.length > 0)) throw new Error(`case ${c.comment}: ${opSuccess} found, but the trace is not an immediate success`);
   const size = (e: string) => (e.length / 2 < 253 ? 1 : 3) + e.length / 2;
   const control = w[w.length - (t.annexHex ? 2 : 1)];
   return {
@@ -667,6 +672,7 @@ function traceView(c: any, which: "success" | "failure"): TapscriptTraceView {
     },
     budgetStart: t.budgetStart,
     sigOpsCounted: t.sigOpsCounted,
+    opSuccess,
     steps: t.steps.map((s) => ({ position: s.position, name: s.name, executed: s.executed, note: s.note, failed: !!s.failed, before: s.stackBefore.map(idx), after: s.stackAfter.map(idx), sig: s.sig ?? null })),
   };
 }

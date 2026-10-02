@@ -58,14 +58,14 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
 
   const verdict = trace.valid
     ? "Every gate passes: Verify succeeds."
-    : `Verify stops at gate ${failedAt + 1}, ${SCHNORR_STAGES[failedAt].label.toLowerCase()}; later gates never run.`;
+    : `Verify stops at gate ${failedAt + 1} (${SCHNORR_STAGES[failedAt].label}): ${stageNote(trace.steps[failedAt].stage, trace.steps[failedAt].values, false)}; later gates never run.`;
   const published = own
     ? `Published result for vector ${fixture.vectorIndex}: ${fixture.expected ? "TRUE" : "FALSE"}.`
     : `This pairing of vector ${fixture.vectorIndex}'s key and signature with vector ${message.fromVector}'s message is not itself a published vector; the tested model computes the result.`;
   const status =
     shown >= N
       ? `Vector ${fixture.vectorIndex} with ${msgName}. ${verdict} ${published}`
-      : `Gate ${shown} of ${N}, ${SCHNORR_STAGES[cur].label.toLowerCase()}: ${STATUS_WORD[statusOf(cur)]}${curStep && statusOf(cur) !== "not-reached" ? ` (${stageNote(curStep.stage, curStep.values, curStep.ok)})` : ""}.`;
+      : `Gate ${shown} of ${N} (${SCHNORR_STAGES[cur].label}): ${STATUS_WORD[statusOf(cur)]}${curStep && statusOf(cur) !== "not-reached" ? ` (${stageNote(curStep.stage, curStep.values, curStep.ok)})` : ""}.`;
 
   const describe = () =>
     `Verify for vector ${fixture.vectorIndex}: public key ${fixture.publicKeyHex}, ${msgName} ${message.hex || "(empty)"}, signature r = ${r}, s = ${s}. ` +
@@ -115,14 +115,15 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
     return (
       <Drawing id={id} width={W} height={H} title="Verify, gate by gate" desc={describe()}>
         {inputs}
-        <Arrow d={`M24 ${wide ? 46 : 90} V${row1 - 4}`} ids={ids} />
+        {wide ? <path class="k-leader" d="M14 48 V52 H526 V48" /> : <path class="k-leader" d="M10 34 H14 M10 34 V78 H14 M118 34 H128" />}
+        <Arrow d={`M${wide ? 24 : 10} ${wide ? 52 : 78} V${row1 - 4}`} ids={ids} />
         <path class="k-ring" d={track} />
         {SCHNORR_STAGES.map((st, i) => {
           const [x, y] = gateAt(i);
           const k = statusOf(i);
           return (
-            <g class="k-gate" data-status={k} data-current={i === cur ? "true" : undefined}>
-              <rect class={`k-outline k-fill--plain${k === "fail" || i === cur ? " k-cell--em" : ""}${k === "pending" || k === "not-reached" ? " k-dashed" : ""}`} x={x - 13} y={y - 17} width="26" height="34" style={k === "not-reached" ? `fill:${ids.hatch}` : undefined} />
+            <g class={`k-gate${k === "not-reached" ? " k-faded" : ""}`} data-status={k} data-current={i === cur ? "true" : undefined}>
+              <rect class={`k-outline k-fill--plain${k === "fail" || i === cur ? " k-cell--em" : ""}${k === "pending" || k === "not-reached" ? " k-dashed" : ""}`} x={x - 13} y={y - 17} width="26" height="34" />
               <Value at={[x, y - 23]} text={String(i + 1)} size={8.5} anchor="middle" cls="k-value--label" />
               <Value at={[x, y + 30]} text={i === cur ? `▲ ${st.gate}` : st.gate} size={8} anchor="middle" cls={k === "pass" || k === "fail" ? "" : "k-value--muted"} />
               {k === "pass" ? <text class="k-lamp__m k-value--ok" x={x} y={y + 4} text-anchor="middle">✓</text> : null}
@@ -164,10 +165,10 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {strip("Public BIP 340 vector", "vector", fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}, ${f.expected ? "valid" : "invalid"}: ${f.label}` })), fixtureId, chooseFixture)}
+          {strip("Public BIP 340 vector", "vector", fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}: ${f.expected ? "" : "invalid, "}${f.label}` })), fixtureId, chooseFixture)}
           {strip("Message", "message", fixture.derived.messages.map((m) => ({
             value: m.key,
-            text: m.key === fixture.derived.ownMessage ? `Signed m · ${m.bytes} B` : `m of V${m.fromVector} · ${m.bytes} B`,
+            text: m.key === fixture.derived.ownMessage ? `Own m · ${m.bytes} B` : `m of V${m.fromVector} · ${m.bytes} B`,
             aria: m.key === fixture.derived.ownMessage ? `Its own message, ${m.bytes} bytes` : `The message of vector ${m.fromVector}, ${m.bytes} bytes`,
           })), messageKey, setMessageKey)}
         </div>

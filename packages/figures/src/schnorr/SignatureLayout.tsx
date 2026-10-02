@@ -47,6 +47,9 @@ export function SignatureLayout({ fixture }: { fixture: DerivedSchnorrFixture })
         <Value at={[14 + 16 * cell, 172]} text="x of a point R" size={8.5} anchor="middle" cls="k-value--muted" />
         <Value at={[14 + 48 * cell, 172]} text="a number below n" size={8.5} anchor="middle" cls="k-value--muted" />
 
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
+        <path class="k-leader" d="M14 36 H8 M14 78 H8 M14 120 H8 M8 36 V182 H150" />
         <Arrow d="M174 140 V182 H150 V194" ids={ids} />
         <Machine at={[118, 198]} w={72} d={30} h={26} label="Verify" sub="BIP 340" />
         <Arrow d="M186 228 H266" ids={ids} />

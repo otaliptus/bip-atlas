@@ -109,7 +109,8 @@
      "caption": "For vector 1 the two sides balance. Each term comes from the inputs, from the challenge hash, or from the curve’s fixed point G; Verify rearranges the equation to compute R.",
      "claims": [
       "final-scheme",
-      "verify-steps"
+      "verify-steps",
+      "vectors-reproduced"
      ],
      "layout": "prose"
     }
@@ -189,6 +190,14 @@
     },
     {
      "type": "paragraph",
+     "text": "Try the verifier’s message control on a valid vector. The key and signature stay the same, but another message changes e, which changes R. For every valid vector in the figure, that is enough to fail, at either the even-y check or the x comparison. Nothing in the verifier knows which message was “meant”; it only checks the one it is given.",
+     "claims": [
+      "message-swap",
+      "verify-steps"
+     ]
+    },
+    {
+     "type": "paragraph",
      "text": "Each vector in the CSV carries a short comment. These describe how a failing vector was built, not necessarily which check catches it. Vector 7 is labelled “negated message”, yet it never reaches the comparison of x(R) with r: the R it produces has an odd y coordinate, so it fails one step earlier. Vectors 8 and 11 do reach that comparison, and fail there. Reading the BIP’s algorithm and watching it run are two different kinds of evidence, and this page shows both.",
      "claims": [
       "comment-vs-stage",
@@ -221,14 +230,6 @@
       "verify-steps"
      ],
      "layout": "wide"
-    },
-    {
-     "type": "paragraph",
-     "text": "Try the message control on a valid vector. The key and signature stay the same, but another message changes e, which changes R. For every valid vector in the figure, that is enough to fail, at either the even-y check or the x comparison. Nothing in the verifier knows which message was “meant”; it only checks the one it is given.",
-     "claims": [
-      "message-swap",
-      "verify-steps"
-     ]
     },
     {
      "type": "callout",
@@ -285,7 +286,8 @@
      "claims": [
       "tagged-hash",
       "challenge-sizes",
-      "arbitrary-size"
+      "arbitrary-size",
+      "verify-steps"
      ],
      "layout": "prose"
     },
@@ -339,7 +341,9 @@
      "claims": [
       "implicit-y",
       "lift-x",
-      "two-secret-keys"
+      "two-secret-keys",
+      "verify-steps",
+      "vectors-reproduced"
      ],
      "layout": "prose"
     },

@@ -61,6 +61,28 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A08.2",
+     "recipe": "tapscript-order.v1",
+     "title": "Checks in a fixed order",
+     "fixtures": [
+      "core-case-1135",
+      "core-case-1109",
+      "core-case-804",
+      "core-case-824",
+      "core-case-662",
+      "core-case-50"
+     ],
+     "caption": "Every recorded witness of this chapter, run through BIP 342’s order. Most pass or stop at the run itself; the OP_SUCCESS case leaves early through the decoder, valid.",
+     "claims": [
+      "scope",
+      "order",
+      "op-success",
+      "traces-agree"
+     ],
+     "layout": "wide"
+    },
+    {
      "type": "paragraph",
      "text": "The execution rules themselves start from those of P2WSH, SegWit version 0’s script spends, and change a short list of things. The rest of this chapter walks through that list.",
      "claims": [
@@ -96,6 +118,30 @@
       "sig-empty",
       "sig-unknown"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A08.3",
+     "recipe": "tapscript-sig-rules.v1",
+     "title": "What a signature opcode does",
+     "fixtures": [
+      "core-case-1135",
+      "core-case-1109",
+      "core-case-804",
+      "core-case-824",
+      "core-case-662",
+      "core-case-50"
+     ],
+     "caption": "The rules for CHECKSIG, CHECKSIGVERIFY and CHECKSIGADD, one tray per shape of key and signature. Under each tray, the recorded witnesses that land in it.",
+     "claims": [
+      "sig-pops",
+      "sig-known",
+      "sig-empty",
+      "sig-unknown",
+      "sig-nonempty",
+      "budget"
+     ],
+     "layout": "prose"
     }
    ]
   },
@@ -122,6 +168,23 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A08.4",
+     "recipe": "tapscript-multisig.v1",
+     "title": "Counting signatures, old and new",
+     "fixtures": [
+      "core-case-804"
+     ],
+     "caption": "Above, a recorded witness whose OP_CHECKMULTISIG fails as soon as it runs. Below, the chain of OP_CHECKSIGADD that BIP 342’s footnote suggests, drawn with symbolic keys.",
+     "claims": [
+      "multisig-disabled",
+      "checksigadd",
+      "multisig-rewrite",
+      "case-multisig"
+     ],
+     "layout": "prose"
+    },
+    {
      "type": "paragraph",
      "text": "That is not the only design. They also describe putting each k-of-k combination in its own leaf, aggregating each combination into one key, or using threshold signatures, each trading privacy, cost and interaction differently.",
      "claims": [
@@ -130,7 +193,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The figure below replays six spends from Bitcoin Core’s validation tests, each with a witness Core accepts and one it rejects. Step through them opcode by opcode. In one, a valid signature turns 23 into 24 and the script compares the result; in its failing twin, n is five bytes long, and the BIP says that MUST fail. Another hands OP_CHECKSIGADD an empty signature and pays nothing for it, while its failure witness offers an empty key instead.",
+     "text": "The figures below replay six spends from Bitcoin Core’s validation tests, each with a witness Core accepts and one it rejects. Step through them opcode by opcode. In one, a valid signature turns 23 into 24 and the script compares the result; in its failing twin, n is five bytes long, and the BIP says that MUST fail. Another hands OP_CHECKSIGADD an empty signature and pays nothing for it, while its failure witness offers an empty key instead.",
      "claims": [
       "traces-agree",
       "case-checksigadd",
@@ -139,7 +202,24 @@
     },
     {
      "type": "figure",
-     "figure": "A08.2",
+     "figure": "A08.5",
+     "recipe": "tapscript-stack-story.v1",
+     "title": "One run, plate by plate",
+     "fixtures": [
+      "core-case-1109"
+     ],
+     "caption": "Core case 1109’s success witness, one opcode per frame. The stack is drawn as plates with the top one highest; the exact values are listed under the frames.",
+     "claims": [
+      "case-checksigadd",
+      "sig-nonempty",
+      "budget",
+      "traces-agree"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "figure",
+     "figure": "A08.6",
      "recipe": "tapscript-trace.v1",
      "title": "Recorded tapscript runs",
      "fixtures": [
@@ -197,7 +277,28 @@
     },
     {
      "type": "figure",
-     "figure": "A08.3",
+     "figure": "A08.7",
+     "recipe": "tapscript-sig-pays.v1",
+     "title": "A signature pays its own way",
+     "fixtures": [
+      "core-case-1135",
+      "core-case-1109",
+      "core-case-804",
+      "core-case-824",
+      "core-case-662",
+      "core-case-50"
+     ],
+     "caption": "A checked signature brings its own bytes and a length byte into the witness, and so into the budget; its check costs less than that. An empty signature costs nothing.",
+     "claims": [
+      "budget",
+      "budget-arith",
+      "sig-empty"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "figure",
+     "figure": "A08.8",
      "recipe": "sigops-budget.v1",
      "title": "What the recorded witnesses could afford",
      "fixtures": [
@@ -238,12 +339,43 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A08.9",
+     "recipe": "tapscript-op-success.v1",
+     "title": "A trapdoor in the decoder",
+     "fixtures": [
+      "core-case-50"
+     ],
+     "caption": "Core case 50’s two witnesses. An OP_SUCCESS opcode ends validation, valid, before anything runs; OP_NOP runs and leaves an empty stack.",
+     "claims": [
+      "op-success",
+      "case-success",
+      "order"
+     ],
+     "layout": "prose"
+    },
+    {
      "type": "paragraph",
      "text": "One rule went the other way, from advice to consensus. In P2WSH, MINIMALIF is only a standardness rule; in tapscript, OP_IF and OP_NOTIF must receive exactly an empty vector or the single byte 0x01. In the recorded MINIMALIF case, the failing witness offers a three-byte value instead, and the script stops at OP_IF.",
      "claims": [
       "minimalif",
       "case-minimalif"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A08.10",
+     "recipe": "tapscript-minimalif.v1",
+     "title": "OP_IF takes 0x01 or nothing",
+     "fixtures": [
+      "core-case-662"
+     ],
+     "caption": "Core case 662: the success witness gives OP_IF the byte 0x01; the failure witness gives it a longer value, and the script stops there.",
+     "claims": [
+      "minimalif",
+      "case-minimalif"
+     ],
+     "layout": "prose"
     },
     {
      "type": "callout",

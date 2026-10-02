@@ -11,7 +11,6 @@ import type {
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
   DerivedTaprootTreeFixture,
-  DerivedTapscriptFixture,
   DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
@@ -171,35 +170,6 @@ export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture })
       steps={steps}
       label="Each published PSBT state stacked in order, growing as roles add records."
       source={<>Source: BIP 174 lines {f.steps[0].line}–{f.extracted.line}; parsed and combined by the tested PSBT model.</>}
-    />
-  );
-}
-
-/* ---------- BIP 342 ---------- */
-export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
-  const f = fixtures.find((x) => x.caseIndex === 1109) ?? fixtures[0];
-  const v = f.derived.success;
-  const label = (ids: number[]) => (ids.length ? [...ids].reverse().map((i) => v.elements[i].label).join(" / ") : "empty");
-  const steps: WorkedStep[] = [
-    {
-      title: "Start from the witness, minus the script and control block",
-      values: [{ label: "stack, top first", value: label(v.initialStack) }],
-      note: `Sigops budget: 50 + ${v.witness.totalBytes} witness bytes = ${v.budgetStart}; each checked signature costs 50.`,
-      layer: { size: 0.35, tone: "plain", cells: v.initialStack.length },
-    },
-    ...v.steps.map((s): WorkedStep => ({
-      title: s.name,
-      values: [{ label: "stack, top first", value: label(s.after) }],
-      note: s.note + (s.sig ? `; budget now ${s.sig.budgetAfter}` : ""),
-      layer: { size: 0.3 + 0.15 * s.after.length, tone: s.sig ? "accent" : "wash", cells: s.after.length },
-    })),
-  ];
-  return (
-    <WorkedExample
-      intro={<>Bitcoin Core test case {f.caseIndex} ({f.label}), success witness: the starting stack, then one opcode per layer. Cells are stack elements.</>}
-      steps={steps}
-      label="The stack after each opcode of one recorded tapscript run."
-      source={<>Source: Core script_assets_test.json case {f.caseIndex}, pinned; recorded at build time and matched to Core’s label.</>}
     />
   );
 }

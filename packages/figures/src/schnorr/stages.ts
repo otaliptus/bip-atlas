@@ -44,7 +44,7 @@ export function stageValues(trace: SchnorrTraceView, id: SchnorrStageId): Record
 /** One-line reading of a stage result, used in status lines and text equivalents. */
 export function stageNote(id: SchnorrStageId, values: Record<string, string>, ok: boolean): string {
   switch (id) {
-    case "lift-x": return ok ? "P found, with even y" : `fails: ${values.reason}`;
+    case "lift-x": return ok ? "P found, with even y" : `fails: ${values.reason === "x ≥ p" ? "pk is not below p" : "pk is the x of no curve point"}`;
     case "r-range": return ok ? "r is below p" : "r is not below p";
     case "s-range": return ok ? "s is below n" : "s is not below n";
     case "challenge": return values.hash === values.e ? "e computed (the hash was already below n)" : "e computed (the hash was reduced mod n)";
