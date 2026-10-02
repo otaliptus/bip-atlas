@@ -122,6 +122,17 @@ export function checkMnemonic(words: readonly string[], wordlist: readonly strin
   return { valid: true, reason: null, entropyHex: bytesToHex(entropy) };
 }
 
+/**
+ * Every wordlist index that completes `prefix` (all words but the last) into
+ * a sentence whose checksum passes. For a 12-word sentence this is
+ * 2048 / 2^4 = 128 indices; the last word carries 7 free entropy bits.
+ */
+export function validLastWords(prefix: readonly string[], wordlist: readonly string[]): number[] {
+  const out: number[] = [];
+  for (let i = 0; i < wordlist.length; i++) if (checkMnemonic([...prefix, wordlist[i]], wordlist).valid) out.push(i);
+  return out;
+}
+
 const encoder = new TextEncoder();
 
 /** BIP39 seed: PBKDF2-HMAC-SHA512(NFKD(mnemonic), "mnemonic" + NFKD(passphrase), 2048, 64 bytes). */

@@ -48,6 +48,10 @@ export interface MnemonicDerived {
   checksumBits: string;
   groups: Array<{ position: number; bits: string; index: number; word: string; entropyBitCount: number; checksumBitCount: number }>;
   seeds: Array<{ passphrase: string; seedHex: string; origin: "vector" | "computed" }>;
+  /** Last-word odds: indices of every last word that would pass the checksum after the first n − 1 words. */
+  lastWord: { prefixWords: number; validIndices: number[]; actualIndex: number };
+  /** The first wordlist entries, for drawing the list itself. */
+  wordlistSample: Array<{ index: number; word: string }>;
 }
 
 export type DerivedMnemonicFixture = MnemonicFixture & { derived: MnemonicDerived };

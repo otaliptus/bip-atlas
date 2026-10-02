@@ -10,6 +10,7 @@ import {
   mnemonicLayout,
   mnemonicToSeed,
   parseWordlist,
+  validLastWords,
 } from "../src";
 
 const root = new URL("../../../", import.meta.url);
@@ -166,5 +167,20 @@ describe("mnemonics worked example", () => {
     const text = readFileSync(new URL("content/chapters/mnemonics.json", root), "utf8");
     expect(text).toContain("begin with the bits `0011`");
     expect(text).toContain("seven zeros followed by `0011`: index 3, the word *about*");
+  });
+});
+
+describe("validLastWords", () => {
+  it("12 words: exactly 2048 / 2^4 = 128 last words pass, including the published one", () => {
+    const words = (trezor.english[12][1] as string).split(" ");
+    const valid = validLastWords(words.slice(0, -1), english);
+    expect(valid.length).toBe(128);
+    expect(valid).toContain(english.indexOf(words.at(-1)!));
+    expect([...valid].sort((a, b) => a - b)).toEqual(valid);
+  });
+  it("24 words: 2048 / 2^8 = 8 pass", () => {
+    const words = (trezor.english[20][1] as string).split(" ");
+    expect(words.length).toBe(24);
+    expect(validLastWords(words.slice(0, -1), english).length).toBe(8);
   });
 });
