@@ -10,7 +10,6 @@ import type {
   DerivedBip32Fixture,
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
-  DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
   DerivedTapscriptFixture,
   DerivedTransactionFixture,
@@ -176,28 +175,7 @@ export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture })
   );
 }
 
-/* ---------- BIP 340 ---------- */
-export function SchnorrWorked({ fixtures }: { fixtures: DerivedSchnorrFixture[] }) {
-  const f = fixtures.find((x) => x.expected) ?? fixtures[0];
-  const t = f.derived.traces[f.derived.ownMessage];
-  const v = (stage: string) => t.steps.find((s) => s.stage === stage)?.values ?? {};
-  const steps: WorkedStep[] = [
-    { title: "Lift the key to the point P with even y", values: [{ label: "pk = x(P)", value: f.publicKeyHex }, { label: "y(P)", value: v("lift-x").y }], layer: { size: 0.6, tone: "plain" } },
-    { title: "Split the signature and check r < p and s < n", values: [{ label: "r", value: v("r-range").r }, { label: "s", value: v("s-range").s }], layer: { tone: "wash", cells: 2 } },
-    { title: "Hash r ‖ P ‖ m with the BIP0340/challenge tag", values: [{ label: "m", value: f.messageHex || "(empty)" }, { label: "e", value: v("challenge").e }], layer: { size: 0.8, tone: "wash", cells: 3 } },
-    { title: "Compute R = s⋅G − e⋅P", values: [{ label: "x(R)", value: v("compute-r").x }, { label: "y(R)", value: v("compute-r").y }], note: "Checked: R is not the point at infinity, and y(R) is even.", layer: { size: 0.6, tone: "wash" } },
-    { title: "Compare x(R) with r", note: t.valid ? "Equal: the signature verifies, as the CSV says." : "Different: verification fails.", layer: { size: 0.45, tone: t.valid ? "accent" : "fail" } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>Published vector {f.vectorIndex} from the BIP 340 CSV, checked step by step.</>}
-      steps={steps}
-      label="The five stages of verifying one valid signature, drawn as stacked layers."
-      source={<>Source: BIP 340 test-vectors.csv line {f.source.line}; arithmetic by @noble/curves.</>}
-    />
-  );
-}
-
+/* ---------- BIP 342 ---------- */
 export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
   const f = fixtures.find((x) => x.caseIndex === 1109) ?? fixtures[0];
   const v = f.derived.success;

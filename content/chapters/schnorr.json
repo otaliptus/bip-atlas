@@ -34,11 +34,11 @@
    "type": "figure",
    "figure": "A06.1",
    "recipe": "schnorr-signature-layout.v1",
-   "title": "Three inputs, fixed sizes",
+   "title": "Three inputs, one answer",
    "fixtures": [
     "bip340-v1"
    ],
-   "caption": "Vector 1 from the BIP’s CSV. The key is a bare x coordinate; the signature is two 32-byte numbers. Only the message has no fixed length.",
+   "caption": "Vector 1 from the BIP’s CSV goes into the verifier. The key is a bare x coordinate, the signature is two 32-byte numbers, and only the message has no fixed length. No secret key goes in.",
    "claims": [
     "verify-inputs",
     "final-scheme",
@@ -69,6 +69,22 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A06.2",
+     "recipe": "schnorr-byte-sizes.v1",
+     "title": "Fixed sizes, smaller keys",
+     "fixtures": [
+      "bip340-v1"
+     ],
+     "caption": "One byte ruler. A DER signature’s size depends on its values; a BIP 340 signature never changes size, and a key keeps only the x coordinate of its compressed form.",
+     "claims": [
+      "encodings",
+      "implicit-y",
+      "verify-inputs"
+     ],
+     "layout": "prose"
+    },
+    {
      "type": "paragraph",
      "text": "The authors also wanted something stricter than most signature standards provide. For use in consensus, they write, the verification algorithm must be completely specified at the byte level, so that nobody can build a signature that some verifiers accept and others reject. They point to the trouble Bitcoin once had with loosely specified DER parsing. Every check below is therefore an exact test, with nothing left to an implementation’s taste.",
      "claims": [
@@ -81,6 +97,21 @@
      "claims": [
       "final-scheme"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A06.3",
+     "recipe": "schnorr-equation.v1",
+     "title": "The equation a signature satisfies",
+     "fixtures": [
+      "bip340-v1"
+     ],
+     "caption": "For vector 1 the two sides balance. Each term comes from the inputs, from the challenge hash, or from the curve’s fixed point G; Verify rearranges the equation to compute R.",
+     "claims": [
+      "final-scheme",
+      "verify-steps"
+     ],
+     "layout": "prose"
     }
    ]
   },
@@ -104,8 +135,25 @@
      ]
     },
     {
+     "type": "figure",
+     "figure": "A06.4",
+     "recipe": "schnorr-verify-story.v1",
+     "title": "One valid vector, step by step",
+     "fixtures": [
+      "bip340-v1"
+     ],
+     "caption": "Published vector 1, checked gate by gate. The exact values are listed under the frames.",
+     "claims": [
+      "verify-steps",
+      "lift-x",
+      "tagged-hash",
+      "vectors-reproduced"
+     ],
+     "layout": "prose"
+    },
+    {
      "type": "paragraph",
-     "text": "The figure runs this list on the published vectors. Choose a valid vector and every stage passes. Choose an invalid one and the run stops at the first failure: a key with no curve point fails at the first stage, and an r equal to p fails at the second, before any hashing. Later stages are marked as not reached, because the BIP’s verifier never gets to them.",
+     "text": "The figure below runs this list on the published vectors. Choose a valid vector and every stage passes. Choose an invalid one and the run stops at the first failure: a key with no curve point fails at the first stage, and an r equal to p fails at the second, before any hashing. Later stages are marked as not reached, because the BIP’s verifier never gets to them.",
      "claims": [
       "verify-steps",
       "vectors-reproduced"
@@ -113,9 +161,9 @@
     },
     {
      "type": "figure",
-     "figure": "A06.2",
+     "figure": "A06.5",
      "recipe": "schnorr-verification.v1",
-     "title": "Verify, step by step",
+     "title": "Verify, gate by gate",
      "fixtures": [
       "bip340-v1",
       "bip340-v15",
@@ -146,6 +194,33 @@
       "comment-vs-stage",
       "vectors-reproduced"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A06.6",
+     "recipe": "schnorr-fail-gates.v1",
+     "title": "Where each vector stops",
+     "fixtures": [
+      "bip340-v1",
+      "bip340-v15",
+      "bip340-v17",
+      "bip340-v5",
+      "bip340-v14",
+      "bip340-v12",
+      "bip340-v13",
+      "bip340-v9",
+      "bip340-v6",
+      "bip340-v7",
+      "bip340-v8",
+      "bip340-v11"
+     ],
+     "caption": "The vectors of the figure above, run through the same gates at once. Each lane is named by its CSV comment, which says how the vector was made; the cross marks the check that rejects it.",
+     "claims": [
+      "comment-vs-stage",
+      "vectors-reproduced",
+      "verify-steps"
+     ],
+     "layout": "wide"
     },
     {
      "type": "paragraph",
@@ -196,7 +271,7 @@
     },
     {
      "type": "figure",
-     "figure": "A06.3",
+     "figure": "A06.7",
      "recipe": "challenge-preimage.v1",
      "title": "One hash, any message",
      "fixtures": [
@@ -244,12 +319,29 @@
     },
     {
      "type": "paragraph",
-     "text": "The figure shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security: breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
+     "text": "The figure below shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security: breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
      "claims": [
       "no-security-loss",
       "two-secret-keys",
       "lift-x"
      ]
+    },
+    {
+     "type": "figure",
+     "figure": "A06.8",
+     "recipe": "schnorr-even-y.v1",
+     "title": "One x, two y, one kept",
+     "fixtures": [
+      "bip340-v1",
+      "bip340-v6"
+     ],
+     "caption": "The even y is kept for the key and required of R: vector 6’s R has odd y, so Verify rejects it. The two secret keys are drawn without values.",
+     "claims": [
+      "implicit-y",
+      "lift-x",
+      "two-secret-keys"
+     ],
+     "layout": "prose"
     },
     {
      "type": "details",

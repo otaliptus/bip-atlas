@@ -9,3 +9,4 @@ export * from "./Magnifier";
 export * from "./Storyboard";
 export * from "./Glyphs";
 export * from "./Packet";
+export * from "./Lamp";

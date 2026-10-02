@@ -31,7 +31,6 @@ import {
   TxWorked,
   AddressWorked,
   PsbtWorked,
-  SchnorrWorked,
   TapscriptWorked,
   P2shWorked,
   P2shTwoStage,
@@ -99,6 +98,11 @@ import {
   SignatureLayout,
   SchnorrVerifier,
   ChallengePreimage,
+  ByteSizes,
+  Equation,
+  VerifyStory,
+  FailGates,
+  EvenY,
   TaprootTweak,
   TaprootCommitment,
   SigMsgLayout,
@@ -196,6 +200,11 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
   {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
   {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
+  {figure.recipe === "schnorr-byte-sizes.v1" && <ByteSizes fixture={sig[0]} />}
+  {figure.recipe === "schnorr-equation.v1" && <Equation fixture={sig[0]} />}
+  {figure.recipe === "schnorr-verify-story.v1" && <VerifyStory fixture={sig[0]} />}
+  {figure.recipe === "schnorr-fail-gates.v1" && <FailGates fixtures={sig} />}
+  {figure.recipe === "schnorr-even-y.v1" && <EvenY fixtures={sig} />}
   {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
   {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
   {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
@@ -242,7 +251,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
-      {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}

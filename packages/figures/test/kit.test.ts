@@ -157,3 +157,27 @@ describe("Packet", () => {
     expect(s).toContain(">8<");
   });
 });
+
+describe("Lamp and wrapLines (batch 3)", () => {
+  it("lights with rays and a tick, darkens with a cross, waits dashed", async () => {
+    const { Lamp } = await import("../src/kit");
+    const on = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "on", label: "TRUE" })));
+    expect(on).toContain('data-state="on"');
+    expect(on).toContain("✓");
+    expect(on).toContain("TRUE");
+    expect(count(on, "k-leader")).toBe(8);
+    const off = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "off" })));
+    expect(off).toContain("✕");
+    expect(off).not.toContain("k-leader");
+    const idle = html(h("svg", {}, h(Lamp, { at: [10, 10], state: "idle" })));
+    expect(idle).toContain("k-dashed");
+    expect(idle).not.toContain("✓");
+    expect(idle).not.toContain("✕");
+  });
+  it("wraps words greedily without splitting them", async () => {
+    const { wrapLines } = await import("../src/kit");
+    expect(wrapLines("Wrong signature (which is equal to the negation)", 16)).toEqual(["Wrong signature", "(which is equal", "to the negation)"]);
+    expect(wrapLines("supercalifragilistic x", 5)).toEqual(["supercalifragilistic", "x"]);
+    expect(wrapLines("", 5)).toEqual([]);
+  });
+});
