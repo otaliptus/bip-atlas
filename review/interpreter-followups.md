@@ -17,6 +17,6 @@ These follow the independent review of `packages/models/src/interpreter.ts` (PR 
 
 **Deliberate breakage.** Each fix was reverted in turn: the tapscript `OP_0` mapping, scope after the witness-script commitment, scope after the tapleaf commitment, the `wellFormed` check, and the native scriptSig ordering. Each made at least one test fail. Reverting fix 6 does not, as explained above.
 
-**Still pending:** the prose nit ("inconclusive for any script or spend shape outside what it covers"). It touches `content/chapters/message-signing.json`, which the illustration batch 4 is editing, so it will follow that merge.
+**Prose nit:** applied in the illustration rollout's closing PR, after batch 4 merged: `message-signing.json` now says the model "answers inconclusive for any script or spend shape outside what it covers".
 
 `pnpm test` (887 vitest + 36 Python), `pnpm check` and `pnpm build` are green.

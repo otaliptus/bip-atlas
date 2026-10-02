@@ -158,7 +158,7 @@ A fresh read-only subagent decoded all 13 address fixtures with its own BIP 173/
 | A4 | should-fix | Verdicts in A04.8 and the mixed-case label in A04.3 were typed by hand. | Built from the model's version, family and failed stage; A04.3 throws unless the reason is mixed case. |
 | A5 | should-fix | Prefix and checksum in the lab ribbon were told apart by colour only. | Brackets "PREFIX" and "CHECKSUM" on the ribbon; "LAST 6 = CHECKSUM" in A04.4. The family gate says what the version needs. |
 | A6 | should-fix | "A typo in the prefix is caught too" had no quote in the ledger. | The figure says "THE PREFIX IS CHECKSUMMED TOO"; `checksum-computation` now quotes BIP 173 lines 156–158. |
-| A7 | should-fix | Two prose sentences overstate BIP 350 ("states … within one checksum family"; "overwhelming odds otherwise"). | **Not changed here:** both predate this batch and the brief limits prose edits to figure pointers. Flagged for the chapter's next editorial pass. |
+| A7 | should-fix | Two prose sentences overstate BIP 350 ("states … within one checksum family"; "overwhelming odds otherwise"). | **Not changed here:** both predate this batch and the brief limits prose edits to figure pointers. Applied in the rollout's closing PR. |
 | A8–A10 | nits | Ledger quotes for BIP 173 line 306 and BIP 350 line 208; figure claims citing the fixtures; crowded alphabet cells; "BLACK = 1" on one panel only; an unused import; no arrows from POLYMOD in A04.8. | All applied. |
 | B2–B3 | nits | Circular HD status when the parent is itself the hardened node; "change 0" readable as chain 0. | "is a hardened child, which M cannot derive"; "change · index 0". |
 
