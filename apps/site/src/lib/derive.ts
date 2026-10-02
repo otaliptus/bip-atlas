@@ -193,6 +193,7 @@ import type {
 } from "@bip-atlas/figures";
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
+import { REVIEWED as B322_REVIEWED, reviewedOpName as b322OpName } from "@bip-atlas/models/interpreter";
 import { ROOT } from "./root";
 const SNAPSHOT = "sources/research-2026-10-01";
 /** Phase-three BIPs, snapshotted separately at the same bitcoin/bips commit. */
@@ -1443,6 +1444,10 @@ function deriveBip322(f: Bip322VectorFixture): DerivedBip322Fixture {
   const le = (h: string) => parseInt(h.match(/../g)!.reverse().join(""), 16);
   const hash = bip322MessageHash(v.message);
   const { spk, kind } = bip322AddressScript(v.address);
+  // Error vectors name the failure they expect; published hashes, where given, must match.
+  if (f.group === "error" && (r.state !== "invalid" || !r.reason.includes(v.error_substr))) throw new Error(`${f.id}: model's reason does not contain "${v.error_substr}"`);
+  const pub = (b322Set(f.set).tx_hashes ?? []).find((x: any) => x.message === v.message && x.address === v.address);
+  if (pub && (pub.message_hash !== hash || pub.to_spend_tx_hash !== r.toSpend.txid || pub.to_sign_tx_hash !== r.toSign.txid)) throw new Error(`${f.id}: hashes differ from the published tx_hashes`);
   const out: DerivedBip322Fixture = {
     ...f,
     derived: {
@@ -1488,7 +1493,16 @@ export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
         const detail = d.verdict.state === "valid" ? `valid at time T = ${d.verdict.time} and age S = ${d.verdict.age}` : d.verdict.reason!;
         return { label: all.find((x) => x.id === id)!.label, message: d.message, address: d.address, state: d.verdict.state, detail };
       });
-      return { ...vf, derived: { rows } } as unknown as T;
+      // The interpreter's reviewed opcode set, by name; fail if a name is missing.
+      const reviewed = (Object.entries(B322_REVIEWED) as Array<[string, ReadonlySet<number>]>).map(([version, set]) => ({
+        version,
+        ops: [...set].sort((a, b) => a - b).map((op) => {
+          const n = b322OpName(op);
+          if (!n.startsWith("OP_")) throw new Error(`${vf.id}: no name for reviewed opcode ${op}`);
+          return n.slice(3);
+        }),
+      }));
+      return { ...vf, derived: { rows, reviewed } } as unknown as T;
     }
     if (f.kind === "v2-vector") return deriveV2(f as unknown as V2VectorFixture) as unknown as T;
     if (f.kind === "v2-framing") return deriveV2Framing(f as unknown as V2FramingFixture) as unknown as T;

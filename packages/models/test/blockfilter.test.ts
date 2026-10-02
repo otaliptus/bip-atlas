@@ -138,9 +138,9 @@ describe("block-filters chapter prose numbers", () => {
     expect(text).toContain("block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25");
     expect(Math.round(((a.filter.length - 1) * 8) / a.N)).toBe(21);
     expect(Math.round(((b.filter.length - 1) * 8) / b.N)).toBe(21);
-    expect(text).toContain("about 21 bits per item, close to that floor, against about 23 bits");
-    expect(Math.round(Math.log2(13 * 784931))).toBe(23);
-    expect(Math.round(Math.log2(9 * 784931))).toBe(23);
+    expect(text).toContain("about 21 bits per item, close to that floor, against 24 and 23 bits");
+    expect(Math.ceil(Math.log2(13 * 784931))).toBe(24);
+    expect(Math.ceil(Math.log2(9 * 784931))).toBe(23);
     expect(rows.find((r) => r[7] === "Empty data")![5]).toBe("00");
     expect(text).toContain("whose filter is the single byte 00");
   });

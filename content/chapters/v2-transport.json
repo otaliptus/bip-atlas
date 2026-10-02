@@ -39,13 +39,13 @@
       "fixtures": [
         "v2-framing"
       ],
-      "caption": "Bytes added to every message: v1’s 24-byte cleartext header against v2’s encrypted length, header byte, type ID and authentication tag.",
+      "caption": "The bytes added to every message: v1’s 24-byte cleartext header against v2’s encrypted length, header byte, type ID and authentication tag, 21 bytes for a message with a short ID.",
       "claims": [
         "framing-computed",
         "packet-format",
         "message-type"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -67,6 +67,23 @@
             "forces-active",
             "goals"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A17.2",
+          "recipe": "v2-eavesdropper.v1",
+          "title": "Passive and active listeners",
+          "fixtures": [],
+          "caption": "Schematic. Encryption stops a passive listener; an active one in the middle ends up with a different session ID on each side.",
+          "claims": [
+            "v1-plaintext",
+            "aim",
+            "forces-active",
+            "session-id",
+            "no-auth",
+            "traffic-analysis"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -107,12 +124,42 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A17.3",
+          "recipe": "v2-ellswift.v1",
+          "title": "64 bytes that look random",
+          "fixtures": [
+            "v2-packet-1"
+          ],
+          "caption": "The initiator’s opening bytes in one of BIP 324’s vectors. This site does not decode ElligatorSwift; the vector supplies the decoding.",
+          "claims": [
+            "ellswift",
+            "garbage",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "A responder also has to keep talking to v1 peers. It watches the first 16 bytes: if they are the network magic followed by “version” and padding, the start of every v1 connection, it switches to v1.",
           "claims": [
             "v1-detect",
             "goals"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A17.4",
+          "recipe": "v2-detect.v1",
+          "title": "v1 or v2?",
+          "fixtures": [
+            "v2-packet-1"
+          ],
+          "caption": "A v1 connection always opens with the same 16 bytes; a v2 initiator’s key almost never does.",
+          "claims": [
+            "v1-detect"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -124,25 +171,20 @@
         },
         {
           "type": "figure",
-          "figure": "A17.2",
-          "recipe": "v2-handshake.v1",
-          "title": "From two public keys to an encrypted packet",
+          "figure": "A17.5",
+          "recipe": "v2-key-story.v1",
+          "title": "From two keys to a packet",
           "fixtures": [
-            "v2-packet-0",
-            "v2-packet-1",
-            "v2-packet-223",
-            "v2-packet-448",
-            "v2-packet-999"
+            "v2-packet-0"
           ],
-          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The model recomputes the ECDH, secret, keys and session ID, each equal to the vector’s, and the packet: in full where the vector publishes it, and its last 128 bytes for packets 223 and 448, where that is all the vector gives. The ElligatorSwift decodings are the vector’s own.",
+          "caption": "BIP 324’s vector for the initiator’s packet 0, recomputed by the tested model step by step; exact values are listed below the frames.",
           "claims": [
-            "vectors",
             "ecdh",
             "hkdf",
-            "packet-format",
-            "rekey"
+            "terminator-aad",
+            "vectors"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -153,12 +195,56 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A17.6",
+          "recipe": "v2-handshake.v1",
+          "title": "From two public keys to an encrypted packet",
+          "fixtures": [
+            "v2-packet-0",
+            "v2-packet-1",
+            "v2-packet-223",
+            "v2-packet-448",
+            "v2-packet-999"
+          ],
+          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener’s panel shows only what crosses the wire; the v1 view is a general comparison, not about the vector. Every value is recomputed by the tested model and equals the vector’s; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector’s own.",
+          "claims": [
+            "vectors",
+            "ecdh",
+            "hkdf",
+            "packet-format",
+            "rekey",
+            "terminator-aad",
+            "version-packet",
+            "garbage",
+            "decoys",
+            "traffic-analysis",
+            "framing-computed"
+          ],
+          "layout": "wide"
+        },
+        {
           "type": "paragraph",
           "text": "The authors explain that the terminator exists because the receiver has to find where the garbage ends. Scanning for a fixed 16-byte sequence is cheap, whereas trying to authenticate a packet at every offset would mean recomputing a Poly1305 tag for every byte received. A receiver reads at most 4111 bytes, 4095 of garbage and the terminator, before giving up.",
           "claims": [
             "terminator-why",
             "garbage"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A17.7",
+          "recipe": "v2-terminator.v1",
+          "title": "Finding the end of the garbage",
+          "fixtures": [
+            "v2-packet-0"
+          ],
+          "caption": "In this vector the initiator sent the maximum 4,095 bytes of garbage before its terminator.",
+          "claims": [
+            "terminator-why",
+            "garbage",
+            "terminator-aad"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -179,6 +265,22 @@
           "claims": [
             "length-unauth"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A17.8",
+          "recipe": "v2-packet-bytes.v1",
+          "title": "One packet, byte by byte",
+          "fixtures": [
+            "v2-packet-1"
+          ],
+          "caption": "All 21 bytes of a published packet with 1 byte of contents. The tag covers the header and contents, not the length.",
+          "claims": [
+            "packet-format",
+            "length-unauth",
+            "vectors"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -212,7 +314,7 @@
         },
         {
           "type": "figure",
-          "figure": "A17.3",
+          "figure": "A17.9",
           "recipe": "v2-rekey.v1",
           "title": "Nonces and keys across a rekey",
           "fixtures": [

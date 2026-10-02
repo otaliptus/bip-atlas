@@ -34,17 +34,18 @@
     "figure": {
       "type": "figure",
       "figure": "A16.1",
-      "recipe": "golomb-rice-code.v1",
-      "title": "Golomb-Rice codes",
+      "recipe": "bf-two-directions.v1",
+      "title": "Two directions",
       "fixtures": [
-        "bf-golomb"
+        "bf-block-926485"
       ],
-      "caption": "BIP 158’s table for P = 2, recomputed, beside one real code with the basic filter’s P = 19: a quotient in unary, then a fixed-width remainder.",
+      "caption": "Under BIP 37 the client tells a node what it wants. Under BIPs 157 and 158 the node publishes one filter per block, here the 25-byte filter of testnet block 926,485, and the client tests it.",
       "claims": [
-        "gr-coding",
-        "gr-computed"
+        "bip37-flaws",
+        "reverse",
+        "light-clients"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -76,6 +77,22 @@
             "serialize",
             "dedup"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A16.2",
+          "recipe": "bf-element-sieve.v1",
+          "title": "What goes in",
+          "fixtures": [
+            "bf-block-926485"
+          ],
+          "caption": "Testnet block 926,485 touches 18 scripts. Its OP_RETURN output and every repeat are left out; 9 distinct scripts remain.",
+          "claims": [
+            "contents",
+            "dedup",
+            "vectors"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -110,6 +127,21 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A16.3",
+          "recipe": "golomb-rice-code.v1",
+          "title": "Golomb-Rice codes",
+          "fixtures": [
+            "bf-golomb"
+          ],
+          "caption": "BIP 158’s table for P = 2, recomputed, beside one real code with the basic filter’s P = 19: a quotient in unary, then a fixed-width remainder.",
+          "claims": [
+            "gr-coding",
+            "gr-computed"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "For the basic filter, P MUST be 19 and M MUST be 784931. The authors cite analysis that M ≈ 1.497137·2^P is close to optimal, and empirical analysis that these values minimize bandwidth once both the filters themselves and the blocks downloaded because of false positives are counted.",
           "claims": [
@@ -118,8 +150,27 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A16.4",
+          "recipe": "bf-build-story.v1",
+          "title": "A filter, step by step",
+          "fixtures": [
+            "bf-block-1263442"
+          ],
+          "caption": "Testnet block 1,263,442’s filter, built from its three scripts by the tested model; it equals the published filter byte for byte. Exact values are listed below the frames.",
+          "claims": [
+            "siphash",
+            "key",
+            "gcs-steps",
+            "gr-coding",
+            "serialize",
+            "basic-params"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against about 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
+          "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
           "claims": [
             "min-size",
             "size-computed"
@@ -127,7 +178,23 @@
         },
         {
           "type": "figure",
-          "figure": "A16.2",
+          "figure": "A16.5",
+          "recipe": "bf-size.v1",
+          "title": "How tight the coding is",
+          "fixtures": [
+            "bf-block-180480",
+            "bf-block-926485"
+          ],
+          "caption": "Two published filters, in bits after the N byte: the floor of P + 1 bits per element, the coded filter, and each hashed value written at fixed width.",
+          "claims": [
+            "min-size",
+            "size-computed"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A16.6",
           "recipe": "gcs-filter.v1",
           "title": "A filter, built and queried",
           "fixtures": [
@@ -138,12 +205,18 @@
             "bf-block-987876",
             "bf-block-1414221"
           ],
-          "caption": "Six of BIP 158’s testnet blocks. Each filter is rebuilt from the block and the scripts it spends, and equals the published bytes; test scripts come from the block itself and from other vector blocks.",
+          "caption": "Six of BIP 158’s testnet blocks. Each filter is rebuilt from the block and the scripts it spends, and equals the published bytes; test scripts come from the block itself and from other vector blocks. Values the client never reads are drawn empty.",
           "claims": [
             "vectors",
             "contents",
             "query",
-            "gr-coding"
+            "gr-coding",
+            "siphash",
+            "key",
+            "gcs-steps",
+            "serialize",
+            "gcs-def",
+            "scope-of-miss"
           ],
           "layout": "wide"
         },
@@ -169,6 +242,23 @@
             "fp-arith",
             "params-why"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A16.7",
+          "recipe": "bf-query-story.v1",
+          "title": "Yes means maybe",
+          "fixtures": [
+            "bf-block-926485"
+          ],
+          "caption": "Block 926,485 tested with one of its own scripts and with a script from another vector block. The third frame is arithmetic, not a vector.",
+          "claims": [
+            "gcs-def",
+            "fp-arith",
+            "query",
+            "scope-of-miss"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -203,7 +293,7 @@
         },
         {
           "type": "figure",
-          "figure": "A16.3",
+          "figure": "A16.8",
           "recipe": "filter-header-chain.v1",
           "title": "Filter headers, linked",
           "fixtures": [
@@ -225,6 +315,22 @@
             "honest-peer",
             "checkpoints-sync"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A16.9",
+          "recipe": "bf-peer-check.v1",
+          "title": "When peers disagree",
+          "fixtures": [],
+          "caption": "Schematic: what BIP 157 recommends when two peers serve different filter headers.",
+          "claims": [
+            "client-sync",
+            "headers-why",
+            "honest-peer",
+            "filter-check",
+            "block-not-enough"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

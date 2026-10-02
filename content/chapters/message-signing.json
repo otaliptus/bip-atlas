@@ -39,7 +39,7 @@
       "fixtures": [
         "b322-formats"
       ],
-      "caption": "BIP 322’s formats from its table: legacy, which the BIP restricts to P2PKH; simple for native SegWit; full for anything; and full proof of funds.",
+      "caption": "BIP 322’s formats from its table, each envelope stamped with its prefix: legacy, which the BIP restricts to P2PKH; simple for native SegWit; full for anything; and full proof of funds.",
       "claims": [
         "formats",
         "legacy-rules",
@@ -47,7 +47,7 @@
         "full",
         "pof"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -64,21 +64,37 @@
         },
         {
           "type": "paragraph",
-          "text": "The message hash is a BIP 340 tagged hash with the tag BIP0322-signed-message, taken over the message exactly as given, with no length prefix and no terminator. Change one character of the message and the hash changes, and so does to_spend’s ID.",
+          "text": "The message hash is a BIP 340 tagged hash with the tag BIP0322-signed-message, taken over the message exactly as given, with no length prefix and no terminator. Change the message, even by one character, and the hash changes, and so does to_spend’s ID.",
           "claims": [
             "to-spend"
           ]
         },
         {
+          "type": "figure",
+          "figure": "A18.2",
+          "recipe": "bip322-message-hash.v1",
+          "title": "Another message, another hash",
+          "fixtures": [
+            "b322-p2wpkh-hello",
+            "b322-wrong-message"
+          ],
+          "caption": "Two of BIP 322’s vectors for the same address with different messages: unrelated hashes, so different to_spend transactions.",
+          "claims": [
+            "to-spend",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. That witness is the signature.",
+          "text": "The second, to_sign, spends to_spend’s output 0 and pays 0 satoshis to a bare OP_RETURN. The signer fills in its witness, or in the full format its scriptSig and other fields too, exactly as they would to spend a real coin locked to the address. In the simple format that witness is the signature; in the full format, the whole signed to_sign is.",
           "claims": [
             "to-sign"
           ]
         },
         {
           "type": "figure",
-          "figure": "A18.2",
+          "figure": "A18.3",
           "recipe": "bip322-virtual-tx.v1",
           "title": "to_spend and to_sign",
           "fixtures": [
@@ -89,7 +105,7 @@
             "b322-p2pkh-full",
             "b322-wrong-message"
           ],
-          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the one recorded for that vector.",
+          "caption": "Six of BIP 322’s published vectors, rebuilt by the tested model: the message hash, both virtual transactions and the verdict. The build fails if a verdict differs from the expected outcome: valid for signature vectors, invalid for error vectors.",
           "claims": [
             "vectors",
             "to-spend",
@@ -113,6 +129,22 @@
             "consensus-valid",
             "signature-def"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.4",
+          "recipe": "bip322-witness.v1",
+          "title": "A signature that is a witness stack",
+          "fixtures": [
+            "b322-p2wsh-3of3"
+          ],
+          "caption": "The 3-of-3 multisig vector’s signature, item by item: an empty dummy, three ECDSA signatures and the witness script.",
+          "claims": [
+            "signature-def",
+            "consensus-valid",
+            "vectors"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -122,7 +154,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The simple format, prefixed smp, carries only the witness stack. It applies when to_sign keeps all its defaults, nothing added and version, sequence and lock time left at 0, and the address is native SegWit: P2WPKH, P2WSH or P2TR. The verifier rebuilds both transactions itself.",
+          "text": "The simple format, prefixed smp, carries only the witness stack. It may be used only when to_sign keeps all its defaults, nothing added and version, sequence and lock time left at 0, and the address is native SegWit: P2WPKH, P2WSH or P2TR. The verifier rebuilds both transactions itself.",
           "claims": [
             "simple",
             "encode-choice"
@@ -138,8 +170,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A18.5",
+          "recipe": "bip322-choice.v1",
+          "title": "Which format",
+          "fixtures": [],
+          "caption": "Schematic of BIP 322’s encoding rules: proof of funds when inputs were added; simple only with all defaults and a native SegWit address.",
+          "claims": [
+            "encode-choice",
+            "simple",
+            "full",
+            "pof"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "Signers MUST put the prefix on. A verifier may still read an unprefixed signature as simple, for compatibility with implementations written before the BIP was finalized; one of the published vectors tests exactly that. The legacy format MAY still be used, but only for P2PKH addresses, and new proofs SHOULD use the new formats for every address type, P2PKH included.",
+          "text": "Signers MUST put the prefix on. A verifier may still read an unprefixed signature as simple, for compatibility with implementations written before the BIP was finalized; one of the published vectors tests exactly that. The legacy format MAY still be used, but MUST be restricted to P2PKH addresses, and new proofs SHOULD use the new formats for every address type, P2PKH included.",
           "claims": [
             "formats",
             "legacy-rules"
@@ -167,6 +214,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A18.6",
+          "recipe": "bip322-verify-story.v1",
+          "title": "A verifier’s steps",
+          "fixtures": [
+            "b322-p2wpkh-full"
+          ],
+          "caption": "One of BIP 322’s full-format vectors, checked by the tested model step by step; exact values are listed below the frames.",
+          "claims": [
+            "basic-validation",
+            "time-age",
+            "interpreter",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR and FindAndDelete are forbidden; ECDSA signatures must be strictly DER-encoded with a low S value, and a failing one must be empty; pushes must be minimal; IF arguments must be exactly 0x01 or empty; and only a single stack element may remain. Breaking any of these makes the signature invalid.",
           "claims": [
@@ -185,7 +249,7 @@
         },
         {
           "type": "figure",
-          "figure": "A18.3",
+          "figure": "A18.7",
           "recipe": "bip322-verdicts.v1",
           "title": "Three verdicts",
           "fixtures": [
@@ -207,6 +271,22 @@
             "vectors",
             "basic-validation"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.8",
+          "recipe": "bip322-interpreter.v1",
+          "title": "The reviewed opcodes",
+          "fixtures": [
+            "b322-verdicts"
+          ],
+          "caption": "The opcodes this site’s verifier recognises, from the model’s reviewed set. A script with any other opcode is not judged: inconclusive.",
+          "claims": [
+            "interpreter",
+            "upgradeable-rules",
+            "vectors"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -237,6 +317,20 @@
             "not-sender",
             "no-timestamp"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A18.9",
+          "recipe": "bip322-limits.v1",
+          "title": "What a signature does not prove",
+          "fixtures": [],
+          "caption": "Schematic: one moment, one script, one message; no date, no signer and no promise about the coins now.",
+          "claims": [
+            "no-proof",
+            "not-sender",
+            "no-timestamp"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

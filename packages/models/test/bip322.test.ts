@@ -115,7 +115,7 @@ describe("message-signing chapter prose numbers", () => {
     expect(basic.simple.some((v: { bip322_signatures: string[] }) => v.bip322_signatures.some((s) => !/^(smp|ful|pof)/.test(s)))).toBe(true);
     has("one of the published vectors tests exactly that");
     const chapter = JSON.parse(text);
-    const hero = chapter.sections.flatMap((s: { blocks: { figure?: string; fixtures?: string[] }[] }) => s.blocks).find((b: { figure?: string }) => b.figure === "A18.2");
+    const hero = chapter.sections.flatMap((s: { blocks: { figure?: string; fixtures?: string[] }[] }) => s.blocks).find((b: { recipe?: string }) => b.recipe === "bip322-virtual-tx.v1");
     expect(hero.fixtures.length).toBe(6);
     has("Six of BIP 322’s published vectors");
   });
