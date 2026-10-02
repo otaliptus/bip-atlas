@@ -6,6 +6,7 @@ import { entropyToMnemonic, mnemonicToSeed, parseWordlist, validLastWords } from
 import { bytesToHex, hexToBytes } from "@bip-atlas/models/hex";
 import { ChecksumStory } from "../src/mnemonic/ChecksumStory";
 import { EntropyBits } from "../src/mnemonic/EntropyBits";
+import { EntropyWordLab } from "../src/mnemonic/EntropyWordLab";
 import { LastWordOdds } from "../src/mnemonic/LastWordOdds";
 import { MnemonicCard } from "../src/mnemonic/MnemonicCard";
 import { MnemonicChain } from "../src/mnemonic/MnemonicChain";
@@ -130,4 +131,30 @@ describe("MnemonicChain", () => {
     for (const w of ["ENCODE", "STRETCH", "DERIVE"]) expect(s).toContain(w);
   });
   it("renders a wide and a narrow composition", () => expect(count(s, "<svg")).toBe(2));
+});
+
+describe("EntropyWordLab (static render)", () => {
+  const fx = ["zero-128", "ozone-128", "zero-256", "all-hour-256"].map(derived);
+  const s = html(h(EntropyWordLab, { fixtures: fx, figureId: "fig-a01-4" }));
+  it("server-renders the fully cut first sample: all groups and words", () => {
+    expect(s).toContain('data-hydrated="false"');
+    for (const g of fx[0].derived.groups) expect(s).toContain(`>${g.word}<`);
+  });
+  it("cuts the wide ribbon into word groups", () => {
+    // Rows are 44 bits wide, a multiple of 11: a group boundary that falls at a row start needs no cut mark.
+    const wide = s.split("k-resp__narrow")[0];
+    const rows = Math.ceil(fx[0].derived.layout.totalBits / 44);
+    expect(count(wide, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - rows);
+  });
+  it("colours entropy and checksum bits differently", () => {
+    expect(count(s, "k-fill--check") + count(s, "k-mark--check")).toBeGreaterThanOrEqual(fx[0].derived.layout.checksumBits);
+  });
+  it("renders no controls without JavaScript", () => {
+    expect(s).not.toContain('type="range"');
+    expect(s).not.toContain('type="radio"');
+  });
+  it("describes the selected group in the status line", () => {
+    const last = fx[0].derived.groups.at(-1)!;
+    expect(s).toContain(`Word ${last.position + 1} of ${fx[0].derived.layout.wordCount}`);
+  });
 });

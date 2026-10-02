@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
+import { Arrow, Cells, Drawing, IsoBox, Label, Responsive, Value, cellsSize, idsFor, iso, onTop } from "../kit";
 import type { DerivedMnemonicFixture } from "../types";
 
 interface Props {
@@ -7,239 +8,143 @@ interface Props {
   figureId: string;
 }
 
-const VIEW_W = 960;
-
 /**
- * entropy-word-pipeline.v1 — the BIP39 chapter's hero figure.
+ * entropy-word-pipeline.v1 — the Mnemonics chapter's hero (drawing-first).
  *
- * Every bit, index and word comes precomputed from the tested model (see the
- * site's derive step); this component only lays them out. Readers choose among
- * public fixtures; there is no field for entering words or entropy.
+ * The drawing is a ribbon of every bit (entropy pink, checksum purple). The
+ * step slider cuts it into 11-bit groups one at a time; the selected group
+ * drops out as a number and pulls its card from the wordlist, and the
+ * sentence below fills in. Controls: a 128/256-bit strip, sample chips and
+ * the slider. All values come from the tested model; nothing is typed in.
  */
 export function EntropyWordLab({ fixtures, figureId }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
-
   const sizes = [...new Set(fixtures.map((f) => f.derived.layout.entropyBits))].sort((a, b) => a - b);
-  const [size, setSize] = useState(sizes[0]);
   const [fixtureId, setFixtureId] = useState(fixtures[0].id);
-  const [revealed, setRevealed] = useState(false);
-  const [selected, setSelected] = useState(0);
-
   const fixture = fixtures.find((f) => f.id === fixtureId)!;
-  const { layout, groups, entropyBits, checksumBits, hashHex } = fixture.derived;
-  // Without JavaScript, show the fully revealed state: it is the static equivalent.
-  const showGroups = !hydrated || revealed;
-  const current = groups[Math.min(selected, groups.length - 1)];
-  const allBits = entropyBits + checksumBits;
+  const { layout, groups, entropyBits, checksumBits } = fixture.derived;
+  const [step, setStep] = useState(groups.length);
+  // Without JavaScript: every group cut, last group selected (the static equivalent).
+  const shown = hydrated ? Math.min(step, groups.length) : groups.length;
+  const sel = shown > 0 ? groups[shown - 1] : null;
+  const bits = [...(entropyBits + checksumBits)];
+  const size = layout.entropyBits;
 
-  const chooseSize = (bits: number) => {
-    setSize(bits);
-    const first = fixtures.find((f) => f.derived.layout.entropyBits === bits)!;
-    setFixtureId(first.id);
-    setSelected(0);
-  };
-  const chooseFixture = (id: string) => {
+  const choose = (id: string) => {
     setFixtureId(id);
-    setSelected(0);
+    setStep(0);
   };
 
-  const onGridKey = (event: KeyboardEvent) => {
-    const columns = window.matchMedia("(min-width: 48rem)").matches ? 2 : 1;
-    const moves: Record<string, number> = { ArrowRight: 1, ArrowDown: columns, ArrowLeft: -1, ArrowUp: -columns };
-    let next = selected;
-    if (event.key in moves) next = selected + moves[event.key];
-    else if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = groups.length - 1;
-    else return;
-    event.preventDefault();
-    next = Math.max(0, Math.min(groups.length - 1, next));
-    setSelected(next);
-    (event.currentTarget as HTMLElement).querySelector<HTMLElement>(`[data-position="${next}"]`)?.focus();
-  };
+  const status = sel
+    ? `Word ${sel.position + 1} of ${layout.wordCount}: bits ${sel.bits} are ${sel.index}, “${sel.word}”.` +
+      (sel.checksumBitCount ? ` ${sel.entropyBitCount} entropy bits and ${sel.checksumBitCount} checksum bits.` : "")
+    : `${layout.entropyBits} entropy bits and ${layout.checksumBits} checksum bits, not yet cut. Move the slider to cut them into groups of 11.`;
 
-  const bitW = VIEW_W / layout.totalBits;
-  const describe = (g: typeof current) =>
-    `Word ${g.position + 1} of ${layout.wordCount}: bits ${g.bits}, index ${g.index}, “${g.word}”. ` +
-    (g.checksumBitCount === 0
-      ? "All 11 bits are entropy."
-      : g.entropyBitCount === 0
-        ? `All 11 bits are checksum.`
-        : `${g.entropyBitCount} entropy bits and ${g.checksumBitCount} checksum bits.`);
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const perRow = wide ? 44 : 22;
+    const cell = wide ? 13 : 12.5;
+    const W = wide ? 640 : 330;
+    const x0 = (W - perRow * cell) / 2;
+    const rib = cellsSize(bits.length, { size: cell, perRow, rowGap: 7 });
+    const y0 = 34;
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const inSel = (i: number) => sel !== null && Math.floor(i / 11) === sel.position;
+    const dy = y0 + rib.height + 34;
+    const card = wide ? iso(430, dy + 6) : iso(200, dy + 44);
+    const chipsPerRow = wide ? 6 : 3;
+    const chipW = (W - 2 * x0) / chipsPerRow;
+    const chipsY = dy + (wide ? 110 : 160);
+    const H = chipsY + Math.ceil(groups.length / chipsPerRow) * 26 + 10;
+    return (
+      <Drawing id={id} width={W} height={H} title={`From ${layout.totalBits} bits to ${layout.wordCount} words`} desc={status}>
+        <Value at={[x0, 18]} text={`${layout.entropyBits} ENTROPY BITS + ${layout.checksumBits} CHECKSUM = ${layout.totalBits} BITS`} size={9} cls="k-value--label" />
+        <Cells
+          x={x0}
+          y={y0}
+          values={bits.map(() => "")}
+          size={cell}
+          perRow={perRow}
+          rowGap={7}
+          text={false}
+          roleOf={(i) => (i < layout.entropyBits ? "secret" : "check")}
+          strong={(i) => bits[i] === "1"}
+          cutEvery={shown > 0 ? 11 : undefined}
+          emphasis={inSel}
+        />
+        {sel ? (
+          <>
+            <Cells x={x0} y={dy} values={[...sel.bits]} size={16} roleOf={(i) => (i < sel.entropyBitCount ? "secret" : "check")} strong={(i) => sel.bits[i] === "1"} />
+            <Label at={[x0 + 88, dy + 16]} side="down" len={10} text={`group ${sel.position + 1} · 11 bits`} />
+            <Arrow d={`M${x0 + 184} ${dy + 8} H${x0 + 210}`} ids={ids} />
+            <Value at={[x0 + 216, dy + 14]} text={String(sel.index)} size={16} />
+            <IsoBox at={[card(0, 0)[0], card(0, 0)[1] + 3]} w={96} d={54} h={3} role="public" />
+            <text class="k-engrave" transform={onTop(card(10, 20, 0))}>{`#${sel.index}`}</text>
+            <text class="k-engrave k-engrave--word" transform={onTop(card(10, 38, 0))}>{sel.word}</text>
+            {wide ? <Label at={card(96, 27, 0)} side="right" len={10} text="wordlist card" /> : <Label at={card(0, 54, 0)} side="left" len={10} text="wordlist card" />}
+          </>
+        ) : (
+          <Value at={[x0, dy + 14]} text="Not cut yet: move the slider." size={11} cls="k-value--muted" />
+        )}
+        {groups.map((g, k) => {
+          const x = x0 + (k % chipsPerRow) * chipW;
+          const y = chipsY + Math.floor(k / chipsPerRow) * 26;
+          const known = k < shown;
+          const current = sel !== null && k === sel.position;
+          return (
+            <g>
+              <rect class={`k-outline ${current ? "k-fill--public" : "k-fill--plain"}${current ? " k-cell--em" : ""}`} x={x + 2} y={y} width={chipW - 4} height={20} style={known ? undefined : `fill:${ids.hatch}`} />
+              <text class="k-value k-value--muted" x={x + 7} y={y + 13.5} style="font-size:8px">{String(k + 1).padStart(2, "0")}</text>
+              {known ? <text class="k-value" x={x + 24} y={y + 14}>{g.word}</text> : null}
+            </g>
+          );
+        })}
+      </Drawing>
+    );
+  };
 
   return (
-    <div class="atlas-lab atlas-mnemonic-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-segmented">
-            <legend>Entropy size</legend>
-            {sizes.map((bits) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-size`} checked={bits === size} onChange={() => chooseSize(bits)} />
-                <span>{bits}-bit<small>{fixtures.find((f) => f.derived.layout.entropyBits === bits)!.derived.layout.wordCount} words</small></span>
+        <div class="atlas-hero__controls">
+          <div class="atlas-strip" role="radiogroup" aria-label="Entropy size">
+            {sizes.map((b) => (
+              <label class="atlas-strip__opt">
+                <input type="radio" name={`${figureId}-size`} checked={b === size} onChange={() => choose(fixtures.find((f) => f.derived.layout.entropyBits === b)!.id)} />
+                <span>{b} bits</span>
               </label>
             ))}
-          </fieldset>
-          <fieldset class="atlas-lab__samples">
-            <legend>Public sample</legend>
-            {fixtures.filter((f) => f.derived.layout.entropyBits === size).map((f) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-sample`} checked={f.id === fixtureId} onChange={() => chooseFixture(f.id)} />
-                <span>{f.label}<small>{f.shortLabel}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <label class="atlas-switch">
-            <input type="checkbox" role="switch" checked={revealed} onChange={(e) => setRevealed((e.currentTarget as HTMLInputElement).checked)} />
-            <span>Reveal 11-bit groups</span>
-          </label>
-        </div>
-      ) : (
-        <p class="atlas-lab__static-note">
-          Static view of the first sample with every 11-bit group revealed. With JavaScript you can switch samples and
-          sizes and step through the groups.
-        </p>
-      )}
-
-      <div class="atlas-bits">
-        <p class="atlas-bits__title">
-          <span>{layout.entropyBits} entropy bits</span>
-          <span class="atlas-bits__plus">+</span>
-          <span class="atlas-bits__cs">{layout.checksumBits} checksum bits</span>
-          <span class="atlas-bits__eq">= {layout.totalBits} bits</span>
-          {showGroups ? <span class="atlas-bits__eq">= {layout.wordCount} × 11</span> : null}
-        </p>
-        <svg
-          class="atlas-bits__svg"
-          viewBox={`0 0 ${VIEW_W} 52`}
-          preserveAspectRatio="none"
-          role="img"
-          aria-label={`${layout.totalBits} bits: ${layout.entropyBits} of entropy followed by ${layout.checksumBits} checksum bits${showGroups ? `, cut into ${layout.wordCount} groups of 11` : ""}.`}
-        >
-          <defs>
-            <pattern id={`${figureId}-hatch`} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-              <line x1="0" y1="0" x2="0" y2="4" class="atlas-svg-hatch" />
-            </pattern>
-          </defs>
-          <rect x={layout.entropyBits * bitW} y={6} width={layout.checksumBits * bitW} height={28} fill={`url(#${figureId}-hatch)`} />
-          {[...allBits].map((b, i) => (
-            <rect
-              x={i * bitW + 0.4}
-              y={b === "1" ? 6 : 26}
-              width={Math.max(0.6, bitW - 0.8)}
-              height={b === "1" ? 28 : 8}
-              class={i >= layout.entropyBits ? "atlas-bit atlas-bit--cs" : "atlas-bit"}
-            />
-          ))}
-          {showGroups
-            ? groups.map((g) => (
-                <rect
-                  x={g.position * 11 * bitW}
-                  y={38}
-                  width={11 * bitW - 1}
-                  height={g.position === current.position && hydrated ? 10 : 6}
-                  class={g.position === current.position && hydrated ? "atlas-bitgroup atlas-bitgroup--on" : "atlas-bitgroup"}
-                />
-              ))
-            : Array.from({ length: layout.entropyBits / 8 + 1 }, (_, k) => (
-                <line x1={k * 8 * bitW} x2={k * 8 * bitW} y1={36} y2={48} class="atlas-svg-byte-tick" />
-              ))}
-          {showGroups && hydrated ? (
-            <rect x={current.position * 11 * bitW} y={2} width={11 * bitW} height={34} class="atlas-bitgroup-frame" />
-          ) : null}
-        </svg>
-        <p class="atlas-bits__legend" aria-hidden="true">
-          <span><i class="atlas-key atlas-key--one" />bit 1</span>
-          <span><i class="atlas-key atlas-key--zero" />bit 0</span>
-          <span><i class="atlas-key atlas-key--cs" />checksum: first {layout.checksumBits} bits of SHA-256(entropy)</span>
-          <span>{showGroups ? <><i class="atlas-key atlas-key--group" />one word = 11 bits</> : <><i class="atlas-key atlas-key--byte" />byte boundary</>}</span>
-        </p>
-        <p class="atlas-hash">
-          <span class="atlas-hash__label">SHA-256(entropy)</span>
-          <code>
-            <mark>{hashHex.slice(0, Math.ceil(layout.checksumBits / 4))}</mark>
-            {hashHex.slice(Math.ceil(layout.checksumBits / 4), 16)}…
-          </code>
-          <span class="atlas-hash__label">first {layout.checksumBits} bits</span>
-          <code class="atlas-hash__bits">{checksumBits}</code>
-        </p>
-      </div>
-
-      {showGroups ? (
-        <>
-          <div
-            class="atlas-groups"
-            role={hydrated ? "listbox" : "list"}
-            aria-label={`${layout.wordCount} words, one per 11-bit group`}
-            onKeyDown={hydrated ? onGridKey : undefined}
-          >
-            {groups.map((g) => {
-              const on = hydrated && g.position === current.position;
-              const content = (
-                <>
-                  <span class="atlas-group__n">{String(g.position + 1).padStart(2, "0")}</span>
-                  <span class="atlas-group__bits" aria-hidden="true">
-                    {[...g.bits].map((b, i) => (
-                      <span class="atlas-group__bit" data-cs={i >= g.entropyBitCount ? "true" : undefined}>{b}</span>
-                    ))}
-                  </span>
-                  <span class="atlas-group__index">{g.index}</span>
-                  <span class="atlas-group__word">{g.word}</span>
-                </>
-              );
-              return hydrated ? (
-                <button
-                  type="button"
-                  role="option"
-                  class="atlas-group"
-                  data-position={g.position}
-                  data-on={on ? "true" : undefined}
-                  aria-selected={on}
-                  tabIndex={on ? 0 : -1}
-                  aria-label={describe(g)}
-                  onClick={() => setSelected(g.position)}
-                >
-                  {content}
-                </button>
-              ) : (
-                <div class="atlas-group" role="listitem" aria-label={describe(g)}>{content}</div>
-              );
-            })}
           </div>
-          {hydrated ? (
-            <div class="atlas-lab__edit">
-              <div class="atlas-lab__buttons" role="group" aria-label="Step through groups">
-                <button type="button" class="manual-plate-button" onClick={() => setSelected(Math.max(0, current.position - 1))} disabled={current.position === 0}>
-                  ← Previous word
-                </button>
-                <button type="button" class="manual-plate-button" onClick={() => setSelected(Math.min(groups.length - 1, current.position + 1))} disabled={current.position === groups.length - 1}>
-                  Next word →
-                </button>
-                <button type="button" class="manual-plate-button" onClick={() => setSelected(groups.length - 1)}>
-                  Jump to last word
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <p class="atlas-bytes">
-          <span class="atlas-hash__label">Entropy as bytes</span>
-          <code>{fixture.entropyHex.match(/.{2}/g)!.join(" ")}</code>
-        </p>
-      )}
-
-      <p class="atlas-lab__status" aria-live="polite">
-        {showGroups && hydrated
-          ? describe(current)
-          : showGroups
-            ? `The last word holds ${layout.lastWordEntropyBits} entropy bits and ${layout.checksumBits} checksum bits.`
-            : `${layout.entropyBits} bits of entropy, then ${layout.checksumBits} checksum bits taken from its SHA-256 hash. Reveal the groups to see the words.`}
-      </p>
-      <p class="atlas-lab__source">
-        Sample source: {fixture.source.external} ({fixture.source.pointer}), pinned by commit. Public test material;
-        never use it for funds.
-      </p>
+          <div class="atlas-strip" role="radiogroup" aria-label="Public sample">
+            {fixtures.filter((f) => f.derived.layout.entropyBits === size).map((f) => (
+              <label class="atlas-strip__opt">
+                <input type="radio" name={`${figureId}-sample`} checked={f.id === fixtureId} onChange={() => choose(f.id)} />
+                <span>{f.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      {hydrated ? (
+        <div class="atlas-scrub" role="group" aria-label="Reveal 11-bit groups">
+          <button type="button" class="atlas-scrub__btn" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} aria-label="Previous group">←</button>
+          <input
+            type="range"
+            min={0}
+            max={groups.length}
+            value={step}
+            aria-label="Groups revealed"
+            aria-valuetext={step === 0 ? "none" : `${step} of ${groups.length}: ${groups[step - 1].word}`}
+            onInput={(e) => setStep(Number((e.currentTarget as HTMLInputElement).value))}
+          />
+          <button type="button" class="atlas-scrub__btn" onClick={() => setStep(Math.min(groups.length, step + 1))} disabled={step === groups.length} aria-label="Next group">→</button>
+        </div>
+      ) : null}
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <p class="atlas-hero__source">Sample: {fixture.source.external} ({fixture.source.pointer}), pinned. Public test material; never use it for funds.</p>
     </div>
   );
 }

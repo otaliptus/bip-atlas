@@ -1457,7 +1457,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .atlas-fig__stage { position: relative; }
 .atlas-fig__caption { margin-block-start: var(--manual-space-4); max-inline-size: var(--atlas-measure); font-size: 0.9375rem; line-height: 1.5; font-style: italic; color: var(--manual-muted); }
 @media (min-width: 64rem) {
-  .atlas-fig__code { display: block; position: absolute; inset-inline-start: -2.5rem; inset-block-start: 0.1rem; writing-mode: vertical-rl; rotate: 180deg; font-family: var(--manual-pixel); font-size: 0.75rem; letter-spacing: 0.04em; color: var(--manual-blue); }
+  .atlas-fig__code { display: block; position: absolute; left: -2.5rem; top: 0.1rem; writing-mode: vertical-rl; rotate: 180deg; font-family: var(--manual-pixel); font-size: 0.75rem; letter-spacing: 0.04em; color: var(--manual-blue); }
   .atlas-fig__num { display: none; }
 }
 
@@ -1531,3 +1531,22 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-dot { stroke: var(--manual-rule); stroke-width: 0.25; }
 .k-ring { fill: none; stroke: var(--atlas-ink); stroke-width: 1.25; vector-effect: non-scaling-stroke; }
 .k-faded { opacity: 0.45; }
+
+/* ---------- drawing-first heroes ---------- */
+.atlas-hero { display: grid; gap: var(--manual-space-4); }
+.atlas-hero__controls { display: flex; flex-wrap: wrap; gap: var(--manual-space-3) var(--manual-space-5); }
+.atlas-strip { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--atlas-ink); }
+.atlas-strip__opt { position: relative; }
+.atlas-strip__opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.atlas-strip__opt span { display: block; padding: 0.35rem 0.75rem; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.atlas-strip__opt + .atlas-strip__opt span { border-inline-start: 1px solid var(--atlas-ink); }
+.atlas-strip__opt input:checked + span { background: var(--atlas-ink); color: #ffffff; }
+.atlas-strip__opt input:focus-visible + span { outline: 2px solid var(--manual-focus); outline-offset: 2px; }
+.atlas-scrub { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--manual-space-3); align-items: center; max-inline-size: 30rem; margin-inline: auto; inline-size: 100%; }
+.atlas-scrub input[type="range"] { inline-size: 100%; accent-color: var(--manual-blue); }
+.atlas-scrub__btn { appearance: none; border: 1px solid var(--atlas-ink); background: #ffffff; font-family: var(--manual-code); min-inline-size: 2.75rem; min-block-size: 2.75rem; cursor: pointer; }
+.atlas-scrub__btn:disabled { opacity: 0.35; cursor: default; }
+.atlas-scrub__btn:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 2px; }
+.atlas-hero__status { margin: 0; font-size: 0.9375rem; text-align: center; min-block-size: 3em; }
+.atlas-hero__source { margin: 0; font-family: var(--manual-code); font-size: 0.6875rem; color: var(--manual-muted); text-align: center; }
+.atlas-hero .k-drawing { max-inline-size: 100%; }
