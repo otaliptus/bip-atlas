@@ -43,10 +43,13 @@ import {
   AddressWorked,
   SchnorrWorked,
   TapscriptWorked,
-  P2shWorked,
   P2shTwoStage,
   P2shCommitment,
   P2shWrapped,
+  P2shLimit,
+  P2shShape,
+  P2shStackStory,
+  P2shFailures,
   TimelockFields,
   TimelockPinned,
   TimelockRanges,
@@ -231,6 +234,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
   {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
+  {figure.recipe === "p2sh-limit.v1" && <P2shLimit fixture={p2sh[0]} />}
+  {figure.recipe === "p2sh-shape.v1" && <P2shShape fixtures={p2sh} />}
+  {figure.recipe === "p2sh-stack-story.v1" && <P2shStackStory fixture={p2sh[0]} />}
+  {figure.recipe === "p2sh-failures.v1" && <P2shFailures fixture={p2sh[0]} />}
   {figure.recipe === "timelock-fields.v1" && <TimelockFields client:visible fixtures={timelock} figureId={figureId} />}
   {figure.recipe === "timelock-pinned-fields.v1" && <TimelockPinned fixtures={timelockTx} />}
   {figure.recipe === "timelock-ranges.v1" && <TimelockRanges fixture={timelockEnc[0]} />}
@@ -264,7 +271,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
-      {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}

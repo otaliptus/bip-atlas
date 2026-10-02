@@ -12,7 +12,6 @@ import type {
   DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
   DerivedTapscriptFixture,
-  DerivedP2shFixture,
   DerivedTimelockCaseFixture,
   DerivedVersionbitsDeploymentFixture,
   DerivedVersionbitsGuidelineFixture,
@@ -145,28 +144,6 @@ export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixtur
       steps={steps}
       label="The stack after each opcode of one recorded tapscript run."
       source={<>Source: Core script_assets_test.json case {f.caseIndex}, pinned; recorded at build time and matched to Core’s label.</>}
-    />
-  );
-}
-
-/* ---------- BIP 16 ---------- */
-export function P2shWorked({ fixtures }: { fixtures: DerivedP2shFixture[] }) {
-  const f = fixtures.find((x) => x.derived.kind === "legacy") ?? fixtures[0];
-  const d = f.derived;
-  const [s1, s2, s3] = d.stages;
-  const ms = s3?.steps.find((s) => s.checks);
-  const steps: WorkedStep[] = [
-    { title: "The output commits to a 20-byte hash", values: [{ label: `scriptPubKey (${d.scriptPubKeyHex.length / 2} bytes)`, value: d.scriptPubKeyHex }], layer: { size: 0.45, tone: "plain", cells: 3 } },
-    { title: `The spend's scriptSig only pushes data: ${s1.note}`, values: [{ label: "pushes", value: s2.stackBefore.map((e) => (e === "" ? "(empty)" : `${e.length / 2} bytes`)).join(" · ") }], layer: { tone: "wash", cells: s2.stackBefore.length } },
-    { title: "Hash the last push and compare", values: [{ label: "HASH160(redeem script)", value: d.redeemHash160Hex }, { label: "hash in the output", value: d.committedHashHex }], note: "Equal, so the output really committed to this script.", layer: { size: 0.5, tone: "hatch", cells: 2 } },
-    { title: "Run the redeem script on the remaining stack", values: [{ label: "redeem script", value: d.redeemAsm }], note: ms ? `Each signature must match a key, in order: ${ms.checks!.map((c) => `signature ${c.sigIndex + 1} → key ${c.keyIndex! + 1}`).join(", ")}.` : undefined, layer: { size: 0.8, tone: "accent", cells: 2 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>The published spend <strong>{f.label}</strong> ({f.shortLabel}), checked the way BIP 16 describes. The hatched layer is the hash check.</>}
-      steps={steps}
-      label="An output's hash, the revealed script, the hash comparison and the script run, drawn as stacked layers."
-      source={<>Source: BIP {f.source.bip} line {f.source.line}; recorded by the tested P2SH model, signatures verified with noble.</>}
     />
   );
 }

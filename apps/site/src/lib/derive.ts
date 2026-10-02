@@ -170,6 +170,7 @@ import type {
   TapscriptTraceView,
   DerivedP2shFixture,
   P2shSpendFixture,
+  P2shItemKind,
   SchnorrVectorFixture,
   BfBlockFixture,
   DerivedBfBlockFixture,
@@ -769,9 +770,57 @@ function deriveP2sh(f: P2shSpendFixture): DerivedP2shFixture {
   if (!t.valid) throw new Error(`${f.id}: the recorded spend does not validate`);
   const tx = parseTransaction(f.txHex);
   const wit = tx.witnesses[f.inputIndex] ?? [];
+  const witnessScriptHex = t.kind === "p2sh-p2wsh" ? wit[wit.length - 1] : null;
+  // What each item on the stacks is, checked structurally; anything else stops the build.
+  const itemKinds: Record<string, P2shItemKind> = {};
+  const kindOf = (hex: string): P2shItemKind => {
+    const n = hex.length / 2;
+    if (hex === "") return "empty";
+    if (hex === t.redeemScriptHex) return "redeem script";
+    if (witnessScriptHex && hex === witnessScriptHex) return "witness script";
+    if (hex.startsWith("30") && n === 2 + parseInt(hex.slice(2, 4), 16) + 1) return "signature";
+    if (n === 33 && (hex.startsWith("02") || hex.startsWith("03"))) return "public key";
+    if (n === 20) return "hash";
+    if (n <= 4) return "number";
+    throw new Error(`${f.id}: stack item of ${n} bytes is outside the reviewed kinds`);
+  };
+  for (const s of t.stages) for (const item of [...s.stackBefore, ...s.steps.flatMap((x) => x.stackAfter)]) itemKinds[item] = kindOf(item);
+  if (witnessScriptHex) itemKinds[witnessScriptHex] = kindOf(witnessScriptHex);
+  // A legacy multisig spend, broken three ways and re-run through the model.
+  let failures: DerivedP2shFixture["derived"]["failures"] = null;
+  if (t.kind === "legacy") {
+    const seg = tx.segments.find((g) => g.id === `input.${f.inputIndex}.scriptsig`)!;
+    const withSig = (sig: string) => {
+      const n = sig.length / 2;
+      if (n >= 0xfd) throw new Error(`${f.id}: scriptSig too long for this check`);
+      return tx.segments.map((g) => (g === seg ? n.toString(16).padStart(2, "0") + sig : g.hex)).join("");
+    };
+    const sigHex = tx.inputs[f.inputIndex].scriptSigHex;
+    const redeem = t.redeemScriptHex;
+    const at = redeem.length / 2 - 1;
+    const altered = redeem.slice(0, -2) + (redeem.endsWith("ae") ? "af" : "ae");
+    const ta = traceP2sh(withSig(sigHex.replace(redeem, altered)), f.inputIndex, spk, amount);
+    const tn = traceP2sh(withSig("76" + sigHex), f.inputIndex, spk, amount);
+    const ops = decodeScript(sigHex).map((o) => o.dataHex!);
+    const push = (h: string) => (h === "" ? "00" : (h.length / 2).toString(16).padStart(2, "0") + h);
+    if (ops.length !== 4 || ops[0] !== "") throw new Error(`${f.id}: expected OP_0, two signatures and the redeem script`);
+    const ts = traceP2sh(withSig(push(ops[0]) + push(ops[2]) + push(ops[1]) + push(redeem)), f.inputIndex, spk, amount);
+    const failsAt = (x: typeof ta) => x.stages.find((s) => !s.ok)?.id;
+    if (ta.valid || failsAt(ta) !== "hash-match" || tn.valid || failsAt(tn) !== "push-only" || ts.valid || failsAt(ts) !== "redeem") {
+      throw new Error(`${f.id}: a broken spend did not fail where expected`);
+    }
+    failures = {
+      alteredRedeem: { byteIndex: at, fromHex: redeem.slice(-2), toHex: altered.slice(-2), hash160Hex: bytesToHex(hash160(hexToBytes(altered))), failsAt: "hash-match" },
+      nonPush: { opHex: "76", failsAt: "push-only" },
+      swapped: { failsAt: "redeem" },
+    };
+  }
   return {
     ...f,
     derived: {
+      itemKinds,
+      witnessScriptHex,
+      failures,
       kind: t.kind,
       valid: t.valid,
       scriptPubKeyHex: spk,

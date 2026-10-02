@@ -399,7 +399,27 @@ export interface P2shDerived {
   /** The serialized witness: item count, each item's length prefix and the items; 0 if empty. */
   witnessBytes: number;
   stages: P2shStageView[];
+  /**
+   * What each stack item is, by its hex, for every item that appears in the
+   * trace. Classified structurally at build time (the redeem or witness
+   * script by equality, a DER signature plus sighash byte by its length
+   * fields, a compressed key by its prefix); derive throws on anything else.
+   */
+  itemKinds: Record<string, P2shItemKind>;
+  /** The witness script of a P2SH-P2WSH spend, else null. */
+  witnessScriptHex: string | null;
+  /**
+   * For a legacy multisig spend, the same spend broken three ways and re-run
+   * through the tested model (derive throws unless each fails where shown).
+   */
+  failures: {
+    alteredRedeem: { byteIndex: number; fromHex: string; toHex: string; hash160Hex: string; failsAt: string };
+    nonPush: { opHex: string; failsAt: string };
+    swapped: { failsAt: string };
+  } | null;
 }
+
+export type P2shItemKind = "empty" | "signature" | "public key" | "redeem script" | "witness script" | "hash" | "number";
 
 export type DerivedP2shFixture = P2shSpendFixture & { derived: P2shDerived };
 
