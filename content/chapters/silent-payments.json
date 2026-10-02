@@ -298,7 +298,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Only certain input types provide the needed keys in a suitable form. A multi-key or conditional script may leave ambiguity about which keys should count. BIP 352 excludes those cases from the shared-secret calculation and requires at least one eligible input. Funding a payment and contributing a key to its calculation are distinct jobs.",
+     "text": "Only certain input types provide the needed keys in a suitable form. BIP 352 excludes inputs with several keys or conditional branches from the shared-secret calculation: they would let a sender re-sign with a different set of public keys after the output was derived, a problem in collaborative transactions. It also requires at least one eligible input. Funding a payment and contributing a key to its calculation are distinct jobs.",
      "claims": [
       "excluded-multi",
       "input-list",

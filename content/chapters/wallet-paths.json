@@ -90,7 +90,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Account discovery starts with account 0 and searches its external chain for transactions. If it finds transactions, it continues with the next account. It stops at the first account with no transaction history. Software should therefore not create a new account while the previous account has no history.",
+          "text": "Account discovery starts with account 0 and searches its external chain for transactions. If it finds transactions, it continues with the next account. It stops at the first account with no transaction history. This works because software should not create a new account while the previous one has no history.",
           "claims": [
             "discovery",
             "account"
@@ -105,9 +105,10 @@
         },
         {
           "type": "paragraph",
-          "text": "The discovery procedure checks only external chains because internal chains receive coins from their associated external chains. This identifies which accounts have been used. Recovering their funds also requires finding their internal/change outputs.",
+          "text": "BIP 44 scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains. This identifies which accounts have been used. Recovering their funds also requires finding their internal/change outputs.",
           "claims": [
             "discovery",
+            "gap-limit",
             "recovery-change"
           ]
         },
@@ -248,7 +249,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
+              "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths in Fig. A12.3 above. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
               "claims": [
                 "vectors"
               ]

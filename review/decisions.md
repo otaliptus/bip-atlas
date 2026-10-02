@@ -9,3 +9,4 @@ Decisions that deliberately depart from the kit originals (`BIP_ATLAS_SPEC.md`, 
 | D3 | 2026-10-02 | Drawing-first heroes with one control; worked-example tabs become static storyboards | Phase-two "two-tab figures" pattern | `drawing: true` recipes, `Plate.astro` |
 | D4 | 2026-10-02 | Shared SVG kit fed by models; no raster art, no canvas | — | `packages/figures/src/kit/` |
 | D5 | 2026-10-02 | Pilot Mnemonics and Taproot, then user review, before other chapters | — | `docs/superpowers/specs/2026-10-02-illustration-redesign-design.md` §8 |
+| D6 | 2026-10-02 | Chapter-specific shorter reading-path word ranges (`content/reading-policy.json`); detail moves to disclosures rather than padding | Spec/catalog `targetWords` (1,100–1,800) | `content/reading-policy.json`, `packages/publication/test/chapters.test.ts` |

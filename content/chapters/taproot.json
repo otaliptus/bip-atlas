@@ -161,7 +161,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The example has leaf A closer to the root than leaves B and C. Choosing A therefore produces a shorter control block. This is a tradeoff the wallet can make before the output is created; it cannot rearrange the tree later while keeping the same commitment.",
+     "text": "The example has leaf A closer to the root than leaves B and C. Choosing A therefore produces a shorter control block. This is a tradeoff the wallet can make before the output is created; it cannot later move a leaf to a different depth without changing the commitment.",
      "claims": [
       "vector5",
       "tree-shape",
@@ -233,7 +233,7 @@
       },
       {
        "type": "paragraph",
-       "text": "When there are no scripts, BIP 341 recommends that wallets still tweak the internal key, hashing P alone. Its authors warn that some ways of sharing an untweaked key would let a participant add a hidden script. MuSig aggregation avoids that particular problem. The no-script example above follows the wallet recommendation.",
+       "text": "When there are no scripts, BIP 341 recommends that wallets still tweak the internal key, hashing P alone. Its authors explain why: if the output key is an aggregate of several parties’ keys, a malicious party could add a script path the others do not notice, bypass the shared policy and steal the coin. MuSig aggregation avoids that particular problem because it already randomizes the internal key. The no-script example above follows the wallet recommendation.",
        "claims": [
         "no-script-commit",
         "vector0"
@@ -400,7 +400,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Taproot still leaves clues. A script-path spend reveals its chosen condition and depth, and a distinctive tree can hint at the software that built it. Reusing keys creates other links; the BIP advises against reuse even in different leaves. The useful promise is narrower disclosure of spending conditions, not blanket anonymity.",
+     "text": "Taproot still leaves clues. A script-path spend reveals its chosen condition and depth, and a distinctive tree can hint at the software that built it. Reusing keys creates other links; the BIP says keys should never be reused, and that covers every leaf committed to in the output, not only the one spent. The useful promise is narrower disclosure of spending conditions, not blanket anonymity.",
      "claims": [
       "privacy",
       "no-reuse"

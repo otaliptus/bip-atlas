@@ -29,7 +29,10 @@
           "abstract",
           "motivation",
           "scope",
-          "order"
+          "order",
+          "multisig-disabled",
+          "budget",
+          "op-success-upgrade"
         ]
       }
     ],
@@ -110,7 +113,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "OP_CHECKSIG and OP_CHECKSIGVERIFY use 32-byte public keys to check BIP 340 Schnorr signatures. The signed message includes the Taproot transaction digest and a tapscript extension identifying the leaf, the key version and the last executed OP_CODESEPARATOR. A signature therefore authorizes this script, through its leaf hash.",
+          "text": "OP_CHECKSIG and OP_CHECKSIGVERIFY use 32-byte public keys to check BIP 340 Schnorr signatures. The signed message is BIP 341’s signature message (SigMsg) plus a tapscript extension: the leaf hash, a key version byte and the position of the last executed OP_CODESEPARATOR. A signature therefore authorizes this script, through its leaf hash.",
           "claims": [
             "checksig-schnorr",
             "sig-message"
@@ -327,7 +330,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "OP_SUCCESSx opcodes leave room for future soft forks. After the BIP 141 and BIP 341 checks, encountering one while decoding makes the spend valid immediately. The interpreter does not run the script, and even undecodable bytes after that opcode do not change the result. The recorded example uses OP_SUCCESS126. The BIP warns that using an undefined OP_SUCCESS opcode is insecure and can lose funds.",
+          "text": "OP_SUCCESSx opcodes leave room for future soft forks. After the BIP 141 and BIP 341 checks, encountering one while decoding makes the spend valid immediately. The interpreter does not run the script, and even undecodable bytes after that opcode do not change the result. The recorded example uses OP_SUCCESS126. The BIP warns that using an undefined OP_SUCCESS opcode is insecure and leads to fund loss.",
           "claims": [
             "op-success",
             "op-success-upgrade",

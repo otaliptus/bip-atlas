@@ -535,7 +535,7 @@
     },
     {
       "id": "webserver-breach",
-      "statement": "BIP 32’s webshop rationale says that exposing the external-chain xpub reveals incoming payments without giving the private keys needed to spend the received funds; this is the limitation of xpub disclosure alone.",
+      "statement": "BIP 32 says someone who illegally obtains access to the webserver can at most see incoming payments, not steal them.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [

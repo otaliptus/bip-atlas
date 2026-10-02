@@ -141,6 +141,19 @@ describe("shared contracts", () => {
     }
   });
 
+  it("keeps reading-policy ranges on existing chapters and within the catalog maximum (decision D6)", () => {
+    const entries = Object.entries(readingPolicy.chapterRanges);
+    expect(entries.length).toBeGreaterThan(0);
+    for (const [id, range] of entries) {
+      expect(chapterIds, `${id} is a chapter`).toContain(id);
+      expect(range.min, `${id} min`).toBeGreaterThan(0);
+      expect(range.min, `${id} min < max`).toBeLessThan(range.max);
+      const brief = catalog.chapters.find((c: { id: string }) => c.id === id);
+      expect(brief?.targetWords?.max, `${id} catalog targetWords`).toBeTypeOf("number");
+      expect(range.max, `${id} max`).toBeLessThanOrEqual(brief.targetWords.max);
+    }
+  });
+
   it("pins external vector files by hash", () => {
     for (const entry of externalLock.files) {
       const bytes = readFileSync(new URL(`sources/external/${entry.file}`, root));

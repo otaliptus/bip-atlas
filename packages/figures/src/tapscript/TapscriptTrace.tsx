@@ -155,7 +155,7 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
           <dt>Witness size</dt><dd>{v.witness.totalBytes} bytes = 1 (item count) + initial stack {v.witness.stackBytes} + script {v.witness.scriptBytes} + control block {v.witness.controlBytes}{v.witness.annexBytes ? ` + annex ${v.witness.annexBytes}` : ""}, each with its length prefix</dd>
         </dl>
       </details>
-      <p class="atlas-hero__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit and linked from BIP 341. Each control block was checked against its output key first, as in Fig. A07.4.</p>
+      <p class="atlas-hero__source">Bitcoin Core qa-assets script_assets_test.json, case {fixture.caseIndex} (“{fixture.comment}”), pinned by commit and linked from BIP 341. Each control block was checked against its output key first, as in Fig. A07.6.</p>
     </div>
   );
 }

@@ -21,7 +21,8 @@ export function BfDirections({ fixture }: { fixture: DerivedBfBlockFixture }) {
     <Value at={[27, 162]} text="INSIDE YOUR WALLET" size={9} cls="k-value--label" />
     <Cells x={27} y={174} values={Array(d.filterBytes).fill("")} size={cell} roleOf={() => "net"} text={false} />
     <Value at={[27, 196]} text={`FILTER OF BLOCK ${group(d.height)} · ${d.filterBytes} B`} size={8.3} />
-    <rect class="k-cell k-fill--public" x="27" y="211" width="131" height="23" />
+    {/* Watched scripts stay private in the wallet: neutral and dashed, not the public green. */}
+    <rect class="k-cell k-fill--plain k-dashed" x="27" y="211" width="131" height="23" data-watched="local" />
     <Value at={[92, 226]} text="YOUR WATCHED SCRIPTS" size={8} anchor="middle" />
     <path class="k-line" d="M163 222 H188" marker-end={ids.arrow} />
     <Value at={[199, 219]} text="TEST LOCALLY" size={9} cls="k-value--label" />

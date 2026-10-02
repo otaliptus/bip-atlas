@@ -49,7 +49,7 @@
       "recipe": "bip322-limits.v1",
       "title": "What the signature proves",
       "fixtures": [],
-      "caption": "The message and address define the challenge. A valid response satisfies that script; identity, freshness and a current balance need separate evidence.",
+      "caption": "The address supplies the script to satisfy, and to_spend commits to the message. A valid response satisfies that script for this message; identity, freshness and a current balance need separate evidence.",
       "claims": [
         "no-proof",
         "not-sender",
@@ -325,9 +325,10 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The verifier starts with the address, message and response. It reconstructs the virtual transactions, checks that they refer to each other correctly, and validates the script under BIP 322’s additional rules. In the explorer’s wrong-message example, the changed challenge makes the signature check fail.",
+          "text": "The verifier starts with the address, message and response. It reconstructs the virtual transactions, checks that they refer to each other correctly, and validates the script under BIP 322’s additional rules. In the explorer’s wrong-message example, the changed message changes the message hash and so to_spend, and the signature no longer verifies.",
           "claims": [
             "basic-validation",
+            "to-spend",
             "required-rules",
             "vectors"
           ]
@@ -361,7 +362,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A verifier that does not understand a script must not turn that gap into an assurance that the proof passed. This page’s verifier covers the published simple and full examples; proof-of-funds PSBTs and committed scripts outside its supported set remain inconclusive unless an earlier check has failed.",
+          "text": "A verifier that does not understand a script should not turn that gap into an assurance that the proof passed; the BIP says it should stop and answer inconclusive. This page’s verifier covers the published simple and full examples; proof-of-funds PSBTs and committed scripts outside its supported set remain inconclusive unless an earlier check has failed.",
           "claims": [
             "interpreter",
             "upgradeable-rules",

@@ -1,6 +1,18 @@
 import { Drawing, Value, idsFor } from "../kit";
 import type { DerivedTapscriptFixture } from "../types";
 
+/** The symbolic policy: how many signatures it requires, and which key slots receive one. */
+export const MULTISIG_REQUIRED = 2;
+const MULTISIG_SLOTS = [true, false, true];
+
+/** Running CHECKSIG / CHECKSIGADD counts for the slots; throws unless the final count meets the requirement. */
+export function multisigTally(required = MULTISIG_REQUIRED, slots = MULTISIG_SLOTS) {
+  const counts = slots.map((_, i) => slots.slice(0, i + 1).filter(Boolean).length);
+  const total = counts[counts.length - 1] ?? 0;
+  if (total !== required) throw new Error(`multisig illustration: ${total} signatures drawn, policy requires ${required}`);
+  return { required, slots, counts, total };
+}
+
 /** A symbolic threshold policy beside the recorded failure of the old opcode. */
 export function MultisigChain({ fixture }: { fixture: DerivedTapscriptFixture }) {
   const v = fixture.derived.failure;
@@ -8,17 +20,16 @@ export function MultisigChain({ fixture }: { fixture: DerivedTapscriptFixture })
   if (!last?.failed || last.name !== "OP_CHECKMULTISIG") throw new Error(`${fixture.id}: expected the disabled opcode to fail`);
   const before = v.steps.slice(0, -1).filter((s) => s.executed).length;
   // This is a symbolic policy, not an invented signed transaction or test vector.
-  const slots = [true, false, true];
-  const total = slots.filter(Boolean).length;
+  const { required, slots, counts, total } = multisigTally();
   const ids = idsFor("a08-multisig");
   return (
-    <Drawing id="a08-multisig" width={344} height={382} title="Count the signatures that arrive"
-      desc={`Symbolic 2-of-3 policy using known 32-byte keys. Valid signature, empty slot, valid signature: the count goes 1, 1, ${total}. CHECKSIG starts the count; CHECKSIGADD adds one for a valid signature or zero for an empty one. NUMEQUAL compares the result with the required count. A non-empty invalid signature fails immediately. Separately, Core case ${fixture.caseIndex}'s failure witness reaches the disabled OP_CHECKMULTISIG after ${before} opcodes and fails.`}>
-      <Value at={[14, 16]} text="SYMBOLIC POLICY · TWO OF THREE KEYS" size={9} cls="k-value--label" />
+    <Drawing id="a08-multisig" width={344} height={382} title="Counting signatures in a symbolic policy"
+      desc={`A symbolic illustration of a ${required}-of-${slots.length} policy, not a recorded script run: no keys or signatures from a test vector are drawn. Signature, empty slot, signature: the count goes ${counts.join(", ")}. CHECKSIG starts the count; CHECKSIGADD adds one for a valid signature or zero for an empty one. NUMEQUAL compares the result with the required count. A non-empty invalid signature fails immediately. Separately, Core case ${fixture.caseIndex}'s failure witness reaches the disabled OP_CHECKMULTISIG after ${before} opcodes and fails.`}>
+      <Value at={[14, 16]} text={`SYMBOLIC POLICY · ${required} OF ${slots.length} KEYS · NOT A RECORDED RUN`} size={8.5} cls="k-value--label" />
       <Value at={[14, 34]} text="A slot can be empty. A bad signature cannot pass." size={8} cls="k-value--muted" />
       {slots.map((signed, i) => {
         const y = 57 + i * 74;
-        const count = slots.slice(0, i + 1).filter(Boolean).length;
+        const count = counts[i];
         return <g data-slot={signed ? "signature" : "empty"}>
           <rect class={`k-outline ${signed ? "k-fill--sig" : "k-fill--plain k-dashed"}`} x="14" y={y} width="80" height="35" rx="2" />
           <Value at={[54, y + 15]} text={signed ? "SIGNATURE" : "EMPTY SLOT"} size={8} anchor="middle" />
@@ -36,8 +47,8 @@ export function MultisigChain({ fixture }: { fixture: DerivedTapscriptFixture })
       })}
       <path class="k-line" d="M301 245 V273 H270" marker-end={ids.arrow} />
       <rect class="k-outline k-fill--plain k-cell--em" x="14" y="265" width="249" height="44" />
-      <Value at={[28, 282]} text="NUMEQUAL · REQUIRED 2" size={9} cls="k-value--label" />
-      <Value at={[28, 301]} text={`${total} = 2   ✓   POLICY SATISFIED`} size={11} />
+      <Value at={[28, 282]} text={`NUMEQUAL · REQUIRED ${required}`} size={9} cls="k-value--label" />
+      <Value at={[28, 301]} text={`${total} = ${required}   ✓   POLICY SATISFIED`} size={11} />
       <line class="k-sep k-leader" x1="14" y1="330" x2="330" y2="330" />
       <Value at={[14, 349]} text="✕ OP_CHECKMULTISIG IS DISABLED" size={9} cls="k-value--label" />
       <Value at={[14, 365]} text={`CORE ${fixture.caseIndex}: FAILS AFTER ${before} OPCODES`} size={8} cls="k-value--muted" />
