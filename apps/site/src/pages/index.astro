@@ -20,19 +20,28 @@ const chapters = [...catalog.chapters].sort((a, b) => a.readingOrder - b.reading
       </p>
     </div>
     <ol class="atlas-contents" aria-label="Chapters, in reading order">
-      {chapters.map((ch) => {
+      {chapters.map((ch, index) => {
         const loaded = available.get(ch.id);
         return (
           <li class="atlas-contents__item" data-available={loaded ? "true" : "false"}>
-            <span class="atlas-contents__bips">BIP {ch.primaryBips.map((n) => String(n).padStart(4, "0")).join(" + ")}</span>
-            {loaded ? (
-              <a class="atlas-contents__title" href={`/learn/${ch.id}/`}>{ch.questionTitle}</a>
-            ) : (
-              <span class="atlas-contents__title">{ch.questionTitle}</span>
-            )}
-            <span class="atlas-contents__state">
-              {loaded ? `Draft · source ${shortCommit(loaded.lock.commit)} · ${loaded.publication.reviewState === "in-review" ? "technical review applied" : loaded.publication.reviewState === "approved" ? "signed off" : "not yet reviewed"}` : `Not yet written · phase ${ch.phase}`}
-            </span>
+            <a class="atlas-contents__link" href={loaded ? `/learn/${ch.id}/` : undefined} aria-labelledby={`chapter-${ch.id}-title`}>
+              {loaded && <img
+                class="atlas-contents__thumbnail"
+                src={`/thumbnails/${ch.id}.png`}
+                alt=""
+                width="352"
+                height="264"
+                loading={index < 4 ? "eager" : "lazy"}
+                decoding="async"
+              />}
+              <span class="atlas-contents__heading">
+                <span class="atlas-contents__bips">BIP {ch.primaryBips.map((n) => String(n).padStart(4, "0")).join(" + ")}</span>
+                <span class="atlas-contents__title" id={`chapter-${ch.id}-title`}>{ch.questionTitle}</span>
+                <span class="atlas-contents__state">
+                  {loaded ? `Draft · source ${shortCommit(loaded.lock.commit)} · ${loaded.publication.reviewState === "in-review" ? "technical review applied" : loaded.publication.reviewState === "approved" ? "signed off" : "not yet reviewed"}` : `Not yet written · phase ${ch.phase}`}
+                </span>
+              </span>
+            </a>
           </li>
         );
       })}
