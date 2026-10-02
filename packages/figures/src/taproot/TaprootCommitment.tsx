@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
 import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
 import type { DerivedTaprootTreeFixture, TaprootLeafView } from "../types";
-import { layoutTree, seenMap, type Seen } from "./treeLayout";
+import { layoutTree, pruneForView, seenMap, type Seen } from "./treeLayout";
 
 type Path = "key" | "script";
 type View = "wallet" | "proof";
@@ -39,7 +39,8 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
   const proof = view === "proof";
   const seen = d.root ? seenMap(d.root, path, leaf.id, proof) : new Map<string, Seen>();
   const keyOnlyView = path === "key" && proof;
-  const sig = d.keySpend?.signatureHex ?? "";
+  if (!d.keySpend) throw new Error(`${fixture.id}: the hero needs the published key-path spend of this output`);
+  const sig = d.keySpend.signatureHex;
   const scriptBytes = leaf.scriptHex.length / 2;
   const cbBytes = leaf.controlBlockHex.length / 2;
   const m = leaf.path.length;
@@ -63,7 +64,9 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
     const cx = W / 2;
     const cardW = wide ? 134 : 80;
     const treeTop = 196, levelH = 72;
-    const placed = d.root ? layoutTree(d.root, W - (wide ? 80 : 50), levelH) : [];
+    // In the proof view, lay out only what is drawn, so positions and depth leak nothing.
+    const shape = d.root ? (proof ? pruneForView(d.root, seen) : d.root) : null;
+    const placed = shape ? layoutTree(shape, W - (wide ? 80 : 50), levelH) : [];
     const rootX = placed.find((n) => n.parent === null)?.x ?? 0;
     const off = cx - rootX;
     const at = (hash: string) => {
@@ -83,7 +86,8 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
           <>
             <rect class="k-outline k-mark--sig" x={cx - 60} y={60} width="120" height="26" />
             <Value at={[cx, 77]} text={`SIGNATURE · ${sig.length / 2} B`} size={9} anchor="middle" cls="k-value--on" />
-            <Arrow d={`M${cx} 58 V32`} ids={ids} />
+            <line class="k-leader k-dashed" x1={cx} y1={58} x2={cx} y2={32} />
+            <Value at={[cx + 6, 48]} text="CHECKED AGAINST Q" size={7.5} cls="k-value--muted" />
             <Value at={[cx, 118]} text="THE SPEND SHOWS NO TREE AND NO INTERNAL KEY" size={wide ? 9 : 8} anchor="middle" cls="k-value--muted" />
           </>
         ) : (
@@ -104,7 +108,7 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
           const s = seen.get(n.hash)!, ps = seen.get(n.parent)!;
           if (s === "absent" || ps === "absent") return null;
           const a = at(n.parent), b = at(n.hash);
-          return <line class={`k-leader${s === "sibling" ? " k-dashed" : ""}`} x1={a.x} y1={a.y + 24} x2={b.x} y2={b.y - 14} />;
+          return <line class="k-leader" x1={a.x} y1={a.y + 24} x2={b.x} y2={b.y - 14} />;
         })}
         {/* Nodes */}
         {placed.map((n) => {
@@ -123,7 +127,7 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
                 {wide ? null : <Value at={[x - cardW / 2 + 6, y + 22]} text={l.scriptReading.split(" ").slice(1).join(" ")} size={7.5} />}
                 {s === "revealed" ? (
                   <>
-                    <rect class="k-outline k-mark--sig" x={x - cardW / 2} y={y + 28} width={cardW} height="12" />
+                    <rect class="k-outline k-mark--plain" x={x - cardW / 2} y={y + 28} width={cardW} height="12" />
                     <Value at={[x, y + 37]} text="IN THE WITNESS" size={7.5} anchor="middle" cls="k-value--on" />
                   </>
                 ) : s === "sibling" ? (
@@ -143,6 +147,9 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
             </g>
           );
         })}
+        {!proof && d.root ? (
+          <Value at={[24, stripY - 26]} text={wide ? "LEFT AND RIGHT ARE THE WALLET'S LAYOUT; EACH PAIR IS HASHED IN SORTED ORDER" : "EACH PAIR IS HASHED IN SORTED ORDER"} size={7.5} cls="k-value--muted" />
+        ) : null}
         {/* Witness strip */}
         <Value at={[24, stripY - 8]} text={path === "key" ? "WITNESS · KEY PATH · 1 ITEM" : `WITNESS · SCRIPT PATH · ${leafName(leaf.id).toUpperCase()}`} size={8.5} cls="k-value--label" />
         {path === "key" ? (
@@ -173,7 +180,7 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
       {hydrated ? (
         <div class="atlas-hero__controls">
           {strip("Spending path", "path", [{ value: "key", text: "Key path" }, { value: "script", text: "Script path" }], path, (v) => setPath(v as Path))}
-          {strip("Leaf", "leaf", d.leaves.map((l) => ({ value: String(l.id), text: leafName(l.id), disabled: path === "key" })), String(leafId), (v) => setLeafId(Number(v)))}
+          {path === "script" ? strip("Leaf", "leaf", d.leaves.map((l) => ({ value: String(l.id), text: leafName(l.id) })), String(leafId), (v) => setLeafId(Number(v))) : null}
           {strip("Show", "view", [{ value: "wallet", text: "Everything" }, { value: "proof", text: "Only the proof" }], view, (v) => setView(v as View))}
         </div>
       ) : (
@@ -206,11 +213,11 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
 
 /** Script-path witness: inputs (not shown), the script, and the control block split into its parts. */
 function witnessStrip(ids: DrawingIds, x: number, y: number, width: number, scriptBytes: number, cbBytes: number, m: number, wide: boolean) {
-  const inputsW = wide ? 90 : 56;
+  const inputsW = wide ? 122 : 56;
   const rest = width - inputsW;
   const unit = rest / (scriptBytes + cbBytes);
   const parts: Array<{ w: number; role: string; label: string; style?: string }> = [
-    { w: inputsW, role: "hidden", label: wide ? "script inputs" : "inputs", style: `fill:${ids.hatch}` },
+    { w: inputsW, role: "plain", label: wide ? "inputs: not in vector" : "inputs", style: "stroke-dasharray:3 2" },
     { w: scriptBytes * unit, role: "plain", label: `script ${scriptBytes} B` },
     { w: unit, role: "plain", label: "" },
     { w: 32 * unit, role: "public", label: "P 32 B" },

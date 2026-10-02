@@ -1,5 +1,6 @@
 import { Drawing, IsoBox, Responsive, Value, idsFor, type DrawingIds } from "../kit";
 import type { DerivedTaprootTreeFixture } from "../types";
+import { storyLeaf } from "./treeLayout";
 
 const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
 
@@ -10,14 +11,15 @@ const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
  */
 export function WitnessStacks({ fixture }: { fixture: DerivedTaprootTreeFixture }) {
   const d = fixture.derived;
-  const leaf = d.leaves.find((l) => l.id === 1) ?? d.leaves[0];
-  const sigBytes = (d.keySpend?.signatureHex.length ?? 128) / 2;
+  const leaf = storyLeaf(d.leaves);
+  if (!d.keySpend) throw new Error(`${fixture.id}: needs the published key-path spend`);
+  const sigBytes = d.keySpend.signatureHex.length / 2;
   const scriptBytes = leaf.scriptHex.length / 2;
   const cbBytes = leaf.controlBlockHex.length / 2;
   const desc =
     `Key path: the witness has one item, a ${sigBytes}-byte signature (the published key-path spend of this output). ` +
     `Script path for ${leafName(leaf.id)}: the script's own inputs (not published by the vector), then the ${scriptBytes}-byte script, then the ${cbBytes}-byte control block. ` +
-    `A verifier tells them apart by counting items; an annex, if present, would be a last item starting with the byte 0x50.`;
+    `A verifier tells them apart by counting items after removing any annex, a last item starting with the byte 0x50; either kind of spend may carry one.`;
   const stack = (ids: DrawingIds, x: number, y: number, title: string, plates: Array<{ role: "sig" | "plain" | "hash" | "hidden"; label: string }>) => (
     <g>
       <Value at={[x, y]} text={title} size={9} cls="k-value--label" />
@@ -39,11 +41,11 @@ export function WitnessStacks({ fixture }: { fixture: DerivedTaprootTreeFixture 
       <>
         {stack(ids, keyAt[0], keyAt[1], "KEY PATH · 1 ITEM", [{ role: "sig", label: `signature · ${sigBytes} B` }])}
         {stack(ids, scriptAt[0], scriptAt[1], "SCRIPT PATH · " + leafName(leaf.id).toUpperCase(), [
-          { role: "hidden", label: "script inputs (not shown)" },
+          { role: "plain", label: "script inputs (not in the vector)" },
           { role: "plain", label: `script · ${scriptBytes} B` },
-          { role: "hash", label: `control block · ${cbBytes} B` },
+          { role: "plain", label: `control block · ${cbBytes} B` },
         ])}
-        <Value at={[wide ? 318 : 14, wide ? 196 : 300]} text="AN ANNEX (FIRST BYTE 0x50) WOULD COME LAST" size={8} cls="k-value--muted" />
+        <Value at={[14, wide ? 196 : 300]} text="EITHER STACK MAY END WITH AN ANNEX (FIRST BYTE 0x50); IT IS SET ASIDE FIRST" size={8} cls="k-value--muted" />
       </>
     );
   };

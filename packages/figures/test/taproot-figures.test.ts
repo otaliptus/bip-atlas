@@ -129,7 +129,8 @@ describe("SigMsgLayout", () => {
   });
   it("marks the two all-inputs commitments", () => {
     expect(count(s, 'data-field="sha_amounts"')).toBeGreaterThanOrEqual(1);
-    expect(count(s, "k-fill--sig")).toBeGreaterThanOrEqual(2);
+    expect(count(s, "k-cell--em")).toBeGreaterThanOrEqual(2);
+    expect(s).not.toContain("k-fill--sig");
   });
   it("prints the sighash from the model", () => {
     expect(s).toContain(d.derived.sighashHex.slice(0, 32));
@@ -165,6 +166,14 @@ describe("TaprootCommitment (static renders)", () => {
     for (const l of d.leaves) expect(s).not.toContain(l.leafHash.slice(0, 8));
     expect(s).toContain(d.outputKeyHex.slice(0, 8));
     expect(s).toContain("THE SPEND SHOWS NO TREE");
+  });
+  it("proof view lays out only what is drawn: leaf A's proof is shallower than its wallet view", () => {
+    const height = (s: string) => Number(wideOnly(s).match(/viewBox="0 0 640 (\d+(?:\.\d+)?)"/)![1]);
+    const proofA = height(render({ path: "script", leafId: 0, view: "proof" }));
+    const walletA = height(render({ path: "script", leafId: 0, view: "wallet" }));
+    const proofB = height(render({ path: "script", leafId: 1, view: "proof" }));
+    expect(proofA).toBeLessThan(walletA);
+    expect(proofA).toBeLessThan(proofB);
   });
   it("control block parts add up to its length", () => {
     const s = wideOnly(render({ path: "script", leafId: 1, view: "proof" }));

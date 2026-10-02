@@ -147,7 +147,7 @@ describe("Packet", () => {
   ];
   it("wraps fields across rows and repeats the label of a continued field", () => {
     const s = html(h("svg", {}, h(Packet, { x: 0, y: 0, fields, perRow: 16, unit: 10 })));
-    expect(s).toContain(">hash_type<");
+    expect(s).toContain(">hash_type · 12 B<");
     expect(s).toContain("sha_prevouts …cont");
     expect(packetSize(fields, 16, 10, 22).rows).toBe(3);
   });

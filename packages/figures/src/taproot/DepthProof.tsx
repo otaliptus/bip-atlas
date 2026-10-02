@@ -36,7 +36,8 @@ export function DepthProof({ fixture }: { fixture: DerivedTaprootTreeFixture }) 
           <g>
             <rect class="k-outline k-fill--plain" x={x - cardW / 2} y={cardTop(n.depth) - 10} width={cardW} height="24" />
             <Value at={[x - cardW / 2 + 6, cardTop(n.depth) + 6]} text={leafName(l.id).toUpperCase()} size={8.5} cls="k-value--label" />
-            <rect class="k-cell k-fill--public" x={x - cardW / 2} y={cardTop(maxDepth) + 34} width={33 * unit} height="14" />
+            <rect class="k-cell k-fill--plain" x={x - cardW / 2} y={cardTop(maxDepth) + 34} width={unit} height="14" />
+            <rect class="k-cell k-fill--public" x={x - cardW / 2 + unit} y={cardTop(maxDepth) + 34} width={32 * unit} height="14" />
             {Array.from({ length: l.path.length }, (_, j) => (
               <rect class="k-cell k-fill--hash" x={x - cardW / 2 + (33 + 32 * j) * unit} y={cardTop(maxDepth) + 34} width={32 * unit} height="14" />
             ))}

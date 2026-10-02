@@ -1,6 +1,6 @@
 import type { Role } from "./roles";
 
-export interface PacketField { id: string; label: string; bytes: number; role?: Role; value?: string }
+export interface PacketField { id: string; label: string; bytes: number; role?: Role; value?: string; /** Heavy outline, for fields singled out by the figure. */ em?: boolean }
 
 interface Seg { field: PacketField; row: number; col: number; len: number; cont: boolean }
 
@@ -50,12 +50,13 @@ export function Packet({ x, y, fields, perRow, unit = 9, rowH = 22, ruler = fals
         : null}
       {segs.map((s) => {
         const sx = x + s.col * unit, sy = y + s.row * rowH, w = s.len * unit;
-        const name = s.cont ? `${s.field.label} …cont` : s.field.label;
+        const sized = `${s.field.label} · ${s.field.bytes} B`;
+        const name = s.cont ? `${s.field.label} …cont` : sized.length * 5.4 + 8 < w ? sized : s.field.label;
         const fits = name.length * 5.4 + 8 < w;
         return (
           <g data-field={s.field.id}>
-            <rect class={`k-cell k-fill--${s.field.role ?? "plain"}`} x={sx} y={sy} width={w} height={rowH} />
-            {fits ? <text class="k-packet__t" x={sx + 4} y={sy + rowH / 2 + 3.2}>{name}</text> : null}
+            <rect class={`k-cell k-fill--${s.field.role ?? "plain"}${s.field.em ? " k-cell--em" : ""}`} x={sx} y={sy} width={w} height={rowH} />
+            {fits ? <text class="k-packet__t" x={sx + 4} y={sy + rowH / 2 + 3.2}>{name}</text> : s.cont && w > 14 ? <text class="k-packet__t" x={sx + 4} y={sy + rowH / 2 + 3.2}>…</text> : null}
           </g>
         );
       })}

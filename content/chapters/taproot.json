@@ -174,7 +174,7 @@
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "Count the items: one means the key path, two or more (after any annex) the script path.",
+     "caption": "Count the items after removing any annex: one means the key path, two or more the script path.",
      "claims": [
       "path-choice",
       "key-path-rule",
@@ -200,7 +200,7 @@
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "The verifier’s recomputation for leaf B of vector 5, step by step. Exact values: Fig. A07.1 and the details under Fig. A07.2.",
+     "caption": "The verifier’s recomputation for leaf B of vector 5, step by step; the exact values are listed under the frames.",
      "claims": [
       "tweak-check",
       "parity-why",
@@ -345,7 +345,7 @@
      "fixtures": [
       "bip341-keyspend-input4"
      ],
-     "caption": "The signature message for input 4 of the published key-path vector, the spend shown in Fig. A07.2. The two shaded items commit to every spent output’s amount and scriptPubKey.",
+     "caption": "The signature message for input 4 of the published key-path vector, the spend shown in Fig. A07.2. The two outlined items commit to every spent output’s amount and scriptPubKey.",
      "claims": [
       "sigmsg-commits",
       "signature-form",

@@ -44,7 +44,7 @@ export function TaprootTweak({ fixtures }: { fixtures: DerivedTaprootTreeFixture
                 </>
               )}
               <Arrow d={`M46 ${y + 38} H118 V${y + 62} H140`} ids={ids} />
-              <Arrow d={`M${d.merkleRootHex ? 124 : 132} ${y + 106} H128 V${y + 80} H140`} ids={ids} />
+              {d.merkleRootHex ? <Arrow d={`M124 ${y + 106} H128 V${y + 80} H140`} ids={ids} /> : <Value at={[48, y + 117]} text="HASHED: P ONLY" size={8} cls="k-value--muted" />}
               <Machine at={[172, y + 66]} w={64} d={34} h={26} label="TapTweak" sub="hash" role="hash" />
               <Value at={[148, y + 134]} text={`t = ${short(d.tweakHex)}`} size={9.5} cls="k-value--hash" />
               <Arrow d={`M232 ${y + 56} H268`} ids={ids} />
@@ -52,7 +52,7 @@ export function TaprootTweak({ fixtures }: { fixtures: DerivedTaprootTreeFixture
               <KeyGlyph at={[276, y + 40]} role="public" />
               <Value at={[276, y + 68]} text="OUTPUT KEY Q" size={8.5} cls="k-value--label" />
               <Value at={[276, y + 80]} text={short(d.outputKeyHex)} size={9.5} />
-              <Value at={[276, y + 102]} text="51 20 ‖ Q" size={9} cls="k-value--muted" />
+              <Value at={[276, y + 102]} text={`${d.scriptPubKeyHex.slice(0, 2)} ${d.scriptPubKeyHex.slice(2, 4)} ‖ Q`} size={9} cls="k-value--muted" />
               <Value at={[276, y + 114]} text="OUTPUT SCRIPT" size={8} cls="k-value--muted" />
             </g>
           );

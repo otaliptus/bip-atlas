@@ -6,7 +6,7 @@ const ALL_INPUTS = new Set(["sha_amounts", "sha_scriptpubkeys"]);
 /**
  * taproot-sigmsg.v1 — static. The BIP 341 signature message for one
  * published key-path spend as a packet diagram on a 32-byte ruler. The two
- * blue fields commit to every spent output's amount and scriptPubKey.
+ * outlined fields commit to every spent output's amount and scriptPubKey.
  */
 export function SigMsgLayout({ fixture }: { fixture: DerivedTaprootKeyspendFixture }) {
   const d = fixture.derived;
@@ -15,7 +15,8 @@ export function SigMsgLayout({ fixture }: { fixture: DerivedTaprootKeyspendFixtu
     id: it.id,
     label: it.label,
     bytes: it.bytes,
-    role: ALL_INPUTS.has(it.id) ? "sig" : it.id.startsWith("sha_") ? "hash" : "plain",
+    role: it.id.startsWith("sha_") ? "hash" : "plain",
+    em: ALL_INPUTS.has(it.id),
   }));
   const size = packetSize(fields, perRow, unit, rowH);
   const anchors = packetAnchors(fields, perRow, x0, y0, unit, rowH);
@@ -56,7 +57,7 @@ export function SigMsgLayout({ fixture }: { fixture: DerivedTaprootKeyspendFixtu
             </g>
           );
         })}
-        <rect class="k-cell k-fill--sig" x={x0} y={legendY - 8} width="10" height="10" />
+        <rect class="k-cell k-fill--hash k-cell--em" x={x0} y={legendY - 8} width="10" height="10" />
         <Value at={[x0 + 16, legendY + 1]} text="AMOUNT AND SCRIPTPUBKEY OF EVERY SPENT OUTPUT" size={8.5} cls="k-value--label" />
         <Value at={[x0, legendY + 24]} text="hash_TapSighash(0x00 ‖ SigMsg) =" size={9.5} />
         <Value at={[x0, legendY + 38]} text={d.sighashHex.slice(0, 32)} size={9.5} />

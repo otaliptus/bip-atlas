@@ -11,14 +11,17 @@ export type Seen = "revealed" | "recomputed" | "sibling" | "known" | "absent";
 
 export const leavesUnder = (n: TaprootNodeView): number[] => (n.leaf !== null ? [n.leaf] : n.children.flatMap(leavesUnder));
 
-/** Leaves evenly spaced along x in tree order; each parent centred over its children; y = depth × levelH. */
+/** Tips (nodes drawn without children) in tree order. */
+const tipsUnder = (n: TaprootNodeView): TaprootNodeView[] => (n.children.length === 0 ? [n] : n.children.flatMap(tipsUnder));
+
+/** Tips evenly spaced along x in tree order; each parent centred over its children; y = depth × levelH. */
 export function layoutTree(root: TaprootNodeView, width: number, levelH: number): PlacedNode[] {
-  const leafOrder = leavesUnder(root);
-  const step = width / leafOrder.length;
+  const tips = tipsUnder(root);
+  const step = width / tips.length;
   const out: PlacedNode[] = [];
   const walk = (n: TaprootNodeView, depth: number, parent: string | null): number => {
-    const x = n.leaf !== null
-      ? step * (leafOrder.indexOf(n.leaf) + 0.5)
+    const x = n.children.length === 0
+      ? step * (tips.indexOf(n) + 0.5)
       : n.children.map((c) => walk(c, depth + 1, n.hash)).reduce((a, b) => a + b, 0) / n.children.length;
     out.push({ hash: n.hash, leaf: n.leaf, depth, x, y: depth * levelH, parent });
     return x;
@@ -46,4 +49,23 @@ export function seenMap(root: TaprootNodeView, path: "key" | "script", leafId: n
   };
   visit(root, false);
   return m;
+}
+
+/**
+ * The tree as the proof view may lay it out: absent nodes removed and each
+ * sibling made a tip, so neither the positions nor the depth of the drawing
+ * depend on anything the spend does not reveal. Returns null if nothing is drawn.
+ */
+export function pruneForView(root: TaprootNodeView, seen: Map<string, Seen>): TaprootNodeView | null {
+  const s = seen.get(root.hash);
+  if (!s || s === "absent") return null;
+  if (s === "sibling") return { ...root, children: [] };
+  return { ...root, children: root.children.map((c) => pruneForView(c, seen)).filter((c): c is TaprootNodeView => c !== null) };
+}
+
+/** The leaf the chapter's figures follow (leaf B of vector 5). Throws rather than silently drawing another leaf. */
+export function storyLeaf<T extends { id: number }>(leaves: T[], id = 1): T {
+  const leaf = leaves.find((l) => l.id === id);
+  if (!leaf) throw new Error(`taproot figures: the published tree has no leaf ${id}`);
+  return leaf;
 }

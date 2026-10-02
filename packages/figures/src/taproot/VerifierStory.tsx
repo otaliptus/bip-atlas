@@ -1,5 +1,6 @@
 import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Storyboard, Value, type Frame } from "../kit";
 import type { DerivedTaprootTreeFixture } from "../types";
+import { storyLeaf } from "./treeLayout";
 
 const short = (hex: string) => `${hex.slice(0, 8)}…`;
 
@@ -21,7 +22,7 @@ function HashCube({ x, y, label, value }: { x: number; y: number; label: string;
  */
 export function VerifierStory({ fixture }: { fixture: DerivedTaprootTreeFixture }) {
   const d = fixture.derived;
-  const leaf = d.leaves.find((l) => l.id === 1) ?? d.leaves[0];
+  const leaf = storyLeaf(d.leaves);
   const step = (id: string) => leaf.check.filter((s) => s.id === id);
   const [len] = step("length"), [lv] = step("leaf-version"), [lh] = step("leaf-hash"), [tw] = step("tweak"), [ok] = step("output-key"), [cmp] = step("compare");
   const branches = step("branch");
@@ -84,7 +85,7 @@ export function VerifierStory({ fixture }: { fixture: DerivedTaprootTreeFixture 
       ),
     })),
     {
-      note: `Tweak the internal key with the rebuilt root: t = ${short(tw.values.t)}`,
+      note: `Hash P and the rebuilt root with TapTweak: t = ${short(tw.values.t)}`,
       desc: `TapTweak of the internal key P = ${d.internalKeyHex} and the rebuilt root ${tw.values.root} gives t = ${tw.values.t}.`,
       draw: (ids) => (
         <>
@@ -99,15 +100,15 @@ export function VerifierStory({ fixture }: { fixture: DerivedTaprootTreeFixture 
       ),
     },
     {
-      note: `Q' = P + t·G has x = ${short(ok.values.x)}, the output key, and parity ${ok.values.parity}, matching the parity bit. ${cmp.ok ? "The spend's commitment holds." : ""}`,
+      note: `Q' = P + t·G has x = ${short(ok.values.x)}, the output key, and y ${ok.values.parity === "0" ? "even" : "odd"} (parity ${ok.values.parity}), matching the parity bit. ${cmp.ok ? "The spend's commitment holds." : ""}`,
       desc: `P + t·G has x coordinate ${ok.values.x}, equal to the output key ${cmp.values.q}, and y parity ${ok.values.parity}, equal to the control block's parity bit. The commitment check ${cmp.ok ? "passes" : "fails"}.`,
       draw: (ids) => (
         <>
           <KeyGlyph at={[16, 44]} role="public" />
           <Value at={[16, 70]} text="Q' = P + t·G" size={9} />
           <Value at={[16, 84]} text={short(ok.values.x)} size={8.5} />
-          <Arrow d="M96 50 H140" ids={ids} />
-          <Value at={[118, 42]} text="=" size={12} anchor="middle" />
+          <Value at={[124, 56]} text="=" size={16} anchor="middle" />
+          <Value at={[124, 70]} text="COMPARE" size={7} anchor="middle" cls="k-value--muted" />
           <KeyGlyph at={[150, 44]} role="public" />
           <Value at={[150, 70]} text="OUTPUT KEY Q" size={8.5} cls="k-value--label" />
           <Value at={[150, 84]} text={short(cmp.values.q)} size={8.5} />
@@ -116,7 +117,28 @@ export function VerifierStory({ fixture }: { fixture: DerivedTaprootTreeFixture 
       ),
     },
   ];
-  return <Storyboard id="a07-verify" title="Rebuilding the commitment" width={300} height={140} frames={frames} />;
+  return (
+    <>
+      <Storyboard id="a07-verify" title="Rebuilding the commitment" width={300} height={140} frames={frames} />
+      <details class="atlas-disclosure">
+        <summary>Exact values, step by step</summary>
+        <dl class="atlas-hexlist">
+          <dt>Control block ({len.values.bytes} bytes)</dt><dd><code class="atlas-break">{leaf.controlBlockHex}</code></dd>
+          <dt>k0 = TapLeaf hash</dt><dd><code class="atlas-break">{lh.values.k0}</code></dd>
+          {branches.map((b) => (
+            <>
+              <dt>Branch {Number(b.values.j) + 1}: k, e{b.values.j}, result</dt>
+              <dd><code class="atlas-break">{b.values.k}</code><br /><code class="atlas-break">{b.values.e}</code><br /><code class="atlas-break">{b.values.next}</code></dd>
+            </>
+          ))}
+          <dt>Internal key P</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd>
+          <dt>t = TapTweak hash</dt><dd><code class="atlas-break">{tw.values.t}</code></dd>
+          <dt>x(Q') = output key</dt><dd><code class="atlas-break">{ok.values.x}</code></dd>
+          <dt>Parity</dt><dd>{ok.values.parity} ({ok.values.parity === "0" ? "y even" : "y odd"})</dd>
+        </dl>
+      </details>
+    </>
+  );
 }
 
 export const VERIFIER_FRAME_IDS = ["length", "leaf-hash", "branch", "tweak", "output-key"];
