@@ -154,7 +154,7 @@
         },
         {
           "type": "paragraph",
-          "text": "What this buys is a guarantee, not just good odds. BIP 173 states that the code detects any error affecting at most four characters and has less than a one-in-a-billion chance of missing larger ones. BIP 350's later analysis states the firm part more narrowly: within one checksum family, up to four substituted characters are *always* detected. A decoder that accepts both families does not inherit that guarantee for edits that also change the witness version; that case needs separate analysis.",
+          "text": "What this buys is a guarantee, not just good odds. BIP 173 states that the code detects any error affecting at most four characters and has less than a one-in-a-billion chance of missing larger ones. BIP 350's later analysis states the firm part as substitutions: up to four substituted characters are *always* detected. It reports that result for each code checked by its own verifier, so on our reading a decoder that accepts both families does not inherit the guarantee for edits that also change the witness version; BIP 350 calls the v1+-to-v0 case unlikely but hard to analyze.",
           "claims": [
             "bech32-guarantee",
             "substitution-guarantee",
@@ -507,7 +507,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Go back to the six characters at the end of the address. They hold no part of the destination. They let software reject a mistyped string, with certainty for up to four substitutions within one checksum family and with overwhelming odds otherwise. The rules around them say what happens next: refuse, point at most to where an error might be, and leave the correction to the user.",
+          "text": "Go back to the six characters at the end of the address. They hold no part of the destination. They let software reject a mistyped string: always when at most four characters are substituted and the string is checked against its own family's checksum, and otherwise with odds rather than certainty. The rules around them say what happens next: refuse, point at most to where an error might be, and leave the correction to the user.",
           "claims": [
             "checksum-six",
             "substitution-guarantee",

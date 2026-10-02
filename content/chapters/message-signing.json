@@ -266,7 +266,7 @@
         },
         {
           "type": "paragraph",
-          "text": "This site’s model is such a partial verifier. Its script interpreter runs only a reviewed set of opcodes, enough for every published simple and full vector: P2PKH, P2SH, nested and native SegWit, multisig, Taproot key and script paths, and time locks. It applies the required rules in all of them, answers inconclusive for any script outside that set and for proof-of-funds signatures, and rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
+          "text": "This site’s model is such a partial verifier. Its script interpreter runs only a reviewed set of opcodes, enough for every published simple and full vector: P2PKH, P2SH, nested and native SegWit, multisig, Taproot key and script paths, and time locks. It applies the required rules in all of them, answers inconclusive for proof-of-funds signatures and for any committed script or spend shape outside what it covers, unless an earlier check has already failed, and rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
           "claims": [
             "vectors",
             "basic-validation"

@@ -450,9 +450,4 @@ const tlSpec = figure.recipe === "timelock-fields.v1" ? timelockHeroSpec(timeloc
   {figure.recipe === "bip322-verify-story.v1" && <Bip322VerifyStory fixture={b322[0]} />}
   {figure.recipe === "bip322-interpreter.v1" && <Bip322Rack fixture={b322Verdicts[0]} />}
   {figure.recipe === "bip322-limits.v1" && <Bip322Limits />}
-  {recipe.interactive && !recipe.drawing && (
-    <Fragment slot="worked">
-      {/* No card-style hero is left: every worked tab retired with the illustration batches. */}
-    </Fragment>
-  )}
 </Plate>

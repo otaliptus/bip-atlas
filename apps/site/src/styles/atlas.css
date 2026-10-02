@@ -175,7 +175,6 @@ body.manual { min-block-size: 100vh; }
 .atlas-choice input:checked + span::before { background: var(--manual-blue); border-color: var(--manual-blue); box-shadow: inset 0 0 0 2px var(--manual-blue-wash); }
 .atlas-choice input:focus-visible + span { outline: 2px solid var(--manual-focus); outline-offset: 3px; }
 
-
 .atlas-lab__buttons { display: flex; flex-wrap: wrap; gap: var(--manual-space-2); }
 .manual-plate-button { cursor: pointer; }
 .manual-plate-button:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -366,7 +365,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .atlas-tap-exact dt { font-family: var(--manual-code); color: var(--manual-muted); }
 .atlas-tap-exact dd { margin: 0; min-inline-size: 0; }
 
-
 /* Tablet check: at 64–80rem the plate sits beside the contents rail and is narrower than at 768 px. */
 @media (max-width: 79.99rem) {
 }
@@ -389,93 +387,7 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .atlas-backrefs a { text-decoration: none; color: var(--manual-blue-dark); padding: 0 0.15rem; border-bottom: 1px solid currentColor; }
 .atlas-backrefs a:hover, .atlas-backrefs a:focus-visible { background: var(--manual-blue-wash); }
 
-/* ---------- chapter accents (used by worked examples and figure tabs) ---------- */
-.atlas-chapter { --atlas-accent: var(--manual-blue-dark); }
-.atlas-chapter[data-chapter="mnemonics"] { --atlas-accent: #a3461a; }
-.atlas-chapter[data-chapter="hd-wallets"] { --atlas-accent: #2b6e47; }
-.atlas-chapter[data-chapter="segwit"] { --atlas-accent: #5b45a8; }
-.atlas-chapter[data-chapter="addresses"] { --atlas-accent: #1934c6; }
-.atlas-chapter[data-chapter="psbt"] { --atlas-accent: #93305f; }
-.atlas-chapter[data-chapter="schnorr"] { --atlas-accent: #0b6e7a; }
-.atlas-chapter[data-chapter="taproot"] { --atlas-accent: #7a5e12; }
-.atlas-chapter[data-chapter="tapscript"] { --atlas-accent: #b0362a; }
-.atlas-chapter {
-  --atlas-accent-wash: color-mix(in srgb, var(--atlas-accent) 9%, #ffffff);
-  --atlas-accent-tint: color-mix(in srgb, var(--atlas-accent) 22%, #ffffff);
-  --atlas-accent-mid: color-mix(in srgb, var(--atlas-accent) 45%, #ffffff);
-}
-
-/* ---------- figure tabs ---------- */
-.atlas-tabs { display: grid; gap: var(--manual-space-4); }
-.atlas-tabs__list { display: flex; gap: 0; border-block-end: 1px solid var(--manual-ink); }
-.atlas-tabs__list[hidden] { display: none; }
-.atlas-tabs__list [role="tab"] { appearance: none; background: transparent; border: 1px solid transparent; border-block-end: 0; margin-block-end: -1px; padding: 0.55rem 1rem 0.5rem; font: inherit; font-family: var(--manual-code); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--manual-muted); cursor: pointer; display: inline-flex; gap: 0.5rem; align-items: center; }
-.atlas-tabs__list [role="tab"][aria-selected="true"] { color: var(--manual-ink); background: var(--manual-paper); border-color: var(--manual-ink); box-shadow: inset 0 3px 0 var(--atlas-accent); }
-.atlas-tabs__list [role="tab"]:hover { color: var(--manual-ink); }
-.atlas-tabs__list [role="tab"]:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: -4px; }
-.atlas-tabs__num { display: inline-grid; place-items: center; inline-size: 1.3rem; block-size: 1.3rem; border: 1px solid currentColor; font-size: 0.75rem; }
-[aria-selected="true"] > .atlas-tabs__num { background: var(--atlas-accent); border-color: var(--atlas-accent); color: #ffffff; }
-.atlas-tabs__fallback { margin: 0 0 var(--manual-space-3); font-family: var(--manual-code); font-size: 0.8125rem; font-weight: 500; line-height: 1.4; text-transform: uppercase; letter-spacing: 0.05em; border-block-end: 1px solid var(--manual-ink); padding-block-end: 0.35rem; }
-.atlas-tabs.is-enhanced .atlas-tabs__fallback { display: none; }
-.atlas-tabs:not(.is-enhanced) .atlas-tabs__panel + .atlas-tabs__panel { margin-block-start: var(--manual-space-6); }
-
-/* ---------- worked examples ---------- */
-.atlas-worked { display: grid; gap: var(--manual-space-4); }
-.atlas-worked__intro { margin: 0; font-size: 0.9375rem; }
-.atlas-worked__body { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: var(--manual-space-5); align-items: start; }
-.atlas-worked__art { position: sticky; inset-block-start: 1rem; }
-.atlas-iso { display: block; inline-size: 100%; max-inline-size: 22rem; block-size: auto; margin-inline: auto; overflow: visible; }
-.atlas-iso__slab polygon { stroke: var(--manual-ink); stroke-width: 1.25; stroke-linejoin: round; }
-.atlas-iso__top { fill: var(--manual-surface); }
-.atlas-iso__left { fill: #ececf2; }
-.atlas-iso__right { fill: #dcdce5; }
-.atlas-iso__slab[data-tone="wash"] .atlas-iso__top { fill: var(--atlas-accent-wash); }
-.atlas-iso__slab[data-tone="wash"] .atlas-iso__left { fill: var(--atlas-accent-tint); }
-.atlas-iso__slab[data-tone="wash"] .atlas-iso__right { fill: var(--atlas-accent-mid); }
-.atlas-iso__slab[data-tone="accent"] .atlas-iso__top { fill: var(--atlas-accent-tint); }
-.atlas-iso__slab[data-tone="accent"] .atlas-iso__left { fill: var(--atlas-accent-mid); }
-.atlas-iso__slab[data-tone="accent"] .atlas-iso__right { fill: var(--atlas-accent); }
-.atlas-iso__slab[data-tone="fail"] .atlas-iso__top { fill: var(--atlas-edit-wash); }
-.atlas-iso__slab[data-tone="fail"] .atlas-iso__left { fill: color-mix(in srgb, var(--atlas-edit) 30%, #ffffff); }
-.atlas-iso__slab[data-tone="fail"] .atlas-iso__right { fill: var(--atlas-edit); }
-.atlas-iso__slab[data-tone="muted"] polygon { stroke: var(--manual-rule); }
-.atlas-iso__hatch-line { stroke: var(--atlas-accent); stroke-width: 1.5; }
-.atlas-iso__grid { stroke: var(--manual-ink); stroke-width: 0.6; opacity: 0.55; }
-.atlas-iso__cell { stroke: none !important; }
-.atlas-iso__cell--on { fill: var(--atlas-accent); opacity: 0.8; }
-.atlas-iso__cell--mark { fill: var(--atlas-accent-mid); }
-.atlas-iso__slab[data-tone="fail"] .atlas-iso__cell--mark { fill: var(--atlas-edit); }
-.atlas-iso__leader { stroke: var(--manual-ink); stroke-width: 1; stroke-dasharray: 3 3; }
-.atlas-iso__badge circle { fill: var(--atlas-accent); stroke: none; }
-.atlas-iso__badge text { fill: #ffffff; font-family: var(--manual-code); font-size: 14px; font-weight: 500; }
-.atlas-worked__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--manual-space-3); counter-reset: none; }
-.atlas-worked__steps li { display: grid; grid-template-columns: 1.75rem minmax(0, 1fr); gap: 0.75rem; align-items: start; padding-block-end: var(--manual-space-3); border-block-end: 1px dashed var(--manual-rule); }
-.atlas-worked__steps li:last-child { border-block-end: 0; }
-.atlas-worked__n { display: grid; place-items: center; inline-size: 1.75rem; block-size: 1.75rem; border-radius: 50%; background: var(--atlas-accent); color: #ffffff; font-family: var(--manual-code); font-size: 0.875rem; font-weight: 500; }
-.atlas-worked__steps li[data-tone="fail"] .atlas-worked__n { background: var(--atlas-edit); }
-.atlas-worked__text { min-inline-size: 0; display: grid; gap: 0.3rem; }
-.atlas-worked__title { margin: 0; font-weight: 600; font-size: 0.9375rem; line-height: 1.4; }
-.atlas-worked__values { margin: 0; display: grid; gap: 0.2rem; }
-.atlas-worked__values div { display: grid; grid-template-columns: minmax(6rem, auto) minmax(0, 1fr); gap: 0.5rem; align-items: baseline; }
-.atlas-worked__values dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-worked__values dd { margin: 0; min-inline-size: 0; }
-.atlas-worked__values code { font-size: 0.75rem !important; }
-.atlas-worked__note { margin: 0; font-size: 0.875rem; color: var(--manual-muted); }
-@media (max-width: 47.99rem) {
-  .atlas-worked__body { grid-template-columns: minmax(0, 1fr); }
-  .atlas-worked__art { position: static; }
-  .atlas-iso { max-inline-size: 15rem; }
-  .atlas-worked__values div { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .atlas-tabs__list [role="tab"] { padding-inline: 0.6rem; flex: 1 1 0; justify-content: center; }
-}
-.atlas-worked__spaced { overflow-wrap: anywhere; word-break: normal; }
-.atlas-tabs__panel:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 4px; }
-
-/* ---------- p2sh (BIP 16) ---------- */
-.atlas-chapter[data-chapter="p2sh"] { --atlas-accent: #6d4c9f; }
-
 /* ---------- Timelocks (BIPs 65, 68, 112, 113) ---------- */
-.atlas-chapter[data-chapter="timelocks"] { --atlas-accent: #2a5d8f; }
 /* A pre-rendered hero drawn in one narrow composition: capped so its labels stay label-sized. */
 .atlas-hero.atlas-hero--compact .k-drawing { max-inline-size: 28rem; }
 /* The "compare units" toggle: the layer shows without JavaScript and when the box is ticked. */
@@ -486,7 +398,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .k-story__foot { margin: var(--manual-space-2) 0 0; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
 
 /* ---------- Version bits (BIPs 9, 8) ---------- */
-.atlas-chapter[data-chapter="version-bits"] { --atlas-accent: #7b4a2d; }
 /* Period tiles: states in ink, letter as the second cue. */
 .k-vb-tile { stroke: var(--atlas-ink); stroke-width: 0.75; vector-effect: non-scaling-stroke; fill: #ffffff; }
 .k-vb-tile--defined { stroke-dasharray: 2 2; }
@@ -515,7 +426,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .k-vb-gauge__needle { stroke: var(--atlas-ink); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linecap: round; }
 
 /* ---------- Wallet paths (BIPs 44, 84, 86) ---------- */
-.atlas-chapter[data-chapter="wallet-paths"] { --atlas-accent: #566b1d; }
 .k-iso--em .k-face { stroke-width: 2; }
 .k-engrave--big { font-size: 14px !important; font-weight: 500; }
 .k-wp-named { stroke-width: 2.25 !important; }
@@ -536,7 +446,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .atlas-chapter[data-chapter="wallet-paths"] .atlas-hero__status { overflow-wrap: anywhere; }
 
 /* ---------- Descriptors (BIPs 380–386) ---------- */
-.atlas-chapter[data-chapter="descriptors"] { --atlas-accent: #8a3b12; }
 .k-ds-fn { font-weight: 600; }
 /* Checksum character groups: neutral shades (purple stays for checksums). */
 .k-ds-g0 { fill: #ffffff; } .k-ds-g1 { fill: #e4e4ea; } .k-ds-g2 { fill: #8f8f9a; }
@@ -551,14 +460,7 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .atlas-ds-check[aria-pressed="true"] { background: var(--atlas-ink); color: #ffffff; }
 .atlas-chapter[data-chapter="descriptors"] .atlas-hero__status { overflow-wrap: anywhere; }
 
-/* ---------- MuSig2 (BIP 327) ---------- */
-.atlas-chapter[data-chapter="musig2"] { --atlas-accent: #1d6f5f; }
-
-/* ---------- Silent payments (BIP 352) ---------- */
-.atlas-chapter[data-chapter="silent-payments"] { --atlas-accent: #6a3d7a; }
-
 /* ---------- Block filters (BIPs 157/158) ---------- */
-.atlas-chapter[data-chapter="block-filters"] { --atlas-accent: #2f5f3a; }
 .k-bf-hex { font-size: 8.5px !important; }
 .k-bf-why { font-size: 8.5px !important; letter-spacing: 0.06em; }
 .k-bf-gap { font-size: 9px !important; letter-spacing: 0.04em; }
@@ -572,7 +474,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .k-bf-ban { stroke: var(--atlas-ink); stroke-width: 2; vector-effect: non-scaling-stroke; }
 
 /* ---------- v2 transport (BIP 324) ---------- */
-.atlas-chapter[data-chapter="v2-transport"] { --atlas-accent: #8a2d4f; }
 .k-v2-t { font-size: 9px !important; letter-spacing: 0.05em; }
 .k-v2-b { font-size: 8.5px !important; letter-spacing: 0.04em; }
 .k-v2-hex { font-size: 8.5px !important; }
@@ -580,7 +481,6 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
 .k-v2-window { fill: none; stroke: var(--atlas-ink); stroke-width: 1.5; stroke-dasharray: 4 2; vector-effect: non-scaling-stroke; }
 
 /* ---------- Message signing (BIP 322) ---------- */
-.atlas-chapter[data-chapter="message-signing"] { --atlas-accent: #5a4a8a; }
 .k-b3-h { font-size: 9px !important; letter-spacing: 0.06em; font-weight: 500; }
 .k-b3-l { font-size: 8.5px !important; letter-spacing: 0.05em; fill: var(--manual-muted) !important; }
 .k-b3-v { font-size: 8.5px !important; }
