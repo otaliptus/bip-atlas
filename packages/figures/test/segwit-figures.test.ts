@@ -7,7 +7,7 @@ import { AmountStory } from "../src/tx/AmountStory";
 import { Bip143Preimage } from "../src/tx/Bip143Preimage";
 import { NestedInput } from "../src/tx/NestedInput";
 import { SighashReuse } from "../src/tx/SighashReuse";
-import { TransactionAnatomy } from "../src/tx/TransactionAnatomy";
+import { TransactionAnatomy, transactionHeroSpec } from "../src/tx/TransactionAnatomy";
 import { TwoSerializations } from "../src/tx/TwoSerializations";
 import { WeightMeter } from "../src/tx/WeightMeter";
 import { WitnessCommitment } from "../src/tx/WitnessCommitment";
@@ -68,8 +68,10 @@ describe("TransactionAnatomy (hero, static renders)", () => {
   const fx = [native, nested];
   const r = (initial?: { fixtureId: string; lens: "txid" | "wtxid" | "bip143" }) => html(h(TransactionAnatomy, { fixtures: fx, figureId: "fig-a03-4", initial }));
   it("no-JS default: first example through the txid lens, marker, flag and witness hatched", () => {
-    const s = r();
-    expect(s).toContain('data-hydrated="false"');
+    const spec = transactionHeroSpec(fx);
+    expect(spec.states).toHaveLength(6);
+    const s = r(spec.states.find((x) => x.id === spec.noJsId)!.state);
+    expect(s).not.toContain("aria-live");
     const wide = wideOnly(s);
     const hatched = [...new Set(wide.match(/data-field="([^"]+)" data-hatched="true"/g)!.map((x) => x.split('"')[1]))];
     const expected = txFields(native.derived).filter((f) => f.part !== "base").map((f) => f.id);

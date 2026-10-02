@@ -1,5 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
-import { holdFocus } from "../focus";
+import { checkSpec, type HeroSpec } from "../heroStates";
 import { Arrow, Cells, Computer, Drawing, Responsive, Value, idsFor, type DrawingIds } from "../kit";
 import type { DerivedPsbtTraceFixture, PsbtRecordView, PsbtStateView } from "../types";
 import { MapCard, cardHeight, hex2, mapTitle, shortName, shortRole, type CardRow } from "./cards";
@@ -7,11 +6,35 @@ import { MapCard, cardHeight, hex2, mapTitle, shortName, shortRole, type CardRow
 interface Props {
   fixture: DerivedPsbtTraceFixture;
   figureId: string;
-  /** Starting step (index into the trace, the extractor last); the no-JS render uses `noJsStep`. */
-  initial?: { step: number; compare: Compare };
+  /** The state to draw: a step of the trace (the extractor last) and what counts as new. Defaults to the Creator. */
+  initial?: PsbtHeroState;
 }
 
 type Compare = "step" | "creator";
+export interface PsbtHeroState { step: number; compare: Compare }
+
+/** The hero's controls (compare strip, role stepper) and its pre-rendered states. */
+export function psbtHeroSpec(fixture: DerivedPsbtTraceFixture): HeroSpec<PsbtHeroState> {
+  const { states } = fixture.derived;
+  const steps = [...states.map((s) => ({ id: s.id, role: s.role })), { id: "extractor", role: "Transaction Extractor" }];
+  const combinerAt = states.findIndex((s) => s.basedOn.length > 1);
+  if (combinerAt < 0) throw new Error(`${fixture.id}: the trace has no combiner step`);
+  const compares: Compare[] = ["step", "creator"];
+  return checkSpec({
+    controls: [
+      { kind: "strip", name: "compare", label: "Mark as new", options: [{ value: "step", text: "Added by this role" }, { value: "creator", text: "Added since the Creator" }] },
+      { kind: "stepper", name: "step", label: "Role in the trace", options: steps.map((s, i) => ({ value: String(i), text: s.role })), prevLabel: "Previous role", nextLabel: "Next role" },
+    ],
+    states: steps.flatMap((s, i) =>
+      s.id === "extractor"
+        ? [{ id: `${i}`, keys: compares.map((c) => `${c}|${i}`), state: { step: i, compare: "step" as Compare }, valueText: `${i + 1} of ${steps.length}: ${s.role}` }]
+        : compares.map((c) => ({ id: `${i}-${c}`, keys: [`${c}|${i}`], state: { step: i, compare: c }, valueText: `${i + 1} of ${steps.length}: ${s.role}` })),
+    ),
+    initialKey: "step|0",
+    noJsId: `${combinerAt}-step`,
+    staticNote: "Static view: the Combiner’s PSBT, which holds every update and both signers’ signatures. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.",
+  });
+}
 
 const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
 
@@ -27,16 +50,9 @@ const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDa
  * PSBT parsed by the tested model; nothing is signed or broadcast.
  */
 export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
   const { states, extracted } = fixture.derived;
   const steps = [...states.map((s) => ({ id: s.id, role: s.role })), { id: "extractor", role: "Transaction Extractor" }];
-  const combinerAt = states.findIndex((s) => s.basedOn.length > 1);
-  if (combinerAt < 0) throw new Error(`${fixture.id}: the trace has no combiner step`);
-  const [step, setStep] = useState(initial?.step ?? 0);
-  const [compare, setCompare] = useState<Compare>(initial?.compare ?? "step");
-  // Without JavaScript: the combiner's state, where every field is present at once.
-  const at = hydrated || initial ? step : combinerAt;
+  const { step: at, compare } = initial ?? { step: 0, compare: "step" as Compare };
   const isExtract = steps[at].id === "extractor";
   const state: PsbtStateView = isExtract ? states[states.length - 1] : states[at];
   const creator = new Set(states[0].maps.flatMap((m) => m.records).map(sig));
@@ -181,42 +197,12 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
     );
   };
 
-  const go = (i: number) => setStep(Math.max(0, Math.min(steps.length - 1, i)));
   const newRecs = isExtract ? [] : all.filter((r) => markOf(r) === "new");
 
   return (
-    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-hero__controls">
-          <div class="atlas-strip" role="radiogroup" aria-label="Mark as new">
-            {([["step", "Added by this role"], ["creator", "Added since the Creator"]] as const).map(([v, t]) => (
-              <label class="atlas-strip__opt">
-                <input type="radio" name={`${figureId}-compare`} checked={compare === v} onChange={() => setCompare(v)} />
-                <span>{t}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p class="atlas-hero__static">Static view: the Combiner’s PSBT, which holds every update and both signers’ signatures. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.</p>
-      )}
+    <>
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
-      {hydrated ? (
-        <div class="atlas-scrub" role="group" aria-label="Advance through the published trace">
-          <button type="button" class="atlas-scrub__btn" onClick={() => go(step - 1)} disabled={step === 0} aria-label="Previous role">←</button>
-          <input
-            type="range"
-            min={0}
-            max={steps.length - 1}
-            value={step}
-            aria-label="Role in the trace"
-            aria-valuetext={`${step + 1} of ${steps.length}: ${steps[step].role}`}
-            onInput={(e) => go(Number((e.currentTarget as HTMLInputElement).value))}
-          />
-          <button type="button" class="atlas-scrub__btn" onClick={() => go(step + 1)} disabled={step === steps.length - 1} aria-label="Next role">→</button>
-        </div>
-      ) : null}
-      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <p class="atlas-hero__status" data-status>{status}</p>
       <details class="atlas-disclosure">
         <summary>{isExtract ? "Exact identifiers" : newRecs.length ? `Exact fields marked new (${newRecs.length})` : `Exact fields of this PSBT (${all.length})`}</summary>
         <dl class="atlas-hexlist">
@@ -237,6 +223,6 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
         </dl>
       </details>
       <p class="atlas-hero__source">BIP 174 test vectors, lines {states[0].line}–{fixture.extracted.line}: published test material on testnet keys. Parsed, combined and extracted by the tested model.</p>
-    </div>
+    </>
   );
 }

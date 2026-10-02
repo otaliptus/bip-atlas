@@ -1,5 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
-import { holdFocus } from "../focus";
+import { checkSpec, type HeroSpec } from "../heroStates";
 import { Arrow, Cells, Drawing, Machine, Magnifier, Responsive, Value, idsFor } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
 import { BytePacket, bytesHeight, layoutBytes, type ByteField } from "./BytePacket";
@@ -7,12 +6,27 @@ import { BytePacket, bytesHeight, layoutBytes, type ByteField } from "./BytePack
 import { preimageRole, shortHex, txFields } from "./fields";
 
 type Lens = "txid" | "wtxid" | "bip143";
+export interface TxHeroState { fixtureId: string; lens: Lens }
 
 interface Props {
   fixtures: DerivedTransactionFixture[];
   figureId: string;
-  /** Starting state; the no-JS render uses it too. Defaults to the first example through the txid lens. */
-  initial?: { fixtureId: string; lens: Lens };
+  /** The state to draw. Defaults to the first example through the txid lens (also the no-JS state). */
+  initial?: TxHeroState;
+}
+
+/** The hero's controls and its six pre-rendered states (two examples × three lenses). */
+export function transactionHeroSpec(fixtures: DerivedTransactionFixture[]): HeroSpec<TxHeroState> {
+  return checkSpec({
+    controls: [
+      { kind: "strip", name: "tx", label: "Published example", options: fixtures.map((f) => ({ value: f.id, text: f.shortLabel ?? f.label })) },
+      { kind: "strip", name: "lens", label: "Lens", options: LENSES.map((l) => ({ value: l.id, text: l.text })) },
+    ],
+    states: fixtures.flatMap((f) => LENSES.map((l) => ({ id: `${f.id}-${l.id}`, keys: [`${f.id}|${l.id}`], state: { fixtureId: f.id, lens: l.id } }))),
+    initialKey: `${fixtures[0].id}|txid`,
+    noJsId: `${fixtures[0].id}-txid`,
+    staticNote: "Static view: the first example through the txid lens. With JavaScript you can switch to the wtxid and BIP 143 lenses and to the second example.",
+  });
 }
 
 const LENSES: Array<{ id: Lens; text: string }> = [
@@ -40,11 +54,7 @@ const LEGEND: Array<{ role: string; text: string }> = [
  * published sighash. Controls: an example strip and a lens strip.
  */
 export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  const start = initial ?? { fixtureId: fixtures[0].id, lens: "txid" as Lens };
-  const [fixtureId, setFixtureId] = useState(start.fixtureId);
-  const [lens, setLens] = useState<Lens>(start.lens);
+  const { fixtureId, lens } = initial ?? { fixtureId: fixtures[0].id, lens: "txid" as Lens };
   const fixture = fixtures.find((f) => f.id === fixtureId);
   if (!fixture) throw new Error(`transaction-anatomy: no fixture ${fixtureId}`);
   const d = fixture.derived;
@@ -177,29 +187,10 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
     );
   };
 
-  const strip = (label: string, name: string, options: Array<{ value: string; text: string }>, current: string, set: (v: string) => void) => (
-    <div class="atlas-strip" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
-        <label class="atlas-strip__opt">
-          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} onChange={() => set(o.value)} />
-          <span>{o.text}</span>
-        </label>
-      ))}
-    </div>
-  );
-
   return (
-    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-hero__controls">
-          {strip("Published example", "tx", fixtures.map((f) => ({ value: f.id, text: f.shortLabel ?? f.label })), fixtureId, setFixtureId)}
-          {strip("Lens", "lens", LENSES.map((l) => ({ value: l.id, text: l.text })), lens, (v) => setLens(v as Lens))}
-        </div>
-      ) : (
-        <p class="atlas-hero__static">Static view: the first example through the txid lens. With JavaScript you can switch to the wtxid and BIP 143 lenses and to the second example.</p>
-      )}
+    <>
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
-      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <p class="atlas-hero__status" data-status>{status}</p>
       <details class="atlas-disclosure">
         <summary>Exact values for this view</summary>
         <dl class="atlas-hexlist">
@@ -222,6 +213,6 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
         </dl>
       </details>
       <p class="atlas-hero__source">BIP 143 line {fixture.source.line} ({fixture.source.section}). Parsed and hashed by the tested model; the preimage and sighash match the published ones. Serialization only: nothing here checks signatures.</p>
-    </div>
+    </>
   );
 }

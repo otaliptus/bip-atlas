@@ -3,7 +3,7 @@ import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { P2shCommitment } from "../src/p2sh/P2shCommitment";
 import { P2shFailures, P2shShape, P2shStackStory } from "../src/p2sh/P2shStatics";
-import { P2shTwoStage } from "../src/p2sh/P2shTwoStage";
+import { P2shTwoStage, p2shHeroSpec } from "../src/p2sh/P2shTwoStage";
 import { P2shLimit, P2shWrapped } from "../src/p2sh/P2shWrapped";
 import type { DerivedP2shFixture } from "../src/types";
 import { deriveChapter } from "./derived";
@@ -31,15 +31,22 @@ describe("deriveP2sh additions", () => {
 describe("P2shTwoStage (hero, static renders)", () => {
   const r = (initial?: { id: string; revealed: boolean; stage: number }) => html(h(P2shTwoStage, { fixtures: all, figureId: "fig-a09-4", initial }));
   it("no-JS default: legacy spend revealed at its last stage", () => {
-    const s = r();
-    expect(s).toContain('data-hydrated="false"');
+    const spec = p2shHeroSpec(all);
+    const s = r(spec.states.find((x) => x.id === spec.noJsId)!.state);
     expect(s).toContain("OP_CHECKMULTISIG");
     expect(s).toContain(legacy.derived.redeemScriptHex);
     expect(s).toContain("✓ THE SPEND IS VALID");
   });
-  it("before the spend nothing about the script leaks, for every spend", () => {
-    for (const f of all) {
-      const s = r({ id: f.id, revealed: false, stage: 0 });
+  it("before the spend nothing about the script leaks, for every spend and any stepper position", () => {
+    const spec = p2shHeroSpec(all);
+    // The spend strip names sources only, and every hidden key shows the one hidden state.
+    expect(JSON.stringify(spec.controls)).not.toMatch(/P2WSH|P2WPKH|legacy|multisig/i);
+    all.forEach((_, i) => [0, 1, 2].forEach((k) => expect(spec.states.find((x) => x.keys.includes(`s${i}|hidden|${k}`))!.id).toBe(`s${i}-hidden`)));
+    for (const st of spec.states.filter((x) => !x.state.revealed)) {
+      const f = all.find((x) => x.id === st.state.id)!;
+      const s = r(st.state);
+      expect(html(h(P2shTwoStage, { fixtures: all, figureId: `fig-a09-4-${st.id}`, initial: st.state }))).not.toMatch(/witness|redeem"|data-stage=|p2wsh|p2wpkh|legacy/i);
+      expect(st.valueText).not.toMatch(/witness|P2W|multisig/i);
       expect(s).not.toContain(f.derived.redeemScriptHex);
       expect(s).not.toMatch(/OP_CHECKMULTISIG|&lt;|OP_0 /);
       expect(s).not.toContain(f.derived.redeemHash160Hex.slice(0, 8) + "… = THE LOCK");
@@ -82,7 +89,7 @@ describe("Static P2SH drawings", () => {
     const s = html(h(P2shWrapped, { fixtures: all }));
     expect(legacy.derived.scriptSigBytes).toBe(218);
     expect([wsh.derived.scriptSigBytes, wsh.derived.witnessBytes]).toEqual([35, 218]);
-    expect(s).toContain("4 × 218 + 0 = 872 WU");
+    expect(s).toContain("SCRIPTSIG + WITNESS: 4 × 218 + 0 = 872 WU");
     expect(s).toContain("4 × 35 + 218 = 358 WU");
   });
   it("A09.7: fifteen keys in 513 bytes; the pinned script is 3 + 34 × 2", () => {

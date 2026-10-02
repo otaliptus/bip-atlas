@@ -144,7 +144,7 @@ describe("p2sh chapter prose numbers", () => {
     expect([p.inputs[0].scriptSigHex.length / 2, ser(p, 0)]).toEqual([23, 107]);
     expect([4 * 218 + 0, 4 * 35 + 218]).toEqual([872, 358]);
     expect(text).toContain("The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes.");
-    expect(text).toContain("that comes to 872 weight units against 358");
+    expect(text).toContain("those bytes come to 872 weight units against 358");
     expect(traceP2sh(p2wpkhTx, 0, p2wpkhSpk, 1_000_000_000n).redeemScriptHex.length / 2).toBe(22);
     expect(traceP2sh(extracted, 1, wrappedSpk, wrappedAmount).redeemScriptHex.length / 2).toBe(34);
     expect(text).toContain("the redeem script is a 22-byte program");

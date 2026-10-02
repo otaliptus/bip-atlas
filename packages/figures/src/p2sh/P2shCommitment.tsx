@@ -29,7 +29,7 @@ export function P2shCommitment({ fixture: f }: { fixture: DerivedP2shFixture }) 
         <Value at={[140, 30]} text="THE LOCK IS ONLY A HASH" size={9} cls="k-value--label" />
         <rect class="k-cell k-fill--hash k-cell--em" x="140" y="38" width="120" height="20" />
         <Value at={[146, 51.5]} text={short(d.committedHashHex)} size={9.5} />
-        <Value at={[140, 74]} text="20 B, WHATEVER THE CONDITIONS" size={8.5} cls="k-value--muted" />
+        <Value at={[140, 74]} text="20 B, WHATEVER THE CONDITIONS" size={9} cls="k-value--muted" />
         <rect class="k-outline k-fill--plain" x="14" y="112" width="316" height="44" />
         <Value at={[20, 127]} text={`REDEEM SCRIPT · ${d.redeemScriptHex.length / 2} B · KEPT BY THE RECEIVER`} size={9} cls="k-value--label" />
         <Value at={[20, 145]} text={d.redeemAsm} size={9.5} />

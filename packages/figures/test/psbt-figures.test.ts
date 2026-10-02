@@ -1,7 +1,7 @@
 import { h, type VNode } from "preact";
 import { render } from "preact-render-to-string";
 import { beforeAll, describe, expect, it } from "vitest";
-import { PsbtEnvelope } from "../src/psbt/PsbtEnvelope";
+import { PsbtEnvelope, psbtHeroSpec } from "../src/psbt/PsbtEnvelope";
 import { PsbtLayout, psbtBytes } from "../src/psbt/PsbtLayout";
 import { PsbtCombine, PsbtFinalize, UnknownFields } from "../src/psbt/PsbtMerge";
 import { PsbtRecords } from "../src/psbt/PsbtRecords";
@@ -35,8 +35,10 @@ describe("PSBT bytes", () => {
 describe("PsbtEnvelope (hero, static renders)", () => {
   const r = (initial?: { step: number; compare: "step" | "creator" }) => html(h(PsbtEnvelope, { fixture: trace, figureId: "fig-a05-3", initial }));
   it("no-JS default shows the Combiner's PSBT with all its fields", () => {
-    const s = r();
-    expect(s).toContain('data-hydrated="false"');
+    const spec = psbtHeroSpec(trace);
+    // Eight steps: seven states in two compare modes, and the extractor once.
+    expect(spec.states).toHaveLength(15);
+    const s = r(spec.states.find((x) => x.id === spec.noJsId)!.state);
     const comb = trace.derived.states.find((x) => x.basedOn.length > 1)!;
     expect(s).toContain(`THIS PSBT: ${comb.bytes} B`);
     expect((wideOnly(s).match(/data-record="Partial Signature"/g) ?? []).length).toBe(4);

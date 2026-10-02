@@ -811,17 +811,22 @@ function deriveP2sh(f: P2shSpendFixture): DerivedP2shFixture {
     const ta = traceP2sh(withSig(sigHex.replace(redeem, altered)), f.inputIndex, spk, amount);
     const tn = traceP2sh(withSig("76" + sigHex), f.inputIndex, spk, amount);
     const ops = decodeScript(sigHex).map((o) => o.dataHex!);
-    const push = (h: string) => (h === "" ? "00" : (h.length / 2).toString(16).padStart(2, "0") + h);
+    const push = (h: string) => {
+      if (h.length / 2 > 75) throw new Error(`${f.id}: a pushed item over 75 bytes is outside this check`);
+      return h === "" ? "00" : (h.length / 2).toString(16).padStart(2, "0") + h;
+    };
     if (ops.length !== 4 || ops[0] !== "") throw new Error(`${f.id}: expected OP_0, two signatures and the redeem script`);
     const ts = traceP2sh(withSig(push(ops[0]) + push(ops[2]) + push(ops[1]) + push(redeem)), f.inputIndex, spk, amount);
     const failsAt = (x: typeof ta) => x.stages.find((s) => !s.ok)?.id;
     if (ta.valid || failsAt(ta) !== "hash-match" || tn.valid || failsAt(tn) !== "push-only" || ts.valid || failsAt(ts) !== "redeem") {
       throw new Error(`${f.id}: a broken spend did not fail where expected`);
     }
+    const swappedChecks = ts.stages.find((s) => s.id === "redeem")?.steps.find((x) => x.checks)?.checks;
+    if (!swappedChecks?.length) throw new Error(`${f.id}: the swapped spend recorded no signature checks`);
     failures = {
       alteredRedeem: { byteIndex: at, fromHex: redeem.slice(-2), toHex: altered.slice(-2), hash160Hex: bytesToHex(hash160(hexToBytes(altered))), failsAt: "hash-match" },
-      nonPush: { opHex: "76", failsAt: "push-only" },
-      swapped: { failsAt: "redeem" },
+      nonPush: { opHex: "76", opName: "OP_DUP", failsAt: "push-only" },
+      swapped: { failsAt: "redeem", checks: swappedChecks },
     };
   }
   return {

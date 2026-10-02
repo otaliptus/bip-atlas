@@ -480,6 +480,9 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .atlas-ser__key { display: inline-block; inline-size: 0.75rem; block-size: 0.75rem; border: 1px solid var(--manual-ink); margin-inline-end: 0.35rem; vertical-align: -0.1em; }
 
 /* ---------- FIG A03.x segwit drawings ---------- */
+/* Pre-rendered heroes (HeroStates.astro, batch 2): hidden states and not-yet-wired controls stay hidden whatever their display rule. */
+[data-hero-states] [hidden] { display: none !important; }
+[data-hero-states] > [data-state] { display: grid; gap: var(--manual-space-4); }
 .k-badge text, .k-badge__t { font-size: 8px !important; font-weight: 600; }
 .k-legend__t { font-size: 9px !important; letter-spacing: 0.06em; }
 .k-proj { fill: var(--manual-grid); fill-opacity: 0.35; stroke: var(--atlas-ink); stroke-width: 0.5; vector-effect: non-scaling-stroke; }

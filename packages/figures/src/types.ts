@@ -416,8 +416,8 @@ export interface P2shDerived {
    */
   failures: {
     alteredRedeem: { byteIndex: number; fromHex: string; toHex: string; hash160Hex: string; failsAt: string };
-    nonPush: { opHex: string; failsAt: string };
-    swapped: { failsAt: string };
+    nonPush: { opHex: string; opName: string; failsAt: string };
+    swapped: { failsAt: string; checks: Array<{ sigIndex: number; keyIndex: number | null; ok: boolean }> };
   } | null;
 }
 

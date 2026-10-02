@@ -85,12 +85,12 @@ export function P2shWrapped({ fixtures }: { fixtures: DerivedP2shFixture[] }) {
         return (
           <g data-fixture={f.id}>
             <Value at={[14, y]} text={KIND[d.kind].toUpperCase()} size={9} cls="k-value--label" />
-            <Value at={[14, y + 17]} text={`SCRIPTSIG · ${d.scriptSigBytes} B`} size={8.5} cls="k-value--muted" />
+            <Value at={[14, y + 17]} text={`SCRIPTSIG · ${d.scriptSigBytes} B`} size={9} cls="k-value--muted" />
             {bar(c.scriptSig, 14, y + 21)}
-            <Value at={[14, y + 51]} text={d.witnessBytes ? `WITNESS · ${d.witnessBytes} B` : "WITNESS · NONE"} size={8.5} cls="k-value--muted" />
+            <Value at={[14, y + 51]} text={d.witnessBytes ? `WITNESS · ${d.witnessBytes} B` : "WITNESS · NONE"} size={9} cls="k-value--muted" />
             {bar(c.witness, 14, y + 55)}
             <rect class="k-cell k-mark--plain" x="14" y={y + 76} width={(w / maxW) * 150} height="5" />
-            <Value at={[14 + (w / maxW) * 150 + 6, y + 82]} text={`4 × ${d.scriptSigBytes} + ${d.witnessBytes} = ${w} WU`} size={9} cls="k-value--label" />
+            <Value at={[14 + (w / maxW) * 150 + 6, y + 82]} text={`SCRIPTSIG + WITNESS: 4 × ${d.scriptSigBytes} + ${d.witnessBytes} = ${w} WU`} size={9} cls="k-value--label" />
           </g>
         );
       })}
@@ -108,8 +108,11 @@ export function P2shLimit({ fixture: f }: { fixture: DerivedP2shFixture }) {
   const keys = Math.floor((MAX_PUSH - FIXED) / PER_KEY);
   const total = FIXED + keys * PER_KEY;
   const own = f.derived.redeemScriptHex.length / 2;
-  const ownKeys = (own - FIXED) / PER_KEY;
-  if (!Number.isInteger(ownKeys)) throw new Error(`p2sh-limit: ${f.id} redeem script is not 3 + 34n bytes`);
+  // The keys the redeem script pushed, as the model's trace recorded them; the length must agree.
+  const run = f.derived.stages.find((s) => s.id === "redeem");
+  const pushedKeys = new Set((run?.steps ?? []).flatMap((x) => x.stackAfter).filter((x) => f.derived.itemKinds[x] === "public key"));
+  const ownKeys = pushedKeys.size;
+  if (!ownKeys || FIXED + PER_KEY * ownKeys !== own) throw new Error(`p2sh-limit: ${f.id} redeem script is not 3 + 34 bytes per key`);
   const unit = 300 / 560;
   const x0 = 14, y = 44;
   return (
@@ -120,7 +123,7 @@ export function P2shLimit({ fixture: f }: { fixture: DerivedP2shFixture }) {
       title="Why fifteen keys"
       desc={`A pushed item is at most ${MAX_PUSH} bytes. A multisig redeem script with 33-byte keys takes ${FIXED} bytes plus ${PER_KEY} per key, so ${keys} keys fit in ${total} bytes and one more would need ${total + PER_KEY}. The pinned 2-of-2 is ${own} bytes: ${FIXED} + ${PER_KEY} × ${ownKeys}.`}
     >
-      {[0, 100, 200, 300, 400, 500].map((b) => (
+      {[0, 100, 200, 300, 400].map((b) => (
         <g>
           <line class="k-leader" x1={x0 + b * unit} y1={y - 6} x2={x0 + b * unit} y2={y - 2} />
           <text class="k-packet__ruler" x={x0 + b * unit} y={y - 9} text-anchor="middle">{b}</text>
@@ -133,10 +136,10 @@ export function P2shLimit({ fixture: f }: { fixture: DerivedP2shFixture }) {
       <line class="k-cut" x1={x0 + MAX_PUSH * unit} y1={y - 12} x2={x0 + MAX_PUSH * unit} y2={y + 30} />
       <Value at={[x0 + MAX_PUSH * unit - 4, y + 42]} text={`${MAX_PUSH} B LIMIT`} size={9} anchor="end" cls="k-value--label" />
       <Value at={[x0, y + 42]} text={`${keys} KEYS = ${FIXED} + ${PER_KEY} × ${keys} = ${total} B`} size={9} cls="k-value--label" />
-      <Value at={[x0, y + 56]} text={`A ${keys + 1}TH KEY WOULD NEED ${total + PER_KEY} B (DASHED)`} size={8.5} cls="k-value--muted" />
+      <Value at={[x0, y + 56]} text={`A ${keys + 1}TH KEY WOULD NEED ${total + PER_KEY} B (DASHED)`} size={9} cls="k-value--muted" />
       <rect class="k-cell k-fill--plain" x={x0} y={y + 72} width={FIXED * unit} height="14" />
       {Array.from({ length: ownKeys }, (_, i) => <rect class="k-cell k-fill--public" x={x0 + (FIXED + i * PER_KEY) * unit} y={y + 72} width={PER_KEY * unit} height="14" />)}
-      <Value at={[x0 + own * unit + 6, y + 83]} text={`THIS SPEND'S ${ownKeys} KEYS: ${own} B = ${FIXED} + ${PER_KEY} × ${ownKeys}`} size={8.5} cls="k-value--label" />
+      <Value at={[x0 + own * unit + 6, y + 83]} text={`THIS SPEND'S ${ownKeys} KEYS: ${own} B = ${FIXED} + ${PER_KEY} × ${ownKeys}`} size={9} cls="k-value--label" />
     </Drawing>
   );
 }

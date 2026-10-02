@@ -1,5 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
-import { holdFocus } from "../focus";
+import { checkSpec, type HeroSpec } from "../heroStates";
 import { Arrow, Drawing, IsoBox, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
 import type { DerivedP2shFixture } from "../types";
 import { Padlock, StackPlates, stackHeight } from "./stack";
@@ -7,8 +6,35 @@ import { Padlock, StackPlates, stackHeight } from "./stack";
 interface Props {
   fixtures: DerivedP2shFixture[];
   figureId: string;
-  /** Starting state; the no-JS render uses its own (revealed, last stage). */
-  initial?: { id: string; revealed: boolean; stage: number };
+  /** The state to draw. Defaults to the first spend, revealed, at its last stage (also the no-JS state). */
+  initial?: P2shHeroState;
+}
+export interface P2shHeroState { id: string; revealed: boolean; stage: number }
+
+/**
+ * The hero's controls (spend, reveal, stage stepper) and its pre-rendered
+ * states. The spend strip is labelled by source only, so it names no script
+ * kind before the spend; choosing "Before the spend" or another spend goes
+ * back to stage 1, and moving the stepper reveals the script.
+ */
+export function p2shHeroSpec(fixtures: DerivedP2shFixture[]): HeroSpec<P2shHeroState> {
+  const n = fixtures[0].derived.stages.length;
+  if (fixtures.some((f) => f.derived.stages.length !== n)) throw new Error("p2sh-two-stage: every spend needs the same number of stages");
+  const stages = Array.from({ length: n }, (_, k) => String(k));
+  return checkSpec({
+    controls: [
+      { kind: "strip", name: "spend", label: "Pinned spend", options: fixtures.map((f, i) => ({ value: `s${i}`, text: f.shortLabel ?? `spend ${i + 1}`, resets: ["stage"] })) },
+      { kind: "strip", name: "reveal", label: "Redeem script", options: [{ value: "hidden", text: "Before the spend", resets: ["stage"] }, { value: "shown", text: "Revealed by the spend" }] },
+      { kind: "stepper", name: "stage", label: "Stage", options: stages.map((k) => ({ value: k, text: k })), sets: { reveal: "shown" }, prevLabel: "Previous stage", nextLabel: "Next stage" },
+    ],
+    states: fixtures.flatMap((f, i) => [
+      { id: `s${i}-hidden`, keys: stages.map((k) => `s${i}|hidden|${k}`), state: { id: f.id, revealed: false, stage: 0 }, valueText: "not started: the redeem script is not known yet" },
+      ...f.derived.stages.map((st, k) => ({ id: `s${i}-${k}`, keys: [`s${i}|shown|${k}`], state: { id: f.id, revealed: true, stage: k }, valueText: `${k + 1} of ${n}: ${st.title}` })),
+    ]),
+    initialKey: "s0|hidden|0",
+    noJsId: `s0-${n - 1}`,
+    staticNote: "Static view: the first spend at its last stage. With JavaScript you can hide the redeem script, switch spends and step through the stages; Fig. A09.3 draws every step.",
+  });
 }
 
 const KIND: Record<string, string> = { legacy: "legacy P2SH", "p2sh-p2wpkh": "P2SH-wrapped P2WPKH", "p2sh-p2wsh": "P2SH-wrapped P2WSH" };
@@ -26,17 +52,12 @@ const short = (hex: string, n = 8) => `${hex.slice(0, n)}…`;
  * is recorded at build time by the tested model; nothing here signs.
  */
 export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  const [id, setId] = useState(initial?.id ?? fixtures[0].id);
-  const [revealed, setRevealed] = useState(initial?.revealed ?? false);
-  const [stage, setStage] = useState(initial?.stage ?? 0);
+  const { id, revealed, stage } = initial ?? { id: fixtures[0].id, revealed: true, stage: fixtures[0].derived.stages.length - 1 };
   const f = fixtures.find((x) => x.id === id);
   if (!f) throw new Error(`p2sh-two-stage: no fixture ${id}`);
   const d = f.derived;
-  const live = hydrated || initial;
-  const shown = live ? revealed : true;
-  const at = live ? Math.min(stage, d.stages.length - 1) : d.stages.length - 1;
+  const shown = revealed;
+  const at = Math.min(stage, d.stages.length - 1);
   const s = d.stages[at];
   const ok = d.stages.slice(0, at + 1).every((x) => x.ok);
 
@@ -66,7 +87,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
     const H = areaY + area.h + 16;
     return (
       <Drawing id={fid} width={W} height={H} title="One push, two evaluations" desc={describe()}>
-        <Value at={[x0, 14]} text={`${shown ? f.label.toUpperCase() : "THE OUTPUT ALONE"} · ${(f.shortLabel ?? "").toUpperCase()}`} size={9} cls="k-value--label" />
+        <Value at={[x0, 14]} text={shown ? `${f.label.toUpperCase()} · ${(f.shortLabel ?? "").toUpperCase()}` : "THE OUTPUT ALONE"} size={9} cls="k-value--label" />
         <IsoBox at={[x0 + 44, 50]} w={44} d={34} h={24} role="plain" />
         <Padlock at={[x0 + 40, 62]} />
         <Value at={[x0, 104]} text={`OUTPUT · ${d.scriptPubKeyHex.length / 2} B`} size={9} cls="k-value--label" />
@@ -79,7 +100,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
           <text class="k-packet__t" x={cellsX + 45} y={53.4}>{short(d.committedHashHex)}</text>
           <rect class="k-cell k-fill--plain" x={cellsX + 40 + hashW} y={40} width="20" height="20" />
           <text class="k-cell__t" x={cellsX + 50 + hashW} y={53.4} text-anchor="middle">{d.scriptPubKeyHex.slice(-2)}</text>
-          <Value at={[cellsX, 74]} text="OP_HASH160 · 20-BYTE HASH · OP_EQUAL" size={8.5} cls="k-value--muted" />
+          <Value at={[cellsX, 74]} text="OP_HASH160 · 20-BYTE HASH · OP_EQUAL" size={9} cls="k-value--muted" />
         </g>
         {/* The redeem script: hatched until revealed. */}
         <rect class="k-outline k-fill--plain" x={card.x} y={card.y} width={card.w} height="52" style={shown ? undefined : `fill:${ids.hatch}`} />
@@ -87,7 +108,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
           <>
             <Value at={[card.x + 6, card.y + 15]} text={`REDEEM SCRIPT · ${d.redeemScriptHex.length / 2} B · ${KIND[d.kind].toUpperCase()}`} size={9} cls="k-value--label" />
             <Value at={[card.x + 6, card.y + 31]} text={d.redeemAsm} size={9} />
-            <Value at={[card.x + 6, card.y + 45]} text={`HASH160 = ${short(d.redeemHash160Hex)} = THE LOCK`} size={8.5} cls="k-value--hash" />
+            <Value at={[card.x + 6, card.y + 45]} text={`HASH160 = ${short(d.redeemHash160Hex)} = THE LOCK`} size={9} cls="k-value--hash" />
           </>
         ) : (
           <>
@@ -100,7 +121,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
           const cx = x0 + i * (chipW + 6);
           const done = shown && i <= at;
           return (
-            <g class={done ? undefined : "k-faded"} data-stage={st.id}>
+            <g class={done ? undefined : "k-faded"} data-stage={shown ? st.id : undefined}>
               <rect class={`k-outline k-fill--plain${shown && i === at ? " k-cell--em" : ""}`} x={cx} y={chipsY} width={chipW} height="24" style={shown ? undefined : `fill:${ids.hatch}`} />
               <text class="k-card__name" x={cx + 6} y={chipsY + 15.5}>{`${i + 1} ${!shown ? "" : wide ? CHIP[st.id].toUpperCase() : CHIP[st.id].split(" ")[0].toUpperCase()}${done ? (st.ok ? " ✓" : " ✗") : ""}`}</text>
             </g>
@@ -139,18 +160,22 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
     if (s.id === "hash-match") {
       const st = s.stackBefore;
       const h = stackHeight(st.length);
-      const mx = x0 + plateW + 44;
-      const tx = wide ? x0 + plateW + 120 : x0;
-      const ty = wide ? y + 14 : y + Math.max(h, 92) + 12;
+      // The machine sits right of the stack's top item; its output goes on to the comparison.
+      const mx = x0 + plateW + 34;
+      const tx = wide ? x0 + plateW + 130 : x0;
+      const ty = wide ? y + 14 : y + Math.max(h, 96) + 12;
       return {
-        h: wide ? Math.max(h, 92) + 6 : Math.max(h, 92) + 46,
+        h: wide ? Math.max(h, 96) + 6 : Math.max(h, 96) + 46,
         el: (
           <g>
-            <StackPlates x={x0} y={y} w={plateW} items={st} kinds={kinds} em={st.length - 1} />
-            <Arrow d={`M${x0 + plateW + 4} ${y + 8} H${mx - 10}`} ids={ids} />
-            <Machine at={[mx, y + 46]} w={48} d={26} h={20} label="HASH160" role="hash" />
-            <Value at={[tx, ty]} text={`HASH160 OF THE TOP ITEM = ${short(d.redeemHash160Hex)}`} size={9} cls="k-value--hash" />
-            <Value at={[tx, ty + 16]} text={`THE LOCK = ${short(d.committedHashHex)} ${s.ok ? "✓ EQUAL" : "✗ DIFFERENT"}`} size={9} cls={s.ok ? "k-value--ok" : "k-value--fail"} />
+            <Value at={[x0, y - 4]} text="A COPY OF THE STACK" size={9} cls="k-value--muted" />
+            <StackPlates x={x0} y={y + 4} w={plateW} items={st} kinds={kinds} em={st.length - 1} />
+            <Arrow d={`M${x0 + plateW + 4} ${y + 12} H${mx + 6} V${y + 24}`} ids={ids} />
+            <Machine at={[mx, y + 56]} w={56} d={26} h={20} label="HASH160" role="hash" />
+            {wide ? <Arrow d={`M${mx + 52} ${y + 46} H${tx - 6} V${ty + 2}`} ids={ids} /> : <Arrow d={`M${mx + 20} ${y + 92} V${ty - 12}`} ids={ids} />}
+            <Value at={[tx, ty + 12]} text={`HASH160 OF THE TOP ITEM = ${short(d.redeemHash160Hex)}`} size={9} cls="k-value--hash" />
+            <Value at={[tx, ty + 28]} text={`THE LOCK = ${short(d.committedHashHex)}`} size={9} cls="k-value--hash" />
+            <Value at={[tx, ty + 44]} text={s.ok ? "✓ EQUAL" : "✗ DIFFERENT"} size={9.5} cls={s.ok ? "k-value--ok" : "k-value--fail"} />
           </g>
         ),
       };
@@ -159,10 +184,16 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
     const st = s.stackBefore;
     const h = stackHeight(st.length);
     const checks = s.steps.find((x) => x.checks)?.checks ?? [];
-    const final = s.steps.at(-1)?.stackAfter ?? [];
+    const final = s.steps.at(-1)?.stackAfter;
+    if (!final) throw new Error(`p2sh-two-stage: ${id} stage ${s.id} recorded no steps`);
+    // What runs, as the model recorded it: the script's asm, or for P2WPKH the steps it ran.
+    const runs = s.scriptAsm ?? s.steps.map((x) => x.name).join(" ");
+    const program =
+      d.kind === "p2sh-p2wpkh" ? "hash160(key) = the 20-byte program" : d.kind === "p2sh-p2wsh" ? "sha-256(witness script) = the 32-byte program" : null;
     const lines = [
-      ...(wide ? [`runs: ${s.scriptAsm ?? "<key> OP_CHECKSIG"}`] : ["runs:", s.scriptAsm ?? "<key> OP_CHECKSIG"]),
-      ...(checks.length ? [`checks: ${checks.map((c) => `sig ${c.sigIndex + 1} → ${c.keyIndex === null ? "no key" : `key ${c.keyIndex + 1}`}`).join(", ")}`] : []),
+      ...(program ? [`${program}${s.ok ? " ✓" : ""}`] : []),
+      ...(wide ? [`runs: ${runs}`] : ["runs:", runs]),
+      ...(checks.length ? [`checks: ${checks.map((c) => `sig ${c.sigIndex + 1} → ${c.keyIndex === null ? "no key left" : `key ${c.keyIndex + 1}`}`).join(", ")}`] : []),
       `left on the stack: ${final.length === 1 && final[0] === "01" ? "true" : `${final.length} items`}`,
     ];
     const tx = wide ? x0 + plateW + 20 : x0;
@@ -171,7 +202,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
       h: wide ? Math.max(h, lines.length * 15 + 30) : h + 12 + lines.length * 15 + 26,
       el: (
         <g>
-          <Value at={[x0, y - 4]} text={d.kind === "legacy" ? "STACK LEFT AFTER THE SCRIPT IS POPPED" : "THE WITNESS STACK"} size={8.5} cls="k-value--muted" />
+          <Value at={[x0, y - 4]} text={d.kind === "legacy" ? "STACK LEFT AFTER THE SCRIPT IS POPPED" : d.kind === "p2sh-p2wsh" ? "WITNESS ITEMS BELOW THE SCRIPT" : "THE WITNESS ITEMS"} size={9} cls="k-value--muted" />
           <StackPlates x={x0} y={y + 4} w={plateW} items={st} kinds={kinds} />
           {lines.map((l, i) => <Value at={[tx, ty + 14 + i * 15]} text={l.toUpperCase()} size={9} cls="k-value--label" />)}
           <Value at={[tx, ty + 14 + lines.length * 15 + 4]} text={s.ok ? "✓ THE SPEND IS VALID" : "✗ THE SPEND FAILS"} size={9.5} cls={s.ok ? "k-value--ok" : "k-value--fail"} />
@@ -180,40 +211,10 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
     };
   }
 
-  const strip = (label: string, name: string, options: Array<{ value: string; text: string }>, current: string, set: (v: string) => void) => (
-    <div class="atlas-strip" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
-        <label class="atlas-strip__opt">
-          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} onChange={() => set(o.value)} />
-          <span>{o.text}</span>
-        </label>
-      ))}
-    </div>
-  );
-  const go = (n: number) => {
-    setRevealed(true);
-    setStage(Math.max(0, Math.min(d.stages.length - 1, n)));
-  };
-
   return (
-    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-hero__controls">
-          {strip("Pinned spend", "spend", fixtures.map((x) => ({ value: x.id, text: x.label.replace(/ 2-of-2$/, "") })), id, (v) => (setId(v), setStage(0)))}
-          {strip("Redeem script", "reveal", [{ value: "hidden", text: "Before the spend" }, { value: "shown", text: "Revealed by the spend" }], shown ? "shown" : "hidden", (v) => setRevealed(v === "shown"))}
-        </div>
-      ) : (
-        <p class="atlas-hero__static">Static view: the legacy 2-of-2 spend at its last stage. With JavaScript you can hide the redeem script, switch spends and step through the stages; Fig. A09.3 draws every step.</p>
-      )}
+    <>
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
-      {hydrated ? (
-        <div class="atlas-scrub" role="group" aria-label="Step through both evaluations">
-          <button type="button" class="atlas-scrub__btn" onClick={() => go(stage - 1)} disabled={!shown || at === 0} aria-label="Previous stage">←</button>
-          <input type="range" min={0} max={d.stages.length - 1} value={at} aria-label="Stage" aria-valuetext={`${at + 1} of ${d.stages.length}: ${s.title}`} onInput={(e) => go(Number((e.currentTarget as HTMLInputElement).value))} />
-          <button type="button" class="atlas-scrub__btn" onClick={() => go(shown ? at + 1 : 0)} disabled={shown && at === d.stages.length - 1} aria-label="Next stage">→</button>
-        </div>
-      ) : null}
-      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <p class="atlas-hero__status" data-status>{status}</p>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>
         <dl class="atlas-hexlist">
@@ -227,7 +228,7 @@ export function P2shTwoStage({ fixtures, figureId, initial }: Props) {
           ) : null}
         </dl>
       </details>
-      <p class="atlas-hero__source">BIP {f.source.bip} line {f.source.line}. Recorded at build time by the tested model; every signature verified (noble) against the digest it computed. Nothing here signs.{shown && ok && d.kind === "legacy" ? ` BIP 16 sigops for this redeem script: ${d.redeemSigops}.` : ""}</p>
-    </div>
+      <p class="atlas-hero__source">{shown ? `BIP ${f.source.bip} line ${f.source.line}. ` : "Published test vectors. "}Recorded at build time by the tested model; every signature verified (noble) against the digest it computed. Nothing here signs.{shown && ok && d.kind === "legacy" ? ` BIP 16 sigops for this redeem script: ${d.redeemSigops}.` : ""}</p>
+    </>
   );
 }

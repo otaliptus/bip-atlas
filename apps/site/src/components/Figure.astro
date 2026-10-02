@@ -13,15 +13,6 @@ import {
   MasterKeySplit,
   MnemonicCard,
   ProgramRegrouping,
-  PsbtEnvelope,
-  PsbtLayout,
-  UnknownFields,
-  PsbtCombine,
-  PsbtFinalize,
-  PsbtRecords,
-  PsbtRoleStory,
-  SignerDisplay,
-  UtxoCheck,
   RECIPE_MAP,
   SeedDerivation,
   EntropyBits,
@@ -30,26 +21,10 @@ import {
   LastWordOdds,
   PassphraseSeeds,
   MnemonicChain,
-  TransactionAnatomy,
-  TwoSerializations,
-  WeightMeter,
-  WitnessField,
-  WitnessCommitment,
-  NestedInput,
-  SighashReuse,
-  Bip143Preimage,
-  AmountStory,
   Bip32Worked,
   AddressWorked,
   SchnorrWorked,
   TapscriptWorked,
-  P2shTwoStage,
-  P2shCommitment,
-  P2shWrapped,
-  P2shLimit,
-  P2shShape,
-  P2shStackStory,
-  P2shFailures,
   TimelockFields,
   TimelockPinned,
   TimelockRanges,
@@ -134,9 +109,31 @@ import {
   type DerivedPsbtTraceFixture,
   type DerivedTransactionFixture,
 } from "@bip-atlas/figures";
+// Batch 2 chapters (segwit, psbt, p2sh, timelocks) import their figures by subpath, so their static
+// drawings stay out of the shared client chunk that the package index feeds.
+import { P2shCommitment } from "@bip-atlas/figures/p2sh/P2shCommitment.tsx";
+import { P2shFailures, P2shShape, P2shStackStory } from "@bip-atlas/figures/p2sh/P2shStatics.tsx";
+import { P2shTwoStage, p2shHeroSpec } from "@bip-atlas/figures/p2sh/P2shTwoStage.tsx";
+import { P2shLimit, P2shWrapped } from "@bip-atlas/figures/p2sh/P2shWrapped.tsx";
+import { PsbtEnvelope, psbtHeroSpec } from "@bip-atlas/figures/psbt/PsbtEnvelope.tsx";
+import { PsbtLayout } from "@bip-atlas/figures/psbt/PsbtLayout.tsx";
+import { PsbtCombine, PsbtFinalize, UnknownFields } from "@bip-atlas/figures/psbt/PsbtMerge.tsx";
+import { PsbtRecords } from "@bip-atlas/figures/psbt/PsbtRecords.tsx";
+import { PsbtRoleStory } from "@bip-atlas/figures/psbt/PsbtRoleStory.tsx";
+import { SignerDisplay, UtxoCheck } from "@bip-atlas/figures/psbt/PsbtSigner.tsx";
+import { AmountStory } from "@bip-atlas/figures/tx/AmountStory.tsx";
+import { Bip143Preimage } from "@bip-atlas/figures/tx/Bip143Preimage.tsx";
+import { NestedInput } from "@bip-atlas/figures/tx/NestedInput.tsx";
+import { SighashReuse } from "@bip-atlas/figures/tx/SighashReuse.tsx";
+import { TransactionAnatomy, transactionHeroSpec } from "@bip-atlas/figures/tx/TransactionAnatomy.tsx";
+import { TwoSerializations } from "@bip-atlas/figures/tx/TwoSerializations.tsx";
+import { WeightMeter } from "@bip-atlas/figures/tx/WeightMeter.tsx";
+import { WitnessCommitment } from "@bip-atlas/figures/tx/WitnessCommitment.tsx";
+import { WitnessField } from "@bip-atlas/figures/tx/WitnessField.tsx";
 import type { Figure } from "@bip-atlas/publication";
 import { deriveFixtures } from "../lib/derive";
 import Plate from "./Plate.astro";
+import HeroStates from "./HeroStates.astro";
 
 interface Props {
   figure: Figure;
@@ -183,6 +180,10 @@ const v2Rekey = picked as DerivedV2RekeyFixture[];
 const b322 = picked as DerivedBip322Fixture[];
 const b322Formats = picked as DerivedBip322FormatsFixture[];
 const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
+// Batch 2 heroes are pre-rendered: every state on the server, switched by HeroStates' script.
+const txSpec = figure.recipe === "transaction-anatomy.v1" ? transactionHeroSpec(tx) : null;
+const psbtSpec = figure.recipe === "psbt-envelope.v1" ? psbtHeroSpec(trace[0]) : null;
+const p2shSpec = figure.recipe === "p2sh-two-stage.v1" ? p2shHeroSpec(p2sh) : null;
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} drawing={recipe.drawing === true} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -201,7 +202,15 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
   {figure.recipe === "two-serializations.v1" && <TwoSerializations fixture={tx[0]} />}
-  {figure.recipe === "transaction-anatomy.v1" && <TransactionAnatomy client:visible fixtures={tx} figureId={figureId} />}
+  {txSpec && (
+    <HeroStates figureId={figureId} spec={txSpec}>
+      {txSpec.states.map((s) => (
+        <div data-state data-keys={s.keys.join(" ")} hidden={s.id !== txSpec.noJsId}>
+          <TransactionAnatomy fixtures={tx} figureId={`${figureId}-${s.id}`} initial={s.state} />
+        </div>
+      ))}
+    </HeroStates>
+  )}
   {figure.recipe === "weight-meter.v1" && <WeightMeter fixtures={tx} />}
   {figure.recipe === "witness-field.v1" && <WitnessField fixture={tx[0]} />}
   {figure.recipe === "witness-commitment.v1" && <WitnessCommitment fixture={tx[0]} />}
@@ -210,7 +219,15 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "bip143-preimage.v1" && <Bip143Preimage fixture={tx[0]} />}
   {figure.recipe === "amount-storyboard.v1" && <AmountStory fixture={tx[0]} />}
   {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
-  {figure.recipe === "psbt-envelope.v1" && <PsbtEnvelope client:visible fixture={trace[0]} figureId={figureId} />}
+  {psbtSpec && (
+    <HeroStates figureId={figureId} spec={psbtSpec}>
+      {psbtSpec.states.map((s) => (
+        <div data-state data-keys={s.keys.join(" ")} data-valuetext={s.valueText} hidden={s.id !== psbtSpec.noJsId}>
+          <PsbtEnvelope fixture={trace[0]} figureId={`${figureId}-${s.id}`} initial={s.state} />
+        </div>
+      ))}
+    </HeroStates>
+  )}
   {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
   {figure.recipe === "psbt-records.v1" && <PsbtRecords fixture={trace[0]} />}
   {figure.recipe === "psbt-role-story.v1" && <PsbtRoleStory fixture={trace[0]} />}
@@ -232,7 +249,15 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
   {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
   {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
-  {figure.recipe === "p2sh-two-stage.v1" && <P2shTwoStage client:visible fixtures={p2sh} figureId={figureId} />}
+  {p2shSpec && (
+    <HeroStates figureId={figureId} spec={p2shSpec}>
+      {p2shSpec.states.map((s) => (
+        <div data-state data-keys={s.keys.join(" ")} data-valuetext={s.valueText} hidden={s.id !== p2shSpec.noJsId}>
+          <P2shTwoStage fixtures={p2sh} figureId={`${figureId}-${s.id}`} initial={s.state} />
+        </div>
+      ))}
+    </HeroStates>
+  )}
   {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
   {figure.recipe === "p2sh-limit.v1" && <P2shLimit fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-shape.v1" && <P2shShape fixtures={p2sh} />}

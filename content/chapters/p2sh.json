@@ -99,7 +99,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and the figure above recomputes it for real spends and compares it with the output byte for byte.",
+          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and Fig. A09.1 recomputes it for a real spend and compares it with the output byte for byte.",
           "claims": [
             "template",
             "spends-verified"
@@ -226,7 +226,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, that comes to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
+          "text": "The difference shows in where the bytes sit. The legacy 2-of-2 puts 218 bytes in its scriptSig. The wrapped 2-of-2 needs a 35-byte scriptSig, and its witness serializes to 218 bytes. Since weight counts a byte outside the witness four times and a witness byte once, those bytes come to 872 weight units against 358, so moving the signatures makes the wrapped spend lighter.",
           "claims": [
             "sizes",
             "weight"
