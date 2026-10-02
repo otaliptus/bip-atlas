@@ -7,6 +7,8 @@ export { stageVerdict } from "./describe";
 export { MnemonicCard } from "./mnemonic/MnemonicCard";
 export { EntropyWordLab } from "./mnemonic/EntropyWordLab";
 export { SeedDerivation } from "./mnemonic/SeedDerivation";
+export { EntropyBits } from "./mnemonic/EntropyBits";
+export { ChecksumStory } from "./mnemonic/ChecksumStory";
 export { MasterKeySplit } from "./hd/MasterKeySplit";
 export { DerivationTree } from "./hd/DerivationTree";
 export { ExtendedKeyLayout } from "./hd/ExtendedKeyLayout";

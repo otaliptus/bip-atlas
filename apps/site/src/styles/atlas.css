@@ -1522,3 +1522,6 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-story__frame .k-drawing { max-inline-size: 100%; }
 .k-story__note { margin: var(--manual-space-2) 0 0; font-size: 0.875rem; line-height: 1.45; }
 .k-story__n { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-blue); margin-inline-end: 0.25rem; }
+.k-engrave--n { fill: var(--manual-muted) !important; font-size: 8.5px !important; }
+.k-label-flat { font-size: 8px !important; letter-spacing: 0.08em; }
+.k-plate .k-face--top { fill: #f1f1f4; }

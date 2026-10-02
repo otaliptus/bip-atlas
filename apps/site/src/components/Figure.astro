@@ -18,6 +18,8 @@ import {
   UnknownFields,
   RECIPE_MAP,
   SeedDerivation,
+  EntropyBits,
+  ChecksumStory,
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
@@ -170,6 +172,8 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "mnemonic-card.v1" && <MnemonicCard fixture={mnemonic[0]} />}
   {figure.recipe === "entropy-word-pipeline.v1" && <EntropyWordLab client:visible fixtures={mnemonic} figureId={figureId} />}
   {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
+  {figure.recipe === "entropy-bits.v1" && <EntropyBits fixture={mnemonic[0]} />}
+  {figure.recipe === "checksum-storyboard.v1" && <ChecksumStory fixture={mnemonic[0]} />}
   {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
   {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
