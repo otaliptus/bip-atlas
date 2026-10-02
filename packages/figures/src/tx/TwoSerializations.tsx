@@ -22,7 +22,7 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
   const x0 = 15, unit = 270 / m.totalSize, tapeY = 52, tapeH = 18;
 
   /** The tape with some groups lifted out (and, if `closed`, the gaps closed up). */
-  const tape = (lifted: string[], closed = false) => {
+  const tape = (hatch: string, lifted: string[], closed = false) => {
     let x = x0;
     return groups.map((q) => {
       const w = q.bytes * unit;
@@ -34,7 +34,7 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
         <g data-group={q.key}>
           {out ? (
             <>
-              <rect class="k-cell k-fill--plain k-dashed" x={gx} y={tapeY} width={w} height={tapeH} style="fill:none" />
+              <rect class="k-cell" x={gx} y={tapeY} width={w} height={tapeH} style={`fill:${hatch}`} />
               {q.key === "marker" ? (
                 markerHex.map((hx, k) => <g><rect class="k-cell k-fill--plain" x={gx - 8 + k * 14} y={tapeY - 34} width="14" height="14" /><text class="k-cell__t" x={gx - 1 + k * 14} y={tapeY - 23.6} text-anchor="middle">{hx}</text></g>)
               ) : (
@@ -53,15 +53,29 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
     <>
       <Arrow d={`M${from} ${tapeY + tapeH + 4} V${tapeY + tapeH + 22}`} ids={ids} />
       <Machine at={[from - 20, 128]} w={64} d={30} h={26} label="SHA-256" sub="twice" role="hash" />
-      <Value at={[from + 62, 130]} text={name} size={8.5} cls="k-value--label" />
+      <Value at={[from + 62, 130]} text={name} size={9} cls="k-value--label" />
       <Value at={[from + 62, 143]} text={shortHex(hex, 12)} size={9.5} cls="k-value--hash" />
     </>
   );
+  /** Leaders to the tiny fields at either end of the tape. */
+  const ends = (y: number, closed: boolean) => {
+    const right = x0 + (closed ? m.baseSize : m.totalSize) * unit - (g("locktime").bytes * unit) / 2;
+    return (
+      <>
+        <g class="k-label">
+          <path class="k-leader" d={`M${x0 + (g("version").bytes * unit) / 2} ${y} V${y + 10}`} />
+          <text x={x0 - 1} y={y + 20}>{`NVERSION · ${g("version").bytes} B`}</text>
+          <path class="k-leader" d={`M${right} ${y} V${y + 10}`} />
+          <text x={closed ? right - 1 : right + 1} y={y + 20} text-anchor={closed ? "start" : "end"}>{`NLOCKTIME · ${g("locktime").bytes} B`}</text>
+        </g>
+      </>
+    );
+  };
   const offsetOf = (key: string) => x0 + groups.slice(0, groups.findIndex((q) => q.key === key)).reduce((n, q) => n + q.bytes * unit, 0);
-  const lift = (ids: DrawingIds, key: string, label: string) => {
+  const lift = (key: string) => {
     const gx = offsetOf(key);
     return key === "marker" ? (
-      <path class="k-leader" d={`M${gx + 22} ${tapeY - 27} H${gx + 34}`} />
+      <path class="k-leader" d={`M${gx + 22} ${tapeY - 27} H${gx + 34} M${gx} ${tapeY - 20} V${tapeY}`} />
     ) : (
       <path class="k-leader" d={`M${gx + g(key).bytes * unit / 2} ${tapeY - 30} V${tapeY - 40}`} />
     );
@@ -72,9 +86,9 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
       desc: `A tape of ${m.totalSize} bytes: ${groups.map((q) => `${q.label} ${q.bytes} bytes`).join(", ")}. Double SHA-256 of all of it is the wtxid, ${m.wtxidHex}.`,
       draw: (ids) => (
         <>
-          {tape([])}
+          {tape(ids.hatch, [])}{ends(tapeY + tapeH, false)}
           <Bracket x1={x0} x2={x0 + m.totalSize * unit} y={tapeY - 4} below={false} text={`everything · ${m.totalSize} B`} />
-          {hashOut(ids, 90, "WTXID", m.wtxidHex)}
+          {hashOut(ids, 150, "WTXID", m.wtxidHex)}
         </>
       ),
     },
@@ -83,10 +97,10 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
       desc: `The marker ${markerHex[0]} and flag ${markerHex[1]}, ${marker.bytes} bytes right after nVersion, are lifted out of the tape.`,
       draw: (ids) => (
         <>
-          {tape(["marker"])}
-          {lift(ids, "marker", "")}
-          <Value at={[offsetOf("marker") + 38, tapeY - 24]} text={`MARKER · FLAG · ${marker.bytes} B`} size={8.5} cls="k-value--label" />
-          <Value at={[x0, tapeY + tapeH + 18]} text="LEFT OUT OF THE TXID" size={8.5} cls="k-value--muted" />
+          {tape(ids.hatch, ["marker"])}{ends(tapeY + tapeH, false)}
+          {lift("marker")}
+          <Value at={[offsetOf("marker") + 38, tapeY - 24]} text={`MARKER · FLAG · ${marker.bytes} B`} size={9} cls="k-value--label" />
+          <Value at={[x0, tapeY + tapeH + 44]} text="LEFT OUT OF THE TXID" size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -95,10 +109,10 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
       desc: `The witness, ${witness.bytes} bytes just before nLockTime, is lifted out as well.`,
       draw: (ids) => (
         <>
-          {tape(["marker", "witness"])}
-          {lift(ids, "witness", "")}
-          <Value at={[offsetOf("witness") + witness.bytes * unit / 2, tapeY - 44]} text={`WITNESS · ${witness.bytes} B`} size={8.5} anchor="middle" cls="k-value--label" />
-          <Value at={[x0, tapeY + tapeH + 18]} text={`${m.totalSize - m.baseSize} B LEFT OUT IN ALL`} size={8.5} cls="k-value--muted" />
+          {tape(ids.hatch, ["marker", "witness"])}{ends(tapeY + tapeH, false)}
+          {lift("witness")}
+          <Value at={[offsetOf("witness") + witness.bytes * unit / 2, tapeY - 44]} text={`WITNESS · ${witness.bytes} B`} size={9} anchor="middle" cls="k-value--label" />
+          <Value at={[x0, tapeY + tapeH + 44]} text={`${m.totalSize - m.baseSize} B LEFT OUT IN ALL`} size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -107,9 +121,9 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
       desc: `The remaining ${m.baseSize} bytes, nVersion, inputs, outputs and nLockTime, are what a pre-SegWit node sees. Double SHA-256 of them is the txid, ${m.txidHex}.`,
       draw: (ids) => (
         <>
-          {tape(["marker", "witness"], true)}
+          {tape(ids.hatch, ["marker", "witness"], true)}{ends(tapeY + tapeH, true)}
           <Bracket x1={x0} x2={x0 + m.baseSize * unit} y={tapeY - 4} below={false} text={`old serialization · ${m.baseSize} B`} />
-          {hashOut(ids, 90, "TXID", m.txidHex)}
+          {hashOut(ids, 150, "TXID", m.txidHex)}
         </>
       ),
     },

@@ -39,7 +39,7 @@ export function KeyCheck({ ids, keyPart: key, y, input }: { ids: DrawingIds; key
       <Arrow d={`M${kx} ${y} V${y + 46}`} ids={ids} />
       <Machine at={[mx, y + 76]} w={52} d={28} h={22} label="HASH160" role="hash" />
       <Arrow d={`M${mx - 28} ${y + 84} H${150}`} ids={ids} />
-      <Value at={[14, y + 72]} text="= THE 20-BYTE PROGRAM" size={8.5} cls="k-value--label" />
+      <Value at={[14, y + 72]} text="= THE 20-BYTE PROGRAM" size={9} cls="k-value--label" />
       <Value at={[14, y + 86]} text={shortHex(input.programHex, 16)} size={9.5} cls="k-value--hash" />
     </g>
   );
@@ -88,7 +88,7 @@ export function WitnessField({ fixture }: { fixture: DerivedTransactionFixture }
           </>
         ))}
         <KeyCheck ids={ids} keyPart={keyPart} y={y + 22} input={keyInput} />
-        <Value at={[14, 212]} text="THE PROGRAM IS IN THE OUTPUT BEING SPENT" size={8} cls="k-value--muted" />
+        <Value at={[14, 212]} text="THE PROGRAM IS IN THE OUTPUT BEING SPENT" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact witness items</summary>

@@ -62,7 +62,7 @@ export function PsbtRoleStory({ fixture }: { fixture: DerivedPsbtTraceFixture })
         <>
           <Computer at={[14, 20]} label="Extractor" />
           <rect class="k-cell k-fill--plain k-cell--em" x="92" y="32" width="200" height="18" />
-          <Value at={[98, 44.5]} text={`NETWORK TX · ${extracted.bytes} B`} size={8.5} cls="k-value--label" />
+          <Value at={[98, 44.5]} text={`NETWORK TX · ${extracted.bytes} B`} size={9} cls="k-value--label" />
           <Value at={[92, 70]} text={`txid ${extracted.txidHex.slice(0, 12)}…`} size={9} cls="k-value--hash" />
         </>
       ),

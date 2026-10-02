@@ -71,15 +71,20 @@ export function BytePacket({ segs, hatch, ruler, perRow, unit, x, y, rowH }: { s
               height={rowH}
               style={f.hatched ? `fill:${hatch}` : undefined}
             />
-            {fits ? <text class="k-packet__t" x={s.x + 4} y={s.y + rowH / 2 + 3.2}>{f.short}</text> : null}
+            {fits ? (
+              <text class="k-packet__t" x={s.x + 4} y={s.y + rowH / 2 + 3.2}>{f.short}</text>
+            ) : !s.first && s.w > 14 ? (
+              // A continuation of a field from the row above.
+              <text class="k-packet__t" x={s.x + 4} y={s.y + rowH / 2 + 3.2}>{s.w > f.short.length * 5.5 + 26 ? `…${f.short}` : "…"}</text>
+            ) : null}
           </g>
         );
       })}
       {segs.filter((s) => s.first && s.field.badges?.length).map((s) =>
         s.field.badges!.map((n, k) => (
           <g class="k-badge">
-            <circle class="k-outline k-fill--plain" cx={s.x + 5 + k * 11} cy={s.y} r="5" />
-            <text x={s.x + 5 + k * 11} y={s.y + 2.6} text-anchor="middle">{n}</text>
+            <circle class="k-outline k-fill--plain" cx={s.x + 6 + k * 13} cy={s.y} r="6" />
+            <text x={s.x + 6 + k * 13} y={s.y + 2.9} text-anchor="middle">{n}</text>
           </g>
         )),
       )}

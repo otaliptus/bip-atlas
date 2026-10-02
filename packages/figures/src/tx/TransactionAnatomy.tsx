@@ -22,7 +22,7 @@ const LENSES: Array<{ id: Lens; text: string }> = [
 ];
 
 const LEGEND: Array<{ role: string; text: string }> = [
-  { role: "hash", text: "previous txid" },
+  { role: "hash", text: "hash · txid" },
   { role: "sig", text: "signature" },
   { role: "public", text: "public key" },
   { role: "time", text: "nSequence · nLockTime" },
@@ -85,7 +85,7 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
       ? `txid: double SHA-256 of the ${m.baseSize} bytes a pre-SegWit node sees. The marker, flag and witness (${witnessBytes} bytes) are left out.`
       : lens === "wtxid"
         ? `wtxid: double SHA-256 of all ${m.totalSize} bytes, marker, flag and witness included.`
-        : `BIP 143 preimage for input ${signed}: ten items, ${preimageBytes} bytes. Numbered bytes feed the item with that number; ${outside.map((o) => o.label).join(", ").replace(/, ([^,]*)$/, " and $1")} come from outside the transaction.`;
+        : `BIP 143 preimage for input ${signed}: ten items, ${preimageBytes} bytes. Numbered bytes feed the item with that number; ${outside.map((o) => o.label).join(", ").replace(/, ([^,]*)$/, " and $1")} are not fields of the transaction.`;
   const describe = () =>
     `${fixture.label}: a serialized transaction of ${m.totalSize} bytes. Fields in order: ${fields.map((f) => `${f.label}, ${f.bytes} byte${f.bytes === 1 ? "" : "s"}`).join("; ")}. ` +
     (lens === "bip143"
@@ -129,17 +129,17 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
             {lens === "txid" ? (
               <rect x={(wide ? 210 : 140) - 22} y={53} width="44" height="22" style={`fill:${ids.hatch};opacity:0.55`} />
             ) : null}
-            <Value at={[(wide ? 210 : 140) + 44, 56]} text="MARKER · FLAG" size={8.5} cls="k-value--label" />
-            <Value at={[(wide ? 210 : 140) + 44, 70]} text={lens === "txid" ? "NOT IN THE TXID" : "HASHED INTO THE WTXID"} size={8.5} cls="k-value--muted" />
+            <Value at={[(wide ? 210 : 140) + 44, 56]} text="MARKER · FLAG" size={9} cls="k-value--label" />
+            <Value at={[(wide ? 210 : 140) + 44, 70]} text={lens === "txid" ? "NOT IN THE TXID" : "HASHED INTO THE WTXID"} size={9} cls="k-value--muted" />
           </>
         ) : null}
         {lens === "bip143" ? (
           <>
             <circle class="k-outline k-fill--plain" cx={x0 + 5} cy={56} r="5" />
             <text class="k-badge__t" x={x0 + 5} y={58.6} text-anchor="middle">n</text>
-            <Value at={[x0 + 16, 59]} text={wide ? "BYTES THAT FEED PREIMAGE ITEM n; FADED BYTES ARE NOT USED" : "FEEDS PREIMAGE ITEM n"} size={8.5} cls="k-value--label" />
+            <Value at={[x0 + 16, 59]} text={wide ? "BYTES THAT FEED PREIMAGE ITEM n; FADED BYTES ARE NOT USED" : "FEEDS PREIMAGE ITEM n"} size={9} cls="k-value--label" />
             <rect class="k-cell k-fill--plain k-dashed" x={x0} y={72} width="10" height="10" />
-            <Value at={[x0 + 16, 81]} text="DASHED: NOT IN THE TRANSACTION" size={8.5} cls="k-value--label" />
+            <Value at={[x0 + 16, 81]} text="DASHED: NOT A FIELD OF THE TX" size={9} cls="k-value--label" />
           </>
         ) : null}
         <BytePacket segs={segs} hatch={ids.hatch} ruler perRow={perRow} unit={unit} x={x0} y={y0} rowH={rowH} />
@@ -155,12 +155,12 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
           <Arrow d={`M${mx + 20} ${pEnd + 6} V${my - 34}`} ids={ids} />
         )}
         <Machine at={[mx, my]} w={70} d={36} h={30} label="SHA-256" sub="twice" role="hash" />
-        <Value at={[resX, resY]} text={lens === "bip143" ? "SIGHASH" : hashName.toUpperCase()} size={8.5} cls="k-value--label" />
+        <Value at={[resX, resY]} text={lens === "bip143" ? "SIGHASH" : hashName.toUpperCase()} size={9} cls="k-value--label" />
         <Value at={[resX, resY + 13]} text={shortHex(lens === "bip143" ? d.digest.sighashHex : hashHex, 16)} size={9.5} cls="k-value--hash" />
         <Value
           at={[resX, resY + 26]}
           text={lens === "bip143" ? `= BIP 143 LINE ${fixture.sighash.sighashLine}` : lens === "txid" ? `${m.baseSize} OF ${m.totalSize} BYTES` : `ALL ${m.totalSize} BYTES`}
-          size={8}
+          size={9}
           cls="k-value--muted"
         />
         {legend.map((l, k) => {

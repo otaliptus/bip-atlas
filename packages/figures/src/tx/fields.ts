@@ -46,11 +46,17 @@ export function txFields(d: TransactionDerived): TxField[] {
       add(s, `${s.id}.len`, `input ${i} · scriptSig length`, "len", len, "plain");
       const body = s.hex.slice(2);
       if (body !== input.scriptSigHex) throw new Error(`${s.id}: scriptSig differs from the input view`);
-      if (input.scriptSig === "signature-push") add(s, `${s.id}.body`, `input ${i} · scriptSig: one signature push`, "scriptSig · signature", body, "sig");
-      else if (input.scriptSig === "program-push") add(s, `${s.id}.body`, `input ${i} · scriptSig: push of the witness program`, "scriptSig · program", body, "plain");
-      else if (body) throw new Error(`${s.id}: expected an empty scriptSig`);
+      if (input.scriptSig === "signature-push") {
+        add(s, `${s.id}.push`, `input ${i} · scriptSig push opcode`, "push", body.slice(0, 2), "plain");
+        add(s, `${s.id}.body`, `input ${i} · scriptSig: the signature`, "scriptSig · signature", body.slice(2), "sig");
+      } else if (input.scriptSig === "program-push") {
+        add(s, `${s.id}.push`, `input ${i} · scriptSig push opcode`, "push", body.slice(0, 2), "plain");
+        add(s, `${s.id}.version`, `input ${i} · redeem script: witness version 0`, "v0", body.slice(2, 4), "plain");
+        add(s, `${s.id}.push20`, `input ${i} · redeem script: push of 20 bytes`, "push", body.slice(4, 6), "plain");
+        add(s, `${s.id}.body`, `input ${i} · redeem script: the 20-byte witness program (a key hash)`, "program", body.slice(6), "hash");
+      } else if (body) throw new Error(`${s.id}: expected an empty scriptSig`);
     } else if (s.id.endsWith(".sequence")) add(s, s.id, `input ${i} · nSequence`, "nSequence", s.hex, "time");
-    else if (s.id.endsWith(".value")) add(s, s.id, `output ${i} · amount`, "amount", s.hex, "plain");
+    else if (s.id.endsWith(".value")) add(s, s.id, `output ${i} · value`, "value", s.hex, "plain");
     else if (s.id.endsWith(".script")) {
       add(s, `${s.id}.len`, `output ${i} · script length`, "len", one(s.hex, s.id), "plain");
       add(s, `${s.id}.body`, `output ${i} · scriptPubKey`, "scriptPubKey", s.hex.slice(2), "plain");
@@ -91,4 +97,10 @@ export function txGroups(d: TransactionDerived) {
 export const preimageRole = (id: string): Role =>
   id === "hashPrevouts" || id === "hashSequence" || id === "hashOutputs" ? "hash" : id === "sequence" || id === "locktime" ? "time" : "plain";
 
-export const shortHex =(hex: string, n = 8) => `${hex.slice(0, n)}…`;
+/** Name of a BIP 143 sighash type item; this teaching model signs SIGHASH_ALL only, so anything else throws. */
+export function sighashName(hex: string): "SIGHASH_ALL" {
+  if (hex !== "01000000") throw new Error(`sighash type ${hex} is outside this drawing`);
+  return "SIGHASH_ALL";
+}
+
+export const shortHex = (hex: string, n = 8) => `${hex.slice(0, n)}…`;

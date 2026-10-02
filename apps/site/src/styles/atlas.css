@@ -480,11 +480,11 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .atlas-ser__key { display: inline-block; inline-size: 0.75rem; block-size: 0.75rem; border: 1px solid var(--manual-ink); margin-inline-end: 0.35rem; vertical-align: -0.1em; }
 
 /* ---------- FIG A03.x segwit drawings ---------- */
-.k-badge text, .k-badge__t { font-size: 7px !important; font-weight: 600; }
-.k-legend__t { font-size: 8.5px !important; letter-spacing: 0.06em; }
+.k-badge text, .k-badge__t { font-size: 8px !important; font-weight: 600; }
+.k-legend__t { font-size: 9px !important; letter-spacing: 0.06em; }
 .k-proj { fill: var(--manual-grid); fill-opacity: 0.35; stroke: var(--atlas-ink); stroke-width: 0.5; vector-effect: non-scaling-stroke; }
-.k-proj--wit { fill: none; stroke-dasharray: 2 2; }
-.k-wit { fill: #f1f1f4 !important; stroke-dasharray: 2 1.5; }
+.k-proj--wit { fill: none; }
+.k-wit { fill: color-mix(in srgb, var(--atlas-ink) 14%, #ffffff) !important; }
 .k-value--fail { fill: var(--atlas-ink) !important; font-weight: 600; }
 
 /* ---------- PSBT envelope ---------- */
@@ -492,7 +492,7 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .k-card__type, .k-card__empty { font-size: 9px !important; fill: var(--manual-muted) !important; }
 .k-card__name { font-size: 9px !important; }
 .k-card__type--on { fill: #ffffff !important; font-weight: 500; }
-.k-card__tag { font-size: 8.5px !important; fill: var(--manual-muted) !important; letter-spacing: 0.04em; }
+.k-card__tag { font-size: 9px !important; fill: var(--manual-muted) !important; letter-spacing: 0.04em; }
 .atlas-method li, .atlas-method p { overflow-wrap: anywhere; }
 
 /* ---------- schnorr (BIP 340) ---------- */

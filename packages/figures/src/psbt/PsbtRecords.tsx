@@ -49,7 +49,7 @@ export function PsbtRecords({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
         <Value at={[14, 14]} text={`INPUT ${input.index} MAP · ${sigs.length} PARTIAL SIGNATURES`} size={9} cls="k-value--label" />
         {rows.map((x) => (
           <g>
-            <Value at={[14, x.y - 18]} text={`FROM ${x.role.toUpperCase()}`} size={8.5} cls="k-value--muted" />
+            <Value at={[14, x.y - 18]} text={`FROM ${x.role.toUpperCase()}`} size={9} cls="k-value--muted" />
             <PartsRow placed={x.placed} y={x.y} />
             <Bracket x1={x.placed[1].x} x2={x.placed[2].x + x.placed[2].w} y={x.y + 24} text={`key · ${1 + x.r.keyDataHex.length / 2} B`} align="start" />
             <Bracket x1={x.placed[4].x} x2={x.placed[4].x + x.placed[4].w} y={x.y + 24} text={`value · ${x.r.valueHex.length / 2} B`} align="start" />

@@ -6,7 +6,7 @@ import { KeyCheck, WitnessLabels, witnessParts } from "./WitnessField";
 
 /**
  * nested-input.v1 — static. One P2SH-wrapped P2WPKH input: a scriptSig that
- * pushes the 22-byte witness program (version 0, push of 20, key hash), and a
+ * pushes a 22-byte redeem script (witness version 0, then a push of the 20-byte witness program, a key hash), and a
  * two-item witness whose key hashes to that program.
  */
 export function NestedInput({ fixture }: { fixture: DerivedTransactionFixture }) {
@@ -23,7 +23,7 @@ export function NestedInput({ fixture }: { fixture: DerivedTransactionFixture })
       { kind: "byte", hex: sig.slice(0, 2) },
       { kind: "byte", hex: sig.slice(2, 4) },
       { kind: "byte", hex: sig.slice(4, 6) },
-      { kind: "block", bytes: 20, role: "hash", text: `key hash · 20 B` },
+      { kind: "block", bytes: 20, role: "hash", text: `program · 20 B` },
     ],
     14, 18, 6,
   );
@@ -37,13 +37,13 @@ export function NestedInput({ fixture }: { fixture: DerivedTransactionFixture })
         width={344}
         height={310}
         title="One input with a scriptSig and a witness"
-        desc={`Input ${k} of the ${fixture.label} example. Its scriptSig is ${sig.length / 2} bytes: the push opcode ${sig.slice(0, 2)} and the ${progBytes}-byte redeem script ${sig.slice(2)}, which is a witness program: version byte ${sig.slice(2, 4)}, push of 20 (${sig.slice(4, 6)}) and the 20-byte key hash. Its witness holds a ${input.witness[0].length / 2}-byte signature and a ${input.witness[1].length / 2}-byte public key, whose HASH160 is that key hash.`}
+        desc={`Input ${k} of the ${fixture.label} example. Its scriptSig is ${sig.length / 2} bytes: the push opcode ${sig.slice(0, 2)} and the ${progBytes}-byte redeem script ${sig.slice(2)}: the witness version byte ${sig.slice(2, 4)}, then a push of 20 bytes (${sig.slice(4, 6)}) of the witness program, a key hash. Its witness holds a ${input.witness[0].length / 2}-byte signature and a ${input.witness[1].length / 2}-byte public key, whose HASH160 is that key hash.`}
       >
         <Value at={[14, 14]} text={`INPUT ${k} · SCRIPTSIG · ${sig.length / 2} B`} size={9} cls="k-value--label" />
         <PartsRow placed={sigPlaced} y={y1} />
-        <Bracket x1={sigPlaced[1].x} x2={hashPart.x + hashPart.w} y={y1 + 24} text={`redeem script = witness program · ${progBytes} B`} align="start" />
+        <Bracket x1={sigPlaced[1].x} x2={hashPart.x + hashPart.w} y={y1 + 24} text={`redeem script · ${progBytes} B`} align="start" />
         {/* Elbow leaders: the leftmost byte gets the highest label, so no leader crosses another. */}
-        {[`push of ${progBytes} bytes`, "witness version 0", "push of 20 bytes"].map((t, j) => {
+        {[`push of ${progBytes} bytes`, "witness version 0", "push of the 20-byte program"].map((t, j) => {
           const cx = sigPlaced[j].x + 9, ly = y1 - 36 + j * 12;
           return (
             <g class="k-label">
@@ -56,7 +56,7 @@ export function NestedInput({ fixture }: { fixture: DerivedTransactionFixture })
         <PartsRow placed={witPlaced} y={y2} />
         <WitnessLabels placed={witPlaced} y={y2 + 20} input={input} />
         <KeyCheck ids={ids} keyPart={witPlaced.at(-1)!} y={y2 + 22} input={input} />
-        <Value at={[14, 302]} text="THE SAME KEY HASH THE SCRIPTSIG PUSHES" size={8} cls="k-value--muted" />
+        <Value at={[14, 302]} text="THE SAME KEY HASH THE SCRIPTSIG PUSHES" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact scriptSig and witness</summary>

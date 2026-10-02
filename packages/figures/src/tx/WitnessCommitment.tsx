@@ -24,8 +24,8 @@ function Tree({ top, leaves }: { top: number; leaves: Leaf[] }) {
       {leaves.map((l, k) => (
         <g data-leaf={l.name}>
           {cube(xs[k], leafY, l.zero ? "plain" : "hash")}
-          <Value at={[xs[k], leafY + 24]} text={l.name.toUpperCase()} size={8} anchor="middle" cls="k-value--label" />
-          {l.value ? <Value at={[xs[k], leafY + 36]} text={l.value} size={8.5} anchor="middle" cls={l.zero ? "k-value--muted" : "k-value--hash"} /> : null}
+          <Value at={[xs[k], leafY + 24]} text={l.name.toUpperCase()} size={9} anchor="middle" cls="k-value--label" />
+          {l.value ? <Value at={[xs[k], leafY + 36]} text={l.value} size={9} anchor="middle" cls={l.zero ? "k-value--muted" : "k-value--hash"} /> : null}
         </g>
       ))}
     </g>
@@ -49,23 +49,23 @@ export function WitnessCommitment({ fixture }: { fixture: DerivedTransactionFixt
         width={344}
         height={392}
         title="Two trees in one block"
-        desc={`A schematic block of four transactions, one of them the published example. The txids, ${shortHex(m.txidHex)} among them, are hashed pairwise into the merkle root in the block header. The wtxids, ${shortHex(m.wtxidHex)} among them and with the coinbase's taken as 32 zero bytes, are hashed the same way into a witness root, and a commitment built from it is recorded in an output of the coinbase transaction, which is itself one of the txid leaves.`}
+        desc={`A schematic block of four transactions, one of them the published example. The txids, ${shortHex(m.txidHex)} among them, are hashed pairwise into the merkle root in the block header. The wtxids, ${shortHex(m.wtxidHex)} among them and with the coinbase's taken as 32 zero bytes, are hashed the same way into a witness root. The double SHA-256 of that root followed by a 32-byte reserved value, which sits in the coinbase input’s witness, is the commitment recorded in an output of the coinbase transaction, which is itself one of the txid leaves.`}
       >
         <rect class="k-outline k-fill--plain" x="96" y="8" width="152" height="40" />
-        <Value at={[104, 22]} text="BLOCK HEADER" size={8.5} cls="k-value--label" />
+        <Value at={[104, 22]} text="BLOCK HEADER" size={9} cls="k-value--label" />
         <rect class="k-cell k-fill--hash" x="104" y="28" width="136" height="14" />
-        <Value at={[110, 38.5]} text="MERKLE ROOT" size={8} />
+        <Value at={[110, 38.5]} text="MERKLE ROOT" size={9} />
         <line class="k-leader" x1="172" y1="48" x2="172" y2="62" />
-        <Value at={[14, 96]} text="TXIDS" size={8.5} cls="k-value--label" />
+        <Value at={[14, 96]} text="TXIDS" size={9} cls="k-value--label" />
         <Tree top={78} leaves={[{ name: "coinbase", value: null }, { name: "example", value: shortHex(m.txidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
         {/* The coinbase transaction carries the commitment in one of its outputs. */}
         <rect class="k-outline k-fill--hash k-cell--em" x="14" y="214" width="112" height="22" />
-        <Value at={[20, 228.5]} text="COINBASE OUTPUT" size={8} />
+        <Value at={[20, 228.5]} text="COINBASE OUTPUT" size={9} />
         <line class="k-leader k-dashed" x1="52" y1="196" x2="52" y2="214" />
-        <Value at={[134, 222]} text="COMMITMENT, BUILT FROM" size={8} cls="k-value--muted" />
-        <Value at={[134, 233]} text="THE WITNESS ROOT" size={8} cls="k-value--muted" />
+        <Value at={[134, 214]} text="COMMITMENT = SHA-256 TWICE OF" size={9} cls="k-value--muted" />
+        <Value at={[134, 226]} text="WITNESS ROOT ‖ RESERVED VALUE" size={9} cls="k-value--muted" /><Value at={[134, 238]} text="(32 B, IN THE COINBASE’S WITNESS)" size={8.5} cls="k-value--muted" />
         <Arrow d="M160 262 L120 240" ids={ids} />
-        <Value at={[14, 276]} text="WTXIDS" size={8.5} cls="k-value--label" />
+        <Value at={[14, 276]} text="WTXIDS" size={9} cls="k-value--label" />
         <Tree top={258} leaves={[{ name: "coinbase", value: "00…00", zero: true }, { name: "example", value: shortHex(m.wtxidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
       </Drawing>
       <details class="atlas-disclosure">

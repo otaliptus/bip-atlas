@@ -134,27 +134,27 @@ export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
         {track(ids, wide)}
         <g class={isExtract ? "k-faded" : undefined}>
           <Cells x={x0} y={top} values={MAGIC} size={16} />
-          <Value at={[x0 + 86, top + 12]} text={`MAGIC “psbt” + 0xff · ${state.bytes} BYTES`} size={8.5} cls="k-value--label" />
+          <Value at={[x0 + 86, top + 12]} text={`MAGIC “psbt” + 0xff · ${state.bytes} BYTES`} size={9} cls="k-value--label" />
           {maps.map((m, k) => <MapCard x={place[k].x} y={place[k].y} w={place[k].w} title={mapTitle(m.scope, m.index)} rows={rowsOf(m)} hatch={ids.hatch} />)}
         </g>
         {isExtract ? (
           <>
             <rect class="k-cell k-fill--plain k-cell--em" x={x0} y={footY - 14} width={wide ? 600 : 300} height="20" />
-            <Value at={[x0 + 6, footY]} text={`NETWORK TRANSACTION · ${extracted.bytes} B · ${extracted.inputs} IN · ${extracted.outputs} OUT`} size={8.5} cls="k-value--label" />
+            <Value at={[x0 + 6, footY]} text={`NETWORK TRANSACTION · ${extracted.bytes} B · ${extracted.inputs} IN · ${extracted.outputs} OUT`} size={9} cls="k-value--label" />
             <Value at={[x0, footY + 24]} text={`txid ${extracted.txidHex.slice(0, 16)}…`} size={9.5} cls="k-value--hash" />
           </>
         ) : (
           <g>
             <rect class="k-cell k-mark--plain" x={x0} y={footY - 9} width="10" height="10" />
-            <Value at={[x0 + 16, footY]} text={compare === "creator" ? "NEW SINCE THE CREATOR" : "NEW IN THIS STEP"} size={8.5} cls="k-value--label" />
+            <Value at={[x0 + 16, footY]} text={compare === "creator" ? "NEW SINCE THE CREATOR" : "NEW IN THIS STEP"} size={9} cls="k-value--label" />
             <rect class="k-cell k-dashed" x={x0 + (wide ? 170 : 150)} y={footY - 9} width="10" height="10" style={`fill:${ids.hatch}`} />
-            <Value at={[x0 + (wide ? 186 : 166), footY]} text="CLEARED BY THIS STEP" size={8.5} cls="k-value--label" />
+            <Value at={[x0 + (wide ? 186 : 166), footY]} text="CLEARED BY THIS STEP" size={9} cls="k-value--label" />
             {wide ? (
               <>
                 <rect class="k-cell k-fill--sig" x={x0 + 350} y={footY - 9} width="10" height="10" />
-                <Value at={[x0 + 366, footY]} text="SIGNATURE" size={8.5} cls="k-value--label" />
+                <Value at={[x0 + 366, footY]} text="SIGNATURE" size={9} cls="k-value--label" />
                 <rect class="k-cell k-fill--public" x={x0 + 450} y={footY - 9} width="10" height="10" />
-                <Value at={[x0 + 466, footY]} text="KEYED BY A PUBLIC KEY" size={8.5} cls="k-value--label" />
+                <Value at={[x0 + 466, footY]} text="KEYED BY A PUBLIC KEY" size={9} cls="k-value--label" />
               </>
             ) : null}
           </g>

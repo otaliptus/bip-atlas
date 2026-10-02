@@ -130,7 +130,7 @@
           "fixtures": [
             "native-p2wpkh"
           ],
-          "caption": "A schematic block of four transactions; the example is not in a real block. The txids feed the header as before; the wtxids, the coinbase’s taken as zeros, feed a commitment in a coinbase output.",
+          "caption": "A schematic block of four transactions; the example is not in a real block. The txids feed the header as before; the wtxids, the coinbase’s taken as zeros, feed a commitment in a coinbase output, together with a reserved value.",
           "claims": [
             "wtxid-commitment",
             "committed",
@@ -155,12 +155,16 @@
             "native-p2wpkh",
             "p2sh-p2wpkh"
           ],
-          "caption": "Through the txid lens the marker, flag and witness are hatched out, and with them the SegWit input’s signature. The ordinary input’s signature sits in its scriptSig, so the txid still covers it. The BIP 143 lens numbers the bytes behind each preimage item.",
+          "caption": "Through the txid lens the marker, flag and witness are hatched out, and with them the SegWit input’s signature. In the first example the ordinary input’s signature sits in its scriptSig, so the txid still covers it. The BIP 143 lens numbers the bytes behind each preimage item.",
           "claims": [
             "two-ids",
             "empty-witness",
             "p2wpkh",
-            "fixture-inputs"
+            "p2sh-nested",
+            "fixture-inputs",
+            "ten-items",
+            "amount",
+            "summary-hashes"
           ],
           "layout": "wide"
         }
@@ -223,7 +227,7 @@
           "fixtures": [
             "p2sh-p2wpkh"
           ],
-          "caption": "The P2SH-P2WPKH example’s only input. The scriptSig pushes a 22-byte redeem script that is itself a witness program; the witness holds the signature and the key.",
+          "caption": "The P2SH-P2WPKH example’s only input. Its scriptSig pushes a 22-byte redeem script: a version byte and a 20-byte witness program. The witness holds the signature and the key.",
           "claims": [
             "p2sh-nested",
             "p2wpkh",
@@ -281,6 +285,7 @@
           "claims": [
             "weight-units",
             "tx-weight",
+            "fixture-sizes",
             "examples-published",
             "examples-reproduced"
           ],
@@ -317,7 +322,7 @@
           "recipe": "sighash-reuse.v1",
           "title": "Hashing once, or once per input",
           "fixtures": [],
-          "caption": "Schematic, with no values: four inputs under each digest. BIP 143’s three summary hashes are made once and shared by every input’s preimage.",
+          "caption": "Schematic, with no values: four inputs under each digest. BIP 143’s three summary hashes can be made once and shared by every input’s preimage; each preimage is then hashed on its own.",
           "claims": [
             "quadratic",
             "hash-reuse",
@@ -327,7 +332,7 @@
         },
         {
           "type": "paragraph",
-          "text": "For SIGHASH_ALL, the three summary hashes cover every input’s outpoint, every input’s nSequence and every output. They are computed once and reused for each input that is signed, which is where the saving comes from.",
+          "text": "For SIGHASH_ALL, the three summary hashes cover every input’s outpoint, every input’s nSequence and every output. They can be computed once and reused for each input that is signed, which is where the saving comes from.",
           "claims": [
             "summary-hashes",
             "hash-reuse"
@@ -341,7 +346,7 @@
           "fixtures": [
             "native-p2wpkh"
           ],
-          "caption": "The ten items for the mixed example’s SegWit input, on a 32-byte ruler. Dashed items are not in the transaction; the amount is outlined. The digest matches the one BIP 143 publishes.",
+          "caption": "The ten items for the mixed example’s SegWit input, on a 32-byte ruler. Dashed items are not fields of the transaction; the amount is outlined. The digest matches the one BIP 143 publishes.",
           "claims": [
             "ten-items",
             "amount",

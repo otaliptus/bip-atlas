@@ -32,7 +32,7 @@ export function SignerDisplay({ fixture }: { fixture: DerivedPsbtTraceFixture })
           <rect class={`k-cell k-fill--plain${r.dashed ? " k-dashed" : ""}${r.em ? " k-cell--em" : ""}`} x="34" y={rowY(i) - 2} width="276" height="20" />
           <Value at={[40, rowY(i) + 11.5]} text={r.k} size={9} cls="k-value--label" />
           <Value at={[84, rowY(i) + 11.5]} text={`${r.v} BTC`} size={9.5} />
-          {r.tag ? <Value at={[304, rowY(i) + 11.5]} text={r.tag} size={7.5} anchor="end" cls="k-value--muted" /> : null}
+          {r.tag ? <Value at={[304, rowY(i) + 11.5]} text={r.tag} size={8.5} anchor="end" cls="k-value--muted" /> : null}
         </g>
       ))}
       <circle class="k-outline k-fill--plain" cx="150" cy={H - 21} r="6" />
@@ -60,20 +60,20 @@ export function UtxoCheck({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
         desc={`Input ${c.inputIndex} of the PSBT carries a ${c.utxoBytes}-byte non-witness UTXO: the whole previous transaction. Its double SHA-256 is ${c.computedTxidHex}. The unsigned transaction's input ${c.inputIndex} names previous txid ${c.prevoutTxidHex}, output ${c.vout}. They are equal, so the signer is looking at the transaction this input really spends.`}
       >
         <rect class="k-cell k-fill--plain" x="14" y="22" width="120" height="22" />
-        <Value at={[20, 37]} text={`PREVIOUS TX · ${c.utxoBytes} B`} size={8.5} cls="k-value--label" />
-        <Value at={[14, 14]} text={`INPUT ${c.inputIndex} · NON-WITNESS UTXO`} size={8.5} cls="k-value--muted" />
+        <Value at={[20, 37]} text={`PREVIOUS TX · ${c.utxoBytes} B`} size={9} cls="k-value--label" />
+        <Value at={[14, 14]} text={`INPUT ${c.inputIndex} · NON-WITNESS UTXO`} size={9} cls="k-value--muted" />
         <Arrow d="M138 33 H196" ids={ids} />
         <Machine at={[230, 50]} w={56} d={26} h={22} label="SHA-256" sub="twice" role="hash" />
         <rect class="k-cell k-fill--hash" x="190" y="108" width="140" height="22" />
         <Value at={[196, 123]} text={short(c.computedTxidHex)} size={9.5} />
-        <Value at={[270, 100]} text="COMPUTED" size={8.5} cls="k-value--label" />
+        <Value at={[270, 100]} text="COMPUTED" size={9} cls="k-value--label" />
         <Arrow d="M254 94 V105" ids={ids} />
         <rect class="k-cell k-fill--hash" x="14" y="108" width="140" height="22" />
         <Value at={[20, 123]} text={short(c.prevoutTxidHex)} size={9.5} />
-        <Value at={[14, 100]} text={`UNSIGNED TX · INPUT ${c.inputIndex} PREVOUT`} size={8.5} cls="k-value--label" />
+        <Value at={[14, 100]} text={`UNSIGNED TX · INPUT ${c.inputIndex} PREVOUT`} size={9} cls="k-value--label" />
         <Value at={[172, 124]} text="=" size={16} anchor="middle" />
         <Value at={[14, 156]} text={c.computedTxidHex === c.prevoutTxidHex ? "✓ THE SAME TXID" : "✗ DIFFERENT: DO NOT SIGN"} size={9} cls={c.computedTxidHex === c.prevoutTxidHex ? "k-value--ok" : "k-value--fail"} />
-        <Value at={[14, 172]} text={`IT SPENDS OUTPUT ${c.vout} OF THAT TRANSACTION`} size={8.5} cls="k-value--muted" />
+        <Value at={[14, 172]} text={`IT SPENDS OUTPUT ${c.vout} OF THAT TRANSACTION`} size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact txids (byte order as computed)</summary>

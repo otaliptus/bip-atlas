@@ -1,10 +1,8 @@
-import { readFileSync } from "node:fs";
 import { h, type VNode } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { hash160 } from "@bip-atlas/models/bip32";
 import { bytesToHex, hexToBytes } from "@bip-atlas/models/hex";
-import { bip143Digest, measureTransaction, parseTransaction } from "@bip-atlas/models/tx";
 import { AmountStory } from "../src/tx/AmountStory";
 import { Bip143Preimage } from "../src/tx/Bip143Preimage";
 import { NestedInput } from "../src/tx/NestedInput";
@@ -15,51 +13,21 @@ import { WeightMeter } from "../src/tx/WeightMeter";
 import { WitnessCommitment } from "../src/tx/WitnessCommitment";
 import { WitnessField } from "../src/tx/WitnessField";
 import { txFields, txGroups } from "../src/tx/fields";
-import type { DerivedTransactionFixture, TransactionFixture, TxInputView } from "../src/types";
+import type { DerivedTransactionFixture } from "../src/types";
+import { deriveChapter } from "./derived";
 
-const root = new URL("../../../", import.meta.url);
-const fixtures: TransactionFixture[] = JSON.parse(readFileSync(new URL("fixtures/segwit.json", root), "utf8")).fixtures;
 const html = (n: VNode<any>) => render(n);
-const btc = (sats: bigint) => `${sats / 100000000n}.${(sats % 100000000n).toString().padStart(8, "0")}`;
-
-/** The values deriveTransaction computes, with the same structural checks (the site build runs them too). */
-function derived(id: string): DerivedTransactionFixture {
-  const f = fixtures.find((x) => x.id === id)!;
-  const tx = parseTransaction(f.txHex);
-  const s = f.sighash;
-  const digest = bip143Digest(tx, s.inputIndex, s.scriptCodeHex, BigInt(s.amountSats));
-  expect([digest.preimageHex, digest.sighashHex]).toEqual([s.preimageHex, s.sighashHex]);
-  const program = s.scriptCodeHex.match(/^1976a914([0-9a-f]{40})88ac$/)![1];
-  const inputs = tx.inputs.map((inp, k): TxInputView => {
-    const kind = f.inputKinds[k];
-    const witness = tx.witnesses[k] ?? [];
-    if (kind.startsWith("P2PK (legacy)")) return { kind, scriptSigHex: inp.scriptSigHex, scriptSig: "signature-push", witness, witnessKind: "empty", programHex: null };
-    expect(bytesToHex(hash160(hexToBytes(witness[1])))).toBe(program);
-    return { kind, scriptSigHex: inp.scriptSigHex, scriptSig: inp.scriptSigHex ? "program-push" : "empty", witness, witnessKind: "p2wpkh", programHex: program };
-  });
-  const ids = (p: string, suf = "") => tx.segments.filter((g) => g.id.startsWith(p) && g.id.endsWith(suf)).map((g) => g.id);
-  const i = s.inputIndex;
-  const from: Record<string, string[]> = {
-    version: ["version"], hashPrevouts: ids("input.", ".outpoint"), hashSequence: ids("input.", ".sequence"), outpoint: [`input.${i}.outpoint`],
-    scriptCode: inp(tx, i) ? [`input.${i}.scriptsig`] : [], amount: [], sequence: [`input.${i}.sequence`], hashOutputs: ids("output."), locktime: ["locktime"], hashType: [],
-  };
-  return {
-    ...f,
-    derived: {
-      segments: tx.segments,
-      measures: measureTransaction(tx),
-      digest: { items: digest.items.map((it) => ({ ...it, from: from[it.id], note: it.id })), sighashHex: digest.sighashHex },
-      inputs,
-      amountBtc: btc(BigInt(s.amountSats)),
-    },
-  };
-}
-const inp = (tx: ReturnType<typeof parseTransaction>, i: number) => tx.inputs[i].scriptSigHex !== "";
-
-const native = derived("native-p2wpkh");
-const nested = derived("p2sh-p2wpkh");
+// The site's own deriveTransaction, with its fail-closed structural checks.
+const [native, nested] = await deriveChapter<DerivedTransactionFixture>("segwit.json", ["native-p2wpkh", "p2sh-p2wpkh"]);
 const wideOnly = (s: string) => s.split("k-resp__narrow")[0];
 
+describe("deriveTransaction input views", () => {
+  it("classifies each input and ties every P2WPKH key to its program", () => {
+    expect(native.derived.inputs.map((i) => [i.scriptSig, i.witnessKind])).toEqual([["signature-push", "empty"], ["empty", "p2wpkh"]]);
+    expect(nested.derived.inputs.map((i) => [i.scriptSig, i.witnessKind])).toEqual([["program-push", "p2wpkh"]]);
+    for (const f of [native, nested]) for (const i of f.derived.inputs.filter((x) => x.witnessKind === "p2wpkh")) expect(bytesToHex(hash160(hexToBytes(i.witness[1])))).toBe(i.programHex);
+  });
+});
 describe("SegWit fields", () => {
   it("reassemble each transaction exactly and colour by role", () => {
     for (const f of [native, nested]) {
@@ -70,7 +38,7 @@ describe("SegWit fields", () => {
     }
     // The P2PK input's scriptSig is its signature push; the nested one pushes a program, not a signature.
     expect(txFields(native.derived).find((x) => x.id === "input.0.scriptsig.body")!.role).toBe("sig");
-    expect(txFields(nested.derived).find((x) => x.id === "input.0.scriptsig.body")!.role).toBe("plain");
+    expect(txFields(nested.derived).find((x) => x.id === "input.0.scriptsig.body")!.role).toBe("hash");
   });
   it("groups add up to the measured sizes", () => {
     for (const f of [native, nested]) {
@@ -151,7 +119,8 @@ describe("Static SegWit drawings", () => {
   it("A03.5 nested input: the 22-byte program push and the matching key", () => {
     const s = html(h(NestedInput, { fixture: nested }));
     expect(nested.derived.inputs[0].scriptSigHex).toBe(`160014${nested.derived.inputs[0].programHex}`);
-    expect(s).toContain("witness program · 22 B".toUpperCase());
+    expect(s).toContain("REDEEM SCRIPT · 22 B");
+    expect(s).not.toContain("WITNESS PROGRAM · 22");
     expect(s).toContain(nested.derived.inputs[0].scriptSigHex);
   });
   it("A03.6 weight: 3 × base + total and the virtual size for each example", () => {
@@ -174,7 +143,7 @@ describe("Static SegWit drawings", () => {
     const total = native.derived.digest.items.reduce((n, i) => n + i.hex.length / 2, 0);
     expect(total).toBe(182);
     expect(s).toContain(`${total} BYTES`);
-    expect(s).toContain(`AMOUNT ${native.derived.amountBtc} BTC`);
+    expect(s).toContain(`AMOUNT SPENT, ${native.derived.amountBtc} BTC`);
     expect(native.derived.amountBtc).toBe("6.00000000");
     expect(s).toContain(native.derived.digest.sighashHex.slice(0, 32));
     expect(s).toContain(native.derived.digest.sighashHex.slice(32));
