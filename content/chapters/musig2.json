@@ -40,11 +40,10 @@
    "fixtures": [
     "sig-agg-0"
    ],
-   "caption": "BIP 327’s first signature-aggregation vector. The chain sees one key and one 64-byte signature, which plain BIP 340 verification accepts; nothing shows how many signed.",
+   "caption": "BIP 327’s first signature-aggregation vector, as a key path spend would show it: one key and one 64-byte signature, which plain BIP 340 verification accepts; nothing shows how many signed.",
    "claims": [
     "compact-private",
     "bip340-compat",
-    "n-of-n",
     "vectors"
    ],
    "layout": "prose"
@@ -136,7 +135,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂; and e is the usual BIP 340 challenge for R, the key and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest signer or aggregator, the BIP uses the generator G instead: signing can then continue, and the culprit is caught when partial signatures are verified. One of its signing vectors exercises exactly that case.",
+     "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂, where R₁ and R₂ are the two points of the aggregate nonce; and e is the usual BIP 340 challenge for R, the key and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest signer or aggregator, the BIP uses the generator G instead: signing can then continue, and the culprit is caught when partial signatures are verified. One of its signing vectors exercises exactly that case.",
      "claims": [
       "session",
       "vectors"
@@ -201,7 +200,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The aggregate key can be tweaked along the way. A plain tweak derives child keys in the manner of BIP 32; an x-only tweak adds a Taproot commitment, so the same output can be spent either with the group’s signature or through a script path. Two of the figure’s vectors carry tweaks.",
+     "text": "The aggregate key can be tweaked along the way. A plain tweak derives child keys in the manner of BIP 32; an x-only tweak adds a Taproot commitment, so the same output can be spent either with the group’s signature or through a script path. Two of the vectors in Fig. A14.4 carry tweaks.",
      "claims": [
       "tweaks"
      ]
@@ -242,7 +241,7 @@
      "fixtures": [
       "sig-agg-0"
      ],
-     "caption": "Schematic, with no values: Sign reads the secret nonce and overwrites it with zeros, so a second Sign with the same nonce is refused, as this site’s model does.",
+     "caption": "Schematic, with no values: BIP 327 allows Sign to overwrite the secret nonce with zeros after reading it, and this site’s model does, so a second Sign with that nonce is refused.",
      "claims": [
       "nonce-reuse"
      ],

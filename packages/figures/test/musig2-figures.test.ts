@@ -73,7 +73,7 @@ function checks(): DerivedMusig2PsigChecksFixture {
   const X = d.pubkeys.map(hx), P = d.pnonces.map(hx), M = d.msgs.map(hx);
   const run = (c: any, sig: string) => partialSigVerify(hx(sig), c.nonce_indices.map((i: number) => P[i]), c.key_indices.map((i: number) => X[i]), [], [], M[c.msg_index], c.signer_index);
   const v0 = d.valid_test_cases[0];
-  const rows: any[] = [{ label: "Published valid partial signature", signer: v0.signer_index, psig: v0.expected.toLowerCase(), verdict: run(v0, v0.expected) ? "valid" : "invalid", detail: "holds" }];
+  const rows: any[] = [{ label: "Published valid partial signature", signer: v0.signer_index, psig: v0.expected.toLowerCase(), verdict: run(v0, v0.expected) ? "valid" : "invalid", detail: "s·G = Re + e·a·g′·P holds" }];
   for (const c of d.verify_fail_test_cases) rows.push({ label: c.comment, signer: c.signer_index, psig: c.sig.toLowerCase(), verdict: run(c, c.sig) ? "valid" : "invalid", detail: "does not hold" });
   for (const c of d.verify_error_test_cases) {
     let caught: any = null;
@@ -131,7 +131,7 @@ describe("A14.4 hero (no-JS)", () => {
     expect(s).toContain('data-hydrated="false"');
     expect(s).toContain(short(s0.derived.signature.slice(0, 64)));
     expect(s).toContain(s0.derived.signature);
-    expect(s).not.toContain("secret key, nonces");
+    expect(s).not.toContain("secret key");
     expect(s.split('data-state="on"').length - 1).toBe(2 * (s0.derived.signers.length + 1));
   });
   it("vector 3 carries three tweaks, all drawn", () => {
@@ -144,7 +144,8 @@ describe("A14.5 round storyboard", () => {
   it("has one frame per stage and draws secrets without values", () => {
     const s = html(el(RoundStory, { fixture: s0 }));
     expect(s.split('class="k-story__frame"').length - 1).toBe(5);
-    expect(s).toContain("secret key, nonces");
+    expect(s).toContain("secret key, nonce");
+    expect(s).toContain("nonce used");
   });
 });
 

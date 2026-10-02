@@ -60,7 +60,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
     const did = `${figureId}-${w}`;
     const H = sceneHeight(d, W, step, 22);
     return (
-      <Drawing id={did} width={W} height={H} title="Two rounds around a table" desc={describeSession(d, step, show)}>
+      <Drawing id={did} width={W} height={H} title="A signing session, round by round" desc={describeSession(d, step, show)}>
         <Value at={[10, 12]} text={`STAGE ${step + 1} OF ${stages.length} · ${stage.title.toUpperCase()}`} size={8.5} cls="k-value--label" />
         <Scene d={d} upto={step} reveal={show} ids={idsFor(did)} W={W} y0={22} />
       </Drawing>
@@ -71,7 +71,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          <div class="atlas-strip" role="radiogroup" aria-label="Published vector">
+          <div class="atlas-strip" role="radiogroup" aria-label="Choose a published vector">
             {fixtures.map((x) => (
               <label class="atlas-strip__opt">
                 <input type="radio" name={`${figureId}-case`} checked={x.id === id} onChange={() => (setId(x.id), setAt(0))} />

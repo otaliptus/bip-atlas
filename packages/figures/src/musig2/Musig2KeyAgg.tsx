@@ -22,7 +22,7 @@ export function Musig2KeyAgg({ fixture }: { fixture: DerivedMusig2KeyaggFixture 
   const rowH = 112;
   const desc =
     d.orders.map((o, n) => `Order ${n + 1}: ${o.keys.map((k, i) => `${name(k)} with coefficient ${o.coefficients[i] === ONE ? "1" : o.coefficients[i]}`).join(", ")}; the aggregate key is ${o.aggXonly}.`).join(" ") +
-    ` The plain sum P1 + P2 + P3 has x coordinate ${d.naiveSumXonly}, which is neither aggregate.`;
+    ` The plain sum ${first.map((_, i) => `P${i + 1}`).join(" + ")} has x coordinate ${d.naiveSumXonly}, which is neither aggregate.`;
   return (
     <>
       <Drawing id="a14-keyagg" width={344} height={rowH * d.orders.length + 96} title="Not a plain sum" desc={desc}>
@@ -51,7 +51,7 @@ export function Musig2KeyAgg({ fixture }: { fixture: DerivedMusig2KeyaggFixture 
         })}
         <g data-naive="true">
           <Value at={[14, rowH * d.orders.length + 22]} text="THE PLAIN SUM, NOT MUSIG2" size={8.5} cls="k-value--label" />
-          <Value at={[14, rowH * d.orders.length + 40]} text="P1 + P2 + P3" size={10} />
+          <Value at={[14, rowH * d.orders.length + 40]} text={first.map((_, i) => `P${i + 1}`).join(" + ")} size={10} />
           <Arrow d={`M100 ${rowH * d.orders.length + 36} H130`} ids={ids} />
           <Value at={[138, rowH * d.orders.length + 40]} text={`x = ${short(d.naiveSumXonly)}`} size={10} />
           <path class="k-ring" d={`M134 ${rowH * d.orders.length + 26} L250 ${rowH * d.orders.length + 46} M134 ${rowH * d.orders.length + 46} L250 ${rowH * d.orders.length + 26}`} />
@@ -68,7 +68,7 @@ export function Musig2KeyAgg({ fixture }: { fixture: DerivedMusig2KeyaggFixture 
               <dt>Q{n + 1} (x-only)</dt><dd><code class="atlas-break">{o.aggXonly}</code></dd>
             </>
           ))}
-          <dt>x of P1 + P2 + P3</dt><dd><code class="atlas-break">{d.naiveSumXonly}</code></dd>
+          <dt>x of {first.map((_, i) => `P${i + 1}`).join(" + ")}</dt><dd><code class="atlas-break">{d.naiveSumXonly}</code></dd>
         </dl>
       </details>
     </>

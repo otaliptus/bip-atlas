@@ -15,13 +15,13 @@ export function RoundStory({ fixture }: { fixture: DerivedMusig2SessionFixture }
   const W = 330;
   const H = sceneHeight(d, W, stages.length - 1, 4, true);
   const frames: Frame[] = stages.map((s, i) => ({
-    note: `${s.title}. ${s.note}`,
+    note: `${s.title}. ${s.note}${s.id === "session" && !d.rEvenY ? " Here R has odd y, so each signer negates its secret nonces when it signs." : ""}`,
     desc: describeSession(d, i, true),
     draw: (ids) => <Scene d={d} upto={i} reveal ids={ids} W={W} y0={4} secrets />,
   }));
   return (
     <>
-      <Storyboard id="a14-story" title={`A signing session, case ${fixture.caseIndex}`} width={W} height={H} frames={frames} />
+      <Storyboard id="a14-story" title="One session, stage by stage" width={W} height={H} frames={frames} />
       <details class="atlas-disclosure">
         <summary>Exact values</summary>
         <p class="atlas-hexlist" style="overflow-wrap:anywhere">{describeSession(d, stages.length - 1, true)}</p>

@@ -16,8 +16,8 @@ export function ChainView({ fixture }: { fixture: DerivedMusig2SessionFixture })
   if (sig.length !== 128) throw new Error(`${fixture.id}: not a 64-byte signature`);
   const ids = idsFor("a14-chain");
   const desc =
-    `Left of the boundary, ${n} signers, each with its own key; the chain does not see them. Right of it, what a key path spend shows: ` +
-    `one 32-byte key, ${d.finalXonly}, and one 64-byte signature, ${sig}. BIP 340 verification accepts the signature for that key and the message, exactly as it would a single signer's.`;
+    `Left of the boundary, ${n} signers; the chain does not see them. Right of it, what a key path spend would show: ` +
+    `one 32-byte key, ${d.finalXonly}, and one 64-byte signature, ${sig}. BIP 340 verification accepts the signature for that key and the message, exactly as it would a single signer's. The message is the vector's 32-byte test message, standing in for a transaction digest; in a real Taproot output the key would usually be tweaked first.`;
   return (
     <>
       <Drawing id="a14-chain" width={344} height={226} title="Many signers, one key, one signature" desc={desc}>
@@ -30,7 +30,7 @@ export function ChainView({ fixture }: { fixture: DerivedMusig2SessionFixture })
         ))}
         <Arrow d={`M128 ${110} H156`} ids={ids} />
         <Boundary x={140} y1={22} y2={212} label="" />
-        <Value at={[166, 14]} text="WHAT THE CHAIN SEES" size={8.5} cls="k-value--label" />
+        <Value at={[166, 14]} text="WHAT A KEY PATH SPEND SHOWS" size={8.5} cls="k-value--label" />
         <KeyGlyph at={[166, 34]} role="public" />
         <Value at={[204, 42]} text="ONE KEY · 32 B" size={8.5} cls="k-value--label" />
         <Value at={[204, 54]} text={short(d.finalXonly)} size={9.5} />
@@ -41,7 +41,7 @@ export function ChainView({ fixture }: { fixture: DerivedMusig2SessionFixture })
         <Value at={[166, 112]} text="ONE SIGNATURE · 64 B" size={8.5} cls="k-value--label" />
         <Arrow d="M246 120 V146" ids={ids} />
         <Lamp at={[246, 162]} state="on" label="BIP 340 VERIFY" />
-        <Value at={[166, 206]} text="NO SIGN OF HOW MANY SIGNED" size={8} cls="k-value--muted" />
+        <Value at={[166, 206]} text="MESSAGE: THE VECTOR'S TEST MESSAGE" size={8} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>

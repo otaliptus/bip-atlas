@@ -50,7 +50,7 @@ export function Scene({ d, upto, reveal, ids, W, y0 = 0, secrets = false }: { d:
   const lines: Array<{ role: Role; text: string; ok?: boolean }> = [];
   if (reached("keys")) lines.push({ role: "public", text: `Q = ${short(d.aggXonly)} (aggregate key)` });
   if (reached("tweaks")) d.tweaks.forEach((t, i) => lines.push({ role: "public", text: `after ${t.xonly ? "x-only" : "plain"} tweak ${i + 1}: ${short(t.resultXonly)}` }));
-  if (reached("round1")) lines.push({ role: "public", text: `aggregate nonce ${short(d.aggnonce[0])} ${short(d.aggnonce[1])}` });
+  if (reached("round1")) lines.push({ role: "public", text: `aggregate nonce R₁ ${short(d.aggnonce[0])} R₂ ${short(d.aggnonce[1])}` });
   if (reached("session")) {
     lines.push({ role: "hash", text: `b ${short(d.b)} · e ${short(d.e)}` });
     lines.push({ role: "public", text: `R = R₁ + b·R₂: ${short(d.R)}` });
@@ -62,22 +62,22 @@ export function Scene({ d, upto, reveal, ids, W, y0 = 0, secrets = false }: { d:
       {d.signers.map((s, i) => {
         const x = 10 + (i % cols) * colW;
         const y = y0 + Math.floor(i / cols) * blockH;
-        const cx = x + 44;
+        const cx = x + 50;
         const items: Array<{ role: Role; text: string; dashed?: boolean; lamp?: boolean }> = [];
-        if (secrets) items.push({ role: "secret", text: "secret key, nonces", dashed: true });
-        if (reached("keys")) items.push({ role: "public", text: `P${i + 1} ${short(s.pubkey)}` }, { role: "hash", text: `a = ${s.coefficient === ONE ? "1 (second key)" : short(s.coefficient)}` });
-        if (reached("round1")) items.push({ role: "public", text: `R₁ ${short(s.pubnonce[0])}` }, { role: "public", text: `R₂ ${short(s.pubnonce[1])}` });
+        if (secrets) items.push({ role: "secret", text: reached("round2") ? "key; nonce used" : reached("round1") ? "secret key, nonce" : "secret key", dashed: true });
+        if (reached("keys")) items.push({ role: "public", text: `P${i + 1} ${short(s.pubkey)}` }, { role: "hash", text: `a = ${s.coefficient === ONE ? "1 (2nd key)" : short(s.coefficient)}` });
+        if (reached("round1")) items.push({ role: "public", text: `own R₁ ${short(s.pubnonce[0])}` }, { role: "public", text: `own R₂ ${short(s.pubnonce[1])}` });
         if (reached("round2")) items.push({ role: "sig", text: `s${i + 1} ${short(s.psig)}`, lamp: true });
         return (
           <g data-signer={i + 1}>
-            <Computer at={[x + 8, y + 4]} label={`signer ${i + 1}`} />
+            <Computer at={[x + 12, y + 4]} label={`signer ${i + 1}`} />
             {items.map((it, k) => (
               <g>
-                <Chip x={cx} y={y + 2 + k * 15} w={colW - 62} role={it.role} text={it.text} dashed={it.dashed} />
-                {it.lamp ? <Lamp at={[cx + colW - 54, y + 8.5 + k * 15]} state={s.psigVerifies ? "on" : "off"} r={4} /> : null}
+                <Chip x={cx} y={y + 2 + k * 15} w={colW - 66} role={it.role} text={it.text} dashed={it.dashed} />
+                {it.lamp ? <Lamp at={[cx + colW - 58, y + 8.5 + k * 15]} state={s.psigVerifies ? "on" : "off"} r={4} /> : null}
               </g>
             ))}
-            <path class="k-leader k-dashed" d={`M${x + 21} ${y + 48} V${tableY - 6}`} marker-end={ids.arrow} />
+            <path class="k-leader k-dashed" d={`M${x + 25} ${y + 48} V${tableY - 6}`} marker-end={ids.arrow} />
           </g>
         );
       })}
