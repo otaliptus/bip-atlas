@@ -57,3 +57,61 @@ Figures are numbered in reading order. "Data" names the fixtures and the derived
 | A15.5 | `sp-input-eligibility.v1` (redraw) | A sorting tray: each vector's inputs as tokens, sorted into "key counts" and "skipped" with the reason. | 5 vectors | eligibility-vectors, input-list, compressed-only, nums |
 | A15.6 | `sp-scan-loop.v1` **new** | The receiver's counter k: P₀ found, P₁ found, P₂ not found, stop (vector 10). | case 10 | scan-loop, multi-output |
 | A15.7 | `sp-labels.v1` **new** | The unlabeled and labeled addresses of vector 12 as ribbons; their shared leading characters (B_scan) outlined. | case 12 | labels, labels-linkable |
+
+## What shipped
+
+All 32 figures in the plan shipped as listed, with three differences:
+- A08.7 is the signature-pays figure and A08.8 the budget tanks: the order was swapped so the explanation comes before the six tanks.
+- In A08.2 the gates are numbered as BIP 342 numbers its steps (1, ·, 2, 3, 4, 4). The leaf-version check is drawn as an unnumbered precondition.
+- MuSig2's opening figure is now the chain view. The key-aggregation figure moved to the "keys" section, so "The figure above" still points at it.
+
+Every recipe in the four chapters has `drawing: true`. `SchnorrWorked`, `TapscriptWorked`, `Musig2Worked` and `SpWorked` are deleted, together with their exports and their `worked` slot lines. Dead card CSS is removed from the four chapters' sections of `atlas.css`. Figure counts:
+
+| Chapter | Hero | Static |
+|---|---|---|
+| Schnorr | 1 | 7 |
+| Tapscript | 1 | 9 |
+| MuSig2 | 1 | 6 |
+| Silent payments | 1 | 6 |
+
+Kit additions, each with tests appended to `kit.test.ts`:
+- `kit/Lamp.tsx`: `Lamp` (a verdict lamp with ✓, ✕ or dashed marks) and `wrapLines`.
+- `kit/Controls.tsx`: `Strip` and `Scrub`, the hero affordances, shared by the four heroes.
+
+Model and derive changes:
+- `packages/models/src/tapscript-budget.ts` holds `BUDGET_BASE` and `SIGOP_COST`. It has no imports, so static figures can use the constants without bundling the recorder and `@noble/curves`. `tapscript.ts` uses and re-exports them.
+- `deriveTapscript` adds `opSuccess` (it throws unless an OP_SUCCESS trace is an immediate success) and `witness.controlHex`. It also labels a non-32-byte key popped by a signature opcode as "N-byte key, unknown type".
+- `deriveSp` now throws when the sender has no shared secret for the scan key it pays, where it used to fall back to `""`.
+- `deriveMusig2PsigChecks` writes the verify formula with g′.
+
+## Independent reviews
+
+Each chapter had one fresh read-only reviewer. Each reviewer read the ledger, the pinned BIP text and vectors, the model, derive, the components and the 2× screenshots. What held up was applied.
+
+| Chapter | Must-fix | Applied (summary) |
+|---|---|---|
+| Schnorr | 2 | (1) Lower-casing turned "R" into "r" in the text equivalents; the status and desc now use stage notes without changing case. (2) "Signed m" was wrong for invalid vectors; it now reads "Own m". Should-fix: V1's lane marked "(no comment)"; a legend in the narrow lanes; the message-control paragraph moved under the hero; computed claims cited; inputs bus in A06.1; lamps out of the lanes; "not used by Verify". |
+| Tapscript | 4 | (1) The tape showed where a run would stop before reaching it; unrun opcodes now stay "ahead" until the end. (2) The hero now shows the signature count, and the witness strip is named after its catalog control. (3) The signature-rule tray keeps "CHECKSIGVERIFY MUST fail" and catches bad arguments (empty key, long n), and the headings say "non-empty sig". (4) Clipping at 375. Should-fix: OP_SUCCESS drawn with no budget in force; gate numbering; control block disclosed; the 33-byte key drawn as a key; Fig. A07.4 cited; MUST scope in the prose; the A08.8 caption no longer claims what is not drawn. |
+| MuSig2 | 0 | Should-fix: the aggregate nonce's halves named R₁ and R₂ (prose too), with signers' points marked "own"; the secret card follows the session; the zeroing rule kept at MAY; the chain view labelled as what a key path spend *would* show; neutral psig chips with "checked as signer N"; g′; the pointer to Fig. A14.4; narrow collisions; titles. |
+| Silent payments | 1 | (1) The sender panel showed the label number m, which only b_scan can recover; it is removed, with a test. Should-fix: label matches show the output actually found; input_hash·A moved to the public column; sender output notes and status; the checksum and the shared character marked in the address ribbon; the labels guard uses ceil; hero claims (`sum-inputs`, `input-hash`, `nums`, `goals`); prose P_k now says "B_m for a labeled address". |
+
+Not applied:
+- **Test helpers copy derive (Tapscript, Silent payments).** The tests rebuild derived fixtures from the models, as the pilots do. They do not import `derive.ts`, because importing it would pull it into `pnpm check`, which does not typecheck it today.
+- **Sender P subscripts with several scan-key groups (Silent payments).** No vector has several groups; the hero now throws if one ever does.
+- **Observer-view vector names (Silent payments).** The vector chooser names the test case. This is test-vector naming outside the drawing, not observer knowledge.
+
+## Checks
+
+- **Tests and build:** `pnpm test` passes (921 vitest + 36 Python), and so do `pnpm check` and `pnpm build`. New figure tests:
+  - `schnorr-figures.test.ts`, `tapscript-figures.test.ts`, `musig2-figures.test.ts` and `silentpayments-figures.test.ts` cover values against independent model runs, no-JS heroes, failure states and leak checks. The leak checks: the observer and sender views of the silent-payment hero, and no secret values in MuSig2.
+  - The prose-number tests were updated where a pointer sentence changed.
+- **Screenshots:** `review/screenshots/batch3/` holds 60 shots: every figure at 1440, two hero states, 768 and 375 heroes, two dense figures at 375, and the no-JS hero. `tools/screenshots.mjs` reported no overflow, no console errors and no external requests at every step. 2× element shots of every figure at 1440 and 375 were checked by eye while building.
+- **Accessibility:** `tools/a11y-tablet-audit.mjs` with axe-core ran at 768 and 1024. axe found no violations for each hero (JS), each page (JS) or each page (no JS). The keyboard tab order is reversible: Schnorr 9 stops, Tapscript 13, MuSig2 11, Silent payments 8. There was no overflow or clipping at either width.
+- **Client JS:** the gzip-9 total across `dist/_astro/*.js` went from 50.5 KB (base `9e386e5`, measured the same way) to 56.2 KB, under the 60 KB limit. That is +5.7 KB, above the ~2 KB this batch was given. The new heroes carry full text equivalents and drawings, and the four old card heroes were smaller.
+  - The first build was at 69.9 KB: the tapscript static figures imported `@bip-atlas/models/tapscript`, whose side effects pulled `@noble/curves` into the shared island chunk. Moving the constants out fixed this.
+
+## Not done
+
+- **No live screen-reader session**, and Chromium only.
+- **Bundle budget:** the four heroes' bundle growth (+5.7 KB) exceeds the batch allowance. The obvious next cut is lighter text equivalents. That would weaken the full-text-equivalent rule, so it was not done without asking.
+- **Human sign-off:** none yet.
