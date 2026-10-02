@@ -16,6 +16,12 @@ import {
   PsbtEnvelope,
   PsbtLayout,
   UnknownFields,
+  PsbtCombine,
+  PsbtFinalize,
+  PsbtRecords,
+  PsbtRoleStory,
+  SignerDisplay,
+  UtxoCheck,
   RECIPE_MAP,
   SeedDerivation,
   EntropyBits,
@@ -35,7 +41,6 @@ import {
   AmountStory,
   Bip32Worked,
   AddressWorked,
-  PsbtWorked,
   SchnorrWorked,
   TapscriptWorked,
   P2shWorked,
@@ -204,6 +209,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
   {figure.recipe === "psbt-envelope.v1" && <PsbtEnvelope client:visible fixture={trace[0]} figureId={figureId} />}
   {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
+  {figure.recipe === "psbt-records.v1" && <PsbtRecords fixture={trace[0]} />}
+  {figure.recipe === "psbt-role-story.v1" && <PsbtRoleStory fixture={trace[0]} />}
+  {figure.recipe === "psbt-signer-display.v1" && <SignerDisplay fixture={trace[0]} />}
+  {figure.recipe === "psbt-utxo-check.v1" && <UtxoCheck fixture={trace[0]} />}
+  {figure.recipe === "psbt-combine.v1" && <PsbtCombine fixture={trace[0]} />}
+  {figure.recipe === "psbt-finalize.v1" && <PsbtFinalize fixture={trace[0]} />}
   {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
   {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
   {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
@@ -251,7 +262,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
-      {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}

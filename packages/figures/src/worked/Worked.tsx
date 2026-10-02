@@ -9,7 +9,6 @@ import type {
   AddressFixture,
   DerivedBip32Fixture,
   DerivedMnemonicFixture,
-  DerivedPsbtTraceFixture,
   DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
   DerivedTapscriptFixture,
@@ -96,41 +95,6 @@ export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
       steps={steps}
       label="An address exploded into prefix, version, program and checksum, then a one-character typo."
       source={<>Source: BIP 173/350 test vectors; checked by the tested bech32 model at build time.</>}
-    />
-  );
-}
-
-/* ---------- BIP 174 ---------- */
-export function PsbtWorked({ fixture: f }: { fixture: DerivedPsbtTraceFixture }) {
-  const steps: WorkedStep[] = f.derived.states.map((s, i) => {
-    const records = s.maps.flatMap((m) => m.records);
-    const added = records.filter((r) => r.status === "added");
-    const removed = s.maps.reduce((n, m) => n + m.removed.length, 0);
-    const counts = [...added.reduce((m, r) => m.set(r.name, (m.get(r.name) ?? 0) + 1), new Map<string, number>())].map(([name, n]) => `${n} ${name} record${n === 1 ? "" : "s"}`);
-    const parent = s.basedOn.length === 1 ? f.derived.states.findIndex((x) => x.id === s.basedOn[0]) : -1;
-    const parallel = parent >= 0 && parent !== i - 1 ? ` Works on state ${parent + 1}, in parallel with ${f.derived.states[i - 1].role}.` : "";
-    return {
-      title: `${s.role} · ${s.bytes} bytes, ${records.length} record${records.length === 1 ? "" : "s"}`,
-      note:
-        i === 0
-          ? "Unsigned transaction in the global map; every input and output map empty."
-          : s.basedOn.length > 1
-            ? `Merges ${s.basedOn.length} PSBTs into one holding every record from each${s.uniqueFrom ? `: ${s.uniqueFrom.map((n, k) => `${n} only in ${f.derived.states.find((x) => x.id === s.basedOn[k])?.role ?? "one copy"}’s copy`).join(", ")}` : ""}.`
-            : `${added.length ? `Adds ${counts.join(", ")}.` : "Adds nothing new."}${removed ? ` Removes ${removed} record${removed === 1 ? "" : "s"}.` : ""}${parallel}`,
-      layer: { size: 0.45 + 0.55 * Math.min(1, records.length / 16), tone: removed ? "hatch" : i === 0 ? "plain" : "wash", cells: Math.min(records.length, 24), highlight: records.map((r, k) => (r.status === "added" && i > 0 ? k : -1)).filter((k) => k >= 0 && k < 24) },
-    };
-  });
-  steps.push({
-    title: `Extractor · network transaction, ${f.derived.extracted.bytes} bytes`,
-    values: [{ label: "txid (byte order as computed)", value: f.derived.extracted.txidHex }],
-    layer: { size: 0.5, tone: "accent" },
-  });
-  return (
-    <WorkedExample
-      intro={<>The <strong>{f.label}</strong>, one published state per layer. Cells are records; filled cells were just added; a hatched layer removed records.</>}
-      steps={steps}
-      label="Each published PSBT state stacked in order, growing as roles add records."
-      source={<>Source: BIP 174 lines {f.steps[0].line}–{f.extracted.line}; parsed and combined by the tested PSBT model.</>}
     />
   );
 }

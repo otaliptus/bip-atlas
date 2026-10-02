@@ -443,12 +443,37 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
   });
   const tx = parseTransaction(f.extracted.hex);
   const m = measureTransaction(tx);
+  // The signer's view: the first state that carries UTXOs (the Updater's).
+  const withUtxos = f.steps.map((s) => parsed.get(s.id)!).find((p) => p.inputs.every((inp) => inp.some((r) => r.keyType === 0x00 || r.keyType === 0x01)));
+  if (!withUtxos) throw new Error(`${f.id}: no state carries a UTXO for every input`);
+  const ins = withUtxos.inputs.map((inp, i) => {
+    const prevout = withUtxos.unsignedTx.inputs[i].prevoutHex;
+    const vout = leU32(prevout.slice(64));
+    const full = inp.find((r) => r.keyType === 0x00);
+    if (full) {
+      const prev = parseTransaction(full.valueHex);
+      const computed = measureTransaction(prev).txidHex;
+      if (computed !== prevout.slice(0, 64)) throw new Error(`${f.id}: input ${i} non-witness UTXO does not hash to its prevout`);
+      const out = prev.outputs[vout];
+      if (!out) throw new Error(`${f.id}: input ${i} prevout index ${vout} is not in its UTXO`);
+      return { index: i, sats: out.valueSats, from: "non-witness-utxo" as const, check: { inputIndex: i, utxoBytes: full.valueHex.length / 2, computedTxidHex: computed, prevoutTxidHex: prevout.slice(0, 64), vout } };
+    }
+    const wit = inp.find((r) => r.keyType === 0x01)!;
+    return { index: i, sats: BigInt(`0x${wit.valueHex.slice(0, 16).match(/../g)!.reverse().join("")}`), from: "witness-utxo" as const, check: null };
+  });
+  const utxoCheck = ins.find((x) => x.check)?.check;
+  if (!utxoCheck) throw new Error(`${f.id}: no input carries a non-witness UTXO`);
+  const outSats = withUtxos.unsignedTx.outputs.reduce((n, o) => n + o.valueSats, 0n);
+  const fee = ins.reduce((n, x) => n + x.sats, 0n) - outSats;
+  if (fee < 0n) throw new Error(`${f.id}: outputs exceed inputs`);
   return {
     ...f,
     derived: {
       states,
       extracted: { bytes: f.extracted.hex.length / 2, txidHex: m.txidHex, wtxidHex: m.wtxidHex, inputs: tx.inputs.length, outputs: tx.outputs.length },
       outputsBtc: tx.outputs.map((o) => btc(o.valueSats)),
+      utxoCheck,
+      amounts: { inputs: ins.map((x) => ({ index: x.index, btc: btc(x.sats), from: x.from })), outputsBtc: withUtxos.unsignedTx.outputs.map((o) => btc(o.valueSats)), feeBtc: btc(fee) },
     },
   };
 }

@@ -480,14 +480,6 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .atlas-ser__key { display: inline-block; inline-size: 0.75rem; block-size: 0.75rem; border: 1px solid var(--manual-ink); margin-inline-end: 0.35rem; vertical-align: -0.1em; }
 
 /* ---------- FIG A03.x segwit drawings ---------- */
-/* .atlas-ser above is still used by other chapters' card figures; .atlas-tx-lab and .atlas-num by the PSBT hero until it is redrawn. */
-.atlas-tx-lab__body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--manual-space-5); align-items: start; }
-.atlas-num { display: inline-grid; place-items: center; min-inline-size: 1.25rem; block-size: 1.25rem; padding-inline: 0.2rem; margin-inline-start: 0.15rem; font-family: var(--manual-code); font-size: 0.6875rem; background: var(--manual-ink); color: var(--manual-paper); border-radius: 0.625rem; }
-.atlas-tx-lab__panel { position: sticky; inset-block-start: 1rem; }
-@media (max-width: 79.99rem) {
-  .atlas-tx-lab__body { grid-template-columns: minmax(0, 1fr); }
-  .atlas-tx-lab__panel { position: static; }
-}
 .k-badge text, .k-badge__t { font-size: 7px !important; font-weight: 600; }
 .k-legend__t { font-size: 8.5px !important; letter-spacing: 0.06em; }
 .k-proj { fill: var(--manual-grid); fill-opacity: 0.35; stroke: var(--atlas-ink); stroke-width: 0.5; vector-effect: non-scaling-stroke; }
@@ -496,52 +488,11 @@ i.atlas-xkey__seg--3 { background: #fff; } i.atlas-xkey__seg--4 { background: va
 .k-value--fail { fill: var(--atlas-ink) !important; font-weight: 600; }
 
 /* ---------- PSBT envelope ---------- */
-.atlas-env { display: grid; gap: var(--manual-space-2); padding: var(--manual-space-3); border: 2px solid var(--manual-ink); background: var(--manual-surface); position: relative; }
-.atlas-env::before { content: ""; position: absolute; inset: 0 0 auto 0; block-size: 0.5rem; background: repeating-linear-gradient(90deg, var(--manual-blue) 0 0.75rem, transparent 0.75rem 1.25rem); opacity: 0.35; }
-.atlas-env__magic { display: flex; gap: 0.6rem; align-items: baseline; margin-block-start: var(--manual-space-2) !important; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-env__magic code { font-size: 0.8125rem !important; background: var(--manual-ink) !important; color: var(--manual-paper); padding: 0.1rem 0.4rem !important; }
-.atlas-env__map { border: 1px solid var(--manual-blue); padding: var(--manual-space-2) var(--manual-space-3); background: var(--manual-paper); }
-.atlas-env__map[data-scope="global"] { border-width: 2px; }
-.atlas-env__map[data-scope="output"] { border-style: dashed; }
-.atlas-env__title { margin: 0 0 0.35rem; font-family: var(--manual-code); font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
-.atlas-env__records { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.atlas-env__record { display: grid; grid-template-columns: 3.25rem minmax(0, auto) auto; grid-template-areas: "type name new" ". reading reading"; gap: 0.1rem 0.5rem; align-items: baseline; inline-size: 100%; padding: 0.3rem 0.4rem; background: var(--manual-surface); border: 1px solid var(--manual-grid); text-align: start; font: inherit; color: inherit; font-size: 0.875rem; }
-button.atlas-env__record { cursor: pointer; min-block-size: 2.5rem; }
-button.atlas-env__record:hover { border-color: var(--manual-blue); }
-.atlas-env__record[aria-pressed="true"] { border: 2px solid var(--manual-ink); }
-.atlas-env__record[data-status="added"] { background: var(--manual-blue-wash); border-color: var(--manual-blue); }
-.atlas-env__record[data-status="removed"] { opacity: 0.55; text-decoration: line-through; border-style: dashed; }
-.atlas-env__type { grid-area: type; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-blue-dark); }
-.atlas-env__name { grid-area: name; font-weight: 500; }
-.atlas-env__new { grid-area: new; justify-self: end; font-family: var(--manual-code); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 0.3rem; border: 1px solid currentColor; color: var(--manual-blue-dark); }
-.atlas-env__record[data-status="removed"] .atlas-env__new { color: var(--atlas-edit); }
-.atlas-env__reading { grid-area: reading; font-size: 0.8125rem; color: var(--manual-muted); }
-.atlas-env__kv { grid-area: reading; font-size: 0.75rem !important; overflow-wrap: anywhere; word-break: break-all; background: none !important; padding: 0 !important; }
-.atlas-env__empty { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); padding: 0.2rem 0; }
-.atlas-env__foot { font-size: 0.8125rem; color: var(--manual-muted); }
-.atlas-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.atlas-roles__step { display: inline-flex; align-items: center; gap: 0.4rem; min-block-size: 2.5rem; padding: 0.3rem 0.65rem 0.3rem 0.35rem; border: 1px solid var(--manual-rule); background: var(--manual-surface); font-family: var(--manual-code); font-size: 0.8125rem; cursor: pointer; }
-.atlas-roles__step .atlas-num { margin: 0; background: var(--manual-muted); }
-.atlas-roles__step[aria-current="step"] { border: 2px solid var(--manual-ink); background: var(--manual-blue-wash); }
-.atlas-roles__step[aria-current="step"] .atlas-num { background: var(--manual-blue); }
-.atlas-psbt-lab__body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--manual-space-5); align-items: start; }
-.atlas-psbt-lab__detail { position: sticky; inset-block-start: 1rem; }
-.atlas-trace-static { display: grid; gap: var(--manual-space-3); padding-inline-start: 1.5rem; }
-.atlas-trace-static p { font-size: 0.9375rem; margin-block-start: 0.25rem !important; }
-.atlas-trace-static__line { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-unknown { display: grid; gap: var(--manual-space-2); }
-.atlas-unknown__inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--manual-space-3); }
-.atlas-unknown__out { border-width: 2px; }
-.atlas-env__record[data-known="false"] .atlas-env__name { color: var(--manual-warning); }
-@media (max-width: 63.99rem) {
-  .atlas-psbt-lab__body { grid-template-columns: minmax(0, 1fr); }
-  .atlas-psbt-lab__detail { position: static; }
-}
-@media (max-width: 47.99rem) {
-  .atlas-unknown__inputs { grid-template-columns: minmax(0, 1fr); }
-  .atlas-env__record { grid-template-columns: 2.75rem minmax(0, 1fr) auto; }
-}
-.atlas-unknown .atlas-env__record { grid-template-columns: 4.5rem minmax(0, auto) auto; }
+.k-card__t { font-size: 9px !important; letter-spacing: 0.06em; font-weight: 500; }
+.k-card__type, .k-card__empty { font-size: 9px !important; fill: var(--manual-muted) !important; }
+.k-card__name { font-size: 9px !important; }
+.k-card__type--on { fill: #ffffff !important; font-weight: 500; }
+.k-card__tag { font-size: 8.5px !important; fill: var(--manual-muted) !important; letter-spacing: 0.04em; }
 .atlas-method li, .atlas-method p { overflow-wrap: anywhere; }
 
 /* ---------- schnorr (BIP 340) ---------- */

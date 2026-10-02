@@ -1,188 +1,223 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import type { DerivedPsbtTraceFixture, PsbtRecordView } from "../types";
+import { Arrow, Cells, Computer, Drawing, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import type { DerivedPsbtTraceFixture, PsbtRecordView, PsbtStateView } from "../types";
+import { MapCard, cardHeight, hex2, mapTitle, shortName, shortRole, type CardRow } from "./cards";
 
 interface Props {
   fixture: DerivedPsbtTraceFixture;
   figureId: string;
+  /** Starting step (index into the trace, the extractor last); the no-JS render uses `noJsStep`. */
+  initial?: { step: number; compare: Compare };
 }
 
 type Compare = "step" | "creator";
 
-const title = (scope: string, index: number) => (scope === "global" ? "Global" : `${scope === "input" ? "Input" : "Output"} ${index}`);
-const short = (hex: string) => (hex.length > 40 ? `${hex.slice(0, 24)}…${hex.slice(-8)}` : hex || "—");
 const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
+const MAGIC = ["70", "73", "62", "74", "ff"];
 
 /**
- * psbt-envelope.v1 — the PSBT chapter's hero figure.
+ * psbt-envelope.v1 — the PSBT chapter's hero (drawing-first).
  *
- * Replays the role trace published in BIP 174's test vectors. Every state is a
- * published PSBT, parsed by the tested model; the combiner step and the final
- * extraction were checked against the published bytes at build time. Nothing is
- * signed, uploaded, or broadcast here.
+ * The roles of BIP 174's published trace drawn as computers in a row (the
+ * two signers both start from the second Updater's PSBT), and below them the
+ * envelope itself: the magic bytes and one card per key-value map. A stepper
+ * moves the envelope from hand to hand; records a role added are outlined
+ * and dotted, records the finalizer cleared are hatched. A strip compares
+ * with the previous state or with the Creator's. Every state is a published
+ * PSBT parsed by the tested model; nothing is signed or broadcast.
  */
-export function PsbtEnvelope({ fixture, figureId }: Props) {
+export function PsbtEnvelope({ fixture, figureId, initial }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const { states, extracted } = fixture.derived;
   const steps = [...states.map((s) => ({ id: s.id, role: s.role })), { id: "extractor", role: "Transaction Extractor" }];
-  const [at, setAt] = useState(0);
-  const [compare, setCompare] = useState<Compare>("step");
-  const [picked, setPicked] = useState<string | null>(null);
-
+  const combinerAt = states.findIndex((s) => s.basedOn.length > 1);
+  if (combinerAt < 0) throw new Error(`${fixture.id}: the trace has no combiner step`);
+  const [step, setStep] = useState(initial?.step ?? 0);
+  const [compare, setCompare] = useState<Compare>(initial?.compare ?? "step");
+  // Without JavaScript: the combiner's state, where every field is present at once.
+  const at = hydrated || initial ? step : combinerAt;
   const isExtract = steps[at].id === "extractor";
-  const state = isExtract ? null : states[at];
+  const state: PsbtStateView = isExtract ? states[states.length - 1] : states[at];
   const creator = new Set(states[0].maps.flatMap((m) => m.records).map(sig));
-  const statusOf = (r: PsbtRecordView & { status: string }) => (compare === "creator" ? (creator.has(sig(r)) ? "kept" : "added") : r.status);
-  const allRecords = state ? state.maps.flatMap((m) => m.records) : [];
-  const detail = picked ? allRecords.find((r) => sig(r) === picked) ?? null : null;
-  const added = allRecords.filter((r) => statusOf(r) === "added").length;
-  const removed = state ? state.maps.reduce((n, m) => n + m.removed.length, 0) : 0;
+  const markOf = (r: PsbtRecordView & { status: string }): CardRow["mark"] =>
+    isExtract ? undefined : compare === "creator" ? (creator.has(sig(r)) ? undefined : "new") : r.status === "added" && at > 0 ? "new" : undefined;
+  const rowsOf = (m: PsbtStateView["maps"][number]): CardRow[] => [
+    ...m.records.map((r) => ({ r, mark: markOf(r) })),
+    ...(compare === "step" && !isExtract ? m.removed.map((r) => ({ r, mark: "removed" as const })) : []),
+  ];
+  const all = state.maps.flatMap((m) => m.records);
+  const added = all.filter((r) => markOf(r) === "new");
+  const removed = state.maps.reduce((n, m) => n + m.removed.length, 0);
+  const roleOf = (id: string) => steps.find((x) => x.id === id)!.role;
 
-  const go = (i: number) => {
-    setAt(Math.max(0, Math.min(steps.length - 1, i)));
-    setPicked(null);
+  const status = isExtract
+    ? `Transaction Extractor: every input has final scripts, so it builds the ${extracted.bytes}-byte network transaction. That is no longer a PSBT.`
+    : state.basedOn.length === 0
+      ? `Creator: the envelope holds the unsigned transaction and one empty map per input and output, ${state.bytes} bytes.`
+      : state.uniqueFrom && compare === "step"
+        ? `${state.role}: adds nothing of its own. It merges ${state.uniqueFrom.map((n, i) => `${n} field${n === 1 ? "" : "s"} only ${roleOf(state.basedOn[i])} had`).join(" and ")}; ${state.bytes} bytes.`
+        : `${state.role}: ${added.length} field${added.length === 1 ? "" : "s"} new${compare === "creator" ? " since the Creator" : ""}${compare === "step" && removed ? `, ${removed} cleared` : ""}; ${state.bytes} bytes.${state.basedOn.length === 1 && at > 0 && state.basedOn[0] !== steps[at - 1].id ? ` It starts from the PSBT of ${shortRole(state.basedOn[0], roleOf(state.basedOn[0]))}, not of ${shortRole(steps[at - 1].id, steps[at - 1].role)}.` : ""}`;
+
+  const describe = () =>
+    `${status} ` +
+    (isExtract
+      ? `Network transaction: ${extracted.inputs} inputs, ${extracted.outputs} outputs, txid ${extracted.txidHex}.`
+      : `Maps: ${state.maps.map((m) => `${mapTitle(m.scope, m.index)}: ${rowsOf(m).map(({ r, mark }) => `${shortName(r)}${mark === "new" ? " (new)" : mark === "removed" ? " (cleared)" : ""}`).join(", ") || "empty"}`).join("; ")}.`);
+
+  /** The role track: computers left to right, signers side by side, the fork drawn as arcs. */
+  const track = (ids: DrawingIds, wide: boolean) => {
+    const per = wide ? steps.length : 4;
+    const dx = wide ? 76 : 80;
+    const x0 = wide ? 20 : 18;
+    const pos = (i: number) => ({ x: x0 + (i % per) * dx, y: (wide ? 22 : 8) + Math.floor(i / per) * 56 });
+    const idx = (id: string) => steps.findIndex((s) => s.id === id);
+    return (
+      <g class="k-track">
+        {steps.map((s, i) => {
+          const p = pos(i);
+          const cur = i === at;
+          return (
+            <g data-step={s.id} data-current={cur ? "true" : undefined} class={i > at ? "k-faded" : undefined}>
+              {cur ? <rect class="k-outline k-cell--em" x={p.x - 14} y={p.y - 5} width="54" height="52" style="fill:none" /> : null}
+              <Computer at={[p.x, p.y]} label={shortRole(s.id, s.role)} />
+            </g>
+          );
+        })}
+        {wide
+          ? steps.slice(1).map((s, i) => {
+              const k = i + 1;
+              const st = states[k];
+              const from = st ? st.basedOn.map(idx) : [k - 1];
+              return from.map((f) => {
+                const a = pos(f), b = pos(k);
+                return b.x - a.x === dx ? (
+                  <Arrow d={`M${a.x + 30} ${a.y + 10} H${b.x - 4}`} ids={ids} />
+                ) : (
+                  <Arrow d={`M${a.x + 13} ${a.y - 2} C${a.x + 13} ${a.y - 14}, ${b.x + 13} ${b.y - 14}, ${b.x + 13} ${b.y - 4}`} ids={ids} />
+                );
+              });
+            })
+          : null}
+      </g>
+    );
   };
 
-  if (!hydrated) {
-    // Static equivalent: every step with what it added or removed.
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const W = wide ? 640 : 330;
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const top = wide ? 96 : 132;
+    const x0 = wide ? 20 : 15;
+    const maps = state.maps;
+    // Card placement: wide, one row of five; narrow, global on top, then inputs, then outputs in pairs.
+    const place = wide
+      ? maps.map((_, k) => ({ x: x0 + k * 124, y: top + 26, w: 120 }))
+      : (() => {
+          const out: Array<{ x: number; y: number; w: number }> = [];
+          let y = top + 26;
+          const groups = [maps.filter((m) => m.scope === "global"), maps.filter((m) => m.scope === "input"), maps.filter((m) => m.scope === "output")];
+          for (const g of groups) {
+            const h = Math.max(...g.map((m) => cardHeight(rowsOf(m).length)));
+            g.forEach((_, k) => out.push({ x: x0 + k * 152, y, w: g.length === 1 ? 300 : 148 }));
+            y += h + 8;
+          }
+          return out;
+        })();
+    const bottom = Math.max(...maps.map((m, k) => place[k].y + cardHeight(rowsOf(m).length)));
+    const footY = bottom + 22;
+    const H = footY + (isExtract ? 52 : 28);
     return (
-      <div class="atlas-lab atlas-psbt-lab" data-hydrated="false">
-        <p class="atlas-lab__static-note">
-          Static view: what each role in BIP 174’s published trace adds or removes. With JavaScript you can step through
-          the envelope and inspect each field.
-        </p>
-        <ol class="atlas-trace-static">
-          {states.map((s) => {
-            const recs = s.maps.flatMap((m) => m.records.filter((r) => r.status === "added").map((r) => `${title(m.scope, m.index)}: ${r.name}`));
-            const gone = s.maps.flatMap((m) => m.removed.map((r) => `${title(m.scope, m.index)}: ${r.name}`));
-            return (
-              <li>
-                <strong>{s.role}</strong> <span class="atlas-trace-static__line">line {s.line}, {s.bytes} bytes</span>
-                {s.basedOn.length === 0 ? <p>Creates the envelope with the unsigned transaction and empty maps.</p> : null}
-                {recs.length ? <p>Adds: {recs.join("; ")}.</p> : null}
-                {gone.length ? <p>Removes: {gone.join("; ")}.</p> : null}
-              </li>
-            );
-          })}
-          <li><strong>Transaction Extractor</strong> <span class="atlas-trace-static__line">line {fixture.extracted.line}</span><p>Produces the {extracted.bytes}-byte network transaction.</p></li>
-        </ol>
-      </div>
+      <Drawing id={id} width={W} height={H} title="One envelope, many hands" desc={describe()}>
+        {track(ids, wide)}
+        <g class={isExtract ? "k-faded" : undefined}>
+          <Cells x={x0} y={top} values={MAGIC} size={16} />
+          <Value at={[x0 + 86, top + 12]} text={`MAGIC “psbt” + 0xff · ${state.bytes} BYTES`} size={8.5} cls="k-value--label" />
+          {maps.map((m, k) => <MapCard x={place[k].x} y={place[k].y} w={place[k].w} title={mapTitle(m.scope, m.index)} rows={rowsOf(m)} hatch={ids.hatch} />)}
+        </g>
+        {isExtract ? (
+          <>
+            <rect class="k-cell k-fill--plain k-cell--em" x={x0} y={footY - 14} width={wide ? 600 : 300} height="20" />
+            <Value at={[x0 + 6, footY]} text={`NETWORK TRANSACTION · ${extracted.bytes} B · ${extracted.inputs} IN · ${extracted.outputs} OUT`} size={8.5} cls="k-value--label" />
+            <Value at={[x0, footY + 24]} text={`txid ${extracted.txidHex.slice(0, 16)}…`} size={9.5} cls="k-value--hash" />
+          </>
+        ) : (
+          <g>
+            <rect class="k-cell k-mark--plain" x={x0} y={footY - 9} width="10" height="10" />
+            <Value at={[x0 + 16, footY]} text={compare === "creator" ? "NEW SINCE THE CREATOR" : "NEW IN THIS STEP"} size={8.5} cls="k-value--label" />
+            <rect class="k-cell k-dashed" x={x0 + (wide ? 170 : 150)} y={footY - 9} width="10" height="10" style={`fill:${ids.hatch}`} />
+            <Value at={[x0 + (wide ? 186 : 166), footY]} text="CLEARED BY THIS STEP" size={8.5} cls="k-value--label" />
+            {wide ? (
+              <>
+                <rect class="k-cell k-fill--sig" x={x0 + 350} y={footY - 9} width="10" height="10" />
+                <Value at={[x0 + 366, footY]} text="SIGNATURE" size={8.5} cls="k-value--label" />
+                <rect class="k-cell k-fill--public" x={x0 + 450} y={footY - 9} width="10" height="10" />
+                <Value at={[x0 + 466, footY]} text="KEYED BY A PUBLIC KEY" size={8.5} cls="k-value--label" />
+              </>
+            ) : null}
+          </g>
+        )}
+      </Drawing>
     );
-  }
+  };
+
+  const go = (i: number) => setStep(Math.max(0, Math.min(steps.length - 1, i)));
+  const newRecs = isExtract ? [] : all.filter((r) => markOf(r) === "new");
 
   return (
-    <div class="atlas-lab atlas-psbt-lab" data-hydrated="true" onClickCapture={holdFocus}>
-      <ol class="atlas-roles" aria-label="Roles in the published trace">
-        {steps.map((s, i) => (
-          <li>
-            <button type="button" class="atlas-roles__step" aria-current={i === at ? "step" : undefined} onClick={() => go(i)}>
-              <span class="atlas-num">{i + 1}</span>
-              {s.role}
-            </button>
-          </li>
-        ))}
-      </ol>
-      <div class="atlas-lab__controls">
-        <div class="atlas-lab__buttons" role="group" aria-label="Advance through the trace">
-          <button type="button" class="manual-plate-button" onClick={() => go(at - 1)} disabled={at === 0}>← Previous role</button>
-          <button type="button" class="manual-plate-button" onClick={() => go(at + 1)} disabled={at === steps.length - 1}>Next role →</button>
-        </div>
-        {!isExtract ? (
-          <fieldset class="atlas-segmented">
-            <legend>Mark as new</legend>
-            <label class="atlas-choice">
-              <input type="radio" name={`${figureId}-compare`} checked={compare === "step"} onChange={() => setCompare("step")} />
-              <span>added by this role</span>
-            </label>
-            <label class="atlas-choice">
-              <input type="radio" name={`${figureId}-compare`} checked={compare === "creator"} onChange={() => setCompare("creator")} />
-              <span>added since the Creator</span>
-            </label>
-          </fieldset>
-        ) : null}
-      </div>
-
-      <p class="atlas-lab__status" aria-live="polite">
-        <strong>{steps[at].role}.</strong>{" "}
-        {isExtract
-          ? `Every input now has final scripts, so the extractor builds the ${extracted.bytes}-byte network transaction. It is no longer a PSBT.`
-          : state!.basedOn.length === 0
-            ? `Creates the envelope: the unsigned transaction and one empty map per input and output (${state!.bytes} bytes).`
-            : state!.uniqueFrom && compare === "step"
-              ? `Adds nothing of its own. It merges ${state!.uniqueFrom.map((n, i) => `${n} field${n === 1 ? "" : "s"} only ${steps.find((x) => x.id === state!.basedOn[i])!.role} had`).join(" and ")} · ${state!.bytes} bytes.`
-              : `${added} field${added === 1 ? "" : "s"} marked new${compare === "creator" ? " since the Creator" : removed ? `, ${removed} removed by this role` : ""} · ${state!.bytes} bytes${state!.id === "signer-b" ? " · starts from the updated PSBT, not from Signer A’s" : ""}.`}
-      </p>
-
-      {isExtract ? (
-        <section class="atlas-panel atlas-psbt-lab__final">
-          <h3 class="atlas-panel__title">Network transaction · BIP 174 line {fixture.extracted.line}</h3>
-          <dl class="atlas-tx-lab__sizes">
-            <div><dt>Size</dt><dd>{extracted.bytes} bytes</dd></div>
-            <div><dt>Inputs · outputs</dt><dd>{extracted.inputs} · {extracted.outputs}</dd></div>
-            <div><dt>txid</dt><dd><code>{short(extracted.txidHex)}</code></dd></div>
-            <div><dt>wtxid</dt><dd><code>{short(extracted.wtxidHex)}</code></dd></div>
-          </dl>
-          <p class="atlas-panel__scope">This page only replays the published bytes. It does not broadcast anything.</p>
-        </section>
-      ) : (
-        <div class="atlas-psbt-lab__body">
-          <div class="atlas-env">
-            <p class="atlas-env__magic"><code>70 73 62 74 ff</code> <span>“psbt” + 0xff</span></p>
-            {state!.maps.map((m) => (
-              <section class="atlas-env__map" data-scope={m.scope} aria-label={`${title(m.scope, m.index)} map`}>
-                <h3 class="atlas-env__title">{title(m.scope, m.index)} map</h3>
-                <ul class="atlas-env__records">
-                  {m.records.map((r) => (
-                    <li>
-                      <button
-                        type="button"
-                        class="atlas-env__record"
-                        data-status={statusOf(r)}
-                        aria-pressed={picked === sig(r)}
-                        onClick={() => setPicked(picked === sig(r) ? null : sig(r))}
-                      >
-                        <span class="atlas-env__type">0x{r.keyType.toString(16).padStart(2, "0")}</span>
-                        <span class="atlas-env__name">{r.name}</span>
-                        {statusOf(r) === "added" ? <span class="atlas-env__new">new</span> : null}
-                        <span class="atlas-env__reading">{r.reading}</span>
-                      </button>
-                    </li>
-                  ))}
-                  {(compare === "step" ? m.removed : []).map((r) => (
-                    <li class="atlas-env__record" data-status="removed">
-                      <span class="atlas-env__type">0x{r.keyType.toString(16).padStart(2, "0")}</span>
-                      <span class="atlas-env__name">{r.name}</span>
-                      <span class="atlas-env__new">removed</span>
-                    </li>
-                  ))}
-                  {m.records.length === 0 && m.removed.length === 0 ? <li class="atlas-env__empty">empty</li> : null}
-                </ul>
-              </section>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
+      {hydrated ? (
+        <div class="atlas-hero__controls">
+          <div class="atlas-strip" role="radiogroup" aria-label="Mark as new">
+            {([["step", "Added by this role"], ["creator", "Added since the Creator"]] as const).map(([v, t]) => (
+              <label class="atlas-strip__opt">
+                <input type="radio" name={`${figureId}-compare`} checked={compare === v} onChange={() => setCompare(v)} />
+                <span>{t}</span>
+              </label>
             ))}
           </div>
-          <section class="atlas-panel atlas-psbt-lab__detail" aria-live="polite" aria-label="Field detail">
-            {detail ? (
-              <>
-                <h3 class="atlas-panel__title">{detail.name}</h3>
-                <dl class="atlas-node__fields">
-                  <div><dt>Map</dt><dd>{title(detail.scope, detail.index)}</dd></div>
-                  <div><dt>Key type</dt><dd><code>0x{detail.keyType.toString(16).padStart(2, "0")}</code> {detail.constant ? <code>{detail.constant}</code> : null}</dd></div>
-                  <div><dt>Defined in</dt><dd>{detail.parentBip ? `BIP ${detail.parentBip}` : "no registered type"}</dd></div>
-                  <div><dt>Key data</dt><dd><code title={detail.keyDataHex}>{short(detail.keyDataHex)}</code></dd></div>
-                  <div><dt>Value</dt><dd><code title={detail.valueHex}>{short(detail.valueHex)}</code> ({detail.valueHex.length / 2} bytes)</dd></div>
-                  {detail.reading ? <div><dt>Reads as</dt><dd>{detail.reading}</dd></div> : null}
-                </dl>
-              </>
-            ) : (
-              <p class="atlas-panel__empty">Select a field to inspect its key, value and the BIP that defines it.</p>
-            )}
-          </section>
         </div>
+      ) : (
+        <p class="atlas-hero__static">Static view: the Combiner’s PSBT, where every field is present at once. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.</p>
       )}
-      <p class="atlas-lab__source">
-        Trace: BIP 174 test vectors, lines {states[0].line}–{fixture.extracted.line}. Published test material on testnet keys; never use it for funds.
-      </p>
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      {hydrated ? (
+        <div class="atlas-scrub" role="group" aria-label="Advance through the published trace">
+          <button type="button" class="atlas-scrub__btn" onClick={() => go(step - 1)} disabled={step === 0} aria-label="Previous role">←</button>
+          <input
+            type="range"
+            min={0}
+            max={steps.length - 1}
+            value={step}
+            aria-label="Role in the trace"
+            aria-valuetext={`${step + 1} of ${steps.length}: ${steps[step].role}`}
+            onInput={(e) => go(Number((e.currentTarget as HTMLInputElement).value))}
+          />
+          <button type="button" class="atlas-scrub__btn" onClick={() => go(step + 1)} disabled={step === steps.length - 1} aria-label="Next role">→</button>
+        </div>
+      ) : null}
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>{isExtract ? "Exact identifiers" : `Exact fields marked new (${newRecs.length})`}</summary>
+        <dl class="atlas-hexlist">
+          {isExtract ? (
+            <>
+              <dt>txid (byte order as computed)</dt><dd><code class="atlas-break">{extracted.txidHex}</code></dd>
+              <dt>wtxid</dt><dd><code class="atlas-break">{extracted.wtxidHex}</code></dd>
+            </>
+          ) : (
+            newRecs.map((r) => (
+              <>
+                <dt>{mapTitle(r.scope, r.index)} · {hex2(r.keyType)} {r.name}{r.parentBip ? ` (BIP ${r.parentBip})` : ""}{r.reading ? `: ${r.reading}` : ""}</dt>
+                <dd>key data <code class="atlas-break">{r.keyDataHex || "none"}</code><br />value <code class="atlas-break">{r.valueHex}</code></dd>
+              </>
+            ))
+          )}
+        </dl>
+      </details>
+      <p class="atlas-hero__source">BIP 174 test vectors, lines {states[0].line}–{fixture.extracted.line}: published test material on testnet keys. Parsed, combined and extracted by the tested model.</p>
     </div>
   );
 }
