@@ -154,7 +154,7 @@
     },
     {
      "type": "paragraph",
-     "text": "After the terminator come encrypted packets. The first packet authenticates the garbage already sent, so altering those bytes makes the check fail. An empty version message announces v2; decoy packets may precede it. The responder can send its version in its first flight without waiting for another round trip.",
+     "text": "Encrypted packets follow the terminator. The first packet authenticates the garbage already sent, so a change to those bytes makes authentication fail. An empty version message announces v2. Decoy packets may precede it. The responder can include its version message in its first response without waiting for another round trip.",
      "claims": [
       "terminator-aad",
       "version-packet"

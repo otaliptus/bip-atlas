@@ -8,7 +8,7 @@
   ],
   "specimenLabel": "BIPs 0044 · 0084 · 0086",
   "title": "Where in the tree do wallet keys live?",
-  "dek": "BIP 32 can derive an endless tree of keys from one seed. BIP 44 says which branches a wallet should use, and BIPs 84 and 86 say what each branch pays to.",
+  "dek": "BIP 32 derives a tree of keys from one seed. BIP 44 specifies the wallet’s paths. BIPs 84 and 86 specify paths and output types for SegWit and Taproot.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -16,7 +16,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A seed gives a wallet one master key, and BIP 32 can derive children from it without end. That raises a practical question: if two wallets restore the same seed, where do they look for coins? Without an agreement, each could derive keys in a different corner of the tree and never find the other’s; BIP 84’s author puts the aim as letting different wallets use the same seed seamlessly.",
+        "text": "BIP 32 derives a master key and a tree of child keys from a seed. Two wallets can restore the same seed but search different parts of that tree. Each may then miss the other’s coins. They need a shared path convention. BIP 84’s author identifies this compatibility between wallets as the aim.",
         "claims": [
           "on-bip32",
           "motivation",
@@ -75,20 +75,39 @@
         },
         {
           "type": "paragraph",
-          "text": "Accounts split the keys into independent identities, numbered from 0, so a wallet never mixes coins between them; BIP 44 compares them to bank accounts, one for donations whose addresses are public, one for savings, one for shared expenses. The change level has two values: 0 for the external chain, addresses meant to be seen outside the wallet such as receiving addresses, and 1 for the internal chain that collects change. Below it, addresses are simply numbered from 0.",
+          "text": "Accounts separate keys into independent identities, numbered from 0. A wallet following BIP 44 does not mix coins between accounts. The BIP compares them to bank accounts for donations, savings or shared expenses.",
           "claims": [
-            "account",
+            "account"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The change level uses 0 for the external chain and 1 for the internal chain. External addresses are intended for use outside the wallet, such as receiving payments. Internal addresses receive transaction change. Each chain numbers its addresses from 0.",
+          "claims": [
             "change",
             "index"
           ]
         },
         {
           "type": "paragraph",
-          "text": "BIP 44’s account-discovery procedure finds which accounts have been used: derive account 0, scan its external chain, and move on to the next account only if this one has transactions. That works because software should not create a new account while the previous one has no history. Within a chain, BIP 44 gave the gap limit as 20: after 20 unused addresses in a row, scanning stops, and wallet software should warn a user who tries to hand out an address beyond it. For account discovery, BIP 44 scans only external chains, reasoning that internal chains receive only coins that come from the associated external chains. External-chain history determines which accounts are discovered; recovering their funds also requires finding their internal/change outputs.",
+          "text": "Account discovery starts with account 0 and searches its external chain for transactions. If it finds transactions, it continues with the next account. It stops at the first account with no transaction history. Software should therefore not create a new account while the previous account has no history.",
           "claims": [
             "discovery",
-            "account",
-            "gap-limit",
+            "account"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 44 gave the gap limit as 20: scanning a chain stops after 20 consecutive unused addresses. Wallet software should warn before a user gives out an address beyond that limit.",
+          "claims": [
+            "gap-limit"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The discovery procedure checks only external chains because internal chains receive coins from their associated external chains. This identifies which accounts have been used. Recovering their funds also requires finding their internal/change outputs.",
+          "claims": [
+            "discovery",
             "recovery-change"
           ]
         },
@@ -165,7 +184,7 @@
         },
         {
           "type": "paragraph",
-          "text": "So an account’s extended public key reaches every address the account will ever use, receiving and change alike. The build demonstrates it: from the published account public keys alone, the model re-derives all of the published addresses below them. Sharing an account xpub with a watch-only wallet or a server reveals the account’s whole history and future addresses; on its own, it cannot spend.",
+          "text": "An account’s extended public key can derive every receiving and change address in that account. The model demonstrates this with the published account public keys: it re-derives every published address below them. Sharing an account xpub therefore reveals the account’s address history and future addresses. The xpub alone does not let its holder spend funds.",
           "claims": [
             "xpub-exposure"
           ]
@@ -187,11 +206,17 @@
         },
         {
           "type": "paragraph",
-          "text": "The published values make each step checkable. For BIP 84’s first receiving address, the walk ends at a compressed public key; hashing it gives the 20 bytes that go into the output, and the address is those bytes in bech32. For BIP 86, the same position yields a key whose x coordinate becomes the internal key, and the tweak turns it into the output key the address encodes. Either way the spend is short: BIP 84 expects a signature and the public key in the witness, BIP 86 a signature alone, and both leave the scriptSig empty.",
+          "text": "For BIP 84’s first receiving address, derivation produces a compressed public key. Its hash supplies the 20 bytes in the output, which the address encodes with Bech32. In BIP 86, the derived key’s x coordinate identifies the internal key. A tweak produces the output key encoded in the address.",
           "claims": [
             "vectors",
             "b84",
-            "b86",
+            "b86"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The spending witnesses differ too. BIP 84 expects a signature and public key. BIP 86 expects a signature alone. Both leave the scriptSig empty.",
+          "claims": [
             "spend-layouts"
           ]
         },
@@ -246,7 +271,7 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 84 fills that gap for SegWit version 0. It keeps BIP 44’s structure and changes only the purpose, 84′, which it says indicates the transaction serialization: each key becomes a pay-to-witness-public-key-hash output, 0x0014 followed by the key’s 20-byte hash, encoded as a bech32 address. It also gives extended keys different version bytes, so they print as zpub and zprv instead of xpub and xprv.",
+          "text": "BIP 84 specifies the output type for SegWit version 0. It keeps BIP 44’s path structure and changes only the purpose, 84′. Each key produces a pay-to-witness-public-key-hash output: 0x0014 followed by the key’s 20-byte hash. The address encodes this with Bech32. BIP 84 also assigns different version bytes to extended keys, so they print as zpub and zprv instead of xpub and xprv.",
           "claims": [
             "b84",
             "b84-versions"
@@ -283,7 +308,14 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 86 does the same for Taproot. Purpose 86′ marks keys used as the internal key of a single-key P2TR output. The derived key becomes the internal key, is tweaked with a hash of the key alone, so that, as BIP 341 recommends, the output commits to an unspendable script path rather than to none, and the result goes into a version 1 output, 0x5120 followed by the 32-byte output key. BIP 86 defines no alternate version bytes, and its test vectors print as xprv and xpub.",
+          "text": "BIP 86 specifies the output type for Taproot. Purpose 86′ marks keys used as the internal key of a single-key P2TR output. The wallet derives a tweak by hashing the internal key without a script-tree root, then applies it to obtain the output key. This commits to an unspendable script path, as BIP 341 recommends.",
+          "claims": [
+            "b86"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The wallet puts the result into a version 1 output: 0x5120 followed by the 32-byte output key. BIP 86 defines no alternate version bytes. Its test vectors print as xprv and xpub.",
           "claims": [
             "b86",
             "vectors"
@@ -291,7 +323,7 @@
         },
         {
           "type": "paragraph",
-          "text": "These conventions make recovery possible when a backup preserves only the seed. The wallet still needs to try the right paths and output types. They all use BIP 32 derivation; each convention tells the wallet where to look and, for BIPs 84 and 86, what to build from the keys it finds.",
+          "text": "These conventions help a wallet recover funds from a seed backup. The wallet still needs to search the correct paths and output types. Each convention uses BIP 32 derivation and specifies where to find the keys. BIPs 84 and 86 also specify which outputs to build from them.",
           "claims": [
             "b86-why",
             "easy",

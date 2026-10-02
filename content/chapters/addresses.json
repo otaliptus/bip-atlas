@@ -7,9 +7,9 @@
   ],
   "specimenLabel": "BIP 0173 + 0350",
   "title": "How does an address notice a typing mistake?",
-  "dek": "The last six characters of a bc1 address carry no information at all. They exist to catch mistakes, and the rules around them decide what a wallet must refuse.",
+  "dek": "The last six characters of a bc1 address form a checksum. They help detect typing errors but add no destination data. A decoder checks the checksum and the address format before accepting the address.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
   "opening": {
     "blocks": [
@@ -108,18 +108,18 @@
     },
     {
       "id": "six-characters",
-      "heading": "Six characters that say nothing",
+      "heading": "Six characters for error detection",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The last six characters of the data part are the checksum. They carry no information of their own: remove them and nothing about the destination is lost. Their job is to make almost every string invalid, so that a wrong one is noticed before anyone acts on it.",
+          "text": "The last six characters of the data part are the checksum. They add no information about the destination. A decoder uses them to check the preceding characters. Most possible strings fail this check, which helps the decoder detect typing errors.",
           "claims": [
             "checksum-six"
           ]
         },
         {
           "type": "paragraph",
-          "text": "To check them, a decoder turns each data character into a number from 0 to 31, puts a few numbers derived from the prefix in front, and runs the whole sequence through a short function that BIP 173 calls `polymod`. For a correctly copied Bech32 string, the function returns exactly 1. Any other result means the string is not one an encoder produced.",
+          "text": "The decoder converts each data character to a number from 0 to 31. It places numbers derived from the prefix before these values. It then passes the sequence to a function that BIP 173 calls `polymod`. A correctly encoded Bech32 string produces exactly 1. Any other result means the Bech32 checksum is invalid.",
           "claims": [
             "checksum-computation"
           ]
@@ -154,7 +154,7 @@
         },
         {
           "type": "paragraph",
-          "text": "What this buys is a guarantee, not just good odds. BIP 173 states that the code detects any error affecting at most four characters and has less than a one-in-a-billion chance of missing larger ones. BIP 350's later analysis states the firm part as substitutions: up to four substituted characters are *always* detected. It reports that result for each code checked by its own verifier, so on our reading a decoder that accepts both families does not inherit the guarantee for edits that also change the witness version; BIP 350 calls the v1+-to-v0 case unlikely but hard to analyze.",
+          "text": "BIP 173 states that the code detects any error affecting at most four characters. It gives a less than one-in-a-billion chance of missing larger errors. BIP 350’s later analysis specifies character substitutions: each checksum detects up to four substituted characters when checked by its own verifier. Our reading is that a decoder supporting both families cannot apply this guarantee to edits that also change the witness version. An edit can change the witness version and thus the required checksum family. BIP 350 describes the v1+-to-v0 case as unlikely but hard to analyze.",
           "claims": [
             "bech32-guarantee",
             "substitution-guarantee",
@@ -239,7 +239,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The reason is money, not mathematics. Correction turns an invalid string into a valid one. If more mistakes were made than the code can account for, the valid string it produces is the wrong one, and an incorrect but valid address can lose funds irrecoverably. So implementations should at most point to where an error might be, and should leave correction to the user, who can check the original.",
+          "text": "Automatic correction can produce a valid address for a different destination. This can happen when the number of errors exceeds what the code can correct. Sending funds to the resulting address can cause an irreversible loss. Implementations should at most indicate possible error locations. They should leave correction to the user, who can compare the address with its source.",
           "claims": [
             "no-correction"
           ]
@@ -375,7 +375,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The change also broke something on purpose. Software that only knows Bech32 rejects every Bech32m address. BIP 350 argues that this clean break protects older senders from the insertion weakness, and from implementations that experiments had shown would burn funds sent to version 1 addresses. When it was written, the BIP noted that no wallets were creating version 1 addresses yet.",
+          "text": "Bech32m deliberately requires updated software. Software that only knows Bech32 rejects every Bech32m address. BIP 350 argues that this incompatibility protects older senders from the insertion weakness. It also protects against implementations that experiments had shown would burn funds sent to version 1 addresses. At the time, the BIP noted that no wallets were creating version 1 addresses yet.",
           "claims": [
             "clean-break",
             "history-2020"
@@ -507,7 +507,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Go back to the six characters at the end of the address. They hold no part of the destination. They let software reject a mistyped string: always when at most four characters are substituted and the string is checked against its own family's checksum, and otherwise with odds rather than certainty. The rules around them say what happens next: refuse, point at most to where an error might be, and leave the correction to the user.",
+          "text": "The six checksum characters let software detect errors without adding destination data. Each checksum always detects up to four character substitutions when a string is checked against its own family’s checksum. Other changes have probabilistic guarantees, with the cross-family limits described above. Implementations should reject invalid addresses, indicate possible error locations at most, and leave correction to the user.",
           "claims": [
             "checksum-six",
             "substitution-guarantee",

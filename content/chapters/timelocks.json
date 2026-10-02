@@ -9,9 +9,9 @@
   ],
   "specimenLabel": "BIPs 0065 · 0068 · 0112 · 0113",
   "title": "When is a coin allowed to move?",
-  "dek": "Two fields in every transaction can hold it back: nLockTime by block height or date, nSequence by the age of the coin it spends. Two opcodes let an output insist on them.",
+  "dek": "nLockTime delays a transaction until a specified block height or time. Each input’s nSequence can require a minimum age for the spent output. Script opcodes can enforce these requirements.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
@@ -28,7 +28,7 @@
       },
       {
         "type": "paragraph",
-        "text": "The rules are small, but every one of them hides a condition that is easy to miss. This chapter goes through them field by field, with the checks run on Bitcoin Core’s own test transactions.",
+        "text": "The transaction fields and script opcodes have different jobs. A field can delay one transaction. A script condition can require the transaction to use that field. The examples below check both against Bitcoin Core’s test transactions.",
         "claims": [
           "cltv-rules",
           "csv-rules",
@@ -60,7 +60,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Every transaction ends with a four-byte number, nLockTime. It keeps that transaction from being mined until a given block height or block time has been reached; strictly, a block may include it only once its height, or time, is greater than nLockTime. Nothing about it touches the coins being spent: it is a property of one particular spending transaction.",
+          "text": "Every transaction ends with a four-byte number, nLockTime. When enforced, it prevents inclusion until the block height or applicable block time is greater than that value. The field constrains this spending transaction. It does not prevent a different transaction from spending the same coins.",
           "claims": [
             "nlocktime",
             "last-invalid"
@@ -68,7 +68,7 @@
         },
         {
           "type": "paragraph",
-          "text": "That is why, on its own, it cannot lock anything. BIP 65’s motivation puts it precisely: a transaction with nLockTime set proves a spend is possible later, but nobody can prove the coin is unspendable until then, because a different signed transaction spending it, with no lock at all, may already exist.",
+          "text": "Setting nLockTime does not by itself make the coins unspendable before that time. As BIP 65 explains, another signed transaction may already spend them without a lock. A condition in the output’s script is needed to enforce the delay on the spend.",
           "claims": [
             "not-a-lock"
           ]
@@ -96,7 +96,7 @@
         },
         {
           "type": "paragraph",
-          "text": "There is one more condition, and it is easy to miss. If every input of a transaction has the maximum sequence number, 0xffffffff, nLockTime is not enforced at all. Published transactions show both sides. BIP 143’s native P2WPKH example sets nLockTime to 17 and leaves one input non-final, so no block below height 18 could include it. BIP 174’s final transaction has nLockTime 0 and only final inputs.",
+          "text": "If every input has the maximum sequence number, 0xffffffff, the transaction’s nLockTime is not enforced. BIP 143’s native P2WPKH example sets nLockTime to 17 and leaves one input non-final, so no block below height 18 could include it. BIP 174’s final transaction has nLockTime 0 and only final inputs.",
           "claims": [
             "final-disables",
             "pinned-reading"
@@ -137,14 +137,34 @@
         },
         {
           "type": "paragraph",
-          "text": "The opcode does not look at the chain. It compares its argument with the spending transaction’s nLockTime, and since nLockTime itself must have been reached for that transaction to be mined, the comparison proves the date indirectly. The BIP credits Gregory Maxwell with suggesting this comparison against nLockTime rather than against the current height or time.",
+          "text": "The opcode compares its argument with the spending transaction’s nLockTime. It does not read the current chain height or time. The transaction’s nLockTime must also permit inclusion in the block. Together, these checks enforce the script’s requirement. The BIP credits Gregory Maxwell with suggesting this indirect comparison.",
           "claims": [
             "cltv-indirect"
           ]
         },
         {
           "type": "paragraph",
-          "text": "The checks are few and run in a fixed order. The script fails if the stack is empty, if the argument is negative, if the argument and nLockTime are of different kinds, if the argument is greater than nLockTime, or if the input’s nSequence is 0xffffffff. That last check is the one that stops a spender from switching nLockTime off. Otherwise the opcode behaves as a NOP and the script continues.",
+          "text": "OP_CHECKLOCKTIMEVERIFY rejects the script if any of these conditions applies:",
+          "claims": [
+            "cltv-rules"
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "The stack is empty.",
+            "The argument is negative.",
+            "The argument and nLockTime use different units: block height versus time.",
+            "The argument is greater than nLockTime.",
+            "This input’s nSequence is 0xffffffff."
+          ],
+          "claims": [
+            "cltv-rules"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The last check prevents this input from disabling nLockTime. If all checks pass, execution continues as for a NOP: no further operation occurs at this opcode.",
           "claims": [
             "cltv-rules",
             "final-disables"
@@ -196,7 +216,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The BIP’s examples show what this buys. Its simplest one freezes funds outright: an expiry time, the opcode, a DROP, and then an ordinary pay-to-public-key-hash check, which nobody can spend before the expiry.",
+          "text": "The BIP’s simplest example prevents spending before an expiry time. Its script contains the expiry, OP_CHECKLOCKTIMEVERIFY, a DROP, and an ordinary pay-to-public-key-hash check. The signature check cannot authorize a spend before the expiry requirement is met.",
           "claims": [
             "freeze"
           ]
@@ -217,7 +237,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The bits are laid out carefully. If bit 31 is set, BIP 68 gives the field no meaning (though 0xffffffff still marks the input final for nLockTime). If it is clear, the field is a relative lock-time: bit 22 picks the unit, blocks when clear and 512-second units when set, and the value sits in the low 16 bits. The mask that extracts it, 0x0000ffff, MUST be applied; the bits in between are left for future use.",
+          "text": "If bit 31 is set, BIP 68 does not enforce a relative lock. The value 0xffffffff still marks the input final for nLockTime. When bit 31 is clear, bit 22 selects the relative-lock unit: blocks if clear, or 512-second units if set. The low 16 bits hold the value. The mask 0x0000ffff MUST be applied to extract it. The intervening bits are reserved for future use.",
           "claims": [
             "bip68-disable",
             "bip68-type",
@@ -252,7 +272,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A block-based relative lock of n allows inclusion at the coin’s confirmation height plus n, or later. A time-based lock uses median time past (MTP), not elapsed wall-clock time: the MTP of the candidate spending block’s parent must be at least the MTP of the coin’s confirmation block’s parent plus 512 × n seconds. The starting anchor is the block immediately before the coin confirmed. The coinbase input is exempt.",
+          "text": "A block-based relative lock of n permits inclusion at the coin’s confirmation height plus n, or later. A time-based lock uses median time past (MTP), not elapsed wall-clock time. Its starting value is the MTP of the block immediately before the coin’s confirmation block. Add 512 × n seconds to get the required time. The MTP of the candidate spending block’s parent must reach or exceed that time. The coinbase input is exempt.",
           "claims": [
             "bip68-age",
             "bip68-coinbase"
@@ -260,11 +280,30 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 112 adds the matching opcode, OP_CHECKSEQUENCEVERIFY, in place of NOP3. It compares its argument with the input’s nSequence, after both are masked, so a script branch can require a minimum age of the coin. It fails if the transaction version is below 2, if the input’s own disable flag is set, if the units differ, or if the argument is larger. An argument with bit 31 set makes the opcode a NOP instead, kept for future soft forks.",
+          "text": "BIP 112 replaces NOP3 with OP_CHECKSEQUENCEVERIFY. It lets a script branch require a minimum age for the spent coin. The opcode fails if the stack is empty or the argument is negative. If the argument has bit 31 set, the opcode acts as a NOP, reserved for future soft forks.",
           "claims": [
             "csv-abstract",
             "csv-rules",
             "csv-nop"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Otherwise, the opcode compares the argument with the input’s nSequence after masking both values. It rejects the script if any of these conditions applies:",
+          "claims": [
+            "csv-rules"
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "The transaction version is below 2.",
+            "Bit 31 of the input’s nSequence is set.",
+            "The argument and nSequence use different units.",
+            "The masked argument is greater than the masked nSequence."
+          ],
+          "claims": [
+            "csv-rules"
           ]
         },
         {
@@ -296,7 +335,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The BIP’s examples are escrows and channels. One escrow pays out on two of three signatures at any time, or to Alice alone after 30 days, and its clock starts only when the payment into the escrow confirms. For payment channels, the authors argue a relative lock gives a predictable time to respond to a revoked transaction, where an absolute deadline would force the channel to be closed before it arrives.",
+          "text": "BIP 112 gives escrow and payment-channel examples. One escrow permits spending with two of three signatures at any time, or to Alice alone after 30 days. The delay starts when the payment into the escrow confirms. For channels, the authors argue that a relative lock gives a predictable response period for a revoked transaction. An absolute deadline would instead require closing the channel before that deadline.",
           "claims": [
             "csv-escrow",
             "csv-channels"
@@ -310,7 +349,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A time lock still needs a notion of now. Before BIP 113, the time compared was the including block’s own timestamp. Since block timestamps need not be in order, the authors saw a perverse incentive: a miner could claim a later time to include transactions that by the wall clock had not yet matured, and collect their fees.",
+          "text": "Before BIP 113, time-based nLockTime used the including block’s own timestamp. Block timestamps need not increase in order. The authors identified an incentive for a miner to claim a later time and collect fees from transactions that had not matured by wall-clock time.",
           "claims": [
             "mtp-why"
           ]

@@ -124,7 +124,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "A signing device can give its owner a chance to inspect the payment. How much is being spent? Where is it going? What is the fee? The PSBT carries information about the previous outputs so that a signer can work out those amounts. Derivation paths can also help it recognise change returning to its own wallet.",
+     "text": "A signing device can show its owner the destinations, amounts and fee before signing. The PSBT describes the unspent transaction outputs (UTXOs) that the transaction will spend. These records supply the amounts needed to calculate the fee. Derivation paths can also help the device identify change returning to its own wallet.",
      "claims": [
       "signer-display",
       "change-detection",

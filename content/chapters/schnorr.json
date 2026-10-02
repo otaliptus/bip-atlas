@@ -6,7 +6,7 @@
   ],
   "specimenLabel": "BIP 0340",
   "title": "What does a signature verifier actually check?",
-  "dek": "A BIP 340 verifier receives a public key, a message and 64 bytes of signature. It runs a short list of checks, fixed down to the byte, and any one of them can refuse.",
+  "dek": "A BIP 340 verifier checks a public key, a message and a 64-byte signature. It accepts the signature only if every required check passes.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
@@ -14,7 +14,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "When a wallet shows that a payment was authorized, a program somewhere has run a verifier: a function that takes a public key, a message and a signature, and answers yes or no. It sees no secret key and learns nothing about who pressed a button. It only checks whether the three inputs fit together.",
+        "text": "A signature verifier is a function that checks a public key, a message and a signature. It returns success or failure. It does not receive a secret key or identify the person who requested the signature. Its job is to check the mathematical relationship between the three inputs.",
         "claims": [
           "verify-inputs",
           "verify-steps"
@@ -86,14 +86,14 @@
         },
         {
           "type": "paragraph",
-          "text": "The authors also wanted something stricter than most signature standards provide. For use in consensus, they write, the verification algorithm must be completely specified at the byte level, so that nobody can build a signature that some verifiers accept and others reject. They point to the trouble Bitcoin once had with loosely specified DER parsing. Every check below is therefore an exact test, with nothing left to an implementation’s taste.",
+          "text": "Consensus requires verifiers to agree about which signatures are valid. BIP 340’s authors therefore specify verification at the byte level, including each rejection condition. They cite Bitcoin’s earlier problems with loosely specified DER parsing. An implementation cannot choose different checks and still follow this specification.",
           "claims": [
             "completely-specified"
           ]
         },
         {
           "type": "paragraph",
-          "text": "The 64 bytes split cleanly in two. The first half, *r*, is the x coordinate of a curve point R that the signer committed to. The second half, *s*, is a number. Together they must satisfy one equation, s⋅G = R + e⋅P, where G is the curve’s fixed base point, P is the public key’s point, and e is a hash that binds R, the key and the message together.",
+          "text": "The first 32 bytes, *r*, encode the x coordinate of a curve point R chosen by the signer. The remaining 32 bytes encode a number, *s*. Verification checks the equation s⋅G = R + e⋅P. Here G is the curve’s fixed base point and P is the public key’s point. The challenge e is a hash that binds R, the public key and the message.",
           "claims": [
             "final-scheme"
           ]
@@ -122,7 +122,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 340 writes Verify as a list. First, turn the key into a point: *lift_x* takes the 32 bytes as an x coordinate and returns the curve point with that x and an even y, or fails if the number is too large or no such point exists. Next, read r and s from the signature and fail unless r is below the field size *p* and s is below the curve order *n*.",
+          "text": "Verification starts by converting the public key into a curve point. The function *lift_x* reads the key’s 32 bytes as an x coordinate. It returns the point with that x coordinate and an even y coordinate. It fails if x is too large or no such point exists. The verifier then reads r and s from the signature. It rejects r at or above the field size *p*, and s at or above the curve order *n*.",
           "claims": [
             "verify-steps",
             "lift-x"
@@ -130,7 +130,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Then compute the challenge e, a tagged hash of r, the key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Fail if R is the point at infinity, fail if its y coordinate is odd, and fail if its x coordinate is not r. Success means no step failed.",
+          "text": "Next, compute the challenge e from a tagged hash of r, the public key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Reject the signature if R is the point at infinity, its y coordinate is odd, or its x coordinate differs from r. Accept it only if every check passes.",
           "claims": [
             "verify-steps"
           ]
@@ -223,7 +223,7 @@
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "This chapter draws no curve. Points on secp256k1 are pairs of integers modulo a 256-bit prime, and the smooth curves of textbook pictures are drawn over real numbers. Every value in the figures is computed, not illustrated.",
+          "text": "The figures show computed values and checks instead of a smooth curve. Points on secp256k1 use integer coordinates modulo a 256-bit prime. A textbook curve drawn over the real numbers would not represent those coordinates.",
           "claims": [
             "curve-arithmetic"
           ]
@@ -358,7 +358,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A successful Verify establishes one thing: this signature fits this key and this message under BIP 340’s equation. It does not say what the message means, and BIP 340 asks applications to keep contexts apart, so that a signed message from one application is never accepted as something else, such as a transaction. The authors also note that the security of Schnorr signatures implies they are non-malleable, while ECDSA signatures are inherently malleable.",
+          "text": "Successful verification means that the signature is valid for this public key and message under BIP 340. It does not establish what the message means. BIP 340 says applications should ensure that a message signed for one context is never accepted in a different context. For example, a signed application message should not be accepted as a transaction. The authors also explain that Schnorr signatures are non-malleable under their security assumptions, while ECDSA signatures are inherently malleable.",
           "claims": [
             "verify-steps",
             "domain-separation",

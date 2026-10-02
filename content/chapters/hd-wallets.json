@@ -6,7 +6,7 @@
   ],
   "specimenLabel": "BIP 0032",
   "title": "How can one seed grow an entire wallet?",
-  "dek": "One backup, billions of keys. The trick is a 32-byte companion to every key, and a rule about which branches an extended public key may follow.",
+  "dek": "A seed can reproduce a tree of keys. Each key has a 32-byte chain code. An extended public key can derive public descendants through normal branches, but not hardened branches.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
@@ -59,7 +59,7 @@
         },
         {
           "type": "paragraph",
-          "text": "An ordinary public key cannot reveal its children. To derive them, you also need the chain code: together they form the extended public key.",
+          "text": "A public key alone is not enough to derive child public keys. The derivation also needs the chain code. Together, the public key and chain code form an extended public key, or xpub.",
           "claims": [
             "chain-code",
             "reconstruction"
@@ -97,7 +97,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "To make child number *i*, run HMAC-SHA512 keyed with the parent’s chain code. The 64-byte output splits as the master did. The left half is added to the parent’s private key, modulo the order of the curve, to give the child’s private key. The right half becomes the child’s chain code.",
+          "text": "To derive child number *i*, use the parent’s chain code as the key for HMAC-SHA512. Split the 64-byte output into two halves. Add the left half to the parent’s private key, modulo the curve order, to obtain the child’s private key. The right half becomes the child’s chain code.",
           "claims": [
             "split",
             "ckdpriv-normal"
@@ -162,7 +162,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Because a normal child’s HMAC input is the parent’s public key, someone holding only the extended public key can compute the child’s public key and chain code too: add the public point of the left half to the parent’s public key. BIP 32 notes that both routes give the same child, and that this is exactly what makes normal keys useful.",
+          "text": "Normal derivation uses the parent’s public key in the HMAC input. An extended public key therefore supplies everything needed to derive a normal child’s public key and chain code. Convert the HMAC output’s left half to a public point and add it to the parent’s public key. The right half supplies the child’s chain code. BIP 32 states that public and private derivation produce corresponding keys for the same child.",
           "claims": [
             "ckdpub",
             "equivalence"
@@ -185,7 +185,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Its own example is a webshop. The shop’s server can hold one extended public key and generate a fresh address for every order, without ever holding a key that could spend the payments. Disclosure of that xpub alone reveals incoming payments but does not enable spending the wallet’s existing outputs. Our operational caution is that control of the server can still let an attacker replace the receiving addresses it displays and divert future payments, without deriving a private key.",
+          "text": "BIP 32 gives a webshop as an example. Its server can use an extended public key to generate a fresh address for each order without holding the spending keys. Disclosure of that xpub reveals incoming payments but does not enable spending existing outputs. There is a separate operational risk: an attacker who controls the server can replace the receiving addresses it displays. That can divert future payments without revealing a private key.",
           "claims": [
             "webshop",
             "webserver-breach",
@@ -233,7 +233,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "If normal derivation is so useful, why not use it everywhere? BIP 32 points to a weakness that is easy to miss. An extended public key, together with the private key of any descendant reached from it by normal steps only, is equivalent to the parent’s extended private key, and therefore to every key beneath it.",
+          "text": "Normal derivation has a specific risk. An attacker may obtain a parent xpub and a descendant private key connected to it through normal steps only. Together, these let the attacker recover the parent’s extended private key and derive every key below it.",
           "claims": [
             "weakness"
           ]
@@ -264,7 +264,7 @@
         },
         {
           "type": "paragraph",
-          "text": "This is why BIP 32 uses hardened derivation at the account level. A leak of one account’s private keys then cannot climb past the hardened edge to the master or to other accounts. It is also why BIP 32 says extended public keys must be treated more carefully than ordinary public keys. The risk to funds arises only when an extended public key meets a leaked private key reached from it by normal steps; on its own it reconstructs public keys and nothing more.",
+          "text": "BIP 32 uses hardened derivation at the account level to limit this risk. A leaked account private key cannot reveal the master key or keys in other accounts through this recovery method. BIP 32 therefore requires more care with extended public keys than with ordinary public keys. Recovering a parent private key requires both its xpub and a leaked descendant private key connected through normal steps. The xpub alone derives only public keys.",
           "claims": [
             "hardened-reason",
             "weakness",
@@ -360,7 +360,7 @@
         },
         {
           "type": "paragraph",
-          "text": "From that one value, every node can have 2³¹ normal and 2³¹ hardened children, and every one of them can be recomputed from the seed alone. That is the whole promise of the title: a single backup covers the entire tree.",
+          "text": "Every node can have 2³¹ normal and 2³¹ hardened children. The seed can reproduce every node in the tree, so one seed backup covers all those keys.",
           "claims": [
             "indices",
             "reconstruction",

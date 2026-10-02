@@ -125,11 +125,12 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The first round exchanges public nonces. Each signer generates a secret nonce and shares its public part, which in MuSig2 is two points rather than one. The public points are aggregated. This round can happen before the message or the final group of signers is known.",
+          "text": "A nonce is temporary signing data that must not be reused for another signature. Each signer generates a secret nonce and shares its public part, which in MuSig2 is two points rather than one. The first round exchanges and aggregates these public nonces. This round can happen before the message or the final group of signers is known.",
           "claims": [
             "flow",
             "two-points",
-            "preprocessing"
+            "preprocessing",
+            "nonce-reuse"
           ]
         },
         {

@@ -8,13 +8,13 @@
   "title": "How can a wallet backup become a list of words?",
   "dek": "Twelve ordinary words can stand in for 128 random bits. There is no encryption involved, just counting, a small checksum and a list of 2,048 words.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
   "opening": {
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Many wallets ask you to write down a dozen or two dozen words and keep them somewhere safe. The words are not a password you chose, and nobody composed them as a sentence. BIP 39 describes them as a way to carry computer-generated randomness in a form people can write on paper or read over the telephone.",
+        "text": "Many wallets ask you to record a list of 12 or 24 words and keep it secret. This list is a *mnemonic phrase*. BIP 39 uses it to encode computer-generated randomness in a form that people can write on paper or read aloud. The user does not invent the words as a password.",
         "claims": [
           "purpose",
           "computer-randomness"
@@ -52,7 +52,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Everything starts with entropy: a block of random bits produced by a computer. BIP 39 allows between 128 and 256 bits, in steps of 32. More bits make a stronger backup and a longer sentence.",
+          "text": "The starting value is entropy: random bits produced by a computer. BIP 39 allows between 128 and 256 bits, in steps of 32. More random bits increase resistance to guessing and require a longer mnemonic phrase.",
           "claims": [
             "ent-sizes"
           ]
@@ -235,7 +235,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The list has 2,048 words for a reason: 2,048 is two to the eleventh power, so every word stands for exactly 11 bits, no more and no less. That is what lets the bit string and the sentence convert into each other without anything left over.",
+          "text": "The list has 2,048 words for a reason: 2,048 is two to the eleventh power, so every word stands for exactly 11 bits, no more and no less. The mnemonic phrase therefore represents all the bits in the entropy and checksum.",
           "claims": [
             "split-11",
             "length-table"
@@ -259,7 +259,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The English list was chosen with care. BIP 39 describes an ideal list as one where the first four letters identify each word, where near-pairs such as *build* and *built* or *woman* and *women* are avoided, and which is sorted so software can search it quickly.",
+          "text": "BIP 39 describes the properties of an ideal wordlist. The first four letters should identify each word. Similar pairs such as *build* and *built* or *woman* and *women* should be avoided. Sorting the list lets software search it quickly.",
           "claims": [
             "wordlist-design"
           ]
@@ -274,7 +274,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Other languages exist, but BIP 39 strongly discourages generating sentences from them, because most wallets support only the English list.",
+          "text": "Wordlists exist in other languages. BIP 39 strongly discourages generating mnemonic phrases from them because most wallets support only the English list.",
           "claims": [
             "english-recommend"
           ]
@@ -317,7 +317,7 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 39 does require software to compute the checksum of a sentence and to warn when it is invalid. A warning is the whole of the job: the checksum cannot say which word is wrong.",
+          "text": "BIP 39 requires software to compute the mnemonic phrase’s checksum and warn if it is invalid. The checksum does not identify the incorrect word.",
           "claims": [
             "warn-invalid",
             "short-checksum"
@@ -331,7 +331,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The second half of BIP 39 does not reverse the first, and never recovers the entropy. Instead it feeds the sentence itself into PBKDF2, a deliberately repetitive function: HMAC-SHA512, 2,048 iterations, a 64-byte result. The sentence is the password. The salt is the word `mnemonic` followed by an optional passphrase. Both are normalized to NFKD first.",
+          "text": "Seed derivation uses the mnemonic phrase directly. It does not first recover the original entropy. BIP 39 applies PBKDF2 with HMAC-SHA512, 2,048 iterations and a 64-byte result. The mnemonic phrase supplies the password input. The salt is the word `mnemonic` followed by an optional passphrase. Both inputs are normalized to NFKD first.",
           "claims": [
             "pbkdf2",
             "independent"
@@ -364,7 +364,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Because this step starts from the words rather than the entropy, the seed depends on exactly how the sentence is written. The same entropy written with another wordlist gives a completely different seed, and there is no way back from a seed to a sentence.",
+          "text": "The seed depends on the mnemonic phrase’s text, not just the entropy it represents. Encoding the same entropy with a different wordlist produces a different seed. Seed derivation provides no way to recover the mnemonic phrase from the seed.",
           "claims": [
             "wordlist-dependence",
             "independent"
@@ -387,7 +387,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Notice also what the seed step leaves out. It never checks the checksum and places no constraints on how the sentence is built; clients are free to use their own wordlists or even whole sentence generators, though BIP 39 advises against using sentences its own algorithm did not produce. Software must still compute the checksum with a wordlist and warn if it is invalid.",
+          "text": "The seed-derivation step does not check the checksum or require a particular phrase structure. Clients can use their own wordlists or sentence generators. However, BIP 39 advises against phrases that its encoding algorithm did not produce. Software must still compute the checksum with a wordlist and warn if it is invalid.",
           "claims": [
             "no-structure",
             "independent",
@@ -398,7 +398,7 @@
     },
     {
       "id": "passphrase",
-      "heading": "A passphrase is not a password",
+      "heading": "A passphrase changes the seed",
       "blocks": [
         {
           "type": "paragraph",
@@ -426,7 +426,7 @@
         },
         {
           "type": "paragraph",
-          "text": "That makes it unlike an app’s unlock password, which protects a file on one device and complains when you get it wrong. Mistype a BIP 39 passphrase and nothing complains; the words simply lead somewhere else.",
+          "text": "An app’s unlock password protects a local wallet file, and the app can report an incorrect password. A mistyped BIP 39 passphrase can instead produce a different valid seed. Seed derivation does not report a passphrase error. The resulting wallet may therefore differ from the one the user intended.",
           "claims": [
             "passphrase-not-password"
           ]
@@ -446,18 +446,18 @@
     },
     {
       "id": "next",
-      "heading": "Still not a key",
+      "heading": "From seed to keys",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The 64-byte seed still signs nothing. BIP 39 hands it to BIP 32 or a similar scheme, which grows a whole tree of keys from it. That is the next chapter.",
+          "text": "The 64-byte seed is input for key derivation, not a signing key. BIP 32 or a similar scheme derives the wallet’s keys from it. The next chapter explains that step.",
           "claims": [
             "bip32-next"
           ]
         },
         {
           "type": "paragraph",
-          "text": "It is tempting to call the words a private key. They are not. They encode entropy; the seed is produced by stretching the sentence; keys come from the seed in a further step. All three must stay secret: the words, with the passphrase if one is used, rebuild the seed and every key after it, and the seed alone rebuilds the keys.",
+          "text": "The mnemonic phrase encodes entropy. Seed derivation uses that phrase and the optional passphrase. Key derivation then uses the seed. The phrase and its passphrase, if used, can reproduce the seed and keys. The seed alone can reproduce the keys. Keep all this secret material private.",
           "claims": [
             "two-parts",
             "pbkdf2",
@@ -472,7 +472,7 @@
           "fixtures": [
             "ozone-128"
           ],
-          "caption": "Encoding rewrites the entropy as words; stretching computes a new seed from the words and the passphrase; deriving keys is the next chapter.",
+          "caption": "Encoding represents entropy as a mnemonic phrase. Seed derivation uses the phrase and the passphrase. The next chapter explains key derivation from the seed.",
           "claims": [
             "two-parts",
             "pbkdf2",

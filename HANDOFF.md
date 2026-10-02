@@ -1,6 +1,6 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 2 October 2026, after the editorial and figure revisions. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 2 October 2026, after the clarity revision. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
@@ -21,8 +21,9 @@ Last updated: 2 October 2026, after the editorial and figure revisions. If you w
     | `v2-transport` | 324 |
     | `message-signing` | 322 |
 
-  - Each chapter had an independent technical review before the editorial revisions. The fourteen revised chapters are now `draft-unreviewed`, pending a fresh review; Mnemonics, Addresses, SegWit and Timelocks remain `in-review`. No chapter is marked approved.
+  - Each chapter had an independent technical review before the editorial revisions. Seventeen chapters are now `draft-unreviewed`, pending a fresh review; SegWit remains `in-review`. No chapter is marked approved.
   - **Editorial revisions:** fourteen chapters have tighter prose and fewer repeated figures. Detailed rules remain in disclosures, and all evidence claims remain cited. Records and screenshots: `review/editorial-four-chapters.md`, `review/editorial-descriptors.md`, and `review/editorial-nine-chapters.md`. These author and automated checks do not replace an independent technical review.
+  - **Clarity revision:** nine chapters now use more literal wording, shorter explanations, and clearer terminology. Timelocks has explicit condition lists. See `review/editorial-clarity.md` for scope and checks.
 - **Phase-three sources:**
   - Snapshot: `sources/research-2026-10-01-phase3`, the same `bitcoin/bips` commit, including each BIP's auxiliary vector files.
   - External pinned files: `sources/external/` holds Bitcoin Core v29.0 locktime cases (an excerpt; `tools/extract-locktime-cases.mjs` rebuilds it).
