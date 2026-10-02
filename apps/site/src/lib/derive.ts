@@ -117,6 +117,7 @@ import {
   LOCKTIME_THRESHOLD,
   SEQUENCE_LOCKTIME_MASK,
   SEQUENCE_LOCKTIME_TYPE_FLAG,
+  SEQUENCE_LOCKTIME_GRANULARITY,
   validLastWords,
 } from "@bip-atlas/models";
 import { sha256 } from "@noble/hashes/sha2.js";
@@ -161,6 +162,7 @@ import type {
   PsbtRecordView,
   PsbtTraceFixture,
   TransactionFixture,
+  TxInputView,
   DerivedSchnorrFixture,
   SchnorrDerived,
   TaprootTreeDerived,
@@ -173,6 +175,7 @@ import type {
   TapscriptTraceView,
   DerivedP2shFixture,
   P2shSpendFixture,
+  P2shItemKind,
   SchnorrVectorFixture,
   BfBlockFixture,
   DerivedBfBlockFixture,
@@ -336,12 +339,44 @@ function deriveTransaction(f: TransactionFixture): DerivedTransactionFixture {
     locktime: { from: ["locktime"], note: "copied from the transaction" },
     hashType: { from: [], note: "SIGHASH_ALL, chosen by the signer" },
   };
+  // Per-input view for the drawings, from the reviewed input kinds, checked structurally.
+  const program = s.scriptCodeHex.match(/^1976a914([0-9a-f]{40})88ac$/)?.[1];
+  if (!program) throw new Error(`${f.id}: scriptCode is not the P2WPKH template`);
+  if (f.inputKinds.length !== tx.inputs.length) throw new Error(`${f.id}: one input kind per input expected`);
+  const inputs = tx.inputs.map((inp, k): TxInputView => {
+    const kind = f.inputKinds[k];
+    const witness = tx.witnesses[k] ?? [];
+    const sig = inp.scriptSigHex;
+    const p2wpkh = () => {
+      if (witness.length !== 2) throw new Error(`${f.id}: input ${k} P2WPKH witness must have two items`);
+      if (k !== s.inputIndex || bytesToHex(hash160(hexToBytes(witness[1]))) !== program) throw new Error(`${f.id}: input ${k} key does not hash to the program`);
+    };
+    if (kind.startsWith("P2PK (legacy)")) {
+      const n = parseInt(sig.slice(0, 2), 16);
+      if (!(n >= 1 && n <= 75 && sig.length === 2 + 2 * n) || witness.length) throw new Error(`${f.id}: input ${k} is not a single-push P2PK spend`);
+      return { kind, scriptSigHex: sig, scriptSig: "signature-push", witness, witnessKind: "empty", programHex: null };
+    }
+    if (kind.startsWith("P2WPKH")) {
+      if (sig !== "") throw new Error(`${f.id}: native input ${k} must have an empty scriptSig`);
+      p2wpkh();
+      return { kind, scriptSigHex: sig, scriptSig: "empty", witness, witnessKind: "p2wpkh", programHex: program };
+    }
+    if (kind.startsWith("P2SH-P2WPKH")) {
+      if (sig !== `160014${program}`) throw new Error(`${f.id}: input ${k} scriptSig is not a push of the 22-byte program`);
+      p2wpkh();
+      return { kind, scriptSigHex: sig, scriptSig: "program-push", witness, witnessKind: "p2wpkh", programHex: program };
+    }
+    throw new Error(`${f.id}: input kind "${kind}" is outside the reviewed set`);
+  });
+  const sats = BigInt(s.amountSats);
   return {
     ...f,
     derived: {
       segments: tx.segments,
       measures: measureTransaction(tx),
       digest: { items: digest.items.map((it) => ({ ...it, ...sources[it.id] })), sighashHex: digest.sighashHex },
+      inputs,
+      amountBtc: btc(sats),
     },
   };
 }
@@ -405,6 +440,13 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
   if (combiner && serializePsbt(combinePsbts(combiner.basedOn.map((id) => parsed.get(id)!))) !== combiner.hex) {
     throw new Error(`${f.id}: combining ${combiner.basedOn.join(" + ")} does not reproduce line ${combiner.line}`);
   }
+  // The figures say either order gives the same bytes: check the other order too.
+  if (combiner && serializePsbt(combinePsbts([...combiner.basedOn].reverse().map((id) => parsed.get(id)!))) !== combiner.hex) {
+    throw new Error(`${f.id}: combining in the reverse order does not reproduce line ${combiner.line}`);
+  }
+  const magicHex = f.steps[0].hex.slice(0, 10);
+  if (f.steps.some((s) => s.hex.slice(0, 10) !== magicHex) || magicHex !== "70736274ff") throw new Error(`${f.id}: a state does not start with the PSBT magic`);
+  const reversed = (hex: string) => hex.match(/../g)!.reverse().join("");
   const last = f.steps.at(-1)!;
   if (extractTransaction(parsed.get(last.id)!) !== f.extracted.hex) throw new Error(`${f.id}: extraction differs from line ${f.extracted.line}`);
   const sig = (r: { scope: string; index: number; keyType: number; keyDataHex: string; valueHex: string }) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDataHex}/${r.valueHex}`;
@@ -431,12 +473,39 @@ function derivePsbtTrace(f: PsbtTraceFixture): DerivedPsbtTraceFixture {
   });
   const tx = parseTransaction(f.extracted.hex);
   const m = measureTransaction(tx);
+  // The signer's view: the first state that carries UTXOs (the Updater's).
+  const withUtxos = f.steps.map((s) => parsed.get(s.id)!).find((p) => p.inputs.every((inp) => inp.some((r) => r.keyType === 0x00 || r.keyType === 0x01)));
+  if (!withUtxos) throw new Error(`${f.id}: no state carries a UTXO for every input`);
+  const ins = withUtxos.inputs.map((inp, i) => {
+    const prevout = withUtxos.unsignedTx.inputs[i].prevoutHex;
+    const vout = leU32(prevout.slice(64));
+    const full = inp.find((r) => r.keyType === 0x00);
+    if (full) {
+      const prev = parseTransaction(full.valueHex);
+      const computed = measureTransaction(prev).txidHex;
+      if (computed !== prevout.slice(0, 64)) throw new Error(`${f.id}: input ${i} non-witness UTXO does not hash to its prevout`);
+      const out = prev.outputs[vout];
+      if (!out) throw new Error(`${f.id}: input ${i} prevout index ${vout} is not in its UTXO`);
+      return { index: i, sats: out.valueSats, from: "non-witness-utxo" as const, check: { inputIndex: i, utxoBytes: full.valueHex.length / 2, computedTxidHex: computed, prevoutTxidHex: prevout.slice(0, 64), vout, displayTxidHex: reversed(computed) } };
+    }
+    const wit = inp.find((r) => r.keyType === 0x01)!;
+    return { index: i, sats: BigInt(`0x${wit.valueHex.slice(0, 16).match(/../g)!.reverse().join("")}`), from: "witness-utxo" as const, check: null };
+  });
+  const utxoCheck = ins.find((x) => x.check)?.check;
+  if (!utxoCheck) throw new Error(`${f.id}: no input carries a non-witness UTXO`);
+  if (!pinnedText("bip-0174.mediawiki").includes(`TXID: <tt>${utxoCheck.displayTxidHex}</tt>`)) throw new Error(`${f.id}: the checked txid is not the one BIP 174 lists`);
+  const outSats = withUtxos.unsignedTx.outputs.reduce((n, o) => n + o.valueSats, 0n);
+  const fee = ins.reduce((n, x) => n + x.sats, 0n) - outSats;
+  if (fee < 0n) throw new Error(`${f.id}: outputs exceed inputs`);
   return {
     ...f,
     derived: {
       states,
-      extracted: { bytes: f.extracted.hex.length / 2, txidHex: m.txidHex, wtxidHex: m.wtxidHex, inputs: tx.inputs.length, outputs: tx.outputs.length },
+      extracted: { bytes: f.extracted.hex.length / 2, txidHex: m.txidHex, wtxidHex: m.wtxidHex, inputs: tx.inputs.length, outputs: tx.outputs.length, txidDisplayHex: reversed(m.txidHex) },
+      magicHex,
       outputsBtc: tx.outputs.map((o) => btc(o.valueSats)),
+      utxoCheck,
+      amounts: { inputs: ins.map((x) => ({ index: x.index, btc: btc(x.sats), from: x.from })), outputsBtc: withUtxos.unsignedTx.outputs.map((o) => btc(o.valueSats)), feeBtc: btc(fee) },
     },
   };
 }
@@ -745,9 +814,62 @@ function deriveP2sh(f: P2shSpendFixture): DerivedP2shFixture {
   if (!t.valid) throw new Error(`${f.id}: the recorded spend does not validate`);
   const tx = parseTransaction(f.txHex);
   const wit = tx.witnesses[f.inputIndex] ?? [];
+  const witnessScriptHex = t.kind === "p2sh-p2wsh" ? wit[wit.length - 1] : null;
+  // What each item on the stacks is, checked structurally; anything else stops the build.
+  const itemKinds: Record<string, P2shItemKind> = {};
+  const kindOf = (hex: string): P2shItemKind => {
+    const n = hex.length / 2;
+    if (hex === "") return "empty";
+    if (hex === t.redeemScriptHex) return "redeem script";
+    if (witnessScriptHex && hex === witnessScriptHex) return "witness script";
+    if (hex.startsWith("30") && n === 2 + parseInt(hex.slice(2, 4), 16) + 1) return "signature";
+    if (n === 33 && (hex.startsWith("02") || hex.startsWith("03"))) return "public key";
+    if (n === 20) return "hash";
+    if (n <= 4) return "number";
+    throw new Error(`${f.id}: stack item of ${n} bytes is outside the reviewed kinds`);
+  };
+  for (const s of t.stages) for (const item of [...s.stackBefore, ...s.steps.flatMap((x) => x.stackAfter)]) itemKinds[item] = kindOf(item);
+  if (witnessScriptHex) itemKinds[witnessScriptHex] = kindOf(witnessScriptHex);
+  // A legacy multisig spend, broken three ways and re-run through the model.
+  let failures: DerivedP2shFixture["derived"]["failures"] = null;
+  if (t.kind === "legacy") {
+    const seg = tx.segments.find((g) => g.id === `input.${f.inputIndex}.scriptsig`)!;
+    const withSig = (sig: string) => {
+      const n = sig.length / 2;
+      if (n >= 0xfd) throw new Error(`${f.id}: scriptSig too long for this check`);
+      return tx.segments.map((g) => (g === seg ? n.toString(16).padStart(2, "0") + sig : g.hex)).join("");
+    };
+    const sigHex = tx.inputs[f.inputIndex].scriptSigHex;
+    const redeem = t.redeemScriptHex;
+    const at = redeem.length / 2 - 1;
+    const altered = redeem.slice(0, -2) + (redeem.endsWith("ae") ? "af" : "ae");
+    const ta = traceP2sh(withSig(sigHex.replace(redeem, altered)), f.inputIndex, spk, amount);
+    const tn = traceP2sh(withSig("76" + sigHex), f.inputIndex, spk, amount);
+    const ops = decodeScript(sigHex).map((o) => o.dataHex!);
+    const push = (h: string) => {
+      if (h.length / 2 > 75) throw new Error(`${f.id}: a pushed item over 75 bytes is outside this check`);
+      return h === "" ? "00" : (h.length / 2).toString(16).padStart(2, "0") + h;
+    };
+    if (ops.length !== 4 || ops[0] !== "") throw new Error(`${f.id}: expected OP_0, two signatures and the redeem script`);
+    const ts = traceP2sh(withSig(push(ops[0]) + push(ops[2]) + push(ops[1]) + push(redeem)), f.inputIndex, spk, amount);
+    const failsAt = (x: typeof ta) => x.stages.find((s) => !s.ok)?.id;
+    if (ta.valid || failsAt(ta) !== "hash-match" || tn.valid || failsAt(tn) !== "push-only" || ts.valid || failsAt(ts) !== "redeem") {
+      throw new Error(`${f.id}: a broken spend did not fail where expected`);
+    }
+    const swappedChecks = ts.stages.find((s) => s.id === "redeem")?.steps.find((x) => x.checks)?.checks;
+    if (!swappedChecks?.length) throw new Error(`${f.id}: the swapped spend recorded no signature checks`);
+    failures = {
+      alteredRedeem: { byteIndex: at, fromHex: redeem.slice(-2), toHex: altered.slice(-2), hash160Hex: bytesToHex(hash160(hexToBytes(altered))), failsAt: "hash-match" },
+      nonPush: { opHex: "76", opName: "OP_DUP", failsAt: "push-only" },
+      swapped: { failsAt: "redeem", checks: swappedChecks },
+    };
+  }
   return {
     ...f,
     derived: {
+      itemKinds,
+      witnessScriptHex,
+      failures,
       kind: t.kind,
       valid: t.valid,
       scriptPubKeyHex: spk,
@@ -798,6 +920,25 @@ function deriveTimelockCase(f: TimelockCaseFixture): DerivedTimelockCaseFixture 
   const e = evaluateCoreLockCase(asm, fields, 0);
   if (e.valid !== (f.expected === "valid")) throw new Error(`${f.id}: model says ${e.valid ? "valid" : "invalid"}, Core says ${f.expected}`);
   if ((e.script.opcode === "CHECKLOCKTIMEVERIFY") !== (f.lock === "absolute")) throw new Error(`${f.id}: lock kind does not match the opcode`);
+  // The hero's "change a field": the same case with one field changed, re-run through the model.
+  const iso = (n: number) => new Date(n * 1000).toISOString();
+  const variant = (id: string, label: string, field: "version" | "nLockTime" | "nSequence", patch: Partial<typeof fields>) => {
+    const g = { ...fields, ...patch, sequences: patch.sequences ?? fields.sequences };
+    const r = evaluateCoreLockCase(asm, g, 0);
+    return { id, label, field, version: g.version, nLockTime: g.nLockTime, nSequence: g.sequences[0], nLockTimeIso: iso(g.nLockTime), value16: g.sequences[0] & SEQUENCE_LOCKTIME_MASK, value16Seconds: (g.sequences[0] & SEQUENCE_LOCKTIME_MASK) * 2 ** SEQUENCE_LOCKTIME_GRANULARITY, checks: r.result.checks.map((k) => ({ ...k })), valid: r.valid };
+  };
+  const seq0 = fields.sequences[0];
+  const edits =
+    f.lock === "absolute"
+      ? [
+          variant("locktime-plus", "nLockTime + 1", "nLockTime", { nLockTime: fields.nLockTime + 1 }),
+          variant("final", seq0 === 0xffffffff ? "input made non-final" : "input made final", "nSequence", { sequences: [seq0 === 0xffffffff ? 0xfffffffe : 0xffffffff] }),
+        ]
+      : [
+          variant("version", `version ${fields.version >= 2 ? 1 : 2}`, "version", { version: fields.version >= 2 ? 1 : 2 }),
+          variant("bit31", `the input's bit 31 ${seq0 & 0x80000000 ? "cleared" : "set"}`, "nSequence", { sequences: [(seq0 ^ 0x80000000) >>> 0] }),
+        ];
+  if (fields.nLockTime >= 0xffffffff) throw new Error(`${f.id}: nLockTime + 1 would overflow`);
   return {
     ...f,
     derived: {
@@ -810,6 +951,10 @@ function deriveTimelockCase(f: TimelockCaseFixture): DerivedTimelockCaseFixture 
       nSequence: fields.sequences[0],
       txHex: c.txHex,
       checks: e.result.checks.map((k) => ({ ...k })),
+      nLockTimeIso: iso(fields.nLockTime),
+      value16: fields.sequences[0] & SEQUENCE_LOCKTIME_MASK,
+      value16Seconds: (fields.sequences[0] & SEQUENCE_LOCKTIME_MASK) * 2 ** SEQUENCE_LOCKTIME_GRANULARITY,
+      edits,
       valid: e.valid,
     },
   };

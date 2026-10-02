@@ -137,6 +137,26 @@ export interface TransactionDerived {
     items: Array<{ id: string; label: string; hex: string; from: string[]; note: string }>;
     sighashHex: string;
   };
+  /**
+   * Each input's scriptSig and witness, classified at build time from the
+   * fixture's reviewed input kind and checked structurally (derive throws on
+   * any mismatch): a P2PK scriptSig is one signature push, a nested program
+   * push is 0x00 0x14 + 20 bytes, a P2WPKH witness is [signature, key] with
+   * HASH160(key) equal to the 20-byte program.
+   */
+  inputs: TxInputView[];
+  /** The signed input's spent amount (BIP 143 item 6), in BTC, from the fixture's published value. */
+  amountBtc: string;
+}
+
+export interface TxInputView {
+  kind: string;
+  scriptSigHex: string;
+  scriptSig: "signature-push" | "program-push" | "empty";
+  witness: string[];
+  witnessKind: "p2wpkh" | "empty";
+  /** The 20-byte witness program (key hash) of a P2WPKH input, nested or native. */
+  programHex: string | null;
 }
 
 export type DerivedTransactionFixture = TransactionFixture & { derived: TransactionDerived };
@@ -179,8 +199,18 @@ export interface PsbtStateView {
 
 export interface PsbtTraceDerived {
   states: PsbtStateView[];
-  extracted: { bytes: number; txidHex: string; wtxidHex: string; inputs: number; outputs: number };
+  extracted: { bytes: number; txidHex: string; wtxidHex: string; inputs: number; outputs: number; /** The txid in the byte order BIP 174 and block explorers print (reversed). */ txidDisplayHex: string };
+  /** The five magic bytes every state starts with (derive checks each state). */
+  magicHex: string;
   outputsBtc: string[];
+  /**
+   * The signer's pre-signing check for the first input with a non-witness
+   * UTXO: the double SHA-256 of that previous transaction equals the txid in
+   * the input's prevout (derive throws otherwise).
+   */
+  utxoCheck: { inputIndex: number; utxoBytes: number; computedTxidHex: string; prevoutTxidHex: string; vout: number; /** The same txid in display (reversed) byte order, as BIP 174 prints it. */ displayTxidHex: string };
+  /** What a signer can display, read from the updated PSBT's UTXO records; derive throws on a negative fee. */
+  amounts: { inputs: Array<{ index: number; btc: string; from: "non-witness-utxo" | "witness-utxo" }>; outputsBtc: string[]; feeBtc: string };
 }
 
 export type DerivedPsbtTraceFixture = PsbtTraceFixture & { derived: PsbtTraceDerived };
@@ -385,7 +415,27 @@ export interface P2shDerived {
   /** The serialized witness: item count, each item's length prefix and the items; 0 if empty. */
   witnessBytes: number;
   stages: P2shStageView[];
+  /**
+   * What each stack item is, by its hex, for every item that appears in the
+   * trace. Classified structurally at build time (the redeem or witness
+   * script by equality, a DER signature plus sighash byte by its length
+   * fields, a compressed key by its prefix); derive throws on anything else.
+   */
+  itemKinds: Record<string, P2shItemKind>;
+  /** The witness script of a P2SH-P2WSH spend, else null. */
+  witnessScriptHex: string | null;
+  /**
+   * For a legacy multisig spend, the same spend broken three ways and re-run
+   * through the tested model (derive throws unless each fails where shown).
+   */
+  failures: {
+    alteredRedeem: { byteIndex: number; fromHex: string; toHex: string; hash160Hex: string; failsAt: string };
+    nonPush: { opHex: string; opName: string; failsAt: string };
+    swapped: { failsAt: string; checks: Array<{ sigIndex: number; keyIndex: number | null; ok: boolean }> };
+  } | null;
 }
+
+export type P2shItemKind = "empty" | "signature" | "public key" | "redeem script" | "witness script" | "hash" | "number";
 
 export type DerivedP2shFixture = P2shSpendFixture & { derived: P2shDerived };
 
@@ -418,6 +468,32 @@ export interface TimelockCaseDerived {
   nLockTime: number;
   nSequence: number;
   txHex: string;
+  checks: TimelockCheckView[];
+  valid: boolean;
+  /** nLockTime read as a Unix time (ISO), for the both-readings view. */
+  nLockTimeIso: string;
+  /** Input 0's low 16 bits, and that value read as 512-second units (in seconds). */
+  value16: number;
+  value16Seconds: number;
+  /**
+   * The same case with one field changed, re-run through the tested model at
+   * build time: for CLTV, nLockTime + 1 and the input made final or not; for
+   * CSV, the version flipped between 1 and 2 and bit 31 of nSequence flipped.
+   */
+  edits: TimelockEdit[];
+}
+
+export interface TimelockEdit {
+  id: string;
+  /** What changed, in words (e.g. "nLockTime + 1"). */
+  label: string;
+  field: "version" | "nLockTime" | "nSequence";
+  version: number;
+  nLockTime: number;
+  nSequence: number;
+  nLockTimeIso: string;
+  value16: number;
+  value16Seconds: number;
   checks: TimelockCheckView[];
   valid: boolean;
 }

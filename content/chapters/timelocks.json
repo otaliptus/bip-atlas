@@ -44,7 +44,7 @@
       "fixtures": [
         "bip68-encodings"
       ],
-      "caption": "nLockTime splits its 32 bits at 500,000,000; a relative lock reads the same 16 bits as blocks or as 512-second units, depending on one flag.",
+      "caption": "nLockTime splits its 32 bits at 500,000,000: heights below, Unix times above. A relative lock reads the same 16 bits as blocks or as 512-second units, depending on one flag.",
       "claims": [
         "two-kinds",
         "bip68-type",
@@ -74,6 +74,20 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A10.2",
+          "recipe": "timelock-not-a-lock.v1",
+          "title": "A field that does not lock a coin",
+          "fixtures": [],
+          "caption": "Schematic. A future nLockTime proves a spend is possible later, but another spend of the same coin may already exist; a condition in the coin’s own script closes that gap.",
+          "claims": [
+            "not-a-lock",
+            "nlocktime",
+            "cltv-abstract"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The same field carries two kinds of value. Below a threshold it is a block height; at or above it, a time. BIP 65’s code names the threshold LOCKTIME_THRESHOLD, and Bitcoin Core defines it as 500,000,000, which as a Unix time falls on 5 November 1985. Any height Bitcoin will reach for a very long time sits below that line, and any date worth locking to sits above it.",
           "claims": [
@@ -90,7 +104,7 @@
         },
         {
           "type": "figure",
-          "figure": "A10.2",
+          "figure": "A10.3",
           "recipe": "timelock-pinned-fields.v1",
           "title": "Reading published transactions",
           "fixtures": [
@@ -106,7 +120,7 @@
             "bip68-version",
             "bip68-disable"
           ],
-          "layout": "wide"
+          "layout": "prose"
         }
       ]
     },
@@ -138,7 +152,7 @@
         },
         {
           "type": "figure",
-          "figure": "A10.3",
+          "figure": "A10.4",
           "recipe": "timelock-fields.v1",
           "title": "The lock fields, checked",
           "fixtures": [
@@ -155,7 +169,7 @@
             "core-invalid-118",
             "core-invalid-128"
           ],
-          "caption": "Twelve one-input transactions from Bitcoin Core’s test suite. Each locking script is just an argument and the opcode; change a field and the same tested model re-runs the checks.",
+          "caption": "Twelve one-input transactions from Bitcoin Core’s test suite, each locked by an argument and the opcode (some push a 1 after it). The field changes are run through the same tested model at build time; they are not Core cases.",
           "claims": [
             "core-cases",
             "cltv-rules",
@@ -212,6 +226,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A10.5",
+          "recipe": "timelock-sequence-bits.v1",
+          "title": "Thirty-two bits, three jobs",
+          "fixtures": [
+            "bip68-encodings"
+          ],
+          "caption": "BIP 68’s two largest relative locks as bits: the disable flag, the type flag and the 16 value bits; the rest carry no meaning.",
+          "claims": [
+            "bip68-disable",
+            "bip68-type",
+            "bip68-mask",
+            "bip68-ranges"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Why 512 seconds? The authors chose it because blocks arrive every 600 seconds on average, so either unit covers about the same span with the same bits. BIP 68’s own examples give the limits: up to 65,535 blocks, about 1.25 years, or a time below 33,554,431 seconds, about 1.06 years.",
           "claims": [
@@ -235,6 +266,22 @@
             "csv-rules",
             "csv-nop"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A10.6",
+          "recipe": "timelock-csv-story.v1",
+          "title": "CHECKSEQUENCEVERIFY, check by check",
+          "fixtures": [
+            "core-valid-127"
+          ],
+          "caption": "One of Bitcoin Core’s cases, a time-based relative lock, run check by check by the tested model.",
+          "claims": [
+            "csv-rules",
+            "bip68-mask",
+            "core-cases"
+          ],
+          "layout": "prose"
         },
         {
           "type": "callout",
@@ -277,6 +324,19 @@
             "bip68-type",
             "mtp-hour"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A10.7",
+          "recipe": "timelock-mtp.v1",
+          "title": "Which clock",
+          "fixtures": [],
+          "caption": "Schematic, not chain data: block timestamps need not increase, so locks read the median of the last eleven instead.",
+          "claims": [
+            "mtp",
+            "mtp-why"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

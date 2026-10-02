@@ -181,7 +181,7 @@ describe("the opcodes against Bitcoin Core's pinned cases", () => {
     expect(b112[280]).toContain("CHECKSEQUENCEVERIFY behaves as a NOP");
     const r = checkSequenceVerify(2n ** 31n, { version: 1, nLockTime: 0, sequences: [0xffffffff] }, 0);
     expect(r.ok).toBe(true);
-    expect(r.checks.at(-1)).toMatchObject({ id: "arg-disabled", stopsHere: true });
+    expect(r.checks.at(-1)).toMatchObject({ id: "arg-disabled", stopsHere: true, label: "The argument's disable flag is set: no lock" });
   });
 
   it("fails CSV when the input's own disable flag is set", () => {
@@ -224,7 +224,8 @@ describe("timelocks chapter prose numbers", () => {
   it("restates BIP 68's ranges and the 12-of-51 figure", () => {
     expect(text).toContain("up to 65,535 blocks, about 1.25 years, or a time below 33,554,431 seconds, about 1.06 years");
     expect(text).toContain("Twelve one-input transactions from Bitcoin Core’s test suite");
-    expect(text.match(/"core-(valid|invalid)-\d+"/g)!.length).toBe(12);
+    // Distinct cases: the CSV storyboard reuses one of the hero's twelve.
+    expect(new Set(text.match(/"core-(valid|invalid)-\d+"/g)!).size).toBe(12);
     expect(excerpt.cases.length).toBe(51);
   });
 

@@ -39,10 +39,10 @@
       "fixtures": [
         "native-p2wpkh"
       ],
-      "caption": "The txid covers only the bytes a pre-SegWit node would see. The wtxid covers everything, including the marker, flag and witness. Hashes are shown in the byte order they are computed.",
+      "caption": "The native P2WPKH example from BIP 143, drawn to scale. All of it hashes to the wtxid; without the marker, flag and witness it hashes to the txid. Hashes are shown in the byte order they are computed.",
       "claims": [
         "two-ids",
-        "block-weight",
+        "marker-flag",
         "examples-published"
       ],
       "layout": "prose"
@@ -100,11 +100,43 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A03.2",
+          "recipe": "witness-field.v1",
+          "title": "The witness section, byte by byte",
+          "fixtures": [
+            "native-p2wpkh"
+          ],
+          "caption": "The mixed example’s witness section: an empty field for the ordinary input, then a count, two lengths, a signature and a key for the SegWit input. The key hashes to the program it spends.",
+          "claims": [
+            "witness-format",
+            "empty-witness",
+            "p2wpkh"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Why have a second identifier at all? Because blocks that contain witness data must commit to it too. BIP 141 adds a rule requiring a commitment to the wtxids of a block’s transactions, built like the existing merkle root and recorded in an output of the coinbase transaction. The coinbase’s own wtxid is simply taken to be all zeros.",
           "claims": [
             "wtxid-commitment"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A03.3",
+          "recipe": "witness-commitment.v1",
+          "title": "Two trees in one block",
+          "fixtures": [
+            "native-p2wpkh"
+          ],
+          "caption": "A schematic block of four transactions; the example is not in a real block. The txids feed the header as before; the wtxids, the coinbase’s taken as zeros, feed a commitment in a coinbase output, together with a reserved value.",
+          "claims": [
+            "wtxid-commitment",
+            "committed",
+            "two-ids"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -116,19 +148,23 @@
         },
         {
           "type": "figure",
-          "figure": "A03.2",
+          "figure": "A03.4",
           "recipe": "transaction-anatomy.v1",
           "title": "Which bytes each hash covers",
           "fixtures": [
             "native-p2wpkh",
             "p2sh-p2wpkh"
           ],
-          "caption": "Through the txid lens, the marker, flag and witness fields drop out, and with them the SegWit input’s signature. The ordinary input’s signature sits in its scriptSig, so the txid still covers it.",
+          "caption": "Through the txid lens the marker, flag and witness are hatched out, and with them the SegWit input’s signature. In the first example the ordinary input’s signature sits in its scriptSig, so the txid still covers it. The BIP 143 lens numbers the bytes behind each preimage item.",
           "claims": [
             "two-ids",
             "empty-witness",
             "p2wpkh",
-            "fixture-inputs"
+            "p2sh-nested",
+            "fixture-inputs",
+            "ten-items",
+            "amount",
+            "summary-hashes"
           ],
           "layout": "wide"
         }
@@ -177,11 +213,27 @@
         },
         {
           "type": "paragraph",
-          "text": "The second example in the figure wraps a witness program inside an older P2SH script. Its scriptSig carries the redeem script that contains the program, so that single input has both a scriptSig and a witness.",
+          "text": "The second example wraps a witness program inside an older P2SH script. Its scriptSig carries the redeem script that contains the program, so that single input has both a scriptSig and a witness, as drawn below.",
           "claims": [
             "p2sh-nested",
             "fixture-inputs"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A03.5",
+          "recipe": "nested-input.v1",
+          "title": "One input with a scriptSig and a witness",
+          "fixtures": [
+            "p2sh-p2wpkh"
+          ],
+          "caption": "The P2SH-P2WPKH example’s only input. Its scriptSig pushes a 22-byte redeem script: a version byte and a 20-byte witness program. The witness holds the signature and the key.",
+          "claims": [
+            "p2sh-nested",
+            "p2wpkh",
+            "fixture-inputs"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -222,21 +274,22 @@
         },
         {
           "type": "figure",
-          "figure": "A03.3",
+          "figure": "A03.6",
           "recipe": "weight-meter.v1",
-          "title": "Weight of the two examples",
+          "title": "Bytes into weight",
           "fixtures": [
             "native-p2wpkh",
             "p2sh-p2wpkh"
           ],
-          "caption": "Each base byte counts four times; each witness-related byte, marker and flag included, counts once. The totals are computed from the parsed transactions, not estimated.",
+          "caption": "Both examples on one scale. Each base byte is stretched four times; each witness-related byte, marker and flag included, counts once. The totals are computed from the parsed transactions, not estimated.",
           "claims": [
             "weight-units",
             "tx-weight",
+            "fixture-sizes",
             "examples-published",
             "examples-reproduced"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -264,12 +317,43 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A03.7",
+          "recipe": "sighash-reuse.v1",
+          "title": "Hashing once, or once per input",
+          "fixtures": [],
+          "caption": "Schematic, with no values: four inputs under each digest. BIP 143’s three summary hashes can be made once and shared by every input’s preimage; each preimage is then hashed on its own.",
+          "claims": [
+            "quadratic",
+            "hash-reuse",
+            "summary-hashes"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "For SIGHASH_ALL, the three summary hashes cover every input’s outpoint, every input’s nSequence and every output. They are computed once and reused for each input that is signed, which is where the saving comes from.",
+          "text": "For SIGHASH_ALL, the three summary hashes cover every input’s outpoint, every input’s nSequence and every output. They can be computed once and reused for each input that is signed, which is where the saving comes from.",
           "claims": [
             "summary-hashes",
             "hash-reuse"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A03.8",
+          "recipe": "bip143-preimage.v1",
+          "title": "What a SegWit signature signs",
+          "fixtures": [
+            "native-p2wpkh"
+          ],
+          "caption": "The ten items for the mixed example’s SegWit input, on a 32-byte ruler. Dashed items are not fields of the transaction; the amount is outlined. The digest matches the one BIP 143 publishes.",
+          "claims": [
+            "ten-items",
+            "amount",
+            "scriptcode-p2wpkh",
+            "examples-reproduced"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -280,8 +364,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A03.9",
+          "recipe": "amount-storyboard.v1",
+          "title": "Why the signature covers the amount",
+          "fixtures": [
+            "native-p2wpkh"
+          ],
+          "caption": "An offline signer sees which output an input spends, not how much it holds. The amount it is given goes into the digest, so a wrong one cannot produce a valid signature.",
+          "claims": [
+            "cold-wallet",
+            "amount"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "Use the BIP 143 lens in the figure to see where each item comes from. For a P2WPKH input the scriptCode is a standard pay-to-public-key-hash script built from the 20-byte program. The page reproduces the published preimage and digest of both examples byte for byte.",
+          "text": "Use the BIP 143 lens of Fig. A03.4 to see where each item comes from. For a P2WPKH input the scriptCode is a standard pay-to-public-key-hash script built from the 20-byte program. The page reproduces the published preimage and digest of both examples byte for byte.",
           "claims": [
             "scriptcode-p2wpkh",
             "examples-published",
