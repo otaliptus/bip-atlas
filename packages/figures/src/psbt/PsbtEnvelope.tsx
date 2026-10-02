@@ -32,7 +32,7 @@ export function psbtHeroSpec(fixture: DerivedPsbtTraceFixture): HeroSpec<PsbtHer
     ),
     initialKey: "step|0",
     noJsId: `${combinerAt}-step`,
-    staticNote: "Static view: the Combiner’s PSBT, which holds every update and both signers’ signatures. With JavaScript you can pass the envelope from role to role. Fig. A05.4 shows every step without it.",
+    staticNote: "Static view: the Combiner’s PSBT, which holds every update and both signers’ signatures. With JavaScript you can pass the envelope from role to role.",
   });
 }
 

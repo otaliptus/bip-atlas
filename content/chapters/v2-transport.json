@@ -58,7 +58,8 @@
      "text": "Encryption raises the cost of observation. Instead of quietly recording readable traffic, an attacker needs to become involved: intercept a connection throughout its life, cause a downgrade to v1, or run a node that honest peers connect to. The authors’ aim is to make large-scale surveillance and tampering more expensive.",
      "claims": [
       "forces-active",
-      "goals"
+      "goals",
+      "aim"
      ]
     },
     {
@@ -154,7 +155,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Encrypted packets follow the terminator. The first packet authenticates the garbage already sent, so a change to those bytes makes authentication fail. An empty version message announces v2. Decoy packets may precede it. The responder can include its version message in its first response without waiting for another round trip.",
+     "text": "Encrypted packets follow the terminator. The first packet authenticates the garbage already sent, so a change to those bytes makes authentication fail. An empty version packet announces v2. Decoy packets may precede it. The responder can include its version packet in its first response without waiting for another round trip.",
      "claims": [
       "terminator-aad",
       "version-packet"

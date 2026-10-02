@@ -144,6 +144,21 @@ describe("v2-transport chapter prose numbers", () => {
     const hero = chapter.sections.flatMap((s: any) => s.blocks).find((b: any) => b.recipe === "v2-handshake.v1");
     expect(hero.fixtures).toHaveLength(5);
   });
+
+  it("packets 223 and 448 publish only a 128-byte ciphertext suffix", () => {
+    const fx = JSON.parse(readFileSync(new URL("fixtures/v2-transport.json", root), "utf8")).fixtures;
+    for (const idx of [223, 448]) {
+      const f = fx.find((x: { id: string }) => x.id === `v2-packet-${idx}`);
+      expect(f.index).toBe(idx);
+      const v = packets[f.source.line - 2];
+      expect(v.in_idx).toBe(String(idx));
+      expect(v.out_ciphertext).toBe("");
+      expect(v.out_ciphertext_endswith.length / 2).toBe(128);
+      // A suffix, not the whole packet.
+      expect(V2_OVERHEAD + v.in_contents.length / 2 * Number(v.in_multiply)).toBeGreaterThan(128);
+    }
+    has("For packets 223 and 448, the published vectors supply only the last 128 bytes of ciphertext.");
+  });
 });
 
 describe("vector parsing", () => {

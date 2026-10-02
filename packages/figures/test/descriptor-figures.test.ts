@@ -121,6 +121,17 @@ describe("DescriptorOutputs", () => {
     expect(new Set(d.derived.scripts[0]).size).toBe(4);
     expect(s).toContain("KEY is a placeholder for that same public key");
   });
+  it("slices every drawn byte from the model's scripts: prefix + highlighted + suffix = script", () => {
+    const s = html(h(DescriptorOutputs, { fixture: d }));
+    const key = d.derived.keys[0].publicKeys[0];
+    // Preact writes an empty attribute without a value (P2WPKH has no suffix).
+    const groups = [...s.matchAll(/data-script-prefix="([0-9a-f]+)" data-script-payload="([0-9a-f]+)" data-script-suffix(?:="([0-9a-f]*)")?/g)]
+      .map(([m, p, k, x]) => [m, p, k, x ?? ""]);
+    expect(groups.map(([, p, k, x]) => p + k + x)).toEqual(d.derived.scripts[0]);
+    expect(groups[0][2]).toBe(key);
+    const sp = (hex: string) => hex.match(/../g)!.join(" ");
+    for (const [, p, k, x] of groups) expect(s).toContain(`${sp(p)} ${k.slice(0, 12)}…${x ? ` ${sp(x)}` : ""}<`);
+  });
   it("refuses a ranged fixture that would imply several different keys", () => {
     expect(() => html(h(DescriptorOutputs, { fixture: derived("bip382-wpkh-ranged") }))).toThrow();
   });

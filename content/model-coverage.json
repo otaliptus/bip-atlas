@@ -1,8 +1,8 @@
 {
   "mnemonics": {
     "name": "Mnemonics",
-    "published": "All 24 English and 24 Japanese BIP 39 reference vectors, from entropy through words to seed; the pinned wordlist hash.",
-    "additional": "Checksum failures, entropy sizes and Unicode normalization cases.",
+    "published": "All 24 English and 24 Japanese BIP 39 reference vectors, from entropy through words to seed.",
+    "additional": "Checksum failures, entropy sizes, Unicode normalization cases and the pinned English and Japanese wordlist hashes.",
     "limits": "Public examples only; passing vectors does not establish the safety of a recovery phrase or wallet."
   },
   "hd-wallets": {
@@ -13,14 +13,14 @@
   },
   "segwit": {
     "name": "SegWit",
-    "published": "The two BIP 143 SIGHASH_ALL witness examples: transaction serialization, signing preimages and digests.",
+    "published": "BIP 143’s native P2WPKH and P2SH-P2WPKH examples (both SIGHASH_ALL): transaction serialization, signing preimages and digests.",
     "additional": "Byte layout, transaction IDs, weight and virtual-size arithmetic, and rejection of unsupported signature-hash modes.",
     "limits": "Selected witness-v0 examples, not every signature-hash mode or full transaction validation."
   },
   "addresses": {
     "name": "Addresses",
     "published": "Every Bech32, Bech32m and SegWit address vector in BIPs 173 and 350, including invalid-case rejection stages.",
-    "additional": "Checksum edits, witness-version and program-length boundaries, and encoding round trips.",
+    "additional": "Checksum edits, witness-version and program-length boundaries, and program-to-character round trips.",
     "limits": "Encoding validity does not establish ownership, balance or a safe destination."
   },
   "psbt": {
@@ -50,7 +50,7 @@
   "p2sh": {
     "name": "P2SH",
     "published": "Three spends from BIPs 143 and 174: legacy 2-of-2, wrapped P2WPKH and wrapped P2WSH, replayed with signature checks.",
-    "additional": "Redeem-script mutations, push-only rules, signature order, witness-stack rules and sigop limits.",
+    "additional": "Redeem-script mutations, push-only rules, signature order, witness-stack rules and BIP 16 sigop counting and the 15-key, 520-byte arithmetic.",
     "limits": "Reviewed script forms and signature-hash modes only; unsupported opcodes and witness forms raise scope errors."
   },
   "timelocks": {

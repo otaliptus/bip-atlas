@@ -311,7 +311,7 @@
     },
     {
       "id": "key-path-rule",
-      "statement": "The output key q is the witness program already published in the spent output. After removing an optional annex, a key path witness has one element: a signature valid for q; it does not reveal the internal key or script tree.",
+      "statement": "The output key q is the witness program already published in the spent output. After removing an optional annex, a key path witness has one element: a signature valid for q.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -679,7 +679,7 @@
     },
     {
       "id": "no-script-commit",
-      "statement": "If no script path is needed, the BIP says the output key should still commit to an unspendable script path, Q = P + int(hash_TapTweak(bytes(P)))G, instead of having none; the authors explain that with some key-aggregation schemes a party could otherwise hide a script path, though MuSig's randomized aggregation does not have this issue.",
+      "statement": "If no script path is needed, the BIP says the output key should still commit to an unspendable script path, Q = P + int(hash_TapTweak(bytes(P)))G, instead of having none; the authors explain that with some key-aggregation schemes a malicious party could otherwise add a script path unnoticed, bypass the multiparty policy and steal the coin, though MuSig's randomized aggregation does not have this issue.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -698,6 +698,14 @@
             159
           ],
           "quote": "If the taproot output key is an aggregate of keys, there is the possibility for a malicious party to add a script path without being noticed by the other parties."
+        },
+        {
+          "bip": 341,
+          "lines": [
+            160,
+            160
+          ],
+          "quote": "This allows to bypass the multiparty policy and to steal the coin."
         },
         {
           "bip": 341,
@@ -775,7 +783,7 @@
     },
     {
       "id": "no-reuse",
-      "statement": "The BIP says taproot outputs should never reuse keys, for privacy, including in every leaf.",
+      "statement": "The BIP says taproot outputs should never reuse keys, for privacy, and that this applies to every leaf committed to in the output, not only the leaf used to spend it.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [

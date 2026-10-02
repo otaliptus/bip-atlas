@@ -172,14 +172,14 @@
     },
     {
      "type": "paragraph",
-     "text": "SegWit has a less obvious trap. BIP 174 describes an attack in which a user is persuaded to sign repeatedly while the claimed amounts of other inputs change. A signature covering only its own input’s amount cannot settle the fee for the whole transaction. The BIP notes that many wallets request full previous transactions for SegWit inputs too.",
+     "text": "SegWit has a less obvious trap. BIP 174 describes an attack in which a user is persuaded to sign repeatedly while the claimed amounts of other inputs change. A signature covering only its own input’s amount cannot settle the fee for the whole transaction. The BIP notes that many wallets require full previous transactions for SegWit inputs too.",
      "claims": [
       "bip143-fee-issue"
      ]
     },
     {
      "type": "paragraph",
-     "text": "A Signer must use the UTXOs supplied in the PSBT and only add data. It does not have to support every kind of input. Its contribution is a partial signature attached to an input, identified by the public key that made it. Other signatures can sit beside it without overwriting it.",
+     "text": "A Signer must use only the UTXOs supplied in the PSBT and only add data. It does not have to support every kind of input. Its contribution is a partial signature attached to an input, identified by the public key that made it. Other signatures can sit beside it without overwriting it.",
      "claims": [
       "signer",
       "signer-scope",
@@ -344,7 +344,8 @@
      "type": "paragraph",
      "text": "A device will eventually encounter a field that was added after its software was written. BIP 174 requires signers to ignore unfamiliar types and pass them through. The device can do its own job without erasing information another participant needs. Finalization preserves those unknown fields too.",
      "claims": [
-      "passthrough"
+      "passthrough",
+      "finalizer"
      ]
     },
     {
@@ -376,15 +377,6 @@
      "type": "details",
      "summary": "Source and example notes",
      "blocks": [
-      {
-       "type": "paragraph",
-       "text": "That leaves a practical problem: what do you send them? A bare unsigned transaction leaves out information a signer needs. A Partially Signed Bitcoin Transaction, or PSBT, packages the transaction with that information and gives each participant somewhere to put its contribution. BIP 174 defines the common format.",
-       "claims": [
-        "abstract",
-        "motivation",
-        "updater"
-       ]
-      },
       {
        "type": "paragraph",
        "text": "BIP 174 was assigned in 2017 and is recorded as deployed in the pinned source. The example replays published PSBTs; it does not create signatures, hold keys or broadcast a transaction.",

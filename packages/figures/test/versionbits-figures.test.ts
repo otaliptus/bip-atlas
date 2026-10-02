@@ -123,6 +123,16 @@ describe("version-bits figures", () => {
     }
   });
 
+  it("A11.8 does not hatch LOCKED_IN (hatching means hidden) and keeps labels at 8 units or more", () => {
+    const s = html(h(VersionbitsRecord, { fixtures: [csv, segwit] }));
+    const drawings = s.slice(0, s.indexOf("<details"));
+    expect(drawings).not.toMatch(/fill:url\(/);
+    expect((drawings.match(/k-fill--plain k-dashed/g) ?? []).length).toBe(2 * 2);
+    const sizes = [...drawings.matchAll(/font-size:\s*([\d.]+)px/g)].map((m) => Number(m[1]));
+    expect(sizes.length).toBeGreaterThan(0);
+    expect(Math.min(...sizes)).toBeGreaterThanOrEqual(8);
+  });
+
   it("A11.9 runs BIP 8 both ways and draws the MUST_SIGNAL rule from the model", () => {
     const s = html(h(VersionbitsBip8, { fixture: g }));
     expect(mustSignalInvalid(201, 1815)).toBe(false);

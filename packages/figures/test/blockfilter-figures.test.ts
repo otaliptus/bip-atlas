@@ -91,6 +91,13 @@ describe("block-filter figures", () => {
     expect(s.split("k-cell k-fill--net").length - 1).toBe(25);
   });
 
+  it("A16.1 does not colour the private watched scripts as public", () => {
+    const s = html(h(BfDirections, { fixture: b926 }));
+    expect(s).not.toContain("k-fill--public");
+    expect(s).toMatch(/<rect class="k-cell k-fill--plain k-dashed"[^>]*data-watched="local"/);
+    expect(s).toContain("YOUR WATCHED SCRIPTS");
+  });
+
   it("A16.2 sieves 18 scripts into 9 and gives every script in full", () => {
     const s = html(h(BfSieve, { fixture: b926 }));
     expect(b926.derived.elements.length).toBe(18);

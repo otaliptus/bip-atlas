@@ -1,4 +1,4 @@
-import { Drawing, Responsive, Value, idsFor } from "../kit";
+import { Drawing, Responsive, Value } from "../kit";
 import type { DerivedVersionbitsDeploymentFixture, VersionbitsNetworkView } from "../types";
 import { num } from "./parts";
 
@@ -12,7 +12,7 @@ export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDe
   const draw = (wide: boolean) => {
     const W = wide ? 640 : 344, margin = 14, lane = (W - margin * 2) / 3;
     const blockH = wide ? 153 : 171;
-    const id = `a11-record-${wide ? "w" : "n"}`, ids = idsFor(id);
+    const id = `a11-record-${wide ? "w" : "n"}`;
     return <Drawing id={id} width={W} height={fixtures.length * blockH + 51} title="The block where the rules change" desc={desc}>
       {["COUNT SIGNALS", "WAIT ONE PERIOD", "ENFORCE RULES"].map((t, k) => <Value at={[margin + k * lane + 5, 16]} text={t} size={wide ? 11 : 8.2} cls="k-value--label" />)}
       {fixtures.map((f, k) => {
@@ -23,7 +23,8 @@ export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDe
           <Value at={[W - margin, y]} text={`BIPS ${d.bips.join(" / ")}`} size={8} anchor="end" cls="k-value--muted" />
           <rect class="k-outline k-fill--plain" x={margin} y={y + 14} width={lane} height="42" />
           {Array.from({ length: 12 }, (_, b) => <path class="k-leader" d={`M${margin + (b + 1) * lane / 13} ${y + 14} v7 M${margin + (b + 1) * lane / 13} ${y + 49} v7`} />)}
-          <rect class="k-outline" x={margin + lane} y={y + 14} width={lane} height="42" style={`fill:${ids.hatch}`} />
+          {/* LOCKED_IN is a waiting period, not hidden data: a dashed outline, not the hatch. */}
+          <rect class="k-outline k-fill--plain k-dashed" x={margin + lane} y={y + 14} width={lane} height="42" />
           <rect class="k-outline k-mark--plain" x={activeX} y={y + 14} width={lane} height="42" />
           <Value at={[margin + lane / 2, y + 40]} text="STARTED" size={wide ? 13 : 10} anchor="middle" />
           <Value at={[margin + lane * 1.5, y + 40]} text="LOCKED_IN" size={wide ? 13 : 10} anchor="middle" />
@@ -33,10 +34,12 @@ export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDe
           <Value at={[margin, y + 88]} text={num(i.tallyTo)} size={wide ? 10 : 9} cls="k-value--muted" />
           <Value at={[margin + lane + 6, y + 75]} text={num(i.lockedInFrom)} size={wide ? 12 : 10} />
           <Value at={[activeX + 7, y + 75]} text={num(m.activeHeight!)} size={wide ? 17 : 13} />
-          <Value at={[activeX + 7, y + 90]} text="AND EVERY BLOCK AFTER" size={wide ? 8 : 6.8} cls="k-value--label" />
+          {wide
+            ? <Value at={[activeX + 7, y + 90]} text="AND EVERY BLOCK AFTER" size={8} cls="k-value--label" />
+            : <><Value at={[activeX + 7, y + 89]} text="AND EVERY BLOCK" size={8} cls="k-value--label" /><Value at={[activeX + 7, y + 99]} text="AFTER" size={8} cls="k-value--label" /></>}
           <Value at={[margin, y + 108]} text={`≥ ${num(m.threshold)} SIGNALS`} size={wide ? 9 : 8} cls="k-value--label" />
-          <Value at={[margin, y + 122]} text="PERIODS INFERRED; COUNT NOT RECORDED" size={wide ? 8.5 : 7} cls="k-value--muted" />
-          <Value at={[activeX + 7, y + 114]} text="HEIGHT RECORDED" size={wide ? 9 : 7.5} cls="k-value--label" />
+          <Value at={[margin, y + 122]} text="PERIODS INFERRED; COUNT NOT RECORDED" size={wide ? 8.5 : 8} cls="k-value--muted" />
+          <Value at={[activeX + 7, y + 114]} text="HEIGHT RECORDED" size={wide ? 9 : 8} cls="k-value--label" />
         </g>;
       })}
       <Value at={[14, fixtures.length * blockH + 40]} text="STRIPS SHOW PHASES, NOT INDIVIDUAL BLOCKS" size={8} cls="k-value--muted" />

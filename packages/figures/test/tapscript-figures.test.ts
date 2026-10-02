@@ -4,7 +4,7 @@ import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { BUDGET_BASE, SIGOP_COST, decodeNum, decodeTapscript, traceTapscript, type ScriptAssetCase } from "@bip-atlas/models/tapscript";
 import { MinimalIf } from "../src/tapscript/MinimalIf";
-import { MultisigChain } from "../src/tapscript/MultisigChain";
+import { MULTISIG_REQUIRED, MultisigChain, multisigTally } from "../src/tapscript/MultisigChain";
 import { OpSuccess } from "../src/tapscript/OpSuccess";
 import { SigPays } from "../src/tapscript/SigPays";
 import { SigRules } from "../src/tapscript/SigRules";
@@ -128,6 +128,22 @@ describe("A08.1 multisig", () => {
     expect(derived("core-case-824").derived.success.elements.map((e) => e.label)).toContain("33-byte key, unknown type");
     expect(s).toContain("CHECKSIGADD");
     expect(s).toContain("SYMBOLIC");
+  });
+  it("derives its counts from the slots and says it is a symbolic illustration, not a run", () => {
+    const t = multisigTally();
+    expect(t.required).toBe(MULTISIG_REQUIRED);
+    expect(t.counts).toEqual([1, 1, 2]);
+    expect(t.total).toBe(t.required);
+    expect(() => multisigTally(3)).toThrow();
+    expect(() => multisigTally(2, [true, false, false])).toThrow();
+    const s = html(h(MultisigChain, { fixture: derived("core-case-804") }));
+    const desc = s.slice(s.indexOf("<desc"), s.indexOf("</desc>"));
+    expect(desc).toContain("symbolic illustration");
+    expect(desc).toContain("not a recorded script run");
+    expect(desc).not.toMatch(/known .*keys/);
+    expect(desc).toContain(`count goes ${t.counts.join(", ")}`);
+    expect(s).toContain(`NUMEQUAL · REQUIRED ${t.required}`);
+    expect(s).toContain(`${t.total} = ${t.required}`);
   });
 });
 

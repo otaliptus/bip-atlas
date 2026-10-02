@@ -16,12 +16,18 @@ export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
   const d = fixture.derived;
   const candidate = d.steps.find((s) => s.matched);
   if (!candidate) throw new Error(`${fixture.id}: the receiving scene needs a matching output`);
+  // The drawing labels P_k itself as the found output, which is only true for an unlabelled (direct) match.
+  const found = d.txOutputs.find((o) => o.mine && o.k === candidate.k);
+  if (candidate.via !== "direct" || found?.key !== candidate.Pk || found.label !== null) {
+    throw new Error(`${fixture.id}: the receiving scene draws P_k as the found output, so the first match must be unlabelled`);
+  }
+  const matches = d.txOutputs.filter((o) => o.mine).length;
   const ids = idsFor("a15-find");
   const outputsY = 195;
   const scanY = outputsY + d.txOutputs.length * 32 + 45;
   return (
     <>
-      <Drawing id="a15-find" width={344} height={scanY + 96} title="One address to publish; a payment to find" desc={`The receiver publishes ${d.receiver.address}, which carries the public scan and spend keys. The sender uses it with the transaction inputs to derive a Taproot output. In the receiver's view, scanning this transaction finds ${d.txOutputs.filter((o) => o.mine).length} matching output. The receiver computes ${candidate.Pk} for counter ${candidate.k}. The receiver uses the private scan key, public spend key and transaction input information locally. The scan secret is not sent. This is a teaching view of the receiver's knowledge, not what an outside observer can discover.`}>
+      <Drawing id="a15-find" width={344} height={scanY + 96} title="One address to publish; a payment to find" desc={`The receiver publishes ${d.receiver.address}, which carries the public scan and spend keys. The sender uses it with the transaction inputs to derive a Taproot output. In the receiver's view, scanning this transaction finds ${matches} matching output${matches === 1 ? "" : "s"}, marked with a heavier outline and the word MATCH; all outputs are equally public. The receiver computes ${candidate.Pk} for counter ${candidate.k}. The receiver uses the private scan key, public spend key and transaction input information locally. The scan secret is not sent. This is a teaching view of the receiver's knowledge, not what an outside observer can discover.`}>
         <rect class="k-outline k-fill--plain" x="54" y="12" width="236" height="67" rx="4" />
         <Value at={[172, 29]} text="PUBLIC RECEIVING ADDRESS" size={9.5} anchor="middle" />
         <Value at={[172, 47]} text={`${d.receiver.address.slice(0, 18)}…`} size={12} anchor="middle" />
@@ -33,7 +39,7 @@ export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
         <Value at={[26, 188]} text="OUTPUTS IN THIS TRANSACTION" size={9.5} />
         {d.txOutputs.map((o, i) => (
           <g data-output-match={o.mine ? "true" : "false"}>
-            <rect class={`k-outline ${o.mine ? "k-fill--public" : "k-fill--plain"}`} x="26" y={outputsY + i * 32} width="292" height="26" rx="13" />
+            <rect class={`k-outline k-fill--plain${o.mine ? " k-cell--em" : ""}`} x="26" y={outputsY + i * 32} width="292" height="26" rx="13" />
             <Value at={[40, outputsY + i * 32 + 17]} text={`${o.key.slice(0, 16)}…`} size={10} />
             <Value at={[302, outputsY + i * 32 + 17]} text={o.mine ? "✓ MATCH" : "PASS"} size={9.5} anchor="end" />
           </g>

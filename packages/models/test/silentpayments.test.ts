@@ -120,7 +120,11 @@ describe("silent-payments chapter prose numbers", () => {
     const hero = chapter.sections.flatMap((s: any) => s.blocks).find((b: any) => b.recipe === "silent-payment-derivation.v1");
     expect(hero.fixtures).toHaveLength(6);
     expect(fx.find((f: { kind: string }) => f.kind === "sp-eligibility").caseIndices.length).toBe(5);
-    expect(text).toContain("sp-eligibility");
+    const allBlocks = (blocks: any[]): any[] => blocks.flatMap((b) => [b, ...(b.blocks ? allBlocks(b.blocks) : [])]);
+    const figures = allBlocks([chapter.opening.figure, ...chapter.sections.flatMap((s: any) => s.blocks)])
+      .filter((b: any) => b?.recipe === "sp-input-eligibility.v1");
+    expect(figures).toHaveLength(1);
+    expect(figures[0].fixtures).toEqual(["sp-eligibility"]);
   });
 });
 

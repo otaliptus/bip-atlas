@@ -7,10 +7,15 @@ const { lock } = chapters[0];
 const claimCount = chapters.reduce((n, c) => n + c.ledger.claims.length, 0);
 const external = loadExternalLock();
 const coverage = loadModelCoverage();
+const awaitingReview = chapters.filter((c) => c.publication.reviewState === "draft-unreviewed").length;
 // Excerpt descriptions in the lock's path field are labels, not GitHub paths.
 const excerptPaths: Record<string, string[]> = {
   "core-script-assets-excerpt.json": ["unit_test_data/script_assets_test.json"],
   "core-locktime-cases-excerpt.json": ["src/test/data/tx_valid.json", "src/test/data/tx_invalid.json", "src/script/script.h"],
+};
+// Files the BIP text does not link itself (see each entry's note in the lock).
+const citedLabel: Record<string, string> = {
+  "core-locktime-cases-excerpt.json": "tests for the reference implementation linked by BIP",
 };
 ---
 <Base title="Methodology · BIP Atlas" description="Sources, checks and limits behind BIP Atlas." current="methodology">
@@ -30,7 +35,7 @@ const excerptPaths: Record<string, string[]> = {
       {external.files.map((f) => (
         <li>
           {(excerptPaths[f.file] ?? [f.path]).map((path, i) => <>{i > 0 && "; "}<a href={`${f.repository}/blob/${f.commit}/${path}`}>{f.repository.replace("https://github.com/", "")}/{path}</a></>)}
-          {excerptPaths[f.file] && " (pinned excerpt)"} at <code>{shortCommit(f.commit)}</code>, cited by BIP {f.citedBy.bip}
+          {excerptPaths[f.file] && " (pinned excerpt)"} at <code>{shortCommit(f.commit)}</code>, {citedLabel[f.file] ?? "cited by BIP"} {f.citedBy.bip}
         </li>
       ))}
     </ul>
@@ -71,7 +76,7 @@ const excerptPaths: Record<string, string[]> = {
     </p>
     <h2>What has not</h2>
     <ul>
-      <li>Every chapter is hand-authored. Each has had one independent technical review whose findings were applied, but none has formal sign-off; all are marked as drafts.</li>
+      <li>Every chapter is hand-authored. Each had one independent technical review before later editorial revisions; {awaitingReview} revised {awaitingReview === 1 ? "chapter awaits" : "chapters await"} a fresh review. None has formal sign-off; all are marked as drafts.</li>
       <li>No automated writing pipeline is connected yet.</li>
       <li>The models are teaching models. They check structure and encodings against published vectors; they are not wallets, signers or full conformance suites, and they say nothing about ownership, balance, or whether a payment is safe.</li>
       <li>No screen-reader session or accessibility audit has been performed beyond the checks recorded in the project.</li>

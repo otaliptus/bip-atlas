@@ -68,6 +68,24 @@ describe("A15.1 address", () => {
     expect(main).not.toContain(s0.derived.sharedSecret);
     expect(main).toContain(s0.derived.steps.find((s) => s.matched)!.Pk.slice(0, 8));
   });
+  it("draws every output with the same fill and marks a match by outline and text, with a desc that agrees in number", () => {
+    const s = html(h(SpAddress, { fixture: s0 }));
+    const main = s.slice(0, s.indexOf("<details"));
+    const outputs = [...main.matchAll(/data-output-match="(true|false)"><rect class="([^"]+)"/g)];
+    expect(outputs.length).toBe(s0.derived.txOutputs.length);
+    for (const [, mine, cls] of outputs) {
+      expect(cls).toContain("k-fill--plain");
+      expect(cls).not.toContain("k-fill--public");
+      expect(cls.includes("k-cell--em")).toBe(mine === "true");
+    }
+    const n = s0.derived.txOutputs.filter((o) => o.mine).length;
+    expect(main.split("✓ MATCH").length - 1).toBe(n);
+    expect(main).toContain(`finds ${n} matching output${n === 1 ? "" : "s"},`);
+  });
+  it("refuses to label P_k as the found output when the match came through a label", () => {
+    const labelled = { ...s0, derived: { ...s0.derived, steps: s0.derived.steps.map((st) => (st.matched ? { ...st, via: "label" } : st)) } };
+    expect(() => html(h(SpAddress, { fixture: labelled }))).toThrow(/unlabelled/);
+  });
   it("draws all 116 characters and decodes to the two keys", () => {
     const s = html(h(SpAddress, { fixture: s0 }));
     expect(s0.derived.receiver.address).toHaveLength(116);

@@ -49,7 +49,8 @@
       "claims": [
         "assignments",
         "crosscheck",
-        "implied"
+        "implied",
+        "signal-lockedin"
       ],
       "layout": "wide"
     }
@@ -61,14 +62,14 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Before BIP 9, a soft fork raised the block version number. Several upgrades could not run independently, a failed attempt used up a version, and the old mechanism allowed only a small number of upgrades. BIP 9’s authors wanted separate signals for separate deployments.",
+          "text": "Before BIP 9, a soft fork raised the block version number, and nodes compared versions as integers. Only one change could roll out at a time, and none could be rejected for good: until one had fully rolled out, no later one could be scheduled. Every upgrade also permanently restricted which version values were allowed. BIP 9’s authors wanted separate signals for separate deployments.",
           "claims": [
             "bip34-problem"
           ]
         },
         {
           "type": "paragraph",
-          "text": "Reading the field as bits fixes all three. A signalling block must have 001 as its top three bits, which gives versions from 0x20000000 to 0x3FFFFFFF; a block whose top bits are anything else counts as signalling nothing. That leaves 29 bits for deployments, and two other top-bit patterns for future mechanisms.",
+          "text": "Reading the field as bits lets separate deployments signal side by side. A signalling block must have 001 as its top three bits, which gives versions from 0x20000000 to 0x3FFFFFFF; a block whose top bits are anything else counts as signalling nothing. That leaves 29 bits for deployments, and two other top-bit patterns for future mechanisms.",
           "claims": [
             "top-bits",
             "29-bits"
@@ -93,7 +94,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Each deployment gets a bit and a window in which that bit counts. Setting it outside that window does not turn the rules on. A bit can eventually be reused, but the authors recommend a pause so old software does not mistake the next deployment for the previous one.",
+          "text": "Each deployment gets a bit and a window in which that bit counts. Setting it outside that window does not turn the rules on. A bit can eventually be reused, but BIP 9 discourages that until necessary, and even then recommends a pause in between to detect buggy software.",
           "claims": [
             "params",
             "bit-reuse"
@@ -295,7 +296,9 @@
           "type": "paragraph",
           "text": "BIP 8’s authors wanted to limit miners’ ability to delay a change and avoid a schedule tied to block timestamps. Their proposal uses block heights for the start and deadline. It also allows a minimum activation height, so a change can lock in without taking effect too soon.",
           "claims": [
-            "bip8-why"
+            "bip8-why",
+            "bip8-abstract",
+            "bip8-min-activation"
           ]
         },
         {
@@ -325,7 +328,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The choice can split nodes onto different chains. BIP 8 warns that nodes requiring lock-in may follow a lower-work chain than nodes that do not, potentially for an extended period. Its authors suggest this option for changes facing political opposition from a significant share of miners.",
+          "text": "The choice can split nodes onto different chains. BIP 8 warns that nodes requiring lock-in may follow a lower-work chain than nodes that do not, potentially for an extended period. Its authors suggest this option for changes facing political opposition from a non-negligible share of miners.",
           "claims": [
             "bip8-split",
             "bip8-guidelines"
