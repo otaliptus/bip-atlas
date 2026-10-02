@@ -73,3 +73,19 @@ A fresh read-only subagent re-ran every hero and A16.7 probe through the model a
 | 9 | should-fix | Hero cited too few claims. | Added siphash, key, gcs-steps, serialize, gcs-def, scope-of-miss. |
 | 10 | should-fix | "KEY: THE BLOCK HASH" overstated. | "KEY: FIRST 16 B OF THE BLOCK HASH". |
 | 11–18 | nits | Spike arc near 0; overlapping marks; floating sieve arrow; "‖" glyph and genesis label in A16.8; uncoloured hero bits; "each costing a download"; hard-coded greys. | Arc skipped when tiny; decoded marks drawn on top; arrow anchored; "+" and "(GENESIS)"; the rest left as is (hero bit cells stay ink/grey, the prose sentence is the reviewed phase-3 text). |
+
+## v2 transport (A17)
+
+Was 3 figures (framing bars, a card-style hero with a worked-example tab, a rekey table). Now 1 drawing-first hero and 8 static drawings. The worked example (packet 0's key schedule) becomes A17.5. ElligatorSwift is not implemented: every figure that shows an x coordinate says the decoding is the vector's.
+
+| Fig. | Recipe | Drawing | Data | Claims |
+|---|---|---|---|---|
+| A17.1 | `v1-v2-framing.v1` (opening, redrawn) | Two packet diagrams on one byte scale: v1's 24-byte cleartext header (plain) and v2's length, header, ID and tag (cyan), payload dashed. Totals checked against `V1_HEADER` and `V2_OVERHEAD`. | `v2-framing` | framing-computed, packet-format, message-type |
+| A17.2 | `v2-eavesdropper.v1` **new** (schematic storyboard) | Node A, node B, OPEN NETWORK boundary and a listener: v1 readable; v2 random-looking; an active attacker in the middle with session ID A ≠ B. | none | v1-plaintext, aim, forces-active, session-id, no-auth |
+| A17.3 | `v2-ellswift.v1` **new** | The initiator's 64 key bytes as cyan cells (u and t halves), the optional garbage, and x with "not decoded here". | `v2-packet-1` | ellswift, garbage, vectors |
+| A17.4 | `v2-detect.v1` **new** | The 16 bytes every v1 connection starts with (magic, "version", padding, from `V1_PREFIX`) against the start of a v2 key. | `v2-packet-1` | v1-detect |
+| A17.5 | `v2-key-story.v1` **new** (storyboard, 4 frames; was the worked example) | Two encodings; ECDH and the tagged hash to the secret (pink); HKDF's four keys, terminators and session ID; packet 0 with 4,095 bytes of garbage as AAD. | `v2-packet-0` | ecdh, hkdf, terminator-aad, vectors |
+| A17.6 | `v2-handshake.v1` (hero, redrawn) | This side and the peer across the open network; wire items step by step; secrets drawn only on the two sides; the listener's panel lists only wire bytes, with a hatched "secret, keys: not on the wire". Strips: vector, v2 packet / v1 equivalent. Stepper: five stages. | five `v2-packet-*` | vectors, ecdh, hkdf, packet-format, rekey |
+| A17.7 | `v2-terminator.v1` **new** | Garbage then the 16-byte terminator under a sliding window; "at most 4,095 + 16 = 4,111 B read". | `v2-packet-0` | terminator-why, garbage, terminator-aad |
+| A17.8 | `v2-packet-bytes.v1` **new** | All 21 bytes of packet 1 on a byte ruler with what protects each part, and what the endpoints recover. | `v2-packet-1` | packet-format, length-unauth, vectors |
+| A17.9 | `v2-rekey.v1` (redrawn) | A ring of 224 packet slots, the nonce on both sides of the boundary, and the key chain epoch 0 → 1 → 2 (secret keys). | `v2-rekey` | rekey, vectors |

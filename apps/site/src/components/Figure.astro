@@ -78,7 +78,12 @@ import {
   V2Handshake,
   V2Framing,
   V2Rekey,
-  V2Worked,
+  V2Eavesdropper,
+  V2Ellswift,
+  V2Detect,
+  V2KeyStory,
+  V2Terminator,
+  V2PacketBytes,
   Bip322VirtualTx,
   Bip322Formats,
   Bip322Verdicts,
@@ -256,6 +261,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
   {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
   {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
+  {figure.recipe === "v2-eavesdropper.v1" && <V2Eavesdropper />}
+  {figure.recipe === "v2-ellswift.v1" && <V2Ellswift fixture={v2[0]} />}
+  {figure.recipe === "v2-detect.v1" && <V2Detect fixture={v2[0]} />}
+  {figure.recipe === "v2-key-story.v1" && <V2KeyStory fixture={v2[0]} />}
+  {figure.recipe === "v2-terminator.v1" && <V2Terminator fixture={v2[0]} />}
+  {figure.recipe === "v2-packet-bytes.v1" && <V2PacketBytes fixture={v2[0]} />}
   {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
   {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
@@ -273,7 +284,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
-      {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
       {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
   )}
