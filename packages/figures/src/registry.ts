@@ -263,6 +263,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: true,
     controls: ["Switch key/script path", "Select a leaf", "Reveal only the proof material"],
     fixtureKind: "taproot-tree",
+    drawing: true,
   },
   {
     id: "taproot-sigmsg.v1",

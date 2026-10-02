@@ -1,269 +1,237 @@
 import { useEffect, useState } from "preact/hooks";
-import type { DerivedTaprootTreeFixture, TaprootLeafView, TaprootNodeView } from "../types";
+import { holdFocus } from "../focus";
+import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import type { DerivedTaprootTreeFixture, TaprootLeafView } from "../types";
+import { layoutTree, seenMap, type Seen } from "./treeLayout";
+
+type Path = "key" | "script";
+type View = "wallet" | "proof";
 
 interface Props {
   fixture: DerivedTaprootTreeFixture;
   figureId: string;
+  /** Starting state; the no-JS render uses it too. Defaults to the script path for leaf B, everything shown. */
+  initial?: { path: Path; leafId: number; view: View };
 }
 
-type Path = "key" | "script";
-type View = "wallet" | "proof";
-/** What a viewer of the spend can see about one piece of the structure. */
-type Seen = "revealed" | "hash-only" | "recomputed" | "hidden" | "known";
-
-const short = (hex: string) => `${hex.slice(0, 6)}…${hex.slice(-4)}`;
+const short = (hex: string) => `${hex.slice(0, 8)}…`;
 const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
 
-const leavesUnder = (n: TaprootNodeView): number[] => (n.leaf !== null ? [n.leaf] : n.children.flatMap(leavesUnder));
-
-const SEEN_TEXT: Record<Seen, string> = {
-  revealed: "in the witness",
-  "hash-only": "only its hash revealed",
-  recomputed: "recomputed by the verifier",
-  hidden: "not revealed",
-  known: "known to the wallet",
-};
-
 /**
- * taproot-commitment.v1 — the Taproot chapter's hero figure.
+ * taproot-commitment.v1 — the Taproot chapter's hero (drawing-first).
  *
- * One published BIP 341 tree: every hash, tweak, key and control block was
- * recomputed at build time with the tested model and matched against the
- * wallet vectors, and every control block was run through the BIP's
- * commitment check. The key-path signature is the published witness for this
- * same output. The reader chooses a spending path, a leaf, and whether to see
- * only what the spend reveals; nothing here signs or accepts input.
+ * One published BIP 341 tree, recomputed and checked at build time. The
+ * drawing shows the output key Q, the tweak, the script tree and the witness.
+ * "Only the proof" draws only what a spend reveals: for the key path just Q
+ * and a signature; for the script path the chosen leaf, the hashes the
+ * verifier recomputes and each sibling as one opaque hash. Anything else is
+ * not drawn at all, so the drawing cannot leak the tree's shape.
  */
-export function TaprootCommitment({ fixture, figureId }: Props) {
+export function TaprootCommitment({ fixture, figureId, initial }: Props) {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   const d = fixture.derived;
-  const [path, setPath] = useState<Path>("script");
-  const [leafId, setLeafId] = useState(d.leaves[d.leaves.length > 1 ? 1 : 0]?.id ?? 0);
-  const [view, setView] = useState<View>("wallet");
-  const leaf: TaprootLeafView | undefined = d.leaves.find((l) => l.id === leafId);
+  const start = initial ?? { path: "script" as Path, leafId: d.leaves[d.leaves.length > 1 ? 1 : 0]?.id ?? 0, view: "wallet" as View };
+  const [path, setPath] = useState<Path>(start.path);
+  const [leafId, setLeafId] = useState(start.leafId);
+  const [view, setView] = useState<View>(start.view);
+  const leaf: TaprootLeafView = d.leaves.find((l) => l.id === leafId) ?? d.leaves[0];
   const proof = view === "proof";
+  const seen = d.root ? seenMap(d.root, path, leaf.id, proof) : new Map<string, Seen>();
+  const keyOnlyView = path === "key" && proof;
+  const sig = d.keySpend?.signatureHex ?? "";
+  const scriptBytes = leaf.scriptHex.length / 2;
+  const cbBytes = leaf.controlBlockHex.length / 2;
+  const m = leaf.path.length;
 
-  // For the chosen leaf: hashes on the path are siblings; nodes containing the leaf are recomputed.
-  const siblingHashes = new Set(path === "script" && leaf ? leaf.path : []);
-  const seenOf = (n: TaprootNodeView): Seen => {
-    if (path === "key") return proof ? "hidden" : "known";
-    if (n.leaf === leafId) return "revealed";
-    if (leavesUnder(n).includes(leafId)) return "recomputed";
-    if (siblingHashes.has(n.hash)) return "hash-only";
-    return proof ? "hidden" : "known";
+  const status =
+    path === "key"
+      ? `Key path: the witness is one ${sig.length / 2}-byte signature for Q. ${proof ? "Nothing about the internal key or the tree is revealed." : "The wallet knows the whole tree; the spend shows none of it."}`
+      : `${leafName(leaf.id)}: the witness carries its script (${scriptBytes} bytes) and a ${cbBytes}-byte control block with ${m} sibling hash${m === 1 ? "" : "es"}; the verifier recomputes ${m} hash${m === 1 ? "" : "es"} up to the root, then the tweak, and checks Q.`;
+
+  const describe = () => {
+    if (keyOnlyView) return `What a key-path spend shows: the output key Q, ${d.outputKeyHex}, and a ${sig.length / 2}-byte signature. No internal key and no tree.`;
+    const drawn = [...seen.entries()].filter(([, s]) => s !== "absent").length;
+    return `Output key Q ${d.outputKeyHex}, made from internal key P ${d.internalKeyHex} tweaked by the Merkle root. ${proof ? `Only the proof is drawn: ${drawn} tree nodes.` : `The whole tree is drawn: ${d.leaves.map((l) => `${leafName(l.id)}, ${l.scriptReading}`).join("; ")}.`} ${status}`;
   };
 
-  /**
-   * In the wallet's view the whole tree is drawn. In the proof view only what a
-   * verifier can know is drawn: the chosen leaf, the nodes it recomputes, and
-   * each sibling as one opaque hash, which could be a leaf or a whole subtree.
-   */
-  const renderNode = (n: TaprootNodeView) => {
-    const seen = seenOf(n);
-    const l = n.leaf !== null ? d.leaves.find((x) => x.id === n.leaf)! : null;
-    if (proof && seen === "hash-only") {
-      return (
-        <li class="atlas-tap-tree__item">
-          <div class="atlas-tap-node" data-seen={seen} data-kind="sibling">
-            <span class="atlas-tap-node__name">Sibling hash</span>
-            <code class="atlas-tap-node__hash">{short(n.hash)}</code>
-            <span class="atlas-tap-node__seen">a leaf or a subtree: the spend does not say</span>
-          </div>
-        </li>
-      );
-    }
+  const draw = (w: "wide" | "narrow") => {
+    const wide = w === "wide";
+    const W = wide ? 640 : 330;
+    const id = `${figureId}-${w}`;
+    const ids = idsFor(id);
+    const cx = W / 2;
+    const cardW = wide ? 134 : 80;
+    const treeTop = 196, levelH = 72;
+    const placed = d.root ? layoutTree(d.root, W - (wide ? 80 : 50), levelH) : [];
+    const rootX = placed.find((n) => n.parent === null)?.x ?? 0;
+    const off = cx - rootX;
+    const at = (hash: string) => {
+      const n = placed.find((p) => p.hash === hash)!;
+      return { x: n.x + off, y: treeTop + n.y, n };
+    };
+    const maxDepth = Math.max(0, ...placed.map((p) => p.depth));
+    const stripY = keyOnlyView ? 150 : treeTop + maxDepth * levelH + 82;
+    const H = stripY + 74;
     return (
-      <li class="atlas-tap-tree__item">
-        <div class="atlas-tap-node" data-seen={seen} data-kind={l ? "leaf" : "branch"}>
-          <span class="atlas-tap-node__name">{l ? leafName(l.id) : "TapBranch"}</span>
-          {l ? <code class="atlas-tap-node__script">{l.scriptReading}</code> : null}
-          <code class="atlas-tap-node__hash">{short(n.hash)}</code>
-          <span class="atlas-tap-node__seen">{l && seen === "revealed" ? "script in the witness; hash recomputed" : SEEN_TEXT[seen]}</span>
-        </div>
-        {n.children.length ? <ol class="atlas-tap-tree__kids">{n.children.map(renderNode)}</ol> : null}
-      </li>
+      <Drawing id={id} width={W} height={H} title="One output, several ways to spend" desc={describe()}>
+        {/* Output key Q */}
+        <KeyGlyph at={[cx - 15, 8]} role="public" />
+        <Value at={[cx + 24, 16]} text="OUTPUT KEY Q" size={8.5} cls="k-value--label" />
+        <Value at={[cx + 24, 28]} text={short(d.outputKeyHex)} size={9.5} />
+        {keyOnlyView ? (
+          <>
+            <rect class="k-outline k-mark--sig" x={cx - 60} y={60} width="120" height="26" />
+            <Value at={[cx, 77]} text={`SIGNATURE · ${sig.length / 2} B`} size={9} anchor="middle" cls="k-value--on" />
+            <Arrow d={`M${cx} 58 V32`} ids={ids} />
+            <Value at={[cx, 118]} text="THE SPEND SHOWS NO TREE AND NO INTERNAL KEY" size={wide ? 9 : 8} anchor="middle" cls="k-value--muted" />
+          </>
+        ) : (
+          <>
+            <Arrow d={`M${cx} 66 V34`} ids={ids} />
+            <Value at={[cx + 8, 54]} text="P + t·G" size={9} />
+            <Machine at={[cx - 28, 102]} w={64} d={34} h={26} label="TapTweak" sub="hash" role="hash" />
+            <KeyGlyph at={[wide ? cx - 190 : 14, 88]} role="public" />
+            <Value at={[wide ? cx - 190 : 14, 116]} text="INTERNAL KEY P" size={8.5} cls="k-value--label" />
+            <Value at={[wide ? cx - 190 : 14, 128]} text={short(d.internalKeyHex)} size={9.5} />
+            <Arrow d={`M${wide ? cx - 156 : 48} 94 H${cx - 62}`} ids={ids} />
+            {d.root ? <Arrow d={`M${cx} ${treeTop - 16} V${150}`} ids={ids} /> : null}
+          </>
+        )}
+        {/* Edges, drawn only between drawn nodes */}
+        {placed.map((n) => {
+          if (!n.parent) return null;
+          const s = seen.get(n.hash)!, ps = seen.get(n.parent)!;
+          if (s === "absent" || ps === "absent") return null;
+          const a = at(n.parent), b = at(n.hash);
+          return <line class={`k-leader${s === "sibling" ? " k-dashed" : ""}`} x1={a.x} y1={a.y + 24} x2={b.x} y2={b.y - 14} />;
+        })}
+        {/* Nodes */}
+        {placed.map((n) => {
+          const s = seen.get(n.hash)!;
+          if (s === "absent") return null;
+          const { x, y } = at(n.hash);
+          const l = n.leaf !== null ? d.leaves.find((v) => v.id === n.leaf)! : null;
+          const isRoot = n.parent === null;
+          if (l && !(proof && s === "sibling")) {
+            // A leaf drawn as a script card.
+            return (
+              <g class="k-leafcard" data-seen={s}>
+                <rect class={`k-outline k-fill--plain${s === "revealed" ? " k-cell--em" : ""}`} x={x - cardW / 2} y={y - 14} width={cardW} height={42} />
+                <Value at={[x - cardW / 2 + 6, y]} text={leafName(l.id).toUpperCase()} size={8.5} cls="k-value--label" />
+                <Value at={[x - cardW / 2 + 6, y + 12]} text={wide ? l.scriptReading : l.scriptReading.split(" ")[0]} size={wide ? 8 : 7.5} />
+                {wide ? null : <Value at={[x - cardW / 2 + 6, y + 22]} text={l.scriptReading.split(" ").slice(1).join(" ")} size={7.5} />}
+                {s === "revealed" ? (
+                  <>
+                    <rect class="k-outline k-mark--sig" x={x - cardW / 2} y={y + 28} width={cardW} height="12" />
+                    <Value at={[x, y + 37]} text="IN THE WITNESS" size={7.5} anchor="middle" cls="k-value--on" />
+                  </>
+                ) : s === "sibling" ? (
+                  <Value at={[x - cardW / 2, y + 40]} text={wide ? `HASH IN PROOF · ${short(l.leafHash)}` : `HASH ${short(l.leafHash)}`} size={7.5} cls="k-value--hash" />
+                ) : null}
+              </g>
+            );
+          }
+          // A hash drawn as a cube: root, branch, or an opaque sibling in the proof view.
+          const role = s === "known" ? "plain" : "hash";
+          const label = s === "sibling" ? (proof ? "LEAF OR SUBTREE?" : "SIBLING") : s === "recomputed" ? (isRoot ? "ROOT · RECOMPUTED" : "RECOMPUTED") : isRoot ? "MERKLE ROOT" : "TAPBRANCH";
+          return (
+            <g class="k-hashnode" data-seen={s}>
+              <IsoBox at={[x, y + 10]} w={22} d={22} h={14} role={role} cls={s === "recomputed" ? "k-iso--dashed" : ""} />
+              <Value at={[x + 24, y + 4]} text={label} size={7.5} cls="k-value--label" />
+              {s === "sibling" ? <Value at={[x + 24, y + 15]} text={short(n.hash)} size={8} cls="k-value--hash" /> : null}
+            </g>
+          );
+        })}
+        {/* Witness strip */}
+        <Value at={[24, stripY - 8]} text={path === "key" ? "WITNESS · KEY PATH · 1 ITEM" : `WITNESS · SCRIPT PATH · ${leafName(leaf.id).toUpperCase()}`} size={8.5} cls="k-value--label" />
+        {path === "key" ? (
+          <>
+            <rect class="k-cell k-mark--sig" x="24" y={stripY} width={W - 48} height="22" />
+            <Value at={[30, stripY + 15]} text={`signature · ${sig.length / 2} B`} size={9} cls="k-value--on" />
+          </>
+        ) : (
+          witnessStrip(ids, 24, stripY, W - 48, scriptBytes, cbBytes, m, wide)
+        )}
+      </Drawing>
     );
   };
 
-  const keySeen: Seen = path === "key" ? (proof ? "hidden" : "known") : "revealed";
-  const rootSeen: Seen = path === "key" ? (proof ? "hidden" : "known") : "recomputed";
-  const cb = leaf?.controlBlockHex ?? "";
-  const pathHashes = leaf ? leaf.path : [];
+  const strip = (label: string, name: string, options: Array<{ value: string; text: string; disabled?: boolean }>, current: string, set: (v: string) => void) => (
+    <div class="atlas-strip" role="radiogroup" aria-label={label}>
+      {options.map((o) => (
+        <label class="atlas-strip__opt" data-disabled={o.disabled ? "true" : undefined}>
+          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} disabled={o.disabled} onChange={() => set(o.value)} />
+          <span>{o.text}</span>
+        </label>
+      ))}
+    </div>
+  );
 
   return (
-    <div class="atlas-lab atlas-tap-lab" data-hydrated={hydrated ? "true" : "false"} data-path={path} data-view={view}>
+    <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-segmented">
-            <legend>Spending path</legend>
-            {(["key", "script"] as const).map((p) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-path`} checked={path === p} onChange={() => setPath(p)} />
-                <span>{p === "key" ? "Key path" : "Script path"}<small>{p === "key" ? "one signature" : "script + proof"}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-segmented" disabled={path === "key"}>
-            <legend>Leaf</legend>
-            {d.leaves.map((l) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-leaf`} checked={leafId === l.id} onChange={() => setLeafId(l.id)} disabled={path === "key"} />
-                <span>{leafName(l.id)}<small>depth {l.path.length}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-segmented">
-            <legend>Show</legend>
-            {(["wallet", "proof"] as const).map((v) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-view`} checked={view === v} onChange={() => setView(v)} />
-                <span>{v === "wallet" ? "Everything" : "Only the proof"}<small>{v === "wallet" ? "the wallet’s view" : "what the spend reveals"}</small></span>
-              </label>
-            ))}
-          </fieldset>
+        <div class="atlas-hero__controls">
+          {strip("Spending path", "path", [{ value: "key", text: "Key path" }, { value: "script", text: "Script path" }], path, (v) => setPath(v as Path))}
+          {strip("Leaf", "leaf", d.leaves.map((l) => ({ value: String(l.id), text: leafName(l.id), disabled: path === "key" })), String(leafId), (v) => setLeafId(Number(v)))}
+          {strip("Show", "view", [{ value: "wallet", text: "Everything" }, { value: "proof", text: "Only the proof" }], view, (v) => setView(v as View))}
         </div>
       ) : (
-        <p class="atlas-lab__static-note">
-          Static view: a script-path spend of {leaf ? leafName(leaf.id) : "a leaf"}, with the whole tree shown as the wallet knows it.
-          With JavaScript you can switch to the key path, choose another leaf, and hide everything the spend does not reveal.
-        </p>
+        <p class="atlas-hero__static">Static view: the script path for {leafName(start.leafId)}, with the whole tree shown. With JavaScript you can switch to the key path, pick another leaf, and show only what the spend reveals.</p>
       )}
-
-      <div class="atlas-tap-lab__body">
-        <div class="atlas-tap-lab__structure" role="group" aria-label="Commitment structure">
-          <div class="atlas-tap-out">
-            <span class="atlas-tap-out__label">Output · witness v1 program</span>
-            <code class="atlas-break">{d.outputKeyHex}</code>
-            <small>Output key Q (x only). This is all the output itself shows.</small>
-          </div>
-          {proof && path === "key" ? null : (
-            <>
-          <p class="atlas-tap-eq">
-            Q = P + t⋅G, &nbsp;t = hash<sub>TapTweak</sub>(p ‖ root)
-            <span class="atlas-tap-eq__seen">{path === "key" ? (proof ? "tweak not revealed" : "known to the wallet") : "recomputed by the verifier"}</span>
-          </p>
-          <div class="atlas-tap-inputs">
-            <div class="atlas-tap-node" data-seen={keySeen} data-kind="key">
-              <span class="atlas-tap-node__name">Internal key P</span>
-              {proof && keySeen === "hidden" ? <span class="atlas-tap-node__hash" data-concealed="true">—</span> : <code class="atlas-tap-node__hash">{short(d.internalKeyHex)}</code>}
-              <span class="atlas-tap-node__seen">{SEEN_TEXT[keySeen]}</span>
-            </div>
-            <div class="atlas-tap-node" data-seen={rootSeen} data-kind="root">
-              <span class="atlas-tap-node__name">Merkle root</span>
-              {proof && rootSeen === "hidden" ? <span class="atlas-tap-node__hash" data-concealed="true">—</span> : <code class="atlas-tap-node__hash">{d.merkleRootHex ? short(d.merkleRootHex) : "none"}</code>}
-              <span class="atlas-tap-node__seen">{SEEN_TEXT[rootSeen]}</span>
-            </div>
-          </div>
-            </>
-          )}
-          {d.root && !(proof && path === "key") ? <ol class="atlas-tap-tree" aria-label={proof ? "What the proof shows of the script tree" : "Script tree"}>{renderNode(d.root)}</ol> : null}
-          {proof && path === "key" ? <p class="atlas-tap-none">Nothing else is drawn: from a key-path spend, Q could be a plain key or hide an internal key and any number of scripts.</p> : null}
-          <p class="atlas-tap-legend">
-            <span data-seen="revealed">in the witness</span>
-            <span data-seen="hash-only">hash only</span>
-            <span data-seen="recomputed">recomputed</span>
-            {proof ? null : <span data-seen="known">known to the wallet</span>}
-          </p>
-        </div>
-
-        <section class="atlas-panel atlas-tap-lab__panel" aria-live="polite" aria-label="Witness and verification">
+      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact values for this view</summary>
+        <dl class="atlas-hexlist">
+          <dt>Output key Q</dt><dd><code class="atlas-break">{d.outputKeyHex}</code></dd>
           {path === "key" ? (
             <>
-              <h3 class="atlas-panel__title">Key-path witness · 1 element</h3>
-              {d.keySpend ? (
-                <>
-                  <ol class="atlas-tap-witness">
-                    <li>
-                      <span class="atlas-tap-witness__label">signature · {d.keySpend.signatureHex.length / 2} bytes{d.keySpend.hashType === 0 ? ", SIGHASH_DEFAULT" : ""}</span>
-                      <code class="atlas-break">{d.keySpend.signatureHex}</code>
-                    </li>
-                  </ol>
-                  <p class="atlas-tap-check" data-ok="true">✓ BIP 340 signature valid for the output key Q over the transaction’s signature hash</p>
-                </>
-              ) : (
-                <p class="atlas-panel__empty">The published vectors include no key-path spend of this output.</p>
-              )}
-              <p class="atlas-panel__scope">
-                The spend shows Q and one signature. Nothing in it says whether a script tree exists: the internal key, the tweak and every script stay
-                off chain. Signing needs the secret key for Q: the internal secret key (negated if needed) plus the tweak.
-              </p>
+              <dt>Signature (published key-path witness)</dt><dd><code class="atlas-break">{sig}</code></dd>
+              {proof ? null : <><dt>Internal key P</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd><dt>Merkle root</dt><dd><code class="atlas-break">{d.merkleRootHex}</code></dd></>}
             </>
-          ) : leaf ? (
+          ) : (
             <>
-              <h3 class="atlas-panel__title">Script-path witness for {leafName(leaf.id)}</h3>
-              <ol class="atlas-tap-witness">
-                <li data-missing="true">
-                  <span class="atlas-tap-witness__label">script inputs</span>
-                  <span>Whatever the script needs; for this leaf, a signature for its key. The vectors publish none, so none is shown.</span>
-                </li>
-                <li>
-                  <span class="atlas-tap-witness__label">script s · {leaf.scriptHex.length / 2} bytes</span>
-                  <code class="atlas-break">{leaf.scriptHex}</code>
-                </li>
-                <li>
-                  <span class="atlas-tap-witness__label">control block c · {cb.length / 2} bytes = 33 + 32 × {pathHashes.length}</span>
-                  <span class="atlas-tap-cb">
-                    <code data-part="byte" title="leaf version | parity">{cb.slice(0, 2)}</code>
-                    <code data-part="key" class="atlas-break">{cb.slice(2, 66)}</code>
-                    {pathHashes.map((h) => <code data-part="path" class="atlas-break">{h}</code>)}
-                  </span>
-                  <small>
-                    first byte 0x{cb.slice(0, 2)} = leaf version 0x{leaf.leafVersion.toString(16)} + parity bit {d.parity}; then the internal key P; then {pathHashes.length} sibling {pathHashes.length === 1 ? "hash" : "hashes"}
-                  </small>
-                </li>
-              </ol>
-              <ol class="atlas-tap-steps" aria-label="Verifier recomputation">
-                {leaf.check.map((s) => (
-                  <li data-ok={s.ok ? "true" : "false"}>
-                    {s.id === "length" ? <>Length {s.values.bytes} bytes = 33 + 32 × {s.values.m} ✓</> : null}
-                    {s.id === "internal-key" ? <>P = lift_x(c[1:33]) ✓</> : null}
-                    {s.id === "leaf-version" ? <>leaf version v = c[0] &amp; 0xfe = {s.values.v}</> : null}
-                    {s.id === "leaf-hash" ? <>k0 = hash<sub>TapLeaf</sub>(v ‖ size ‖ s) = <code>{short(s.values.k0)}</code></> : null}
-                    {s.id === "branch" ? (
-                      <>
-                        k{Number(s.values.j) + 1} = hash<sub>TapBranch</sub>({s.values.first === "k" ? `k${s.values.j} ‖ e${s.values.j}` : `e${s.values.j} ‖ k${s.values.j}`}) = <code>{short(s.values.next)}</code>
-                        <small> smaller hash first</small>
-                      </>
-                    ) : null}
-                    {s.id === "tweak" ? <>t = hash<sub>TapTweak</sub>(p ‖ k) = <code>{short(s.values.t)}</code></> : null}
-                    {s.id === "output-key" ? <>Q = P + t⋅G; y(Q) is {s.values.parity === "0" ? "even" : "odd"}, matching the parity bit</> : null}
-                    {s.id === "compare" ? <>x(Q) = q {s.ok ? "✓" : "✕"}: the output committed to this script</> : null}
-                  </li>
-                ))}
-              </ol>
-              <p class="atlas-panel__scope">
-                The spend reveals that a script path exists, the internal key P, the leaf version and parity bit, this leaf’s script and its inputs, and its depth ({leaf.path.length}).
-                The rest of the tree appears, if at all, only as sibling hashes.
-                Running the script itself is BIP 342’s job and is not shown here.
-              </p>
+              <dt>{leafName(leaf.id)} script</dt><dd><code class="atlas-break">{leaf.scriptHex}</code></dd>
+              <dt>Control block</dt><dd><code class="atlas-break">{leaf.controlBlockHex}</code></dd>
+              <dt>Internal key P (bytes 1–32 of the control block)</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd>
             </>
-          ) : null}
-        </section>
-      </div>
-
-      <details class="atlas-tap-exact">
-        <summary>Exact values{proof ? " (only those this spend reveals or lets a verifier recompute)" : " (the wallet’s view)"}</summary>
-        <dl>
-          {!(proof && path === "key") ? <div><dt>internal key P</dt><dd><code class="atlas-break">{d.internalKeyHex}</code></dd></div> : null}
-          {!(proof && path === "key") ? <div><dt>Merkle root</dt><dd><code class="atlas-break">{d.merkleRootHex ?? "none"}</code></dd></div> : null}
-          {!(proof && path === "key") ? <div><dt>tweak t</dt><dd><code class="atlas-break">{d.tweakHex}</code></dd></div> : null}
-          <div><dt>output key Q</dt><dd><code class="atlas-break">{d.outputKeyHex}</code>{proof && path === "key" ? null : <> (y {d.parity ? "odd" : "even"})</>}</dd></div>
-          <div><dt>address</dt><dd><code class="atlas-break">{d.address}</code></dd></div>
-          {proof && path === "script" && leaf ? (
-            <>
-              <div><dt>{leafName(leaf.id)} hash</dt><dd><code class="atlas-break">{leaf.leafHash}</code></dd></div>
-              {leaf.path.map((h, k) => <div><dt>sibling hash {k + 1}</dt><dd><code class="atlas-break">{h}</code></dd></div>)}
-            </>
-          ) : !proof ? (
-            d.leaves.map((l) => <div><dt>{leafName(l.id)} hash</dt><dd><code class="atlas-break">{l.leafHash}</code></dd></div>)
-          ) : null}
+          )}
         </dl>
       </details>
-      <p class="atlas-lab__source">
-        Source: BIP 341 wallet-test-vectors.json, {fixture.source.pointer}{fixture.keySpend ? ` and ${fixture.keySpend.pointer}` : ""}. Hashes are byte arrays, first byte first.
-        The tree’s shape is this vector’s; BIP 341 lets a wallet choose any binary tree.
-      </p>
+      <p class="atlas-hero__source">BIP 341 wallet-test-vectors.json, {fixture.source.pointer}. Every hash, tweak and control block was recomputed and checked at build time.</p>
     </div>
+  );
+}
+
+/** Script-path witness: inputs (not shown), the script, and the control block split into its parts. */
+function witnessStrip(ids: DrawingIds, x: number, y: number, width: number, scriptBytes: number, cbBytes: number, m: number, wide: boolean) {
+  const inputsW = wide ? 90 : 56;
+  const rest = width - inputsW;
+  const unit = rest / (scriptBytes + cbBytes);
+  const parts: Array<{ w: number; role: string; label: string; style?: string }> = [
+    { w: inputsW, role: "hidden", label: wide ? "script inputs" : "inputs", style: `fill:${ids.hatch}` },
+    { w: scriptBytes * unit, role: "plain", label: `script ${scriptBytes} B` },
+    { w: unit, role: "plain", label: "" },
+    { w: 32 * unit, role: "public", label: "P 32 B" },
+    ...Array.from({ length: m }, (_, j) => ({ w: 32 * unit, role: "hash", label: `e${j} 32 B` })),
+  ];
+  let cx = x;
+  const cbStart = x + inputsW + scriptBytes * unit;
+  return (
+    <g class="k-witness">
+      {parts.map((p) => {
+        const px = cx;
+        cx += p.w;
+        return (
+          <g>
+            <rect class={`k-cell k-fill--${p.role}`} x={px} y={y} width={p.w} height="22" style={p.style} />
+            {p.label && p.label.length * 5 + 6 < p.w ? <text class="k-value" x={px + 4} y={y + 14.5} style="font-size:8px">{p.label}</text> : null}
+          </g>
+        );
+      })}
+      <path class="k-leader" d={`M${cbStart} ${y + 26} V${y + 31} H${x + width} V${y + 26}`} />
+      <text class="k-value k-value--label" x={(cbStart + x + width) / 2} y={y + 44} text-anchor="middle" style="font-size:8.5px">{`CONTROL BLOCK · 33 + 32 × ${m} = ${cbBytes} B`}</text>
+    </g>
   );
 }

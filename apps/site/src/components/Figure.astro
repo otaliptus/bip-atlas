@@ -32,7 +32,6 @@ import {
   AddressWorked,
   PsbtWorked,
   SchnorrWorked,
-  TaprootWorked,
   TapscriptWorked,
   P2shWorked,
   P2shTwoStage,
@@ -236,7 +235,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
-      {figure.recipe === "taproot-commitment.v1" && <TaprootWorked fixture={tap[0]} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}

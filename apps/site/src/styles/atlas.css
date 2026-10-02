@@ -1488,3 +1488,7 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 .k-value--hash { fill: #9a7400 !important; font-weight: 500; }
 .k-dashed { stroke-dasharray: 3 2; }
 .k-sep { stroke: var(--manual-rule); }
+.k-value--on { fill: #ffffff !important; font-weight: 500; }
+.k-iso--dashed .k-face { stroke-dasharray: 3 2; }
+.atlas-hero__static { margin: 0; font-size: 0.875rem; color: var(--manual-muted); }
+.atlas-strip__opt[data-disabled="true"] span { opacity: 0.35; }

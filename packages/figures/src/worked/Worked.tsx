@@ -198,33 +198,6 @@ export function SchnorrWorked({ fixtures }: { fixtures: DerivedSchnorrFixture[] 
   );
 }
 
-/* ---------- BIP 341 ---------- */
-export function TaprootWorked({ fixture: f }: { fixture: DerivedTaprootTreeFixture }) {
-  const d = f.derived;
-  const leaf = [...d.leaves].sort((a, b) => b.path.length - a.path.length)[0];
-  const branches = leaf.check.filter((s) => s.id === "branch");
-  const tweak = leaf.check.find((s) => s.id === "tweak")!.values;
-  const steps: WorkedStep[] = [
-    { title: `Reveal one script (leaf ${String.fromCharCode(65 + leaf.id)}) and hash it with its leaf version 0x${leaf.leafVersion.toString(16)} and length`, values: [{ label: "script", value: leaf.scriptHex }, { label: "TapLeaf hash", value: leaf.leafHash }], layer: { size: 0.4, tone: "accent" } },
-    ...branches.map((b, j): WorkedStep => ({
-      title: `Fold in sibling hash ${j + 1}, smaller first`,
-      values: [{ label: "sibling", value: b.values.e }, { label: "TapBranch", value: b.values.next }],
-      layer: { size: 0.55 + 0.2 * j, tone: "wash", cells: 2 },
-    })),
-    { title: "Tweak the internal key with the root", values: [{ label: "internal key P", value: d.internalKeyHex }, { label: "t", value: tweak.t }], layer: { size: 0.9, tone: "wash", cells: 2 } },
-    { title: "Q = P + t⋅G must equal the output key", values: [{ label: "output key q", value: d.outputKeyHex }], note: `It does, and y(Q) is ${d.parity ? "odd" : "even"}, matching the control block’s parity bit: the output committed to this script all along.`, layer: { size: 0.6, tone: "accent" } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>Spending published vector {f.vectorIndex} through one of its deepest leaves: what the verifier rebuilds from the control block.</>}
-      steps={steps}
-      label="A leaf hash folded with sibling hashes up to the root, then tweaked into the output key."
-      source={<>Source: BIP 341 wallet-test-vectors.json, {f.source.pointer}; every value matched the vector at build time.</>}
-    />
-  );
-}
-
-/* ---------- BIP 342 ---------- */
 export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixture[] }) {
   const f = fixtures.find((x) => x.caseIndex === 1109) ?? fixtures[0];
   const v = f.derived.success;

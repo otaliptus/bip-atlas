@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { checkControlBlock, sigMsg, taprootOutput, taprootSighash } from "@bip-atlas/models/taproot";
 import { parseTransaction } from "@bip-atlas/models/tx";
 import { SigMsgLayout } from "../src/taproot/SigMsgLayout";
+import { TaprootCommitment } from "../src/taproot/TaprootCommitment";
 import { TaprootTweak } from "../src/taproot/TaprootTweak";
 import { layoutTree, seenMap } from "../src/taproot/treeLayout";
 import type { DerivedTaprootKeyspendFixture, DerivedTaprootTreeFixture, TaprootKeyspendFixture, TaprootTreeFixture } from "../src/types";
@@ -129,5 +130,42 @@ describe("SigMsgLayout", () => {
   it("prints the sighash from the model", () => {
     expect(s).toContain(d.derived.sighashHex.slice(0, 32));
     expect(s).toContain(d.derived.sighashHex.slice(32));
+  });
+});
+
+describe("TaprootCommitment (static renders)", () => {
+  const f = derived("bip341-spk5");
+  const d = f.derived;
+  const render = (initial?: { path: "key" | "script"; leafId: number; view: "wallet" | "proof" }) =>
+    html(h(TaprootCommitment, { fixture: f, figureId: "fig-a07-2", initial }));
+  const wideOnly = (s: string) => s.split("k-resp__narrow")[0];
+
+  it("no-JS default: script path for leaf B, whole tree, status from the model", () => {
+    const s = render();
+    expect(s).toContain('data-hydrated="false"');
+    for (const l of d.leaves) expect(wideOnly(s)).toContain(l.scriptReading.replace(/</g, "&lt;"));
+    const b = d.leaves.find((l) => l.id === 1)!;
+    expect(s).toContain(`a ${b.controlBlockHex.length / 2}-byte control block with ${b.path.length} sibling hashes`);
+    expect(s).not.toContain('type="radio"');
+  });
+  it("proof view for leaf A draws one opaque sibling and no other leaf", () => {
+    const s = wideOnly(render({ path: "script", leafId: 0, view: "proof" }));
+    expect(count(s, "LEAF OR SUBTREE?")).toBe(1);
+    expect(s).not.toContain("LEAF B");
+    expect(s).not.toContain("LEAF C");
+  });
+  it("key path, proof view: no internal key, no root, no tree anywhere (drawing, desc or disclosure)", () => {
+    const s = render({ path: "key", leafId: 1, view: "proof" });
+    expect(s).not.toContain(d.internalKeyHex.slice(0, 8));
+    expect(s).not.toContain(d.merkleRootHex!.slice(0, 8));
+    for (const l of d.leaves) expect(s).not.toContain(l.leafHash.slice(0, 8));
+    expect(s).toContain(d.outputKeyHex.slice(0, 8));
+    expect(s).toContain("THE SPEND SHOWS NO TREE");
+  });
+  it("control block parts add up to its length", () => {
+    const s = wideOnly(render({ path: "script", leafId: 1, view: "proof" }));
+    const b = d.leaves.find((l) => l.id === 1)!;
+    expect(s).toContain(`33 + 32 × ${b.path.length} = ${b.controlBlockHex.length / 2} B`);
+    expect(33 + 32 * b.path.length).toBe(b.controlBlockHex.length / 2);
   });
 });
