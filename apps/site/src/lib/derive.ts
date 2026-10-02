@@ -113,6 +113,7 @@ import {
   LOCKTIME_THRESHOLD,
   SEQUENCE_LOCKTIME_MASK,
   SEQUENCE_LOCKTIME_TYPE_FLAG,
+  SEQUENCE_LOCKTIME_GRANULARITY,
   validLastWords,
 } from "@bip-atlas/models";
 import { sha256 } from "@noble/hashes/sha2.js";
@@ -885,6 +886,25 @@ function deriveTimelockCase(f: TimelockCaseFixture): DerivedTimelockCaseFixture 
   const e = evaluateCoreLockCase(asm, fields, 0);
   if (e.valid !== (f.expected === "valid")) throw new Error(`${f.id}: model says ${e.valid ? "valid" : "invalid"}, Core says ${f.expected}`);
   if ((e.script.opcode === "CHECKLOCKTIMEVERIFY") !== (f.lock === "absolute")) throw new Error(`${f.id}: lock kind does not match the opcode`);
+  // The hero's "change a field": the same case with one field changed, re-run through the model.
+  const iso = (n: number) => new Date(n * 1000).toISOString();
+  const variant = (id: string, label: string, field: "version" | "nLockTime" | "nSequence", patch: Partial<typeof fields>) => {
+    const g = { ...fields, ...patch, sequences: patch.sequences ?? fields.sequences };
+    const r = evaluateCoreLockCase(asm, g, 0);
+    return { id, label, field, version: g.version, nLockTime: g.nLockTime, nSequence: g.sequences[0], nLockTimeIso: iso(g.nLockTime), value16: g.sequences[0] & SEQUENCE_LOCKTIME_MASK, value16Seconds: (g.sequences[0] & SEQUENCE_LOCKTIME_MASK) * 2 ** SEQUENCE_LOCKTIME_GRANULARITY, checks: r.result.checks.map((k) => ({ ...k })), valid: r.valid };
+  };
+  const seq0 = fields.sequences[0];
+  const edits =
+    f.lock === "absolute"
+      ? [
+          variant("locktime-plus", "nLockTime + 1", "nLockTime", { nLockTime: fields.nLockTime + 1 }),
+          variant("final", seq0 === 0xffffffff ? "input made non-final" : "input made final", "nSequence", { sequences: [seq0 === 0xffffffff ? 0xfffffffe : 0xffffffff] }),
+        ]
+      : [
+          variant("version", `version ${fields.version >= 2 ? 1 : 2}`, "version", { version: fields.version >= 2 ? 1 : 2 }),
+          variant("bit31", `bit 31 ${seq0 & 0x80000000 ? "cleared" : "set"}`, "nSequence", { sequences: [(seq0 ^ 0x80000000) >>> 0] }),
+        ];
+  if (fields.nLockTime >= 0xffffffff) throw new Error(`${f.id}: nLockTime + 1 would overflow`);
   return {
     ...f,
     derived: {
@@ -897,6 +917,10 @@ function deriveTimelockCase(f: TimelockCaseFixture): DerivedTimelockCaseFixture 
       nSequence: fields.sequences[0],
       txHex: c.txHex,
       checks: e.result.checks.map((k) => ({ ...k })),
+      nLockTimeIso: iso(fields.nLockTime),
+      value16: fields.sequences[0] & SEQUENCE_LOCKTIME_MASK,
+      value16Seconds: (fields.sequences[0] & SEQUENCE_LOCKTIME_MASK) * 2 ** SEQUENCE_LOCKTIME_GRANULARITY,
+      edits,
       valid: e.valid,
     },
   };

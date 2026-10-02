@@ -13,30 +13,36 @@ interface Props {
   spec: HeroSpec<unknown>;
 }
 const { figureId, spec } = Astro.props;
-const controls = spec.controls.map((c) => ({ kind: c.kind, name: c.name, options: c.options.map((o) => ({ value: o.value, resets: o.resets ?? [] })), sets: c.sets ?? {} }));
+const keyed = spec.controls.filter((c) => c.kind !== "toggle");
+const controls = keyed.map((c) => ({ kind: c.kind, name: c.name, options: c.options.map((o) => ({ value: o.value, resets: o.resets ?? [] })), sets: c.sets ?? {}, showWhen: c.showWhen ?? null }));
 const strips = spec.controls.filter((c) => c.kind === "strip");
+const toggles = spec.controls.filter((c) => c.kind === "toggle");
 const stepper = spec.controls.find((c) => c.kind === "stepper");
 const initial = spec.initialKey.split("|");
+const at = (name: string) => initial[keyed.findIndex((c) => c.name === name)];
 ---
-<div class="atlas-hero" id={`${figureId}-hero`} data-hero-states data-hydrated="false" data-initial={spec.initialKey} data-controls={JSON.stringify(controls)}>
+<div class:list={["atlas-hero", { "atlas-hero--compact": spec.compact }]} id={`${figureId}-hero`} data-hero-states data-hydrated="false" data-initial={spec.initialKey} data-controls={JSON.stringify(controls)}>
   <p class="atlas-hero__static" data-nojs>{spec.staticNote}</p>
   <div class="atlas-hero__controls" data-js hidden>
     {strips.map((c) => (
-      <div class="atlas-strip" role="radiogroup" aria-label={c.label}>
+      <div class="atlas-strip" role="radiogroup" aria-label={c.label} data-strip={c.name}>
         {c.options.map((o) => (
           <label class="atlas-strip__opt">
-            <input type="radio" name={`${figureId}-${c.name}`} value={o.value} checked={initial[spec.controls.indexOf(c)] === o.value} />
+            <input type="radio" name={`${figureId}-${c.name}`} value={o.value} checked={at(c.name) === o.value} />
             <span>{o.text}</span>
           </label>
         ))}
       </div>
+    ))}
+    {toggles.map((c) => (
+      <label class="atlas-toggle"><input type="checkbox" data-toggle={c.name} /> <span>{c.label}</span></label>
     ))}
   </div>
   <slot />
   {stepper && (
     <div class="atlas-scrub" role="group" aria-label={stepper.label} data-js hidden>
       <button type="button" class="atlas-scrub__btn" data-step="-1" aria-label={stepper.prevLabel ?? "Previous"}>←</button>
-      <input type="range" min="0" max={stepper.options.length - 1} value={stepper.options.findIndex((o) => o.value === initial[spec.controls.indexOf(stepper)])} aria-label={stepper.label} data-range={stepper.name} />
+      <input type="range" min="0" max={stepper.options.length - 1} value={stepper.options.findIndex((o) => o.value === at(stepper.name))} aria-label={stepper.label} data-range={stepper.name} />
       <button type="button" class="atlas-scrub__btn" data-step="1" aria-label={stepper.nextLabel ?? "Next"}>→</button>
     </div>
   )}
@@ -44,13 +50,14 @@ const initial = spec.initialKey.split("|");
 </div>
 
 <script>
-  type Ctl = { kind: string; name: string; options: Array<{ value: string; resets: string[] }>; sets: Record<string, string> };
+  type Ctl = { kind: string; name: string; options: Array<{ value: string; resets: string[] }>; sets: Record<string, string>; showWhen: { name: string; value: string } | null };
   for (const root of document.querySelectorAll<HTMLElement>("[data-hero-states]")) {
     const controls: Ctl[] = JSON.parse(root.dataset.controls!);
     const states = [...root.querySelectorAll<HTMLElement>(":scope > [data-state]")];
     const live = root.querySelector<HTMLElement>("[data-live]")!;
     const range = root.querySelector<HTMLInputElement>("[data-range]");
     const [prev, next] = [...root.querySelectorAll<HTMLButtonElement>("[data-step]")];
+    const radios = (c: Ctl) => root.querySelectorAll<HTMLInputElement>(`[data-strip="${c.name}"] input`);
     const value: Record<string, string> = {};
     root.dataset.initial!.split("|").forEach((v, i) => (value[controls[i].name] = v));
     const show = () => {
@@ -63,7 +70,8 @@ const initial = spec.initialKey.split("|");
       }
       for (const c of controls) {
         if (c.kind === "strip") {
-          for (const i of root.querySelectorAll<HTMLInputElement>(`input[type=radio][name="${root.id.replace(/-hero$/, "")}-${c.name}"]`)) i.checked = i.value === value[c.name];
+          for (const i of radios(c)) i.checked = i.value === value[c.name];
+          root.querySelector<HTMLElement>(`[data-strip="${c.name}"]`)!.hidden = !!c.showWhen && value[c.showWhen.name] !== c.showWhen.value;
         } else if (range) {
           const at = c.options.findIndex((o) => o.value === value[c.name]);
           range.value = String(at);
@@ -81,9 +89,7 @@ const initial = spec.initialKey.split("|");
       if (stepped) Object.assign(value, c.sets);
       show();
     };
-    for (const c of controls.filter((x) => x.kind === "strip")) {
-      for (const i of root.querySelectorAll<HTMLInputElement>(`input[type=radio][name="${root.id.replace(/-hero$/, "")}-${c.name}"]`)) i.addEventListener("change", () => set(c.name, i.value));
-    }
+    for (const c of controls.filter((x) => x.kind === "strip")) for (const i of radios(c)) i.addEventListener("change", () => set(c.name, i.value));
     const step = controls.find((x) => x.kind === "stepper");
     if (step && range) {
       range.addEventListener("input", () => set(step.name, step.options[Number(range.value)].value, true));
@@ -95,6 +101,11 @@ const initial = spec.initialKey.split("|");
           if (at >= 0 && at < step.options.length) set(step.name, step.options[at].value, true);
         });
       }
+    }
+    for (const t of root.querySelectorAll<HTMLInputElement>("[data-toggle]")) {
+      const apply = () => (root.dataset[t.dataset.toggle!] = t.checked ? "on" : "off");
+      t.addEventListener("change", apply);
+      apply();
     }
     for (const s of root.querySelectorAll<HTMLElement>("[data-status]")) s.hidden = true;
     for (const n of root.querySelectorAll<HTMLElement>("[data-js]")) n.hidden = false;

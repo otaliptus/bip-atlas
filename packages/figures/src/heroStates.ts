@@ -8,9 +8,15 @@
  * in the browser, and the client JS cost is one small shared script.
  */
 
-/** A segmented strip (radiogroup) or a stepper (range plus previous/next buttons). */
+/**
+ * A segmented strip (radiogroup), a stepper (range plus previous/next
+ * buttons) or a toggle (a checkbox that only sets a data attribute on the
+ * hero, for layers every state draws; toggles are not part of the key).
+ */
 export interface HeroControl {
-  kind: "strip" | "stepper";
+  kind: "strip" | "stepper" | "toggle";
+  /** Strips only: shown only while another control has this value. */
+  showWhen?: { name: string; value: string };
   /** Short id; also part of each radio's name. */
   name: string;
   /** Accessible name of the radiogroup or range. */
@@ -41,6 +47,8 @@ export interface HeroSpec<S> {
   noJsId: string;
   /** Shown without JavaScript, above the drawing. */
   staticNote: string;
+  /** One narrow composition, capped in width (instead of wide and narrow ones). */
+  compact?: boolean;
 }
 
 /** Every combination of the given option lists, as "a|b|c" keys. */
@@ -50,7 +58,7 @@ export function combos(lists: string[][]): string[][] {
 
 /** Checks a spec: every combination of control values maps to exactly one state, and the no-JS and initial states exist. */
 export function checkSpec<S>(spec: HeroSpec<S>): HeroSpec<S> {
-  const all = combos(spec.controls.map((c) => c.options.map((o) => o.value))).map((k) => k.join("|"));
+  const all = combos(spec.controls.filter((c) => c.kind !== "toggle").map((c) => c.options.map((o) => o.value))).map((k) => k.join("|"));
   const seen = new Map<string, string>();
   for (const st of spec.states) for (const k of st.keys) {
     if (seen.has(k)) throw new Error(`hero spec: key ${k} maps to two states`);

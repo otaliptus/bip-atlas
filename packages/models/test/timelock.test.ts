@@ -224,7 +224,8 @@ describe("timelocks chapter prose numbers", () => {
   it("restates BIP 68's ranges and the 12-of-51 figure", () => {
     expect(text).toContain("up to 65,535 blocks, about 1.25 years, or a time below 33,554,431 seconds, about 1.06 years");
     expect(text).toContain("Twelve one-input transactions from Bitcoin Core’s test suite");
-    expect(text.match(/"core-(valid|invalid)-\d+"/g)!.length).toBe(12);
+    // Distinct cases: the CSV storyboard reuses one of the hero's twelve.
+    expect(new Set(text.match(/"core-(valid|invalid)-\d+"/g)!).size).toBe(12);
     expect(excerpt.cases.length).toBe(51);
   });
 

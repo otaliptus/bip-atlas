@@ -1,277 +1,172 @@
-import { useEffect, useState } from "preact/hooks";
-import { holdFocus } from "../focus";
-import {
-  checkLockTimeVerify,
-  checkSequenceVerify,
-  LOCKTIME_THRESHOLD,
-  SEQUENCE_FINAL,
-  SEQUENCE_LOCKTIME_DISABLE_FLAG,
-  SEQUENCE_LOCKTIME_MASK,
-  SEQUENCE_LOCKTIME_TYPE_FLAG,
-} from "@bip-atlas/models/timelock";
+import { checkSpec, combos, type HeroSpec } from "../heroStates";
+import { Drawing, Value, idsFor } from "../kit";
 import type { DerivedTimelockCaseFixture, TimelockCheckView } from "../types";
+import { LOCKTIME_THRESHOLD as THRESHOLD, SEQUENCE_LOCKTIME_TYPE_FLAG } from "@bip-atlas/models/timelock";
+import { BitRow } from "./bits";
 
-interface Props {
-  fixtures: DerivedTimelockCaseFixture[];
-  figureId: string;
-}
+export interface TimelockHeroState { caseId: string; edit: string }
 
-type Mode = "absolute" | "relative";
-interface Edits {
-  version: number;
-  nLockTime: number;
-  nSequence: number;
-}
-
-const hex32 = (n: number) => `0x${(n >>> 0).toString(16).padStart(8, "0")}`;
 const num = (n: number | bigint) => n.toLocaleString("en-US");
-const utc = (s: number) => new Date(s * 1000).toISOString().replace("T", " ").replace(".000Z", " UTC");
+const hex32 = (n: number) => `0x${(n >>> 0).toString(16).padStart(8, "0")}`;
+const utc = (iso: string) => iso.replace("T", " ").replace(".000Z", " UTC");
 
-/** A rough duration, for comparing units only. */
-function span(seconds: number): string {
-  if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
-  if (seconds < 86_400 * 2) return `${(seconds / 3600).toFixed(1)} h`;
-  const YEAR = 86_400 * 365.25;
-  if (seconds < YEAR) return `${(seconds / 86_400).toFixed(1)} days`;
-  return `${(seconds / YEAR).toFixed(2)} years`;
-}
-
-/** What each bit of nSequence means under BIP 68 (when bit 31 is clear). */
-function bitRole(b: number, disabled: boolean): "disable" | "type" | "value" | "unused" {
-  if (b === 31) return "disable";
-  if (disabled) return "unused"; // with bit 31 set, BIP 68 gives the other 31 bits no meaning
-  if (b === 22) return "type";
-  if (b <= 15) return "value";
-  return "unused";
-}
-const ROLE_TEXT = { disable: "disable flag", type: "type flag (set: 512-second units)", value: "lock-time value", unused: "no meaning under BIP 68" };
-
-function Checks({ checks, valid }: { checks: TimelockCheckView[]; valid: boolean }) {
-  return (
-    <ol class="atlas-tl-checks">
-      {checks.map((c) => (
-        <li data-ok={c.ok ? "true" : "false"} data-stop={c.stopsHere ? "true" : undefined}>
-          <span class="atlas-tl-checks__mark" aria-hidden="true">{c.ok ? "✓" : "✕"}</span>
-          <span class="atlas-tl-checks__label">{c.label}</span>
-          <span class="atlas-tl-checks__detail">{c.detail}</span>
-        </li>
-      ))}
-      <li class="atlas-tl-checks__result" data-ok={valid ? "true" : "false"}>
-        <span class="atlas-tl-checks__mark" aria-hidden="true">{valid ? "✓" : "✕"}</span>
-        <span class="atlas-tl-checks__label">{valid ? "Script continues: the spend is valid" : "Script fails: the spend is invalid"}</span>
-      </li>
-    </ol>
-  );
+/**
+ * The hero's controls and its pre-rendered states: one per Core case and
+ * field change (each re-run through the tested model at build time). The
+ * "compare units" toggle shows a layer every state draws.
+ */
+export function timelockHeroSpec(fixtures: DerivedTimelockCaseFixture[]): HeroSpec<TimelockHeroState> {
+  const abs = fixtures.filter((f) => f.lock === "absolute"), rel = fixtures.filter((f) => f.lock === "relative");
+  if (!abs.length || !rel.length) throw new Error("timelock-fields: needs absolute and relative cases");
+  const editsOf = (f: DerivedTimelockCaseFixture) => ["core", ...f.derived.edits.map((e) => e.id)];
+  const [ea, er] = [editsOf(abs[0]), editsOf(rel[0])];
+  if (abs.some((f) => editsOf(f).join() !== ea.join()) || rel.some((f) => editsOf(f).join() !== er.join())) throw new Error("timelock-fields: every case of a kind needs the same edits");
+  const caseOpts = (fs: DerivedTimelockCaseFixture[]) => fs.map((f, i) => ({ value: `c${i}`, text: f.shortLabel ?? f.label }));
+  const all = combos([["absolute", "relative"], abs.map((_, i) => `c${i}`), rel.map((_, i) => `c${i}`), ea, er]).map((k) => k.join("|"));
+  const states = [
+    ...abs.flatMap((f, i) => ea.map((e) => ({ id: `${f.id}-${e}`, keys: all.filter((k) => { const [l, a, , x] = k.split("|"); return l === "absolute" && a === `c${i}` && x === e; }), state: { caseId: f.id, edit: e } }))),
+    ...rel.flatMap((f, i) => er.map((e) => ({ id: `${f.id}-${e}`, keys: all.filter((k) => { const [l, , r, , y] = k.split("|"); return l === "relative" && r === `c${i}` && y === e; }), state: { caseId: f.id, edit: e } }))),
+  ];
+  const editText = (f: DerivedTimelockCaseFixture, e: string) => (e === "core" ? "As in Core" : e === "final" ? "Flip input final" : e === "bit31" ? "Flip bit 31" : e === "version" ? "Flip the version" : f.derived.edits.find((x) => x.id === e)!.label);
+  return checkSpec({
+    controls: [
+      { kind: "strip", name: "lock", label: "Lock", options: [{ value: "absolute", text: "Absolute · nLockTime" }, { value: "relative", text: "Relative · nSequence" }] },
+      { kind: "strip", name: "caseA", label: "Bitcoin Core test case", options: caseOpts(abs), showWhen: { name: "lock", value: "absolute" } },
+      { kind: "strip", name: "caseR", label: "Bitcoin Core test case", options: caseOpts(rel), showWhen: { name: "lock", value: "relative" } },
+      { kind: "strip", name: "editA", label: "Change a field", options: ea.map((e) => ({ value: e, text: editText(abs[0], e) })), showWhen: { name: "lock", value: "absolute" } },
+      { kind: "strip", name: "editR", label: "Change a field", options: er.map((e) => ({ value: e, text: editText(rel[0], e) })), showWhen: { name: "lock", value: "relative" } },
+      { kind: "toggle", name: "compare", label: "Compare height and time units", options: [] },
+    ],
+    states,
+    initialKey: "absolute|c0|c0|core|core",
+    noJsId: `${abs[0].id}-core`,
+    staticNote: `Static view: the first absolute-lock case, with the checks it passes or fails, both readings shown. With JavaScript you can switch to relative locks, pick any of the ${fixtures.length} cases and change a field.`,
+    compact: true,
+  });
 }
 
 /**
- * timelock-fields.v1 — the Timelocks chapter's hero figure.
+ * timelock-fields.v1 — the Timelocks chapter's hero (drawing-first).
  *
- * Bitcoin Core's own CLTV/CSV test transactions, with the checks BIP 65 and
- * BIP 112 make. The pinned cases are evaluated at build time (and the build
- * fails unless every verdict matches Core's label); edited fields are
- * re-evaluated in the browser by the same tested model and marked as edits.
+ * A gate: the coin's locking script on top, the spending transaction's lock
+ * fields below it, and BIP 65's or BIP 112's checks as a row of lamps that
+ * the spend has to pass, in order. Absolute locks draw nLockTime and the
+ * argument on a ruler split at 500,000,000 (heights | times); relative locks
+ * draw the argument's and the input's 32 bits with the disable and type
+ * flags. Every value and verdict comes from Bitcoin Core's own test cases,
+ * run through the tested model at build time, including the field changes.
  */
-export function TimelockFields({ fixtures, figureId }: Props) {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  const byMode = (m: Mode) => fixtures.filter((f) => f.lock === m);
-  const [mode, setMode] = useState<Mode>(fixtures[0].lock);
-  const [id, setId] = useState(fixtures[0].id);
-  const f = fixtures.find((x) => x.id === id)!;
+export function TimelockFields({ fixtures, figureId, initial }: { fixtures: DerivedTimelockCaseFixture[]; figureId: string; initial?: TimelockHeroState }) {
+  const { caseId, edit } = initial ?? { caseId: fixtures[0].id, edit: "core" };
+  const f = fixtures.find((x) => x.id === caseId);
+  if (!f) throw new Error(`timelock-fields: no case ${caseId}`);
   const d = f.derived;
-  const original: Edits = { version: d.version, nLockTime: d.nLockTime, nSequence: d.nSequence };
-  const [edits, setEdits] = useState<Edits>(original);
-  const [compare, setCompare] = useState(false);
-
-  const choose = (x: DerivedTimelockCaseFixture) => {
-    setId(x.id);
-    setEdits({ version: x.derived.version, nLockTime: x.derived.nLockTime, nSequence: x.derived.nSequence });
-  };
-  const switchMode = (m: Mode) => {
-    setMode(m);
-    choose(byMode(m)[0]);
-  };
-
-  const e = hydrated ? edits : original;
-  const modified = e.version !== d.version || e.nLockTime !== d.nLockTime || e.nSequence !== d.nSequence;
-  const fields = { version: e.version, nLockTime: e.nLockTime, sequences: [e.nSequence] };
-  const live = modified
-    ? (() => {
-        const arg = BigInt(d.argument);
-        const r = d.opcode === "CHECKLOCKTIMEVERIFY" ? checkLockTimeVerify(arg, fields, 0) : checkSequenceVerify(arg, fields, 0);
-        return { checks: r.checks as TimelockCheckView[], valid: r.ok && (d.trailingOne || arg !== 0n) };
-      })()
-    : { checks: d.checks, valid: d.valid };
-
-  const set = (patch: Partial<Edits>) => setEdits({ ...e, ...patch });
-  const isTime = d.opcode === "CHECKLOCKTIMEVERIFY" ? e.nLockTime >= LOCKTIME_THRESHOLD : (e.nSequence & SEQUENCE_LOCKTIME_TYPE_FLAG) !== 0;
-  const value16 = e.nSequence & SEQUENCE_LOCKTIME_MASK;
-  const relActive = e.version >= 2 && (e.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG) === 0;
-
+  const e = edit === "core" ? null : d.edits.find((x) => x.id === edit);
+  if (edit !== "core" && !e) throw new Error(`timelock-fields: no edit ${edit} for ${caseId}`);
+  const v = e ?? { version: d.version, nLockTime: d.nLockTime, nSequence: d.nSequence, nLockTimeIso: d.nLockTimeIso, value16: d.value16, value16Seconds: d.value16Seconds, checks: d.checks, valid: d.valid, field: null as null | string, label: "" };
+  const cltv = d.opcode === "CHECKLOCKTIMEVERIFY";
+  const arg = BigInt(d.argument);
+  const id = `${figureId}-d`;
+  const ids = idsFor(id);
+  const x0 = 14;
+  const vizH = cltv ? 104 : 136;
+  const checksY = 158 + vizH;
+  const H = checksY + v.checks.length * 26 + 46;
+  const asm = d.asm.replace(/(CHECKLOCKTIMEVERIFY|CHECKSEQUENCEVERIFY)/, "OP_$1");
+  const status =
+    `${f.label}${e ? `, with ${e.label}` : ""}: ` +
+    (v.valid ? "every check passes and the script continues" : `fails at “${v.checks.find((c) => !c.ok)?.label ?? "the final stack"}”`) +
+    (e ? ". Not a Core test case: the tested model's verdict." : `. Bitcoin Core labels it ${f.expected}; the model agrees.`);
+  const field = (x: number, w: number, name: string, text: string, role: string, changed: boolean) => (
+    <g data-field={name}>
+      <rect class={`k-cell k-fill--${role}${changed ? " k-cell--em" : ""}`} x={x} y={112} width={w} height="26" />
+      <text class="k-card__name" x={x + 5} y={123}>{name.toUpperCase()}</text>
+      <text class="k-value" x={x + 5} y={134.5} style="font-size:9.5px">{text}</text>
+      {changed ? <text class="k-card__tag" x={x + w - 4} y={123} text-anchor="end">CHANGED</text> : null}
+    </g>
+  );
+  // CLTV ruler: heights on the left half, times on the right half, each scaled within its half.
+  const pos = (n: number) => (n < THRESHOLD ? x0 + (n / THRESHOLD) * 150 : x0 + 166 + ((n - THRESHOLD) / (2 ** 32 - THRESHOLD)) * 150);
   return (
-    <div class="atlas-lab atlas-tl-lab" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-lab__controls">
-          <fieldset class="atlas-segmented">
-            <legend>Lock</legend>
-            {(["absolute", "relative"] as const).map((m) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-mode`} checked={mode === m} onChange={() => switchMode(m)} />
-                <span>{m === "absolute" ? "Absolute" : "Relative"}<small>{m === "absolute" ? "nLockTime · CHECKLOCKTIMEVERIFY" : "nSequence · CHECKSEQUENCEVERIFY"}</small></span>
-              </label>
-            ))}
-          </fieldset>
-          <fieldset class="atlas-lab__samples">
-            <legend>Bitcoin Core test case</legend>
-            {byMode(mode).map((x) => (
-              <label class="atlas-choice">
-                <input type="radio" name={`${figureId}-case`} checked={x.id === id} onChange={() => choose(x)} />
-                <span>{x.label}<small>{x.shortLabel} · Core: {x.expected}</small></span>
-              </label>
-            ))}
-          </fieldset>
-        </div>
-      ) : (
-        <p class="atlas-lab__static-note">
-          Static view: the first absolute-lock case, with the checks it passes or fails. With JavaScript you can switch to relative locks, pick any of the
-          {" "}{fixtures.length} cases, change the transaction’s fields and compare height and time units.
-        </p>
-      )}
-
-      <div class="atlas-tl-script">
-        <span class="atlas-tl-script__tag">Locking script (the spent output)</span>
-        <code>{d.asm.replace(/(CHECKLOCKTIMEVERIFY|CHECKSEQUENCEVERIFY)/, "OP_$1")}</code>
-        <span class="atlas-tl-script__note">
-          Argument {num(BigInt(d.argument))}
-          {d.opcode === "CHECKSEQUENCEVERIFY" && BigInt(d.argument) >= 0n ? ` = ${hex32(Number(BigInt(d.argument) & 0xffffffffn))}` : ""}
-        </span>
-      </div>
-
-      <section class="atlas-panel atlas-tl-fields" aria-label="The spending transaction's fields">
-        <h3 class="atlas-panel__title">Spending transaction{modified ? " · edited" : ""}</h3>
-        <dl class="atlas-tl-fields__list">
-          <div data-focus={d.opcode === "CHECKSEQUENCEVERIFY" ? "true" : undefined}>
-            <dt>nVersion</dt>
-            <dd>
-              {e.version}
-              {hydrated && d.opcode === "CHECKSEQUENCEVERIFY" ? (
-                <button type="button" class="manual-plate-button atlas-tl-btn" onClick={() => set({ version: e.version >= 2 ? 1 : 2 })}>Set to {e.version >= 2 ? 1 : 2}</button>
-              ) : null}
-            </dd>
-          </div>
-          <div data-focus={d.opcode === "CHECKLOCKTIMEVERIFY" ? "true" : undefined}>
-            <dt>nLockTime</dt>
-            <dd>
-              {num(e.nLockTime)} <small>({e.nLockTime >= LOCKTIME_THRESHOLD ? "a time" : "a height"})</small>
-              {hydrated && d.opcode === "CHECKLOCKTIMEVERIFY" ? (
-                <span class="atlas-tl-btns">
-                  <button type="button" class="manual-plate-button atlas-tl-btn" disabled={e.nLockTime === 0} onClick={() => set({ nLockTime: e.nLockTime - 1 })}>− 1</button>
-                  <button type="button" class="manual-plate-button atlas-tl-btn" disabled={e.nLockTime === 0xffffffff} onClick={() => set({ nLockTime: e.nLockTime + 1 })}>+ 1</button>
-                </span>
-              ) : null}
-            </dd>
-          </div>
-          <div>
-            <dt>input 0 nSequence</dt>
-            <dd>
-              <code>{hex32(e.nSequence)}</code> <small>{e.nSequence === SEQUENCE_FINAL ? "(final)" : ""}</small>
-              {hydrated && d.opcode === "CHECKLOCKTIMEVERIFY" ? (
-                <button type="button" class="manual-plate-button atlas-tl-btn" onClick={() => set({ nSequence: e.nSequence === SEQUENCE_FINAL ? (d.nSequence === SEQUENCE_FINAL ? 0xfffffffe : d.nSequence) : SEQUENCE_FINAL })}>
-                  {e.nSequence === SEQUENCE_FINAL ? "Make non-final" : "Make final"}
-                </button>
-              ) : null}
-            </dd>
-          </div>
+    <>
+      <Drawing
+        id={id}
+        width={344}
+        height={H}
+        title="The gate a spend has to pass"
+        desc={`${status} The locking script is ${asm}. The spending transaction has version ${v.version}, input 0 nSequence ${hex32(v.nSequence)} and nLockTime ${num(v.nLockTime)}. Checks in order: ${v.checks.map((c) => `${c.label}: ${c.ok ? "yes" : "no"} (${c.detail})`).join("; ")}.`}
+      >
+        <Value at={[x0, 14]} text={`${f.label.toUpperCase()}`} size={9} cls="k-value--label" />
+        <Value at={[x0, 27]} text={e ? "CHANGED: NOT A CORE CASE" : `BITCOIN CORE ${f.coreFile} #${f.coreIndex} · ${f.expected.toUpperCase()}`} size={8.5} cls="k-value--muted" />
+        <Value at={[x0, 46]} text="THE COIN'S LOCK (SPENT OUTPUT SCRIPT)" size={9} cls="k-value--muted" />
+        <rect class="k-outline k-fill--time" x={x0} y={52} width="316" height="24" />
+        <text class="k-value" x={x0 + 6} y={68} style="font-size:9.5px">{asm}</text>
+        <Value at={[x0, 92]} text={cltv ? `ARGUMENT ${num(arg)} · ${arg < 0n ? "NEGATIVE" : arg < BigInt(THRESHOLD) ? "A HEIGHT" : "A TIME"}` : `ARGUMENT ${arg < 0n ? num(arg) : hex32(Number(arg & 0xffffffffn))}`} size={9} cls="k-value--label" />
+        <Value at={[x0, 106]} text="THE SPENDING TRANSACTION" size={9} cls="k-value--muted" />
+        {field(x0, 70, "nVersion", String(v.version), "plain", v.field === "version")}
+        {field(x0 + 76, 120, "input 0 nSequence", hex32(v.nSequence), "time", v.field === "nSequence")}
+        {field(x0 + 202, 114, "nLockTime", num(v.nLockTime), "time", v.field === "nLockTime")}
+        {cltv ? (
+          <g class="k-ruler">
+            <rect class="k-cell k-fill--plain" x={x0} y={168} width="150" height="12" />
+            <rect class="k-cell k-fill--plain" x={x0 + 166} y={168} width="150" height="12" />
+            <text class="k-card__type" x={x0} y={194}>HEIGHTS · 0</text>
+            <text class="k-card__type" x={x0 + 316} y={194} text-anchor="end">TIMES · 2³² − 1</text>
+            <line class="k-cut" x1={x0 + 158} y1={160} x2={x0 + 158} y2={186} />
+            <text class="k-card__type" x={x0 + 162} y={156}>{num(THRESHOLD)}</text>
+            {arg >= 0n ? (
+              <g>
+                <path class="k-outline k-mark--plain" d={`M${pos(Number(arg))} 166 l-4 -6 h8 z`} />
+                <text class="k-card__name" x={pos(Number(arg)) - 6} y={160} text-anchor="end">ARG</text>
+              </g>
+            ) : null}
+            <path class="k-outline k-mark--time" d={`M${pos(v.nLockTime)} 182 l-4 6 h8 z`} />
+            <text class="k-card__name" x={pos(v.nLockTime) - 6} y={208} text-anchor="end">nLockTime</text>
+            <g class="k-compare">
+              <text class="k-card__name" x={x0} y={226}>{`AS A HEIGHT: BLOCK ${num(v.nLockTime)}${v.nLockTime < THRESHOLD ? " ← READ THIS WAY" : ""}`}</text>
+              <text class="k-card__name" x={x0} y={240}>{`AS A TIME: ${utc(v.nLockTimeIso)}${v.nLockTime >= THRESHOLD ? " ← READ THIS WAY" : ""}`}</text>
+            </g>
+          </g>
+        ) : (
+          <g>
+            <BitRow x={x0} y={166} n={Number(arg & 0xffffffffn) >>> 0} label="ARGUMENT" ids={ids} ruler />
+            <BitRow x={x0} y={200} n={v.nSequence} label="INPUT 0 nSEQUENCE" ids={ids} />
+            <g class="k-compare">
+              <text class="k-card__name" x={x0} y={240}>{`LOW 16 BITS AS BLOCKS: ${num(v.value16)} BLOCKS`}</text>
+              <text class="k-card__name" x={x0} y={254}>{`AS 512-SECOND UNITS: ${num(v.value16)} × 512 = ${num(v.value16Seconds)} S`}</text>
+              <text class="k-card__name" x={x0} y={268}>{`BIT 22 IS ${v.nSequence & SEQUENCE_LOCKTIME_TYPE_FLAG ? "SET: 512-SECOND UNITS" : "CLEAR: BLOCKS"}`}</text>
+            </g>
+          </g>
+        )}
+        <Value at={[x0, checksY - 6]} text={cltv ? "BIP 65'S CHECKS, IN ORDER" : "BIP 112'S CHECKS, IN ORDER"} size={9} cls="k-value--muted" />
+        {v.checks.map((c: TimelockCheckView, i: number) => {
+          const y = checksY + i * 26;
+          return (
+            <g data-check={c.id} data-ok={c.ok ? "true" : "false"}>
+              <rect class={`k-cell ${c.ok ? "k-fill--plain" : "k-mark--plain"}`} x={x0} y={y} width="20" height="20" />
+              <text class={`k-cell__t${c.ok ? "" : " k-cell__t--on"}`} x={x0 + 10} y={y + 13.5} text-anchor="middle">{c.ok ? "✓" : "✗"}</text>
+              <text class="k-card__name" x={x0 + 28} y={y + 9}>{`${i + 1} ${c.label}`}</text>
+              <text class="k-card__type" x={x0 + 28} y={y + 19.5}>{c.detail.length > 52 ? `${c.detail.slice(0, 51)}…` : c.detail}</text>
+            </g>
+          );
+        })}
+        <Value at={[x0, H - 22]} text={v.valid ? "✓ THE SCRIPT CONTINUES: THE SPEND IS VALID" : "✗ THE SCRIPT FAILS: THE SPEND IS INVALID"} size={9.5} cls={v.valid ? "k-value--ok" : "k-value--fail"} />
+      </Drawing>
+      <p class="atlas-hero__status" data-status>{status}</p>
+      <details class="atlas-disclosure">
+        <summary>Exact checks and fields</summary>
+        <dl class="atlas-hexlist">
+          <dt>Locking script</dt><dd><code class="atlas-break">{asm}</code></dd>
+          <dt>nVersion · input 0 nSequence · nLockTime</dt><dd>{v.version} · <code>{hex32(v.nSequence)}</code> · {num(v.nLockTime)}</dd>
+          {v.checks.map((c: TimelockCheckView) => (
+            <>
+              <dt>{c.label}: {c.ok ? "yes" : "no"}</dt>
+              <dd>{c.detail}</dd>
+            </>
+          ))}
         </dl>
-
-        {d.opcode === "CHECKSEQUENCEVERIFY" ? (
-          <div class="atlas-tl-bits" role="group" aria-label={`nSequence bits, 31 down to 0${hydrated ? "; press a bit to flip it" : ""}`}>
-            {Array.from({ length: 32 }, (_, k) => 31 - k).map((b) => {
-              const on = ((e.nSequence >>> b) & 1) === 1;
-              const role = bitRole(b, (e.nSequence & SEQUENCE_LOCKTIME_DISABLE_FLAG) !== 0);
-              const label = `bit ${b}, ${ROLE_TEXT[role]}, ${on ? "set" : "clear"}`;
-              return hydrated ? (
-                <button type="button" class="atlas-tl-bit" data-role={role} data-on={on ? "true" : "false"} aria-pressed={on} aria-label={label} title={label} onClick={() => set({ nSequence: (e.nSequence ^ (2 ** b)) >>> 0 })}>
-                  {on ? "1" : "0"}
-                </button>
-              ) : (
-                <span class="atlas-tl-bit" data-role={role} data-on={on ? "true" : "false"} title={label}>{on ? "1" : "0"}</span>
-              );
-            })}
-          </div>
-        ) : null}
-        {d.opcode === "CHECKSEQUENCEVERIFY" ? (
-          <p class="atlas-tl-bits__key">
-            <span data-role="disable">bit 31 disable</span> <span data-role="type">bit 22 type</span> <span data-role="value">bits 0–15 value</span> <span data-role="unused">no meaning</span>
-          </p>
-        ) : null}
-        {hydrated && modified ? (
-          <button type="button" class="manual-plate-button" onClick={() => setEdits(original)}>Reset to the Core case</button>
-        ) : null}
-      </section>
-
-      <section class="atlas-panel atlas-tl-result" aria-live="polite" aria-label="Checks">
-        <h3 class="atlas-panel__title">{d.opcode === "CHECKLOCKTIMEVERIFY" ? "BIP 65’s checks, in order" : "BIP 112’s checks, in order"}</h3>
-        <Checks checks={live.checks} valid={live.valid} />
-        <p class="atlas-tl-result__label">
-          {modified
-            ? "Edited fields: not a Core test case. Result from this site’s tested model."
-            : `Bitcoin Core labels this case ${f.expected}; the model agrees.`}
-        </p>
-      </section>
-
-      {hydrated ? (
-        <label class="atlas-tl-compare">
-          <input type="checkbox" checked={compare} onChange={(ev) => setCompare((ev.target as HTMLInputElement).checked)} />
-          Compare height and time units
-        </label>
-      ) : null}
-      {hydrated && compare ? (
-        <section class="atlas-panel atlas-tl-units" aria-label="Height and time readings">
-          {d.opcode === "CHECKLOCKTIMEVERIFY" ? (
-            <>
-              <h3 class="atlas-panel__title">nLockTime {num(e.nLockTime)}, read both ways</h3>
-              <ul class="atlas-tl-units__rows">
-                <li data-chosen={!isTime ? "true" : undefined}>
-                  <strong>As a block height</strong> {num(e.nLockTime)}: the first block that could include it would be {num(e.nLockTime + 1)}.
-                </li>
-                <li data-chosen={isTime ? "true" : undefined}>
-                  <strong>As a Unix time</strong> {utc(e.nLockTime)}: a block could include it once the median time past of the block before it is later.
-                </li>
-              </ul>
-              <p class="atlas-panel__scope">
-                Consensus picks one reading: below {num(LOCKTIME_THRESHOLD)} ({utc(LOCKTIME_THRESHOLD)}) it is a height, otherwise a time. Here: {isTime ? "time" : "height"}.
-                {e.nSequence === SEQUENCE_FINAL ? " But this transaction’s only input is final, so nLockTime is not enforced at all." : ""}
-              </p>
-            </>
-          ) : (
-            <>
-              <h3 class="atlas-panel__title">Value {num(value16)} (the low 16 bits), read both ways</h3>
-              <ul class="atlas-tl-units__rows">
-                {[
-                  { chosen: !isTime, title: "As blocks", seconds: value16 * 600, text: `${num(value16)} blocks after the coin’s block, about ${span(value16 * 600)} at the 600-second average` },
-                  { chosen: isTime, title: "As 512-second units", seconds: value16 * 512, text: `${num(value16)} × 512 = ${num(value16 * 512)} s, about ${span(value16 * 512)}, counted in median time past` },
-                ].map((r, _i, all) => (
-                  <li data-chosen={r.chosen ? "true" : undefined}>
-                    <strong>{r.title}</strong> {r.text}
-                    <span class="atlas-tl-units__bar" style={`inline-size: ${Math.max(all[0].seconds, all[1].seconds) ? (r.seconds / Math.max(all[0].seconds, all[1].seconds)) * 100 : 0}%`} aria-hidden="true" />
-                  </li>
-                ))}
-              </ul>
-              <p class="atlas-panel__scope">
-                Bit 22 picks the reading: here {isTime ? "set, so 512-second units" : "clear, so blocks"}.
-                {relActive ? "" : e.version < 2 ? " But the version is below 2, so BIP 68 reads no relative lock here." : " But bit 31 is set, so BIP 68 reads no relative lock here."}
-              </p>
-            </>
-          )}
-        </section>
-      ) : null}
-
-      <p class="atlas-lab__source">
-        Source: Bitcoin Core {f.coreFile}, entry {f.coreIndex} (“{f.comment}”), tag v29.0, pinned by commit and hash. One-input transactions with no signatures:
-        only the lock fields matter here.
-      </p>
-    </div>
+      </details>
+      <p class="atlas-hero__source">Bitcoin Core v29.0 {f.coreFile}, entry {f.coreIndex} (“{f.comment}”), pinned by commit and hash; one-input transactions with no signatures. Every check run by the tested model at build time.</p>
+    </>
   );
 }

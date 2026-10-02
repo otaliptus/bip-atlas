@@ -456,6 +456,32 @@ export interface TimelockCaseDerived {
   txHex: string;
   checks: TimelockCheckView[];
   valid: boolean;
+  /** nLockTime read as a Unix time (ISO), for the both-readings view. */
+  nLockTimeIso: string;
+  /** Input 0's low 16 bits, and that value read as 512-second units (in seconds). */
+  value16: number;
+  value16Seconds: number;
+  /**
+   * The same case with one field changed, re-run through the tested model at
+   * build time: for CLTV, nLockTime + 1 and the input made final or not; for
+   * CSV, the version flipped between 1 and 2 and bit 31 of nSequence flipped.
+   */
+  edits: TimelockEdit[];
+}
+
+export interface TimelockEdit {
+  id: string;
+  /** What changed, in words (e.g. "nLockTime + 1"). */
+  label: string;
+  field: "version" | "nLockTime" | "nSequence";
+  version: number;
+  nLockTime: number;
+  nSequence: number;
+  nLockTimeIso: string;
+  value16: number;
+  value16Seconds: number;
+  checks: TimelockCheckView[];
+  valid: boolean;
 }
 export type DerivedTimelockCaseFixture = TimelockCaseFixture & { derived: TimelockCaseDerived };
 

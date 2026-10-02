@@ -25,10 +25,6 @@ import {
   AddressWorked,
   SchnorrWorked,
   TapscriptWorked,
-  TimelockFields,
-  TimelockPinned,
-  TimelockRanges,
-  TimelockWorked,
   VersionbitsMachine,
   VersionbitsField,
   VersionbitsRecord,
@@ -130,6 +126,8 @@ import { TwoSerializations } from "@bip-atlas/figures/tx/TwoSerializations.tsx";
 import { WeightMeter } from "@bip-atlas/figures/tx/WeightMeter.tsx";
 import { WitnessCommitment } from "@bip-atlas/figures/tx/WitnessCommitment.tsx";
 import { WitnessField } from "@bip-atlas/figures/tx/WitnessField.tsx";
+import { TimelockFields, timelockHeroSpec } from "@bip-atlas/figures/timelock/TimelockFields.tsx";
+import { TimelockCsvStory, TimelockMtp, TimelockNotALock, TimelockPinned, TimelockRanges, TimelockSequenceBits } from "@bip-atlas/figures/timelock/TimelockStatics.tsx";
 import type { Figure } from "@bip-atlas/publication";
 import { deriveFixtures } from "../lib/derive";
 import Plate from "./Plate.astro";
@@ -184,6 +182,7 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
 const txSpec = figure.recipe === "transaction-anatomy.v1" ? transactionHeroSpec(tx) : null;
 const psbtSpec = figure.recipe === "psbt-envelope.v1" ? psbtHeroSpec(trace[0]) : null;
 const p2shSpec = figure.recipe === "p2sh-two-stage.v1" ? p2shHeroSpec(p2sh) : null;
+const tlSpec = figure.recipe === "timelock-fields.v1" ? timelockHeroSpec(timelock) : null;
 ---
 <Plate figure={figure} numbers={numbers} interactive={recipe.interactive} drawing={recipe.drawing === true} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
@@ -263,9 +262,21 @@ const p2shSpec = figure.recipe === "p2sh-two-stage.v1" ? p2shHeroSpec(p2sh) : nu
   {figure.recipe === "p2sh-shape.v1" && <P2shShape fixtures={p2sh} />}
   {figure.recipe === "p2sh-stack-story.v1" && <P2shStackStory fixture={p2sh[0]} />}
   {figure.recipe === "p2sh-failures.v1" && <P2shFailures fixture={p2sh[0]} />}
-  {figure.recipe === "timelock-fields.v1" && <TimelockFields client:visible fixtures={timelock} figureId={figureId} />}
+  {tlSpec && (
+    <HeroStates figureId={figureId} spec={tlSpec}>
+      {tlSpec.states.map((s) => (
+        <div data-state data-keys={s.keys.join(" ")} hidden={s.id !== tlSpec.noJsId}>
+          <TimelockFields fixtures={timelock} figureId={`${figureId}-${s.id}`} initial={s.state} />
+        </div>
+      ))}
+    </HeroStates>
+  )}
   {figure.recipe === "timelock-pinned-fields.v1" && <TimelockPinned fixtures={timelockTx} />}
   {figure.recipe === "timelock-ranges.v1" && <TimelockRanges fixture={timelockEnc[0]} />}
+  {figure.recipe === "timelock-not-a-lock.v1" && <TimelockNotALock />}
+  {figure.recipe === "timelock-sequence-bits.v1" && <TimelockSequenceBits fixture={timelockEnc[0]} />}
+  {figure.recipe === "timelock-csv-story.v1" && <TimelockCsvStory fixture={timelock[0]} />}
+  {figure.recipe === "timelock-mtp.v1" && <TimelockMtp />}
   {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
   {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
   {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
@@ -296,7 +307,6 @@ const p2shSpec = figure.recipe === "p2sh-two-stage.v1" ? p2shHeroSpec(p2sh) : nu
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
-      {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}

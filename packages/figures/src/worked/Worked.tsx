@@ -12,7 +12,6 @@ import type {
   DerivedSchnorrFixture,
   DerivedTaprootTreeFixture,
   DerivedTapscriptFixture,
-  DerivedTimelockCaseFixture,
   DerivedVersionbitsDeploymentFixture,
   DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
@@ -144,65 +143,6 @@ export function TapscriptWorked({ fixtures }: { fixtures: DerivedTapscriptFixtur
       steps={steps}
       label="The stack after each opcode of one recorded tapscript run."
       source={<>Source: Core script_assets_test.json case {f.caseIndex}, pinned; recorded at build time and matched to Core’s label.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 65, 68, 112, 113 ---------- */
-const hex32 = (n: number) => `0x${(n >>> 0).toString(16).padStart(8, "0")}`;
-/** Bit positions (31 first) to drawn cell indices: value bits and the two flags. */
-const VALUE_CELLS = Array.from({ length: 16 }, (_, i) => 16 + i);
-const FLAG_CELLS = [0, 9];
-
-export function TimelockWorked({ fixtures }: { fixtures: DerivedTimelockCaseFixture[] }) {
-  const f = fixtures.find((x) => x.id === "core-valid-127") ?? fixtures.find((x) => x.lock === "relative") ?? fixtures[0];
-  const d = f.derived;
-  const arg = BigInt(d.argument);
-  const argHex = hex32(Number(arg & 0xffffffffn));
-  const check = (id: string) => d.checks.find((c) => c.id === id);
-  const value = check("value");
-  const steps: WorkedStep[] = [
-    {
-      title: "The spent output's script pushes an argument, then CHECKSEQUENCEVERIFY",
-      values: [{ label: "script", value: d.asm.replace("CHECKSEQUENCEVERIFY", "OP_CHECKSEQUENCEVERIFY") }, { label: "argument", value: `${d.argument} = ${argHex}` }],
-      layer: { size: 0.5, tone: "plain", cells: 2 },
-    },
-    {
-      title: `Bit 31 of the argument is ${check("arg-disabled")?.stopsHere ? "set, so the opcode does nothing" : "clear, so the opcode checks the input"}`,
-      values: [{ label: "argument bits", value: argHex }],
-      note: "Bits 0–15 hold the value (filled); bit 22 picks the unit and bit 31 disables (marked).",
-      layer: { tone: "wash", cells: 32, highlight: VALUE_CELLS, mark: FLAG_CELLS },
-    },
-    {
-      title: `The transaction's version is ${d.version}`,
-      values: [{ label: "nVersion", value: String(d.version) }],
-      note: d.version >= 2 ? "Version 2 or more: BIP 68 gives nSequence its relative-lock meaning." : "Below 2: BIP 68 does not apply, and CHECKSEQUENCEVERIFY fails.",
-      layer: { size: 0.35, tone: d.version >= 2 ? "plain" : "fail", cells: 1 },
-    },
-    {
-      title: `The input's own bit 31 is ${check("input-disabled")?.ok === false ? "set, so the opcode fails" : "clear"}`,
-      values: [{ label: "input 0 nSequence", value: hex32(d.nSequence) }],
-      note: "An input with bit 31 set carries no relative lock, so it could not satisfy one.",
-      layer: { size: 0.35, tone: check("input-disabled")?.ok === false ? "fail" : "plain", cells: 1 },
-    },
-    {
-      title: "Read the input's nSequence with the same mask",
-      values: [{ label: "input 0 nSequence", value: hex32(d.nSequence) }, ...(check("type") ? [{ label: "units", value: check("type")!.detail }] : [])],
-      layer: { tone: "hatch", cells: 32, highlight: VALUE_CELLS, mark: FLAG_CELLS },
-    },
-    {
-      title: value ? "Compare the masked values" : "Stop at the first failed check",
-      values: value ? [{ label: "argument ≤ nSequence?", value: value.detail }] : [{ label: "failed", value: d.checks.find((c) => !c.ok)?.label ?? "—" }],
-      note: d.valid ? `Every check passes, so the script continues. Bitcoin Core labels this case ${f.expected}.` : `The script fails. Bitcoin Core labels this case ${f.expected}.`,
-      layer: { size: 0.6, tone: d.valid ? "accent" : "fail", cells: 2 },
-    },
-  ];
-  return (
-    <WorkedExample
-      intro={<>Bitcoin Core’s test case <strong>{f.label}</strong> ({f.coreFile}, entry {f.coreIndex}), checked the way BIP 112 describes. Filled cells are the 16 value bits; marked cells are bits 22 and 31.</>}
-      steps={steps}
-      label="A CHECKSEQUENCEVERIFY argument and an input's nSequence, masked to the same 16 value bits and compared, drawn as stacked layers."
-      source={<>Source: Bitcoin Core v29.0 transaction tests (pinned excerpt); evaluated at build time by the tested timelock model.</>}
     />
   );
 }
