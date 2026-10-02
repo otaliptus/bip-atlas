@@ -11,7 +11,8 @@ import { WalletExamples } from "../src/wallet/WalletExamples";
 import { WalletP2trStory } from "../src/wallet/WalletP2trStory";
 import { WalletPathLevels } from "../src/wallet/WalletPathLevels";
 import { WalletPathSchemes } from "../src/wallet/WalletPathSchemes";
-import { WalletPathWalk } from "../src/wallet/WalletPathWalk";
+import { WalletPathValues, WalletPathWalk, walletWalkSpec } from "../src/wallet/WalletPathWalk";
+import { StateHero } from "../src/StateHero";
 import { WalletSpendLayouts } from "../src/wallet/WalletSpendLayouts";
 import { WalletXpubReach } from "../src/wallet/WalletXpubReach";
 import type { DerivedWalletPathFixture, WalletAddressView, WalletPathVectorFixture } from "../src/types";
@@ -118,7 +119,15 @@ describe("WalletExamples", () => {
 
 describe("WalletPathWalk (hero)", () => {
   const all = [d84, d86, d44];
-  const at = (initial?: { fixtureId: string; address: number; step: number }) => html(h(WalletPathWalk, { fixtures: all, figureId: "fig-a12-4", initial }));
+  /** What a reader sees in one state: the no-JS render with only that state's layers. */
+  const at = (initial?: { fixtureId: string; address: number; step: number }) => {
+    const st = initial ? { scheme: initial.fixtureId, addr: String(initial.address), step: String(initial.step) } : undefined;
+    const spec = walletWalkSpec(all, "fig-a12-4", st);
+    return html(h(StateHero, { spec, values: h(WalletPathValues, { fixtures: all, initial: spec.initial, only: true }) }, h(WalletPathWalk, { fixtures: all, figureId: "fig-a12-4", initial: spec.initial, only: true })));
+  };
+  it("has a status line for all 63 states", () => {
+    expect(Object.keys(walletWalkSpec(all, "x").status).length).toBe(3 * 3 * 7);
+  });
   it("no-JS default: BIP 84's first receiving path, every level walked, address from the model", () => {
     const s = at();
     expect(s).toContain('data-hydrated="false"');

@@ -560,6 +560,8 @@ export interface DescriptorKeyView {
   text: string;
   kind: string;
   isPrivate: boolean;
+  /** Under tr(), keys are x-only (BIP 386): publicKeys then hold the 32-byte x coordinate. */
+  xonly: boolean;
   origin: string | null;
   derivation: string | null;
   range: string | null;

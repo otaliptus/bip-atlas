@@ -1015,10 +1015,12 @@ function deriveDescriptor(f: DescriptorVectorFixture): DerivedDescriptorFixture 
         text: k.text,
         kind: k.kind,
         isPrivate: k.isPrivate,
+        xonly: d!.root.fn === "tr",
         origin: k.origin ? `${k.origin.fingerprint}${fmtSteps(k.origin.path)}` : null,
         derivation: k.ext ? fmtSteps(k.path) + (k.range ? `/*${k.range === "hardened" ? "h" : ""}` : "") || null : null,
         range: k.range,
-        publicKeys: Array.from({ length: n }, (_, i) => bytesToHex(keyAt(k, i).pub)),
+        // BIP 386: every key under tr() is serialized x-only.
+        publicKeys: Array.from({ length: n }, (_, i) => { const pub = keyAt(k, i).pub; return bytesToHex(d!.root.fn === "tr" && pub.length === 33 ? pub.slice(1) : pub); }),
       });
     });
     const children = d.root.fn === "combo" ? (d.ranged ? 2 : 1) : d.ranged ? 3 : 1;

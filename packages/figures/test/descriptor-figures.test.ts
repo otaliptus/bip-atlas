@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest";
 import { descsumCheck, descsumCreate, descsumExpand } from "@bip-atlas/models/descsum";
 import { ALLOWED, expand, keyAt, parseDescriptor } from "@bip-atlas/models/descriptors";
 import { bytesToHex } from "@bip-atlas/models/hex";
-import { DescriptorAnatomy } from "../src/descriptors/DescriptorAnatomy";
+import { DescriptorAnatomy, DescriptorValues, descriptorSpec } from "../src/descriptors/DescriptorAnatomy";
+import { StateHero } from "../src/StateHero";
 import { DescriptorChecksum } from "../src/descriptors/DescriptorChecksum";
 import { DescriptorIndex } from "../src/descriptors/DescriptorIndex";
 import { DescriptorNesting } from "../src/descriptors/DescriptorNesting";
@@ -58,11 +59,11 @@ export function derived(id: string): DerivedDescriptorFixture {
       if (k.range) mark(k.end - (k.range === "hardened" ? 3 : 2), k.end, "range", i);
       const n = k.range ? 3 : 1;
       keys.push({
-        text: k.text, kind: k.kind, isPrivate: k.isPrivate,
+        text: k.text, kind: k.kind, isPrivate: k.isPrivate, xonly: d!.root.fn === "tr",
         origin: k.origin ? `${k.origin.fingerprint}${fmtSteps(k.origin.path)}` : null,
         derivation: k.ext ? fmtSteps(k.path) + (k.range ? `/*${k.range === "hardened" ? "h" : ""}` : "") || null : null,
         range: k.range,
-        publicKeys: Array.from({ length: n }, (_, i) => bytesToHex(keyAt(k, i).pub)),
+        publicKeys: Array.from({ length: n }, (_, i) => { const pub = keyAt(k, i).pub; return bytesToHex(d!.root.fn === "tr" && pub.length === 33 ? pub.slice(1) : pub); }),
       });
     });
     const children = d.root.fn === "combo" ? (d.ranged ? 2 : 1) : d.ranged ? 3 : 1;
@@ -112,7 +113,8 @@ describe("DescriptorSentence", () => {
   const s = html(h(DescriptorSentence, { fixture: d }));
   it("names each part and gives the descriptor in full", () => {
     for (const label of ["SCRIPT EXPRESSION", "KEY ORIGIN", "PUBLIC KEY", "DERIVATION", "RANGE"]) expect(s).toContain(label);
-    expect(s).toContain(">[ffffffff/13′]<");
+    expect(s).toContain(">[ffffffff<");
+    expect(s).toContain(">/13′]<");
     expect(disclosure(s)).toContain(d.descriptor);
   });
 });
@@ -156,7 +158,12 @@ describe("DescriptorSpellings", () => {
 
 describe("DescriptorAnatomy (hero)", () => {
   const all = heroIds.map(derived);
-  const at = (initial?: { fixtureId: string; key: number; checked: boolean }) => html(h(DescriptorAnatomy, { fixtures: all, figureId: "fig-a13-5", initial }));
+  /** What a reader sees in one state: the no-JS render with only that state's layers. */
+  const at = (initial?: { fixtureId: string; key: number; checked: boolean }) => {
+    const st = initial ? { desc: initial.fixtureId, key: String(initial.key), check: initial.checked ? "1" : "0" } : undefined;
+    const spec = descriptorSpec(all, "fig-a13-5", st);
+    return html(h(StateHero, { spec, values: h(DescriptorValues, { fixtures: all, initial: spec.initial, only: true }) }, h(DescriptorAnatomy, { fixtures: all, figureId: "fig-a13-5", initial: spec.initial, only: true })));
+  };
   it("no-JS default: the ranged wpkh(), checksum checked, three scripts", () => {
     const s = at();
     expect(s).toContain('data-hydrated="false"');
@@ -169,6 +176,9 @@ describe("DescriptorAnatomy (hero)", () => {
     expect(s).toContain("HOLDS A PRIVATE KEY: A SPENDING SECRET");
     expect(s.split(">pk( )<").length - 1).toBe(4 * 2);
     expect(s).toContain("KEY 2 OF 5 · EXTENDED PRIVATE KEY");
+    expect(s).toContain("{ } BRANCH");
+    expect(s).toContain("x-only df12b703");
+    expect(at({ fixtureId: "bip386-tr-tree", key: 0, checked: false })).toContain("INTERNAL KEY");
   });
   it("shows a payload typo as rejected, with no scripts", () => {
     const s = at({ fixtureId: "bip380-raw-typo", key: 0, checked: true });

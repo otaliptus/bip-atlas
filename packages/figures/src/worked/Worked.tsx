@@ -4,9 +4,7 @@
  * derived data as the interactive view (or, for addresses, the tested bech32
  * model run at build time); nothing here is invented or computed in the browser.
  */
-import { analyzeSegwitAddress } from "@bip-atlas/models/bech32";
 import type {
-  AddressFixture,
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
   DerivedSchnorrFixture,
@@ -63,50 +61,6 @@ export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture })
       steps={steps}
       label="A serialized transaction exploded into its fields, then its two identifiers."
       source={<>Source: BIP 143 line {f.source.line}; sizes and hashes from the tested transaction model.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 173/350 ---------- */
-export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
-  const good = fixtures.find((f) => analyzeSegwitAddress(f.address, f.network).valid && analyzeSegwitAddress(f.address, f.network).witnessVersion === 0) ?? fixtures[0];
-  const a = analyzeSegwitAddress(good.address, good.network);
-  const typo = fixtures.find((f) => analyzeSegwitAddress(f.address, f.network).failedStage === "checksum");
-  const sep = good.address.lastIndexOf("1");
-  const program = good.address.slice(sep + 2, -6);
-  const steps: WorkedStep[] = [
-    { title: "Human-readable part and separator", values: [{ label: "HRP + separator", value: `${good.address.slice(0, sep)} + ${good.address[sep]}` }], layer: { size: 0.3, tone: "plain", cells: sep + 1 } },
-    { title: "Witness version, one character", values: [{ label: "character → version", value: `${good.address[sep + 1]} → ${a.witnessVersion}` }], layer: { size: 0.25, tone: "wash", cells: 1 } },
-    {
-      title: `Program: ${program.length} characters of 5 bits`,
-      values: [{ label: "characters", value: program }, { label: `${a.programHex!.length / 2} bytes`, value: a.programHex! }],
-      layer: { tone: "wash", cells: program.length },
-    },
-    {
-      title: `Checksum: 6 characters, ${a.encoding === "bech32" ? "Bech32" : "Bech32m"}`,
-      values: [{ label: "checksum", value: good.address.slice(-6) }],
-      note: `Version ${a.witnessVersion} must use ${a.witnessVersion === 0 ? "Bech32" : "Bech32m"}; it does, and the program length fits the version, so the address is valid.`,
-      layer: { size: 0.4, tone: "accent", cells: 6 },
-    },
-  ];
-  if (typo) {
-    const pos = [...typo.address].findIndex((c, i) => c !== good.address[i]);
-    const t = analyzeSegwitAddress(typo.address, typo.network);
-    if (pos >= 0 && t.failedStage === "checksum") {
-      steps.push({
-        title: `Change one character (position ${pos + 1}: ${good.address[pos]} → ${typo.address[pos]})`,
-        values: [{ label: "typed", value: typo.address }],
-        note: "The checksum no longer matches either family: rejected at the checksum stage. Validation only rejects; BIP 173 lets software at most hint where an error might be, never suggest the correction.",
-        layer: { tone: "fail", cells: good.address.length - sep - 1, mark: [pos - sep - 1] },
-      });
-    }
-  }
-  return (
-    <WorkedExample
-      intro={<>The published address <strong>{good.label}</strong>, split into its parts{typo ? ", then one typo" : ""}.</>}
-      steps={steps}
-      label="An address exploded into prefix, version, program and checksum, then a one-character typo."
-      source={<>Source: BIP 173/350 test vectors; checked by the tested bech32 model at build time.</>}
     />
   );
 }

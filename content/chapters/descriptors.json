@@ -196,7 +196,7 @@
             "bip384-combo",
             "bip386-tr-tree"
           ],
-          "caption": "Descriptors published in BIPs 380–386, split into their parts, expanded, and checked. Every expansion matches the scripts the BIPs list.",
+          "caption": "Descriptors published in BIPs 380–386, split into their parts, expanded, and checked. Every script the BIPs list for them is reproduced.",
           "claims": [
             "expansion-tested",
             "key-expr",

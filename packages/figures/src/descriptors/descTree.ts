@@ -34,7 +34,8 @@ export function descTree(tokens: Token[]): DescNode {
         top().children.push(n);
         stack.push(n);
       } else if (t.text === ")" || t.text === "}") {
-        if (stack.length < 2) throw new Error("unbalanced descriptor");
+        const want = t.text === ")" ? "fn" : "tree";
+        if (stack.length < 2 || top().kind !== want) throw new Error("unbalanced descriptor");
         stack.pop();
       } else if (t.text !== ",") throw new Error(`unexpected punctuation ${t.text}`);
     } else if (t.key !== null) {

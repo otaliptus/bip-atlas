@@ -96,3 +96,34 @@ A fresh read-only subagent recomputed, in pure Python from the "abandon … abou
 | 11–16 | nits | "P = x(key)"; the "32 B" bracket under the 0x20 byte; "PUBLIC" bracket and unlabelled account line; chain labels running together; "ACCOUNT XPUB" over a zpub; the narrow xpub label crowding a tag. | "P = lift_x(x)"; "PUSH 32"; "PUBLIC DERIVATION" and "ACCOUNT LINE"; chain labels inside each V; "ACCOUNT XPUB (ZPUB)"; the narrow label moved under the stack. |
 | 17 | nit | Some 9-unit labels render at 8.8 px at 375. | Kept: the spec sets labels at 9–9.5 units; same convention as the HD review. |
 | 18 | nit | Odd-length storyboards leave a gap at 1440. | Kit behaviour, not changed here. |
+
+### Descriptors — independent review
+
+A fresh read-only subagent recomputed, in pure Python, BIP 380's checksum for all eight hero descriptors (symbol counts and checksums), the 18 symbols of raw(deadbeef), BIP 32 children, hash160s and every listed script, and confirmed both new fixtures are verbatim (BIP 381 lines 78 and 82). **No wrong values.**
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| 1 | must-fix | A13.1 labels ran past the viewBox and clipped at 375. | Labels right of centre read leftwards; text at 9.5 units; the checksum is labelled below. |
+| 2 | must-fix | The hero's key panel overflowed at 1440. | Origin and "after the key" on separate lines. |
+| 3 | must-fix | Children of a hardened range (`/*'`) were labelled 0, 1, 2. | 0′, 1′, 2′ in the hero, A13.2 and the disclosures. |
+| 4 | should-fix | Keys under tr() were shown as 33-byte keys; BIP 386 serializes them x-only. | `deriveDescriptor` now gives the x-only key under tr() (`xonly` on the key view); the hero says "x-only". |
+| 5 | should-fix | The whole origin was hash yellow. | Only the fingerprint is yellow; the steps are plain (hero, A13.1, A13.4, A13.6). |
+| 6 | should-fix | A13.7 showed the group by colour alone, in checksum purple. | Neutral greys plus a "g0/g1/g2" label under each character; purple only for group symbols and the checksum. |
+| 7 | should-fix | "No keys" had a public-key glyph; a rejected body used the hidden hatch. | No glyph without keys; a rejected body is a plain box marked "✕ REJECTED". |
+| 8 | should-fix | A13.8's recomputed checksum looked like a third vector; the hero's computed checksum for descriptors without one was not marked computed. | "COMPUTED HERE, NOT IN BIP 380"; "COMPUTED HERE · NONE WRITTEN, WHICH IS ALLOWED". |
+| 9 | should-fix | A13.3 shortened the origin with no exact value. | The descriptor is in the disclosure. |
+| 10 | should-fix | A13.4 did not say what differs; one arrow left from row 3 only. | Per-row labels (WIF or public key, hardened as ' or h, line) and leaders from all three rows into the script. |
+| 11 | should-fix | combo() scripts were tagged 1–4. | P2PK, P2PKH, P2WPKH, P2SH-P2WPKH. |
+| 12 | should-fix | A13.1's derivation leader was a 2-unit tick; the # box had no label. | Fixed leader lengths; "CHECKSUM · OPTIONAL". |
+| 13–15 | nits | ′ and h mixed; A13.6's note named /1/2/*; the push byte coloured as the hash; "HOLDS AN XPRV" hard-coded; every brace labelled "SCRIPT TREE"; the no-JS note and the hero caption. | ′ throughout drawings; "/1/2 steps down … the final /*"; push byte split out; wording from the key kind; inner braces "BRANCH", tr()'s first key "INTERNAL KEY"; note and caption reworded. |
+| 16 | nit | Labels of 9 units render at 8.8 px at 375. | Kept at 9 units, the spec's label size (as in the other reviews). |
+| 17 | nit | `descTree` popped on ")" or "}" without checking the box kind. | It now throws unless the closer matches. |
+| 18 | nit | The figure test re-implements `deriveDescriptor`. | Kept: the pilot tests follow the same pattern; noted for a later shared helper. |
+
+## Client JS budget: layered heroes
+
+The coordinator set the batch budget at ≤ 1 KB net (the site total must stay under 60 KB with all four batches). The first drawing-first heroes cost about 1.7 KB more each than the card heroes they replaced (16.8 KB for the four, against 10.8 KB). So three heroes (HD wallets, Wallet paths, Descriptors), whose states are all known at build time, are now **layered**: the server renders every state's parts once, each tagged `data-when="key=value&…"`, and a small shared island, `StateHero` (`packages/figures/src/StateHero.tsx`, helpers in `heroLayers.ts`), holds the state, draws the strips, slider and toggle, shows the matching layers and announces a status line from a table computed at build time. Highlights that only restyle (the current plate, the highlighted key) follow `data-s-*` attributes through CSS. The Addresses hero stays a computing island, because a reader can change any character.
+
+- Without JavaScript, the initial state's layers are the visible ones, so the static view is unchanged.
+- Hidden layers are `display: none`, so assistive technology does not read them. As before, the island's props and the page source hold every state's values; for the HD hero the M view's layers are built from public values only, and tests check the visible M-view render for leaks.
+- Measured after the batch: **49,523 bytes** gzipped across `apps/site/dist/_astro/*.js`, against about 51,860 before the batch: about 2.3 KB **less** than before.

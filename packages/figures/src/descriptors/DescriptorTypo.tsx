@@ -17,7 +17,7 @@ export function DescriptorTypo({ fixtures }: { fixtures: DerivedDescriptorFixtur
   const rows = [
     { text: good.derived.body, cs: good.derived.checksumGiven!, verdict: "✓ MATCHES", note: `BIP 380 LINE ${good.source.line}`, mark: -1 },
     { text: typo.derived.body, cs: typo.derived.checksumGiven!, verdict: "✕ TYPO CAUGHT", note: `BIP 380 LINE ${typo.source.line} · COMPUTED #${forged}`, mark: diff },
-    { text: typo.derived.body, cs: forged, verdict: "✓ MATCHES", note: "RECOMPUTED BY ANYONE: NO KEY NEEDED", mark: diff },
+    { text: typo.derived.body, cs: forged, verdict: "✓ MATCHES", note: "COMPUTED HERE, NOT IN BIP 380 · NO KEY NEEDED", mark: diff },
   ];
   const CW = 13;
   const desc =

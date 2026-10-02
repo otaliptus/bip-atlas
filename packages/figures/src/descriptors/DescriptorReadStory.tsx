@@ -47,7 +47,8 @@ export function DescriptorReadStory({ fixture }: { fixture: DerivedDescriptorFix
       desc: `The key origin is [${origin}]: the fingerprint ${origin.split("/")[0]} of the key where derivation began, and the steps taken from it. It is information about the key and changes no script.`,
       draw: () => (
         <>
-          {bar(14, 20, 120, "hash", `[${origin}]`)}
+          {bar(14, 20, origin.indexOf("/") * 5.7 + 16, "hash", `[${origin.slice(0, origin.indexOf("/"))}`)}
+          {bar(14 + origin.indexOf("/") * 5.7 + 16, 20, (origin.length - origin.indexOf("/")) * 5.7 + 14, "plain", `${origin.slice(origin.indexOf("/"))}]`)}
           <Value at={[14, 56]} text={`FINGERPRINT ${origin.split("/")[0]}`} size={9} cls="k-value--label" />
           <Value at={[14, 70]} text={`STEPS ${origin.slice(origin.indexOf("/"))}`} size={9} cls="k-value--label" />
           <Value at={[14, 96]} text="FOR SOFTWARE THAT HOLDS THE ROOT KEY" size={9} cls="k-value--muted" />
@@ -55,7 +56,7 @@ export function DescriptorReadStory({ fixture }: { fixture: DerivedDescriptorFix
       ),
     },
     {
-      note: `The key is an xpub; ${prime(k.derivation ?? "")} steps down from it, and the final * stands for every child index.`,
+      note: `The key is an xpub; ${prime((k.derivation ?? "").replace(/\/\*h?$/, ""))} steps down from it, and the final /* stands for every child index.`,
       desc: `The key ${k.text} is an extended public key. ${k.derivation} derives below it; the range /* gives one public key per child index. Children 0 to ${k.publicKeys.length - 1}: ${k.publicKeys.join(", ")}.`,
       draw: (ids) => (
         <>

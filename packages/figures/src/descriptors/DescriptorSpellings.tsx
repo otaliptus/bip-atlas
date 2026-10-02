@@ -1,4 +1,5 @@
 import { Arrow, Drawing, Value, idsFor } from "../kit";
+import { splitOrigin } from "./DescriptorAnatomy";
 import type { DerivedDescriptorFixture } from "../types";
 
 const short = (s: string, n: number) => `${s.slice(0, n)}…`;
@@ -34,7 +35,7 @@ export function DescriptorSpellings({ fixtures }: { fixtures: DerivedDescriptorF
     `They differ in how a hardened step is marked (' or h) and in whether the key is written as a WIF private key or as its public key. All produce the same script, ${script}.`;
   return (
     <>
-      <Drawing id="a13-spell" width={344} height={70 + rows.length * 34 + 40} title="Three spellings, one script" desc={desc}>
+      <Drawing id="a13-spell" width={344} height={14 + rows.length * 34 + 66} title="Three spellings, one script" desc={desc}>
         {rows.map((r, i) => {
           const y = 14 + i * 34;
           const w1 = r.before.length * 5.7;
@@ -43,17 +44,18 @@ export function DescriptorSpellings({ fixtures }: { fixtures: DerivedDescriptorF
           return (
             <g>
               <Value at={[cx, y + 13]} text={r.before} size={9.5} />
-              <rect class="k-cell k-fill--hash" x={cx + w1 + 1} y={y} width={wo} height="18" />
+              <rect class="k-cell k-fill--hash" x={cx + w1 + 1} y={y} width={splitOrigin(r.origin)[0].length * 5.7 + 4} height="18" />
+              <rect class="k-cell k-fill--plain" x={cx + w1 + 5 + splitOrigin(r.origin)[0].length * 5.7} y={y} width={wo - 4 - splitOrigin(r.origin)[0].length * 5.7} height="18" />
               <Value at={[cx + w1 + 5, y + 13]} text={r.origin} size={9.5} />
               <rect class={`k-cell k-fill--${r.isPrivate ? "secret" : "public"}`} x={cx + w1 + wo + 1} y={y} width={w2} height="18" />
               <Value at={[cx + w1 + wo + 5, y + 13]} text={r.key} size={9.5} />
               <Value at={[cx + w1 + wo + w2 + 3, y + 13]} text={r.after} size={9.5} />
-              <Value at={[336, y + 13]} text={`L${fixtures[i].source.line}`} anchor="end" size={9} cls="k-value--muted" />
-              <Value at={[cx, y + 27]} text={`ORIGIN AS WRITTEN · ${r.isPrivate ? "WIF PRIVATE KEY" : "PUBLIC KEY"}`} size={9} cls="k-value--label" />
+              <line class="k-leader" x1={cx + w1 + wo + w2 + 12} y1={y + 9} x2={320} y2={y + 9} />
+              <Value at={[cx, y + 27]} text={`${r.isPrivate ? "WIF PRIVATE KEY" : "PUBLIC KEY"} · HARDENED AS ${r.origin.includes("h") ? "h" : "'"} · LINE ${fixtures[i].source.line}`} size={9} cls="k-value--label" />
             </g>
           );
         })}
-        <Arrow d={`M172 ${14 + rows.length * 34 - 2} V${14 + rows.length * 34 + 14}`} ids={ids} />
+        <Arrow d={`M320 23 V${14 + rows.length * 34 + 14}`} ids={ids} />
         <rect class="k-cell k-fill--plain k-cell--em" x="8" y={14 + rows.length * 34 + 18} width="328" height="22" />
         <Value at={[14, 14 + rows.length * 34 + 33]} text={`ONE SCRIPT · ${short(script, 26)}`} size={9.5} />
         <Value at={[8, 14 + rows.length * 34 + 58]} text="' AND h BOTH MARK A HARDENED STEP · THE ORIGIN ADDS NO BYTES" size={9} cls="k-value--muted" />

@@ -44,7 +44,7 @@
         "checksum-six",
         "fixture-v0"
       ],
-      "layout": "prose"
+      "layout": "wide"
     }
   },
   "sections": [
@@ -69,11 +69,40 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A04.2",
+          "recipe": "address-alphabet.v1",
+          "title": "Thirty-two characters",
+          "fixtures": [],
+          "caption": "The data alphabet, each character with the 5-bit value it stands for. Digit 1 and the letters b, i and o are left out.",
+          "claims": [
+            "alphabet"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Because the alphabet has no case distinctions, an address can be written entirely in capitals. BIP 173 recommends exactly that inside QR codes, whose alphanumeric mode is considerably more compact. What a decoder must refuse is a string that mixes the two cases. The checksum is always computed on the lowercase form.",
           "claims": [
             "case-rules"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.3",
+          "recipe": "address-case.v1",
+          "title": "One case at a time",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v0-upper",
+            "mixed-case"
+          ],
+          "caption": "BIP 173’s example in lower and in upper case decodes to the same script. A BIP 350 vector with one capital letter among lowercase ones is refused before any other check.",
+          "claims": [
+            "case-rules",
+            "fixture-v0"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -94,6 +123,21 @@
           "claims": [
             "checksum-computation"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.4",
+          "recipe": "address-polymod-story.v1",
+          "title": "Checking the six characters",
+          "fixtures": [
+            "v0-p2wpkh"
+          ],
+          "caption": "BIP 173’s example, checked step by step. The prefix and every data character feed one function, and a correctly copied Bech32 string gives exactly 1.",
+          "claims": [
+            "checksum-computation",
+            "fixture-v0"
+          ],
+          "layout": "prose"
         },
         {
           "type": "details",
@@ -127,7 +171,7 @@
         },
         {
           "type": "figure",
-          "figure": "A04.2",
+          "figure": "A04.5",
           "recipe": "address-checksum-lab.v1",
           "title": "Checksum lab",
           "fixtures": [
@@ -136,7 +180,7 @@
             "v1-bech32-checksum",
             "v0-typo"
           ],
-          "caption": "Any single change you make to a valid sample is stopped at the checksum stage. The decoder learns that the string is wrong, not where: the marked cell is your edit, which the decoder never sees.",
+          "caption": "Any single change you make to a valid sample is stopped at the checksum stage. The decoder learns that the string is wrong, not where: the dark cell is your edit, which the decoder never sees.",
           "claims": [
             "substitution-guarantee",
             "no-correction",
@@ -199,6 +243,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A04.6",
+          "recipe": "address-typo-story.v1",
+          "title": "A typo, caught and not repaired",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v0-typo"
+          ],
+          "caption": "BIP 173’s example and its published one-character typo. The checksum catches the change; the decoder reports no position and offers no fix.",
+          "claims": [
+            "fixture-typo",
+            "no-correction",
+            "checksum-computation"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "callout",
           "label": "Caveat",
           "text": "A wallet that silently fixes an address is not being helpful. If an address is rejected, copy it again from its source rather than accepting a guess.",
@@ -219,6 +280,19 @@
             "substitution-guarantee",
             "q-weakness"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.7",
+          "recipe": "address-q-weakness.v1",
+          "title": "The q insertion",
+          "fixtures": [],
+          "caption": "A schematic of the weakness BIP 350 describes: q characters inserted just before a final p leave a Bech32 checksum valid. Version 0 addresses escaped because only two lengths are allowed.",
+          "claims": [
+            "q-weakness",
+            "v0-unaffected"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -259,6 +333,25 @@
             "family-rule",
             "bech32m-constant"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.8",
+          "recipe": "address-two-constants.v1",
+          "title": "Two constants",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v1-32byte",
+            "v1-bech32-checksum"
+          ],
+          "caption": "One function, two accepted results. The v1 program with a Bech32 checksum passes the checksum stage and is refused only when the version and the family are compared.",
+          "claims": [
+            "bech32m-constant",
+            "family-rule",
+            "fixture-wrong-family",
+            "fixture-v1"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -323,7 +416,7 @@
         },
         {
           "type": "figure",
-          "figure": "A04.3",
+          "figure": "A04.9",
           "recipe": "program-regrouping.v1",
           "title": "Eight-bit bytes, five-bit characters",
           "fixtures": [
@@ -337,7 +430,7 @@
             "fixture-v0",
             "fixture-v1"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -347,6 +440,23 @@
             "fixture-v0",
             "fixture-v1"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A04.10",
+          "recipe": "address-script.v1",
+          "title": "From address to script",
+          "fixtures": [
+            "v0-p2wpkh",
+            "v1-32byte"
+          ],
+          "caption": "The version character becomes an opcode, then come the program’s length and the program: the scripts for BIP 173’s v0 example and BIP 350’s v1 vector.",
+          "claims": [
+            "script-opcodes",
+            "fixture-v0",
+            "fixture-v1"
+          ],
+          "layout": "prose"
         }
       ]
     },

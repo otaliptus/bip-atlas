@@ -8,6 +8,9 @@ import {
   AddressAnatomy,
   AddressChecksumLab,
   DerivationTree,
+  DerivationTreeValues,
+  derivationTreeSpec,
+  StateHero,
   EntropyWordLab,
   ExtendedKeyLayout,
   ExtendedKeyPlates,
@@ -20,6 +23,13 @@ import {
   MasterKeySplit,
   MnemonicCard,
   ProgramRegrouping,
+  AddressAlphabet,
+  AddressCase,
+  PolymodStory,
+  TypoStory,
+  TwoConstants,
+  QWeakness,
+  ScriptOpcodes,
   PsbtEnvelope,
   PsbtLayout,
   UnknownFields,
@@ -35,7 +45,6 @@ import {
   TwoSerializations,
   WeightMeter,
   TxWorked,
-  AddressWorked,
   PsbtWorked,
   SchnorrWorked,
   TapscriptWorked,
@@ -52,6 +61,8 @@ import {
   VersionbitsRecord,
   VersionbitsWorked,
   WalletPathWalk,
+  WalletPathValues,
+  walletWalkSpec,
   WalletPathLevels,
   WalletPathSchemes,
   WalletDiscovery,
@@ -60,6 +71,8 @@ import {
   WalletP2trStory,
   WalletSpendLayouts,
   DescriptorAnatomy,
+  DescriptorValues,
+  descriptorSpec,
   DescriptorChecksum,
   DescriptorIndex,
   DescriptorSentence,
@@ -190,6 +203,13 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
   {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
   {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
+  {figure.recipe === "address-alphabet.v1" && <AddressAlphabet />}
+  {figure.recipe === "address-case.v1" && <AddressCase fixtures={address} />}
+  {figure.recipe === "address-polymod-story.v1" && <PolymodStory fixture={address[0]} />}
+  {figure.recipe === "address-typo-story.v1" && <TypoStory fixtures={address} />}
+  {figure.recipe === "address-two-constants.v1" && <TwoConstants fixtures={address} />}
+  {figure.recipe === "address-q-weakness.v1" && <QWeakness />}
+  {figure.recipe === "address-script.v1" && <ScriptOpcodes fixtures={address} />}
   {figure.recipe === "mnemonic-card.v1" && <MnemonicCard fixture={mnemonic[0]} />}
   {figure.recipe === "entropy-word-pipeline.v1" && <EntropyWordLab client:visible fixtures={mnemonic} figureId={figureId} />}
   {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
@@ -200,7 +220,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "passphrase-seeds.v1" && <PassphraseSeeds fixture={mnemonic[0]} />}
   {figure.recipe === "mnemonic-chain.v1" && <MnemonicChain fixture={mnemonic[0]} />}
   {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
-  {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
+  {figure.recipe === "derivation-tree.v1" && (
+    <StateHero client:visible spec={derivationTreeSpec(hd[0], figureId)}>
+      <DerivationTree fixture={hd[0]} figureId={figureId} />
+      <DerivationTreeValues slot="values" fixture={hd[0]} />
+    </StateHero>
+  )}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
   {figure.recipe === "hd-extended-key.v1" && <ExtendedKeyPlates fixture={hd[0]} />}
   {figure.recipe === "hd-hmac-inputs.v1" && <HmacInputs fixture={hd[0]} />}
@@ -237,7 +262,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
   {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
   {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
-  {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
+  {figure.recipe === "wallet-path-walk.v1" && (
+    <StateHero client:visible spec={walletWalkSpec(wallet, figureId)}>
+      <WalletPathWalk fixtures={wallet} figureId={figureId} />
+      <WalletPathValues slot="values" fixtures={wallet} />
+    </StateHero>
+  )}
   {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
   {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
   {figure.recipe === "wallet-discovery.v1" && <WalletDiscovery fixture={wallet[0]} />}
@@ -245,7 +275,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "wallet-xpub-reach.v1" && <WalletXpubReach fixture={wallet[0]} />}
   {figure.recipe === "wallet-p2tr-story.v1" && <WalletP2trStory fixture={wallet[0]} />}
   {figure.recipe === "wallet-spend-layouts.v1" && <WalletSpendLayouts />}
-  {figure.recipe === "descriptor-anatomy.v1" && <DescriptorAnatomy client:visible fixtures={desc} figureId={figureId} />}
+  {figure.recipe === "descriptor-anatomy.v1" && (
+    <StateHero client:visible spec={descriptorSpec(desc, figureId)}>
+      <DescriptorAnatomy fixtures={desc} figureId={figureId} />
+      <DescriptorValues slot="values" fixtures={desc} />
+    </StateHero>
+  )}
   {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
   {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
   {figure.recipe === "descriptor-sentence.v1" && <DescriptorSentence fixture={desc[0]} />}
@@ -271,7 +306,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
   {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
-      {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}

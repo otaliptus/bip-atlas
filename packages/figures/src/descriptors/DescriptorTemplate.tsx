@@ -20,7 +20,8 @@ export function DescriptorTemplate({ fixture }: { fixture: DerivedDescriptorFixt
   const slots = [
     { op: "OP_DUP", hex: "76" },
     { op: "OP_HASH160", hex: "a9" },
-    { op: "<KEY_hash160>", hex: `14 ${short(hash, 12)}`, fill: true },
+    { op: "push 20 bytes", hex: "14" },
+    { op: "<KEY_hash160>", hex: short(hash, 14), fill: true },
     { op: "OP_EQUALVERIFY", hex: "88" },
     { op: "OP_CHECKSIG", hex: "ac" },
   ];
@@ -30,7 +31,7 @@ export function DescriptorTemplate({ fixture }: { fixture: DerivedDescriptorFixt
     `The script is ${s}, as BIP 381 lists it on line ${fixture.scriptLines[0]}.`;
   return (
     <>
-      <Drawing id="a13-tpl" width={344} height={246} title="Filling the template" desc={desc}>
+      <Drawing id="a13-tpl" width={344} height={268} title="Filling the template" desc={desc}>
         <KeyGlyph at={[8, 10]} role="public" />
         <Value at={[46, 20]} text={`KEY · ${short(k.publicKeys[0], 10)}`} size={9.5} />
         <Value at={[46, 34]} text={k.origin ? `ITS ORIGIN [${k.origin.split("/")[0]}/…] ADDS NO BYTES` : "NO ORIGIN GIVEN"} size={9} cls="k-value--muted" />
@@ -51,6 +52,7 @@ export function DescriptorTemplate({ fixture }: { fixture: DerivedDescriptorFixt
       <details class="atlas-disclosure">
         <summary>Exact values</summary>
         <dl class="atlas-hexlist atlas-hexlist--case">
+          <dt>Descriptor (BIP 381 line {fixture.source.line})</dt><dd><code class="atlas-break">{fixture.descriptor}</code></dd>
           <dt>Key</dt><dd><code class="atlas-break">{k.publicKeys[0]}</code></dd>
           <dt>HASH160 of the key</dt><dd><code class="atlas-break">{hash}</code></dd>
           <dt>Script</dt><dd><code class="atlas-break">{s}</code></dd>

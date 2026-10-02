@@ -1,6 +1,7 @@
 import { Drawing, KeyGlyph, Value } from "../kit";
 import type { DerivedDescriptorFixture } from "../types";
-import { descTree, prime, shortKey, type DescNode } from "./descTree";
+import { descTree, shortKey, type DescNode } from "./descTree";
+import { hPrime } from "./DescriptorAnatomy";
 
 /** The templates BIPs 381 and 382 give (constants of the BIPs, not data). */
 const TEMPLATE: Record<string, [string, string]> = {
@@ -56,7 +57,7 @@ export function DescriptorNesting({ fixture }: { fixture: DerivedDescriptorFixtu
           const b = box(levels.length);
           let x = b.x;
           return key.parts.map((p) => {
-            const text = p.role === "key" ? shortKey(p.text) : prime(p.text);
+            const text = p.role === "key" ? shortKey(p.text) : hPrime(p.text);
             const w = text.length * 5.7 + 8;
             const at = x;
             x += w;
@@ -69,8 +70,8 @@ export function DescriptorNesting({ fixture }: { fixture: DerivedDescriptorFixtu
           });
         })()}
         <KeyGlyph at={[14, 164]} role={k.isPrivate ? "secret" : "public"} scale={0.8} />
-        <Value at={[42, 173]} text={k.isPrivate ? "HOLDS AN XPRV: A SPENDING SECRET" : "PUBLIC KEYS ONLY"} size={9} cls="k-value--label" />
-        <Value at={[14, 196]} text={`CHILD 0 OUTPUT SCRIPT · BIP ${fixture.source.bip} LINE ${fixture.scriptLines[0]}`} size={9} cls="k-value--label" />
+        <Value at={[42, 173]} text={k.isPrivate ? `HOLDS ${k.kind === "xprv" ? "AN XPRV" : "A PRIVATE KEY"}: A SPENDING SECRET` : "PUBLIC KEYS ONLY"} size={9} cls="k-value--label" />
+        <Value at={[14, 196]} text={`CHILD 0${k.range === "hardened" ? "′" : ""} OUTPUT SCRIPT · BIP ${fixture.source.bip} LINE ${fixture.scriptLines[0]}`} size={9} cls="k-value--label" />
         <rect class="k-cell k-fill--plain" x="14" y="202" width="316" height="18" />
         <Value at={[19, 215]} text={`a9 14 ${short(script0.slice(4), 16)} 87`} size={9.5} />
       </Drawing>
@@ -78,7 +79,7 @@ export function DescriptorNesting({ fixture }: { fixture: DerivedDescriptorFixtu
         <summary>Exact values</summary>
         <dl class="atlas-hexlist atlas-hexlist--case">
           <dt>Descriptor (BIP {fixture.source.bip} line {fixture.source.line})</dt><dd><code class="atlas-break">{fixture.descriptor}</code></dd>
-          {d.scripts.map((s, i) => <><dt>Script, child {i}</dt><dd><code class="atlas-break">{s[0]}</code></dd></>)}
+          {d.scripts.map((s, i) => <><dt>Script, child {i}{k.range === "hardened" ? "h" : ""}</dt><dd><code class="atlas-break">{s[0]}</code></dd></>)}
         </dl>
       </details>
     </>

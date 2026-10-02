@@ -25,21 +25,22 @@ export function DescriptorChecksum({ fixture }: { fixture: DerivedDescriptorFixt
     `The polymod over these ${d.symbolCount} symbols gives the checksum ${d.checksumComputed}, which matches the published one.`;
   return (
     <Drawing id="a13-sum" width={344} height={250} title="Characters into symbols" desc={desc}>
-      <Value at={[16, 14]} text={`${d.body}  ·  ${chars.length} CHARACTERS`} size={9} cls="k-value--label" />
+      <Value at={[16, 14]} text={`${d.body} · ${chars.length} CHARACTERS · POSITION AND GROUP (g0–g2)`} size={9} cls="k-value--label" />
       {chars.map((c, i) => (
         <g>
-          <rect class={`k-cell ${["k-fill--plain", "k-fill--check", "k-mark--check"][group(c)]}`} x={cx(i)} y={22} width={CW} height="20" />
+          <rect class={`k-cell k-ds-g${group(c)}`} x={cx(i)} y={22} width={CW} height="20" />
           <Value at={[cx(i) + CW / 2, 36]} text={c} anchor="middle" size={10} cls={group(c) === 2 ? "k-value--on" : ""} />
           <Value at={[cx(i) + CW / 2, 54]} text={String(INPUT_CHARSET.indexOf(c) & 31)} anchor="middle" size={9} cls="k-value--muted" />
+          <Value at={[cx(i) + CW / 2, 66]} text={`g${group(c)}`} anchor="middle" size={9} cls="k-value--muted" />
         </g>
       ))}
-      <Value at={[16, 70]} text="GROUP 0 · 1 · 2 = WHITE · LIGHT · DARK" size={9} cls="k-value--muted" />
+      
       {d.symbols.map((s, j) => {
         const isGroup = s.char === null;
         const from = s.char !== null ? cx(s.char) + CW / 2 : null;
         return (
           <g>
-            {from !== null ? <line class="k-leader" x1={from} y1={76} x2={sx(j) + SW / 2} y2={98} /> : null}
+            {from !== null ? <line class="k-leader" x1={from} y1={72} x2={sx(j) + SW / 2} y2={98} /> : null}
             <rect class={`k-cell ${isGroup ? "k-fill--check k-cell--em" : "k-fill--plain"}`} x={sx(j)} y={100} width={SW} height="18" />
             <Value at={[sx(j) + SW / 2, 112.5]} text={String(s.value)} anchor="middle" size={9} />
           </g>

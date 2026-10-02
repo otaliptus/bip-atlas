@@ -6,7 +6,9 @@ import { createHash } from "node:crypto";
 import { ckdPriv, ckdPub, derivePath, fingerprint, formatIndex, hash160, masterFromSeed, neuter, parsePath, recoverParentPrivateKey, serialize, serializeRaw } from "@bip-atlas/models/bip32";
 import { bytesToHex, hexToBytes } from "@bip-atlas/models/hex";
 import { ChildStory } from "../src/hd/ChildStory";
-import { DerivationTree, layoutHdTree, visibleNodes } from "../src/hd/DerivationTree";
+import { DerivationTree, DerivationTreeValues, derivationTreeSpec, layoutHdTree, visibleNodes } from "../src/hd/DerivationTree";
+import { StateHero } from "../src/StateHero";
+import { matches } from "../src/heroLayers";
 import { ExtendedKeyLayout, splitXkey } from "../src/hd/ExtendedKeyLayout";
 import { ExtendedKeyPlates } from "../src/hd/ExtendedKeyPlates";
 import { Fingerprint } from "../src/hd/Fingerprint";
@@ -197,7 +199,13 @@ describe("HdSharing", () => {
 });
 
 describe("DerivationTree (hero)", () => {
-  const renderAt = (initial?: { view: "private" | "public"; hardenedBranch: boolean; branch: string }) => html(h(DerivationTree, { fixture: d, figureId: "fig-a02-5", initial }));
+  /** What a reader sees in one state: the island's no-JS render with only that state's layers. */
+  const renderAt = (initial?: { view: "private" | "public"; hardenedBranch: boolean; branch: string }) => {
+    const st = initial ? { view: initial.view, toggle: initial.hardenedBranch ? "hardened" : "normal", branch: initial.branch } : undefined;
+    const spec = derivationTreeSpec(d, "fig-a02-5", st);
+    if (st && !spec.status[`view=${st.view}&toggle=${st.toggle}&branch=${st.branch}`]) throw new Error(`no state ${JSON.stringify(st)}`);
+    return html(h(StateHero, { spec, values: h(DerivationTreeValues, { fixture: d, initial: spec.initial, only: true }) }, h(DerivationTree, { fixture: d, figureId: "fig-a02-5", initial: spec.initial, only: true })));
+  };
   const privates = d.derived.nodes.flatMap((n) => [n.privateKeyHex, n.xprv]);
   const valuesOf = (p: string) => { const n = node(p); return [n.publicKeyHex, n.chainCodeHex, n.xpub, n.privateKeyHex, n.xprv, n.hmacOutHex ?? "", n.hmacDataHex ?? ""].filter(Boolean); };
   const leaks = (s: string, values: string[]) => values.filter((v) => s.includes(v.slice(0, 8)));
@@ -245,5 +253,16 @@ describe("DerivationTree (hero)", () => {
   });
   it("throws for a branch that is not drawn", () => {
     expect(() => renderAt({ view: "private", hardenedBranch: false, branch: "m/1H" })).toThrow();
+  });
+  it("has a status line for every reachable state, and hides every layer but the initial state's", () => {
+    const spec = derivationTreeSpec(d, "fig-a02-5");
+    expect(Object.keys(spec.status).length).toBe(2 * 2 * 6);
+    const full = html(h(DerivationTree, { fixture: d, figureId: "fig-a02-5" }));
+    const whens = [...full.matchAll(/data-when="([^"]+)"( style="display:none")?/g)];
+    expect(whens.length).toBeGreaterThan(20);
+    for (const [, raw, hidden] of whens) {
+      const when = raw.replace(/&amp;/g, "&");
+      if (!when.includes("branch=") || when.startsWith("branch=")) expect(Boolean(hidden), when).toBe(!matches(when, { ...spec.initial }));
+    }
   });
 });
