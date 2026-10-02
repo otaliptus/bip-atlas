@@ -58,7 +58,8 @@
           "hardened": "m/1H"
         }
       },
-      "serializePath": "m/0H"
+      "serializePath": "m/0H",
+      "recoveryPath": "m/0H/1"
     }
   ]
 }

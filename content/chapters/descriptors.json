@@ -38,18 +38,19 @@
     "figure": {
       "type": "figure",
       "figure": "A13.1",
-      "recipe": "descriptor-checksum.v1",
-      "title": "Characters into symbols",
+      "recipe": "descriptor-sentence.v1",
+      "title": "A descriptor, part by part",
       "fixtures": [
-        "bip380-raw-valid"
+        "bip382-wpkh-ranged"
       ],
-      "caption": "BIP 380’s own checksum vector. Each character becomes a position and a group; the checksum is computed over the resulting symbols.",
+      "caption": "BIP 382’s ranged example, read as a sentence: what kind of output, where the key came from, the key, the steps after it, and the range.",
       "claims": [
-        "checksum-expand",
-        "charset",
-        "checksum-tested"
+        "structure",
+        "key-expr",
+        "ranged",
+        "solution"
       ],
-      "layout": "wide"
+      "layout": "prose"
     }
   },
   "sections": [
@@ -76,6 +77,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A13.2",
+          "recipe": "descriptor-nesting.v1",
+          "title": "Read from the outside in",
+          "fixtures": [
+            "bip382-sh-wpkh-xprv"
+          ],
+          "caption": "BIP 382’s sh(wpkh(…)) as boxes inside boxes. Each script expression fills its template around the one inside it; this one holds an xprv, so it is a secret.",
+          "claims": [
+            "script-expr",
+            "b381",
+            "b382",
+            "secret-or-not"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The templates are the familiar ones. pk() becomes the key followed by OP_CHECKSIG; pkh() becomes OP_DUP OP_HASH160, the key’s 20-byte hash, OP_EQUALVERIFY and OP_CHECKSIG; wpkh() becomes OP_0 and the same hash. A descriptor adds no new kind of output. It only names, in a fixed form, the outputs wallets already make.",
           "claims": [
@@ -83,6 +101,22 @@
             "b381",
             "b382"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A13.3",
+          "recipe": "descriptor-template.v1",
+          "title": "Filling the template",
+          "fixtures": [
+            "bip381-pkh-origin"
+          ],
+          "caption": "BIP 381’s pkh() example. The key’s HASH160 fills the one slot; every other byte is fixed by the template.",
+          "claims": [
+            "templates",
+            "b381",
+            "expansion-tested"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -123,6 +157,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A13.4",
+          "recipe": "descriptor-spellings.v1",
+          "title": "Three spellings, one script",
+          "fixtures": [
+            "bip381-pkh-origin-wif",
+            "bip381-pkh-origin",
+            "bip381-pkh-origin-h"
+          ],
+          "caption": "Three of BIP 381’s pkh() vectors: hardened steps marked with ' or with h, the key as WIF or as its public key. All three give the same script.",
+          "claims": [
+            "origin-no-effect",
+            "key-expr"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "A final /* turns one key into a range. The descriptor then stands for an output script at every child index, not for one script. BIP 382’s ranged wpkh() example lists its first three, and the figure below derives them.",
           "claims": [
@@ -132,7 +183,7 @@
         },
         {
           "type": "figure",
-          "figure": "A13.2",
+          "figure": "A13.5",
           "recipe": "descriptor-anatomy.v1",
           "title": "Reading a descriptor",
           "fixtures": [
@@ -145,7 +196,7 @@
             "bip384-combo",
             "bip386-tr-tree"
           ],
-          "caption": "Descriptors published in BIPs 380–386, split into their parts, expanded, and checked. Every expansion matches the scripts the BIPs list.",
+          "caption": "Descriptors published in BIPs 380–386, split into their parts, expanded, and checked. Every script the BIPs list for them is reproduced.",
           "claims": [
             "expansion-tested",
             "key-expr",
@@ -155,6 +206,22 @@
             "not-authentication"
           ],
           "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A13.6",
+          "recipe": "descriptor-read-story.v1",
+          "title": "One descriptor, many scripts",
+          "fixtures": [
+            "bip382-wpkh-ranged"
+          ],
+          "caption": "BIP 382’s ranged descriptor read part by part and expanded for the three children the BIP lists.",
+          "claims": [
+            "ranged",
+            "expansion-tested",
+            "templates"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -189,8 +256,24 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A13.7",
+          "recipe": "descriptor-checksum.v1",
+          "title": "Characters into symbols",
+          "fixtures": [
+            "bip380-raw-valid"
+          ],
+          "caption": "BIP 380’s own checksum vector. Each character becomes a position and a group; the checksum is computed over the resulting symbols and matches the published one.",
+          "claims": [
+            "checksum-expand",
+            "charset",
+            "checksum-tested"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "The guarantees are stated precisely. Any single symbol error is always detected; any two or three in a descriptor up to 49,154 characters; any four up to 507; any five up to 77. Random errors slip through with a chance of 1 in 2^40. The figure checks BIP 380’s own example, raw(deadbeef)#89f8spxm, and the same string with one letter changed, which fails.",
+          "text": "The guarantees are stated precisely. Any single symbol error is always detected; any two or three in a descriptor up to 49,154 characters; any four up to 507; any five up to 77. Random errors slip through with a chance of 1 in 2^40. Fig. A13.8 below checks BIP 380’s own example, raw(deadbeef)#89f8spxm, and the same string with one letter changed, which fails.",
           "claims": [
             "checksum-props",
             "checksum-tested"
@@ -211,6 +294,23 @@
           "claims": [
             "not-authentication"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A13.8",
+          "recipe": "descriptor-typo-forgery.v1",
+          "title": "A typo caught, a change not",
+          "fixtures": [
+            "bip380-raw-valid",
+            "bip380-raw-typo"
+          ],
+          "caption": "BIP 380’s valid vector and its one-letter error, which the checksum rejects. Recomputing the checksum for the changed text needs no key, so the checksum says nothing about who wrote a descriptor.",
+          "claims": [
+            "checksum-tested",
+            "not-authentication",
+            "checksum-cases"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -235,13 +335,13 @@
         },
         {
           "type": "figure",
-          "figure": "A13.3",
+          "figure": "A13.9",
           "recipe": "descriptor-expressions.v1",
           "title": "Where each expression may go",
           "fixtures": [
             "bip380-index"
           ],
-          "caption": "BIP 380’s index of script expressions, with the placement rules the model enforces.",
+          "caption": "BIP 380’s index of script expressions, with the placement rules the model enforces. Hatched rows are defined in BIPs outside this chapter’s pinned sources.",
           "claims": [
             "index",
             "b381",
@@ -251,7 +351,7 @@
             "b385",
             "b386"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",

@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
-import { Arrow, Boundary, Bracket, Cells, Computer, Drawing, KeyGlyph, Packet, packetSize, IsoBox, IsoTopGrid, Label, Machine, Magnifier, Responsive, Storyboard, boxPoints, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
+import { Arrow, Boundary, Bracket, Cells, Computer, Drawing, KeyGlyph, Packet, packetSize, IsoBox, IsoTopGrid, Label, Machine, Magnifier, Responsive, Storyboard, Tag, boxPoints, cellsSize, idsFor, iso, onTop, pts } from "../src/kit";
 
 const html = (node: preact.VNode<any>) => render(node);
 const count = (s: string, needle: string) => s.split(needle).length - 1;
@@ -198,5 +198,16 @@ describe("Strip and Scrub (batch 3)", () => {
     expect(s).toContain('aria-label="Next step"');
     expect(s).toContain('aria-valuetext="start"');
     expect(count(s, "disabled")).toBe(1);
+  });
+});
+
+describe("Tag", () => {
+  it("draws a leader and keeps the label's case", () => {
+    const s = html(h("svg", {}, h(Tag, { at: [10, 10], text: "private key k" })));
+    expect(s).toContain(">private key k<");
+    expect(count(s, "<line")).toBe(1);
+    const left = html(h("svg", {}, h(Tag, { at: [100, 10], text: "M", side: "left" })));
+    expect(left).toContain('text-anchor="end"');
+    expect(left).toContain('x2="86"');
   });
 });

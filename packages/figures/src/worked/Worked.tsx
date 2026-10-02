@@ -4,49 +4,15 @@
  * derived data as the interactive view (or, for addresses, the tested bech32
  * model run at build time); nothing here is invented or computed in the browser.
  */
-import { analyzeSegwitAddress } from "@bip-atlas/models/bech32";
 import type {
-  AddressFixture,
-  DerivedBip32Fixture,
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
   DerivedTaprootTreeFixture,
   DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
-  DerivedWalletPathFixture,
-  DerivedDescriptorFixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
-
-const bits = (s: string) => s.match(/.{1,11}/g)?.join(" ") ?? s;
-
-/* ---------- BIP 39 ---------- */
-export function Bip32Worked({ fixture: f }: { fixture: DerivedBip32Fixture }) {
-  const chain = ["m", "m/0H", "m/0H/1", "m/0H/1/2H"];
-  const nodes = chain.map((p) => f.derived.nodes.find((n) => n.path === p)).filter((n): n is NonNullable<typeof n> => !!n);
-  const steps: WorkedStep[] = [
-    {
-      title: "Seed → master key and chain code",
-      values: [{ label: "seed", value: f.seedHex }, { label: "HMAC-SHA512, key “Bitcoin seed”", value: f.derived.masterIHex }],
-      note: "Left 32 bytes: master private key. Right 32 bytes: master chain code.",
-      layer: { size: 0.75, tone: "plain", cells: 2 },
-    },
-    ...nodes.map((n): WorkedStep => ({
-      title: n.path === "m" ? "Master node m" : `${n.path} — ${n.hardened ? "hardened child: needs the parent’s private key" : "normal child: derivable from the parent’s extended public key too"}`,
-      values: [{ label: "xpub", value: n.xpub }, { label: "own key fingerprint", value: n.fingerprintHex }],
-      layer: { size: 0.9 - n.depth * 0.12, tone: n.path === "m" ? "accent" : n.hardened ? "hatch" : "wash" },
-    })),
-  ];
-  return (
-    <WorkedExample
-      intro={<>Walking one branch of <strong>{f.label}</strong>, from the seed to {chain[chain.length - 1]}. Hatched layers are hardened steps.</>}
-      steps={steps}
-      label="Seed, master node and three child derivations, drawn as stacked layers."
-      source={<>Source: BIP 32 test vector 1; every xpub matches the vector where the BIP lists it.</>}
-    />
-  );
-}
 
 /* ---------- BIPs 141/143 ---------- */
 export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture }) {
@@ -84,50 +50,6 @@ export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture })
       steps={steps}
       label="A serialized transaction exploded into its fields, then its two identifiers."
       source={<>Source: BIP 143 line {f.source.line}; sizes and hashes from the tested transaction model.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 173/350 ---------- */
-export function AddressWorked({ fixtures }: { fixtures: AddressFixture[] }) {
-  const good = fixtures.find((f) => analyzeSegwitAddress(f.address, f.network).valid && analyzeSegwitAddress(f.address, f.network).witnessVersion === 0) ?? fixtures[0];
-  const a = analyzeSegwitAddress(good.address, good.network);
-  const typo = fixtures.find((f) => analyzeSegwitAddress(f.address, f.network).failedStage === "checksum");
-  const sep = good.address.lastIndexOf("1");
-  const program = good.address.slice(sep + 2, -6);
-  const steps: WorkedStep[] = [
-    { title: "Human-readable part and separator", values: [{ label: "HRP + separator", value: `${good.address.slice(0, sep)} + ${good.address[sep]}` }], layer: { size: 0.3, tone: "plain", cells: sep + 1 } },
-    { title: "Witness version, one character", values: [{ label: "character → version", value: `${good.address[sep + 1]} → ${a.witnessVersion}` }], layer: { size: 0.25, tone: "wash", cells: 1 } },
-    {
-      title: `Program: ${program.length} characters of 5 bits`,
-      values: [{ label: "characters", value: program }, { label: `${a.programHex!.length / 2} bytes`, value: a.programHex! }],
-      layer: { tone: "wash", cells: program.length },
-    },
-    {
-      title: `Checksum: 6 characters, ${a.encoding === "bech32" ? "Bech32" : "Bech32m"}`,
-      values: [{ label: "checksum", value: good.address.slice(-6) }],
-      note: `Version ${a.witnessVersion} must use ${a.witnessVersion === 0 ? "Bech32" : "Bech32m"}; it does, and the program length fits the version, so the address is valid.`,
-      layer: { size: 0.4, tone: "accent", cells: 6 },
-    },
-  ];
-  if (typo) {
-    const pos = [...typo.address].findIndex((c, i) => c !== good.address[i]);
-    const t = analyzeSegwitAddress(typo.address, typo.network);
-    if (pos >= 0 && t.failedStage === "checksum") {
-      steps.push({
-        title: `Change one character (position ${pos + 1}: ${good.address[pos]} → ${typo.address[pos]})`,
-        values: [{ label: "typed", value: typo.address }],
-        note: "The checksum no longer matches either family: rejected at the checksum stage. Validation only rejects; BIP 173 lets software at most hint where an error might be, never suggest the correction.",
-        layer: { tone: "fail", cells: good.address.length - sep - 1, mark: [pos - sep - 1] },
-      });
-    }
-  }
-  return (
-    <WorkedExample
-      intro={<>The published address <strong>{good.label}</strong>, split into its parts{typo ? ", then one typo" : ""}.</>}
-      steps={steps}
-      label="An address exploded into prefix, version, program and checksum, then a one-character typo."
-      source={<>Source: BIP 173/350 test vectors; checked by the tested bech32 model at build time.</>}
     />
   );
 }
@@ -244,70 +166,6 @@ export function TimelockWorked({ fixtures }: { fixtures: DerivedTimelockCaseFixt
       steps={steps}
       label="A CHECKSEQUENCEVERIFY argument and an input's nSequence, masked to the same 16 value bits and compared, drawn as stacked layers."
       source={<>Source: Bitcoin Core v29.0 transaction tests (pinned excerpt); evaluated at build time by the tested timelock model.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 44, 84, 86 ---------- */
-export function WalletPathWorked({ fixtures }: { fixtures: DerivedWalletPathFixture[] }) {
-  const f = fixtures.find((x) => x.derived.scheme === 86) ?? fixtures[0];
-  const a = f.derived.addresses[0];
-  const o = a.output;
-  const nodes = a.nodes;
-  const steps: WorkedStep[] = [
-    {
-      title: "Three hardened steps from the master key: purpose, coin type, account",
-      values: [{ label: "path", value: nodes.slice(1, 4).map((n) => n.segment).join(" / ") }, { label: "account public key", value: nodes[3].publicKeyHex }],
-      note: "Hardened: each needs its parent's private key.",
-      layer: { size: 0.6, tone: "hatch", cells: 3 },
-    },
-    {
-      title: "Two public steps: the receiving chain, then the first address",
-      values: [{ label: "path", value: nodes.slice(4).map((n) => n.segment).join(" / ") }, { label: "derived public key", value: a.publicKeyHex }],
-      note: "Anyone with the account's extended public key can take these two steps.",
-      layer: { size: 0.8, tone: "wash", cells: 2 },
-    },
-    ...(o && o.kind === "p2tr"
-      ? [
-          { title: "Drop the parity byte: the internal key is the x coordinate", values: [{ label: "internal key", value: o.internalKeyHex }], layer: { size: 0.7, tone: "plain" as const, cells: 1 } },
-          {
-            title: "Tweak it with no script tree: Q = P + int(hashTapTweak(P))·G",
-            values: [{ label: "tweak", value: o.tweakHex }, { label: "output key", value: o.outputKeyHex }],
-            layer: { size: 0.7, tone: "plain" as const, cells: 1 },
-          },
-          { title: "Version 1 witness program, bech32m", values: [{ label: "scriptPubKey", value: o.scriptPubKeyHex }, { label: "address", value: o.address }], layer: { size: 0.9, tone: "accent" as const, cells: 2 } },
-        ]
-      : []),
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP {f.derived.scheme}’s <strong>{a.label}</strong> address, <code>{a.path}</code>, from the published test mnemonic. The derived key’s extended keys, the internal key, output key, scriptPubKey and address match the BIP’s test vectors; the others are derived by the same tested model.</>}
-      steps={steps}
-      label="Three hardened levels, two public levels, then the key-path Taproot tweak and the address, drawn as stacked layers."
-      source={<>Source: BIP {f.derived.scheme} test vectors (lines {a.checkedLines.join(", ")}); derived by the tested BIP 32 and wallet-path models.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 380–386 ---------- */
-export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixture[] }) {
-  const f = fixtures.find((x) => x.id === "bip382-wpkh-ranged") ?? fixtures.find((x) => x.derived.ranged) ?? fixtures[0];
-  const d = f.derived;
-  const k = d.keys[0];
-  const part = (role: string) => d.tokens.filter((t) => t.role === role).map((t) => t.text).join("");
-  const steps: WorkedStep[] = [
-    { title: "The script expression says what kind of output", values: [{ label: "outline", value: d.outline }], note: "wpkh(KEY): pay to the hash of one compressed key, SegWit v0.", layer: { size: 0.5, tone: "plain", cells: 1 } },
-    { title: "Key origin: where this key sits in someone's tree", values: [{ label: "origin", value: `[${k.origin}]` }], note: "A fingerprint and the steps already taken. Information about the key; it changes no script.", layer: { size: 0.6, tone: "hatch", cells: 2 } },
-    { title: "The key itself: an extended public key", values: [{ label: "key", value: part("key") }], note: "Public only, so the descriptor reveals scripts but cannot spend.", layer: { tone: "wash", cells: 4 } },
-    { title: "Derivation after the key, ending in a range", values: [{ label: "steps", value: k.derivation ?? "" }, ...k.publicKeys.map((p, i) => ({ label: `child ${i} key`, value: p }))], note: "/* stands for every unhardened child: one descriptor, many keys.", layer: { size: 0.8, tone: "plain", cells: 3, highlight: [2] } },
-    { title: "Each child key fills the template", values: d.scripts.map((s, i) => ({ label: `child ${i} script`, value: s[0] })), note: "OP_0 <HASH160(key)>, matching the scripts BIP 382 lists.", layer: { size: 0.9, tone: "accent", cells: 3 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 382’s ranged descriptor <code>{d.body.slice(0, 22)}…</code>, read part by part and expanded for its first three children.</>}
-      steps={steps}
-      label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
-      source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
     />
   );
 }

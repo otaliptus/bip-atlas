@@ -48,6 +48,38 @@
       ]
     },
     {
+      "id": "bip381-pkh-origin-wif",
+      "kind": "descriptor-vector",
+      "label": "pkh() with key origin, WIF key",
+      "shortLabel": "BIP 381 · WIF",
+      "source": {
+        "bip": 381,
+        "line": 78,
+        "section": "Test Vectors",
+        "quote": "pkh([deadbeef/1/2'/3/4']L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuP"
+      },
+      "descriptor": "pkh([deadbeef/1/2'/3/4']L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1)",
+      "scriptLines": [
+        79
+      ]
+    },
+    {
+      "id": "bip381-pkh-origin-h",
+      "kind": "descriptor-vector",
+      "label": "pkh() with key origin, h for hardened",
+      "shortLabel": "BIP 381 · h",
+      "source": {
+        "bip": 381,
+        "line": 82,
+        "section": "Test Vectors",
+        "quote": "pkh([deadbeef/1/2h/3/4h]03a34b99f22c790c4e36b2b3c2c35a36db06"
+      },
+      "descriptor": "pkh([deadbeef/1/2h/3/4h]03a34b99f22c790c4e36b2b3c2c35a36db06226e41c692fc82b8b56ac1c540c5bd)",
+      "scriptLines": [
+        83
+      ]
+    },
+    {
       "id": "bip382-wpkh-ranged",
       "kind": "descriptor-vector",
       "label": "wpkh() over a ranged xpub",

@@ -122,6 +122,14 @@
             195
           ],
           "quote": "which is 45% more compact than the normal"
+        },
+        {
+          "bip": 350,
+          "lines": [
+            208,
+            208
+          ],
+          "quote": "<tt>tb1p0xlxvlhemja6c4dqv22uapctqupfhlxm9h8z3k2e72q4k9hcz7vq47Zagq</tt>: Mixed case"
         }
       ]
     },
@@ -178,6 +186,14 @@
             168
           ],
           "quote": "polymod = bech32_polymod(values + [0,0,0,0,0,0]) ^ 1"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            156,
+            158
+          ],
+          "quote": "The human-readable part is processed by first feeding the higher bits of each character's US-ASCII value into the checksum calculation followed by a zero and then the lower bits of each"
         }
       ]
     },
@@ -696,6 +712,14 @@
           "lines": [
             186,
             186
+          ],
+          "quote": "<tt>BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4</tt>: <tt>0014751e76e8199196d454941c45d1b3a323f1433bd6</tt>"
+        },
+        {
+          "bip": 173,
+          "lines": [
+            306,
+            306
           ],
           "quote": "<tt>BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4</tt>: <tt>0014751e76e8199196d454941c45d1b3a323f1433bd6</tt>"
         }

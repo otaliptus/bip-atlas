@@ -19,6 +19,21 @@
       "lab": true
     },
     {
+      "id": "v0-upper",
+      "kind": "address",
+      "label": "Valid v0, uppercase",
+      "shortLabel": "v0 · uppercase",
+      "address": "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4",
+      "network": "bc",
+      "source": {
+        "bip": 173,
+        "line": 306,
+        "section": "Test vectors",
+        "quote": "<tt>BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4</tt>"
+      },
+      "lab": false
+    },
+    {
       "id": "v1-32byte",
       "kind": "address",
       "label": "Valid v1",
