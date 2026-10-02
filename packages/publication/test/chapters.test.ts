@@ -18,6 +18,7 @@ import {
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
 const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
+const policy = read("content/figure-policy.json") as { hero: number; supportingMin: number; supportingMax: number };
 const externalLock = read("sources/external/external.lock.json");
 const chapterIds = readdirSync(new URL("content/chapters/", root)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
 
@@ -65,8 +66,10 @@ for (const id of chapterIds) {
       expect(interactive.map((f) => f.recipe)).toEqual([brief.heroRecipe]);
       expect(RECIPE_MAP.get(brief.heroRecipe)!.controls).toEqual(brief.allowedControls);
       const supporting = figures.length - interactive.length;
-      expect(supporting).toBeGreaterThanOrEqual(brief.figureBudget.supportingMin);
-      expect(supporting).toBeLessThanOrEqual(brief.figureBudget.supportingMax);
+      // The catalog (a kit original) proposes 1–2 static figures; decision D1 in review/decisions.md raises it.
+      expect(interactive.length).toBe(policy.hero);
+      expect(supporting).toBeGreaterThanOrEqual(policy.supportingMin);
+      expect(supporting).toBeLessThanOrEqual(policy.supportingMax);
     });
 
     it("keeps the default reading path inside the target word range", () => {
