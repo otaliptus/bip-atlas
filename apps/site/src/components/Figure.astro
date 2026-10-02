@@ -27,7 +27,6 @@ import {
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
-  MnemonicWorked,
   Bip32Worked,
   TxWorked,
   AddressWorked,
@@ -233,7 +232,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
-      {figure.recipe === "entropy-word-pipeline.v1" && <MnemonicWorked fixture={mnemonic[0]} />}
       {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}

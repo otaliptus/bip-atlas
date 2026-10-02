@@ -66,6 +66,21 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A01.2",
+          "recipe": "entropy-bits.v1",
+          "title": "128 random bits",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "The entropy of a published sample, bit by bit and as hexadecimal.",
+          "claims": [
+            "ent-sizes",
+            "purpose"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The proposal is explicit that it transcribes randomness. It is not a way to turn a sentence someone made up into a wallet; such *brainwallets* are outside its scope.",
           "claims": [
@@ -104,15 +119,31 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A01.3",
+          "recipe": "checksum-storyboard.v1",
+          "title": "Making the checksum",
+          "fixtures": [
+            "zero-128"
+          ],
+          "caption": "The all-zero sample: its hash begins with the bits 0011, which become the checksum.",
+          "claims": [
+            "zero-example",
+            "checksum-def",
+            "split-11"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
-          "text": "The figure below starts from the bits of a public sample. Reveal the groups to see where the cuts fall, then step through to the last word.",
+          "text": "The figure below starts from the bits of a public sample. Move the slider to cut them into groups of 11 and watch each group pick its word.",
           "claims": [
             "split-11"
           ]
         },
         {
           "type": "figure",
-          "figure": "A01.2",
+          "figure": "A01.4",
           "recipe": "entropy-word-pipeline.v1",
           "title": "From bits to words",
           "fixtures": [
@@ -211,6 +242,22 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A01.5",
+          "recipe": "wordlist-index.v1",
+          "title": "Eleven bits, one word",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "Every 11-bit number has exactly one card in a list of 2,048.",
+          "claims": [
+            "split-11",
+            "wordlist-design",
+            "wordlist-checked"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The English list was chosen with care. BIP 39 describes an ideal list as one where the first four letters identify each word, where near-pairs such as *build* and *built* or *woman* and *women* are avoided, and which is sorted so software can search it quickly.",
           "claims": [
@@ -254,6 +301,21 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A01.6",
+          "recipe": "last-word-odds.v1",
+          "title": "One last word in sixteen",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "Keep the first eleven words and try every possible last word: the filled cells pass the checksum.",
+          "claims": [
+            "odds-by-length",
+            "short-checksum"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "BIP 39 does require software to compute the checksum of a sentence and to warn when it is invalid. A warning is the whole of the job: the checksum cannot say which word is wrong.",
           "claims": [
@@ -286,17 +348,16 @@
         },
         {
           "type": "figure",
-          "figure": "A01.3",
+          "figure": "A01.7",
           "recipe": "seed-derivation.v1",
           "title": "Words and passphrase to seed",
           "fixtures": [
             "ozone-128"
           ],
-          "caption": "The same words with a different passphrase give an unrelated seed. An empty passphrase is still a passphrase; it is simply the default.",
+          "caption": "The published vector’s passphrase is “TREZOR”. Change it, or leave it empty, and the seed changes completely: see the next section.",
           "claims": [
             "pbkdf2",
-            "passphrase-empty",
-            "deniability",
+            "independent",
             "vectors"
           ],
           "layout": "wide"
@@ -348,6 +409,22 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A01.8",
+          "recipe": "passphrase-seeds.v1",
+          "title": "Same words, two passphrases",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "Neither seed is wrong: each passphrase simply leads to its own wallet.",
+          "claims": [
+            "deniability",
+            "passphrase-empty",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "That makes it unlike an app’s unlock password, which protects a file on one device and complains when you get it wrong. Mistype a BIP 39 passphrase and nothing complains; the words simply lead somewhere else.",
           "claims": [
@@ -386,6 +463,22 @@
             "pbkdf2",
             "bip32-next"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A01.9",
+          "recipe": "mnemonic-chain.v1",
+          "title": "Still not a key",
+          "fixtures": [
+            "ozone-128"
+          ],
+          "caption": "Three steps, three different secrets; the last step is the next chapter.",
+          "claims": [
+            "two-parts",
+            "pbkdf2",
+            "bip32-next"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
