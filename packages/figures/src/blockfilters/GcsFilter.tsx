@@ -34,8 +34,8 @@ export function GcsFilter({ fixtures, figureId }: Props) {
   const read = p.steps.length;
   const last = p.steps[read - 1];
   const past = last?.outcome === "greater";
-  const miss = "no match: given the right filter, no output here pays to this script and no input spends an output with it.";
-  const verdict = p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : past ? `Value ${read} passes it: ${miss}` : `All ${d.N} values are below it: ${miss}`;
+  const miss = "No match: given the right filter, no output here pays to this script and no input spends an output with it.";
+  const verdict = p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : past ? `Value ${read} passes it, so decoding stops. ${miss}` : `All ${d.N} values are below it. ${miss}`;
   const who = p.from === "this block" ? "A script from this block" : `A script from ${fromText(p.from)}`;
   const status = d.N === 0 ? `The filter is one zero byte, N = 0: nothing can match. ${who} is not even hashed.` : `${who} hashes to ${group(p.target)}. ${verdict}`;
   const desc = `Testnet block ${d.height}: ${d.N} scripts hashed onto 0 to F = ${group(d.F)}: ${d.values.map(group).join(", ") || "none"}. ${status} Decoded: ${p.steps.map((s) => group(s.value)).join(", ") || "nothing"}; values not read are drawn empty.${showBits && d.N ? ` The filter, ${d.filterBytes} bytes, starts with N = ${d.N}, then the codes ${d.codes.map((c) => `${c.unary} ${c.remainder}`).join(", ")}${d.codes.length < d.N ? ", and more" : ""}.` : ""}`;

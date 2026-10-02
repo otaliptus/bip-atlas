@@ -115,7 +115,7 @@ export function Bip322VirtualTx({ fixtures, figureId }: Props) {
             {fixtures.map((x) => (
               <label class="atlas-strip__opt">
                 <input type="radio" name={`${figureId}-vec`} checked={x.id === id} onChange={() => setId(x.id)} aria-label={`${x.label}, ${x.shortLabel}`} />
-                <span>{x.label.split(",")[0]}{x.derived.variant === "ful" ? " · ful" : ""}</span>
+                <span>{x.label.split(",")[0]}{x.derived.variant === "ful" ? " · full" : ""}</span>
               </label>
             ))}
           </div>
