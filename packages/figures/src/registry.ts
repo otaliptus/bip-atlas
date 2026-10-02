@@ -1051,6 +1051,16 @@ export const RECIPES: readonly RecipeDefinition[] = [
     drawing: true,
   },
   {
+    id: "descriptor-outputs.v1",
+    description: "One public key and the four different output scripts in a published combo() expansion.",
+    minFixtures: 1,
+    maxFixtures: 1,
+    interactive: false,
+    controls: [],
+    fixtureKind: "descriptor-vector",
+    drawing: true,
+  },
+  {
     id: "descriptor-sentence.v1",
     description: "One published descriptor laid out as a sentence of named parts.",
     minFixtures: 1,

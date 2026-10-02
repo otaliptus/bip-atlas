@@ -1,0 +1,65 @@
+[
+  {
+    "chapter": "tapscript",
+    "figures": 7,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "version-bits",
+    "figures": 5,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "musig2",
+    "figures": 5,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "block-filters",
+    "figures": 6,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "message-signing",
+    "figures": 6,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "schnorr",
+    "figures": 7,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "wallet-paths",
+    "figures": 6,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "p2sh",
+    "figures": 6,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  },
+  {
+    "chapter": "hd-wallets",
+    "figures": 8,
+    "outsideText": [],
+    "scroll": 1440,
+    "width": 1440
+  }
+]

@@ -8,7 +8,7 @@
   "title": "How can one seed grow an entire wallet?",
   "dek": "One backup, billions of keys. The trick is a 32-byte companion to every key, and a rule about which branches an extended public key may follow.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
   "opening": {
     "blocks": [
@@ -59,7 +59,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Without it, a child would depend only on its parent’s key. With it, knowing a public key is not enough to find that key’s children: you need the extended public key, key and chain code together.",
+          "text": "An ordinary public key cannot reveal its children. To derive them, you also need the chain code: together they form the extended public key.",
           "claims": [
             "chain-code",
             "reconstruction"
@@ -104,22 +104,6 @@
           ]
         },
         {
-          "type": "figure",
-          "figure": "A02.3",
-          "recipe": "hd-child-story.v1",
-          "title": "One step down",
-          "fixtures": [
-            "tv1"
-          ],
-          "caption": "One normal step on test vector 1, from m/0H to m/0H/1. Every value is the tested model’s, and the child matches the xprv that BIP 32 publishes.",
-          "claims": [
-            "split",
-            "ckdpriv-normal",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
           "type": "paragraph",
           "text": "What goes into the HMAC depends on the index. Indices 0 to 2³¹ − 1 are *normal*, and the input is the parent’s public key followed by the index. Indices from 2³¹ upward are *hardened*, and the input is the parent’s private key, padded with a zero byte, followed by the index. Paths mark hardened indices with an H: `m/0H/1` is normal child 1 of hardened child 0 of the master.",
           "claims": [
@@ -131,7 +115,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.4",
+          "figure": "A02.3",
           "recipe": "hd-hmac-inputs.v1",
           "title": "What goes into the HMAC",
           "fixtures": [
@@ -155,7 +139,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.5",
+          "figure": "A02.4",
           "recipe": "derivation-tree.v1",
           "title": "Who can derive what",
           "fixtures": [
@@ -186,7 +170,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.6",
+          "figure": "A02.5",
           "recipe": "hd-two-routes.v1",
           "title": "Two routes, one child",
           "fixtures": [
@@ -218,7 +202,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.7",
+          "figure": "A02.6",
           "recipe": "hd-sharing.v1",
           "title": "Sharing without spending",
           "fixtures": [],
@@ -256,7 +240,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The tests behind this page check this on the published vector. From the extended public key of `m/0H` and the private key of its child `m/0H/1`, they recompute the private key of `m/0H` exactly: subtract the left half of the HMAC, which anyone holding the extended public key can compute.",
+          "text": "For a normal child, the parent xpub reveals the HMAC value added during derivation. Anyone who also obtains that child’s private key can subtract the value again to recover the parent’s private key. The example below shows the recovery on BIP 32’s published vector.",
           "claims": [
             "recovery-computed",
             "weakness"
@@ -264,7 +248,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.8",
+          "figure": "A02.7",
           "recipe": "hd-weakness-story.v1",
           "title": "An xpub plus one leaked key",
           "fixtures": [
@@ -312,7 +296,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.9",
+          "figure": "A02.8",
           "recipe": "extended-key-layout.v1",
           "title": "One node, two serializations",
           "fixtures": [
@@ -334,26 +318,17 @@
           ]
         },
         {
-          "type": "figure",
-          "figure": "A02.10",
-          "recipe": "hd-fingerprint.v1",
-          "title": "Four bytes that name a parent",
-          "fixtures": [
-            "tv1"
-          ],
-          "caption": "The fingerprint is the first four bytes of the Hash160 of a public key, copied into each child’s serialization. It speeds up lookups; it does not identify a key uniquely.",
-          "claims": [
-            "identifier",
-            "fingerprint-collisions"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "Importing an extended public key also requires a check that its X coordinate corresponds to a point on the curve. BIP 32’s fifth test vector is a list of malformed keys of this and other kinds, and the decoder behind this page rejects all sixteen of them, each for its stated reason.",
-          "claims": [
-            "verify-point",
-            "vectors"
+          "type": "details",
+          "summary": "Checks when importing an extended public key",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Importing an extended public key also requires a check that its X coordinate corresponds to a point on the curve. BIP 32’s fifth test vector is a list of malformed keys of this and other kinds, and the decoder behind this page rejects all sixteen of them, each for its stated reason.",
+              "claims": [
+                "verify-point",
+                "vectors"
+              ]
+            }
           ]
         }
       ]
@@ -364,14 +339,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 32 also suggests a default structure. Accounts are hardened children of the master, and each has an external chain for receiving addresses and an internal chain for change, written `m/iH/0/k` and `m/iH/1/k`. The proposal calls this layout a default that clients are encouraged to follow, and allows implementations to deviate for their own needs.",
-          "claims": [
-            "wallet-layout"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "BIP 32 defines only this default, and explicitly lets implementations deviate from it. Path conventions defined in other proposals are layers built on the mechanism described here; they are not part of BIP 32 itself, and an unfamiliar path is not by itself a sign of a broken wallet.",
+          "text": "BIP 32 suggests accounts as hardened children of the master, each with an external chain for receiving and an internal chain for change: m/iH/0/k and m/iH/1/k. It explicitly allows other layouts. Later path conventions build on the same derivation mechanism, so an unfamiliar path does not by itself mean a wallet is broken.",
           "claims": [
             "wallet-layout"
           ]

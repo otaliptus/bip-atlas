@@ -33,7 +33,7 @@ export function p2shHeroSpec(fixtures: DerivedP2shFixture[]): HeroSpec<P2shHeroS
     ]),
     initialKey: "s0|hidden|0",
     noJsId: `s0-${n - 1}`,
-    staticNote: "Static view: the first spend at its last stage. With JavaScript you can hide the redeem script, switch spends and step through the stages; Fig. A09.3 draws every step.",
+    staticNote: "Static view: the first spend at its last stage. With JavaScript you can hide the redeem script, switch spends and step through each check.",
   });
 }
 

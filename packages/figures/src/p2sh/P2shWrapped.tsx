@@ -39,7 +39,7 @@ function contents(d: DerivedP2shFixture["derived"]) {
 export function P2shWrapped({ fixtures }: { fixtures: DerivedP2shFixture[] }) {
   const unit = 300 / Math.max(...fixtures.map((f) => Math.max(f.derived.scriptSigBytes, f.derived.witnessBytes)));
   const maxW = Math.max(...fixtures.map((f) => weight(f.derived)));
-  const rowH = 104;
+  const rowH = 120;
   const fits = (s: Seg) => s.bytes * unit > s.text.length * 5.3 + 8;
   const bar = (segs: Seg[], x: number, y: number) => {
     let at = x;
@@ -90,7 +90,8 @@ export function P2shWrapped({ fixtures }: { fixtures: DerivedP2shFixture[] }) {
             <Value at={[14, y + 51]} text={d.witnessBytes ? `WITNESS · ${d.witnessBytes} B` : "WITNESS · NONE"} size={9} cls="k-value--muted" />
             {bar(c.witness, 14, y + 55)}
             <rect class="k-cell k-mark--plain" x="14" y={y + 76} width={(w / maxW) * 150} height="5" />
-            <Value at={[14 + (w / maxW) * 150 + 6, y + 82]} text={`SCRIPTSIG + WITNESS: 4 × ${d.scriptSigBytes} + ${d.witnessBytes} = ${w} WU`} size={9} cls="k-value--label" />
+            <Value at={[14 + (w / maxW) * 150 + 6, y + 82]} text={`${w} WU`} size={10} cls="k-value--label" />
+            <Value at={[14, y + 100]} text={`SCRIPTSIG + WITNESS: 4 × ${d.scriptSigBytes} + ${d.witnessBytes} = ${w} WU`} size={9} cls="k-value--muted" />
           </g>
         );
       })}

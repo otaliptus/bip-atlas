@@ -97,13 +97,13 @@ describe("silent-payments chapter prose numbers", () => {
   it("dates, sizes and counts", () => {
     expect(b352[9]).toContain("Assigned: 2023-03-09");
     expect(b352[7]).toContain("Status: Complete");
-    expect(text).toContain("BIP 352, assigned in 2023 and recorded as Complete");
+    expect(text).toContain("BIP 352 was assigned in 2023 and is recorded as Complete");
     const addr = vectors[0].receiving[0].expected.addresses[0];
     expect(addr.length).toBe(116);
-    expect(text).toContain("116 characters for version 0 on mainnet, always starting sp1q");
+    expect(text).toContain("version 0 on mainnet it is 116 characters long and starts sp1q");
     const { Bscan, Bm } = decodeAddress(addr);
     expect([Bscan.length / 2, Bm.length / 2]).toEqual([33, 33]);
-    expect(text).toContain("two public keys of 33 bytes each");
+    expect(text).toContain("two compressed public keys account for 66 bytes");
     expect(text).toContain("inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH");
     expect(b352[509]).toContain("'''1.1.0'''");
     expect(b352[510]).toContain("K<sub>max</sub>");
@@ -116,9 +116,11 @@ describe("silent-payments chapter prose numbers", () => {
   it("figure facts the prose relies on", () => {
     const fx = JSON.parse(readFileSync(new URL("fixtures/silent-payments.json", root), "utf8")).fixtures;
     expect(fx.filter((f: { kind: string }) => f.kind === "sp-vector").length).toBe(6);
-    expect(text).toContain("Six of BIP 352’s send-and-receive vectors");
+    const chapter = JSON.parse(text);
+    const hero = chapter.sections.flatMap((s: any) => s.blocks).find((b: any) => b.recipe === "silent-payment-derivation.v1");
+    expect(hero.fixtures).toHaveLength(6);
     expect(fx.find((f: { kind: string }) => f.kind === "sp-eligibility").caseIndices.length).toBe(5);
-    expect(text).toContain("The inputs of five published vectors");
+    expect(text).toContain("sp-eligibility");
   });
 });
 

@@ -123,3 +123,5 @@ export { Bip322Choice } from "./bip322/Bip322Choice";
 export { Bip322VerifyStory } from "./bip322/Bip322VerifyStory";
 export { Bip322Rack } from "./bip322/Bip322Rack";
 export { Bip322Limits } from "./bip322/Bip322Limits";
+
+export { DescriptorOutputs } from "./descriptors/DescriptorOutputs";

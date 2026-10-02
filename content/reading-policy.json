@@ -1,0 +1,61 @@
+{
+  "reason": "Editorial revision requested 2 October 2026: these chapters use shorter main narratives, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum.",
+  "chapterRanges": {
+    "psbt": {
+      "min": 900,
+      "max": 1400
+    },
+    "taproot": {
+      "min": 900,
+      "max": 1400
+    },
+    "silent-payments": {
+      "min": 900,
+      "max": 1400
+    },
+    "v2-transport": {
+      "min": 900,
+      "max": 1400
+    },
+    "descriptors": {
+      "min": 750,
+      "max": 1200
+    },
+    "tapscript": {
+      "min": 550,
+      "max": 1100
+    },
+    "version-bits": {
+      "min": 550,
+      "max": 1100
+    },
+    "musig2": {
+      "min": 550,
+      "max": 1100
+    },
+    "block-filters": {
+      "min": 550,
+      "max": 1100
+    },
+    "message-signing": {
+      "min": 550,
+      "max": 1100
+    },
+    "schnorr": {
+      "min": 900,
+      "max": 1400
+    },
+    "wallet-paths": {
+      "min": 900,
+      "max": 1400
+    },
+    "p2sh": {
+      "min": 850,
+      "max": 1400
+    },
+    "hd-wallets": {
+      "min": 900,
+      "max": 1400
+    }
+  }
+}

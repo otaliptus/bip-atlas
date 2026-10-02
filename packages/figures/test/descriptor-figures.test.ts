@@ -13,6 +13,7 @@ import { DescriptorIndex } from "../src/descriptors/DescriptorIndex";
 import { DescriptorNesting } from "../src/descriptors/DescriptorNesting";
 import { DescriptorReadStory } from "../src/descriptors/DescriptorReadStory";
 import { DescriptorSentence } from "../src/descriptors/DescriptorSentence";
+import { DescriptorOutputs } from "../src/descriptors/DescriptorOutputs";
 import { DescriptorSpellings } from "../src/descriptors/DescriptorSpellings";
 import { DescriptorTemplate } from "../src/descriptors/DescriptorTemplate";
 import { DescriptorTypo } from "../src/descriptors/DescriptorTypo";
@@ -106,6 +107,22 @@ describe("descTree", () => {
     expect(shape("bip383-sortedmulti")).toBe("sortedmulti(2,K,K)");
     expect(shape("bip386-tr-tree")).toBe("tr(K,{pk(K),{{pk(K),pk(K)},pk(K)}})");
     expect(shape("bip380-raw-valid")).toBe("raw(T)");
+  });
+});
+
+describe("DescriptorOutputs", () => {
+  const d = derived("bip384-combo");
+  it("pairs each form with its published script for the same public key", () => {
+    const s = html(h(DescriptorOutputs, { fixture: d }));
+    const key = d.derived.keys[0].publicKeys[0];
+    const expressions = [`pk(${key})`, `pkh(${key})`, `wpkh(${key})`, `sh(wpkh(${key}))`];
+    expect(expressions.map((e) => expand(parseDescriptor(e))[0])).toEqual(d.derived.scripts[0]);
+    for (const script of d.derived.scripts[0]) expect(disclosure(s)).toContain(script);
+    expect(new Set(d.derived.scripts[0]).size).toBe(4);
+    expect(s).toContain("KEY is a placeholder for that same public key");
+  });
+  it("refuses a ranged fixture that would imply several different keys", () => {
+    expect(() => html(h(DescriptorOutputs, { fixture: derived("bip382-wpkh-ranged") }))).toThrow();
   });
 });
 

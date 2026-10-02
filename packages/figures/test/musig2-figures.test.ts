@@ -87,9 +87,9 @@ const all = [chapter.opening.figure, ...chapter.sections.flatMap((s: any) => s.b
 const s0 = session("sig-agg-0");
 
 describe("musig2 figures: placement", () => {
-  it("numbers seven figures in reading order", () => {
-    expect(all.map((f: any) => f.figure)).toEqual(["A14.1", "A14.2", "A14.3", "A14.4", "A14.5", "A14.6", "A14.7"]);
-    expect(all.find((f: any) => f.recipe === "musig2-rounds.v1").figure).toBe("A14.4");
+  it("numbers five figures in reading order", () => {
+    expect(all.map((f: any) => f.figure)).toEqual(["A14.1", "A14.2", "A14.3", "A14.4", "A14.5"]);
+    expect(all.find((f: any) => f.recipe === "musig2-rounds.v1").figure).toBe("A14.3");
   });
 });
 

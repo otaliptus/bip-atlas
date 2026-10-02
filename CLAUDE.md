@@ -34,7 +34,7 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 
 - Every paragraph cites at least one claim; every ledger claim is cited; every quote appears verbatim (whitespace-normalized) at its cited lines.
 - Chapter title, BIPs, hero recipe and its `controls` must match `catalog.json`; figure budget from `content/figure-policy.json` (1 interactive hero + 3 to 12 static figures, decision D1 in `review/decisions.md`; the catalog's own 1–2 is overridden).
-- Default reading path 1,100–1,800 words (`defaultPathWordCount`; details blocks, captions and tables excluded).
+- Default reading path follows the catalog's word range, with chapter-specific editorial overrides in `content/reading-policy.json` (`defaultPathWordCount`; details blocks, captions and tables excluded). Do not pad prose to hit the original minimum.
 - Every exact value shown comes from a model; numbers written in prose need a test that checks them (see `bip39.test.ts`, `tx.test.ts`).
 - Fixtures are copied from pinned sources, never invented or edited to make code pass.
 

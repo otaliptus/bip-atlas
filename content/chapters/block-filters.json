@@ -7,27 +7,28 @@
   ],
   "specimenLabel": "BIP 0157 · 0158",
   "title": "How can a light client ask whether a block concerns it?",
-  "dek": "Full nodes publish a compact filter for every block; a light client tests its own scripts against it and downloads only the blocks that match. A match means “maybe”, and a miss means “not among the filter’s scripts”.",
+  "dek": "Download a small filter, test it locally, and fetch the block only if it might contain a payment you care about. A match is a reason to look closer.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A light client does not download every block. It downloads the block headers, 80 bytes each, checks their proof of work, and follows the chain with the most work. Then it needs to learn which blocks touch its own coins without fetching them all. The older answer, BIP 37, had the client hand a Bloom filter of its interests to a full node. The authors of BIP 157 argue that most implementations gave wallets virtually zero privacy, let a malicious node omit data with little risk of detection, and let crafted filters burden honest nodes.",
+        "text": "A light wallet needs to find its payments without downloading every block. Asking a server to search for its addresses gives that server information about the wallet. BIPs 157 and 158 move the search onto the wallet instead.",
         "claims": [
           "light-clients",
-          "bip37-flaws"
+          "bip37-flaws",
+          "reverse"
         ]
       },
       {
         "type": "paragraph",
-        "text": "BIPs 157 and 158, both assigned in 2017 and recorded as Deployed, reverse the direction. Full nodes build one deterministic filter per block, once, and serve it to anyone; the client tests the filter itself and downloads a block only if it matches. The filter is a Golomb-coded set: it matches every item in the set, and any other item with probability 1/M.",
+        "text": "A full node publishes a compact filter for each block. Everyone receives the same filter. The wallet checks its own scripts locally; if one matches, it downloads the block to see what actually happened. The filter can produce a false alarm, but a correctly built filter will not miss a script in its included set.",
         "claims": [
-          "preamble",
           "reverse",
-          "gcs-def"
+          "gcs-def",
+          "scope-of-miss"
         ]
       }
     ],
@@ -35,23 +36,100 @@
       "type": "figure",
       "figure": "A16.1",
       "recipe": "bf-two-directions.v1",
-      "title": "Two directions",
+      "title": "Search locally, download selectively",
       "fixtures": [
         "bf-block-926485"
       ],
-      "caption": "Under BIP 37 the client tells a node what it wants. Under BIPs 157 and 158 the node publishes one filter per block, here the 25-byte filter of testnet block 926,485, and the client tests it.",
+      "caption": "The filter travels to the wallet; the wallet’s watched scripts stay there. A match leads to a block request, which the serving peer can still observe.",
       "claims": [
         "bip37-flaws",
         "reverse",
-        "light-clients"
+        "light-clients",
+        "privacy-any-source",
+        "random-peers"
       ],
-      "layout": "prose"
+      "layout": "wide"
     }
   },
   "sections": [
     {
+      "id": "maybe",
+      "heading": "A match means “download and check”",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A match is deliberately only a maybe. Several scripts can map to the same filter value. The wallet downloads the block and checks the actual transactions before treating anything as a payment.",
+          "claims": [
+            "gcs-def",
+            "query",
+            "fp-arith"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A miss is firmer, within the included set. Every item in the set matches with probability 1, so a miss in a correctly constructed basic filter rules out a matching included output or spent-output script. It says nothing about excluded items, including empty scripts and outputs beginning with OP_RETURN. In the figure, each block’s included scripts all match its filter, and the scripts taken from other blocks, as expected, do not.",
+          "claims": [
+            "gcs-def",
+            "scope-of-miss",
+            "vectors"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A16.2",
+          "recipe": "gcs-filter.v1",
+          "title": "Try a script that is present, then one that is absent",
+          "fixtures": [
+            "bf-block-926485",
+            "bf-block-1263442",
+            "bf-block-180480",
+            "bf-block-49291",
+            "bf-block-987876",
+            "bf-block-1414221"
+          ],
+          "caption": "Choose a block and a test script. A match is a candidate; a miss rules out that script only within the basic filter’s included set.",
+          "claims": [
+            "vectors",
+            "contents",
+            "query",
+            "gr-coding",
+            "siphash",
+            "key",
+            "gcs-steps",
+            "serialize",
+            "gcs-def",
+            "scope-of-miss"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "How often a false match happens",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A match says the block may concern the client, not that it does. With M = 784931, an unrelated script matches a given filter with probability 1/784931, about 1.3 in a million. That is small per test, but a wallet tests many scripts against many blocks: 100 scripts checked against 10,000 blocks give an expected 1.3 false matches, each costing a needless block download.",
+              "claims": [
+                "gcs-def",
+                "fp-arith",
+                "params-why"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Filters do not hide what the client does next. The authors argue that privacy improves because blocks can be fetched from any source, so no single peer learns everything a client needs. Still, whoever serves a block sees that it was requested, so a client fetching blocks from the network SHOULD pick outbound peers at random, to limit what intersection analysis can learn; the most cautious clients may use private information retrieval.",
+          "claims": [
+            "privacy-any-source",
+            "random-peers"
+          ]
+        }
+      ]
+    },
+    {
       "id": "contents",
-      "heading": "What goes in",
+      "heading": "Which scripts are included?",
       "blocks": [
         {
           "type": "paragraph",
@@ -62,25 +140,8 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "OP_RETURN outputs are left out for a reason the authors give: so that a future soft fork could commit to the filters, probably in an OP_RETURN output of the coinbase, without the commitment having to contain itself.",
-          "claims": [
-            "opreturn-why"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "BIP 158’s test vectors exercise these rules on real testnet blocks: one whose transaction pays to an empty script, one that spends from an empty script, one whose scripts repeat and whose coinbase carries an OP_RETURN witness commitment, which is left out, and one with nothing to put in the filter at all, whose filter is the single byte 00.",
-          "claims": [
-            "vectors",
-            "contents",
-            "serialize",
-            "dedup"
-          ]
-        },
-        {
           "type": "figure",
-          "figure": "A16.2",
+          "figure": "A16.3",
           "recipe": "bf-element-sieve.v1",
           "title": "What goes in",
           "fixtures": [
@@ -96,68 +157,60 @@
         },
         {
           "type": "paragraph",
-          "text": "For scripts covered by the basic filter, it answers one question about one block: does an included output pay to this script, or an input spend from it? It holds scripts and nothing else. A wallet that watches its own scripts can ask that question; a miss tells it nothing about anything outside the set, such as a transaction ID, an empty script or an OP_RETURN output.",
+          "text": "The filter watches scripts, not transaction IDs or arbitrary text. A wallet can look for an output paying to one of its scripts or an input spending such an output. Empty scripts and OP_RETURN outputs are outside that promise.",
           "claims": [
             "scope-of-miss",
             "contents"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Excluded scripts and the published test cases",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "OP_RETURN outputs are left out for a reason the authors give: so that a future soft fork could commit to the filters, probably in an OP_RETURN output of the coinbase, without the commitment having to contain itself.",
+              "claims": [
+                "opreturn-why"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 158’s test vectors exercise these rules on real testnet blocks: one whose transaction pays to an empty script, one that spends from an empty script, one whose scripts repeat and whose coinbase carries an OP_RETURN witness commitment, which is left out, and one with nothing to put in the filter at all, whose filter is the single byte 00.",
+              "claims": [
+                "vectors",
+                "contents",
+                "serialize",
+                "dedup"
+              ]
+            }
           ]
         }
       ]
     },
     {
       "id": "building",
-      "heading": "Building the set",
+      "heading": "Store the gaps, not the scripts",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Each script is first hashed with SipHash, which BIP 158 requires with parameters c = 2 and d = 4. The key is the first 16 bytes of the block’s hash in little-endian order, so it is deterministic but differs from block to block. The 64-bit output is then mapped into the range [0, N·M), where N is the number of items, by multiplying by N·M and keeping the top 64 bits of the product.",
+          "text": "The filter does not contain a list of addresses. Each included script is hashed into a bounded range. Those values are sorted, and the filter stores the gaps between them. Small gaps take fewer bits to write, which is where the compression comes from.",
           "claims": [
             "siphash",
-            "key"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The hashed values are sorted, and only the gaps between neighbours are written. Because the values are spread uniformly at random, the gaps follow roughly a geometric distribution, with small gaps common and large ones rarer, and Golomb-Rice coding is built for exactly that: the gap divided by 2^P goes in unary, as that many ones and a zero, and the remainder follows in P bits. The bit stream is padded with zeros to a whole byte and prefixed with N as a CompactSize. A filter with no items MUST be a single zero byte.",
-          "claims": [
             "gcs-steps",
             "gr-coding",
-            "serialize",
             "geometric"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A16.3",
-          "recipe": "golomb-rice-code.v1",
-          "title": "Golomb-Rice codes",
-          "fixtures": [
-            "bf-golomb"
-          ],
-          "caption": "BIP 158’s table for P = 2, recomputed, beside one real code with the basic filter’s P = 19: a quotient in unary, then a fixed-width remainder.",
-          "claims": [
-            "gr-coding",
-            "gr-computed"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "For the basic filter, P MUST be 19 and M MUST be 784931. The authors cite analysis that M ≈ 1.497137·2^P is close to optimal, and empirical analysis that these values minimize bandwidth once both the filters themselves and the blocks downloaded because of false positives are counted.",
-          "claims": [
-            "basic-params",
-            "params-why"
           ]
         },
         {
           "type": "figure",
           "figure": "A16.4",
           "recipe": "bf-build-story.v1",
-          "title": "A filter, step by step",
+          "title": "From scripts to a short filter",
           "fixtures": [
             "bf-block-1263442"
           ],
-          "caption": "Testnet block 1,263,442’s filter, built from its three scripts by the tested model; it equals the published filter byte for byte. Exact values are listed below the frames.",
+          "caption": "Hash the scripts, sort the values, then encode the gaps. This published example fits into the filter bytes shown at the end.",
           "claims": [
             "siphash",
             "key",
@@ -170,10 +223,10 @@
         },
         {
           "type": "paragraph",
-          "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
+          "text": "To query it, the wallet hashes a watched script using the same block-specific key and range. It reads the gaps and adds them up until it reaches or passes the target. Equality means a match; passing the target means it can stop. Several watched scripts can be sorted and checked in one pass.",
           "claims": [
-            "min-size",
-            "size-computed"
+            "query",
+            "multi-match"
           ]
         },
         {
@@ -193,132 +246,72 @@
           "layout": "prose"
         },
         {
-          "type": "figure",
-          "figure": "A16.6",
-          "recipe": "gcs-filter.v1",
-          "title": "A filter, built and queried",
-          "fixtures": [
-            "bf-block-926485",
-            "bf-block-1263442",
-            "bf-block-180480",
-            "bf-block-49291",
-            "bf-block-987876",
-            "bf-block-1414221"
-          ],
-          "caption": "Six of BIP 158’s testnet blocks. Each filter is rebuilt from the block and the scripts it spends, and equals the published bytes; test scripts come from the block itself and from other vector blocks. Values the client never reads are drawn empty.",
-          "claims": [
-            "vectors",
-            "contents",
-            "query",
-            "gr-coding",
-            "siphash",
-            "key",
-            "gcs-steps",
-            "serialize",
-            "gcs-def",
-            "scope-of-miss"
-          ],
-          "layout": "wide"
-        },
-        {
-          "type": "paragraph",
-          "text": "Querying runs the same steps in reverse. The client hashes its script with the same key and range, then decodes the gaps one by one, adding them up. If a running total equals the target, the filter matches; once a total passes the target, the search stops. A wallet with many scripts can hash and sort them all and walk the filter once.",
-          "claims": [
-            "query",
-            "multi-match"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "maybe",
-      "heading": "Yes means maybe",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "A match says the block may concern the client, not that it does. With M = 784931, an unrelated script matches a given filter with probability 1/784931, about 1.3 in a million. That is small per test, but a wallet tests many scripts against many blocks: 100 scripts checked against 10,000 blocks give an expected 1.3 false matches, each costing a needless block download.",
-          "claims": [
-            "gcs-def",
-            "fp-arith",
-            "params-why"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A16.7",
-          "recipe": "bf-query-story.v1",
-          "title": "Yes means maybe",
-          "fixtures": [
-            "bf-block-926485"
-          ],
-          "caption": "Block 926,485 tested with one of its own scripts and with a script from another vector block. The third frame is arithmetic, not a vector.",
-          "claims": [
-            "gcs-def",
-            "fp-arith",
-            "query",
-            "scope-of-miss"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "A miss is firmer, within the included set. Every item in the set matches with probability 1, so a miss in a correctly constructed basic filter rules out a matching included output or spent-output script. It says nothing about excluded items, including empty scripts and outputs beginning with OP_RETURN. In the figure, each block’s included scripts all match its filter, and the scripts taken from other blocks, as expected, do not.",
-          "claims": [
-            "gcs-def",
-            "scope-of-miss",
-            "vectors"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Filters do not hide what the client does next. The authors argue that privacy improves because blocks can be fetched from any source, so no single peer learns everything a client needs. Still, whoever serves a block sees that it was requested, so a client fetching blocks from the network SHOULD pick outbound peers at random, to limit what intersection analysis can learn; the most cautious clients may use private information retrieval.",
-          "claims": [
-            "privacy-any-source",
-            "random-peers"
+          "type": "details",
+          "summary": "Exact hashing, coding and size rules",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Each script is first hashed with SipHash, which BIP 158 requires with parameters c = 2 and d = 4. The key is the first 16 bytes of the block’s hash in little-endian order, so it is deterministic but differs from block to block. The 64-bit output is then mapped into the range [0, N·M), where N is the number of items, by multiplying by N·M and keeping the top 64 bits of the product.",
+              "claims": [
+                "siphash",
+                "key"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The hashed values are sorted, and only the gaps between neighbours are written. Because the values are spread uniformly at random, the gaps follow roughly a geometric distribution, with small gaps common and large ones rarer, and Golomb-Rice coding is built for exactly that: the gap divided by 2^P goes in unary, as that many ones and a zero, and the remainder follows in P bits. The bit stream is padded with zeros to a whole byte and prefixed with N as a CompactSize. A filter with no items MUST be a single zero byte.",
+              "claims": [
+                "gcs-steps",
+                "gr-coding",
+                "serialize",
+                "geometric"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "For the basic filter, P MUST be 19 and M MUST be 784931. The authors cite analysis that M ≈ 1.497137·2^P is close to optimal, and empirical analysis that these values minimize bandwidth once both the filters themselves and the blocks downloaded because of false positives are counted.",
+              "claims": [
+                "basic-params",
+                "params-why"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
+              "claims": [
+                "min-size",
+                "size-computed"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 158 illustrates Golomb-Rice coding with a P = 2 table. The model reproduces every row of that table, as well as the first P = 19 code of a published basic filter.",
+              "claims": [
+                "gr-computed",
+                "gr-coding"
+              ]
+            }
           ]
         }
       ]
     },
     {
       "id": "trust",
-      "heading": "Trusting the filters",
+      "heading": "A small filter can still be wrong",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A filter cannot be checked by looking at it, so BIP 157 chains them. A filter’s hash is the double SHA-256 of its bytes, and its header is the double SHA-256 of that hash followed by the previous block’s filter header. The previous header for the genesis block is 32 zero bytes. Like block headers, each filter header commits to everything before it.",
+          "text": "A dishonest peer could omit a script from a filter. BIP 157 therefore links filter hashes into a chain and recommends comparing that chain across peers. A disagreement tells the wallet where it needs to investigate; it does not by itself tell the wallet which peer is right.",
           "claims": [
             "headers-def",
-            "headers-why"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A16.8",
-          "recipe": "filter-header-chain.v1",
-          "title": "Filter headers, linked",
-          "fixtures": [
-            "bf-chain"
-          ],
-          "caption": "The genesis block and testnet blocks 2 and 3 from BIP 158’s vectors: each header commits to the filter’s hash and to the previous header.",
-          "claims": [
-            "headers-def",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The BIP’s recommended client procedure leans on that chain. A client SHOULD sync block headers first, then download and verify filter headers, and MAY first fetch the filter header at every 1,000th block (getcfcheckpt), then fill in each interval and check it against them. Unless it has a trusted peer, it SHOULD ask several. If two peers disagree, it SHOULD find the first header they disagree on, download that block, compute the filter itself, and ban any peer whose header does not match. It SHOULD also check every filter it downloads against its header. The authors’ claim is that a client with at least one honest peer can identify the correct filters.",
-          "claims": [
+            "headers-why",
             "client-sync",
-            "filter-check",
-            "honest-peer",
-            "checkpoints-sync"
+            "honest-peer"
           ]
         },
         {
           "type": "figure",
-          "figure": "A16.9",
+          "figure": "A16.6",
           "recipe": "bf-peer-check.v1",
           "title": "When peers disagree",
           "fixtures": [],
@@ -334,20 +327,73 @@
         },
         {
           "type": "paragraph",
-          "text": "Strictly, the block alone is not enough to recompute a basic filter: the filter also holds the scripts its inputs spend, which the block does not contain, and BIP 157 does not say how a light client should obtain or check them. A client may also skip a request entirely: if a filter header commits to the hash of the empty filter, the BIP lets it conclude the filter is empty.",
+          "text": "Rebuilding the disputed filter requires more than the block. The filter includes the scripts of outputs its inputs spend, and those scripts may be in earlier blocks. BIP 157 does not specify how a light client should obtain and check them. For an empty filter, the committed hash can let the client skip the filter request entirely.",
           "claims": [
             "block-not-enough",
             "empty-check"
           ]
         },
         {
-          "type": "paragraph",
-          "text": "The serving side is kept cheap. Nodes SHOULD build and store each block’s filters as the block connects, and SHOULD NOT build them on request, since a peer could otherwise ask for small filters of large blocks and force expensive I/O. Requests are bounded: at most 1,000 blocks of filters, or 2,000 filter headers, at a time. A node signals support with the NODE_COMPACT_FILTERS service bit, and the authors chose this P2P-only design over a consensus change that would make blocks commit to their filters.",
-          "claims": [
-            "node-op",
-            "limits",
-            "service-bit",
-            "why-p2p"
+          "type": "details",
+          "summary": "Filter headers and the recommended peer checks",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A filter cannot be checked by looking at it, so BIP 157 chains them. A filter’s hash is the double SHA-256 of its bytes, and its header is the double SHA-256 of that hash followed by the previous block’s filter header. The previous header for the genesis block is 32 zero bytes. Like block headers, each filter header commits to everything before it.",
+              "claims": [
+                "headers-def",
+                "headers-why"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The BIP’s recommended client procedure leans on that chain. A client SHOULD sync block headers first, then download and verify filter headers, and MAY first fetch the filter header at every 1,000th block (getcfcheckpt), then fill in each interval and check it against them. Unless it has a trusted peer, it SHOULD ask several. If two peers disagree, it SHOULD find the first header they disagree on, download that block, compute the filter itself, and ban any peer whose header does not match. It SHOULD also check every filter it downloads against its header. The authors’ claim is that a client with at least one honest peer can identify the correct filters.",
+              "claims": [
+                "client-sync",
+                "filter-check",
+                "honest-peer",
+                "checkpoints-sync"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Serving filters and protocol request limits",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The serving side is kept cheap. Nodes SHOULD build and store each block’s filters as the block connects, and SHOULD NOT build them on request, since a peer could otherwise ask for small filters of large blocks and force expensive I/O. Requests are bounded: at most 1,000 blocks of filters, or 2,000 filter headers, at a time. A node signals support with the NODE_COMPACT_FILTERS service bit, and the authors chose this P2P-only design over a consensus change that would make blocks commit to their filters.",
+              "claims": [
+                "node-op",
+                "limits",
+                "service-bit",
+                "why-p2p"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Proposal history and the older Bloom-filter approach",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A light client does not download every block. It downloads the block headers, 80 bytes each, checks their proof of work, and follows the chain with the most work. Then it needs to learn which blocks touch its own coins without fetching them all. The older answer, BIP 37, had the client hand a Bloom filter of its interests to a full node. The authors of BIP 157 argue that most implementations gave wallets virtually zero privacy, let a malicious node omit data with little risk of detection, and let crafted filters burden honest nodes.",
+              "claims": [
+                "light-clients",
+                "bip37-flaws"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIPs 157 and 158, both assigned in 2017 and recorded as Deployed, reverse the direction. Full nodes build one deterministic filter per block, once, and serve it to anyone; the client tests the filter itself and downloads a block only if it matches. The filter is a Golomb-coded set: it matches every item in the set, and any other item with probability 1/M.",
+              "claims": [
+                "preamble",
+                "reverse",
+                "gcs-def"
+              ]
+            }
           ]
         }
       ]

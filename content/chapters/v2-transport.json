@@ -1,350 +1,437 @@
 {
-  "schemaVersion": "bip-atlas.publication.v1",
-  "chapterId": "v2-transport",
-  "primaryBips": [
-    324
+ "schemaVersion": "bip-atlas.publication.v1",
+ "chapterId": "v2-transport",
+ "primaryBips": [
+  324
+ ],
+ "specimenLabel": "BIP 0324",
+ "title": "What changes when nodes encrypt their traffic?",
+ "dek": "Blocks and transactions are public. The conversation between two nodes need not be. BIP 324 changes what someone listening on the wire can read.",
+ "authorship": "hand-authored",
+ "reviewState": "draft-unreviewed",
+ "sourceSnapshot": "sources/research-2026-10-01-phase3",
+ "opening": {
+  "blocks": [
+   {
+    "type": "paragraph",
+    "text": "A Bitcoin transaction will eventually be public, but the route it takes through the network says something too. Who sent it first? When did a particular node receive it? With v1 transport, someone able to watch the connections can read the messages and study their source and timing.",
+    "claims": [
+     "v1-plaintext",
+     "v1-tamper-reveal"
+    ]
+   },
+   {
+    "type": "paragraph",
+    "text": "BIP 324 introduces an encrypted transport, v2. The nodes still exchange the same messages about blocks, transactions and peers. What changes is the conversation on the wire: a passive listener sees random-looking bytes instead of readable Bitcoin messages.",
+    "claims": [
+     "abstract",
+     "aim",
+     "same-messages"
+    ]
+   }
   ],
-  "specimenLabel": "BIP 0324",
-  "title": "What changes when nodes encrypt their traffic?",
-  "dek": "BIP 324 wraps the peer-to-peer protocol in opportunistic encryption that looks like random bytes on the wire. It does not tell a node who is on the other end, and it changes nothing about blocks or transactions.",
-  "authorship": "hand-authored",
-  "reviewState": "in-review",
-  "sourceSnapshot": "sources/research-2026-10-01-phase3",
-  "opening": {
-    "blocks": [
+  "figure": {
+   "type": "figure",
+   "figure": "A17.1",
+   "recipe": "v2-eavesdropper.v1",
+   "title": "Listening is different from joining the conversation",
+   "fixtures": [],
+   "caption": "Encryption blocks passive reading. An attacker can still take an active role between the peers; comparing session IDs through another channel can expose that interception.",
+   "claims": [
+    "v1-plaintext",
+    "aim",
+    "forces-active",
+    "session-id",
+    "no-auth",
+    "traffic-analysis"
+   ],
+   "layout": "prose"
+  }
+ },
+ "sections": [
+  {
+   "id": "why",
+   "heading": "What an eavesdropper has to do now",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Encryption raises the cost of observation. Instead of quietly recording readable traffic, an attacker needs to become involved: intercept a connection throughout its life, cause a downgrade to v1, or run a node that honest peers connect to. The authors’ aim is to make large-scale surveillance and tampering more expensive.",
+     "claims": [
+      "forces-active",
+      "goals"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "There is an important limit here. The handshake does not authenticate the peer. A node can establish an encrypted connection to an attacker’s node just as it can to any other node. Encryption protects the bytes in transit; it does not establish a trusted identity for the endpoint.",
+     "claims": [
+      "no-auth"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "An honest connection gives both ends the same session ID. An attacker inserted between them establishes separate connections, giving the ends different IDs. Operators can compare these IDs over another channel. The mismatch becomes useful evidence only when someone actually makes that comparison.",
+     "claims": [
+      "session-id"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Even without reading a message, a listener can observe packet sizes and timing. Those patterns can still identify v2 traffic. The design provides ways to vary the traffic, but it does not promise that an encrypted Bitcoin connection becomes invisible.",
+     "claims": [
+      "traffic-analysis",
+      "decoys"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Why the authors chose a new transport",
+     "blocks": [
       {
-        "type": "paragraph",
-        "text": "Everything Bitcoin nodes relay is public: blocks, transactions, addresses. Before BIP 324, every connection carried it in the clear (v1 connections still do), over connections that were neither encrypted nor authenticated. The authors point out what that costs. A global passive eavesdropper can trivially identify the source and timing of a transaction; bytes can be altered on the fly at low cost; and every connection begins with the same magic bytes, so deep packet inspection can spot and block it.",
-        "claims": [
-          "v1-plaintext",
-          "v1-tamper-reveal"
-        ]
+       "type": "paragraph",
+       "text": "v2 encrypts, but it does not authenticate the peer. Nothing in the handshake tells a node who it is talking to; the BIP says so plainly. The authors argue that in a permissionless network authentication only makes sense in specific settings, such as two nodes run by the same operator, and that it should be added separately, if at all.",
+       "claims": [
+        "no-auth"
+       ]
       },
       {
-        "type": "paragraph",
-        "text": "BIP 324, assigned in 2019 and recorded as Deployed, defines version 2 of the transport. It adds opportunistic encryption, makes the bytes on the wire look uniformly random to a passive observer, trims a little bandwidth, and leaves room to negotiate future upgrades. Only the framing changes: the messages inside are the same ones v1 carries.",
-        "claims": [
-          "preamble",
-          "abstract",
-          "aim",
-          "same-messages"
-        ]
+       "type": "paragraph",
+       "text": "Why not use TLS or Noise? The authors’ answer is that neither treats authentication as a separate, optional layer, neither produces a pseudorandom byte stream that can be shaped to resemble other traffic, neither supports secp256k1 natively, and both hand the application a stream where Bitcoin wants packets. Fixing all of that would forfeit the benefit of reusing them.",
+       "claims": [
+        "not-tls"
+       ]
       }
-    ],
-    "figure": {
-      "type": "figure",
-      "figure": "A17.1",
-      "recipe": "v1-v2-framing.v1",
-      "title": "Framing, v1 and v2",
-      "fixtures": [
-        "v2-framing"
-      ],
-      "caption": "The bytes added to every message: v1’s 24-byte cleartext header against v2’s encrypted length, header byte, type ID and authentication tag, 21 bytes for a message with a short ID.",
-      "claims": [
-        "framing-computed",
-        "packet-format",
-        "message-type"
-      ],
-      "layout": "prose"
+     ]
     }
+   ]
   },
-  "sections": [
+  {
+   "id": "handshake",
+   "heading": "Agree on a secret across an open wire",
+   "blocks": [
     {
-      "id": "why",
-      "heading": "Encryption without authentication",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "v2 encrypts, but it does not authenticate the peer. Nothing in the handshake tells a node who it is talking to; the BIP says so plainly. The authors argue that in a permissionless network authentication only makes sense in specific settings, such as two nodes run by the same operator, and that it should be added separately, if at all.",
-          "claims": [
-            "no-auth"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "What unauthenticated encryption buys, in the authors’ account, is cost. A passive eavesdropper can no longer read the messages; to read traffic it has to become active, by sitting in the middle of the connection for its whole life, downgrading it to v1, or running its own nodes and getting honest ones to connect. Active attacks at scale are more expensive, and for connections an operator sets up by hand they are in principle detectable.",
-          "claims": [
-            "forces-active",
-            "goals"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.2",
-          "recipe": "v2-eavesdropper.v1",
-          "title": "Passive and active listeners",
-          "fixtures": [],
-          "caption": "Schematic. Encryption stops a passive listener; an active one in the middle ends up with a different session ID on each side.",
-          "claims": [
-            "v1-plaintext",
-            "aim",
-            "forces-active",
-            "session-id",
-            "no-auth",
-            "traffic-analysis"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The tools for catching them are the protocol version and the session ID. Both ends derive the session ID from the key exchange, so it is identical on both sides of an honest connection and differs if someone has spliced themselves into the middle. A node may show it to its operator to compare with the peer’s operator out of band.",
-          "claims": [
-            "session-id"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Why not use TLS or Noise? The authors’ answer is that neither treats authentication as a separate, optional layer, neither produces a pseudorandom byte stream that can be shaped to resemble other traffic, neither supports secp256k1 natively, and both hand the application a stream where Bitcoin wants packets. Fixing all of that would forfeit the benefit of reusing them.",
-          "claims": [
-            "not-tls"
-          ]
-        },
-        {
-          "type": "callout",
-          "label": "Caveat",
-          "text": "Encryption is not authentication. A v2 connection can still be to an attacker’s node, and an attacker in the middle is detected only if someone compares protocol versions and session IDs. Traffic analysis of packet sizes and timing can also still reveal that v2 is in use.",
-          "claims": [
-            "no-auth",
-            "session-id",
-            "traffic-analysis"
-          ]
-        }
-      ]
+     "type": "paragraph",
+     "text": "The nodes begin by exchanging fresh public keys. Each combines its private key with the other side’s public information to derive a shared secret. That secret never has to cross the wire. From it they derive keys for sending and receiving, along with their session ID.",
+     "claims": [
+      "ellswift",
+      "ecdh",
+      "hkdf"
+     ]
     },
     {
-      "id": "handshake",
-      "heading": "The handshake",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "Each side starts by generating a fresh ephemeral key and sending its public key as 64 bytes of ElligatorSwift encoding. Every 64-byte string is a valid encoding of some curve point, so encodings sampled uniformly look like random bytes: unlike a plain 32-byte X coordinate (a random 32-byte string is a valid one only about half the time), they give an observer nothing to test. Each side may follow its key with up to 4095 bytes of garbage, so the first message need not be exactly 64 bytes long.",
-          "claims": [
-            "ellswift",
-            "garbage"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.3",
-          "recipe": "v2-ellswift.v1",
-          "title": "64 bytes that look random",
-          "fixtures": [
-            "v2-packet-1"
-          ],
-          "caption": "The initiator’s opening bytes in one of BIP 324’s vectors. This site does not decode ElligatorSwift; the vector supplies the decoding.",
-          "claims": [
-            "ellswift",
-            "garbage",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "A responder also has to keep talking to v1 peers. It watches the first 16 bytes: if they are the network magic followed by “version” and padding, the start of every v1 connection, it switches to v1.",
-          "claims": [
-            "v1-detect",
-            "goals"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.4",
-          "recipe": "v2-detect.v1",
-          "title": "v1 or v2?",
-          "fixtures": [
-            "v2-packet-1"
-          ],
-          "caption": "A v1 connection always opens with the same 16 bytes; a v2 initiator’s key almost never does.",
-          "claims": [
-            "v1-detect"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "Both sides then decode the other’s 64 bytes to an X coordinate and compute X-only ECDH. The result is hashed together with both 64-byte encodings exactly as sent, initiator’s first, so an attacker cannot alter an encoding without breaking the rest of the stream. HKDF-SHA256, salted with the label “bitcoin_v2_shared_secret” and the network magic, expands that secret into the session ID, four cipher keys (a length key and a payload key in each direction) and two 16-byte garbage terminators.",
-          "claims": [
-            "ecdh",
-            "hkdf"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.5",
-          "recipe": "v2-key-story.v1",
-          "title": "From two keys to a packet",
-          "fixtures": [
-            "v2-packet-0"
-          ],
-          "caption": "BIP 324’s vector for the initiator’s packet 0, recomputed by the tested model step by step; exact values are listed below the frames.",
-          "claims": [
-            "ecdh",
-            "hkdf",
-            "terminator-aad",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "Each side sends its garbage terminator, then encrypted packets. The first packet in each direction carries the garbage that side sent as associated data, so the garbage is authenticated and cannot be changed in transit without the connection failing. Each side then sends a version packet with empty contents, possibly after decoys, to say it speaks v2; the responder’s goes out in its first flight, without waiting.",
-          "claims": [
-            "terminator-aad",
-            "version-packet"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.6",
-          "recipe": "v2-handshake.v1",
-          "title": "From two public keys to an encrypted packet",
-          "fixtures": [
-            "v2-packet-0",
-            "v2-packet-1",
-            "v2-packet-223",
-            "v2-packet-448",
-            "v2-packet-999"
-          ],
-          "caption": "Five of BIP 324’s packet-encoding vectors, each seen from one side. The listener’s panel shows only what crosses the wire; the v1 view is a general comparison, not about the vector. Every value is recomputed by the tested model and equals the vector’s; for packets 223 and 448 the vector publishes only the last 128 bytes. The ElligatorSwift decodings are the vector’s own.",
-          "claims": [
-            "vectors",
-            "ecdh",
-            "hkdf",
-            "packet-format",
-            "rekey",
-            "terminator-aad",
-            "version-packet",
-            "garbage",
-            "decoys",
-            "traffic-analysis",
-            "framing-computed"
-          ],
-          "layout": "wide"
-        },
-        {
-          "type": "paragraph",
-          "text": "The authors explain that the terminator exists because the receiver has to find where the garbage ends. Scanning for a fixed 16-byte sequence is cheap, whereas trying to authenticate a packet at every offset would mean recomputing a Poly1305 tag for every byte received. A receiver reads at most 4111 bytes, 4095 of garbage and the terminator, before giving up.",
-          "claims": [
-            "terminator-why",
-            "garbage"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.7",
-          "recipe": "v2-terminator.v1",
-          "title": "Finding the end of the garbage",
-          "fixtures": [
-            "v2-packet-0"
-          ],
-          "caption": "In this vector the initiator sent the maximum 4,095 bytes of garbage before its terminator.",
-          "claims": [
-            "terminator-why",
-            "garbage",
-            "terminator-aad"
-          ],
-          "layout": "prose"
-        }
-      ]
+     "type": "paragraph",
+     "text": "But the first message needs care. If the key exchange began with a recognisable Bitcoin marker, a network filter could identify it before any encryption started. The public keys therefore use ElligatorSwift encoding: 64 bytes designed to look uniformly random to a passive observer.",
+     "claims": [
+      "ellswift",
+      "aim",
+      "v1-tamper-reveal"
+     ]
     },
     {
-      "id": "packets",
-      "heading": "Packets",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "After the handshake every byte on the wire belongs to a packet. A packet is 20 bytes plus its contents: a 3-byte length, encrypted, then ChaCha20-Poly1305 over a 1-byte header and the contents, ending in a 16-byte tag. Contents can be up to 2^24 − 1 bytes.",
-          "claims": [
-            "packet-format"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The length is handled separately because a receiver must know where a packet ends before it can check it. It is encrypted with its own ChaCha20 stream, which keeps running from packet to packet, and is not covered by the tag; a wrong length still makes the packet fail authentication.",
-          "claims": [
-            "length-unauth"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.8",
-          "recipe": "v2-packet-bytes.v1",
-          "title": "One packet, byte by byte",
-          "fixtures": [
-            "v2-packet-1"
-          ],
-          "caption": "All 21 bytes of a published packet with 1 byte of contents. The tag covers the header and contents, not the length.",
-          "claims": [
-            "packet-format",
-            "length-unauth",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "BIP 324 defines one header flag, the highest bit, called the ignore bit; the other bits are ignored for now. A packet with it set is a decoy: the receiver checks that it decrypts and throws it away. Decoys are the protocol’s main means of shaping traffic, which the authors want to make it possible to conceal block propagation; how and when to send them is left out of scope.",
-          "claims": [
-            "decoys",
-            "goals"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Inside a packet, an application message starts with its type, either a one-byte ID from the BIP’s table or a zero byte and the same 12-byte ASCII name v1 uses, followed by the payload. Compared with v1’s 24-byte header, a message with a short ID carries 21 bytes of overhead; one without a short ID carries 33. The authors estimate that encrypting and authenticating costs about as much as the truncated double SHA-256 checksum it replaces.",
-          "claims": [
-            "message-type",
-            "framing-computed",
-            "performance"
-          ]
-        }
-      ]
+     "type": "figure",
+     "figure": "A17.2",
+     "recipe": "v2-ellswift.v1",
+     "title": "The opening should give nothing away",
+     "fixtures": [
+      "v2-packet-1"
+     ],
+     "caption": "The encoded public key looks like random bytes. This example takes the decoded point from the published vector; the site does not implement ElligatorSwift decoding.",
+     "claims": [
+      "ellswift",
+      "garbage",
+      "vectors"
+     ],
+     "layout": "prose"
     },
     {
-      "id": "rekey",
-      "heading": "Forgetting old keys",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch; after the 224th packet its new key is the first 32 bytes of encrypting 32 zero bytes under the old key, with the nonce’s packet field set to 0xffffffff. The length cipher replaces its key with the next 32 bytes of its own stream and moves to the next nonce.",
-          "claims": [
-            "rekey"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A17.9",
-          "recipe": "v2-rekey.v1",
-          "title": "Nonces and keys across a rekey",
-          "fixtures": [
-            "v2-rekey"
-          ],
-          "caption": "The payload cipher from one of BIP 324’s vectors, run forward: the nonce resets and the key changes after packets 223 and 447.",
-          "claims": [
-            "rekey",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "This gives forward secrecy within a session: an attacker who steals the current keys cannot derive earlier ones, so it cannot read traffic recorded before the last rekey. The BIP does not refresh the key exchange during a session, and says why it does not consider that a priority.",
-          "claims": [
-            "forward-secrecy",
-            "goals"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Nodes advertise v2 with the NODE_P2P_V2 service flag. Because flags spread through untrusted relays, a node that is cut off as soon as it tries v2 is encouraged to retry over v1. v2 nodes keep accepting inbound v1 connections, to minimize the risk of splitting the network. Blocks, transactions, scripts and consensus rules are untouched: v2 changes how messages travel between two nodes, not what they say.",
-          "claims": [
-            "signaling",
-            "goals",
-            "same-messages"
-          ]
-        }
-      ]
+     "type": "paragraph",
+     "text": "A peer can also append garbage bytes to its key. These vary the length of the opening message, so an observer cannot rely on one fixed length. Each side later sends a terminator derived from the shared secret, which tells the other side where that garbage ends.",
+     "claims": [
+      "garbage",
+      "hkdf",
+      "terminator-why"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "After the terminator come encrypted packets. The first packet authenticates the garbage already sent, so altering those bytes makes the check fail. An empty version message announces v2; decoy packets may precede it. The responder can send its version in its first flight without waiting for another round trip.",
+     "claims": [
+      "terminator-aad",
+      "version-packet"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A17.3",
+     "recipe": "v2-handshake.v1",
+     "title": "Follow the opening exchange",
+     "fixtures": [
+      "v2-packet-0",
+      "v2-packet-1",
+      "v2-packet-223",
+      "v2-packet-448",
+      "v2-packet-999"
+     ],
+     "caption": "Step through the exchange, then compare the peer’s view with the listener’s. The ElligatorSwift decodings are supplied by the source vectors.",
+     "claims": [
+      "vectors",
+      "ecdh",
+      "hkdf",
+      "packet-format",
+      "rekey",
+      "terminator-aad",
+      "version-packet",
+      "garbage",
+      "decoys",
+      "traffic-analysis",
+      "framing-computed"
+     ],
+     "layout": "wide"
+    },
+    {
+     "type": "paragraph",
+     "text": "Notice that the peers know much more than the listener. Both derive secret material locally from the exchange. Sending the public encodings does not mean sending the resulting cipher keys or session ID. Those remain off the wire, even though both ends can calculate them.",
+     "claims": [
+      "ecdh",
+      "hkdf",
+      "session-id"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "The key schedule and the end of the garbage",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Both sides then decode the other’s 64 bytes to an X coordinate and compute X-only ECDH. The result is hashed together with both 64-byte encodings exactly as sent, initiator’s first, so an attacker cannot alter an encoding without breaking the rest of the stream. HKDF-SHA256, salted with the label “bitcoin_v2_shared_secret” and the network magic, expands that secret into the session ID, four cipher keys (a length key and a payload key in each direction) and two 16-byte garbage terminators.",
+       "claims": [
+        "ecdh",
+        "hkdf"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The authors explain that the terminator exists because the receiver has to find where the garbage ends. Scanning for a fixed 16-byte sequence is cheap, whereas trying to authenticate a packet at every offset would mean recomputing a Poly1305 tag for every byte received. A receiver reads at most 4111 bytes, 4095 of garbage and the terminator, before giving up.",
+       "claims": [
+        "terminator-why",
+        "garbage"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "For packets 223 and 448, the published vectors supply only the last 128 bytes of ciphertext. Those suffixes are what the build compares. ElligatorSwift decodings are taken from the vectors.",
+       "claims": [
+        "vectors"
+       ]
+      }
+     ]
     }
-  ]
+   ]
+  },
+  {
+   "id": "packets",
+   "heading": "Read enough to know where a packet ends",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Once the handshake is over, the receiver needs to separate the incoming stream into packets. That poses a small puzzle: it has to know a packet’s length before it can collect and authenticate the whole thing. BIP 324 therefore encrypts the length separately from the packet’s header and contents.",
+     "claims": [
+      "packet-format",
+      "length-unauth"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The length uses its own ChaCha20 stream. The header and contents use ChaCha20-Poly1305, ending in an authentication tag. The length itself is not covered by that tag, but tampering with it still causes packet authentication to fail. Decryption and checking are part of receiving each packet.",
+     "claims": [
+      "packet-format",
+      "length-unauth"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A17.4",
+     "recipe": "v2-packet-bytes.v1",
+     "title": "A packet has two encrypted parts",
+     "fixtures": [
+      "v2-packet-1"
+     ],
+     "caption": "All 21 bytes of a published packet with 1 byte of contents. The length is encrypted separately; the tag covers the header and contents.",
+     "claims": [
+      "packet-format",
+      "length-unauth",
+      "vectors"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "One header flag tells the receiver to ignore a packet after checking it. That creates a decoy: it travels through the encrypted connection but carries no application message for the node to act on. Decoys offer a way to shape traffic; BIP 324 leaves the policy for sending them to implementations.",
+     "claims": [
+      "decoys",
+      "goals"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "For a real message, the contents begin with its type. Common types can use a short identifier. Other messages use a zero byte followed by the familiar v1 command name. The application still receives the same kind of Bitcoin message after the transport has checked and unpacked it.",
+     "claims": [
+      "message-type",
+      "same-messages"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A17.5",
+     "recipe": "v1-v2-framing.v1",
+     "title": "The wrapper around a message",
+     "fixtures": [
+      "v2-framing"
+     ],
+     "caption": "v1 adds a 24-byte cleartext header. v2 adds 21 bytes for a message with a short ID.",
+     "claims": [
+      "framing-computed",
+      "packet-format",
+      "message-type"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "Encrypting the connection does not necessarily make that wrapper larger. The short-ID case above uses less overhead than v1; the long form uses 33 bytes. The authors also estimate that encryption and authentication cost about as much as the checksum calculation they replace.",
+     "claims": [
+      "framing-computed",
+      "performance"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Packet sizes and header bits",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "After the handshake every byte on the wire belongs to a packet. A packet is 20 bytes plus its contents: a 3-byte length, encrypted, then ChaCha20-Poly1305 over a 1-byte header and the contents, ending in a 16-byte tag. Contents can be up to 2^24 − 1 bytes.",
+       "claims": [
+        "packet-format"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "BIP 324 defines one header flag, the highest bit, called the ignore bit; the other bits are ignored for now. A packet with it set is a decoy: the receiver checks that it decrypts and throws it away. Decoys are the protocol’s main means of shaping traffic, which the authors want to make it possible to conceal block propagation; how and when to send them is left out of scope.",
+       "claims": [
+        "decoys",
+        "goals"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rekey",
+   "heading": "Leave old conversations behind",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Suppose an attacker obtains a node’s current traffic keys. How much of a previously recorded conversation becomes readable? v2 limits that exposure by changing both cipher keys every 224 packets. Once old keys are discarded, the current keys do not let the attacker derive earlier ones.",
+     "claims": [
+      "rekey",
+      "forward-secrecy"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A17.6",
+     "recipe": "v2-rekey.v1",
+     "title": "The key changes as the conversation continues",
+     "fixtures": [
+      "v2-rekey"
+     ],
+     "caption": "The packet counter starts a new epoch when the key changes. The earlier epoch uses a different key.",
+     "claims": [
+      "rekey",
+      "vectors"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "This is forward secrecy within a session. It protects traffic from before the last rekey against theft of the current keys. It does not refresh the public-key exchange during the connection. The precise key and nonce updates are separate from what the application is sending.",
+     "claims": [
+      "forward-secrecy",
+      "rekey"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "How each cipher replaces its key",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch; after the 224th packet its new key is the first 32 bytes of encrypting 32 zero bytes under the old key, with the nonce’s packet field set to 0xffffffff. The length cipher replaces its key with the next 32 bytes of its own stream and moves to the next nonce.",
+       "claims": [
+        "rekey"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "compatibility",
+   "heading": "Keep talking to older nodes",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "A node accepting connections has to recognise older peers too. It examines the first 16 bytes. The network magic followed by “version” and padding identifies the start of v1; when those bytes match, the responder switches to that transport.",
+     "claims": [
+      "v1-detect"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A17.7",
+     "recipe": "v2-detect.v1",
+     "title": "Recognising the old greeting",
+     "fixtures": [
+      "v2-packet-1"
+     ],
+     "caption": "v1 has a fixed opening. A v2 initiator’s random-looking key almost never matches it.",
+     "claims": [
+      "v1-detect"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "Nodes advertise v2 support using the NODE_P2P_V2 service flag. That advertisement travels through untrusted relays, so it is not a guarantee. If a connection is closed immediately after a v2 attempt, a node is encouraged to retry v1. Accepting inbound v1 connections helps avoid splitting the network.",
+     "claims": [
+      "signaling",
+      "goals"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The result is an upgrade to how peers communicate. It leaves blocks, transactions, scripts and consensus rules as they were. A node receiving an encrypted message still has to apply all the usual checks to what that message says.",
+     "claims": [
+      "same-messages"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Source notes",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "BIP 324 was assigned in 2019 and is recorded as Deployed in the pinned source. The examples use published packet vectors, with their ElligatorSwift decodings supplied rather than calculated by this site.",
+       "claims": [
+        "preamble",
+        "vectors"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
 }

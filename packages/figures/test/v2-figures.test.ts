@@ -152,7 +152,7 @@ describe("v2 captions", () => {
   const text = readFileSync(new URL("content/chapters/v2-transport.json", root), "utf8");
   it("states only model numbers", () => {
     expect(text).toContain("21 bytes for a message with a short ID");
-    expect(text).toContain("sent the maximum 4,095 bytes of garbage");
+    expect(text).toContain("4095 of garbage and the terminator");
     expect(text).toContain("All 21 bytes of a published packet with 1 byte of contents");
     expect([p0.derived.packet.aadLen, p1.derived.packet.totalLen, p1.derived.packet.contentsLen]).toEqual([MAX_GARBAGE, 21, 1]);
   });

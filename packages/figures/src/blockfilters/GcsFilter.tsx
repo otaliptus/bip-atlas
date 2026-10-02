@@ -9,7 +9,7 @@ interface Props {
   figureId: string;
 }
 
-const probeName = (from: string, i: number) => (from === "this block" ? `own ${i + 1}` : fromText(from).replace("block ", "from "));
+const probeName = (from: string, i: number) => (from === "this block" ? `Included script ${i + 1}` : fromText(from).replace("block ", "Script from #"));
 
 /**
  * gcs-filter.v1 — the Block filters chapter's hero (drawing-first).
@@ -34,7 +34,7 @@ export function GcsFilter({ fixtures, figureId }: Props) {
   const read = p.steps.length;
   const last = p.steps[read - 1];
   const past = last?.outcome === "greater";
-  const miss = "No match: given the right filter, no output here pays to this script and no input spends an output with it.";
+  const miss = "No match: given the right filter, this script is absent from the included output and spent-output scripts.";
   const verdict = p.matched ? `Value ${read} equals it: a match, so the block may concern this script.` : past ? `Value ${read} passes it, so decoding stops. ${miss}` : `All ${d.N} values are below it. ${miss}`;
   const who = p.from === "this block" ? "A script from this block" : `A script from ${fromText(p.from)}`;
   const status = d.N === 0 ? `The filter is one zero byte, N = 0: nothing can match. ${who} is not even hashed.` : `${who} hashes to ${group(p.target)}. ${verdict}`;
@@ -46,10 +46,11 @@ export function GcsFilter({ fixtures, figureId }: Props) {
     const ly = wide ? 128 : 186;
     const tx = along(p.target, d.F, x0, x1);
     const codes = d.codes.slice(0, wide ? 3 : 2);
-    const cs = wide ? 7 : 6.5;
-    const by = ly + 64;
+    const codeBits = 8 + codes.reduce((n, c) => n + c.unary.length + c.remainder.length, 0);
+    const cs = Math.min(wide ? 7 : 6.5, (x1 - x0 - 14 - codes.length * 4) / codeBits);
+    const by = ly + 88;
     return (
-      <Drawing id={`${figureId}-${wide ? "w" : "n"}`} width={W} height={showBits && d.N ? by + 54 : ly + 48} title="A filter, built and queried" desc={desc}>
+      <Drawing id={`${figureId}-${wide ? "w" : "n"}`} width={W} height={!d.N ? 148 : showBits ? by + 54 : ly + 70} title="A filter, built and queried" desc={desc}>
         {/* The query: script → SipHash → target (none for an empty filter) */}
         {d.N ? <g>
         <rect class="k-outline k-fill--plain" x={x0} y={18} width={112} height={24} />
@@ -61,7 +62,14 @@ export function GcsFilter({ fixtures, figureId }: Props) {
         <Value at={wide ? [x0 + 290, 46] : [x0 + 120, 104]} text="TARGET IN [0, F)" size={8.5} cls="k-value--muted" />
         <Value at={wide ? [x0 + 290, 60] : [x0 + 120, 116]} text="KEY: FIRST 16 B OF THE BLOCK HASH" size={8.5} cls="k-value--muted" />
         </g> : <Value at={[x0, 40]} text="N = 0 · THE FILTER IS ONE ZERO BYTE" size={9} cls="k-value--label" />}
-        {/* The line [0, F): decoded values solid, undecoded hatched */}
+        {/* An empty set has no hash range to search. */}
+        {!d.N ? <g>
+          <rect class="k-outline k-fill--net" x={x0} y="66" width="54" height="54" />
+          <Value at={[x0 + 27, 101]} text="00" size={22} anchor="middle" />
+          <Value at={[x0 + 72, 87]} text="NO ITEMS" size={11} cls="k-value--label" />
+          <Value at={[x0 + 72, 107]} text="no query can match" size={10} />
+        </g> : <g>
+        {/* The line [0, F): decoded values solid, undecoded drawn empty. */}
         <line class="k-line" x1={x0} y1={ly} x2={x1} y2={ly} />
         <Value at={[x0, ly + 16]} text="0" size={8.5} cls="k-value--muted" />
         <Value at={[x1, ly + 16]} text={`F = N·M = ${group(d.F)}`} size={8.5} anchor="end" cls="k-value--muted" />
@@ -80,7 +88,8 @@ export function GcsFilter({ fixtures, figureId }: Props) {
         <path class="k-bf-target" d={`M${tx} ${ly + 22} V${ly + 6} M${tx - 4} ${ly + 11} L${tx} ${ly + 5} L${tx + 4} ${ly + 11}`} />
         <Value at={[Math.min(Math.max(tx, x0 + 40), x1 - 40), ly + 34]} text={d.N === 0 ? "EMPTY" : p.matched ? "MATCH · MAYBE" : "NO MATCH"} size={9} anchor="middle" cls="k-value--label" />
         {last && !p.matched ? <Value at={[along(last.value, d.F, x0, x1), ly - 34]} text={past ? "PASSED: STOP" : "END OF FILTER"} size={8.5} anchor="middle" cls="k-value--muted" /> : null}
-        {d.N ? <Value at={[x1, ly + 30]} text="EMPTY MARK: IN THE FILTER, NOT READ" size={8.5} anchor="end" cls="k-value--muted" /> : null}
+        <Value at={[x0, ly + 54]} text="EMPTY MARK: IN THE FILTER, NOT READ" size={8.5} cls="k-value--muted" />
+        </g>}
         {showBits && d.N ? (
           <g>
             <Value at={[x0, by - 8]} text={`THE FILTER'S FIRST BITS · ${d.filterBytes} BYTES IN ALL`} size={8} cls="k-value--label" />
@@ -118,7 +127,7 @@ export function GcsFilter({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {strip("Published block", "block", fixtures.map((x) => [x.id, group(x.derived.height)]), id, (v) => (setId(v), setPi(0)))}
+          {strip("Published block", "block", fixtures.map((x) => [x.id, x.shortLabel ?? `Block ${group(x.derived.height)}`]), id, (v) => (setId(v), setPi(0)))}
           {d.probes.length ? strip("Test script", "probe", d.probes.map((q, i) => [String(i), probeName(q.from, i)]), String(pi), (v) => setPi(Number(v))) : null}
           {strip("Show", "bits", [["values", "Values"], ["bits", "Bits"]], bits ? "bits" : "values", (v) => setBits(v === "bits"))}
         </div>

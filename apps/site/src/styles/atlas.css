@@ -578,6 +578,12 @@ a.atlas-contents__title:hover { color: var(--manual-blue-dark); }
   .k-resp__wide { display: none; }
   .k-resp__narrow { display: block; }
 }
+/* Opening diagrams also need the narrow composition in a desktop half-column. */
+.k-local-composition { container-type: inline-size; }
+@container (max-width: 39.99rem) {
+  .k-local-composition .k-resp__wide { display: none; }
+  .k-local-composition .k-resp__narrow { display: block; }
+}
 
 /* Storyboards. */
 .k-story { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--k-frame) * 0.9)), 1fr)); gap: var(--manual-space-5) var(--manual-space-4); }

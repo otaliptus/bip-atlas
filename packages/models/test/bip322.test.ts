@@ -102,7 +102,7 @@ describe("message-signing chapter prose numbers", () => {
     expect(w.length).toBe(5);
     expect(w[0]).toBe("");
     expect(w[w.length - 1]).toBe(ms.witness_script);
-    has("a 3-of-3 multisig address, whose “signature” is three ECDSA signatures, an empty dummy item and the witness script");
+    has("3-of-3 multisig example contains three ECDSA signatures, an empty dummy item and the witness script");
     expect(basic.simple.some((v: { bip322_signatures: string[] }) => v.bip322_signatures.some((s) => !/^(smp|ful|pof)/.test(s)))).toBe(true);
     has("one of the published vectors tests exactly that");
     const chapter = JSON.parse(text);

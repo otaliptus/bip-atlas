@@ -170,7 +170,7 @@ describe("taproot chapter prose numbers", () => {
     expect(text).toContain("65 bytes for leaf A and 97 for B and C");
     const len = sigMsg(tx, spent, 4, 0).reduce((n, i) => n + i.hex.length / 2, 0);
     expect(len).toBe(174);
-    expect(text).toContain("for the published input below it is 174");
+    expect(text).toContain("illustrated input’s message is 174 bytes");
     expect(bip[127]).toContain("at most ''206'' bytes");
     expect(text).toContain("at most 206 bytes");
     expect(bip[346]).toContain("height 709632 on Bitcoin mainnet");

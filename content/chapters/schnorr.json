@@ -1,400 +1,395 @@
 {
- "schemaVersion": "bip-atlas.publication.v1",
- "chapterId": "schnorr",
- "primaryBips": [
-  340
- ],
- "specimenLabel": "BIP 0340",
- "title": "What does a signature verifier actually check?",
- "dek": "A BIP 340 verifier receives a public key, a message and 64 bytes of signature. It runs a short list of checks, fixed down to the byte, and any one of them can refuse.",
- "authorship": "hand-authored",
- "reviewState": "in-review",
- "sourceSnapshot": "sources/research-2026-10-01",
- "opening": {
-  "blocks": [
-   {
-    "type": "paragraph",
-    "text": "When a wallet shows that a payment was authorized, a program somewhere has run a verifier: a function that takes a public key, a message and a signature, and answers yes or no. It sees no secret key and learns nothing about who pressed a button. It only checks whether the three inputs fit together.",
-    "claims": [
-     "verify-inputs",
-     "verify-steps"
-    ]
-   },
-   {
-    "type": "paragraph",
-    "text": "BIP 340, assigned in 2020 and recorded as deployed, specifies 64-byte Schnorr signatures over secp256k1, the same curve Bitcoin already used for ECDSA. This chapter follows its verifier one check at a time, using the BIP’s own published test vectors, valid and invalid.",
-    "claims": [
-     "preamble",
-     "abstract",
-     "reference-demo"
-    ]
-   }
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "schnorr",
+  "primaryBips": [
+    340
   ],
-  "figure": {
-   "type": "figure",
-   "figure": "A06.1",
-   "recipe": "schnorr-signature-layout.v1",
-   "title": "Three inputs, one answer",
-   "fixtures": [
-    "bip340-v1"
-   ],
-   "caption": "Vector 1 from the BIP’s CSV goes into the verifier. The key is a bare x coordinate, the signature is two 32-byte numbers, and only the message has no fixed length. No secret key goes in.",
-   "claims": [
-    "verify-inputs",
-    "final-scheme",
-    "implicit-y"
-   ],
-   "layout": "prose"
-  }
- },
- "sections": [
-  {
-   "id": "inputs",
-   "heading": "Three inputs, one answer",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "The verifier’s inputs have fixed shapes. The public key is exactly 32 bytes. The signature is exactly 64 bytes. The message is a byte array of any length, including none at all.",
-     "claims": [
-      "verify-inputs",
-      "arbitrary-size",
-      "challenge-sizes"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Those sizes were deliberate choices. ECDSA signatures in Bitcoin are DER-encoded, so they vary in size and can reach 72 bytes; BIP 340 uses a simple fixed format instead. Public keys shrink from the usual 33-byte compressed point to 32 bytes, because only the x coordinate is kept.",
-     "claims": [
-      "encodings"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.2",
-     "recipe": "schnorr-byte-sizes.v1",
-     "title": "Fixed sizes, smaller keys",
-     "fixtures": [
-      "bip340-v1"
-     ],
-     "caption": "One byte ruler. A DER signature’s size depends on its values; a BIP 340 signature never changes size, and a key keeps only the x coordinate of its compressed form.",
-     "claims": [
-      "encodings",
-      "implicit-y",
-      "verify-inputs"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "paragraph",
-     "text": "The authors also wanted something stricter than most signature standards provide. For use in consensus, they write, the verification algorithm must be completely specified at the byte level, so that nobody can build a signature that some verifiers accept and others reject. They point to the trouble Bitcoin once had with loosely specified DER parsing. Every check below is therefore an exact test, with nothing left to an implementation’s taste.",
-     "claims": [
-      "completely-specified"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The 64 bytes split cleanly in two. The first half, *r*, is the x coordinate of a curve point R that the signer committed to. The second half, *s*, is a number. Together they must satisfy one equation, s⋅G = R + e⋅P, where G is the curve’s fixed base point, P is the public key’s point, and e is a hash that binds R, the key and the message together.",
-     "claims": [
-      "final-scheme"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.3",
-     "recipe": "schnorr-equation.v1",
-     "title": "The equation a signature satisfies",
-     "fixtures": [
-      "bip340-v1"
-     ],
-     "caption": "For vector 1 the two sides balance. Each term comes from the inputs, from the challenge hash, or from the curve’s fixed point G; Verify rearranges the equation to compute R.",
-     "claims": [
-      "final-scheme",
-      "verify-steps",
-      "vectors-reproduced"
-     ],
-     "layout": "prose"
-    }
-   ]
-  },
-  {
-   "id": "checks",
-   "heading": "Eight steps, in order",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "BIP 340 writes Verify as a list. First, turn the key into a point: *lift_x* takes the 32 bytes as an x coordinate and returns the curve point with that x and an even y, or fails if the number is too large or no such point exists. Next, read r and s from the signature and fail unless r is below the field size *p* and s is below the curve order *n*.",
-     "claims": [
-      "verify-steps",
-      "lift-x"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Then compute the challenge e, a tagged hash of r, the key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Fail if R is the point at infinity, fail if its y coordinate is odd, and fail if its x coordinate is not r. Success means no step failed.",
-     "claims": [
-      "verify-steps"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.4",
-     "recipe": "schnorr-verify-story.v1",
-     "title": "One valid vector, step by step",
-     "fixtures": [
-      "bip340-v1"
-     ],
-     "caption": "Published vector 1, checked gate by gate. The exact values are listed under the frames.",
-     "claims": [
-      "verify-steps",
-      "lift-x",
-      "tagged-hash",
-      "vectors-reproduced"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "paragraph",
-     "text": "The figure below runs this list on the published vectors. Choose a valid vector and every stage passes. Choose an invalid one and the run stops at the first failure: a key with no curve point fails at the first stage, and an r equal to p fails at the second, before any hashing. Later stages are marked as not reached, because the BIP’s verifier never gets to them.",
-     "claims": [
-      "verify-steps",
-      "vectors-reproduced"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.5",
-     "recipe": "schnorr-verification.v1",
-     "title": "Verify, gate by gate",
-     "fixtures": [
-      "bip340-v1",
-      "bip340-v15",
-      "bip340-v17",
-      "bip340-v5",
-      "bip340-v14",
-      "bip340-v12",
-      "bip340-v13",
-      "bip340-v9",
-      "bip340-v6",
-      "bip340-v7",
-      "bip340-v8",
-      "bip340-v11"
-     ],
-     "caption": "Twelve published vectors, three valid and nine invalid. On a valid vector, swapping in another fixture’s message keeps the key and signature but changes e, so the recomputed R no longer fits.",
-     "claims": [
-      "verify-steps",
-      "vectors-reproduced",
-      "message-swap",
-      "comment-vs-stage"
-     ],
-     "layout": "wide"
-    },
-    {
-     "type": "paragraph",
-     "text": "Try the verifier’s message control on a valid vector. The key and signature stay the same, but another message changes e, which changes R. For every valid vector in the figure, that is enough to fail, at either the even-y check or the x comparison. Nothing in the verifier knows which message was “meant”; it only checks the one it is given.",
-     "claims": [
-      "message-swap",
-      "verify-steps"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Each vector in the CSV carries a short comment. These describe how a failing vector was built, not necessarily which check catches it. Vector 7 is labelled “negated message”, yet it never reaches the comparison of x(R) with r: the R it produces has an odd y coordinate, so it fails one step earlier. Vectors 8 and 11 do reach that comparison, and fail there. Reading the BIP’s algorithm and watching it run are two different kinds of evidence, and this page shows both.",
-     "claims": [
-      "comment-vs-stage",
-      "vectors-reproduced"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.6",
-     "recipe": "schnorr-fail-gates.v1",
-     "title": "Where each vector stops",
-     "fixtures": [
-      "bip340-v1",
-      "bip340-v15",
-      "bip340-v17",
-      "bip340-v5",
-      "bip340-v14",
-      "bip340-v12",
-      "bip340-v13",
-      "bip340-v9",
-      "bip340-v6",
-      "bip340-v7",
-      "bip340-v8",
-      "bip340-v11"
-     ],
-     "caption": "The vectors of the figure above, run through the same gates at once. Each lane is named by its CSV comment, which says how the vector was made; the cross marks the check that rejects it.",
-     "claims": [
-      "comment-vs-stage",
-      "vectors-reproduced",
-      "verify-steps"
-     ],
-     "layout": "wide"
-    },
-    {
-     "type": "callout",
-     "label": "Caveat",
-     "text": "This chapter draws no curve. Points on secp256k1 are pairs of integers modulo a 256-bit prime, and the smooth curves of textbook pictures are drawn over real numbers. Every value in the figures is computed, not illustrated.",
-     "claims": [
-      "curve-arithmetic"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "challenge",
-   "heading": "What the challenge binds together",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "The challenge e is where the message enters. BIP 340 hashes it with a *tagged hash*: SHA-256 of the tag’s own SHA-256 written twice, followed by the data. Here the tag is the text BIP0340/challenge. The authors use tags so that a hash computed for one purpose cannot be reinterpreted as a hash for another.",
-     "claims": [
-      "tagged-hash",
-      "tag-rationale"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The data is r, then the public key, then the message. Including the key is called key prefixing, and the authors explain why it matters. Without it, anyone could turn a valid signature for a key P into a valid signature for P + a⋅G, for any tweak a they like. They note this would make signatures insecure for keys made by adding tweaks, as BIP 32’s unhardened derivation and Taproot both do.",
-     "claims": [
-      "key-prefixing",
-      "final-scheme"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The message is hashed whole, whatever its length. Earlier revisions of BIP 340 required exactly 32 bytes, and the changelog records the lifting of that rule in April 2023. The published vectors include valid signatures over messages of 0, 1, 17 and 100 bytes alongside the usual 32. The BIP still recommends pre-hashing large messages for performance, and BIP 341’s transaction signatures do sign a 32-byte digest.",
-     "claims": [
-      "arbitrary-size",
-      "challenge-sizes",
-      "bip341-prehash"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.7",
-     "recipe": "challenge-preimage.v1",
-     "title": "One hash, any message",
-     "fixtures": [
-      "bip340-v15",
-      "bip340-v16",
-      "bip340-v17",
-      "bip340-v1",
-      "bip340-v18"
-     ],
-     "caption": "The challenge input for five valid vectors, to scale: 128 fixed bytes, then the message. A longer message only lengthens the tail.",
-     "claims": [
-      "tagged-hash",
-      "challenge-sizes",
-      "arbitrary-size",
-      "verify-steps"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "details",
-     "summary": "Details: why the signature carries R and not e",
-     "blocks": [
+  "specimenLabel": "BIP 0340",
+  "title": "What does a signature verifier actually check?",
+  "dek": "A BIP 340 verifier receives a public key, a message and 64 bytes of signature. It runs a short list of checks, fixed down to the byte, and any one of them can refuse.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01",
+  "opening": {
+    "blocks": [
       {
-       "type": "paragraph",
-       "text": "Schnorr signatures come in two forms. One publishes e and s; the other publishes R and s. BIP 340 chose R, which the authors say supports batch verification because no curve operation sits inside a hash. Batch verification checks many signatures together: it always succeeds if every signature is valid, and succeeds with only negligible probability if any is not.",
-       "claims": [
-        "r-variant",
-        "batch"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "xonly",
-   "heading": "Why only x coordinates",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "Every valid x coordinate on the curve has two possible y values, one even and one odd. BIP 340 removes the ambiguity by rule: the key’s point P and the signature’s point R are always taken to have even y. That is why an x-only key is equivalent to a compressed key beginning with the byte 0x02.",
-     "claims": [
-      "implicit-y",
-      "final-scheme"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The figure below shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security: breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
-     "claims": [
-      "no-security-loss",
-      "two-secret-keys",
-      "lift-x"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A06.8",
-     "recipe": "schnorr-even-y.v1",
-     "title": "One x, two y, one kept",
-     "fixtures": [
-      "bip340-v1",
-      "bip340-v6"
-     ],
-     "caption": "The even y is kept for the key and required of R: vector 6’s R has odd y, so Verify rejects it. The two secret keys are drawn without values.",
-     "claims": [
-      "implicit-y",
-      "lift-x",
-      "two-secret-keys",
-      "verify-steps",
-      "vectors-reproduced"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "details",
-     "summary": "Details: lift_x and the constants",
-     "blocks": [
+        "type": "paragraph",
+        "text": "When a wallet shows that a payment was authorized, a program somewhere has run a verifier: a function that takes a public key, a message and a signature, and answers yes or no. It sees no secret key and learns nothing about who pressed a button. It only checks whether the three inputs fit together.",
+        "claims": [
+          "verify-inputs",
+          "verify-steps"
+        ]
+      },
       {
-       "type": "paragraph",
-       "text": "lift_x fails if x ≥ p. Otherwise it computes c = x³ + 7 mod p and y = c^((p+1)/4) mod p, fails if y² ≠ c, and returns the point with whichever of y and p − y is even. The field size p and the curve order n are fixed 256-bit constants; the curve is y² = x³ + 7 over the integers modulo p.",
-       "claims": [
-        "lift-x-steps",
-        "curve-arithmetic"
-       ]
+        "type": "paragraph",
+        "text": "BIP 340, assigned in 2020 and recorded as deployed, specifies 64-byte Schnorr signatures over secp256k1, the same curve Bitcoin already used for ECDSA. This chapter follows its verifier one check at a time, using the BIP’s own published test vectors, valid and invalid.",
+        "claims": [
+          "preamble",
+          "abstract",
+          "reference-demo"
+        ]
       }
-     ]
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A06.1",
+      "recipe": "schnorr-signature-layout.v1",
+      "title": "Three inputs, one answer",
+      "fixtures": [
+        "bip340-v1"
+      ],
+      "caption": "Vector 1 from the BIP’s CSV goes into the verifier. The key is a bare x coordinate, the signature is two 32-byte numbers, and only the message has no fixed length. No secret key goes in.",
+      "claims": [
+        "verify-inputs",
+        "final-scheme",
+        "implicit-y"
+      ],
+      "layout": "prose"
     }
-   ]
   },
-  {
-   "id": "limits",
-   "heading": "What a passing check does not say",
-   "blocks": [
+  "sections": [
     {
-     "type": "paragraph",
-     "text": "A successful Verify establishes one thing: this signature fits this key and this message under BIP 340’s equation. It does not say what the message means, and BIP 340 asks applications to keep contexts apart, so that a signed message from one application is never accepted as something else, such as a transaction. The authors also note that the security of Schnorr signatures implies they are non-malleable, while ECDSA signatures are inherently malleable.",
-     "claims": [
-      "verify-steps",
-      "domain-separation",
-      "non-malleable"
-     ]
+      "id": "inputs",
+      "heading": "Three inputs, one answer",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The verifier’s inputs have fixed shapes. The public key is exactly 32 bytes. The signature is exactly 64 bytes. The message is a byte array of any length, including none at all.",
+          "claims": [
+            "verify-inputs",
+            "arbitrary-size",
+            "challenge-sizes"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Those sizes were deliberate choices. ECDSA signatures in Bitcoin are DER-encoded, so they vary in size and can reach 72 bytes; BIP 340 uses a simple fixed format instead. Public keys shrink from the usual 33-byte compressed point to 32 bytes, because only the x coordinate is kept.",
+          "claims": [
+            "encodings"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.2",
+          "recipe": "schnorr-byte-sizes.v1",
+          "title": "Fixed sizes, smaller keys",
+          "fixtures": [
+            "bip340-v1"
+          ],
+          "caption": "One byte ruler. A DER signature’s size depends on its values; a BIP 340 signature never changes size, and a key keeps only the x coordinate of its compressed form.",
+          "claims": [
+            "encodings",
+            "implicit-y",
+            "verify-inputs"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "The authors also wanted something stricter than most signature standards provide. For use in consensus, they write, the verification algorithm must be completely specified at the byte level, so that nobody can build a signature that some verifiers accept and others reject. They point to the trouble Bitcoin once had with loosely specified DER parsing. Every check below is therefore an exact test, with nothing left to an implementation’s taste.",
+          "claims": [
+            "completely-specified"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The 64 bytes split cleanly in two. The first half, *r*, is the x coordinate of a curve point R that the signer committed to. The second half, *s*, is a number. Together they must satisfy one equation, s⋅G = R + e⋅P, where G is the curve’s fixed base point, P is the public key’s point, and e is a hash that binds R, the key and the message together.",
+          "claims": [
+            "final-scheme"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.3",
+          "recipe": "schnorr-equation.v1",
+          "title": "The equation a signature satisfies",
+          "fixtures": [
+            "bip340-v1"
+          ],
+          "caption": "For vector 1 the two sides balance. Each term comes from the inputs, from the challenge hash, or from the curve’s fixed point G; Verify rearranges the equation to compute R.",
+          "claims": [
+            "final-scheme",
+            "verify-steps",
+            "vectors-reproduced"
+          ],
+          "layout": "prose"
+        }
+      ]
     },
     {
-     "type": "paragraph",
-     "text": "Nor does BIP 340 by itself provide a multisignature protocol. The key may belong to one person or be an aggregate of several. Schemes such as MuSig2, specified separately in BIP 327, let several parties build one key and one signature through an interactive protocol; to a verifier the result looks like any other signature. BIP 340 warns that multisignature schemes are generally insecure with the nonce generation of its default signing algorithm, or with any other deterministic method.",
-     "claims": [
-      "multisig-scope",
-      "verifier-view"
-     ]
+      "id": "checks",
+      "heading": "Eight steps, in order",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 340 writes Verify as a list. First, turn the key into a point: *lift_x* takes the 32 bytes as an x coordinate and returns the curve point with that x and an even y, or fails if the number is too large or no such point exists. Next, read r and s from the signature and fail unless r is below the field size *p* and s is below the curve order *n*.",
+          "claims": [
+            "verify-steps",
+            "lift-x"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Then compute the challenge e, a tagged hash of r, the key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Fail if R is the point at infinity, fail if its y coordinate is odd, and fail if its x coordinate is not r. Success means no step failed.",
+          "claims": [
+            "verify-steps"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Choose a valid vector below, then switch to an invalid one. The verifier stops at the first failure. A key with no curve point fails before hashing; a later failure means the inputs passed those earlier checks.",
+          "claims": [
+            "verify-steps",
+            "vectors-reproduced"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.4",
+          "recipe": "schnorr-verification.v1",
+          "title": "Verify, gate by gate",
+          "fixtures": [
+            "bip340-v1",
+            "bip340-v15",
+            "bip340-v17",
+            "bip340-v5",
+            "bip340-v14",
+            "bip340-v12",
+            "bip340-v13",
+            "bip340-v9",
+            "bip340-v6",
+            "bip340-v7",
+            "bip340-v8",
+            "bip340-v11"
+          ],
+          "caption": "Twelve published vectors, three valid and nine invalid. On a valid vector, swapping in another fixture’s message keeps the key and signature but changes e, so the recomputed R no longer fits.",
+          "claims": [
+            "verify-steps",
+            "vectors-reproduced",
+            "message-swap",
+            "comment-vs-stage"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "Try the verifier’s message control on a valid vector. The key and signature stay the same, but another message changes e, which changes R. For every valid vector in the figure, that is enough to fail, at either the even-y check or the x comparison. Nothing in the verifier knows which message was “meant”; it only checks the one it is given.",
+          "claims": [
+            "message-swap",
+            "verify-steps"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.5",
+          "recipe": "schnorr-fail-gates.v1",
+          "title": "Compare where the failures occur",
+          "fixtures": [
+            "bip340-v1",
+            "bip340-v15",
+            "bip340-v17",
+            "bip340-v5",
+            "bip340-v14",
+            "bip340-v12",
+            "bip340-v13",
+            "bip340-v9",
+            "bip340-v6",
+            "bip340-v7",
+            "bip340-v8",
+            "bip340-v11"
+          ],
+          "caption": "Each row follows a different published vector. The cross marks the first failed check; later checks are never reached.",
+          "claims": [
+            "comment-vs-stage",
+            "vectors-reproduced",
+            "verify-steps"
+          ],
+          "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "Why a vector’s comment can differ from its failure stage",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Each vector in the CSV carries a short comment. These describe how a failing vector was built, not necessarily which check catches it. Vector 7 is labelled “negated message”, yet it never reaches the comparison of x(R) with r: the R it produces has an odd y coordinate, so it fails one step earlier. Vectors 8 and 11 do reach that comparison, and fail there. Reading the BIP’s algorithm and watching it run are two different kinds of evidence, and this page shows both.",
+              "claims": [
+                "comment-vs-stage",
+                "vectors-reproduced"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "This chapter draws no curve. Points on secp256k1 are pairs of integers modulo a 256-bit prime, and the smooth curves of textbook pictures are drawn over real numbers. Every value in the figures is computed, not illustrated.",
+          "claims": [
+            "curve-arithmetic"
+          ]
+        }
+      ]
     },
     {
-     "type": "paragraph",
-     "text": "Signing is the one part this page leaves alone. The BIP specifies a default signer, but signatures are not unique: other ways of generating its random value produce different, equally valid signatures, and however that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
-     "claims": [
-      "not-unique",
-      "correctness",
-      "reference-demo",
-      "vectors-reproduced"
-     ]
+      "id": "challenge",
+      "heading": "What the challenge binds together",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The challenge e is where the message enters. BIP 340 hashes it with a *tagged hash*: SHA-256 of the tag’s own SHA-256 written twice, followed by the data. Here the tag is the text BIP0340/challenge. The authors use tags so that a hash computed for one purpose cannot be reinterpreted as a hash for another.",
+          "claims": [
+            "tagged-hash",
+            "tag-rationale"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The data is r, then the public key, then the message. Including the key is called key prefixing, and the authors explain why it matters. Without it, anyone could turn a valid signature for a key P into a valid signature for P + a⋅G, for any tweak a they like. They note this would make signatures insecure for keys made by adding tweaks, as BIP 32’s unhardened derivation and Taproot both do.",
+          "claims": [
+            "key-prefixing",
+            "final-scheme"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The message is hashed whole, whatever its length. Earlier revisions of BIP 340 required exactly 32 bytes, and the changelog records the lifting of that rule in April 2023. The published vectors include valid signatures over messages of 0, 1, 17 and 100 bytes alongside the usual 32. The BIP still recommends pre-hashing large messages for performance, and BIP 341’s transaction signatures do sign a 32-byte digest.",
+          "claims": [
+            "arbitrary-size",
+            "challenge-sizes",
+            "bip341-prehash"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.6",
+          "recipe": "challenge-preimage.v1",
+          "title": "One hash, any message",
+          "fixtures": [
+            "bip340-v15",
+            "bip340-v16",
+            "bip340-v17",
+            "bip340-v1",
+            "bip340-v18"
+          ],
+          "caption": "The challenge input for five valid vectors, to scale: 128 fixed bytes, then the message. A longer message only lengthens the tail.",
+          "claims": [
+            "tagged-hash",
+            "challenge-sizes",
+            "arbitrary-size",
+            "verify-steps"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "details",
+          "summary": "Details: why the signature carries R and not e",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Schnorr signatures come in two forms. One publishes e and s; the other publishes R and s. BIP 340 chose R, which the authors say supports batch verification because no curve operation sits inside a hash. Batch verification checks many signatures together: it always succeeds if every signature is valid, and succeeds with only negligible probability if any is not.",
+              "claims": [
+                "r-variant",
+                "batch"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "xonly",
+      "heading": "Why only x coordinates",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every valid x coordinate on the curve has two possible y values, one even and one odd. BIP 340 removes the ambiguity by rule: the key’s point P and the signature’s point R are always taken to have even y. That is why an x-only key is equivalent to a compressed key beginning with the byte 0x02.",
+          "claims": [
+            "implicit-y",
+            "final-scheme"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The figure below shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security: breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
+          "claims": [
+            "no-security-loss",
+            "two-secret-keys",
+            "lift-x"
+          ]
+        },
+        {
+          "type": "figure",
+          "figure": "A06.7",
+          "recipe": "schnorr-even-y.v1",
+          "title": "One x, two y, one kept",
+          "fixtures": [
+            "bip340-v1",
+            "bip340-v6"
+          ],
+          "caption": "The even y is kept for the key and required of R: vector 6’s R has odd y, so Verify rejects it. The two secret keys are drawn without values.",
+          "claims": [
+            "implicit-y",
+            "lift-x",
+            "two-secret-keys",
+            "verify-steps",
+            "vectors-reproduced"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "details",
+          "summary": "Details: lift_x and the constants",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "lift_x fails if x ≥ p. Otherwise it computes c = x³ + 7 mod p and y = c^((p+1)/4) mod p, fails if y² ≠ c, and returns the point with whichever of y and p − y is even. The field size p and the curve order n are fixed 256-bit constants; the curve is y² = x³ + 7 over the integers modulo p.",
+              "claims": [
+                "lift-x-steps",
+                "curve-arithmetic"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "What a passing check does not say",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A successful Verify establishes one thing: this signature fits this key and this message under BIP 340’s equation. It does not say what the message means, and BIP 340 asks applications to keep contexts apart, so that a signed message from one application is never accepted as something else, such as a transaction. The authors also note that the security of Schnorr signatures implies they are non-malleable, while ECDSA signatures are inherently malleable.",
+          "claims": [
+            "verify-steps",
+            "domain-separation",
+            "non-malleable"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Nor does BIP 340 by itself provide a multisignature protocol. The key may belong to one person or be an aggregate of several. Schemes such as MuSig2, specified separately in BIP 327, let several parties build one key and one signature through an interactive protocol; to a verifier the result looks like any other signature. BIP 340 warns that multisignature schemes are generally insecure with the nonce generation of its default signing algorithm, or with any other deterministic method.",
+          "claims": [
+            "multisig-scope",
+            "verifier-view"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Signing algorithms and the reference implementation",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Signing is the one part this page leaves alone. The BIP specifies a default signer, but signatures are not unique: other ways of generating its random value produce different, equally valid signatures, and however that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
+              "claims": [
+                "not-unique",
+                "correctness",
+                "reference-demo",
+                "vectors-reproduced"
+              ]
+            }
+          ]
+        }
+      ]
     }
-   ]
-  }
- ]
+  ]
 }

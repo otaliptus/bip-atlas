@@ -7,56 +7,61 @@
   ],
   "specimenLabel": "BIPs 0009 · 0008",
   "title": "How does a soft fork switch on?",
-  "dek": "Miners mark blocks with a bit; nodes count the marks in fixed windows of 2,016 blocks. A count crossing a threshold locks a change in, and only a period later do its rules apply.",
+  "dek": "A bit in a block can signal readiness. New rules take effect only after a deployment has counted enough signals, waited, and reached activation.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A soft fork tightens the rules in a backward-compatible way. Once it is active, blocks that older software would accept can be rejected, so everyone needs to know from which block the new rules apply. BIP 9, assigned in 2015 and recorded as deployed, is the mechanism that told them for the csv and segwit soft forks. BIP 8, assigned in 2017 and now recorded as complete, is an alternative that counts in block heights and can force the outcome.",
+        "text": "A miner sets a bit in a block header. That block still follows the old rules. So does the next one. A soft fork needs a separate agreement about when nodes will begin rejecting blocks that break the new rules.",
         "claims": [
-          "preambles",
-          "assignments",
-          "bip8-abstract",
-          "abstract"
+          "abstract",
+          "states",
+          "signal-lockedin",
+          "lockin-active"
         ]
       },
       {
         "type": "paragraph",
-        "text": "Both read the same field: the version number at the top of every block header. BIP 9 stops treating it as a number and reads it as a row of bits, each of which can track one proposed change, so several deployments can run at the same time.",
+        "text": "BIP 9 supplies that agreement: count signals over a period, lock in the change if enough blocks signal, then wait another period before enforcing it. BIP 8 changes the clock and adds an option to require signalling at the deadline. In either case, signalling by miners does not measure how many users have upgraded their nodes.",
         "claims": [
-          "abstract"
+          "abstract",
+          "threshold",
+          "lockin-active",
+          "bip8-abstract",
+          "bip8-must-signal",
+          "signalling-not-consent"
         ]
       }
     ],
     "figure": {
       "type": "figure",
       "figure": "A11.1",
-      "recipe": "versionbits-field.v1",
-      "title": "One bit per deployment",
+      "recipe": "versionbits-record.v1",
+      "title": "The block where the rules change",
       "fixtures": [
         "bip9-csv",
         "bip9-segwit"
       ],
-      "caption": "A hypothetical version that would signal for both recorded deployments at once: the top three bits must be 001, and the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
+      "caption": "CSV and SegWit each passed through a counting period and a waiting period. Only the ACTIVE side enforces the new rules. The activation heights are recorded in BIP 9; the preceding periods are inferred from its rules.",
       "claims": [
-        "top-bits",
-        "29-bits",
-        "assignments"
+        "assignments",
+        "crosscheck",
+        "implied"
       ],
-      "layout": "prose"
+      "layout": "wide"
     }
   },
   "sections": [
     {
       "id": "why",
-      "heading": "Why bits",
+      "heading": "What a signal contains",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Before BIP 9, soft forks were signalled by raising the version number. BIP 9’s authors list the problems with that: only one change could be rolled out at once, a proposal could never be rejected for good, and every upgrade permanently ruled out some version values.",
+          "text": "Before BIP 9, a soft fork raised the block version number. Several upgrades could not run independently, a failed attempt used up a version, and the old mechanism allowed only a small number of upgrades. BIP 9’s authors wanted separate signals for separate deployments.",
           "claims": [
             "bip34-problem"
           ]
@@ -72,50 +77,55 @@
         {
           "type": "figure",
           "figure": "A11.2",
-          "recipe": "versionbits-top-bits.v1",
-          "title": "Eight drawers, one for signalling",
-          "fixtures": [],
-          "caption": "The top three bits split the version space into eight ranges. Only 001 signals; 010 and 011 are kept for two future mechanisms.",
+          "recipe": "versionbits-field.v1",
+          "title": "One bit per deployment",
+          "fixtures": [
+            "bip9-csv",
+            "bip9-segwit"
+          ],
+          "caption": "A hypothetical version that would signal for both recorded deployments at once: the top three bits must be 001, and the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
           "claims": [
             "top-bits",
-            "29-bits"
+            "29-bits",
+            "assignments"
           ],
           "layout": "prose"
         },
         {
           "type": "paragraph",
-          "text": "Each deployment names its bit, from 0 to 28, a starttime and a timeout. BIP 9 suggests a start about a month after a release that includes the change, and a timeout one year later. The timeout is what lets a bit be reused: in the authors’ words, a new use of a bit then clearly refers to a new BIP.",
+          "text": "Each deployment gets a bit and a window in which that bit counts. Setting it outside that window does not turn the rules on. A bit can eventually be reused, but the authors recommend a pause so old software does not mistake the next deployment for the previous one.",
           "claims": [
             "params",
-            "guidelines",
-            "timeout-why"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Reuse is allowed but not encouraged. A later deployment may take a bit once the previous one has timed out or activated, and BIP 9 recommends a pause in between. The authors give that fallow period two jobs: it helps detect buggy clients, and it leaves time for warnings and upgrades after a soft fork succeeds.",
-          "claims": [
             "bit-reuse"
           ]
         },
         {
-          "type": "figure",
-          "figure": "A11.3",
-          "recipe": "versionbits-bit-reuse.v1",
-          "title": "Reusing a bit",
-          "fixtures": [],
-          "caption": "Schematic: a later deployment may take the bit only after the earlier one has timed out or activated, ideally after a pause.",
-          "claims": [
-            "bit-reuse",
-            "timeout-why"
-          ],
-          "layout": "prose"
+          "type": "details",
+          "summary": "Choosing and reusing a deployment bit",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Each deployment names its bit, from 0 to 28, a starttime and a timeout. BIP 9 suggests a start about a month after a release that includes the change, and a timeout one year later. The timeout is what lets a bit be reused: in the authors’ words, a new use of a bit then clearly refers to a new BIP.",
+              "claims": [
+                "params",
+                "guidelines",
+                "timeout-why"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Reuse is allowed but not encouraged. A later deployment may take a bit once the previous one has timed out or activated, and BIP 9 recommends a pause in between. The authors give that fallow period two jobs: it helps detect buggy clients, and it leaves time for warnings and upgrades after a soft fork succeeds.",
+              "claims": [
+                "bit-reuse"
+              ]
+            }
+          ]
         }
       ]
     },
     {
       "id": "machine",
-      "heading": "Five states, counted in periods",
+      "heading": "Count, wait, enforce",
       "blocks": [
         {
           "type": "paragraph",
@@ -142,14 +152,14 @@
         },
         {
           "type": "figure",
-          "figure": "A11.4",
+          "figure": "A11.3",
           "recipe": "versionbits-threshold.v1",
-          "title": "How many blocks must signal",
+          "title": "How close is enough?",
           "fixtures": [
             "bip9-csv",
             "bip8-guidelines"
           ],
-          "caption": "One period of 2,016 blocks, to scale. The higher the threshold, the fewer non-signalling blocks it takes to stop a lock-in.",
+          "caption": "A single block can separate reaching the threshold from waiting another period. The thresholds belong to the specified deployment rules.",
           "claims": [
             "threshold",
             "bip8-guidelines",
@@ -159,31 +169,23 @@
         },
         {
           "type": "paragraph",
-          "text": "The order matters because bits are shared over time. If counting came first, the authors explain, two deployments on the same bit could collide: an old one locking in while a new one starts, both demanding that miners set the bit. Checking the timeout first rules that out.",
+          "text": "Once LOCKED_IN, the deployment waits exactly one period. No further tally can undo it. The next period is ACTIVE, and upgraded nodes enforce the new rules. Miners should keep signalling during the wait so uptake remains visible.",
           "claims": [
-            "precedence-why",
-            "threshold"
+            "lockin-active",
+            "signal-lockedin"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Explore the alternatives below: enough signals, one short, or a deadline reached first. BIP 9 checks the timeout before the count, so even a full period of signals cannot rescue an attempt whose timeout has arrived.",
+          "claims": [
+            "threshold",
+            "precedence-why"
           ]
         },
         {
           "type": "figure",
-          "figure": "A11.5",
-          "recipe": "versionbits-boundary.v1",
-          "title": "At a period boundary",
-          "fixtures": [
-            "bip9-csv"
-          ],
-          "caption": "Three trains at the same junction, routed by the tested model with csv’s parameters; the counts are hypothetical. At or past the timeout, even a full count fails.",
-          "claims": [
-            "threshold",
-            "precedence-why",
-            "mtp-clock"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "figure",
-          "figure": "A11.6",
+          "figure": "A11.4",
           "recipe": "versionbits-state-machine.v1",
           "title": "From signalling to rules",
           "fixtures": [
@@ -191,7 +193,7 @@
             "bip9-segwit",
             "bip8-guidelines"
           ],
-          "caption": "The tested state machine over a schematic run of periods. Choose a deployment, step through the boundaries, and set whether a counted period reaches the threshold. The counts are hypothetical.",
+          "caption": "A schematic run of periods. Choose a deployment, step through the boundaries, and set whether a counted period reaches the threshold. The counts are hypothetical.",
           "claims": [
             "states",
             "threshold",
@@ -205,32 +207,6 @@
           "layout": "wide"
         },
         {
-          "type": "paragraph",
-          "text": "Then nothing is counted for one period. LOCKED_IN lasts exactly one period, after which the deployment becomes ACTIVE automatically, and only ACTIVE blocks enforce the new rules. Miners are asked to keep setting the bit while locked in, so that uptake stays visible, but that has no effect on the rules.",
-          "claims": [
-            "lockin-active",
-            "signal-lockedin"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A11.7",
-          "recipe": "versionbits-lifecycle.v1",
-          "title": "csv, from parameters to rules",
-          "fixtures": [
-            "bip9-csv"
-          ],
-          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9’s rules. The count that locked it in is not recorded; BIP 9’s rules imply at least 1,916.",
-          "claims": [
-            "assignments",
-            "implied",
-            "lockin-active",
-            "signal-lockedin",
-            "threshold"
-          ],
-          "layout": "prose"
-        },
-        {
           "type": "callout",
           "label": "Caveat",
           "text": "Signalling is not activation. A STARTED or LOCKED_IN deployment changes no rule; only ACTIVE blocks enforce it, at least one full period after the count that locked it in. (BIP 8’s MUST_SIGNAL period is the one exception: there, a block that fails to signal can itself be invalid.)",
@@ -242,85 +218,89 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "Nodes that have not upgraded still notice. BIP 9 has software track unexpected bits as an unknown upgrade, and says it should warn loudly when one locks in.",
-          "claims": [
-            "warning"
+          "type": "details",
+          "summary": "Why the timeout wins, and how unknown upgrades are noticed",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The order matters because bits are shared over time. If counting came first, the authors explain, two deployments on the same bit could collide: an old one locking in while a new one starts, both demanding that miners set the bit. Checking the timeout first rules that out.",
+              "claims": [
+                "precedence-why",
+                "threshold"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Nodes that have not upgraded still notice. BIP 9 has software track unexpected bits as an unknown upgrade, and says it should warn loudly when one locks in.",
+              "claims": [
+                "warning"
+              ]
+            }
           ]
         }
       ]
     },
     {
       "id": "record",
-      "heading": "What the table records",
+      "heading": "Reading the historical record",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 9 keeps a small table of deployments. It records csv, the bundle of BIPs 68, 112 and 113, on bit 0 with a mainnet window from 1 May 2016 to 1 May 2017, and segwit on bit 1 from 15 November 2016 to 15 November 2017. The dates match the Unix times written in the deployment sections of BIP 68 and BIP 141, and this site’s build fails if they ever disagree.",
+          "text": "The opening diagram uses CSV and SegWit, the deployments listed in BIP 9. Their recorded activation heights let us work backward to the waiting and counting periods. They do not tell us the exact count of signalling blocks; the diagram shows only the threshold that must have been met.",
           "claims": [
             "assignments",
-            "crosscheck"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A11.8",
-          "recipe": "versionbits-record.v1",
-          "title": "Reading back from an activation height",
-          "fixtures": [
-            "bip9-csv",
-            "bip9-segwit"
-          ],
-          "caption": "The two deployments in BIP 9’s table: each mainnet window matches the Unix times in its own BIP, and each activation height implies the two periods before it.",
-          "claims": [
-            "assignments",
-            "crosscheck",
-            "implied"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The table records only where each deployment became active: block 419,328 for csv and 481,824 for segwit, both multiples of 2,016. The rules let us read backwards. csv must have been LOCKED_IN from block 417,312, which means blocks 415,296 to 417,311 included at least 1,916 that signalled; segwit was LOCKED_IN from 479,808.",
-          "claims": [
             "implied",
-            "lockin-active",
-            "threshold"
+            "threshold",
+            "lockin-active"
           ]
         },
         {
-          "type": "paragraph",
-          "text": "Those dates are history, not a schedule. A deployment’s parameters describe one attempt at one time; the table’s states say how each attempt ended.",
-          "claims": [
-            "assignments",
-            "bip8-history"
+          "type": "details",
+          "summary": "Deployment dates, heights and source checks",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 9 keeps a small table of deployments. It records csv, the bundle of BIPs 68, 112 and 113, on bit 0 with a mainnet window from 1 May 2016 to 1 May 2017, and segwit on bit 1 from 15 November 2016 to 15 November 2017. The dates match the Unix times written in the deployment sections of BIP 68 and BIP 141, and this site’s build fails if they ever disagree.",
+              "claims": [
+                "assignments",
+                "crosscheck"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The table records only where each deployment became active: block 419,328 for csv and 481,824 for segwit, both multiples of 2,016. The rules let us read backwards. csv must have been LOCKED_IN from block 417,312, which means blocks 415,296 to 417,311 included at least 1,916 that signalled; segwit was LOCKED_IN from 479,808.",
+              "claims": [
+                "implied",
+                "lockin-active",
+                "threshold"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Those dates are history, not a schedule. A deployment’s parameters describe one attempt at one time; the table’s states say how each attempt ended.",
+              "claims": [
+                "assignments",
+                "bip8-history"
+              ]
+            }
           ]
         }
       ]
     },
     {
       "id": "bip8",
-      "heading": "Heights and a forced ending",
+      "heading": "What happens if the deadline arrives?",
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 8 sets out to correct what its authors call perceived mistakes in BIP 9. Among them: a near-unanimous hashrate threshold lets a small minority of non-signalling miners veto a change, and timestamps meant a sudden loss of hashrate could interfere with a late activation. Block times are unreliable, and triggering at the first retarget after a date is non-intuitive. Heights, they argue, are more reliable, since each block adds exactly one.",
+          "text": "BIP 8’s authors wanted to limit miners’ ability to delay a change and avoid a schedule tied to block timestamps. Their proposal uses block heights for the start and deadline. It also allows a minimum activation height, so a change can lock in without taking effect too soon.",
           "claims": [
             "bip8-why"
           ]
         },
         {
           "type": "paragraph",
-          "text": "So a BIP 8 deployment counts in heights: startheight and timeoutheight, both on retarget boundaries and at least 4,032 blocks apart. Its suggested threshold is lower, 1,815 blocks or 90 percent, and its suggested window is probably at least a year, 52,416 blocks. A minimum activation height can hold a locked-in deployment back so that nodes have time to upgrade; set to 0, LOCKED_IN lasts one period, as in BIP 9.",
-          "claims": [
-            "bip8-params",
-            "bip8-guidelines",
-            "bip8-min-activation"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The new part is lockinontimeout. Without it, a deployment that never reaches the threshold fails at the timeout. With it, the last period before the timeout becomes MUST_SIGNAL: once 2,016 minus the threshold blocks in it have failed to signal, any further block that fails to signal is invalid, and the deployment locks in regardless.",
+          "text": "The choice is lockinontimeout. Turn it off and an attempt without enough signals fails at the deadline. Turn it on and the final period becomes MUST_SIGNAL: once the permitted number of non-signalling blocks has been used, further non-signalling blocks are invalid. That forces the count needed for lock-in.",
           "claims": [
             "bip8-must-signal",
             "bip8-fail"
@@ -328,7 +308,7 @@
         },
         {
           "type": "figure",
-          "figure": "A11.9",
+          "figure": "A11.5",
           "recipe": "versionbits-bip8.v1",
           "title": "Two endings for a stalled deployment",
           "fixtures": [
@@ -345,25 +325,57 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 8 is candid about the cost. Nodes that set lockinontimeout may follow a lower-work chain than nodes that do not, for an extended period, and may need to connect preferentially to each other to avoid a split. The BIP suggests the flag for soft forks facing political opposition from a non-negligible share of miners.",
+          "text": "The choice can split nodes onto different chains. BIP 8 warns that nodes requiring lock-in may follow a lower-work chain than nodes that do not, potentially for an extended period. Its authors suggest this option for changes facing political opposition from a significant share of miners.",
           "claims": [
             "bip8-split",
             "bip8-guidelines"
           ]
         },
         {
-          "type": "paragraph",
-          "text": "One distinction runs through both proposals. Signalling counts blocks, which measures mining; it does not show that users or their nodes have adopted the rules. BIP 8’s motivation draws the same line: hash-power activation enforces new rules in lieu of full nodes upgrading, while all consensus rules are ultimately enforced by full nodes.",
-          "claims": [
-            "signalling-not-consent"
+          "type": "details",
+          "summary": "BIP 8 parameters and deployment history",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "So a BIP 8 deployment counts in heights: startheight and timeoutheight, both on retarget boundaries and at least 4,032 blocks apart. Its suggested threshold is lower, 1,815 blocks or 90 percent, and its suggested window is probably at least a year, 52,416 blocks. A minimum activation height can hold a locked-in deployment back so that nodes have time to upgrade; set to 0, LOCKED_IN lasts one period, as in BIP 9.",
+              "claims": [
+                "bip8-params",
+                "bip8-guidelines",
+                "bip8-min-activation"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The new part is lockinontimeout. Without it, a deployment that never reaches the threshold fails at the timeout. With it, the last period before the timeout becomes MUST_SIGNAL: once 2,016 minus the threshold blocks in it have failed to signal, any further block that fails to signal is invalid, and the deployment locks in regardless.",
+              "claims": [
+                "bip8-must-signal",
+                "bip8-fail"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 8’s own history is in its changelog: rejected after a three-year timeout in 2020, revised with MUST_SIGNAL and a minimum activation height, and advanced to complete in 2026. Its pinned assignments file lists no deployments.",
+              "claims": [
+                "bip8-history",
+                "bip8-empty"
+              ]
+            }
           ]
         },
         {
-          "type": "paragraph",
-          "text": "BIP 8’s own history is in its changelog: rejected after a three-year timeout in 2020, revised with MUST_SIGNAL and a minimum activation height, and advanced to complete in 2026. Its pinned assignments file lists no deployments.",
-          "claims": [
-            "bip8-history",
-            "bip8-empty"
+          "type": "details",
+          "summary": "Proposal dates and status in the pinned sources",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A soft fork tightens the rules in a backward-compatible way. Once it is active, blocks that older software would accept can be rejected, so everyone needs to know from which block the new rules apply. BIP 9, assigned in 2015 and recorded as deployed, is the mechanism that told them for the csv and segwit soft forks. BIP 8, assigned in 2017 and now recorded as complete, is an alternative that counts in block heights and can force the outcome.",
+              "claims": [
+                "preambles",
+                "assignments",
+                "bip8-abstract",
+                "abstract"
+              ]
+            }
           ]
         }
       ]

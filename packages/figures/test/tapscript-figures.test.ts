@@ -70,19 +70,19 @@ const figure = (recipe: string) => [chapter.opening.figure, ...figures].find((f:
 const all = (recipe: string) => figure(recipe).fixtures.map(derived);
 
 describe("tapscript figures: placement", () => {
-  it("numbers ten figures in reading order and keeps the hero", () => {
-    expect([chapter.opening.figure, ...figures].map((f: any) => f.figure)).toEqual(["A08.1", "A08.2", "A08.3", "A08.4", "A08.5", "A08.6", "A08.7", "A08.8", "A08.9", "A08.10"]);
-    expect(figure("tapscript-trace.v1").figure).toBe("A08.6");
+  it("numbers seven figures in reading order and keeps the hero", () => {
+    expect([chapter.opening.figure, ...figures].map((f: any) => f.figure)).toEqual(["A08.1", "A08.2", "A08.3", "A08.4", "A08.5", "A08.6", "A08.7"]);
+    expect(figure("tapscript-trace.v1").figure).toBe("A08.4");
   });
   it("states the case numbers its captions name", () => {
-    expect(figure("tapscript-stack-story.v1").fixtures).toEqual(["core-case-1109"]);
-    expect(figure("tapscript-stack-story.v1").caption).toContain("Core case 1109");
+    expect(figure("tapscript-multisig.v1").fixtures).toEqual(["core-case-804"]);
+    expect(figure("tapscript-multisig.v1").caption).toContain("symbolic threshold policy");
     expect(figure("tapscript-minimalif.v1").caption).toContain("Core case 662");
     expect(figure("tapscript-op-success.v1").caption).toContain("Core case 50");
   });
 });
 
-describe("A08.1 witness", () => {
+describe("A08.2 witness", () => {
   const d = derived("core-case-1135");
   const s = html(h(TapscriptWitness, { fixture: d }));
   it("draws each item and sends the last two to BIP 341", () => {
@@ -96,9 +96,9 @@ describe("A08.1 witness", () => {
   });
 });
 
-describe("A08.2 order", () => {
+describe("retained order recipe", () => {
   it("ends each witness at the gate its recorded verdict names", () => {
-    const s = html(h(TapscriptOrder, { fixtures: all("tapscript-order.v1") }));
+    const s = html(h(TapscriptOrder, { fixtures: all("tapscript-trace.v1") }));
     expect(s).toContain('data-case="50" data-witness="success" data-end="op-success-3"');
     expect(s).toContain('data-case="50" data-witness="failure" data-end="fail-6"');
     expect(s).toContain('data-case="1135" data-witness="success" data-end="valid-6"');
@@ -121,7 +121,7 @@ describe("A08.3 signature rules", () => {
   });
 });
 
-describe("A08.4 multisig", () => {
+describe("A08.1 multisig", () => {
   it("shows case 804's failure stopping at CHECKMULTISIG", () => {
     const s = html(h(MultisigChain, { fixture: derived("core-case-804") }));
     expect(s).toContain("AFTER 5 OPCODES");
@@ -131,7 +131,7 @@ describe("A08.4 multisig", () => {
   });
 });
 
-describe("A08.5 stack storyboard", () => {
+describe("retained stack storyboard recipe", () => {
   const d = derived("core-case-1109");
   const s = html(h(StackStory, { fixture: d }));
   it("has one frame per opcode plus the start, and the budget after the signature", () => {
@@ -142,10 +142,10 @@ describe("A08.5 stack storyboard", () => {
   });
 });
 
-describe("A08.6 hero (no-JS render)", () => {
+describe("A08.4 hero (no-JS render)", () => {
   const fx = all("tapscript-trace.v1");
   it("plays the first case to the end with its verdict", () => {
-    const s = html(h(TapscriptTrace, { fixtures: fx, figureId: "fig-a08-6" }));
+    const s = html(h(TapscriptTrace, { fixtures: fx, figureId: "fig-a08-4" }));
     expect(s).toContain('data-hydrated="false"');
     expect(s).toContain("Bitcoin Core labels this witness valid; the recording agrees.");
     expect(s).toContain('data-state="on"');
@@ -158,7 +158,7 @@ describe("A08.6 hero (no-JS render)", () => {
   });
 });
 
-describe("A08.7 and A08.8 budget", () => {
+describe("A08.5 signature cost and retained budget recipe", () => {
   it("adds 65 bytes for a 64-byte signature against a cost of 50, and 1 for an empty one", () => {
     const s = html(h(SigPays, { fixtures: all("tapscript-sig-pays.v1") }));
     expect(s).toContain("+65 WITNESS BYTES");
@@ -167,13 +167,13 @@ describe("A08.7 and A08.8 budget", () => {
     expect(s).toContain("+1 WITNESS BYTES");
   });
   it("draws each success witness's budget as 50 + witness size", () => {
-    const fx = all("sigops-budget.v1");
+    const fx = all("tapscript-sig-pays.v1");
     const s = html(h(SigopsBudget, { fixtures: fx }));
     for (const f of fx) expect(s).toContain(f.derived.success.opSuccess ? "NO BUDGET IN FORCE" : `${BUDGET_BASE} + ${f.derived.success.witness.totalBytes} = ${f.derived.success.budgetStart}`);
   });
 });
 
-describe("A08.9 OP_SUCCESS and A08.10 MINIMALIF", () => {
+describe("A08.6 OP_SUCCESS and A08.7 MINIMALIF", () => {
   it("case 50: OP_SUCCESS126 is valid without running; OP_NOP leaves nothing", () => {
     const d = derived("core-case-50");
     expect(d.derived.success.opSuccess).toBe("OP_SUCCESS126");

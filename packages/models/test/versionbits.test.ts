@@ -175,7 +175,7 @@ describe("version-bits chapter prose numbers", () => {
   it("thresholds and windows", () => {
     expect(text).toContain("At least 1,916 of them, 95 percent");
     expect(text).toContain("on testnet the threshold was 1,512");
-    expect(text).toContain("fixed windows of 2,016 blocks");
+    expect(text).toContain("boundaries of 2,016-block retarget periods");
     expect(text).toContain("at least 4,032 blocks apart");
     expect(text).toContain("1,815 blocks or 90 percent");
     expect(text).toContain("at least a year, 52,416 blocks");

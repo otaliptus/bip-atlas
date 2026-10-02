@@ -1,6 +1,6 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 2 October 2026, at the end of the illustration rollout (PRs #9 and #10 merged, then the closing PR). If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 2 October 2026, after the editorial and figure revisions. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
@@ -21,7 +21,8 @@ Last updated: 2 October 2026, at the end of the illustration rollout (PRs #9 and
     | `v2-transport` | 324 |
     | `message-signing` | 322 |
 
-  - Each chapter has had one independent technical review. The fixes were applied and recorded in `review/` (`phase-three.md` covers the new ten). Every `reviewState` is `in-review`: no human has signed off any chapter yet.
+  - Each chapter had an independent technical review before the editorial revisions. The fourteen revised chapters are now `draft-unreviewed`, pending a fresh review; Mnemonics, Addresses, SegWit and Timelocks remain `in-review`. No chapter is marked approved.
+  - **Editorial revisions:** fourteen chapters have tighter prose and fewer repeated figures. Detailed rules remain in disclosures, and all evidence claims remain cited. Records and screenshots: `review/editorial-four-chapters.md`, `review/editorial-descriptors.md`, and `review/editorial-nine-chapters.md`. These author and automated checks do not replace an independent technical review.
 - **Phase-three sources:**
   - Snapshot: `sources/research-2026-10-01-phase3`, the same `bitcoin/bips` commit, including each BIP's auxiliary vector files.
   - External pinned files: `sources/external/` holds Bitcoin Core v29.0 locktime cases (an excerpt; `tools/extract-locktime-cases.mjs` rebuilds it).
@@ -41,7 +42,7 @@ Last updated: 2 October 2026, at the end of the illustration rollout (PRs #9 and
   - The kit is `packages/figures/src/kit/`; its placement CSS and palette tokens are in `atlas.css`. All 153 recipes are `drawing: true`.
   - Records: `review/illustration-pilot-*.md` (Mnemonics, Taproot) and `review/illustration-batch1.md` … `batch4.md`, each with figure tables and an independent review.
   - The worked-example tabs are gone (`packages/figures/src/worked/`, the tab code in `Plate.astro`, the `slot="worked"` block in `Figure.astro`, and their CSS). Their content lives on as static storyboard figures.
-  - `content/figure-policy.json`: 1 hero plus 3–12 static figures per chapter (every chapter has 6–9).
+  - `content/figure-policy.json`: 1 hero plus 3–12 static figures per chapter. Editorial revisions reduced the chapter-specific counts; `content/reading-policy.json` records their shorter prose targets.
   - Two layered-hero patterns exist side by side: batch 1's `StateHero.tsx` + `heroLayers.ts` (a small Preact island that shows server-rendered layers) and batch 2's `heroStates.ts` + `HeroStates.astro` (every state pre-rendered, switched by an inline script, no island).
 - **Live:** https://bip-atlas.pages.dev serves `main`. `_headers` sends `X-Robots-Tag: noindex` until a chapter is signed off.
 

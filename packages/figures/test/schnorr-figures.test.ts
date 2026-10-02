@@ -62,9 +62,9 @@ const t1 = verifyTrace(v1.publicKeyHex, v1.messageHex, v1.signatureHex);
 const val = (stage: string, k: string) => t1.steps.find((s) => s.stage === stage)!.values[k];
 
 describe("schnorr figures: placement", () => {
-  it("numbers the eight figures in reading order, all drawn in the kit style", () => {
-    expect(figures.map((f) => f.figure)).toEqual(["A06.1", "A06.2", "A06.3", "A06.4", "A06.5", "A06.6", "A06.7", "A06.8"]);
-    expect(figure("schnorr-verification.v1").figure).toBe("A06.5");
+  it("numbers the seven figures in reading order, all drawn in the kit style", () => {
+    expect(figures.map((f) => f.figure)).toEqual(["A06.1", "A06.2", "A06.3", "A06.4", "A06.5", "A06.6", "A06.7"]);
+    expect(figure("schnorr-verification.v1").figure).toBe("A06.4");
   });
 });
 

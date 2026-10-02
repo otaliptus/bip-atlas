@@ -8,7 +8,7 @@
   "title": "How can a script hide behind a hash?",
   "dek": "A pay-to-script-hash output commits to a 20-byte hash. The conditions behind it stay off chain until someone spends the coin, and then they have to match exactly.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
@@ -90,7 +90,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The responsibility BIP 16 moves is real. The sender needs only the 20 bytes. The receiver must keep the full script, because no spend is possible without supplying it exactly: the scriptSig has to carry the very bytes that hash to the output’s value, and they then have to run successfully.",
+          "text": "The receiver must keep the full redeem script. Knowing its hash is enough to receive a payment, but spending requires the exact script bytes and data that make the script succeed.",
           "claims": [
             "motivation",
             "scriptsig-form",
@@ -98,11 +98,17 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and Fig. A09.1 recomputes it for a real spend and compares it with the output byte for byte.",
-          "claims": [
-            "template",
-            "spends-verified"
+          "type": "details",
+          "summary": "How the script is hashed",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The 20 bytes are the HASH160 of the script. This site’s model computes it as RIPEMD-160 of SHA-256, and Fig. A09.1 recomputes it for a real spend and compares it with the output byte for byte.",
+              "claims": [
+                "template",
+                "spends-verified"
+              ]
+            }
           ]
         }
       ]
@@ -126,22 +132,6 @@
           ]
         },
         {
-          "type": "figure",
-          "figure": "A09.3",
-          "recipe": "p2sh-stack-story.v1",
-          "title": "The stack, step by step",
-          "fixtures": [
-            "bip174-legacy"
-          ],
-          "caption": "The legacy 2-of-2 spend as the model recorded it: the same pushed bytes hashed once as data, then run as a program.",
-          "claims": [
-            "rules",
-            "multisig-order",
-            "spends-verified"
-          ],
-          "layout": "prose"
-        },
-        {
           "type": "paragraph",
           "text": "Step through the three published spends below. In the legacy 2-of-2, the redeem script is a CHECKMULTISIG over two keys, and each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
           "claims": [
@@ -151,7 +141,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.4",
+          "figure": "A09.3",
           "recipe": "p2sh-two-stage.v1",
           "title": "One push, two evaluations",
           "fixtures": [
@@ -179,7 +169,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.5",
+          "figure": "A09.4",
           "recipe": "p2sh-failures.v1",
           "title": "Three ways to fail",
           "fixtures": [
@@ -234,7 +224,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.6",
+          "figure": "A09.5",
           "recipe": "p2sh-wrapped.v1",
           "title": "Where the signatures live",
           "fixtures": [
@@ -270,7 +260,7 @@
     },
     {
       "id": "limits",
-      "heading": "Limits and history",
+      "heading": "What fits inside the wrapper",
       "blocks": [
         {
           "type": "paragraph",
@@ -281,7 +271,7 @@
         },
         {
           "type": "figure",
-          "figure": "A09.7",
+          "figure": "A09.6",
           "recipe": "p2sh-limit.v1",
           "title": "Why fifteen keys",
           "fixtures": [
@@ -303,29 +293,41 @@
           ]
         },
         {
-          "type": "paragraph",
-          "text": "The rest is history the BIP records. It replaced an earlier proposal, BIP 12’s OP_EVAL, and the author describes recognizing one special output form as ugly, but less so than the alternatives. Its rollout asked miners to mark their blocks with /P2SH/, and its rules were to apply to blocks timestamped from 1 April 2012; some earlier transactions in the chain fail them. Old nodes, the BIP notes, check only that the hash matches, which is why it also discusses a costly one-confirmation attack against them.",
-          "claims": [
-            "replaces-eval",
-            "activation",
-            "old-nodes",
-            "one-conf-attack"
+          "type": "details",
+          "summary": "The original rollout and the dates recorded in BIP 16",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The rest is history the BIP records. It replaced an earlier proposal, BIP 12’s OP_EVAL, and the author describes recognizing one special output form as ugly, but less so than the alternatives. Its rollout asked miners to mark their blocks with /P2SH/, and its rules were to apply to blocks timestamped from 1 April 2012; some earlier transactions in the chain fail them. Old nodes, the BIP notes, check only that the hash matches, which is why it also discusses a costly one-confirmation attack against them.",
+              "claims": [
+                "replaces-eval",
+                "activation",
+                "old-nodes",
+                "one-conf-attack"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The rollout plan in the text is concrete. To avoid a lasting split, more than half of miners had to switch to the new rules at once. On 1 February 2012 the previous week’s blocks would be counted: with 550 or more of roughly 1,000 carrying /P2SH/, full validation would start for blocks after 15 February. The rule section, as recorded, names 1 April 2012 instead; the BIP keeps both dates, and this chapter does not try to reconcile them. To old software, meanwhile, these spends were non-standard: it would typically neither relay nor mine them.",
+              "claims": [
+                "rollout",
+                "activation",
+                "old-nonstandard"
+              ]
+            }
           ]
         },
         {
-          "type": "paragraph",
-          "text": "The rollout plan in the text is concrete. To avoid a lasting split, more than half of miners had to switch to the new rules at once. On 1 February 2012 the previous week’s blocks would be counted: with 550 or more of roughly 1,000 carrying /P2SH/, full validation would start for blocks after 15 February. The rule section, as recorded, names 1 April 2012 instead; the BIP keeps both dates, and this chapter does not try to reconcile them. To old software, meanwhile, these spends were non-standard: it would typically neither relay nor mine them.",
-          "claims": [
-            "rollout",
-            "activation",
-            "old-nonstandard"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "One more distinction matters. BIP 16 says spends are only standard, meaning relayed and mined by default, if the redeem script is itself one of the standard script types. That was relay policy as BIP 16 states it, separate from the three validation rules that decide whether a block containing the spend is valid.",
-          "claims": [
-            "standard-only"
+          "type": "details",
+          "summary": "Relay policy versus validation",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "One more distinction matters. BIP 16 says spends are only standard, meaning relayed and mined by default, if the redeem script is itself one of the standard script types. That was relay policy as BIP 16 states it, separate from the three validation rules that decide whether a block containing the spend is valid.",
+              "claims": [
+                "standard-only"
+              ]
+            }
           ]
         }
       ]

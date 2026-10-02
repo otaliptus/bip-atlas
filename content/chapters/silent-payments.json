@@ -6,28 +6,27 @@
  ],
  "specimenLabel": "BIP 0352",
  "title": "Can you receive without handing out an address?",
- "dek": "Silent payments let a receiver publish one static address while every payment lands on a fresh taproot output. The price is that the receiver has to scan transactions to find them.",
+ "dek": "Publish an address once. Receive at fresh outputs. Your wallet does the work of finding which payments belong to you.",
  "authorship": "hand-authored",
- "reviewState": "in-review",
+ "reviewState": "draft-unreviewed",
  "sourceSnapshot": "sources/research-2026-10-01-phase3",
  "opening": {
   "blocks": [
    {
     "type": "paragraph",
-    "text": "Paying the same address again and again ties every payment together. The usual remedy, a fresh address for each payment, means the receiver has to hand each sender something new: an address, a batch of addresses, or an xpub. BIP 352, assigned in 2023 and recorded as Complete, specifies another arrangement: a static address the receiver can publish once, without on-chain notifications and, in the BIP’s words, without on-chain linkability of payments.",
+    "text": "An address is easy to put on a website and awkward to keep using. When every payment goes to that same address, an observer can group the payments together. Giving each sender a fresh address avoids that pattern, but now you have to supply addresses whenever someone wants to pay.",
     "claims": [
-     "interaction",
-     "preamble",
-     "abstract"
+     "interaction"
     ]
    },
    {
     "type": "paragraph",
-    "text": "The address is long: 116 characters for version 0 on mainnet, always starting sp1q. Inside are two public keys of 33 bytes each, a scan key and a (possibly labeled) spend key. A sender never pays to either of them. It pays to a new taproot key computed from those two keys and from the inputs of its own transaction.",
+    "text": "Silent payments let you publish a reusable address while senders pay to fresh Taproot outputs. The address gives them what they need to calculate those outputs. Your wallet can calculate them too, using its scanning key and information in each transaction. That is how it finds your money without a separate notification.",
     "claims": [
-     "address-format",
-     "version",
+     "abstract",
+     "derive",
      "scan-spend",
+     "cost-scan",
      "taproot-only"
     ]
    }
@@ -36,15 +35,18 @@
    "type": "figure",
    "figure": "A15.1",
    "recipe": "sp-address.v1",
-   "title": "Inside an sp1 address",
+   "title": "One address to publish; a payment to find",
    "fixtures": [
     "sp-case-0"
    ],
-   "caption": "The address from BIP 352’s first test vector, character by character: the prefix, the separator, the version character, the data carrying two public keys, and the checksum.",
+   "caption": "The public address helps the sender create a payment. The receiver uses its private scan key to recognise the resulting output.",
    "claims": [
     "address-format",
-    "version",
-    "address-computed"
+    "address-computed",
+    "scan-spend",
+    "derive",
+    "scan-loop",
+    "vectors"
    ],
    "layout": "prose"
   }
@@ -52,11 +54,18 @@
  "sections": [
   {
    "id": "secret",
-   "heading": "A secret two parties can compute",
+   "heading": "Meet at the same secret",
    "blocks": [
     {
      "type": "paragraph",
-     "text": "The idea is elliptic-curve Diffie–Hellman. If Alice holds the private key a for public key A, and Bob holds b for B, then a·B and b·A are the same point. In BIP 352’s simple case, Alice pays Bob at P = B + hash(a·B)·G. Bob sees A in Alice’s transaction, computes hash(b·A) himself, and looks for P among the outputs. Under the usual Diffie–Hellman assumption, anyone without a or b cannot compute that hash, so cannot connect P to B.",
+     "text": "Begin with a simpler version of the idea. Alice wants to pay Bob. She has a private key and Bob’s public key; Bob has his private key and can see Alice’s public key in her transaction. Each combines the private key they hold with the public key of the other person.",
+     "claims": [
+      "ecdh"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Elliptic-curve Diffie–Hellman makes those two calculations reach the same point. Alice and Bob arrive there from different directions. Someone watching with only the public keys cannot perform the same calculation under the usual Diffie–Hellman assumption. The secret is computed at each end, rather than sent between them.",
      "claims": [
       "ecdh",
       "goals"
@@ -66,11 +75,11 @@
      "type": "figure",
      "figure": "A15.2",
      "recipe": "sp-ecdh.v1",
-     "title": "A secret two parties can compute",
+     "title": "Different keys, the same destination",
      "fixtures": [
       "sp-case-0"
      ],
-     "caption": "The simple case, in symbols only: Alice and Bob reach the same point S, and an observer who sees A, B and P cannot.",
+     "caption": "The simplified exchange: Alice computes a·B, Bob computes b·A, and both reach S.",
      "claims": [
       "ecdh",
       "goals"
@@ -79,53 +88,254 @@
     },
     {
      "type": "paragraph",
-     "text": "The full protocol adds three refinements. Alice uses all her eligible inputs at once: a is the sum of their private keys and A the sum of their public keys. She multiplies by an input hash, a tagged hash of the smallest outpoint in the transaction and A, so that a second payment from the same keys does not land on the same output. And Bob’s address carries two keys: B_scan for finding payments and B_spend for spending them, so the scanning key can sit on an online machine while the spending key stays in cold storage.",
+     "text": "Alice hashes that shared point and uses the result to tweak Bob’s public key. The tweaked key is where she pays. Bob can repeat the calculation and look for that key among the transaction’s outputs. Finding a match tells him which output to spend, and he can apply the corresponding tweak to his private spending key.",
      "claims": [
-      "sum-inputs",
-      "input-hash",
-      "scan-spend"
+      "ecdh",
+      "derive",
+      "spend-key"
      ]
     },
     {
      "type": "paragraph",
-     "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G (B_m in place of B_spend for a labeled address), starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
+     "text": "An observer sees the transaction too. What they lack is the private information needed to reproduce the shared secret and connect that output to Bob’s address. The output itself is an ordinary Taproot output. The authors want silent payments to blend in with other transactions, without extra on-chain notification data.",
      "claims": [
-      "derive",
+      "abstract",
+      "goals",
+      "taproot-only"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "The simple-case equation",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "The idea is elliptic-curve Diffie–Hellman. If Alice holds the private key a for public key A, and Bob holds b for B, then a·B and b·A are the same point. In BIP 352’s simple case, Alice pays Bob at P = B + hash(a·B)·G. Bob sees A in Alice’s transaction, computes hash(b·A) himself, and looks for P among the outputs. Under the usual Diffie–Hellman assumption, anyone without a or b cannot compute that hash, so cannot connect P to B.",
+       "claims": [
+        "ecdh",
+        "goals"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "scanning",
+   "heading": "Bob has to look",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "There is no public tag saying “for Bob.” His wallet has to inspect transactions that could contain silent payments and try the calculation. That work moves to the receiver so that the sender can pay without first asking for a new address.",
+     "claims": [
+      "scan-conditions",
+      "scan-loop",
+      "cost-scan",
+      "interaction"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "A payment may include several outputs for the same receiver. The calculation therefore includes a counter. Bob starts with P₀. If that output is present, he tries P₁, then keeps going until the first missing output. In the example below, two outputs match and the next does not.",
+     "claims": [
       "multi-output",
-      "spend-key"
+      "scan-loop",
+      "vectors"
      ]
     },
     {
      "type": "figure",
      "figure": "A15.3",
-     "recipe": "sp-derive-story.v1",
-     "title": "One payment, step by step",
+     "recipe": "sp-scan-loop.v1",
+     "title": "Find a match, then try the next",
      "fixtures": [
-      "sp-case-0"
+      "sp-case-10"
      ],
-     "caption": "BIP 352’s first send-and-receive vector, frame by frame. No secret key is drawn; the exact values are listed under the frames.",
+     "caption": "P₀ and P₁ are present. P₂ is absent, so this search stops.",
      "claims": [
-      "derive",
-      "sum-inputs",
-      "input-hash",
       "scan-loop",
+      "multi-output",
+      "all-outputs",
       "vectors"
      ],
      "layout": "prose"
     },
     {
      "type": "paragraph",
-     "text": "Each output is an ordinary BIP 341 taproot output. Among the authors’ stated goals are no increase in the size or cost of transactions, transactions that blend in with other bitcoin transactions, and no way for an outside observer to link them to a silent payment address.",
+     "text": "Stopping at a gap has a consequence for the sender. Every generated output MUST appear in the finished transaction. If the sender removed P₁ but kept P₂, Bob would stop at the missing P₁ and never discover the later payment. Output discovery depends on this shared ordering.",
      "claims": [
-      "taproot-only",
-      "goals"
+      "all-outputs",
+      "scan-loop"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Scanning is also the main cost of the design. BIP 352’s authors describe it as generally feasible for full nodes and challenging for light clients. Their appendix explores ways a light client might use extra transaction data and block filters, but that discussion is outside the specification.",
+     "claims": [
+      "cost-scan",
+      "light-clients"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Which transactions to scan and when to stop",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Nothing on chain tells Bob a payment has arrived. For silent payments v0, a transaction MUST be scanned if and only if it has at least one taproot output, at least one eligible input, and spends no output with a SegWit version above 1. For each such transaction Bob sums the input keys, computes the input hash and the shared secret, and checks the taproot outputs for P_0.",
+       "claims": [
+        "scan-conditions",
+        "derive",
+        "cost-scan",
+        "scan-loop"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "If P_0 is there, he checks for P_1, and so on; at the first one not found, he stops. These extra checks happen only after a match, so the authors call the added cost negligible. Since version 1.1.0 the search is also capped: a sender fails if any group of recipient addresses sharing one scan key is larger than K_max = 2323, and a receiver stops at k = 2323, which the changelog says mitigates quadratic scanning on adversarial transactions.",
+       "claims": [
+        "multi-output",
+        "kmax",
+        "scan-loop",
+        "negligible"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "address",
+   "heading": "Two keys with different jobs",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "The full address carries two public keys. One is the scan key, which helps find incoming payments. The other is the spend key, which controls spending. Their private counterparts can be kept in different places: scanning can happen online while the spending key remains in cold storage.",
+     "claims": [
+      "scan-spend",
+      "address-format"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "This separation matters during ordinary use. A wallet needs to keep checking for receipts; it need not bring the spending key online every time it does so. A scanning setup has private information of its own, but that information does not by itself give it the spending key.",
+     "claims": [
+      "scan-spend",
+      "spend-key"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The address is a set of public instructions for deriving outputs, rather than the output key of a particular coin. For version 0 on mainnet it is 116 characters long and starts sp1q. The two compressed public keys account for 66 bytes inside it. The address uses Bech32m to encode them and detect errors.",
+     "claims": [
+      "address-format",
+      "version",
+      "address-computed"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Labels let Bob distinguish receipts while continuing to scan with the same key. A labeled address changes the spending side and keeps the scan key. That is convenient bookkeeping, but anyone comparing those addresses can see their shared scan key and tell that they belong together.",
+     "claims": [
+      "labels",
+      "labels-linkable"
      ]
     },
     {
      "type": "figure",
      "figure": "A15.4",
+     "recipe": "sp-labels.v1",
+     "title": "Different labels, the same receiver",
+     "fixtures": [
+      "sp-case-12"
+     ],
+     "caption": "The shared scan key links these published addresses. Labels distinguish receipts; they do not create separate identities.",
+     "claims": [
+      "labels",
+      "labels-linkable",
+      "vectors"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "details",
+     "summary": "Matching labels and recovering change",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Labels let Bob tell payments apart without scanning for several addresses. He publishes (B_scan, B_m), where B_m = B_spend + hash(b_scan ‖ m)·G. When an output does not match P_k directly, he subtracts P_k and checks whether the difference is one of his label points; if not, he negates the output and tries again, because an x-only output does not say which y it had. Label m = 0 is reserved for change: the BIP stresses that a wallet never hands it out, and says every receiving wallet should at least scan for it when recovering from backup.",
+       "claims": [
+        "labels",
+        "negate-output",
+        "change-label",
+        "change-scan"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "inputs",
+   "heading": "Make each payment depend on its transaction",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "The simple Alice-and-Bob exchange leaves out a practical detail: a transaction can have several inputs. The full protocol adds together the keys from all eligible inputs before computing the shared secret. Sender and receiver must choose exactly the same keys, or they will calculate different destinations.",
+     "claims": [
+      "sum-inputs",
+      "input-list",
+      "derive"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "An additional hash ties the calculation to the smallest outpoint and the combined input public key. That makes the destination depend on which coins are being spent, so paying again from the same keys does not simply reuse the previous output. The receiver can recover this input information from the transaction.",
+     "claims": [
+      "input-hash",
+      "where-keys"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Only certain input types provide the needed keys in a suitable form. A multi-key or conditional script may leave ambiguity about which keys should count. BIP 352 excludes those cases from the shared-secret calculation and requires at least one eligible input. Funding a payment and contributing a key to its calculation are distinct jobs.",
+     "claims": [
+      "excluded-multi",
+      "input-list",
+      "select-inputs"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A15.5",
+     "recipe": "sp-input-eligibility.v1",
+     "title": "Which inputs contribute a key?",
+     "fixtures": [
+      "sp-eligibility"
+     ],
+     "caption": "Some inputs can help fund the transaction without contributing to the shared secret. The marks show which keys enter the calculation.",
+     "claims": [
+      "eligibility-vectors",
+      "input-list",
+      "compressed-only",
+      "nums"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "The interactive example brings those pieces together. Follow the sender’s calculation, then switch to the receiver. Finally inspect the observer’s view. Both participants can recognise the payment; the public transaction alone does not provide the secret used to connect it to the address.",
+     "claims": [
+      "derive",
+      "vectors",
+      "goals"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A15.6",
      "recipe": "silent-payment-derivation.v1",
-     "title": "One payment, seen from each side",
+     "title": "The same payment, three viewpoints",
      "fixtures": [
       "sp-case-0",
       "sp-case-9",
@@ -134,7 +344,7 @@
       "sp-case-19",
       "sp-case-23"
      ],
-     "caption": "Six of BIP 352’s send-and-receive vectors, recomputed by the tested model. The sender’s outputs, the receiver’s shared secret and the outputs the receiver finds all equal the published values.",
+     "caption": "Switch between sender, receiver and observer. Each view shows only the information available on that side.",
      "claims": [
       "vectors",
       "derive",
@@ -146,177 +356,107 @@
       "goals"
      ],
      "layout": "wide"
-    }
-   ]
-  },
-  {
-   "id": "inputs",
-   "heading": "Which inputs count",
-   "blocks": [
+    },
     {
-     "type": "paragraph",
-     "text": "Not every input contributes to the secret. Any UTXO with a known output script can fund the transaction (though the sender leaves out outputs with a SegWit version above 1), but sender and receiver MUST derive the shared secret only from inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH. For each, the receiver has to find the public key in what the transaction reveals: the last witness item for the two P2WPKH forms, the scriptSig for P2PKH, and the taproot output key itself for P2TR.",
-     "claims": [
-      "input-list",
-      "where-keys",
-      "exclude-v2"
+     "type": "details",
+     "summary": "The full derivation, including the counter",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G (B_m in place of B_spend for a labeled address), starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
+       "claims": [
+        "derive",
+        "multi-output",
+        "spend-key"
+       ]
+      }
      ]
     },
     {
-     "type": "paragraph",
-     "text": "Inputs with conditional branches or several keys, such as CHECKMULTISIG, are left out; the BIP explains that they would let a participant in a collaborative transaction re-sign with different keys after the output was derived. Only compressed and x-only keys count, so an input that reveals an uncompressed key is skipped. A taproot script-path spend still counts, through its output key: the sender MUST hold that key’s private key or leave the input out, unless the internal key is the NUMS point H from BIP 341, in which case the input is skipped.",
-     "claims": [
-      "excluded-multi",
-      "compressed-only",
-      "where-keys",
-      "nums",
-      "taproot-key-required"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Two details keep sender and receiver in step. A taproot key is x-only, and the receiver assumes the even-y point when it sums the keys, so the sender negates any taproot private key whose point has odd y. And for P2PKH, the receiver MUST parse the scriptSig for the key even when it does not match the usual template, because a third party can malleate a P2PKH scriptSig.",
-     "claims": [
-      "taproot-negate",
-      "p2pkh-malleated"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A15.5",
-     "recipe": "sp-input-eligibility.v1",
-     "title": "Inputs that count, inputs that do not",
-     "fixtures": [
-      "sp-eligibility"
-     ],
-     "caption": "The inputs of five published vectors, read by the tested model: which contribute a key, and why the others are skipped.",
-     "claims": [
-      "eligibility-vectors",
-      "input-list",
-      "compressed-only",
-      "nums"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "paragraph",
-     "text": "A transaction with no eligible input has no secret at all, so a sender’s coin selection MUST include at least one.",
-     "claims": [
-      "select-inputs"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "scanning",
-   "heading": "The receiver has to look",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "Nothing on chain tells Bob a payment has arrived. For silent payments v0, a transaction MUST be scanned if and only if it has at least one taproot output, at least one eligible input, and spends no output with a SegWit version above 1. For each such transaction Bob sums the input keys, computes the input hash and the shared secret, and checks the taproot outputs for P_0.",
-     "claims": [
-      "scan-conditions",
-      "derive",
-      "cost-scan",
-      "scan-loop"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "If P_0 is there, he checks for P_1, and so on; at the first one not found, he stops. These extra checks happen only after a match, so the authors call the added cost negligible. Since version 1.1.0 the search is also capped: a sender fails if any group of recipient addresses sharing one scan key is larger than K_max = 2323, and a receiver stops at k = 2323, which the changelog says mitigates quadratic scanning on adversarial transactions.",
-     "claims": [
-      "multi-output",
-      "kmax",
-      "scan-loop",
-      "negligible"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A15.6",
-     "recipe": "sp-scan-loop.v1",
-     "title": "Scanning until the first miss",
-     "fixtures": [
-      "sp-case-10"
-     ],
-     "caption": "The vector with two outputs to one receiver: P₀ and P₁ are found, P₂ is not, and the scan stops. Below, schematically, why every generated output has to be in the transaction.",
-     "claims": [
-      "scan-loop",
-      "multi-output",
-      "all-outputs",
-      "vectors"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "paragraph",
-     "text": "Labels let Bob tell payments apart without scanning for several addresses. He publishes (B_scan, B_m), where B_m = B_spend + hash(b_scan ‖ m)·G. When an output does not match P_k directly, he subtracts P_k and checks whether the difference is one of his label points; if not, he negates the output and tries again, because an x-only output does not say which y it had. Label m = 0 is reserved for change: the BIP stresses that a wallet never hands it out, and says every receiving wallet should at least scan for it when recovering from backup.",
-     "claims": [
-      "labels",
-      "negate-output",
-      "change-label",
-      "change-scan"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The scanning cost is real. The authors note that it is generally feasible for full nodes but poses a challenge for light clients, and they treat light-client support as open research. An appendix, outside the specification, sketches how a light client might fetch per-transaction tweak data and check BIP 158 block filters.",
-     "claims": [
-      "cost-scan",
-      "light-clients"
+     "type": "details",
+     "summary": "Input eligibility and signing rules",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Not every input contributes to the secret. Any UTXO with a known output script can fund the transaction (though the sender leaves out outputs with a SegWit version above 1), but sender and receiver MUST derive the shared secret only from inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH. For each, the receiver has to find the public key in what the transaction reveals: the last witness item for the two P2WPKH forms, the scriptSig for P2PKH, and the taproot output key itself for P2TR.",
+       "claims": [
+        "input-list",
+        "where-keys",
+        "exclude-v2"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Inputs with conditional branches or several keys, such as CHECKMULTISIG, are left out; the BIP explains that they would let a participant in a collaborative transaction re-sign with different keys after the output was derived. Only compressed and x-only keys count, so an input that reveals an uncompressed key is skipped. A taproot script-path spend still counts, through its output key: the sender MUST hold that key’s private key or leave the input out, unless the internal key is the NUMS point H from BIP 341, in which case the input is skipped.",
+       "claims": [
+        "excluded-multi",
+        "compressed-only",
+        "where-keys",
+        "nums",
+        "taproot-key-required"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Two details keep sender and receiver in step. A taproot key is x-only, and the receiver assumes the even-y point when it sums the keys, so the sender negates any taproot private key whose point has odd y. And for P2PKH, the receiver MUST parse the scriptSig for the key even when it does not match the usual template, because a third party can malleate a P2PKH scriptSig.",
+       "claims": [
+        "taproot-negate",
+        "p2pkh-malleated"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "A transaction with no eligible input has no secret at all, so a sender’s coin selection MUST include at least one.",
+       "claims": [
+        "select-inputs"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The sender has rules of its own. It should sign with DEFAULT, ALL, SINGLE or NONE; the BIP calls ANYONECANPAY unsafe. And every output it generated MUST appear in the final transaction: if P_1 were dropped, the receiver, stopping at the first gap, would never find P_2.",
+       "claims": [
+        "anyonecanpay",
+        "all-outputs"
+       ]
+      }
      ]
     }
    ]
   },
   {
    "id": "limits",
-   "heading": "What it does not hide",
+   "heading": "What you still have to look after",
    "blocks": [
     {
      "type": "paragraph",
-     "text": "The authors’ goal is that outside observers cannot link a transaction to a silent payment address. Even so, the scheme does not hide everything. Every labeled address shares the same B_scan, so anyone can tell that they belong to one receiver; the BIP says labels are not a way to manage separate identities.",
+     "text": "Reusing the public address removes one source of on-chain links. It does not make every surrounding choice private. Labeled addresses can still be grouped together, and the authors advise that a transaction’s inputs belong to one entity: they do not claim a formal security proof for collaborative use.",
      "claims": [
       "labels-linkable",
+      "collaborative",
       "goals"
      ]
     },
     {
-     "type": "figure",
-     "figure": "A15.7",
-     "recipe": "sp-labels.v1",
-     "title": "Labels share the scan key",
-     "fixtures": [
-      "sp-case-12"
-     ],
-     "caption": "A receiver’s unlabeled address and three labeled ones, from a published vector. Their opening characters encode the same B_scan, so anyone comparing them can tell they belong together.",
+     "type": "paragraph",
+     "text": "Backups need thought as well. A wallet restored from its seed can rebuild its history by scanning from its birthday. Because outputs are derived individually, the BIP also recommends regular backups. The convenience of a permanent receiving address comes with a wallet that must remember how to search.",
      "claims": [
-      "labels",
-      "labels-linkable",
-      "vectors"
-     ],
-     "layout": "prose"
-    },
-    {
-     "type": "callout",
-     "label": "Caveat",
-     "text": "The design keeps CoinJoins and multi-party keys in mind, but the authors recommend that all inputs of a transaction belong to the same entity, because there is no formal proof the protocol is secure in a collaborative setting.",
-     "claims": [
-      "collaborative"
+      "backup",
+      "cost-scan"
      ]
     },
     {
-     "type": "paragraph",
-     "text": "The sender has rules of its own. It should sign with DEFAULT, ALL, SINGLE or NONE; the BIP calls ANYONECANPAY unsafe. And every output it generated MUST appear in the final transaction: if P_1 were dropped, the receiver, stopping at the first gap, would never find P_2.",
-     "claims": [
-      "anyonecanpay",
-      "all-outputs"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Recovery needs scanning too. Each output is derived on its own, so the BIP recommends regular backups, and a wallet restored from its seed alone has to scan the chain from its birthday to rebuild its full history.",
-     "claims": [
-      "backup"
+     "type": "details",
+     "summary": "Source notes",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "BIP 352 was assigned in 2023 and is recorded as Complete in the pinned source. The examples use its published send-and-receive vectors. The receiver’s scanning rule includes a bound, K_max = 2323, added in version 1.1.0.",
+       "claims": [
+        "preamble",
+        "vectors",
+        "kmax"
+       ]
+      }
      ]
     }
    ]

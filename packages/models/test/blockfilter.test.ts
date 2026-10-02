@@ -148,7 +148,9 @@ describe("block-filters chapter prose numbers", () => {
   it("figure facts", () => {
     const fx = JSON.parse(readFileSync(new URL("fixtures/block-filters.json", root), "utf8")).fixtures;
     expect(fx.filter((f: { kind: string }) => f.kind === "bf-block").length).toBe(6);
-    expect(text).toContain("Six of BIP 158’s testnet blocks");
+    const chapter = JSON.parse(text);
+    const hero = chapter.sections.flatMap((s: any) => s.blocks).find((b: any) => b.recipe === "gcs-filter.v1");
+    expect(hero.fixtures).toEqual(fx.filter((f: { kind: string }) => f.kind === "bf-block").map((f: { id: string }) => f.id));
     expect(build(0).header).toBe(rows[0][6]);
   });
 });

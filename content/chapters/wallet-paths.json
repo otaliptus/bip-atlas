@@ -10,7 +10,7 @@
   "title": "Where in the tree do wallet keys live?",
   "dek": "BIP 32 can derive an endless tree of keys from one seed. BIP 44 says which branches a wallet should use, and BIPs 84 and 86 say what each branch pays to.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
   "opening": {
     "blocks": [
@@ -109,29 +109,18 @@
           "layout": "prose"
         },
         {
-          "type": "paragraph",
-          "text": "BIP 44’s own examples make the pattern concrete. Its table lists 16 paths: the first and second address on the external and change chains, for the first and second account, on Bitcoin and on testnet. The first Bitcoin receiving address of the first account is m/44′/0′/0′/0/0; its first change address is m/44′/0′/0′/1/0.",
-          "claims": [
-            "examples",
-            "change"
+          "type": "details",
+          "summary": "Two paths from BIP 44’s example table",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 44’s own examples make the pattern concrete. Its table lists 16 paths: the first and second address on the external and change chains, for the first and second account, on Bitcoin and on testnet. The first Bitcoin receiving address of the first account is m/44′/0′/0′/0/0; its first change address is m/44′/0′/0′/1/0.",
+              "claims": [
+                "examples",
+                "change"
+              ]
+            }
           ]
-        },
-        {
-          "type": "figure",
-          "figure": "A12.3",
-          "recipe": "wallet-path-examples.v1",
-          "title": "BIP 44’s examples, as a tree",
-          "fixtures": [
-            "bip44-paths"
-          ],
-          "caption": "All the paths in BIP 44’s examples table: two coins, two accounts, two chains, two addresses. The two paths named above are drawn heavy.",
-          "claims": [
-            "examples",
-            "coin-type",
-            "account",
-            "change"
-          ],
-          "layout": "prose"
         }
       ]
     },
@@ -141,14 +130,14 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
+          "text": "Follow the same mnemonic down a BIP 84 or BIP 86 path below. Both proposals publish the root, account and address values. The explorer lets you see where the paths share a structure and where their keys differ.",
           "claims": [
             "vectors"
           ]
         },
         {
           "type": "figure",
-          "figure": "A12.4",
+          "figure": "A12.3",
           "recipe": "wallet-path-walk.v1",
           "title": "One level at a time",
           "fixtures": [
@@ -183,7 +172,7 @@
         },
         {
           "type": "figure",
-          "figure": "A12.5",
+          "figure": "A12.4",
           "recipe": "wallet-xpub-reach.v1",
           "title": "What one account xpub reaches",
           "fixtures": [
@@ -208,22 +197,7 @@
         },
         {
           "type": "figure",
-          "figure": "A12.6",
-          "recipe": "wallet-p2tr-story.v1",
-          "title": "From key to Taproot address",
-          "fixtures": [
-            "bip86-vectors"
-          ],
-          "caption": "BIP 86’s first receiving path, from the derived key to the address. Every value matches BIP 86’s published vector.",
-          "claims": [
-            "b86",
-            "vectors"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "figure",
-          "figure": "A12.7",
+          "figure": "A12.5",
           "recipe": "wallet-spend-layouts.v1",
           "title": "What a spend carries",
           "fixtures": [],
@@ -241,6 +215,19 @@
             "xpub-exposure",
             "change",
             "index"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Published values behind the explorer",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths below. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
+              "claims": [
+                "vectors"
+              ]
+            }
           ]
         }
       ]
@@ -275,15 +262,15 @@
         },
         {
           "type": "figure",
-          "figure": "A12.8",
+          "figure": "A12.6",
           "recipe": "wallet-path-schemes.v1",
-          "title": "Same shape, three purposes",
+          "title": "One seed, three different destinations",
           "fixtures": [
             "bip44-paths",
             "bip84-vectors",
             "bip86-vectors"
           ],
-          "caption": "The same levels under three purposes. Only the purpose and the output each BIP builds differ; because the purpose is hardened, every key below it is unrelated to the others.",
+          "caption": "Changing the hardened purpose changes every key below it. BIP 84 and BIP 86 also specify how to turn their keys into output scripts; BIP 44 itself does not.",
           "claims": [
             "script-by-purpose",
             "b84",
@@ -304,25 +291,12 @@
         },
         {
           "type": "paragraph",
-          "text": "Its motivation is candid about why fixed paths still matter. Many wallets and hardware signers keep only a seed backup, without the derivation path or script type, so a fixed path makes single-key Taproot outputs likely to be recovered. The author notes that there are now solutions that avoid fixed paths, and largely reuses the approach of BIPs 49 and 84 for ease of implementation.",
+          "text": "These conventions make recovery possible when a backup preserves only the seed. The wallet still needs to try the right paths and output types. They all use BIP 32 derivation; each convention tells the wallet where to look and, for BIPs 84 and 86, what to build from the keys it finds.",
           "claims": [
-            "b86-why"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The purpose also keeps the schemes apart. The same mnemonic produces unrelated keys under 44′, 84′ and 86′, and the three build different kinds of output. What ties a key to a script is the BIP that defines the purpose, not anything in the key itself.",
-          "claims": [
-            "same-seed",
-            "script-by-purpose"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "No new derivation was needed. BIP 86 points out that it uses the same method as BIPs 44, 49 and 84, so it should not be difficult to implement, and BIP 84 leaves further version bytes to SLIP-0132. A wallet that already walks BIP 44’s tree keeps the walk and changes the purpose at the top and the output it builds at the bottom.",
-          "claims": [
+            "b86-why",
             "easy",
-            "script-by-purpose"
+            "script-by-purpose",
+            "same-seed"
           ]
         }
       ]

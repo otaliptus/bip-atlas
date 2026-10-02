@@ -63,6 +63,7 @@ import {
   DescriptorChecksum,
   DescriptorIndex,
   DescriptorSentence,
+  DescriptorOutputs,
   DescriptorNesting,
   DescriptorTemplate,
   DescriptorSpellings,
@@ -403,6 +404,7 @@ const tlSpec = figure.recipe === "timelock-fields.v1" ? timelockHeroSpec(timeloc
   )}
   {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
   {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
+  {figure.recipe === "descriptor-outputs.v1" && <DescriptorOutputs fixture={desc[0]} />}
   {figure.recipe === "descriptor-sentence.v1" && <DescriptorSentence fixture={desc[0]} />}
   {figure.recipe === "descriptor-nesting.v1" && <DescriptorNesting fixture={desc[0]} />}
   {figure.recipe === "descriptor-template.v1" && <DescriptorTemplate fixture={desc[0]} />}

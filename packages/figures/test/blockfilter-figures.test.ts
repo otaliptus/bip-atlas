@@ -194,10 +194,14 @@ describe("block-filter hero", () => {
 describe("block-filter captions", () => {
   const text = readFileSync(new URL("content/chapters/block-filters.json", root), "utf8");
   it("states only model numbers", () => {
-    expect(text).toContain("here the 25-byte filter of testnet block 926,485");
+    const directions = html(h(BfDirections, { fixture: b926 }));
+    expect(directions).toContain("25 bytes");
+    expect(directions).toContain("926,485");
     expect(text).toContain("Testnet block 926,485 touches 18 scripts");
     expect(text).toContain("9 distinct scripts remain");
-    expect(text).toContain("built from its three scripts");
+    const chapter = JSON.parse(text);
+    const buildStory = chapter.sections.flatMap((s: any) => s.blocks).find((b: any) => b.recipe === "bf-build-story.v1");
+    expect(buildStory.fixtures).toEqual([b1263.id]);
     expect([b926.derived.filterBytes, b926.derived.elements.length, b926.derived.N, b1263.derived.N]).toEqual([25, 18, 9, 3]);
   });
 });

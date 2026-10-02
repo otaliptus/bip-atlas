@@ -1,4 +1,4 @@
-import { Arrow, Drawing, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, KeyGlyph, Machine, Value, idsFor } from "../kit";
 import type { DerivedPsbtCombineFixture, DerivedPsbtTraceFixture, PsbtRecordView } from "../types";
 import { MapCard, cardHeight, hex2, mapTitle, shortRole, type CardRow } from "./cards";
 
@@ -11,6 +11,52 @@ const sig = (r: PsbtRecordView) => `${r.scope}/${r.index}/${r.keyType}/${r.keyDa
  * get the published result.
  */
 export function PsbtCombine({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
+  const states = fixture.derived.states;
+  const combined = states.find((s) => s.basedOn.length > 1);
+  if (!combined) throw new Error("psbt-combine: no combiner state");
+  const parts = combined.basedOn.map((id) => states.find((s) => s.id === id)!);
+  const signatures = (s: (typeof states)[number]) => s.maps.find((m) => m.scope === "input" && m.index === 0)!.records.filter((r) => r.keyType === 2);
+  const ids = idsFor("a05-handoff");
+  const document = (x: number, y: number, title: string, from: number[]) => (
+    <g transform={`translate(${x} ${y})`}>
+      <path class="k-outline k-fill--plain" d="M0 0 H100 L118 18 V126 H0 Z" />
+      <path class="k-line" d="M100 0 V18 H118" />
+      <Value at={[10, 31]} text={title} size={10} />
+      <Value at={[10, 48]} text="SAME PAYMENT" size={9} cls="k-value--muted" />
+      <path class="k-leader" d="M10 57 H104 M10 63 H80" />
+      {parts.map((s, k) => (
+        <g data-contribution={s.id} data-present={from.includes(k) ? "true" : "false"}>
+          <rect x="10" y={76 + k * 21} width="98" height="17" rx="3" class={`k-outline ${from.includes(k) ? "k-fill--sig" : "k-fill--plain k-dashed"}`} />
+          <Value at={[17, 88 + k * 21]} text={from.includes(k) ? `${signatures(s).length} SIG · ${shortRole(s.id, s.role).toUpperCase().replace("SIGNER ", "")}` : "AWAITING COPY"} size={9.5} />
+        </g>
+      ))}
+    </g>
+  );
+  return (
+    <>
+      <Drawing id="a05-handoff" width={344} height={370} title="Separate signatures, one transaction" desc={`Both signers receive the same updated PSBT. For input 0, ${parts.map((s) => `${shortRole(s.id, s.role)} adds ${signatures(s).length} partial signature`).join("; ")}. Their private keys stay with the signers. The Combiner merges their documents; input 0 then has ${signatures(combined).length} partial signatures. These are contributions to a PSBT, not a finalized network transaction.`}>
+        <Value at={[172, 15]} text="INPUT 0 · TWO INDEPENDENT COPIES" size={9} anchor="middle" cls="k-value--label" />
+        {parts.map((s, k) => (
+          <g>
+            {document(22 + k * 182, 46, shortRole(s.id, s.role).toUpperCase(), [k])}
+            <KeyGlyph at={[27 + k * 182, 28]} role="secret" scale={0.7} />
+            <Value at={[55 + k * 182, 35]} text="PRIVATE KEY" size={9.5} />
+            <Arrow d={`M${81 + k * 182} 180 V197 H172 V207`} ids={ids} />
+          </g>
+        ))}
+        <Value at={[172, 223]} text="BRING THE COPIES TOGETHER" size={9} anchor="middle" />
+        {document(113, 230, "COMBINED", parts.map((_, k) => k))}
+      </Drawing>
+      <details class="atlas-disclosure">
+        <summary>Inspect the records kept in the merge</summary>
+        <CombineRecords fixture={fixture} />
+      </details>
+    </>
+  );
+}
+
+/** Detailed record view, available after the document handoff is understood. */
+function CombineRecords({ fixture }: { fixture: DerivedPsbtTraceFixture }) {
   const states = fixture.derived.states;
   const comb = states.find((s) => s.basedOn.length > 1);
   if (!comb) throw new Error("psbt-combine: no combiner state");

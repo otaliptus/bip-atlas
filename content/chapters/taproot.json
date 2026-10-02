@@ -6,15 +6,15 @@
  ],
  "specimenLabel": "BIP 0341",
  "title": "How can an output commit to several ways of spending?",
- "dek": "A Taproot output is a single 32-byte key. Behind it can sit a whole tree of alternative scripts, and a spend reveals only the one it uses, along with a proof that it was there all along.",
+ "dek": "A coin can have several spending conditions. Taproot lets a spend reveal just the route it takes, while the unused alternatives stay hidden.",
  "authorship": "hand-authored",
- "reviewState": "in-review",
+ "reviewState": "draft-unreviewed",
  "sourceSnapshot": "sources/research-2026-10-01",
  "opening": {
   "blocks": [
    {
     "type": "paragraph",
-    "text": "Many coins have more than one acceptable way to be spent: the owners all agree, or one of them waits out a timeout, or a backup key steps in. Older Bitcoin outputs either showed one condition or locked all of them behind a single script that had to be published in full when spent.",
+    "text": "Imagine money that its owners can spend together, with a backup route if someone disappears: wait for a timeout, or use another key. Those alternatives are useful to the owners. An observer of the blockchain does not need to learn every one of them each time the money moves.",
     "claims": [
      "motivation",
      "merkle-branches"
@@ -22,106 +22,82 @@
    },
    {
     "type": "paragraph",
-    "text": "BIP 341, assigned in 2020 and building on BIP 340, defines a SegWit version 1 output whose spending rules combine Schnorr signatures, Merkle trees and a trick called Taproot. The BIP records that it activated on mainnet at block 709632. Its authors set out to minimize how much an output reveals about its spending conditions, both when it is created and when it is spent.",
+    "text": "Taproot puts a public key in the output. That key can also commit to a tree of alternative spending scripts. When the owners use the key, they supply a signature. When they use a script, they reveal that script and a proof that it belongs to the commitment. The unused scripts can stay private.",
     "claims": [
-     "preamble",
-     "activation",
      "abstract",
-     "motivation"
+     "informal-design",
+     "key-or-script",
+     "privacy"
     ]
    }
   ],
   "figure": {
    "type": "figure",
    "figure": "A07.1",
-   "recipe": "taproot-tweak.v1",
-   "title": "Internal key in, output key out",
+   "recipe": "taproot-reveals.v1",
+   "title": "What reaches the blockchain",
    "fixtures": [
-    "bip341-spk0",
     "bip341-spk5"
    ],
-   "caption": "Two published vectors. In both, the key that appears in the output is not the internal key: it has been tweaked by a hash. With no scripts, that tweak is the BIP’s recommendation for wallets, not a consensus rule.",
+   "caption": "The same output, spent two ways. A key-path spend reveals no script tree. A script-path spend reveals the chosen script and enough hashes to prove its place.",
    "claims": [
-    "informal-design",
-    "names",
-    "no-script-commit",
-    "vector0",
-    "vectors-reproduced"
+    "privacy",
+    "key-or-script",
+    "key-path-rule"
    ],
-   "layout": "prose"
+   "layout": "wide"
   }
  },
  "sections": [
   {
-   "id": "two-keys",
-   "heading": "Two keys, one output",
+   "id": "reveal",
+   "heading": "Start with what an observer learns",
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Start with an ordinary public key, P, called the internal key. Hash it together with the root of a tree of scripts to get a number t, and add t⋅G to P. The result, Q = P + t⋅G, is the output key. Only Q’s x coordinate goes into the output, as a 32-byte witness program. BIP 341 calls the program q the taproot output key and p the internal key, and they are different numbers.",
+     "text": "The output key is already public before any spend happens. Using the key path adds a signature, with an optional annex discussed below. It does not publish the internal key or the script tree. From that spend alone, an observer cannot tell whether any alternative script existed.",
      "claims": [
-      "informal-design",
-      "tweak-check",
-      "names"
+      "privacy",
+      "key-path-rule",
+      "key-or-script"
      ]
     },
     {
      "type": "paragraph",
-     "text": "A Taproot output is exactly that: a native SegWit output with version 1 and a 32-byte program. Version 1 outputs of other lengths, and version 1 programs wrapped in P2SH, are left unencumbered by these rules. Nodes that never upgraded treat every version 1 program as anyone-can-spend, so these rules are enforced by upgraded nodes.",
+     "text": "This also works with arrangements in which several people jointly control a key. BIP 341’s authors envisioned agreement between all participants as a common route, leaving more complicated conditions for exceptional cases. Key aggregation lets their cooperative signature look like another single-key signature.",
      "claims": [
-      "output-type",
-      "old-nodes"
+      "aggregation",
+      "motivation",
+      "privacy"
      ]
     },
     {
      "type": "paragraph",
-     "text": "Because t depends on the tree, Q commits to the whole tree without showing any of it. Anyone holding the secret key for P can still sign for Q: they add t to their secret key (negated first if P’s y coordinate is odd), and a key path spend is simply a BIP 340 signature with that tweaked key. When no scripts are wanted, the BIP still asks wallets to tweak, hashing P alone, as vector 0 does. The authors explain why: with some ways of sharing one key among several parties, an untweaked output would let one of them slip in a hidden script; MuSig’s aggregation does not have this problem.",
+     "text": "Taking the script path changes the disclosure. Now the script is public, along with a proof connecting it to the output. The proof reveals the script’s depth in the tree. It can include hashes of other branches, but a hash does not tell the observer what the hidden script says.",
      "claims": [
-      "key-spend-signing",
-      "no-script-commit",
-      "vector0"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "tree",
-   "heading": "A tree of scripts",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "Each alternative way to spend is a leaf: a script plus a one-byte leaf version. A leaf’s hash is a tagged hash, TapLeaf, of the version, the script’s length and the script. Pairs of hashes are joined by another tagged hash, TapBranch, all the way up to a single root. Before joining, the two children are sorted, smaller first, so a proof never needs to say which side a hash came from.",
-     "claims": [
-      "informal-design",
+      "privacy",
       "control-contents",
-      "branch-order"
+      "merkle-branches"
      ]
     },
     {
      "type": "paragraph",
-     "text": "The tree can take any shape. BIP 341 suggests a balanced tree when every condition is equally likely, and a Huffman tree, with likely scripts near the top, when the odds are known. These suggestions sit in a section the BIP marks as wallet guidance, not consensus: every output is one internal key plus zero or more scripts, and satisfying any one of them is enough.",
-     "claims": [
-      "tree-shape",
-      "wallet-section"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The figure below shows published vector 5: one internal key and three leaves, with leaf A one level below the root and leaves B and C one level deeper. Switch between the two spending paths, choose a leaf, and then hide everything the spend itself does not reveal.",
+     "text": "That distinction is the point of the interactive tree. First look at everything the wallet knows. Then pick a spending path and switch to the proof view. Watch how much disappears. The two views describe different knowledge about the same output.",
      "claims": [
       "vector5",
-      "vectors-reproduced"
+      "vectors-reproduced",
+      "privacy"
      ]
     },
     {
      "type": "figure",
      "figure": "A07.2",
      "recipe": "taproot-commitment.v1",
-     "title": "One output, several ways to spend",
+     "title": "Choose a path, then hide the rest",
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "BIP 341 vector 5 and the published key-path spend of the same output. A script-path witness carries the script’s inputs, the chosen script and a control block (leaf version and parity, internal key, sibling hashes); the verifier recomputes the rest and compares it with the output key.",
+     "caption": "The wallet knows the whole tree. The blockchain receives only the material needed for the selected spending path.",
      "claims": [
       "informal-design",
       "control-contents",
@@ -136,45 +112,167 @@
    ]
   },
   {
-   "id": "spending",
-   "heading": "Two ways to spend",
+   "id": "tree",
+   "heading": "How a branch can stand for a whole tree",
    "blocks": [
     {
      "type": "paragraph",
-     "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex, a field reserved for future extensions that users SHOULD NOT include until a soft fork defines it. One remaining element means a key path spend; two or more mean a script path spend.",
+     "text": "Each alternative script is a leaf. Hash the leaf’s version and script, including its length, to give it a compact identifier. Hash pairs of identifiers together, then repeat until only a root remains. A change to a script changes the commitment calculated above it.",
      "claims": [
-      "path-choice",
-      "annex"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The key path is a single signature that must be valid for the output key q. The signature names no leaf and reveals nothing about the tree, and the figure’s key-path view shows the published one: 64 bytes, with nothing else in the witness.",
-     "claims": [
-      "key-path-rule",
-      "key-path-verify",
-      "vector5"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "The script path carries more. The second-to-last element is the script, and the last is a control block of 33 + 32m bytes, where m runs from 0 to 128. Its first byte holds the leaf version, with the lowest bit recording whether Q has an even or odd y coordinate. The next 32 bytes are the internal key, followed by m sibling hashes, one per level. In vector 5 that makes 65 bytes for leaf A and 97 for B and C.",
-     "claims": [
-      "script-and-control",
+      "informal-design",
       "control-contents",
+      "branch-order",
+      "merkle-branches"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "To prove that a leaf belongs to this tree, you do not need to supply all the other leaves. Supply a sibling hash at each level instead. Starting with the revealed script, the verifier can hash its way back to the root. A whole hidden subtree can be represented by its one root hash.",
+     "claims": [
+      "merkle-branches",
       "tweak-check",
-      "vector5"
+      "control-contents"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "There is no mandatory tree shape. BIP 341 suggests a balanced tree when the alternatives are equally likely, or a Huffman tree that puts likely scripts nearer the top. Those are wallet-design suggestions. A shallower leaf needs fewer sibling hashes, so its proof takes less space.",
+     "claims": [
+      "tree-shape",
+      "wallet-section",
+      "control-contents"
      ]
     },
     {
      "type": "figure",
      "figure": "A07.3",
-     "recipe": "taproot-witness-stacks.v1",
-     "title": "Two witnesses",
+     "recipe": "taproot-depth.v1",
+     "title": "A deeper leaf needs a longer proof",
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "Count the items after removing any annex: one means the key path, two or more the script path.",
+     "caption": "Each extra level contributes another 32-byte sibling hash.",
+     "claims": [
+      "tree-shape",
+      "control-contents",
+      "privacy"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "The example has leaf A closer to the root than leaves B and C. Choosing A therefore produces a shorter control block. This is a tradeoff the wallet can make before the output is created; it cannot rearrange the tree later while keeping the same commitment.",
+     "claims": [
+      "vector5",
+      "tree-shape",
+      "informal-design",
+      "tweak-check"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "two-keys",
+   "heading": "Where the tree meets the key",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "So far we have a tree root and an ordinary public key. Taproot combines them. The ordinary key is called the internal key, P. A hash of P and the root produces a tweak, t. Adding t⋅G to P gives a new point, Q, whose x coordinate becomes the output’s 32-byte witness program.",
+     "claims": [
+      "informal-design",
+      "tweak-check",
+      "names",
+      "output-type"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A07.4",
+     "recipe": "taproot-tweak.v1",
+     "title": "The tree changes the output key",
+     "fixtures": [
+      "bip341-spk0",
+      "bip341-spk5"
+     ],
+     "caption": "The internal key becomes a different output key after tweaking. The lower example includes a script tree; the upper one has no scripts.",
+     "claims": [
+      "informal-design",
+      "names",
+      "no-script-commit",
+      "vector0",
+      "vectors-reproduced"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "The tree is now tied to the key on the blockchain, even though it was never published. A script-path verifier must reconstruct both the root and the tweaked output key. Producing a plausible-looking tree is not enough: the result must match the particular output being spent.",
+     "claims": [
+      "tweak-check",
+      "informal-design"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The key path remains available because the corresponding private key can be tweaked too. After accounting for the internal point’s y parity, its holder adds the same tweak to the private key and can sign for Q. The public calculation and the signing calculation arrive at the same output key.",
+     "claims": [
+      "key-spend-signing"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Outputs without scripts, older nodes and key aggregation",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "A Taproot output is exactly that: a native SegWit output with version 1 and a 32-byte program. Version 1 outputs of other lengths, and version 1 programs wrapped in P2SH, are left unencumbered by these rules. Nodes that never upgraded treat every version 1 program as anyone-can-spend, so these rules are enforced by upgraded nodes.",
+       "claims": [
+        "output-type",
+        "old-nodes"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "When there are no scripts, BIP 341 recommends that wallets still tweak the internal key, hashing P alone. Its authors warn that some ways of sharing an untweaked key would let a participant add a hidden script. MuSig aggregation avoids that particular problem. The no-script example above follows the wallet recommendation.",
+       "claims": [
+        "no-script-commit",
+        "vector0"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Aggregation is not a matter of adding public keys together by hand: a plain sum is open to key cancellation and related attacks unless something like a proof of possession guards it. BIP 341 points to protocols such as MuSig and leaves their details out of scope, and recommends making the most likely single-key condition the internal key.",
+       "claims": [
+        "internal-key-choice",
+        "naive-sum"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "spending",
+   "heading": "Check the proof, then run the script",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "A script-path witness carries the script’s inputs, the script, and a control block. The block supplies the internal key and the sibling hashes. It also records the leaf version and one bit of information about the output key’s y coordinate. These pieces let the verifier repeat the commitment calculation.",
+     "claims": [
+      "script-and-control",
+      "control-contents",
+      "tweak-check"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A07.5",
+     "recipe": "taproot-witness-stacks.v1",
+     "title": "What the two witnesses carry",
+     "fixtures": [
+      "bip341-spk5"
+     ],
+     "caption": "After removing any annex, one item selects the key path. Two or more select the script path.",
      "claims": [
       "path-choice",
       "key-path-rule",
@@ -186,21 +284,21 @@
     },
     {
      "type": "paragraph",
-     "text": "From those pieces the verifier rebuilds the commitment. It hashes the leaf, folds in each sibling hash in sorted order to reach a root, computes t from the internal key and that root, then Q = P + t⋅G. The spend is accepted only if Q’s x coordinate equals the output key and its y parity matches the control block’s bit. The authors keep that bit so the output key can be lifted to one exact point, which batch verification needs.",
+     "text": "First hash the revealed leaf. Join it to its sibling hash, and keep going up the proof. At each join the hashes are sorted before hashing, so the proof does not need left-or-right directions. Use the reconstructed root and internal key to calculate the tweak and output key.",
      "claims": [
-      "tweak-check",
-      "parity-why"
+      "branch-order",
+      "tweak-check"
      ]
     },
     {
      "type": "figure",
-     "figure": "A07.4",
+     "figure": "A07.6",
      "recipe": "taproot-verifier-story.v1",
-     "title": "Rebuilding the commitment",
+     "title": "Walk the proof back to the output",
      "fixtures": [
       "bip341-spk5"
      ],
-     "caption": "The verifier’s recomputation for leaf B of vector 5, step by step; the exact values are listed under the frames.",
+     "caption": "Follow leaf B upward. Each sibling hash gets the verifier one step closer to the committed root.",
      "claims": [
       "tweak-check",
       "parity-why",
@@ -211,23 +309,42 @@
     },
     {
      "type": "paragraph",
-     "text": "A proof for one leaf proves nothing for another. The tests behind this page take each published control block and try it with a different leaf’s script, with the parity bit flipped and against another vector’s output key: every attempt fails the comparison.",
+     "text": "Both the x coordinate and the parity bit must match. A proof for another script cannot simply be borrowed: changing the script, the parity bit or the expected output breaks the comparison. The parity bit pins down the exact curve point, which the authors need for batch verification.",
      "claims": [
+      "tweak-check",
       "comparison-fails",
-      "vectors-reproduced"
+      "parity-why"
      ]
     },
     {
      "type": "paragraph",
-     "text": "Passing the commitment check only unlocks the next step: the script must then run successfully, with the remaining witness elements as its starting stack. For leaf version 0xc0 those rules are BIP 342’s, the subject of the next chapter.",
+     "text": "Even a correct proof does not make the spend valid on its own. It establishes that this script was committed to. The script must still execute successfully with the remaining witness items as its starting stack. Leaf version 0xc0 uses the Tapscript rules in BIP 342.",
      "claims": [
       "execute"
      ]
     },
     {
      "type": "details",
-     "summary": "Details: byte order and the published vectors",
+     "summary": "Control-block lengths, annexes and byte order",
      "blocks": [
+      {
+       "type": "paragraph",
+       "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex, a field reserved for future extensions that users SHOULD NOT include until a soft fork defines it. One remaining element means a key path spend; two or more mean a script path spend.",
+       "claims": [
+        "path-choice",
+        "annex"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The script path carries more. The second-to-last element is the script, and the last is a control block of 33 + 32m bytes, where m runs from 0 to 128. Its first byte holds the leaf version, with the lowest bit recording whether Q has an even or odd y coordinate. The next 32 bytes are the internal key, followed by m sibling hashes, one per level. In vector 5 that makes 65 bytes for leaf A and 97 for B and C.",
+       "claims": [
+        "script-and-control",
+        "control-contents",
+        "tweak-check",
+        "vector5"
+       ]
+      },
       {
        "type": "paragraph",
        "text": "The wallet vectors write every hash as a byte array, first byte first. That is the opposite of the familiar convention for transaction IDs, which are displayed reversed. This page follows the vectors.",
@@ -247,113 +364,71 @@
    ]
   },
   {
-   "id": "reveal",
-   "heading": "What a spend gives away",
-   "blocks": [
-    {
-     "type": "paragraph",
-     "text": "Only the condition actually used is published. The output key is already visible in the spent output. A key path witness supplies a signature, plus an optional annex; it reveals neither the internal key nor the script tree, so an observer cannot tell whether a tree existed at all. The BIP calls this the ideal case. The authors argue it can be the usual one: assuming most outputs could be spent by everyone involved agreeing, Schnorr key aggregation lets several people control one key that looks like anyone else’s.",
-     "claims": [
-      "privacy",
-      "key-or-script",
-      "aggregation",
-      "key-path-rule"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Aggregation is not a matter of adding public keys together by hand: a plain sum is open to key cancellation and related attacks unless something like a proof of possession guards it. BIP 341 points to protocols such as MuSig and leaves their details out of scope, and recommends making the most likely single-key condition the internal key.",
-     "claims": [
-      "internal-key-choice",
-      "naive-sum"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "A script path spend is more talkative. It reveals that a script path existed, that the key path was not used, the script itself, and the leaf’s depth, which hints at the shape of the tree and even at the wallet software that built it. Other leaves stay hidden, but their hashes may appear as siblings in the proof. Taproot narrows what a spend discloses; it does not make every spend anonymous, and the BIP adds that keys should never be reused, in any leaf.",
-     "claims": [
-      "privacy",
-      "no-reuse"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A07.5",
-     "recipe": "taproot-reveals.v1",
-     "title": "What a spend gives away",
-     "fixtures": [
-      "bip341-spk5"
-     ],
-     "caption": "The output key is already visible in the spent output. A key path witness supplies the signature, plus an optional annex, without revealing the internal key or script tree. A script path witness reveals one script, its proof and depth.",
-     "claims": [
-      "privacy",
-      "key-or-script",
-      "key-path-rule"
-     ],
-     "layout": "wide"
-    },
-    {
-     "type": "callout",
-     "label": "Caveat",
-     "text": "The tree in the figure is one published example, not a required layout, and the hashes shown are not the scripts themselves. Nothing on this page is a way to build or sign real outputs.",
-     "claims": [
-      "tree-shape",
-      "wallet-section"
-     ]
-    },
-    {
-     "type": "figure",
-     "figure": "A07.6",
-     "recipe": "taproot-depth.v1",
-     "title": "Depth is proof size",
-     "fixtures": [
-      "bip341-spk5"
-     ],
-     "caption": "Each level adds one 32-byte hash to the control block. This tree is one published example, not a required shape.",
-     "claims": [
-      "tree-shape",
-      "control-contents",
-      "privacy"
-     ],
-     "layout": "prose"
-    }
-   ]
-  },
-  {
    "id": "signing",
-   "heading": "What the signature covers",
+   "heading": "The signature also commits to the payment",
    "blocks": [
     {
      "type": "paragraph",
-     "text": "A Taproot signature is a BIP 340 signature over a tagged hash, TapSighash, of a signature message. It is 64 bytes, or 65 with an explicit sighash byte; leaving the byte off means SIGHASH_DEFAULT, which signs the whole transaction like SIGHASH_ALL. Spelling out 0x00 as a 65th byte is invalid.",
+     "text": "Hiding unused conditions is only part of BIP 341. The signature message changes too. Unless the signer selects ANYONECANPAY, it commits to the amount and scriptPubKey of every output being spent. This gives an offline signer a commitment to all the input amounts when it checks the fee.",
      "claims": [
-      "signature-form",
-      "key-path-verify"
-     ]
-    },
-    {
-     "type": "paragraph",
-     "text": "Among several changes to the message, one stands out. Unless the signer opts out with ANYONECANPAY, it commits to the amount and scriptPubKey of every output being spent, not just its own. The authors give the reason: an offline signing device can no longer be lied to about the fee or about what it is spending. The message is at most 206 bytes; for the published input below it is 174.",
-     "claims": [
-      "sigmsg-commits",
-      "sigmsg-length"
+      "sigmsg-commits"
      ]
     },
     {
      "type": "figure",
      "figure": "A07.7",
      "recipe": "taproot-sigmsg.v1",
-     "title": "What a key-path signature signs",
+     "title": "The amounts travel into the signature",
      "fixtures": [
       "bip341-keyspend-input4"
      ],
-     "caption": "The signature message for input 4 of the published key-path vector, the spend shown in Fig. A07.2. The two outlined items commit to every spent output’s amount and scriptPubKey.",
+     "caption": "The outlined fields commit to every spent output’s amount and scriptPubKey in this example.",
      "claims": [
       "sigmsg-commits",
       "signature-form",
       "vectors-reproduced"
      ],
      "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "The authors designed that change to prevent a signing device being misled about the fee or the outputs it is spending. It is a separate benefit from revealing fewer scripts: one concerns the transaction the owner authorizes, the other concerns what observers learn afterwards.",
+     "claims": [
+      "sigmsg-commits",
+      "privacy"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Taproot still leaves clues. A script-path spend reveals its chosen condition and depth, and a distinctive tree can hint at the software that built it. Reusing keys creates other links; the BIP advises against reuse even in different leaves. The useful promise is narrower disclosure of spending conditions, not blanket anonymity.",
+     "claims": [
+      "privacy",
+      "no-reuse"
+     ]
+    },
+    {
+     "type": "details",
+     "summary": "Signature encoding and source notes",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "A Taproot signature is a BIP 340 signature over a tagged hash, TapSighash, of a signature message. It is 64 bytes, or 65 with an explicit sighash byte; leaving the byte off means SIGHASH_DEFAULT, which signs the whole transaction like SIGHASH_ALL. Spelling out 0x00 as a 65th byte is invalid.",
+       "claims": [
+        "signature-form",
+        "key-path-verify"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The signature message is at most 206 bytes; the illustrated input’s message is 174 bytes. BIP 341 was assigned in 2020 and records mainnet activation at block 709632. The figures use its published wallet vectors.",
+       "claims": [
+        "sigmsg-length",
+        "preamble",
+        "activation",
+        "vectors-reproduced"
+       ]
+      }
+     ]
     }
    ]
   }

@@ -19,6 +19,7 @@ const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
 const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
 const policy = read("content/figure-policy.json") as { hero: number; supportingMin: number; supportingMax: number };
+const readingPolicy = read("content/reading-policy.json") as { chapterRanges: Record<string, { min: number; max: number }> };
 const externalLock = read("sources/external/external.lock.json");
 const chapterIds = readdirSync(new URL("content/chapters/", root)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
 
@@ -74,8 +75,11 @@ for (const id of chapterIds) {
 
     it("keeps the default reading path inside the target word range", () => {
       const words = defaultPathWordCount(chapter);
-      expect(words).toBeGreaterThanOrEqual(brief.targetWords.min);
-      expect(words).toBeLessThanOrEqual(brief.targetWords.max);
+      // Chapter-specific editorial targets permit shorter main narratives;
+      // detailed rules stay in disclosures rather than padding the reading path.
+      const range = readingPolicy.chapterRanges[id] ?? brief.targetWords;
+      expect(words).toBeGreaterThanOrEqual(range.min);
+      expect(words).toBeLessThanOrEqual(range.max);
     });
 
     it("cites every ledger claim at least once", () => {

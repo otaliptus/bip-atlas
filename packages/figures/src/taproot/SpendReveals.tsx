@@ -1,63 +1,50 @@
-import { Boundary, Computer, Drawing, KeyGlyph, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import { Drawing, KeyGlyph, Responsive, Value } from "../kit";
 import type { DerivedTaprootTreeFixture } from "../types";
 import { storyLeaf } from "./treeLayout";
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
-const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
-
-/**
- * taproot-reveals.v1 — static. What an observer of the chain sees of each
- * kind of spend of the same output. Nothing the spend does not publish is
- * drawn, so the drawing cannot leak the tree.
- */
+/** Two spend receipts show disclosure, without drawing an unobserved tree. */
 export function SpendReveals({ fixture }: { fixture: DerivedTaprootTreeFixture }) {
   const d = fixture.derived;
   const leaf = storyLeaf(d.leaves);
-  const m = leaf.path.length;
   if (!d.keySpend) throw new Error(`${fixture.id}: needs the published key-path spend`);
-  const sigBytes = d.keySpend.signatureHex.length / 2;
-  const desc =
-    `Key path spend: the chain shows the output key Q (${d.outputKeyHex}) and a ${sigBytes}-byte signature; an observer cannot tell whether a script tree exists. ` +
-    `Script path spend of ${leafName(leaf.id)}: the chain shows Q, the inputs the script consumes (for this script, a signature), the script itself, and the control block: a leaf version and parity byte, the internal key and ${m} sibling hashes, which reveal the leaf's depth (${m}) but not what the siblings are.`;
-  const panel = (ids: DrawingIds, x: number, y: number, key: boolean) => (
-    <g>
-      <Value at={[x, y]} text={key ? "KEY PATH SPEND" : `SCRIPT PATH SPEND · ${leafName(leaf.id).toUpperCase()}`} size={9} cls="k-value--label" />
-      <Boundary x={x + 196} y1={y + 12} y2={y + 156} label="chain" />
-      <KeyGlyph at={[x, y + 24]} role="public" />
-      <Value at={[x + 36, y + 34]} text={`Q ${short(d.outputKeyHex)}`} size={8.5} />
-      {key ? (
-        <>
-          <rect class="k-outline k-mark--sig" x={x} y={y + 52} width="150" height="22" />
-          <Value at={[x + 6, y + 67]} text={`signature · ${sigBytes} B`} size={8.5} cls="k-value--on" />
-        </>
-      ) : (
-        <>
-          <rect class="k-outline k-fill--plain k-dashed" x={x} y={y + 46} width="150" height="18" />
-          <Value at={[x + 6, y + 59]} text="inputs (here a signature)" size={7.5} />
-          <rect class="k-outline k-fill--plain" x={x} y={y + 68} width="150" height="18" />
-          <Value at={[x + 6, y + 81]} text={leaf.scriptReading} size={7.5} />
-          <rect class="k-outline k-fill--plain" x={x} y={y + 92} width="14" height="18" />
-          <KeyGlyph at={[x + 20, y + 95]} role="public" scale={0.6} />
-          <Value at={[x + 44, y + 105]} text="version · P" size={8} />
-          {Array.from({ length: m }, (_, j) => (
-            <g>
-              <rect class="k-outline k-fill--hash" x={x + j * 76} y={y + 116} width="70" height="18" />
-              <Value at={[x + j * 76 + 5, y + 129]} text={`e${j} · 32 B`} size={8} />
-            </g>
-          ))}
-          <Value at={[x, y + 150]} text="LEAF OR SUBTREE? THE SPEND DOES NOT SAY" size={7.5} cls="k-value--muted" />
-        </>
-      )}
-      <Computer at={[x + 214, y + 40]} label="observer" />
-      <Value at={[x + 214, y + 100]} text={key ? "NO SIGN OF" : `DEPTH ${m}`} size={8} cls="k-value--label" />
-      <Value at={[x + 214, y + 112]} text={key ? "A SCRIPT TREE" : "OTHER SCRIPTS"} size={8} cls="k-value--label" />
-      <Value at={[x + 214, y + 124]} text={key ? "" : "UNSEEN"} size={8} cls="k-value--label" />
-    </g>
-  );
-  return (
+  const m = leaf.path.length;
+  const desc = `The output key Q ${d.outputKeyHex} is already public. A key-path spend supplies a ${d.keySpend.signatureHex.length / 2}-byte signature and reveals no internal key or script tree. A script-path spend of leaf ${String.fromCharCode(65 + leaf.id)} supplies the script inputs, the chosen script and a control block containing the internal key, leaf version and parity, and ${m} sibling hashes. Its depth is ${m}; the other scripts are not revealed. Optional annexes are omitted from this illustration.`;
+  const panel = (x: number, y: number, key: boolean) => <g transform={`translate(${x} ${y})`}>
+    <Value at={[0, 14]} text={key ? "KEY PATH SPEND" : "SCRIPT PATH SPEND"} size={11} />
+    <KeyGlyph at={[0, 31]} role="public" scale={0.75} />
+    <Value at={[32, 39]} text={`Q ${d.outputKeyHex.slice(0, 12)}…`} size={10} />
+    <Value at={[0, 58]} text="OUTPUT KEY: ALREADY PUBLIC" size={9} cls="k-value--muted" />
+    <path class="k-outline k-fill--plain" d="M0 76 H290 V242 L280 238 L270 242 L260 238 L250 242 L240 238 L230 242 L220 238 L210 242 L200 238 L190 242 L180 238 L170 242 L160 238 L150 242 L140 238 L130 242 L120 238 L110 242 L100 238 L90 242 L80 238 L70 242 L60 238 L50 242 L40 238 L30 242 L20 238 L10 242 L0 238 Z" />
+    <Value at={[14, 96]} text="ADDED WHEN SPENT" size={9} cls="k-value--muted" />
+    {key ? <>
+      <rect class="k-outline k-fill--sig" x="14" y="111" width="262" height="31" rx="3" />
+      <Value at={[27, 131]} text={`signature · ${d.keySpend!.signatureHex.length / 2} B`} size={11} />
+      <Value at={[14, 172]} text="No internal key." size={11} />
+      <Value at={[14, 194]} text="No script." size={11} />
+      <Value at={[14, 218]} text="No sign that a tree ever existed." size={10} />
+    </> : <>
+      <rect class="k-outline k-fill--sig" x="14" y="111" width="262" height="26" rx="3" />
+      <Value at={[25, 128]} text="script inputs (here a signature)" size={9.5} />
+      <rect class="k-outline k-fill--plain" x="14" y="145" width="262" height="30" rx="3" />
+      <Value at={[25, 164]} text={leaf.scriptReading} size={9.5} />
+      <rect class="k-outline k-fill--hash" x="14" y="183" width="262" height="42" rx="3" />
+      <Value at={[25, 200]} text={`PROOF · internal key + ${m} sibling hashes`} size={9.5} />
+      <Value at={[25, 216]} text="leaf version and parity included" size={9} />
+    </>}
+    <Value at={[0, 267]} text={key ? "SCRIPT TREE: UNKNOWN" : `DEPTH ${m} · OTHER SCRIPTS UNSEEN`} size={10} />
+  </g>;
+  return <>
     <Responsive
-      wide={<Drawing id="a07-rev-w" width={620} height={178} title="What a spend gives away" desc={desc}>{panel(idsFor("a07-rev-w"), 14, 14, true)}{panel(idsFor("a07-rev-w"), 326, 14, false)}</Drawing>}
-      narrow={<Drawing id="a07-rev-n" width={300} height={356} title="What a spend gives away" desc={desc}>{panel(idsFor("a07-rev-n"), 14, 14, true)}{panel(idsFor("a07-rev-n"), 14, 192, false)}</Drawing>}
+      wide={<Drawing id="a07-receipt-w" width={632} height={292} title="What reaches the blockchain" desc={desc}>{panel(12, 6, true)}{panel(330, 6, false)}</Drawing>}
+      narrow={<Drawing id="a07-receipt-n" width={314} height={588} title="What reaches the blockchain" desc={desc}>{panel(12, 6, true)}{panel(12, 306, false)}</Drawing>}
     />
-  );
+    <details class="atlas-disclosure">
+      <summary>The output key and the revealed script proof</summary>
+      <dl class="atlas-hexlist">
+        <dt>Output key Q</dt><dd><code class="atlas-break">{d.outputKeyHex}</code></dd>
+        <dt>Revealed script</dt><dd><code class="atlas-break">{leaf.scriptHex}</code></dd>
+        <dt>Control block for this script</dt><dd><code class="atlas-break">{leaf.controlBlockHex}</code></dd>
+      </dl>
+    </details>
+  </>;
 }

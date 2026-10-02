@@ -54,13 +54,20 @@ const figure = (recipe: string) => all.find((f: any) => f.recipe === recipe);
 const s0 = sp("sp-case-0");
 
 describe("silent payments figures: placement", () => {
-  it("numbers seven figures in reading order", () => {
-    expect(all.map((f: any) => f.figure)).toEqual(["A15.1", "A15.2", "A15.3", "A15.4", "A15.5", "A15.6", "A15.7"]);
-    expect(figure("silent-payment-derivation.v1").figure).toBe("A15.4");
+  it("numbers the revised figures in reading order", () => {
+    expect(all.map((f: any) => f.figure)).toEqual(["A15.1", "A15.2", "A15.3", "A15.4", "A15.5", "A15.6"]);
+    expect(figure("silent-payment-derivation.v1").figure).toBe("A15.6");
   });
 });
 
 describe("A15.1 address", () => {
+  it("marks only outputs found by the receiver and keeps the private scan key out of the drawing", () => {
+    const s = html(h(SpAddress, { fixture: s0 }));
+    const main = s.slice(0, s.indexOf("<details"));
+    expect((main.match(/data-output-match="true"/g) ?? []).length).toBe(s0.derived.txOutputs.filter((o) => o.mine).length);
+    expect(main).not.toContain(s0.derived.sharedSecret);
+    expect(main).toContain(s0.derived.steps.find((s) => s.matched)!.Pk.slice(0, 8));
+  });
   it("draws all 116 characters and decodes to the two keys", () => {
     const s = html(h(SpAddress, { fixture: s0 }));
     expect(s0.derived.receiver.address).toHaveLength(116);

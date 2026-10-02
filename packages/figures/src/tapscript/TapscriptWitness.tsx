@@ -22,7 +22,7 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
     { kind: "script", text: `item ${v.initialStack.length} · script · ${scriptBytes} B`, role: "plain" as const, dashed: false },
     { kind: "control", text: `item ${v.initialStack.length + 1} · control block · ${cbBytes} B`, role: "plain" as const, dashed: false },
   ];
-  const rowH = 30, top = 22, x = 14, w = 196;
+  const rowH = 30, top = 40, x = 14, w = 196;
   const y = (i: number) => top + i * rowH;
   const n = rows.length;
   const opsLines = wrapLines(v.ops.map((o) => o.name).join(" "), 54);
@@ -35,7 +35,8 @@ export function TapscriptWitness({ fixture }: { fixture: DerivedTapscriptFixture
   return (
     <>
       <Drawing id="a08-witness" width={344} height={H} title="Two specifications, one witness" desc={desc}>
-        <Value at={[x, 12]} text={`WITNESS · CORE CASE ${fixture.caseIndex} · ${v.witness.items} ITEMS · ITEM 0 IS THE STACK BOTTOM`} size={8.5} cls="k-value--label" />
+        <Value at={[x, 12]} text={`WITNESS · CORE CASE ${fixture.caseIndex} · ${v.witness.items} ITEMS`} size={8.5} cls="k-value--label" />
+        <Value at={[x, 26]} text="ITEM 0 IS THE STACK BOTTOM" size={8.5} cls="k-value--muted" />
         {rows.map((r, i) =>
           r.kind === "control" ? (
             <g>

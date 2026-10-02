@@ -13,6 +13,50 @@ const CHECKSUM_CHARS = 6;
  * the tested model; exact values in the disclosure.
  */
 export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
+  const d = fixture.derived;
+  const candidate = d.steps.find((s) => s.matched);
+  if (!candidate) throw new Error(`${fixture.id}: the receiving scene needs a matching output`);
+  const ids = idsFor("a15-find");
+  const outputsY = 195;
+  const scanY = outputsY + d.txOutputs.length * 32 + 45;
+  return (
+    <>
+      <Drawing id="a15-find" width={344} height={scanY + 96} title="One address to publish; a payment to find" desc={`The receiver publishes ${d.receiver.address}, which carries the public scan and spend keys. The sender uses it with the transaction inputs to derive a Taproot output. In the receiver's view, scanning this transaction finds ${d.txOutputs.filter((o) => o.mine).length} matching output. The receiver computes ${candidate.Pk} for counter ${candidate.k}. The receiver uses the private scan key, public spend key and transaction input information locally. The scan secret is not sent. This is a teaching view of the receiver's knowledge, not what an outside observer can discover.`}>
+        <rect class="k-outline k-fill--plain" x="54" y="12" width="236" height="67" rx="4" />
+        <Value at={[172, 29]} text="PUBLIC RECEIVING ADDRESS" size={9.5} anchor="middle" />
+        <Value at={[172, 47]} text={`${d.receiver.address.slice(0, 18)}…`} size={12} anchor="middle" />
+        <Value at={[172, 65]} text="SCAN KEY + SPEND KEY · BOTH PUBLIC" size={9.5} anchor="middle" cls="k-value--muted" />
+        <Arrow d="M172 83 V113" ids={ids} />
+        <Value at={[172, 131]} text="SENDER CALCULATES A FRESH OUTPUT" size={9.5} anchor="middle" />
+        <Value at={[172, 146]} text="using this address + transaction inputs" size={9.5} anchor="middle" cls="k-value--muted" />
+        <Arrow d="M172 154 V180" ids={ids} />
+        <Value at={[26, 188]} text="OUTPUTS IN THIS TRANSACTION" size={9.5} />
+        {d.txOutputs.map((o, i) => (
+          <g data-output-match={o.mine ? "true" : "false"}>
+            <rect class={`k-outline ${o.mine ? "k-fill--public" : "k-fill--plain"}`} x="26" y={outputsY + i * 32} width="292" height="26" rx="13" />
+            <Value at={[40, outputsY + i * 32 + 17]} text={`${o.key.slice(0, 16)}…`} size={10} />
+            <Value at={[302, outputsY + i * 32 + 17]} text={o.mine ? "✓ MATCH" : "PASS"} size={9.5} anchor="end" />
+          </g>
+        ))}
+        <path class="k-line k-dashed" d={`M172 ${scanY - 5} V${outputsY + d.txOutputs.length * 32 + 4}`} marker-end={ids.arrow} />
+        <circle class="k-outline k-fill--plain" cx="70" cy={scanY + 22} r="23" />
+        <line class="k-line" x1="54" y1={scanY + 40} x2="39" y2={scanY + 57} />
+        <KeyGlyph at={[57, scanY + 17]} role="secret" scale={0.85} />
+        <Value at={[108, scanY + 9]} text="RECEIVER SCANS" size={10} />
+        <Value at={[108, scanY + 27]} text="scan secret + public spend key" size={9.5} />
+        <Value at={[108, scanY + 43]} text="+ transaction input information" size={9.5} />
+        <Value at={[108, scanY + 59]} text={`finds P${candidate.k} ${candidate.Pk.slice(0, 8)}…`} size={9.5} />
+        <Value at={[172, scanY + 88]} text="A MATCH IN THE RECEIVER’S VIEW" size={9.5} anchor="middle" cls="k-value--muted" />
+      </Drawing>
+      <details class="atlas-disclosure">
+        <summary>Inside the address: characters, keys and checksum</summary>
+        <AddressEncoding fixture={fixture} />
+      </details>
+    </>
+  );
+}
+
+function AddressEncoding({ fixture }: { fixture: DerivedSpFixture }) {
   const r = fixture.derived.receiver;
   const a = r.address;
   const sep = a.lastIndexOf("1");

@@ -1,395 +1,402 @@
 {
-  "schemaVersion": "bip-atlas.publication.v1",
-  "chapterId": "psbt",
-  "primaryBips": [
-    174
+ "schemaVersion": "bip-atlas.publication.v1",
+ "chapterId": "psbt",
+ "primaryBips": [
+  174
+ ],
+ "specimenLabel": "BIP 0174",
+ "title": "How can separate devices help sign one transaction?",
+ "dek": "Your laptop can prepare a payment while the keys stay on separate devices. A PSBT is the document they pass around to get it signed.",
+ "authorship": "hand-authored",
+ "reviewState": "draft-unreviewed",
+ "sourceSnapshot": "sources/research-2026-10-01",
+ "opening": {
+  "blocks": [
+   {
+    "type": "paragraph",
+    "text": "Suppose the keys needed to spend some bitcoin live on different devices. Your laptop can prepare the payment, but it cannot finish the job alone. The other devices need to inspect the transaction, find the keys they control and return their signatures. They may even be offline.",
+    "claims": [
+     "motivation",
+     "signer",
+     "signer-display"
+    ]
+   },
+   {
+    "type": "paragraph",
+    "text": "That leaves a practical problem: what do you send them? A bare unsigned transaction leaves out information a signer needs. A Partially Signed Bitcoin Transaction, or PSBT, packages the transaction with that information and gives each participant somewhere to put its contribution. BIP 174 defines the common format.",
+    "claims": [
+     "abstract",
+     "motivation",
+     "updater"
+    ]
+   }
   ],
-  "specimenLabel": "BIP 0174",
-  "title": "How can separate devices help sign one transaction?",
-  "dek": "A PSBT is a working document wrapped around a transaction. Each participant adds what it knows, and only the last step produces something the network would accept.",
-  "authorship": "hand-authored",
-  "reviewState": "in-review",
-  "sourceSnapshot": "sources/research-2026-10-01",
-  "opening": {
-    "blocks": [
+  "figure": {
+   "type": "figure",
+   "figure": "A05.1",
+   "recipe": "psbt-combine.v1",
+   "title": "Separate signatures, one transaction",
+   "fixtures": [
+    "bip174-trace"
+   ],
+   "caption": "Both signers worked from the same updated PSBT. Their copies can be brought together without either signer handing over a private key.",
+   "claims": [
+    "combiner",
+    "signer",
+    "trace-published",
+    "trace-reproduced"
+   ],
+   "layout": "prose"
+  }
+ },
+ "sections": [
+  {
+   "id": "roles",
+   "heading": "Follow the document",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Start with the Creator. It chooses the inputs and outputs and writes the unsigned transaction into a new PSBT. At this point the document says which coins to spend and where they should go, but the extra information about those coins has yet to be filled in.",
+     "claims": [
+      "creator"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "An Updater supplies what it knows: the outputs being spent, any scripts needed to spend them, and derivation paths that help a signing device find the right keys. In this example an additional update supplies the signature hash type, which tells the signer what its signature should commit to.",
+     "claims": [
+      "updater",
+      "trace-published"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "Now the document can branch. Both signers receive the same updated copy. Each adds its own signatures and returns a PSBT. A Combiner brings the additions together. Nobody needs to wait for the other signer to finish before starting, and neither signer needs the other’s private keys.",
+     "claims": [
+      "signer",
+      "combiner",
+      "combine-order",
+      "trace-published"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.2",
+     "recipe": "psbt-envelope.v1",
+     "title": "Follow a PSBT through the handoffs",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "Choose a stage to see what the document contains. The two signers work independently; the Combiner collects their contributions.",
+     "claims": [
+      "updater",
+      "signer",
+      "combiner",
+      "finalizer",
+      "trace-reproduced"
+     ],
+     "layout": "wide"
+    },
+    {
+     "type": "paragraph",
+     "text": "Creator, Updater, Signer and Combiner are jobs, rather than separate boxes you must buy. A wallet may perform several jobs. A signing device can also add information it knows. The format lets those jobs be divided between programs without requiring every program to know how the others work.",
+     "claims": [
+      "roles-entities",
+      "combined-roles",
+      "updater",
+      "signer"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The example follows one route through those jobs. BIP 174 also describes arrangements such as manual CoinJoin and multisignature wallets. A PSBT can travel as a binary file or as Base64 text; the participants need to agree on the transaction and the format, rather than on a particular way of sending it.",
+     "claims": [
+      "examples-workflows",
+      "encoding",
+      "combiner"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "signing",
+   "heading": "Before the device signs",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "A signing device can give its owner a chance to inspect the payment. How much is being spent? Where is it going? What is the fee? The PSBT carries information about the previous outputs so that a signer can work out those amounts. Derivation paths can also help it recognise change returning to its own wallet.",
+     "claims": [
+      "signer-display",
+      "change-detection",
+      "updater"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.3",
+     "recipe": "psbt-signer-display.v1",
+     "title": "What the signer can show",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "The amounts come from the document. Input 0 includes its full previous transaction; input 1 supplies only a witness UTXO record, so the displayed fee depends on that claimed amount.",
+     "claims": [
+      "signer-display",
+      "bip143-fee-issue",
+      "updater",
+      "signer-view"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "Receiving information is not the same as establishing that it is true. For an input spending a pre-SegWit output, the Signer must hash the supplied previous transaction and check that its ID matches the one being spent. Otherwise a convincing-looking record could describe the wrong coins.",
+     "claims": [
+      "signer-txid-check"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.4",
+     "recipe": "psbt-utxo-check.v1",
+     "title": "Does this previous transaction match?",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "Hash the supplied transaction and compare it with the reference in the payment being signed.",
+     "claims": [
+      "signer-txid-check",
+      "signer-view"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "SegWit has a less obvious trap. BIP 174 describes an attack in which a user is persuaded to sign repeatedly while the claimed amounts of other inputs change. A signature covering only its own input’s amount cannot settle the fee for the whole transaction. The BIP notes that many wallets request full previous transactions for SegWit inputs too.",
+     "claims": [
+      "bip143-fee-issue"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "A Signer must use the UTXOs supplied in the PSBT and only add data. It does not have to support every kind of input. Its contribution is a partial signature attached to an input, identified by the public key that made it. Other signatures can sit beside it without overwriting it.",
+     "claims": [
+      "signer",
+      "signer-scope",
+      "key-structure"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "adds",
+   "heading": "Ready to send?",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "Collecting signatures does not immediately produce the transaction that the network expects. First the Input Finalizer arranges the collected pieces into each input’s final scriptSig, witness, or both. Think of the PSBT as the work in progress and these final fields as the assembled result.",
+     "claims": [
+      "finalizer",
+      "extractor"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.5",
+     "recipe": "psbt-finalize.v1",
+     "title": "After assembly",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "The input keeps its UTXO information and gains the final scripts. Partial signatures, paths and other completed working material are cleared.",
+     "claims": [
+      "finalizer",
+      "trace-reproduced"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "That cleanup is deliberate. Once an input has its final scripts, the separate ingredients are no longer needed there. The Finalizer should clear everything except the UTXO records and fields it does not understand. If a sighash type was specified, it must refuse to finalize signatures that use a different one.",
+     "claims": [
+      "finalizer",
+      "finalizer-sighash",
+      "passthrough"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The Transaction Extractor then copies the final scripts into a network transaction. If an input is still incomplete, it must leave the PSBT untouched. This is the last handoff: the result can now leave the signing workflow as a transaction, rather than as a document asking for more work.",
+     "claims": [
+      "extractor"
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "There is another useful check at the merge. The Combiner must reject PSBTs for different transactions. Combining information is only meaningful when everybody has been working on the same payment. For compatible contributions, the order of combination does not matter; conflicting records need separate treatment.",
+     "claims": [
+      "combiner",
+      "combine-order"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "maps",
+   "heading": "A place for every contribution",
+   "blocks": [
+    {
+     "type": "paragraph",
+     "text": "The format gives each piece of information a home. A global map holds transaction-wide information. Each input and each output gets its own map as well. Inside a map, records have keys and values: a key says what the information means, and its value holds the information itself.",
+     "claims": [
+      "maps",
+      "key-structure"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.6",
+     "recipe": "psbt-layout.v1",
+     "title": "The document before anyone adds to it",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "The Creator has supplied the unsigned transaction. The input and output maps are still empty.",
+     "claims": [
+      "maps",
+      "creator",
+      "trace-published"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "paragraph",
+     "text": "A record’s key can include extra identifying data. For a partial signature, that extra data is the signer’s public key. This is how an input can hold several signatures of the same record type: each has a different full key. Repeating an identical key in one map would make the document invalid.",
+     "claims": [
+      "key-structure",
+      "signer",
+      "no-duplicates"
+     ]
+    },
+    {
+     "type": "figure",
+     "figure": "A05.7",
+     "recipe": "psbt-records.v1",
+     "title": "Two signatures can share a record type",
+     "fixtures": [
+      "bip174-trace"
+     ],
+     "caption": "The public key distinguishes one signer’s partial signature from the other’s.",
+     "claims": [
+      "key-structure",
+      "signer",
+      "no-duplicates"
+     ],
+     "layout": "prose"
+    },
+    {
+     "type": "details",
+     "summary": "The byte format and validation rules",
+     "blocks": [
       {
-        "type": "paragraph",
-        "text": "Signing is simple when one program holds every key and knows every coin it spends. It gets harder when keys live on different devices, some deliberately offline, made by different vendors. BIP 174 describes the situation before it: passing a partly signed transaction between signers depended on each implementation.",
-        "claims": [
-          "motivation"
-        ]
+       "type": "paragraph",
+       "text": "A PSBT begins with five bytes: the letters *psbt* followed by `0xff`. Then come key-value maps, one global map followed by one map per input and one per output of the transaction. Each map is a list of records, each with a key and a value, and ends with a single zero byte.",
+       "claims": [
+        "maps"
+       ]
       },
       {
-        "type": "paragraph",
-        "text": "BIP 174, assigned in 2017 and recorded as deployed, defines the Partially Signed Bitcoin Transaction format, or PSBT. It is a container that carries what a signer needs to know and collects signatures until each input has a complete set. The proposal describes a generic format and its version 0.",
-        "claims": [
-          "preamble-dates",
-          "abstract",
-          "generic-v0"
-        ]
+       "type": "paragraph",
+       "text": "Each key is a type number, sometimes followed by key data. A map can hold several records of the same type as long as their full keys differ. That is how one input can carry several signatures at once: each partial signature’s key includes the public key that made it.",
+       "claims": [
+        "key-structure",
+        "signer"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The global map holds the transaction being built, in its old serialization and with every scriptSig and witness empty. A version 0 PSBT without it is invalid. Within a map every key must be unique, and a PSBT with a duplicated key is invalid too. More generally, if any key or value does not match the format its type specifies, the whole PSBT must be considered invalid.",
+       "claims": [
+        "unsigned-tx",
+        "no-duplicates",
+        "format-rule"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "The decoder behind this page rejects all twenty invalid PSBTs that BIP 174 lists, from a missing output map to a duplicated key, and accepts the ten valid ones, keeping every record when it writes them back out. Each invalid case is a rule made concrete: a duplicated key, a filled scriptSig in the unsigned transaction, an unsigned transaction written with witness serialization, and, in twelve of the twenty, a key or value that does not match its type’s format.",
+       "claims": [
+        "vectors-invalid",
+        "no-duplicates",
+        "unsigned-tx",
+        "format-rule"
+       ]
       }
-    ],
-    "figure": {
-      "type": "figure",
-      "figure": "A05.1",
-      "recipe": "psbt-layout.v1",
-      "title": "A newly created PSBT, byte by byte",
-      "fixtures": [
-        "bip174-trace"
-      ],
-      "caption": "The Creator’s PSBT from BIP 174’s trace: five magic bytes, one global record holding the unsigned transaction, and a 0x00 closing each map. The four input and output maps are empty.",
-      "claims": [
-        "maps",
-        "creator",
-        "trace-published"
-      ],
-      "layout": "prose"
+     ]
     }
+   ]
   },
-  "sections": [
+  {
+   "id": "unknown",
+   "heading": "Carry unfamiliar information forward",
+   "blocks": [
     {
-      "id": "maps",
-      "heading": "An envelope of maps",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "A PSBT begins with five bytes: the letters *psbt* followed by `0xff`. Then come key-value maps, one global map followed by one map per input and one per output of the transaction. Each map is a list of records, each with a key and a value, and ends with a single zero byte.",
-          "claims": [
-            "maps"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Each key is a type number, sometimes followed by key data. A map can hold several records of the same type as long as their full keys differ. That is how one input can carry several signatures at once: each partial signature’s key includes the public key that made it.",
-          "claims": [
-            "key-structure",
-            "signer"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.2",
-          "recipe": "psbt-records.v1",
-          "title": "Two keys of one type",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "Input 0 after the Combiner holds both signers’ partial signatures. Each key is the type byte plus the signer’s public key, so the two keys differ.",
-          "claims": [
-            "key-structure",
-            "signer",
-            "no-duplicates"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The global map holds the transaction being built, in its old serialization and with every scriptSig and witness empty. A version 0 PSBT without it is invalid. Within a map every key must be unique, and a PSBT with a duplicated key is invalid too. More generally, if any key or value does not match the format its type specifies, the whole PSBT must be considered invalid.",
-          "claims": [
-            "unsigned-tx",
-            "no-duplicates",
-            "format-rule"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Versions are handled cautiously. A parser that meets a PSBT version number it does not recognize should stop immediately, because the document will contain types it cannot safely ignore. Unknown individual fields are a different matter, as the last section shows.",
-          "claims": [
-            "version-exit",
-            "passthrough"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "A PSBT can travel as a binary file or as Base64 text, so the same document can move between programs that share nothing else.",
-          "claims": [
-            "encoding"
-          ]
-        },
-        {
-          "type": "callout",
-          "label": "Note",
-          "text": "A PSBT is not the transaction that gets broadcast. It is a working document around one, and the network transaction is produced only at the very end.",
-          "claims": [
-            "abstract",
-            "extractor"
-          ]
-        }
-      ]
+     "type": "paragraph",
+     "text": "A device will eventually encounter a field that was added after its software was written. BIP 174 requires signers to ignore unfamiliar types and pass them through. The device can do its own job without erasing information another participant needs. Finalization preserves those unknown fields too.",
+     "claims": [
+      "passthrough"
+     ]
     },
     {
-      "id": "roles",
-      "heading": "Roles, not devices",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "BIP 174 divides the work into roles: Creator, Updater, Signer, Combiner, Input Finalizer and Transaction Extractor. They are roles rather than devices. One program can play several of them, and several participants can play the same one, as the two signers below do.",
-          "claims": [
-            "roles-entities",
-            "trace-published"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "In practice roles cluster. BIP 174 says one entity is likely to be both Creator and Updater, and likewise both Signer and Updater, since a signer can add what it knows just before signing.",
-          "claims": [
-            "combined-roles",
-            "updater",
-            "signer"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The proposal illustrates workflows such as a manual CoinJoin and a 2-of-3 multisig, but it does not prescribe one choreography. The sequence in the figure below is simply the one its test vectors publish, from the first empty envelope to the final transaction.",
-          "claims": [
-            "examples-workflows",
-            "trace-published"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Step through it. Every state is a published PSBT, parsed field by field. The fields each role adds are marked, and their exact keys and values are listed under the drawing.",
-          "claims": [
-            "trace-published",
-            "trace-reproduced"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.3",
-          "recipe": "psbt-envelope.v1",
-          "title": "One envelope, many hands",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "BIP 174’s published trace. Both signers start from the same updated PSBT and the Combiner merges their work; the envelope only gains information until the finalizer clears the signing material from each completed input.",
-          "claims": [
-            "updater",
-            "signer",
-            "combiner",
-            "finalizer",
-            "trace-reproduced"
-          ],
-          "layout": "wide"
-        }
-      ]
+     "type": "figure",
+     "figure": "A05.8",
+     "recipe": "unknown-fields.v1",
+     "title": "Keep what you do not understand",
+     "fixtures": [
+      "unknown-combine"
+     ],
+     "caption": "The dashed records are unfamiliar to this decoder. Combining the documents preserves them because their full keys differ.",
+     "claims": [
+      "unknown-combine",
+      "passthrough",
+      "combiner"
+     ],
+     "layout": "wide"
     },
     {
-      "id": "adds",
-      "heading": "What each role adds",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "The Creator writes the unsigned transaction and leaves every input and output map empty. The Updater fills in what it knows: the outputs being spent, redeem and witness scripts, and BIP 32 derivation paths that tell a signer which of its keys belong where. In the published trace, a second update adds the sighash type.",
-          "claims": [
-            "creator",
-            "updater",
-            "trace-published"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.4",
-          "recipe": "psbt-role-story.v1",
-          "title": "What each role adds",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "One frame per published state, one cell per record in each map: blue for partial signatures, green for BIP 32 paths. Outlined cells are new in that state; struck-through ones were cleared.",
-          "claims": [
-            "creator",
-            "updater",
-            "signer",
-            "combiner",
-            "finalizer",
-            "extractor",
-            "trace-published"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "A Signer must use only the UTXOs inside the PSBT and must only add data. Each signature goes in as a partial signature on its input, keyed by the public key that made it. Because the PSBT carries the outputs being spent, a signer can work out the amounts, destinations and fee, and show them before it signs. Signers need not handle every input type.",
-          "claims": [
-            "signer",
-            "signer-display",
-            "signer-scope"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "That display is only as good as its data. For SegWit inputs, BIP 174 notes a known problem: a signature commits only to its own input’s amount, so an attacker who gets a user to sign repeatedly could alter the claimed amounts of other inputs and push funds into fees. Many wallets therefore ask for the full previous transaction even for SegWit inputs.",
-          "claims": [
-            "bip143-fee-issue"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.5",
-          "recipe": "psbt-signer-display.v1",
-          "title": "What the signer can show",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "Amounts read from the updated PSBT. Input 0’s comes from its full previous transaction; input 1’s only from a witness UTXO record, which states it, so the fee rests on that claim too.",
-          "claims": [
-            "signer-display",
-            "bip143-fee-issue",
-            "updater",
-            "signer-view"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "Some checks come before any signature. For an input that spends a pre-SegWit output, the Signer must confirm that the full previous transaction it was given really hashes to the transaction ID named in the unsigned transaction. The figure below shows that check passing for the first input of the published trace.",
-          "claims": [
-            "signer-txid-check",
-            "trace-reproduced",
-            "signer-view"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.6",
-          "recipe": "psbt-utxo-check.v1",
-          "title": "Checking the previous transaction",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "The previous transaction carried for input 0, hashed: it is the one the unsigned transaction names. Both are drawn as serialized; BIP 174 prints the same txid byte-reversed.",
-          "claims": [
-            "signer-txid-check",
-            "signer-view"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The derivation paths serve the display as well. A signer can use them, together with any extended public keys in the global map, to recognise which outputs return change to its own wallet and leave those out of what it shows the user.",
-          "claims": [
-            "change-detection",
-            "updater"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "The Combiner merges PSBTs for the same transaction into one that contains every record from each, and must refuse to merge different ones. Combining two independent sets of additions gives the same result as applying them one after the other, in either order, unless they conflict. The tests behind this page merge the two published signer PSBTs both ways and get the published result byte for byte.",
-          "claims": [
-            "combiner",
-            "combine-order",
-            "trace-reproduced"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.7",
-          "recipe": "psbt-combine.v1",
-          "title": "Two copies, one merge",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "Input 0 in each signer’s copy and after combining. Each copy has one signature the other lacks; the merge keeps both, in either order.",
-          "claims": [
-            "combiner",
-            "combine-order",
-            "trace-reproduced"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "The Input Finalizer turns the collected pieces into a final scriptSig, a final witness, or both, for each input it can complete. In that input’s map, everything else except the spent output and fields it does not understand should then be cleared. The Transaction Extractor reads those final scripts into a network transaction. If any input is incomplete, it must leave the PSBT untouched.",
-          "claims": [
-            "finalizer",
-            "extractor"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.8",
-          "recipe": "psbt-finalize.v1",
-          "title": "What the finalizer leaves",
-          "fixtures": [
-            "bip174-trace"
-          ],
-          "caption": "Each input keeps its UTXO record and gains its final scripts; everything else, signatures, sighash type, scripts and paths, is struck from the map.",
-          "claims": [
-            "finalizer",
-            "trace-reproduced"
-          ],
-          "layout": "prose"
-        },
-        {
-          "type": "paragraph",
-          "text": "Finalizing has rules of its own. If an input names a sighash type, the Input Finalizer must refuse to finalize it when any signature uses a different one.",
-          "claims": [
-            "finalizer-sighash"
-          ]
-        }
-      ]
+     "type": "paragraph",
+     "text": "An unknown PSBT version is a different situation. The parser should stop immediately: it cannot assume that it understands the document’s rules. Version 2 PSBTs and Taproot fields are defined in other proposals. This chapter follows BIP 174’s version 0, with field names taken from the shared type registry.",
+     "claims": [
+      "version-exit",
+      "generic-v0",
+      "registry"
+     ]
     },
     {
-      "id": "unknown",
-      "heading": "Fields nobody here understands",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "BIP 174 keeps the format extensible by requiring that new types be ignored and passed through by signers that do not know them. A signer that meets a field it does not understand must pass it through when it writes the PSBT back out, and the Input Finalizer is told to leave them when it clears the rest.",
-          "claims": [
-            "passthrough"
-          ]
-        },
-        {
-          "type": "figure",
-          "figure": "A05.9",
-          "recipe": "unknown-fields.v1",
-          "title": "Unknown fields survive combining",
-          "fixtures": [
-            "unknown-combine"
-          ],
-          "caption": "This page’s decoder understands none of the dashed fields, and combining the two PSBTs loses none of them: their keys differ in the key data. The result matches the one BIP 174 publishes.",
-          "claims": [
-            "unknown-combine",
-            "passthrough",
-            "combiner"
-          ],
-          "layout": "wide"
-        },
-        {
-          "type": "paragraph",
-          "text": "Version 2 PSBTs and Taproot-related fields exist, but other proposals define them. A type registry kept alongside BIP 174 lists every field together with the BIP that defines it. The figures here label each field from that registry, and every field in the published trace turns out to come from BIP 174 itself.",
-          "claims": [
-            "registry",
-            "generic-v0"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "checked",
-      "heading": "Replayed, not signed",
-      "blocks": [
-        {
-          "type": "paragraph",
-          "text": "The decoder behind this page rejects all twenty invalid PSBTs that BIP 174 lists, from a missing output map to a duplicated key, and accepts the ten valid ones, keeping every record when it writes them back out. Each invalid case is a rule made concrete: a duplicated key, a filled scriptSig in the unsigned transaction, an unsigned transaction written with witness serialization, and, in twelve of the twenty, a key or value that does not match its type’s format.",
-          "claims": [
-            "vectors-invalid",
-            "no-duplicates",
-            "unsigned-tx",
-            "format-rule"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "It does not sign, it holds no keys and it broadcasts nothing. Replaying a published trace is enough to see how separate devices cooperate on one transaction: each adds only what it knows, and nothing becomes a real transaction until every input is complete.",
-          "claims": [
-            "trace-published",
-            "signer",
-            "extractor"
-          ]
-        }
-      ]
+     "type": "details",
+     "summary": "Source and example notes",
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "That leaves a practical problem: what do you send them? A bare unsigned transaction leaves out information a signer needs. A Partially Signed Bitcoin Transaction, or PSBT, packages the transaction with that information and gives each participant somewhere to put its contribution. BIP 174 defines the common format.",
+       "claims": [
+        "abstract",
+        "motivation",
+        "updater"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "BIP 174 was assigned in 2017 and is recorded as deployed in the pinned source. The example replays published PSBTs; it does not create signatures, hold keys or broadcast a transaction.",
+       "claims": [
+        "preamble-dates",
+        "trace-published",
+        "trace-reproduced"
+       ]
+      }
+     ]
     }
-  ]
+   ]
+  }
+ ]
 }

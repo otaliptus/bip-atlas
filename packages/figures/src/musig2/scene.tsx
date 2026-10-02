@@ -13,7 +13,7 @@ export const STAGES: ReadonlyArray<{ id: StageId; title: string; note: string }>
   { id: "round1", title: "Round 1: nonces", note: "Each signer sends a public nonce of two points. They are summed point by point into one aggregate nonce." },
   { id: "session", title: "Session values", note: "From the aggregate nonce, the key and the message, everyone computes the same b, R = R₁ + b·R₂ and the BIP 340 challenge e." },
   { id: "round2", title: "Round 2: partial signatures", note: "Each signer sends one 32-byte number. Each is checked against that signer's key and nonce." },
-  { id: "aggregate", title: "Aggregate signature", note: "The partial signatures are summed, plus a term for any tweaks: a 64-byte signature that plain BIP 340 verification accepts." },
+  { id: "aggregate", title: "Aggregate signature", note: "Add the partial signatures and the tweak adjustment. Pair the result with R’s x coordinate to form the 64-byte signature." },
 ];
 /** The stages a session goes through: the tweak stage only when it has tweaks. */
 export const stagesFor = (d: Musig2SessionDerived) => STAGES.filter((s) => s.id !== "tweaks" || d.tweaks.length > 0);
@@ -70,7 +70,8 @@ export function Scene({ d, upto, reveal, ids, W, y0 = 0, secrets = false }: { d:
         if (reached("round2")) items.push({ role: "sig", text: `s${i + 1} ${short(s.psig)}`, lamp: true });
         return (
           <g data-signer={i + 1}>
-            <Computer at={[x + 12, y + 4]} label={`signer ${i + 1}`} />
+            <Computer at={[x + 12, y + 4]} />
+            <Value at={[x + 25, y + 40]} text={`S${i + 1}`} size={8} anchor="middle" cls="k-value--label" />
             {items.map((it, k) => (
               <g>
                 <Chip x={cx} y={y + 2 + k * 15} w={colW - 66} role={it.role} text={it.text} dashed={it.dashed} />
