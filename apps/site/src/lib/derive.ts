@@ -15,6 +15,9 @@ import {
   extractTransaction,
   bytesToHex,
   ckdPriv,
+  ckdPub,
+  neuter,
+  recoverParentPrivateKey,
   derivePath,
   entropyToMnemonic,
   fingerprint,
@@ -281,16 +284,32 @@ function deriveBip32(f: Bip32SeedFixture): DerivedBip32Fixture {
       publicKeyHex: bytesToHex(key.publicKey),
       privateKeyHex: bytesToHex(key.privateKey!),
       hmacDataHex: step ? step.dataHex : null,
+      hmacOutHex: step ? step.iHex : null,
+      identifierHex: bytesToHex(hash160(key.publicKey)),
       vectorLine: f.vectorChains.find((c) => c.path === path)?.line ?? null,
       hardenedAncestor: hardenedAt >= 0 ? `m/${indices.slice(0, hardenedAt + 1).map(formatIndex).join("/")}` : null,
     };
   });
+  // BIP 32: a normal child's public key is the same by CKDpriv and by CKDpub (from the neutered parent).
+  for (const n of nodes) {
+    if (!n.parentPath || n.hardened) continue;
+    const pub = ckdPub(neuter(derivePath(master.key, n.parentPath)), parsePath(n.path).at(-1)!);
+    if (bytesToHex(pub.key.publicKey) !== n.publicKeyHex || pub.iHex !== n.hmacOutHex) throw new Error(`${f.id} ${n.path}: CKDpub differs from CKDpriv`);
+  }
+  // BIP 32's stated weakness, recomputed: parent xpub + normal child's private key → parent private key.
+  const child = nodes.find((n) => n.path === f.recoveryPath);
+  if (!child || !child.parentPath || child.hardened) throw new Error(`${f.id}: recoveryPath must be a normal child in the tree`);
+  const parent = nodes.find((n) => n.path === child.parentPath)!;
+  const index = parsePath(child.path).at(-1)!;
+  const recovered = bytesToHex(recoverParentPrivateKey(neuter(derivePath(master.key, parent.path)), hexToBytes(child.privateKeyHex), index));
+  if (recovered !== parent.privateKeyHex) throw new Error(`${f.id}: recovering ${parent.path} from ${child.path} failed`);
+  const recovery = { parentPath: parent.path, childPath: child.path, index, iLHex: child.hmacOutHex!.slice(0, 64), childPrivateKeyHex: child.privateKeyHex, recoveredHex: recovered };
   const serialKey = derivePath(master.key, f.serializePath);
   const rows = (["public", "private"] as const).map((kind) => {
     const raw = serializeRaw(serialKey, kind);
     return { kind, rawHex: bytesToHex(raw), checksumHex: bytesToHex(sha256(sha256(raw)).slice(0, 4)), base58: serialize(serialKey, kind) };
   });
-  return { ...f, derived: { masterIHex: master.iHex, nodes, serialization: { path: f.serializePath, rows } } };
+  return { ...f, derived: { masterIHex: master.iHex, nodes, recovery, serialization: { path: f.serializePath, rows } } };
 }
 
 function deriveTransaction(f: TransactionFixture): DerivedTransactionFixture {
@@ -878,6 +897,25 @@ function walletMaster() {
   return abandonMaster;
 }
 
+/** BIP 44's examples table (coin, account, chain, address, path per row) and its gap limit, from the pinned text. */
+function bip44Tables(lines: string[]) {
+  const start = lines.indexOf("==Examples==");
+  if (start < 0) throw new Error("BIP 44 examples table moved");
+  const examples: Array<{ coin: string; account: string; chain: string; address: string; path: string; line: number }> = [];
+  for (let i = start; i < lines.length && !lines[i].startsWith("|}"); i++) {
+    if (!lines[i].startsWith("|m / 44'")) continue;
+    const [coin, account, chain, address] = lines.slice(i - 4, i).map((l) => l.slice(1).trim());
+    const path = lines[i].slice(1).replace(/ /g, "");
+    parseWalletPath(path);
+    examples.push({ coin, account, chain, address, path, line: i + 1 });
+  }
+  if (examples.length !== 16) throw new Error(`BIP 44 examples table has ${examples.length} paths, expected 16`);
+  const gapAt = lines.findIndex((l) => l.startsWith("Address gap limit is currently set to "));
+  const gap = gapAt >= 0 ? /set to (\d+)\./.exec(lines[gapAt]) : null;
+  if (!gap) throw new Error("BIP 44 gap limit line moved");
+  return { examples, gapLimit: Number(gap[1]), gapLine: gapAt + 1 };
+}
+
 function deriveWalletPath(f: WalletPathVectorFixture): DerivedWalletPathFixture {
   const lines = pinnedText(`bip-${String(f.source.bip).padStart(4, "0")}.mediawiki`, SNAPSHOT_PHASE3).split("\n");
   const value = (n: number) => lines[n - 1].split("=").slice(1).join("=").trim();
@@ -944,7 +982,7 @@ function deriveWalletPath(f: WalletPathVectorFixture): DerivedWalletPathFixture 
   const account = walkPath(master, `${f.account.path}/0/0`)[3].key;
   return {
     ...f,
-    derived: { scheme: f.scheme, accountPath: f.account.path, accountXpub: ser(account, "public"), accountXpubPublished: f.account.pubLine !== null, addresses },
+    derived: { scheme: f.scheme, accountPath: f.account.path, accountXpub: ser(account, "public"), accountXpubPublished: f.account.pubLine !== null, addresses, bip44: f.scheme === 44 ? bip44Tables(lines) : null },
   };
 }
 
@@ -992,10 +1030,12 @@ function deriveDescriptor(f: DescriptorVectorFixture): DerivedDescriptorFixture 
         text: k.text,
         kind: k.kind,
         isPrivate: k.isPrivate,
+        xonly: d!.root.fn === "tr",
         origin: k.origin ? `${k.origin.fingerprint}${fmtSteps(k.origin.path)}` : null,
         derivation: k.ext ? fmtSteps(k.path) + (k.range ? `/*${k.range === "hardened" ? "h" : ""}` : "") || null : null,
         range: k.range,
-        publicKeys: Array.from({ length: n }, (_, i) => bytesToHex(keyAt(k, i).pub)),
+        // BIP 386: every key under tr() is serialized x-only.
+        publicKeys: Array.from({ length: n }, (_, i) => { const pub = keyAt(k, i).pub; return bytesToHex(d!.root.fn === "tr" && pub.length === 33 ? pub.slice(1) : pub); }),
       });
     });
     const children = d.root.fn === "combo" ? (d.ranged ? 2 : 1) : d.ranged ? 3 : 1;

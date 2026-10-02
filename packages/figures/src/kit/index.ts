@@ -11,3 +11,4 @@ export * from "./Glyphs";
 export * from "./Packet";
 export * from "./Lamp";
 export * from "./Controls";
+export * from "./Tag";

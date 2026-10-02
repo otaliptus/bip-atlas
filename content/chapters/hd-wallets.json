@@ -72,6 +72,22 @@
             "extended-key",
             "neuter"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.2",
+          "recipe": "hd-extended-key.v1",
+          "title": "Key plus chain code",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "An extended key is a key and a chain code. Neutering swaps the private key for its public key and keeps the very same chain code.",
+          "claims": [
+            "extended-key",
+            "neuter",
+            "chain-code"
+          ],
+          "layout": "wide"
         }
       ]
     },
@@ -88,6 +104,22 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A02.3",
+          "recipe": "hd-child-story.v1",
+          "title": "One step down",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "One normal step on test vector 1, from m/0H to m/0H/1. Every value is the tested model’s, and the child matches the xprv that BIP 32 publishes.",
+          "claims": [
+            "split",
+            "ckdpriv-normal",
+            "vectors"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "What goes into the HMAC depends on the index. Indices 0 to 2³¹ − 1 are *normal*, and the input is the parent’s public key followed by the index. Indices from 2³¹ upward are *hardened*, and the input is the parent’s private key, padded with a zero byte, followed by the index. Paths mark hardened indices with an H: `m/0H/1` is normal child 1 of hardened child 0 of the master.",
           "claims": [
@@ -96,6 +128,22 @@
             "ckdpriv-hardened",
             "notation"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.4",
+          "recipe": "hd-hmac-inputs.v1",
+          "title": "What goes into the HMAC",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "The same 37 bytes of HMAC data, filled two ways. A normal child hashes the parent’s public key; a hardened child hashes its private key, padded with a zero byte.",
+          "claims": [
+            "ckdpriv-normal",
+            "ckdpriv-hardened",
+            "indices"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -107,7 +155,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.2",
+          "figure": "A02.5",
           "recipe": "derivation-tree.v1",
           "title": "Who can derive what",
           "fixtures": [
@@ -137,6 +185,21 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A02.6",
+          "recipe": "hd-two-routes.v1",
+          "title": "Two routes, one child",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "Two ways to the same child public key. Only the left one needs the private key; the build checks that both agree for every normal child in the tree.",
+          "claims": [
+            "ckdpub",
+            "equivalence"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Its own example is a webshop. The shop’s server can hold one extended public key and generate a fresh address for every order, without ever holding a key that could spend the payments. If the server is broken into, BIP 32 says the attacker can at most see the incoming payments.",
           "claims": [
@@ -151,6 +214,21 @@
             "audits",
             "b2b"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.7",
+          "recipe": "hd-sharing.v1",
+          "title": "Sharing without spending",
+          "fixtures": [],
+          "caption": "BIP 32’s examples of sharing part of a wallet. Each party holds an extended public key; none of them holds a key that can spend.",
+          "claims": [
+            "webshop",
+            "webserver-breach",
+            "audits",
+            "b2b"
+          ],
+          "layout": "wide"
         },
         {
           "type": "paragraph",
@@ -182,6 +260,22 @@
             "recovery-computed",
             "weakness"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.8",
+          "recipe": "hd-weakness-story.v1",
+          "title": "An xpub plus one leaked key",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "BIP 32’s warning, recomputed on the published vector. A leaked child key and its parent’s xpub give back the parent’s private key; the hardened edge above the parent stops the climb there.",
+          "claims": [
+            "weakness",
+            "recovery-computed",
+            "hardened-reason"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -217,7 +311,7 @@
         },
         {
           "type": "figure",
-          "figure": "A02.3",
+          "figure": "A02.9",
           "recipe": "extended-key-layout.v1",
           "title": "One node, two serializations",
           "fixtures": [
@@ -237,6 +331,21 @@
             "identifier",
             "fingerprint-collisions"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A02.10",
+          "recipe": "hd-fingerprint.v1",
+          "title": "Four bytes that name a parent",
+          "fixtures": [
+            "tv1"
+          ],
+          "caption": "The fingerprint is the first four bytes of the Hash160 of a public key, copied into each child’s serialization. It speeds up lookups; it does not identify a key uniquely.",
+          "claims": [
+            "identifier",
+            "fingerprint-collisions"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",
