@@ -1203,7 +1203,8 @@ export function MnemonicCard({ fixture }: { fixture: DerivedMnemonicFixture }) {
   const rows = Math.ceil(groups.length / cols);
   const W = 252, D = 24 * rows + 30, H = 7;
   const ox = D * COS30 + 6, oy = 12;
-  const P = iso(ox, oy);
+  // Box ground origin sits H below the top face, so the top face starts at oy.
+  const P = iso(ox, oy + H);
   const width = Math.ceil((W + D) * COS30 + 12);
   const height = Math.ceil((W + D) * SIN30 + H + 70);
   const wordAt = (i: number): Pt => P(14 + (i % cols) * 80, 30 + Math.floor(i / cols) * 24, H);
@@ -1456,7 +1457,7 @@ describe("LastWordOdds", () => {
   const d = derived("ozone-128");
   const s = html(h(LastWordOdds, { fixture: d }));
   it("draws all 2048 candidates and fills exactly the valid ones", () => {
-    expect(count(s, "<rect")).toBe(2048);
+    expect(count(s, 'class="k-dot ')).toBe(2048);
     expect(count(s, "k-mark--check")).toBe(d.derived.lastWord.validIndices.length);
   });
   it("states the computed odds", () => expect(s).toContain("128 OF 2,048 PASS · 1 IN 16"));
@@ -1499,51 +1500,6 @@ Run: `npx vitest run packages/figures/test/mnemonic-figures.test.ts`
 Expected: FAIL (missing modules).
 
 - [ ] **Step 3: Implement `WordlistIndex`**
-
-```tsx
-import { Arrow, Cells, Drawing, IsoBox, Label, Value, iso, onTop } from "../kit";
-import type { DerivedMnemonicFixture } from "../types";
-
-/** wordlist-index.v1 — static. Eleven bits make a number from 0 to 2,047, which picks one card from a stack of 2,048. */
-export function WordlistIndex({ fixture }: { fixture: DerivedMnemonicFixture }) {
-  const g = fixture.derived.groups[0];
-  const sample = fixture.derived.wordlistSample;
-  const W = 340, H = 268;
-  const P = iso(206, 60);
-  return (
-    <Drawing
-      id="a01-list"
-      width={W}
-      height={H}
-      title="Eleven bits pick one word of 2,048"
-      desc={`The first 11-bit group of the sample, ${g.bits}, is the number ${g.index}, and entry ${g.index} of the 2,048-word English list is “${g.word}”. The list begins ${sample.map((s) => `${s.index} ${s.word}`).join(", ")}; no two words share their first four letters.`}
-    >
-      {({ arrow }: never) => null}
-      <Cells x={14} y={20} values={[...g.bits]} size={14} roleOf={(i) => (i < g.entropyBitCount ? "secret" : "check")} strong={(i) => g.bits[i] === "1"} />
-      <Label at={[14 + 77, 34]} side="down" len={12} text="11 bits" />
-      <Arrow d="M174 27 H196" ids={{ hatch: "", arrow: "url(#a01-list-arrow)" }} />
-      <Value at={[204, 31]} text={String(g.index)} size={14} />
-      {Array.from({ length: 6 }, (_, k) => (
-        <IsoBox at={[220, 96 + (5 - k) * 7]} w={92} d={56} h={3} role="plain" />
-      ))}
-      <IsoBox at={[252, 70]} w={92} d={56} h={3} role="public" cls="k-card-out" />
-      <text class="k-engrave" transform={onTop(iso(252, 67)(10, 22, 0))}>{String(g.index)}</text>
-      <text class="k-engrave k-engrave--word" transform={onTop(iso(252, 67)(10, 38, 0))}>{g.word}</text>
-      <Label at={[214, 150]} side="down" len={14} text="2,048 cards · index 0–2,047" />
-      {sample.map((s, i) => (
-        <g transform={`translate(${14 + i * 106} 214)`}>
-          <rect class="k-outline k-fill--plain" width="96" height="30" />
-          <text class="k-value k-value--muted" x="6" y="12" style="font-size:8px">{s.index}</text>
-          <text class="k-value" x="6" y="25"><tspan class="k-first4">{s.word.slice(0, 4)}</tspan>{s.word.slice(4)}</text>
-        </g>
-      ))}
-      <Label at={[14, 210]} side="up" len={8} text="first four letters never repeat" />
-    </Drawing>
-  );
-}
-```
-
-That code has a mistake: the arrow takes its id from a hand-built object, and there is a stray children function. Use this corrected version instead:
 
 ```tsx
 import { Arrow, Cells, Drawing, IsoBox, Label, Value, idsFor, iso, onTop } from "../kit";
@@ -1840,7 +1796,11 @@ describe("EntropyWordLab (static render)", () => {
   it("server-renders the fully cut first sample: all groups and words", () => {
     expect(s).toContain('data-hydrated="false"');
     for (const g of fx[0].derived.groups) expect(s).toContain(`>${g.word}<`);
-    expect(count(s, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - 1);
+  });
+  it("cuts the wide ribbon into word groups", () => {
+    // Rows are a multiple of 11 bits wide (44 wide, 22 narrow), so every cut falls inside a row.
+    const wide = s.split("k-resp__narrow")[0];
+    expect(count(wide, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - 1);
   });
   it("colours entropy and checksum bits differently", () => {
     expect(count(s, "k-fill--check") + count(s, "k-mark--check")).toBeGreaterThanOrEqual(fx[0].derived.layout.checksumBits);
@@ -1855,17 +1815,6 @@ describe("EntropyWordLab (static render)", () => {
   });
 });
 ```
-
-The `count(s, 'class="k-cut"')` assertion assumes ribbon rows are a multiple of 11 bits wide (`perRow` 44 wide, 22 narrow). That way every cut lands inside a row, and a cut never falls at a row start, where `Cells` suppresses it. Each composition draws 11 cuts; two compositions draw 22. Assert on the wide composition only: split the string at `k-resp__narrow` and count in the first part.
-
-```ts
-  it("cuts the wide ribbon into word groups", () => {
-    const wide = s.split("k-resp__narrow")[0];
-    expect(count(wide, 'class="k-cut"')).toBe(fx[0].derived.layout.wordCount - 1);
-  });
-```
-
-Use this instead of the `k-cut` assertion in the first test.
 
 - [ ] **Step 2: Run to verify failure**
 
