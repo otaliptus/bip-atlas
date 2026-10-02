@@ -12,6 +12,11 @@ export interface RecipeDefinition {
   /** Fixture kind every fixture passed to this recipe must have. */
   /** Fixture kind the recipe draws; several allowed kinds are written "a|b". */
   fixtureKind: string;
+  /**
+   * Drawn in the illustration-kit style (decision D3): rendered without the
+   * figure card or the Interactive / Worked example tabs.
+   */
+  drawing?: boolean;
 }
 
 export const RECIPES: readonly RecipeDefinition[] = [
@@ -50,6 +55,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "entropy-word-pipeline.v1",
@@ -59,6 +65,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: true,
     controls: ["Choose public fixture", "Toggle 128/256-bit fixture", "Reveal 11-bit groups"],
     fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "seed-derivation.v1",
@@ -68,6 +75,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     interactive: false,
     controls: [],
     fixtureKind: "mnemonic",
+    drawing: true,
   },
   {
     id: "master-key-split.v1",

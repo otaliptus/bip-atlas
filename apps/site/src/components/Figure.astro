@@ -163,7 +163,7 @@ const b322 = picked as DerivedBip322Fixture[];
 const b322Formats = picked as DerivedBip322FormatsFixture[];
 const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
 ---
-<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
+<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} drawing={recipe.drawing === true} path={path}>
   {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
   {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
   {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
@@ -218,7 +218,7 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
   {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
-  {recipe.interactive && (
+  {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
       {figure.recipe === "entropy-word-pipeline.v1" && <MnemonicWorked fixture={mnemonic[0]} />}

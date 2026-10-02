@@ -1431,3 +1431,94 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
   .atlas-b322-dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
   .atlas-b322-tx th { inline-size: 6.5rem; }
 }
+
+/* ==========================================================================
+   Illustration kit (decisions D2–D3). Making Software-style drawings:
+   black linework, flat fills with fixed meanings, tiny uppercase labels.
+   ========================================================================== */
+:root {
+  --atlas-ink: #222225;
+  --atlas-c-secret: #f0365a; --atlas-c-secret-p: #ffd0d9;
+  --atlas-c-public: #12b76a; --atlas-c-public-p: #c8f5dc;
+  --atlas-c-hash: #f5b800;   --atlas-c-hash-p: #fff0b3;
+  --atlas-c-sig: #2945f5;    --atlas-c-sig-p: #d5dcff;
+  --atlas-c-check: #8b5cf6;  --atlas-c-check-p: #e6dcff;
+  --atlas-c-net: #06b6d4;    --atlas-c-net-p: #c9f1f8;
+  --atlas-c-time: #f97316;   --atlas-c-time-p: #ffe0c7;
+  --atlas-c-hidden: #9a9aa6; --atlas-c-hidden-p: #ededf2;
+}
+
+/* ---------- figure placement (drawing mode) ---------- */
+.atlas-flow > .atlas-fig { margin-block: var(--manual-space-7); position: relative; }
+.atlas-flow > .atlas-fig--wide { max-inline-size: var(--manual-wide-max); }
+.atlas-fig__title { margin: 0 0 var(--manual-space-4); font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--manual-muted); }
+.atlas-fig__num { color: var(--manual-blue); margin-inline-end: 0.5rem; }
+.atlas-fig__code { display: none; }
+.atlas-fig__stage { position: relative; }
+.atlas-fig__caption { margin-block-start: var(--manual-space-4); max-inline-size: var(--atlas-measure); font-size: 0.9375rem; line-height: 1.5; font-style: italic; color: var(--manual-muted); }
+@media (min-width: 64rem) {
+  .atlas-fig__code { display: block; position: absolute; inset-inline-start: -2.5rem; inset-block-start: 0.1rem; writing-mode: vertical-rl; rotate: 180deg; font-family: var(--manual-pixel); font-size: 0.75rem; letter-spacing: 0.04em; color: var(--manual-blue); }
+  .atlas-fig__num { display: none; }
+}
+
+/* ---------- drawings ---------- */
+.k-drawing { display: block; inline-size: 100%; max-inline-size: calc(var(--k-w) * 1.35); block-size: auto; margin-inline: auto; overflow: visible; font-family: var(--manual-code); }
+.k-drawing text { font-size: 10px; fill: var(--atlas-ink); }
+.k-label text, .k-arrow__t { font-size: 9.5px; letter-spacing: 0.06em; fill: var(--atlas-ink); }
+.k-value { font-size: 10px; }
+.k-value--muted { fill: var(--manual-muted) !important; }
+.k-value--check { fill: var(--atlas-c-check) !important; font-weight: 500; }
+.k-leader, .k-line, .k-cut { fill: none; stroke: var(--atlas-ink); stroke-width: 0.75; vector-effect: non-scaling-stroke; }
+.k-cut { stroke-width: 1.5; }
+.k-arrowhead { fill: none; stroke: var(--atlas-ink); stroke-width: 1; stroke-linejoin: round; }
+.k-hatch { stroke: var(--atlas-c-hidden); stroke-width: 1.2; }
+.k-hatch-bg { fill: var(--atlas-c-hidden-p); }
+.k-cell, .k-face, .k-outline { stroke: var(--atlas-ink); stroke-width: 0.75; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.k-cell--em { stroke-width: 2; }
+.k-cell__t { font-size: 9px !important; }
+.k-cell__t--on { fill: #ffffff !important; font-weight: 500; }
+.k-engrave { font-size: 10px !important; letter-spacing: 0.02em; }
+.k-machine__t { font-size: 9.5px !important; letter-spacing: 0.06em; font-weight: 500; }
+.k-machine__s { font-size: 8.5px !important; fill: var(--manual-muted) !important; }
+.k-mag__src { fill: none; stroke: var(--atlas-ink); stroke-width: 0.75; }
+.k-mag__lens { fill: #ffffff; }
+.k-mag__rim { fill: none; stroke: var(--atlas-ink); stroke-width: 1.25; }
+
+/* Role fills: pastel by default, saturated with k-mark. */
+.k-fill--secret { fill: var(--atlas-c-secret-p); } .k-mark--secret { fill: var(--atlas-c-secret); }
+.k-fill--public { fill: var(--atlas-c-public-p); } .k-mark--public { fill: var(--atlas-c-public); }
+.k-fill--hash { fill: var(--atlas-c-hash-p); }     .k-mark--hash { fill: var(--atlas-c-hash); }
+.k-fill--sig { fill: var(--atlas-c-sig-p); }       .k-mark--sig { fill: var(--atlas-c-sig); }
+.k-fill--check { fill: var(--atlas-c-check-p); }   .k-mark--check { fill: var(--atlas-c-check); }
+.k-fill--net { fill: var(--atlas-c-net-p); }       .k-mark--net { fill: var(--atlas-c-net); }
+.k-fill--time { fill: var(--atlas-c-time-p); }     .k-mark--time { fill: var(--atlas-c-time); }
+.k-fill--hidden { fill: var(--atlas-c-hidden-p); } .k-mark--hidden { fill: var(--atlas-c-hidden); }
+.k-fill--plain { fill: #ffffff; }                  .k-mark--plain { fill: var(--atlas-ink); }
+
+/* Isometric faces: top pastel, sides mixed toward the saturated colour. */
+.k-iso { --k-p: #ffffff; --k-s: #c9c9d2; }
+.k-iso[data-role="secret"] { --k-p: var(--atlas-c-secret-p); --k-s: var(--atlas-c-secret); }
+.k-iso[data-role="public"] { --k-p: var(--atlas-c-public-p); --k-s: var(--atlas-c-public); }
+.k-iso[data-role="hash"] { --k-p: var(--atlas-c-hash-p); --k-s: var(--atlas-c-hash); }
+.k-iso[data-role="sig"] { --k-p: var(--atlas-c-sig-p); --k-s: var(--atlas-c-sig); }
+.k-iso[data-role="check"] { --k-p: var(--atlas-c-check-p); --k-s: var(--atlas-c-check); }
+.k-iso[data-role="net"] { --k-p: var(--atlas-c-net-p); --k-s: var(--atlas-c-net); }
+.k-iso[data-role="time"] { --k-p: var(--atlas-c-time-p); --k-s: var(--atlas-c-time); }
+.k-iso[data-role="hidden"] { --k-p: var(--atlas-c-hidden-p); --k-s: var(--atlas-c-hidden); }
+.k-face--top { fill: var(--k-p); }
+.k-face--left { fill: color-mix(in srgb, var(--k-p) 72%, var(--k-s)); }
+.k-face--right { fill: color-mix(in srgb, var(--k-p) 48%, var(--k-s)); }
+
+/* Two compositions. */
+.k-resp__narrow { display: none; }
+@media (max-width: 47.99rem) {
+  .k-resp__wide { display: none; }
+  .k-resp__narrow { display: block; }
+}
+
+/* Storyboards. */
+.k-story { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--k-frame)), 1fr)); gap: var(--manual-space-5) var(--manual-space-4); }
+.k-story__frame { margin: 0; min-inline-size: 0; }
+.k-story__frame .k-drawing { max-inline-size: 100%; }
+.k-story__note { margin: var(--manual-space-2) 0 0; font-size: 0.875rem; line-height: 1.45; }
+.k-story__n { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-blue); margin-inline-end: 0.25rem; }
