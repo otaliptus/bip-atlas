@@ -40,7 +40,7 @@
         "bip9-csv",
         "bip9-segwit"
       ],
-      "caption": "A block version as BIP 9 reads it: the top three bits must be 001; the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
+      "caption": "The version of a block signalling for both recorded deployments: the top three bits must be 001, and the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
       "claims": [
         "top-bits",
         "29-bits",
@@ -70,6 +70,19 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A11.2",
+          "recipe": "versionbits-top-bits.v1",
+          "title": "Eight drawers, one for signalling",
+          "fixtures": [],
+          "caption": "The top three bits split the version space into eight ranges. Only 001 signals; 010 and 011 are kept for two future mechanisms.",
+          "claims": [
+            "top-bits",
+            "29-bits"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "Each deployment names its bit, from 0 to 28, a starttime and a timeout. BIP 9 suggests a start about a month after a release that includes the change, and a timeout one year later. The timeout is what lets a bit be reused: in the authors’ words, a new use of a bit then clearly refers to a new BIP.",
           "claims": [
@@ -84,6 +97,19 @@
           "claims": [
             "bit-reuse"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A11.3",
+          "recipe": "versionbits-bit-reuse.v1",
+          "title": "Reusing a bit",
+          "fixtures": [],
+          "caption": "Schematic: a later deployment may take the bit only after the earlier one has timed out or activated, ideally after a pause.",
+          "claims": [
+            "bit-reuse",
+            "timeout-why"
+          ],
+          "layout": "prose"
         }
       ]
     },
@@ -115,6 +141,23 @@
           ]
         },
         {
+          "type": "figure",
+          "figure": "A11.4",
+          "recipe": "versionbits-threshold.v1",
+          "title": "How many blocks must signal",
+          "fixtures": [
+            "bip9-csv",
+            "bip8-guidelines"
+          ],
+          "caption": "One period of 2,016 blocks, to scale. The higher the threshold, the fewer non-signalling blocks it takes to stop a lock-in.",
+          "claims": [
+            "threshold",
+            "bip8-guidelines",
+            "bip8-why"
+          ],
+          "layout": "prose"
+        },
+        {
           "type": "paragraph",
           "text": "The order matters because bits are shared over time. If counting came first, the authors explain, two deployments on the same bit could collide: an old one locking in while a new one starts, both demanding that miners set the bit. Checking the timeout first rules that out.",
           "claims": [
@@ -124,7 +167,23 @@
         },
         {
           "type": "figure",
-          "figure": "A11.2",
+          "figure": "A11.5",
+          "recipe": "versionbits-boundary.v1",
+          "title": "At a period boundary",
+          "fixtures": [
+            "bip9-csv"
+          ],
+          "caption": "Three trains at the same junction, routed by the tested model with csv's parameters. Past the timeout, even a full count fails.",
+          "claims": [
+            "threshold",
+            "precedence-why",
+            "mtp-clock"
+          ],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A11.6",
           "recipe": "versionbits-state-machine.v1",
           "title": "From signalling to rules",
           "fixtures": [
@@ -132,7 +191,7 @@
             "bip9-segwit",
             "bip8-guidelines"
           ],
-          "caption": "The tested state machine over a schematic run of periods. Choose a deployment, mark which periods reach the threshold, and step through the boundaries.",
+          "caption": "The tested state machine over a schematic run of periods. Choose a deployment, step through the boundaries, and set whether a counted period reaches the threshold. The counts are hypothetical.",
           "claims": [
             "states",
             "threshold",
@@ -149,6 +208,24 @@
             "lockin-active",
             "signal-lockedin"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A11.7",
+          "recipe": "versionbits-lifecycle.v1",
+          "title": "csv, from parameters to rules",
+          "fixtures": [
+            "bip9-csv"
+          ],
+          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9's rules. The count that locked it in is not recorded, only that it reached 1,916.",
+          "claims": [
+            "assignments",
+            "implied",
+            "lockin-active",
+            "signal-lockedin",
+            "threshold"
+          ],
+          "layout": "prose"
         },
         {
           "type": "callout",
@@ -184,20 +261,20 @@
         },
         {
           "type": "figure",
-          "figure": "A11.3",
+          "figure": "A11.8",
           "recipe": "versionbits-record.v1",
           "title": "Reading back from an activation height",
           "fixtures": [
             "bip9-csv",
             "bip9-segwit"
           ],
-          "caption": "The two deployments in BIP 9’s table, with the lock-in period their recorded activation heights imply.",
+          "caption": "The two deployments in BIP 9's table: each mainnet window matches the Unix times in its own BIP, and each activation height implies the two periods before it.",
           "claims": [
             "assignments",
             "crosscheck",
             "implied"
           ],
-          "layout": "wide"
+          "layout": "prose"
         },
         {
           "type": "paragraph",
@@ -245,6 +322,23 @@
             "bip8-must-signal",
             "bip8-fail"
           ]
+        },
+        {
+          "type": "figure",
+          "figure": "A11.9",
+          "recipe": "versionbits-bip8.v1",
+          "title": "Two endings for a stalled deployment",
+          "fixtures": [
+            "bip8-guidelines"
+          ],
+          "caption": "BIP 8's suggested parameters, run by the tested model with no period reaching the threshold. Only lockinontimeout differs.",
+          "claims": [
+            "bip8-must-signal",
+            "bip8-fail",
+            "bip8-guidelines",
+            "bip8-min-activation"
+          ],
+          "layout": "prose"
         },
         {
           "type": "paragraph",

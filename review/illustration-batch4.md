@@ -1,0 +1,19 @@
+# Illustration batch 4: version-bits, block-filters, v2-transport, message-signing
+
+Redrawn in the illustration-kit style approved on the two pilots (decisions D1–D5 in `review/decisions.md`; spec `docs/superpowers/specs/2026-10-02-illustration-redesign-design.md`). Each chapter: figure plan first, then tests, components, placement, screenshots and an independent review.
+
+## Version bits (A11)
+
+Was 3 figures (field, card-style hero with a worked-example tab, a table). Plan: 1 drawing-first hero and 8 static drawings, in reading order. The worked example (csv read back from its activation height) becomes the A11.7 storyboard.
+
+| Fig. | Recipe | Drawing | Data | Claims |
+|---|---|---|---|---|
+| A11.1 | `versionbits-field.v1` (opening, redrawn) | nVersion as 32 bit cells on a bit ruler, grouped in nibbles with their hex digit; top bits 001 bracketed; bits 1 and 0 lit and named on leaders; the three versions a block sets to signal csv, segwit or both. | `bip9-csv`, `bip9-segwit`; `versionFor` | top-bits, 29-bits, assignments |
+| A11.2 | `versionbits-top-bits.v1` **new** | A cabinet of eight drawers, one per top-bit pattern 000–111, each an eighth of the version space. Drawer 001 is pulled out (BIP 9: 0x20000000–0x3FFFFFFF, 29 bits); 010 and 011 are labelled for future mechanisms; the rest count as no signal. | model constants `TOP_BITS`, `VERSION_MIN/MAX`, `MAX_BIT` | top-bits, 29-bits |
+| A11.3 | `versionbits-bit-reuse.v1` **new** (schematic) | One bit as a track over time: deployment A's window, its end (timeout or activation), a fallow pause, then deployment B. | none (schematic) | bit-reuse, timeout-why |
+| A11.4 | `versionbits-threshold.v1` **new** | Three bars to scale on a 0–2,016 ruler: BIP 9 mainnet 1,916, testnet 1,512, BIP 8's suggested 1,815; the remainder says how many non-signalling blocks are enough to stop lock-in. | `bip9-csv`, `bip8-guidelines`; `PERIOD` | threshold, bip8-guidelines, bip8-why |
+| A11.5 | `versionbits-boundary.v1` **new** (storyboard, 3 frames) | A railway junction at a STARTED boundary: the first switch tests the timeout, the second the count. Three trains: lock-in, one short, and a full count after the timeout that still fails. Each outcome from `bip9Next`. | `bip9-csv` | threshold, precedence-why, mtp-clock |
+| A11.6 | `versionbits-state-machine.v1` (hero, redrawn) | The state machine as a vertical railway with stations (FAILED and MUST_SIGNAL on branches) and a train at the current state; a ribbon of 30 period tiles with the window bracket; a gauge for the current period's count against the threshold. Strips: deployment, this period's count. Stepper: periods. | `bip9-csv`, `bip9-segwit`, `bip8-guidelines`; `simulateBip9/8` | states, threshold, lockin-active, bip8-must-signal, bip8-fail |
+| A11.7 | `versionbits-lifecycle.v1` **new** (storyboard, 5 frames; was the worked example) | csv from parameters to ACTIVE: the deployment ticket, a signalling version, the tally period (count not recorded, only ≥ 1,916 implied), LOCKED_IN, ACTIVE. | `bip9-csv`; `bip9Implied` | assignments, implied, lockin-active, signal-lockedin, threshold |
+| A11.8 | `versionbits-record.v1` (redrawn) | For csv and segwit: the mainnet window as a time bar with its cross-check stamp, and the three periods its activation height implies, on a height ruler. Testnet rows and Unix times in a disclosure. | `bip9-csv`, `bip9-segwit` | assignments, crosscheck, implied |
+| A11.9 | `versionbits-bip8.v1` **new** | Two tracks of BIP 8 periods with the suggested parameters and no period reaching the threshold: lockinontimeout false ends FAILED at the timeout height; true turns the last period into MUST_SIGNAL, then LOCKED_IN and ACTIVE. A magnifier on MUST_SIGNAL: 201 blocks may fail to signal, the 202nd is invalid. | `bip8-guidelines`; `simulateBip8`, `mustSignalInvalid` | bip8-must-signal, bip8-fail, bip8-guidelines, bip8-min-activation |

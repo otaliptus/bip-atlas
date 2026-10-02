@@ -1,45 +1,75 @@
+import { Drawing, Value } from "../kit";
 import type { DerivedVersionbitsDeploymentFixture, VersionbitsNetworkView } from "../types";
+import { PeriodTile, num } from "./parts";
 
-const num = (n: number) => n.toLocaleString("en-US");
 const day = (s: string) => s.slice(0, 10);
 
-function Row({ net, v }: { net: string; v: VersionbitsNetworkView }) {
-  return (
-    <tr>
-      <th scope="row">{net}</th>
-      <td>{day(v.start)}<small>{num(v.startEpoch)}</small></td>
-      <td>{day(v.expire)}<small>{num(v.expireEpoch)}</small></td>
-      <td>{v.activeHeight === null ? v.state : <>block {num(v.activeHeight)}<small>period {num(v.implied!.activePeriod)}</small></>}</td>
-      <td>{v.implied ? <>LOCKED_IN from {num(v.implied.lockedInFrom)}<small>blocks {num(v.implied.tallyFrom)}–{num(v.implied.tallyTo)} reached {num(v.threshold)}</small></> : "—"}</td>
-    </tr>
-  );
-}
-
-/** versionbits-record.v1 — static. The two BIP 9 deployments as the assignment table records them, and what the rules imply. */
+/**
+ * versionbits-record.v1 — static. Each deployment in BIP 9's table: its
+ * mainnet window as a time bar (cross-checked against its own BIP at build
+ * time), and the three periods its recorded activation height implies, on
+ * a block-height strip. The testnet rows and Unix times are in a disclosure.
+ */
 export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDeploymentFixture[] }) {
+  const blockH = 120;
+  const row = (f: DerivedVersionbitsDeploymentFixture, y: number) => {
+    const d = f.derived, m = d.mainnet;
+    if (m.activeHeight === null || !m.implied) throw new Error(`${f.id}: needs a recorded mainnet activation height`);
+    const i = m.implied;
+    const tiles = [
+      { state: "STARTED" as const, a: `${num(i.tallyFrom)}–`, b: num(i.tallyTo), note: `≥ ${num(m.threshold)}` },
+      { state: "LOCKED_IN" as const, a: num(i.lockedInFrom), b: "", note: "" },
+      { state: "ACTIVE" as const, a: num(m.activeHeight), b: "onward", note: "" },
+    ];
+    return (
+      <g data-deployment={d.name}>
+        <Value at={[14, y + 10]} text={`${d.name.toUpperCase()} · BIT ${d.bit} · BIPS ${d.bips.join(", ")}`} size={9} cls="k-value--label" />
+        <rect class="k-cell k-fill--time" x="14" y={y + 16} width="316" height="16" />
+        <Value at={[19, y + 27.5]} text={`${day(m.start)} → ${day(m.expire)}`} size={9} />
+        <Value at={[325, y + 27.5]} text={`= BIP ${f.crossCheck.bip} ✓`} size={8} anchor="end" cls="k-value--label" />
+        <Value at={[14, y + 46]} text="IMPLIED BY BIP 9'S RULES" size={8} cls="k-value--label" />
+        <path class="k-leader" d={`M14 ${y + 54} V${y + 50} H220 V${y + 54}`} />
+        <Value at={[226, y + 46]} text="RECORDED" size={8} cls="k-value--label" />
+        {tiles.map((t, k) => (
+          <g>
+            <PeriodTile x={14 + k * 106} y={y + 56} w={100} h={20} state={t.state} text={false} />
+            <text class={`k-vb-lbl${t.state === "ACTIVE" ? " k-cell__t--on" : ""}`} x={14 + k * 106 + 50} y={y + 69.5} text-anchor="middle">{t.state}</text>
+            <text class="k-vb-height" x={14 + k * 106} y={y + 88}>{t.a}</text>
+            <text class="k-vb-height" x={14 + k * 106} y={y + 98}>{t.b}</text>
+            {t.note ? <text class="k-vb-range" x={14 + k * 106 + 100} y={y + 88} text-anchor="end">{t.note}</text> : null}
+          </g>
+        ))}
+      </g>
+    );
+  };
+  const desc = fixtures
+    .map((f) => {
+      const d = f.derived, m = d.mainnet, i = m.implied!;
+      return `${d.name} on bit ${d.bit} (BIPs ${d.bips.join(", ")}): mainnet window ${day(m.start)} to ${day(m.expire)}, matching BIP ${f.crossCheck.bip}'s Unix times; recorded active from block ${m.activeHeight}; so, by BIP 9's rules, LOCKED_IN from block ${i.lockedInFrom}, after blocks ${i.tallyFrom} to ${i.tallyTo} included at least ${m.threshold} signalling blocks.`;
+    })
+    .join(" ");
+  const netRow = (f: DerivedVersionbitsDeploymentFixture, net: string, v: VersionbitsNetworkView) => (
+    <>
+      <dt>{f.derived.name}, {net} (BIP 9 assignments, line {f.source.line})</dt>
+      <dd>start {v.start} UTC ({v.startEpoch}), timeout {v.expire} UTC ({v.expireEpoch}), state “{v.state}”{v.implied ? `; implied LOCKED_IN from ${num(v.implied.lockedInFrom)}` : ""}</dd>
+    </>
+  );
   return (
-    <div class="atlas-vb-record-fig">
-      {fixtures.map((f) => (
-        <section aria-label={f.derived.name}>
-          <p class="atlas-vb-record-fig__head"><strong>{f.derived.name}</strong> · bit {f.derived.bit} · BIPs {f.derived.bips.join(", ")}</p>
-          <div class="atlas-table-wrap" tabindex={0} role="region" aria-label={`${f.derived.name} deployment record`}>
-            <table class="manual-table atlas-vb-record-fig__table">
-              <caption class="manual-sr-only">{f.derived.name}: start, timeout, recorded activation and implied lock-in</caption>
-              <thead>
-                <tr><th scope="col">Network</th><th scope="col">Start (MTP)</th><th scope="col">Timeout</th><th scope="col">Recorded</th><th scope="col">Implied by BIP 9’s rules</th></tr>
-              </thead>
-              <tbody>
-                <Row net="mainnet" v={f.derived.mainnet} />
-                <Row net="testnet" v={f.derived.testnet} />
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ))}
-      <p class="atlas-lab__source">
-        Dates and states from BIP 9’s assignment table (lines {fixtures.map((f) => f.source.line).join(", ")}); start and timeout cross-checked at build time against the Unix
-        times in each BIP’s own deployment section. The last column is inferred from the activation height by the tested model.
-      </p>
-    </div>
+    <>
+      <Drawing id="a11-record" width={344} height={fixtures.length * blockH} title="Reading back from an activation height" desc={desc}>
+        {fixtures.map((f, k) => row(f, 6 + k * blockH))}
+      </Drawing>
+      <details class="atlas-disclosure">
+        <summary>The table rows, both networks</summary>
+        <dl class="atlas-hexlist">
+          {fixtures.map((f) => (
+            <>
+              {netRow(f, "mainnet", f.derived.mainnet)}
+              {netRow(f, "testnet", f.derived.testnet)}
+            </>
+          ))}
+        </dl>
+      </details>
+    </>
   );
 }

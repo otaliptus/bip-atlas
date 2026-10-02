@@ -44,7 +44,12 @@ import {
   VersionbitsMachine,
   VersionbitsField,
   VersionbitsRecord,
-  VersionbitsWorked,
+  VersionbitsTopBits,
+  VersionbitsReuse,
+  VersionbitsThreshold,
+  VersionbitsBoundary,
+  VersionbitsLifecycle,
+  VersionbitsBip8,
   WalletPathWalk,
   WalletPathLevels,
   WalletPathSchemes,
@@ -153,6 +158,7 @@ const timelockTx = picked as DerivedTimelockBipTxFixture[];
 const timelockEnc = picked as DerivedTimelockEncodingFixture[];
 const vbAny = picked as Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture>;
 const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
+const vbGuide = picked as DerivedVersionbitsGuidelineFixture[];
 const wallet = picked as DerivedWalletPathFixture[];
 const desc = picked as DerivedDescriptorFixture[];
 const descIndex = picked as DerivedDescriptorIndexFixture[];
@@ -215,6 +221,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
   {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
   {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
+  {figure.recipe === "versionbits-top-bits.v1" && <VersionbitsTopBits />}
+  {figure.recipe === "versionbits-bit-reuse.v1" && <VersionbitsReuse />}
+  {figure.recipe === "versionbits-threshold.v1" && <VersionbitsThreshold fixtures={vbAny} />}
+  {figure.recipe === "versionbits-boundary.v1" && <VersionbitsBoundary fixture={vbDep[0]} />}
+  {figure.recipe === "versionbits-lifecycle.v1" && <VersionbitsLifecycle fixture={vbDep[0]} />}
+  {figure.recipe === "versionbits-bip8.v1" && <VersionbitsBip8 fixture={vbGuide[0]} />}
   {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
   {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
   {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
@@ -246,7 +258,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "tapscript-trace.v1" && <TapscriptWorked fixtures={ts} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
-      {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
       {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
