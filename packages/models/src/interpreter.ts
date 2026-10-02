@@ -57,6 +57,14 @@ const OP = {
   OP_NOP4: 0xb3, OP_NOP10: 0xb9, OP_CHECKSIGADD: 0xba,
 } as const;
 
+const OP_NAME = new Map<number, string>(Object.entries(OP).map(([k, v]) => [v, k]));
+/** Name of an opcode in REVIEWED (OP_NOP4…OP_NOP10 by number); throws for any other opcode. */
+export function reviewedOpName(op: number): string {
+  const n = OP_NAME.get(op) ?? (op >= OP.OP_NOP1 && op <= OP.OP_NOP10 ? `OP_NOP${op - OP.OP_NOP1 + 1}` : undefined);
+  if (!n) throw new RangeError(`no name for opcode ${op}`);
+  return n;
+}
+
 const RESERVED_NOPS = new Set([OP.OP_NOP1, ...Array.from({ length: OP.OP_NOP10 - OP.OP_NOP4 + 1 }, (_, i) => OP.OP_NOP4 + i)]);
 const SMALL_INTS = Array.from({ length: 16 }, (_, i) => OP.OP_1 + i);
 

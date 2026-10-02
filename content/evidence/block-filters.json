@@ -663,7 +663,7 @@
     },
     {
       "id": "size-computed",
-      "statement": "In the published vectors, block 180,480's filter has 13 elements in 35 bytes and block 926,485's has 9 in 25 bytes: about 21 bits per element, close to the 20-bit floor, against about 23 bits to write each hashed value at fixed width below N·M.",
+      "statement": "In the published vectors, block 180,480's filter has 13 elements in 35 bytes and block 926,485's has 9 in 25 bytes: about 21 bits per element, close to the 20-bit floor, against 24 and 23 bits to write each hashed value at fixed width below N·M.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

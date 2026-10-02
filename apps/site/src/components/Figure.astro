@@ -42,7 +42,12 @@ import {
   VersionbitsMachine,
   VersionbitsField,
   VersionbitsRecord,
-  VersionbitsWorked,
+  VersionbitsTopBits,
+  VersionbitsReuse,
+  VersionbitsThreshold,
+  VersionbitsBoundary,
+  VersionbitsLifecycle,
+  VersionbitsBip8,
   WalletPathWalk,
   WalletPathLevels,
   WalletPathSchemes,
@@ -68,15 +73,30 @@ import {
   GcsFilter,
   BfGolomb,
   BfChain,
-  BfWorked,
+  BfDirections,
+  BfSieve,
+  BfBuildStory,
+  BfSize,
+  BfQueryStory,
+  BfPeerStory,
   V2Handshake,
   V2Framing,
   V2Rekey,
-  V2Worked,
+  V2Eavesdropper,
+  V2Ellswift,
+  V2Detect,
+  V2KeyStory,
+  V2Terminator,
+  V2PacketBytes,
   Bip322VirtualTx,
   Bip322Formats,
   Bip322Verdicts,
-  Bip322Worked,
+  Bip322Hash,
+  Bip322Witness,
+  Bip322Choice,
+  Bip322VerifyStory,
+  Bip322Rack,
+  Bip322Limits,
   type DerivedBip322Fixture,
   type DerivedBip322FormatsFixture,
   type DerivedBip322VerdictsFixture,
@@ -169,6 +189,7 @@ const timelockTx = picked as DerivedTimelockBipTxFixture[];
 const timelockEnc = picked as DerivedTimelockEncodingFixture[];
 const vbAny = picked as Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture>;
 const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
+const vbGuide = picked as DerivedVersionbitsGuidelineFixture[];
 const wallet = picked as DerivedWalletPathFixture[];
 const desc = picked as DerivedDescriptorFixture[];
 const descIndex = picked as DerivedDescriptorIndexFixture[];
@@ -243,6 +264,12 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
   {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
   {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
+  {figure.recipe === "versionbits-top-bits.v1" && <VersionbitsTopBits />}
+  {figure.recipe === "versionbits-bit-reuse.v1" && <VersionbitsReuse />}
+  {figure.recipe === "versionbits-threshold.v1" && <VersionbitsThreshold fixtures={vbAny} />}
+  {figure.recipe === "versionbits-boundary.v1" && <VersionbitsBoundary fixture={vbDep[0]} />}
+  {figure.recipe === "versionbits-lifecycle.v1" && <VersionbitsLifecycle fixture={vbDep[0]} />}
+  {figure.recipe === "versionbits-bip8.v1" && <VersionbitsBip8 fixture={vbGuide[0]} />}
   {figure.recipe === "wallet-path-walk.v1" && <WalletPathWalk client:visible fixtures={wallet} figureId={figureId} />}
   {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
   {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
@@ -266,12 +293,30 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
   {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
   {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
+  {figure.recipe === "bf-two-directions.v1" && <BfDirections fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-element-sieve.v1" && <BfSieve fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-build-story.v1" && <BfBuildStory fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-size.v1" && <BfSize fixtures={bfBlocks} />}
+  {figure.recipe === "bf-query-story.v1" && <BfQueryStory fixture={bfBlocks[0]} />}
+  {figure.recipe === "bf-peer-check.v1" && <BfPeerStory />}
   {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
   {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
   {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
+  {figure.recipe === "v2-eavesdropper.v1" && <V2Eavesdropper />}
+  {figure.recipe === "v2-ellswift.v1" && <V2Ellswift fixture={v2[0]} />}
+  {figure.recipe === "v2-detect.v1" && <V2Detect fixture={v2[0]} />}
+  {figure.recipe === "v2-key-story.v1" && <V2KeyStory fixture={v2[0]} />}
+  {figure.recipe === "v2-terminator.v1" && <V2Terminator fixture={v2[0]} />}
+  {figure.recipe === "v2-packet-bytes.v1" && <V2PacketBytes fixture={v2[0]} />}
   {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
   {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
   {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
+  {figure.recipe === "bip322-message-hash.v1" && <Bip322Hash fixtures={b322} />}
+  {figure.recipe === "bip322-witness.v1" && <Bip322Witness fixture={b322[0]} />}
+  {figure.recipe === "bip322-choice.v1" && <Bip322Choice />}
+  {figure.recipe === "bip322-verify-story.v1" && <Bip322VerifyStory fixture={b322[0]} />}
+  {figure.recipe === "bip322-interpreter.v1" && <Bip322Rack fixture={b322Verdicts[0]} />}
+  {figure.recipe === "bip322-limits.v1" && <Bip322Limits />}
   {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
@@ -280,12 +325,8 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "p2sh-two-stage.v1" && <P2shWorked fixtures={p2sh} />}
       {figure.recipe === "timelock-fields.v1" && <TimelockWorked fixtures={timelock} />}
-      {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
-      {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
-      {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}
-      {figure.recipe === "bip322-virtual-tx.v1" && <Bip322Worked fixtures={b322} />}
     </Fragment>
   )}
 </Plate>

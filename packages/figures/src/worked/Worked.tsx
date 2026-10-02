@@ -14,13 +14,8 @@ import type {
   DerivedTransactionFixture,
   DerivedP2shFixture,
   DerivedTimelockCaseFixture,
-  DerivedVersionbitsDeploymentFixture,
-  DerivedVersionbitsGuidelineFixture,
   DerivedWalletPathFixture,
   DerivedDescriptorFixture,
-  DerivedBfBlockFixture,
-  DerivedV2Fixture,
-  DerivedBip322Fixture,
 } from "../types";
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
@@ -253,57 +248,6 @@ export function TimelockWorked({ fixtures }: { fixtures: DerivedTimelockCaseFixt
   );
 }
 
-/* ---------- BIPs 9, 8 ---------- */
-export function VersionbitsWorked({ fixtures }: { fixtures: Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture> }) {
-  const f = fixtures.find((x): x is DerivedVersionbitsDeploymentFixture => x.kind === "versionbits-deployment")!;
-  const d = f.derived;
-  const m = d.mainnet;
-  const i = m.implied!;
-  const num = (n: number) => n.toLocaleString("en-US");
-  const steps: WorkedStep[] = [
-    {
-      title: `The deployment's parameters: bit ${d.bit}, a start, a timeout, a threshold`,
-      values: [
-        { label: "starttime", value: `${m.start} UTC = ${m.startEpoch}` },
-        { label: "timeout", value: `${m.expire} UTC = ${m.expireEpoch}` },
-        { label: "threshold", value: `${num(m.threshold)} of 2016 blocks` },
-      ],
-      layer: { size: 0.55, tone: "plain", cells: 3 },
-    },
-    {
-      title: `Once the median time past reaches starttime, a block signals by setting bit ${d.bit}`,
-      values: [{ label: "signalling version", value: `0x${d.signalVersion.toString(16).padStart(8, "0")}` }],
-      note: "Top bits 001 and the deployment bit set. Signalling changes no rule by itself.",
-      layer: { tone: "wash", cells: 32, highlight: [2, 31 - d.bit] },
-    },
-    {
-      title: `Blocks ${num(i.tallyFrom)}–${num(i.tallyTo)}: at least ${num(m.threshold)} of the period's 2016 signal`,
-      values: [{ label: "period", value: `${num(i.activePeriod - 2)} (heights ÷ 2016)` }],
-      note: "Inferred: the table records only the activation height, and BIP 9's rules put the successful count two periods before it.",
-      layer: { tone: "hatch", cells: 12, highlight: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] },
-    },
-    {
-      title: `From block ${num(i.lockedInFrom)}: LOCKED_IN for one period`,
-      values: [{ label: "state", value: "LOCKED_IN — nothing counted, rules not yet enforced" }],
-      layer: { size: 0.75, tone: "plain", cells: 1 },
-    },
-    {
-      title: `From block ${num(m.activeHeight!)}: ACTIVE`,
-      values: [{ label: "recorded", value: m.state }],
-      note: `From this block on, the rules of BIPs ${d.bips.join(", ")} are enforced.`,
-      layer: { size: 0.85, tone: "accent", cells: 1 },
-    },
-  ];
-  return (
-    <WorkedExample
-      intro={<>The <strong>{d.name}</strong> deployment on mainnet, as BIP 9’s assignment table records it, read backwards from its activation height with BIP 9’s rules.</>}
-      steps={steps}
-      label="A deployment's parameters, a signalling version, a counted period, lock-in and activation, drawn as stacked layers."
-      source={<>Source: BIP 9 assignments, line {f.source.line}; dates cross-checked against the deployment section of BIP {f.crossCheck.bip}. Implied periods computed by the tested model.</>}
-    />
-  );
-}
-
 /* ---------- BIPs 44, 84, 86 ---------- */
 export function WalletPathWorked({ fixtures }: { fixtures: DerivedWalletPathFixture[] }) {
   const f = fixtures.find((x) => x.derived.scheme === 86) ?? fixtures[0];
@@ -364,73 +308,6 @@ export function DescriptorWorked({ fixtures }: { fixtures: DerivedDescriptorFixt
       steps={steps}
       label="A descriptor's script expression, key origin, key, derivation and range, then the scripts each child produces, drawn as stacked layers."
       source={<>Source: BIP 382, line {f.source.line}; parsed and expanded by the tested descriptor model, checked against lines {f.scriptLines.join(", ")}.</>}
-    />
-  );
-}
-
-/* ---------- BIPs 157/158 ---------- */
-export function BfWorked({ fixtures }: { fixtures: DerivedBfBlockFixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const hit = d.probes.find((p) => p.matched);
-  const miss = d.probes.find((p) => !p.matched);
-  const c = d.codes[0];
-  const steps: WorkedStep[] = [
-    { title: `Collect the elements: ${d.N} distinct scripts`, values: d.elements.filter((e) => e.included).slice(0, 3).map((e, i) => ({ label: `${e.from} ${i + 1}`, value: e.script })), note: `${d.elements.length - d.N} of ${d.elements.length} scripts are left out (OP_RETURN, empty or repeated).`, layer: { size: 0.95, tone: "plain", cells: Math.min(d.N, 8) } },
-    { title: "Hash each into [0, N·M) with SipHash keyed by the block hash", values: [{ label: "F = N · 784931", value: d.F }, { label: "smallest value", value: d.values[0] ?? "—" }], layer: { size: 0.75, tone: "wash", cells: Math.min(d.N, 8) } },
-    { title: "Sort, take the gaps, Golomb-Rice code them", values: c ? [{ label: `first gap ${c.delta}`, value: `${c.unary} ${c.remainder}` }] : [], note: `${d.bitsTotal} bits plus ${d.paddingBits} of padding.`, layer: { size: 0.55, tone: "hatch", cells: 1 } },
-    { title: "Prefix N and serialize", values: [{ label: `filter, ${d.filterBytes} bytes`, value: d.filterHex }], layer: { size: 0.6, tone: "accent", cells: 1 } },
-    { title: "Query: hash the script the same way and walk the values", values: [...(hit ? [{ label: "script in the block", value: `${hit.script.slice(0, 24)}… → match` }] : []), ...(miss ? [{ label: `script from ${miss.from}`, value: `${miss.script.slice(0, 24)}… → no match` }] : [])], note: "A match means “possibly”; no match means “not among the elements”.", layer: { size: 0.8, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 158’s testnet block {d.height}{d.notes ? ` (“${d.notes}”)` : ""}: from the block’s scripts to the published filter, then two queries.</>}
-      steps={steps}
-      label="Elements, hashed values, Golomb-Rice codes, the serialized filter and a query, drawn as stacked layers."
-      source={<>Source: BIP 158 testnet-19.json (line {f.source.line}); rebuilt by the tested model and checked against the vector.</>}
-    />
-  );
-}
-
-/* ---------- BIP 324 ---------- */
-export function V2Worked({ fixtures }: { fixtures: DerivedV2Fixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const p = d.packet;
-  const steps: WorkedStep[] = [
-    { title: "Two 64-byte public keys cross the wire", values: [{ label: "ours", value: d.ellOurs }, { label: "theirs", value: d.ellTheirs }], note: "ElligatorSwift encodings: uniformly random-looking bytes that decode to curve X coordinates.", layer: { size: 0.95, tone: "plain", cells: 2 } },
-    { title: "X-only ECDH, hashed with both encodings", values: [{ label: "x(ECDH)", value: d.xShared }, { label: "shared secret", value: d.sharedSecret }], layer: { size: 0.7, tone: "wash", cells: 1 } },
-    { title: "HKDF-SHA256 key schedule", values: [{ label: "session ID", value: d.sessionId }, { label: d.initiating ? "initiator_P (our payload key)" : "responder_P (our payload key)", value: d.initiating ? d.keys.initiatorP : d.keys.responderP }], layer: { size: 0.6, tone: "hatch", cells: 4 } },
-    { title: "Garbage terminator, then encrypted packets", values: [{ label: "our terminator", value: d.sendTerminator }], layer: { size: 0.5, tone: "accent", cells: 1 } },
-    { title: `Packet ${p.index}: length, ciphertext, tag`, values: [{ label: "encrypted length", value: p.lengthEnc }, { label: "nonce", value: p.nonce }, { label: "tag", value: p.tag }], note: `${p.totalLen} bytes in all for ${p.contentsLen} bytes of contents.`, layer: { size: 0.85, tone: "plain", cells: 3 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 324’s packet vector for packet {p.index}, seen from the {d.initiating ? "initiator" : "responder"}: from two public keys to one encrypted packet.</>}
-      steps={steps}
-      label="Public keys, shared secret, key schedule, terminator and packet, drawn as stacked layers."
-      source={<>Source: BIP 324 packet_encoding_test_vectors.csv (line {f.source.line}); recomputed by the tested model and checked against the vector. ElligatorSwift decodings are taken from the vector; this site does not implement ElligatorSwift.</>}
-    />
-  );
-}
-
-/* ---------- BIP 322 ---------- */
-export function Bip322Worked({ fixtures }: { fixtures: DerivedBip322Fixture[] }) {
-  const f = fixtures[0];
-  const d = f.derived;
-  const steps: WorkedStep[] = [
-    { title: "Hash the message with a tag", values: [{ label: "message", value: d.message || "(empty)" }, { label: "sha256_tag(\"BIP0322-signed-message\", m)", value: d.messageHash }], layer: { size: 0.6, tone: "wash", cells: 1 } },
-    { title: "to_spend commits to the hash and the address", values: [{ label: "scriptSig: OP_0 PUSH32", value: d.messageHash }, { label: "output script (the address)", value: d.toSpend.challenge }, { label: "to_spend txid", value: d.toSpend.txid }], note: "Its one input spends 000…000:FFFFFFFF, an output that does not exist; it is built only to be checked.", layer: { size: 0.9, tone: "plain", cells: 2 } },
-    { title: "to_sign spends it", values: [{ label: "input", value: `${d.toSpend.txid}:0` }, { label: "output", value: "0 sats to OP_RETURN" }], layer: { size: 0.8, tone: "hatch", cells: 2 } },
-    { title: "The signature is to_sign’s witness", values: d.toSign.witness.map((w, i) => ({ label: `witness item ${i + 1}`, value: w || "(empty)" })), layer: { size: 0.55, tone: "accent", cells: Math.max(1, d.toSign.witness.length) } },
-    { title: "Verify as if to_sign were spending a real coin", values: [{ label: "verdict", value: d.verdict.state === "valid" ? `valid at time ${d.verdict.time}, age ${d.verdict.age}` : `${d.verdict.state}: ${d.verdict.reason}` }], layer: { size: 0.7, tone: "plain", cells: 1 } },
-  ];
-  return (
-    <WorkedExample
-      intro={<>BIP 322’s vector for the message “{d.message}”, signed for {d.address.slice(0, 14)}…: two transactions built only to be checked, not to be broadcast.</>}
-      steps={steps}
-      label="Message hash, to_spend, to_sign, witness and verdict, drawn as stacked layers."
-      source={<>Source: BIP 322 {f.source.file?.replace("bip-0322/", "")} (line {f.source.line}); rebuilt and verified by the tested model.</>}
     />
   );
 }
