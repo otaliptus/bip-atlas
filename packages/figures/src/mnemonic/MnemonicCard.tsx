@@ -28,8 +28,8 @@ export function MnemonicCard({ fixture }: { fixture: DerivedMnemonicFixture }) {
       desc={`A metal backup plate engraved with the ${layout.wordCount} words of a published test phrase, numbered 1 to ${layout.wordCount}: ${groups.map((g) => g.word).join(" ")}. The first word, ${first.word}, is wordlist index ${first.index}, which is 11 bits.`}
     >
       <IsoBox at={[ox, oy + H]} w={W} d={D} h={H} role="plain" cls="k-plate" />
-      <rect class="k-outline k-fill--plain" transform={onTop(P(12, 10, H))} width="104" height="14" />
-      <text class="k-label-flat" transform={onTop(P(17, 20, H))}>PUBLIC TEST VECTOR</text>
+      <rect class="k-outline k-fill--plain" transform={onTop(P(84, 10, H))} width="104" height="14" />
+      <text class="k-label-flat" transform={onTop(P(89, 20, H))}>PUBLIC TEST VECTOR</text>
       {groups.map((g, i) => (
         <g>
           <text class="k-engrave k-engrave--n" transform={onTop(P(col(i), row(i), H))}>{String(g.position + 1).padStart(2, "0")}</text>
@@ -37,7 +37,7 @@ export function MnemonicCard({ fixture }: { fixture: DerivedMnemonicFixture }) {
         </g>
       ))}
       <Label at={P(W, D - 4, 0)} side="down" len={26} text={`${layout.wordCount} words · ${layout.entropyBits} + ${layout.checksumBits} bits`} />
-      <Label at={P(12, 44, H)} side="left" len={20} text={`index ${first.index}`} />
+      <Label at={P(col(0) + 34, row(0) - 9, H)} side="up" len={30} text={`index ${first.index}`} />
     </Drawing>
   );
 }

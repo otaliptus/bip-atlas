@@ -28,13 +28,13 @@ export function ChecksumStory({ fixture }: { fixture: DerivedMnemonicFixture }) 
     },
     {
       note: `The hash begins ${hashBytes.slice(0, 4).join(" ")}…; its first byte is ${firstByteBits.join("")}.`,
-      desc: `SHA-256 of the entropy begins ${hashHex.slice(0, 16)}. Its first byte, ${hashBytes[0]}, is ${firstByteBits.join("")} in binary.`,
+      desc: `SHA-256 of the entropy is ${hashHex}. Its first byte, ${hashBytes[0]}, is ${firstByteBits.join("")} in binary.`,
       draw: () => (
         <>
           <Cells x={14} y={14} values={hashBytes.slice(0, 16)} size={17} roleOf={() => "hash"} />
           <Value at={[294, 27]} text="…" anchor="end" />
           <Magnifier id="a01-cs-mag" from={[22.5, 22.5]} fromR={9} at={[74, 104]} r={42}>
-            <Cells x={30} y={98} values={firstByteBits} size={11} roleOf={(i) => (i < n ? "check" : "hash")} strong={(i) => i < n} />
+            <Cells x={34} y={99} values={firstByteBits} size={10} roleOf={(i) => (i < n ? "check" : "hash")} strong={(i) => i < n} />
           </Magnifier>
         </>
       ),
@@ -70,5 +70,13 @@ export function ChecksumStory({ fixture }: { fixture: DerivedMnemonicFixture }) 
       },
     },
   ];
-  return <Storyboard id="a01-cs" title="Making the checksum" width={300} height={156} frames={frames} />;
+  return (
+    <>
+      <Storyboard id="a01-cs" title="Making the checksum" width={300} height={156} frames={frames} />
+      <details class="atlas-disclosure">
+        <summary>Exact SHA-256 of the entropy, all 32 bytes</summary>
+        <code class="atlas-break">{hashHex}</code>
+      </details>
+    </>
+  );
 }

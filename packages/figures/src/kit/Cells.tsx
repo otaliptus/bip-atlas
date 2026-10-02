@@ -14,6 +14,8 @@ export interface CellsProps {
   text?: boolean;
   /** Draw a cut mark before every n-th cell (e.g. 11 for BIP 39 groups); none at a row start. */
   cutEvery?: number;
+  /** Finer control than cutEvery: draw a cut mark before cell i when this returns true (never at a row start). */
+  cutBefore?: (i: number) => boolean;
   /** Thick outline (e.g. the selected group). */
   emphasis?: (i: number) => boolean;
   /** `fill` for hidden cells, from `idsFor(...).hatch`. */
@@ -26,7 +28,8 @@ export function cellsSize(n: number, { size = 12, perRow = n, rowGap = 4 }: { si
 }
 
 /** Row or grid of square cells: bits, bytes or characters. */
-export function Cells({ x, y, values, size = 12, perRow = values.length, rowGap = 4, roleOf = () => "plain", strong, text = true, cutEvery, emphasis, hatch }: CellsProps) {
+export function Cells({ x, y, values, size = 12, perRow = values.length, rowGap = 4, roleOf = () => "plain", strong, text = true, cutEvery, cutBefore, emphasis, hatch }: CellsProps) {
+  const cut = cutBefore ?? (cutEvery ? (i: number) => i % cutEvery === 0 : () => false);
   return (
     <g class="k-cells">
       {values.map((v, i) => {
@@ -47,7 +50,7 @@ export function Cells({ x, y, values, size = 12, perRow = values.length, rowGap 
             {text && v ? (
               <text class={`k-cell__t${strong?.(i) ? " k-cell__t--on" : ""}`} x={cx + size / 2} y={cy + size / 2 + 3.4} text-anchor="middle">{v}</text>
             ) : null}
-            {cutEvery && i % perRow !== 0 && i % cutEvery === 0 ? <line class="k-cut" x1={cx} y1={cy - 3} x2={cx} y2={cy + size + 3} /> : null}
+            {i % perRow !== 0 && cut(i) ? <line class="k-cut" x1={cx} y1={cy - 3} x2={cx} y2={cy + size + 3} /> : null}
           </g>
         );
       })}

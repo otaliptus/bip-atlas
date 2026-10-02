@@ -37,7 +37,7 @@
       "fixtures": [
         "ozone-128"
       ],
-      "caption": "Each word stands for a number from 0 to 2,047. The numbers carry the entropy, but the seed is later computed from the words themselves.",
+      "caption": "Each word stands for a number from 0 to 2,047. The numbers carry the entropy and its checksum, but the seed is later computed from the words themselves.",
       "claims": [
         "split-11",
         "vectors"
@@ -457,7 +457,7 @@
         },
         {
           "type": "paragraph",
-          "text": "It is tempting to call the words a private key. They are not. They encode entropy; the seed is produced by stretching the sentence; keys come from the seed in a further step. All three must stay secret, because each one, together with the passphrase if one is used, is enough to rebuild everything that follows.",
+          "text": "It is tempting to call the words a private key. They are not. They encode entropy; the seed is produced by stretching the sentence; keys come from the seed in a further step. All three must stay secret: the words, with the passphrase if one is used, rebuild the seed and every key after it, and the seed alone rebuilds the keys.",
           "claims": [
             "two-parts",
             "pbkdf2",
@@ -472,7 +472,7 @@
           "fixtures": [
             "ozone-128"
           ],
-          "caption": "Three steps, three different secrets; the last step is the next chapter.",
+          "caption": "Encoding rewrites the entropy as words; stretching computes a new seed from the words and the passphrase; deriving keys is the next chapter.",
           "claims": [
             "two-parts",
             "pbkdf2",

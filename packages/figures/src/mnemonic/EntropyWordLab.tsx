@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Arrow, Cells, Drawing, IsoBox, Label, Responsive, Value, cellsSize, idsFor, iso, onTop } from "../kit";
+import { Arrow, Bracket, Cells, Drawing, IsoBox, Label, Responsive, Value, cellsSize, idsFor, iso, onTop } from "../kit";
 import type { DerivedMnemonicFixture } from "../types";
 
 interface Props {
@@ -24,7 +24,8 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
   const [fixtureId, setFixtureId] = useState(fixtures[0].id);
   const fixture = fixtures.find((f) => f.id === fixtureId)!;
   const { layout, groups, entropyBits, checksumBits } = fixture.derived;
-  const [step, setStep] = useState(groups.length);
+  // Hydrated, the reader starts from uncut bits (as the prose says) and cuts one group at a time.
+  const [step, setStep] = useState(0);
   // Without JavaScript: every group cut, last group selected (the static equivalent).
   const shown = hydrated ? Math.min(step, groups.length) : groups.length;
   const sel = shown > 0 ? groups[shown - 1] : null;
@@ -36,6 +37,11 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
     setStep(0);
   };
 
+  const cutSoFar = groups.slice(0, shown).map((g) => `${g.position + 1} ${g.word} (#${g.index})`).join(", ");
+  const describe = () =>
+    `${layout.entropyBits} entropy bits followed by ${layout.checksumBits} checksum bits make ${layout.totalBits} bits, ` +
+    `${layout.wordCount} groups of 11. ` +
+    (shown ? `Groups cut so far, with wordlist index counted from 0: ${cutSoFar}.` : "None cut yet.");
   const status = sel
     ? `Word ${sel.position + 1} of ${layout.wordCount}: bits ${sel.bits} are ${sel.index}, “${sel.word}”.` +
       (sel.checksumBitCount ? ` ${sel.entropyBitCount} entropy bits and ${sel.checksumBitCount} checksum bits.` : "")
@@ -59,7 +65,7 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
     const chipsY = dy + (wide ? 110 : 160);
     const H = chipsY + Math.ceil(groups.length / chipsPerRow) * 26 + 10;
     return (
-      <Drawing id={id} width={W} height={H} title={`From ${layout.totalBits} bits to ${layout.wordCount} words`} desc={status}>
+      <Drawing id={id} width={W} height={H} title={`From ${layout.totalBits} bits to ${layout.wordCount} words`} desc={describe()}>
         <Value at={[x0, 18]} text={`${layout.entropyBits} ENTROPY BITS + ${layout.checksumBits} CHECKSUM = ${layout.totalBits} BITS`} size={9} cls="k-value--label" />
         <Cells
           x={x0}
@@ -71,13 +77,20 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
           text={false}
           roleOf={(i) => (i < layout.entropyBits ? "secret" : "check")}
           strong={(i) => bits[i] === "1"}
-          cutEvery={shown > 0 ? 11 : undefined}
+          cutBefore={(i) => i % 11 === 0 && i / 11 <= shown}
           emphasis={inSel}
+        />
+        <Bracket
+          x1={x0 + (layout.entropyBits % perRow) * cell}
+          x2={x0 + perRow * cell}
+          y={y0 + rib.height + 3}
+          text={`checksum · ${layout.checksumBits}`}
         />
         {sel ? (
           <>
+            <Value at={[x0, dy - 7]} text={`GROUP ${sel.position + 1} · 11 BITS`} size={9} cls="k-value--label" />
             <Cells x={x0} y={dy} values={[...sel.bits]} size={16} roleOf={(i) => (i < sel.entropyBitCount ? "secret" : "check")} strong={(i) => sel.bits[i] === "1"} />
-            <Label at={[x0 + 88, dy + 16]} side="down" len={10} text={`group ${sel.position + 1} · 11 bits`} />
+            {sel.checksumBitCount ? <Bracket x1={x0 + sel.entropyBitCount * 16} x2={x0 + 176} y={dy + 19} text="checksum" /> : null}
             <Arrow d={`M${x0 + 184} ${dy + 8} H${x0 + 210}`} ids={ids} />
             <Value at={[x0 + 216, dy + 14]} text={String(sel.index)} size={16} />
             <IsoBox at={[card(0, 0)[0], card(0, 0)[1] + 3]} w={96} d={54} h={3} role="public" />
@@ -86,7 +99,11 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
             {wide ? <Label at={card(96, 27, 0)} side="right" len={10} text="wordlist card" /> : <Label at={card(0, 54, 0)} side="left" len={10} text="wordlist card" />}
           </>
         ) : (
-          <Value at={[x0, dy + 14]} text="Not cut yet: move the slider." size={11} cls="k-value--muted" />
+          <>
+            <Value at={[x0, dy + 14]} text="Not cut yet: move the slider." size={11} cls="k-value--muted" />
+            <IsoBox at={[card(0, 0)[0], card(0, 0)[1] + 3]} w={96} d={54} h={3} role="hidden" hatch={ids.hatch} />
+            {wide ? <Label at={card(96, 27, 0)} side="right" len={10} text="wordlist card" /> : <Label at={card(0, 54, 0)} side="left" len={10} text="wordlist card" />}
+          </>
         )}
         {groups.map((g, k) => {
           const x = x0 + (k % chipsPerRow) * chipW;
@@ -95,7 +112,7 @@ export function EntropyWordLab({ fixtures, figureId }: Props) {
           const current = sel !== null && k === sel.position;
           return (
             <g>
-              <rect class={`k-outline ${current ? "k-fill--public" : "k-fill--plain"}${current ? " k-cell--em" : ""}`} x={x + 2} y={y} width={chipW - 4} height={20} style={known ? undefined : `fill:${ids.hatch}`} />
+              <rect class={`k-outline k-fill--plain${current ? " k-cell--em" : ""}`} x={x + 2} y={y} width={chipW - 4} height={20} style={known ? undefined : `fill:${ids.hatch}`} />
               <text class="k-value k-value--muted" x={x + 7} y={y + 13.5} style="font-size:8px">{String(k + 1).padStart(2, "0")}</text>
               {known ? <text class="k-value" x={x + 24} y={y + 14}>{g.word}</text> : null}
             </g>

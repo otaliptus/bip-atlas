@@ -1,4 +1,4 @@
-import { PBKDF2_ITERATIONS } from "@bip-atlas/models/bip39";
+import { PBKDF2_ITERATIONS, SEED_BYTES } from "@bip-atlas/models/bip39";
 import { Arrow, Bracket, Cells, Drawing, Machine, Value, idsFor } from "../kit";
 import type { DerivedMnemonicFixture } from "../types";
 
@@ -18,10 +18,10 @@ export function SeedDerivation({ fixture }: { fixture: DerivedMnemonicFixture })
       desc={`PBKDF2 with HMAC-SHA512 runs ${rounds} times. Its password is the sentence (“${head} …”) and its salt is the text “mnemonic” followed by the passphrase “${seed.passphrase}”. The result is the 64-byte seed ${seed.seedHex}, which matches the published vector.`}
     >
       <rect class="k-outline k-fill--secret" x="14" y="14" width="150" height="34" />
-      <Value at={[22, 28]} text="PASSWORD" size={8} cls="k-value--muted" />
+      <Value at={[22, 28]} text="PASSWORD · UTF-8 NFKD" size={8} cls="k-value--muted" />
       <Value at={[22, 42]} text={`${head} …`} size={10} />
       <rect class="k-outline k-fill--secret" x="176" y="14" width="150" height="34" />
-      <Value at={[184, 28]} text="SALT" size={8} cls="k-value--muted" />
+      <Value at={[184, 28]} text="SALT · UTF-8 NFKD" size={8} cls="k-value--muted" />
       <Value at={[184, 42]} text={`"mnemonic" + "${seed.passphrase}"`} size={10} />
       <Arrow d="M89 48 V70 H138" ids={ids} />
       <Arrow d="M251 48 V70 H206" ids={ids} />
@@ -30,7 +30,7 @@ export function SeedDerivation({ fixture }: { fixture: DerivedMnemonicFixture })
       <Value at={[270, 122]} text={`× ${rounds}`} size={11} />
       <Arrow d="M194 166 V192" ids={ids} />
       <Cells x={114} y={200} values={bytes} size={20} perRow={8} rowGap={0} roleOf={() => "secret"} />
-      <Bracket x1={114} x2={114 + 8 * 20} y={200 + 8 * 20 + 4} text="seed · 64 bytes = 512 bits" />
+      <Bracket x1={114} x2={114 + 8 * 20} y={200 + 8 * 20 + 4} text={`seed · ${SEED_BYTES} bytes = ${SEED_BYTES * 8} bits`} />
       <Value at={[194, 412]} text="MATCHES THE PUBLISHED VECTOR" anchor="middle" size={9} cls="k-value--muted" />
     </Drawing>
   );

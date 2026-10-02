@@ -38,6 +38,7 @@ export function derived(id: string): DerivedMnemonicFixture {
       ],
       lastWord: { prefixWords: words.length - 1, validIndices: validLastWords(words.slice(0, -1), list), actualIndex: list.indexOf(words.at(-1)!) },
       wordlistSample: [0, 1, 2].map((index) => ({ index, word: list[index] })),
+      wordlistSize: list.length,
     },
   };
 }
@@ -156,5 +157,14 @@ describe("EntropyWordLab (static render)", () => {
   it("describes the selected group in the status line", () => {
     const last = fx[0].derived.groups.at(-1)!;
     expect(s).toContain(`Word ${last.position + 1} of ${fx[0].derived.layout.wordCount}`);
+  });
+});
+
+describe("test derivation", () => {
+  it("labels as 'vector' only a seed equal to the published one", () => {
+    for (const id of ["zero-128", "ozone-128", "zero-256", "all-hour-256"]) {
+      const d = derived(id);
+      expect(d.derived.seeds.find((s) => s.origin === "vector")!.seedHex).toBe(d.seedHex);
+    }
   });
 });

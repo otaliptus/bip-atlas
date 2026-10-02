@@ -243,6 +243,7 @@ function deriveMnemonic(f: MnemonicFixture): DerivedMnemonicFixture {
       ],
       lastWord: { prefixWords: words.length - 1, validIndices, actualIndex },
       wordlistSample: [0, 1, 2].map((index) => ({ index, word: list[index] })),
+      wordlistSize: list.length,
     },
   };
 }

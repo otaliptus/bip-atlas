@@ -7,18 +7,20 @@ const name = (p: string) => (p ? `"${p}"` : "empty");
 export function PassphraseSeeds({ fixture }: { fixture: DerivedMnemonicFixture }) {
   const seeds = fixture.derived.seeds;
   const size = 19;
+  const head = `${fixture.mnemonic.split(" ").slice(0, 3).join(" ")} …`;
   return (
     <Drawing
       id="a01-pass"
       width={340}
-      height={222}
+      height={238}
       title="Same words, two passphrases"
-      desc={seeds.map((s) => `With passphrase ${name(s.passphrase)} the seed is ${s.seedHex}${s.origin === "vector" ? " (published vector)" : " (computed by the tested implementation)"}.`).join(" ")}
+      desc={`The same words, “${head}”, with two passphrases. ` + seeds.map((s) => `With passphrase ${name(s.passphrase)} the seed is ${s.seedHex}${s.origin === "vector" ? " (published vector)" : " (computed by the tested implementation)"}.`).join(" ")}
     >
+      <Value at={[14, 12]} text={`WORDS: ${head}`} size={9} cls="k-value--muted" />
       {seeds.map((s, k) => {
         const x = 14 + k * 168;
         return (
-          <g>
+          <g transform="translate(0 16)">
             <Value at={[x, 18]} text={`PASSPHRASE ${name(s.passphrase).toUpperCase()}`} size={9} />
             <Cells x={x} y={30} values={s.seedHex.match(/.{2}/g)!} size={size} perRow={8} rowGap={0} roleOf={() => "secret"} />
             <Bracket x1={x} x2={x + 8 * size} y={30 + 8 * size + 4} text={s.origin === "vector" ? "published vector" : "computed"} />

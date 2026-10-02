@@ -52,6 +52,8 @@ export interface MnemonicDerived {
   lastWord: { prefixWords: number; validIndices: number[]; actualIndex: number };
   /** The first wordlist entries, for drawing the list itself. */
   wordlistSample: Array<{ index: number; word: string }>;
+  /** Number of words in the wordlist the model used (2,048 for BIP 39). */
+  wordlistSize: number;
 }
 
 export type DerivedMnemonicFixture = MnemonicFixture & { derived: MnemonicDerived };

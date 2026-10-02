@@ -16,7 +16,7 @@ export function EntropyBits({ fixture }: { fixture: DerivedMnemonicFixture }) {
       width={hexX + 84}
       height={y0 + rows * size + 52}
       title={`${layout.entropyBits} bits of entropy`}
-      desc={`The ${layout.entropyBits} entropy bits of a published sample drawn as a ${perRow}-by-${rows} grid, ones filled and zeros empty, beside the same value written as ${fixture.entropyHex.length} hexadecimal characters: ${fixture.entropyHex}.`}
+      desc={`The ${layout.entropyBits} entropy bits of a published sample drawn as a ${perRow}-by-${rows} grid, ones dark and zeros pale, beside the same value written as ${fixture.entropyHex.length} hexadecimal characters: ${fixture.entropyHex}.`}
     >
       {Array.from({ length: rows }, (_, r) => (
         <Value at={[x0 - 6, y0 + r * size + 9]} text={String(r * perRow)} anchor="end" size={8} cls="k-value--muted" />
