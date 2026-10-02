@@ -13,6 +13,7 @@ interface Props {
 export type SpView = "sender" | "receiver" | "observer";
 interface Row { role: Role; text: string; dashed?: boolean; lamp?: "on" | "off" }
 
+const sub = (k: number) => String(k).split("").map((c) => "₀₁₂₃₄₅₆₇₈₉"[Number(c)]).join("");
 const VIEW_NAME: Record<SpView, string> = { sender: "the sender", receiver: "the receiver", observer: "an outside observer" };
 
 /**
@@ -21,12 +22,18 @@ const VIEW_NAME: Record<SpView, string> = { sender: "the sender", receiver: "the
  * are never given a value; a panel that is not the viewer's is not built.
  */
 export function spPanels(d: SpDerived, view: SpView, steps: boolean) {
+  if (new Set(d.paidTo.map((p) => p.Bscan)).size !== 1) throw new Error("the hero numbers outputs for one paid scan key only");
+  const foundAt = (k: number) => {
+    const o = d.txOutputs.find((x) => x.k === k);
+    if (!o) throw new Error(`no output found at k = ${k}`);
+    return o.key;
+  };
   const chain: Row[] = d.inputs.map((i) => (i.pubkey ? { role: "public" as Role, text: `in ${kindOf(i)} · ${short(i.pubkey)}` } : { role: "plain" as Role, text: `in ${kindOf(i)} · skipped`, dashed: true }));
-  if (steps) chain.push({ role: "public", text: `A = Σ keys · ${short(d.A)}` }, { role: "hash", text: `input_hash · ${short(d.inputHash)}` });
+  if (steps) chain.push({ role: "public", text: `A = Σ keys · ${short(d.A)}` }, { role: "hash", text: `input_hash · ${short(d.inputHash)}` }, { role: "public", text: `input_hash·A · ${short(d.tweak)}` });
   for (const o of d.txOutputs) {
     const note =
       view === "observer" ? "owner unknown"
-      : view === "sender" ? (d.senderOutputs.includes(o.key) ? "made by the sender" : "not the sender's")
+      : view === "sender" ? (d.senderOutputs.includes(o.key) ? `silent payment P${sub(d.senderOutputs.indexOf(o.key))}` : "another output")
       : o.mine ? `mine, k = ${o.k}${o.label !== null ? `, label ${o.label}` : ""}` : "not mine";
     chain.push({ role: "public", text: `out ${short(o.key)} · ${note}` });
   }
@@ -34,19 +41,19 @@ export function spPanels(d: SpDerived, view: SpView, steps: boolean) {
     { role: "secret", text: "a = Σ aᵢ · secret, no value", dashed: true },
     ...d.paidTo.flatMap((p) => [
       { role: "public" as Role, text: `pays B_scan ${short(p.Bscan)}` },
-      { role: "public" as Role, text: `B_m ${short(p.Bm)}${p.label !== null ? ` (label ${p.label})` : ""}` },
+      { role: "public" as Role, text: `B_m ${short(p.Bm)}` },
     ]),
     ...(steps ? [{ role: "secret" as Role, text: `secret ${short(d.senderSecret)}` }] : []),
-    ...d.senderOutputs.map((o, k) => ({ role: "public" as Role, text: `makes P${"₀₁₂₃₄₅₆₇₈₉"[k] ?? k} ${short(o)}` })),
+    ...d.senderOutputs.map((o, k) => ({ role: "public" as Role, text: `makes P${sub(k)} ${short(o)}` })),
   ];
   const receiver: Row[] | null = view !== "receiver" ? null : [
     { role: "secret", text: "b_scan · secret, no value", dashed: true },
     { role: "public", text: `B_scan ${short(d.receiver.Bscan)}` },
     { role: "public", text: `B_spend ${short(d.receiver.Bspend)}` },
     ...(d.receiver.labels.length ? [{ role: "plain" as Role, text: `labels ${d.receiver.labels.join(", ")}` }] : []),
-    ...(steps ? [{ role: "hash" as Role, text: `tweak ${short(d.tweak)}` }, { role: "secret" as Role, text: `secret ${short(d.sharedSecret)}` }] : []),
+    ...(steps ? [{ role: "secret" as Role, text: `secret ${short(d.sharedSecret)}` }] : []),
     ...(steps
-      ? d.steps.map((s) => ({ role: "public" as Role, text: `k=${s.k} P ${short(s.Pk)}`, lamp: (s.matched ? "on" : "off") as "on" | "off" }))
+      ? d.steps.map((s) => ({ role: "public" as Role, text: s.via && s.via !== "direct" ? `k=${s.k} via a label → ${short(foundAt(s.k))}` : `k=${s.k} P ${short(s.Pk)}`, lamp: (s.matched ? "on" : "off") as "on" | "off" }))
       : [{ role: "plain" as Role, text: `${d.txOutputs.filter((o) => o.mine).length} output(s) found` }]),
   ];
   return { chain, sender, receiver };
@@ -56,7 +63,7 @@ export function spPanels(d: SpDerived, view: SpView, steps: boolean) {
 export function describeView(d: SpDerived, view: SpView, steps: boolean): string {
   const parts = [`Vector “${d.comment}”, seen by ${VIEW_NAME[view]}.`];
   parts.push(`On chain: inputs ${d.inputs.map((i) => (i.pubkey ? `${kindOf(i)} with key ${i.pubkey}` : `${kindOf(i)}, skipped (${i.skipped})`)).join("; ")}.`);
-  if (steps) parts.push(`Anyone can compute A = ${d.A} and input_hash = ${d.inputHash} from them.`);
+  if (steps) parts.push(`Anyone can compute A = ${d.A}, input_hash = ${d.inputHash} and input_hash·A = ${d.tweak} from them.`);
   parts.push(`Taproot outputs: ${d.txOutputs.map((o) => o.key).join(", ")}.`);
   if (view === "sender") {
     parts.push(`The sender knows its input keys' secrets (not shown) and pays ${d.paidTo.map((p) => p.address).join(", ")}.`);
@@ -64,7 +71,7 @@ export function describeView(d: SpDerived, view: SpView, steps: boolean): string
     parts.push(`It creates ${d.senderOutputs.join(", ")}.`);
   } else if (view === "receiver") {
     parts.push(`The receiver knows b_scan (not shown) and its address ${d.receiver.address}${d.receiver.labels.length ? `, with labels ${d.receiver.labels.join(", ")}` : ""}.`);
-    if (steps) parts.push(`It computes the tweak ${d.tweak} and the shared secret ${d.sharedSecret}; ${d.steps.map((s) => `k = ${s.k}, P = ${s.Pk}, ${s.matched ? "found" : "not found"}`).join("; ")}.`);
+    if (steps) parts.push(`It computes the shared secret ${d.sharedSecret}; ${d.steps.map((s) => `k = ${s.k}, P = ${s.Pk}, ${!s.matched ? "not found" : s.via && s.via !== "direct" ? "found via a label: the output is P plus the label point" : "found"}`).join("; ")}.`);
     parts.push(`Outputs that are its own: ${d.txOutputs.filter((o) => o.mine).map((o) => o.key).join(", ") || "none"}.`);
   } else {
     parts.push("The observer has neither a nor b_scan, so it cannot compute any shared secret or tell which address, if any, an output pays.");
@@ -119,25 +126,25 @@ export function SpDerivation({ fixtures, figureId }: Props) {
   const p = spPanels(d, v, st);
   const status =
     v === "sender"
-      ? `The sender's view: it sums its input keys' secrets, combines them with the receiver's scan key into a shared secret, and creates ${d.senderOutputs.length} taproot output${d.senderOutputs.length === 1 ? "" : "s"}.`
+      ? `The sender's view: it sums its input keys' secrets, combines them with the scan key of the address it pays into a shared secret, and creates ${d.senderOutputs.length} taproot output${d.senderOutputs.length === 1 ? "" : "s"}.`
       : v === "receiver"
-        ? `The receiver's view: from the public input keys and its secret b_scan it reaches ${d.secretsAgree ? "the same shared secret, and finds" : "a shared secret, but finds"} ${d.txOutputs.filter((o) => o.mine).length} output${d.txOutputs.filter((o) => o.mine).length === 1 ? "" : "s"} of its own.`
+        ? `The receiver's view: from the public input keys and its secret b_scan it computes a shared secret and finds ${d.txOutputs.filter((o) => o.mine).length} output${d.txOutputs.filter((o) => o.mine).length === 1 ? "" : "s"} of its own.`
         : "An outside observer's view: the same transaction, with no shared secret and no way to tell whom the outputs pay.";
 
   const draw = (w: "wide" | "narrow") => {
     const wide = w === "wide";
     const did = `${figureId}-${w}`;
     const ids = idsFor(did);
-    const hide = (_side: string) => `HIDDEN: NOT KNOWN TO ${VIEW_NAME[v].toUpperCase()}`;
+    const hidden = `HIDDEN: NOT KNOWN TO ${VIEW_NAME[v].toUpperCase()}`;
     if (wide) {
       const H = 24 + Math.max(panelH(p.sender), panelH(p.chain), panelH(p.receiver)) + 10;
       return (
         <Drawing id={did} width={640} height={H} title="One payment, seen from each side" desc={describeView(d, v, st)}>
-          <Panel x={10} y={12} w={190} title="SENDER" who="sender" rows={p.sender} hidden={hide("SENDER")} hatch={ids.hatch} />
+          <Panel x={10} y={12} w={190} title="SENDER" who="sender" rows={p.sender} hidden={hidden} hatch={ids.hatch} />
           <line class="k-boundary__line" x1="212" y1="4" x2="212" y2={H - 4} />
           <Panel x={224} y={12} w={192} title="THE TRANSACTION · PUBLIC" rows={p.chain} hidden="" hatch={ids.hatch} />
           <line class="k-boundary__line" x1="428" y1="4" x2="428" y2={H - 4} />
-          <Panel x={440} y={12} w={190} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hide("RECEIVER")} hatch={ids.hatch} />
+          <Panel x={440} y={12} w={190} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hidden} hatch={ids.hatch} />
         </Drawing>
       );
     }
@@ -145,11 +152,11 @@ export function SpDerivation({ fixtures, figureId }: Props) {
     const H = y3 + panelH(p.receiver) + 6;
     return (
       <Drawing id={did} width={330} height={H} title="One payment, seen from each side" desc={describeView(d, v, st)}>
-        <Panel x={10} y={y1} w={310} title="SENDER" who="sender" rows={p.sender} hidden={hide("SENDER")} hatch={ids.hatch} />
+        <Panel x={10} y={y1} w={310} title="SENDER" who="sender" rows={p.sender} hidden={hidden} hatch={ids.hatch} />
         <line class="k-boundary__line" x1="4" y1={y2 - 8} x2="326" y2={y2 - 8} />
         <Panel x={10} y={y2} w={310} title="THE TRANSACTION · PUBLIC" rows={p.chain} hidden="" hatch={ids.hatch} />
         <line class="k-boundary__line" x1="4" y1={y3 - 8} x2="326" y2={y3 - 8} />
-        <Panel x={10} y={y3} w={310} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hide("RECEIVER")} hatch={ids.hatch} />
+        <Panel x={10} y={y3} w={310} title="RECEIVER" who="receiver" rows={p.receiver} hidden={hidden} hatch={ids.hatch} />
       </Drawing>
     );
   };

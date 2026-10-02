@@ -81,7 +81,7 @@ export function DeriveStory({ fixture }: { fixture: DerivedSpFixture }) {
           <Chip x={14} y={56} w={126} role="secret" text={short(d.senderSecret)} />
           <Value at={[150, 67]} text="=" size={12} anchor="middle" />
           <Chip x={160} y={56} w={126} role="secret" text={short(d.sharedSecret)} />
-          <Value at={[14, 92]} text="THE SHARED SECRET · KNOWN TO THESE TWO ONLY" size={8} cls="k-value--muted" />
+          <Value at={[14, 92]} text="THE SHARED SECRET · NOT COMPUTABLE BY AN OBSERVER" size={8} cls="k-value--muted" />
         </>
       ),
     },

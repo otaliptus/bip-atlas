@@ -97,7 +97,7 @@ describe("A15.4 hero: who knows what", () => {
         expect(p.sender).toBeNull();
         expect(p.receiver).toBeNull();
         const text = JSON.stringify(p) + describeView(f.derived, "observer", steps);
-        for (const secret of [f.derived.sharedSecret, f.derived.senderSecret, f.derived.tweak, f.derived.receiver.address]) {
+        for (const secret of [f.derived.sharedSecret, f.derived.senderSecret, f.derived.receiver.address]) {
           expect(text).not.toContain(secret);
           expect(text).not.toContain(secret.slice(0, 8));
         }
@@ -113,6 +113,11 @@ describe("A15.4 hero: who knows what", () => {
     const rcv = spPanels(f23.derived, "receiver", true);
     expect(rcv.sender).toBeNull();
     expect(JSON.stringify(rcv) + describeView(f23.derived, "receiver", true)).not.toContain(f23.derived.paidTo[0].address);
+  });
+  it("does not give the sender a label number it could not know", () => {
+    const f12 = fx.find((f: DerivedSpFixture) => f.caseIndex === 12)!;
+    expect(JSON.stringify(spPanels(f12.derived, "sender", true)) + describeView(f12.derived, "sender", true)).not.toMatch(/label \d/);
+    expect(JSON.stringify(spPanels(f12.derived, "receiver", true))).toContain("via a label");
   });
   it("renders the sender's side of the first vector without JavaScript", () => {
     const s = html(h(SpDerivation, { fixtures: fx, figureId: "fig-a15-4" }));

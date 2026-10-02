@@ -88,7 +88,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G, starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
+     "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G (B_m in place of B_spend for a labeled address), starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
      "claims": [
       "derive",
       "multi-output",
@@ -125,7 +125,7 @@
      "type": "figure",
      "figure": "A15.4",
      "recipe": "silent-payment-derivation.v1",
-     "title": "One payment, seen from both sides",
+     "title": "One payment, seen from each side",
      "fixtures": [
       "sp-case-0",
       "sp-case-9",
@@ -139,7 +139,11 @@
       "vectors",
       "derive",
       "multi-output",
-      "labels"
+      "labels",
+      "sum-inputs",
+      "input-hash",
+      "nums",
+      "goals"
      ],
      "layout": "wide"
     }

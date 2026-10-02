@@ -15,14 +15,14 @@ export function SpLabels({ fixture }: { fixture: DerivedSpFixture }) {
   while (all.every((x) => x.a[common] === all[0].a[common])) common++;
   const sep = r.address.lastIndexOf("1");
   // B_scan comes first in the data: its bits fill this many whole 5-bit characters after "sp1q".
-  const scanChars = Math.floor(((r.Bscan.length / 2) * 8) / 5);
+  const scanChars = Math.ceil(((r.Bscan.length / 2) * 8) / 5);
   if (common < sep + 2 + scanChars) throw new Error(`${fixture.id}: labeled addresses do not share the B_scan characters`);
   const total = r.address.length;
   const unit = 300 / total;
   const rowH = 40, top = 30;
   const desc =
     `${all.length} addresses of one receiver: ${all.map((x) => `${x.name.toLowerCase()}, ${x.a}`).join("; ")}. ` +
-    `The first ${common} characters are the same in all of them, because they encode the same scan key B_scan (and, here, the first bits of each B_m); the rest of the spend-key part and the checksum differ. Anyone who sees two of these addresses can tell they belong together.`;
+    `The first ${common} characters are the same in all of them, because they encode the same scan key B_scan, plus the leading prefix bits that every B_m shares; the rest of the spend-key part and the checksum differ. Anyone who sees two of these addresses can tell they belong together.`;
   return (
     <>
       <Drawing id="a15-labels" width={344} height={top + all.length * rowH + 30} title="Labels share the scan key" desc={desc}>
@@ -33,14 +33,15 @@ export function SpLabels({ fixture }: { fixture: DerivedSpFixture }) {
             <g data-label={x.name}>
               <Value at={[14, y + 8]} text={x.name} size={8.5} cls="k-value--label" />
               <rect class="k-outline k-fill--public k-cell--em" x="14" y={y + 13} width={common * unit} height="14" />
-              <rect class="k-outline k-fill--plain" x={14 + common * unit} y={y + 13} width={(total - common) * unit} height="14" />
+              <rect class="k-outline k-fill--plain" x={14 + common * unit} y={y + 13} width={(total - common - 6) * unit} height="14" />
+              <rect class="k-outline k-fill--check k-dashed" x={14 + (total - 6) * unit} y={y + 13} width={6 * unit} height="14" />
               <text class="k-value" x="18" y={y + 23.5} style="font-size:8px">{`${x.a.slice(0, 12)}…`}</text>
               <text class="k-value" x={18 + common * unit} y={y + 23.5} style="font-size:8px">{`${x.a.slice(common, common + 8)}…`}</text>
             </g>
           );
         })}
         <Value at={[14, top + all.length * rowH + 8]} text="OUTLINED: THE SAME IN ALL, COVERING ALL OF B_SCAN" size={8} cls="k-value--muted" />
-        <Value at={[14, top + all.length * rowH + 20]} text="PLAIN: THE REST OF B_M AND THE CHECKSUM, WHICH DIFFER" size={8} cls="k-value--muted" />
+        <Value at={[14, top + all.length * rowH + 20]} text="PLAIN: THE REST OF B_M · DASHED: CHECKSUM · BOTH DIFFER" size={8} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>

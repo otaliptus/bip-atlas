@@ -68,7 +68,7 @@ export function EcdhStory() {
     { note: "Alice holds a secret key a; its public key A shows in the transaction she makes.", desc: "Alice holds the secret key a. Her transaction shows the public key A, which Bob and the observer can read.", draw: (ids) => scene(2, ids) },
     { note: "Each multiplies the other's public key by their own secret: Alice computes a·B, Bob computes b·A.", desc: "Alice computes a·B; Bob computes b·A. The observer has neither a nor b.", draw: (ids) => scene(3, ids) },
     { note: "Both get the same point S (Diffie–Hellman). The observer, with only A and B, cannot.", desc: "a·B equals b·A, the shared point S, known to Alice and Bob. The observer's copy is unknown, drawn hatched.", draw: (ids) => scene(4, ids) },
-    { note: "Alice pays to P = B + hash(S)·G. Bob recomputes it and finds P; the observer sees a key it cannot connect to B.", desc: "Alice pays to the key P = B + hash(S)·G. Bob, knowing S, computes the same P and recognises it. The observer sees P but cannot link it to B.", draw: (ids) => scene(5, ids) },
+    { note: "Alice pays to P = B + hash(S)·G. Bob recomputes it and finds P; under the Diffie–Hellman assumption, the observer cannot connect P to B.", desc: "Alice pays to the key P = B + hash(S)·G. Bob, knowing S, computes the same P and recognises it. The observer sees P but cannot link it to B.", draw: (ids) => scene(5, ids) },
   ];
   return <Storyboard id="a15-ecdh" title="A secret two parties can compute" width={300} height={160} frames={frames} />;
 }

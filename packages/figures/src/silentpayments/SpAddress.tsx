@@ -17,13 +17,16 @@ export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
   const a = r.address;
   const sep = a.lastIndexOf("1");
   if (sep < 1 || a[sep + 1] !== "q") throw new Error(`${fixture.id}: not a version 0 address`);
+  if (a.slice(0, sep) !== "sp") throw new Error(`${fixture.id}: the figure labels a mainnet (sp) address`);
+  // The character whose bits are split between B_scan and B_m (B_scan fills this many whole characters first).
+  const shared = sep + 2 + Math.floor(((r.Bscan.length / 2) * 8) / 5);
   const dataLen = a.length - sep - 2 - CHECKSUM_CHARS;
   const keyBytes = (r.Bscan.length + r.Bspend.length) / 2;
   const roleOf = (i: number): Role => (i < sep ? "plain" : i === sep ? "plain" : i === sep + 1 ? "plain" : i < a.length - CHECKSUM_CHARS ? "public" : "check");
   const perRow = 29, cell = 10.5, x0 = 14, y0 = 26, rowH = 18;
   const rows = Math.ceil(a.length / perRow);
   const ids = idsFor("a15-addr");
-  const keysY = y0 + rows * rowH + 46;
+  const keysY = y0 + rows * rowH + 58;
   const desc =
     `The ${a.length}-character address ${a}. It starts with the human-readable part "${a.slice(0, sep)}", then the separator 1, then the version character q (version 0). ` +
     `The next ${dataLen} characters carry ${keyBytes} bytes: the scan key B_scan ${r.Bscan} and the spend key B_m ${r.Bspend}, both 33-byte compressed public keys. The last ${CHECKSUM_CHARS} characters are the bech32m checksum.`;
@@ -36,7 +39,7 @@ export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
           const role = roleOf(i);
           return (
             <g>
-              <rect class={`k-cell k-fill--${role}${i === sep + 1 ? " k-cell--em" : ""}`} x={x} y={y} width={cell} height={14} />
+              <rect class={`k-cell k-fill--${role}${i === sep + 1 || i === shared ? " k-cell--em" : ""}${role === "check" ? " k-dashed" : ""}`} x={x} y={y} width={cell} height={14} />
               <text class="k-value" x={x + cell / 2} y={y + 10} text-anchor="middle" style={`font-size:8px${i <= sep + 1 ? ";font-weight:600" : ""}`}>{ch}</text>
             </g>
           );
@@ -44,7 +47,8 @@ export function SpAddress({ fixture }: { fixture: DerivedSpFixture }) {
         {[
           { role: "plain" as Role, t: `"${a.slice(0, sep)}" · "1" · "q": PREFIX, SEPARATOR, VERSION 0` },
           { role: "public" as Role, t: `${dataLen} CHARACTERS: B_SCAN ‖ B_M, ${keyBytes} BYTES` },
-          { role: "check" as Role, t: `${CHECKSUM_CHARS} CHARACTERS: BECH32M CHECKSUM` },
+          { role: "check" as Role, t: `${CHECKSUM_CHARS} CHARACTERS, DASHED: BECH32M CHECKSUM` },
+          { role: "public" as Role, t: `OUTLINED: CHARACTER ${shared + 1}, PART B_SCAN, PART B_M` },
         ].map((l, k) => (
           <g>
             <rect class={`k-cell k-fill--${l.role}`} x={x0} y={y0 + rows * rowH + 2 + k * 13} width="10" height="9" />
