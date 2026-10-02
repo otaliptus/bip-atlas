@@ -25,7 +25,7 @@ export function ExtendedKeyPlates({ fixture }: { fixture: DerivedBip32Fixture })
       return (
         <g>
           <IsoBox at={[ox, oy]} w={PW} d={PD} h={PH} role={role} />
-          <text class="k-engrave" transform={onTop(P(10, 28, PH))}>{value}</text>
+          <text class="k-engrave" transform={onTop(P(10, i === 1 ? 42 : 28, PH))}>{value}</text>
           <Tag at={[right[0] + 4, right[1]]} text={label} />
         </g>
       );
@@ -46,7 +46,7 @@ export function ExtendedKeyPlates({ fixture }: { fixture: DerivedBip32Fixture })
     const foot = (x: number, y: number, a: string, b: string) => (
       <>
         <Value at={[x, y]} text={a} size={9} cls="k-value--label" />
-        <Value at={[x, y + 13]} text={b} size={8.5} cls="k-value--muted" />
+        <Value at={[x, y + 13]} text={b} size={9} cls="k-value--muted" />
       </>
     );
     return (
@@ -57,7 +57,7 @@ export function ExtendedKeyPlates({ fixture }: { fixture: DerivedBip32Fixture })
           <>
             <Arrow d="M262 92 H316" ids={ids} />
             <Value at={[289, 84]} text="N( )" anchor="middle" size={10} />
-            <Value at={[289, 108]} text="NEUTER" anchor="middle" size={8} cls="k-value--muted" />
+            <Value at={[289, 108]} text="NEUTER" anchor="middle" size={9} cls="k-value--muted" />
           </>
         ) : (
           <>
@@ -78,7 +78,7 @@ export function ExtendedKeyPlates({ fixture }: { fixture: DerivedBip32Fixture })
       />
       <details class="atlas-disclosure">
         <summary>Exact values (master node of test vector 1)</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           <dt>Private key k</dt><dd><code class="atlas-break">{m.privateKeyHex}</code></dd>
           <dt>Public key K</dt><dd><code class="atlas-break">{m.publicKeyHex}</code></dd>
           <dt>Chain code c</dt><dd><code class="atlas-break">{m.chainCodeHex}</code></dd>

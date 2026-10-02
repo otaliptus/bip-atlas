@@ -52,28 +52,28 @@ export function HmacInputs({ fixture }: { fixture: DerivedBip32Fixture }) {
     .join(" ") + ` The first byte of the hardened index, ${hardIdx.slice(0, 2)}, is ${topBits.join("")} in binary: its top bit is set, so the index is at least 2^31. Both are keyed by the parent's chain code.`;
   return (
     <>
-      <Drawing id="a02-hmacin" width={344} height={244} title="What goes into the HMAC" desc={desc}>
+      <Drawing id="a02-hmacin" width={344} height={252} title="What goes into the HMAC" desc={desc}>
         {rows.map((r, k) => (
           <g>
             <Value at={[X, Y[k] - (k === 0 ? 24 : 10)]} text={`${r.child.hardened ? "HARDENED" : "NORMAL"} · ${r.parent.path} → ${r.child.path}`} size={9} cls="k-value--label" />
             <Packet x={X} y={Y[k]} fields={r.fields} perRow={per} unit={UNIT} ruler={k === 0} />
             <Value at={[X + per * UNIT, Y[k] + 34]} text={`i = ${r.child.childNumberHex}`} anchor="end" size={9} />
-            {r.child.hardened ? <Value at={[X, Y[k] + 34]} text="00: ONE ZERO BYTE" size={8.5} cls="k-value--muted" /> : null}
+            {r.child.hardened ? <Value at={[X, Y[k] + 34]} text="00: ONE ZERO BYTE" size={9} cls="k-value--muted" /> : null}
           </g>
         ))}
-        <Value at={[X + per * UNIT, Y[0] - 24]} text={`${per} B`} anchor="end" size={8.5} cls="k-value--muted" />
-        <Magnifier id="a02-hmacin-mag" from={[idxX + 16, Y[1] + 11]} fromR={8} at={[262, 196]} r={38}>
-          <Cells x={230} y={184} values={topBits} size={8} roleOf={() => "plain"} strong={(i) => topBits[i] === "1"} text={false} />
-          <Value at={[262, 212]} text={`0x${hardIdx.slice(0, 2)} = ${topBits.join("")}`} anchor="middle" size={8.5} />
+        <Value at={[X + per * UNIT, Y[0] - 24]} text={`${per} B`} anchor="end" size={9} cls="k-value--muted" />
+        <Magnifier id="a02-hmacin-mag" from={[idxX + 4, Y[1] + 11]} fromR={5} at={[262, 190]} r={34}>
+          <Cells x={230} y={186} values={topBits} size={8} roleOf={() => "plain"} strong={(i) => topBits[i] === "1"} text={false} />
         </Magnifier>
+        <Value at={[262, 240]} text={`FIRST BYTE 0x${hardIdx.slice(0, 2)} = ${topBits.join("")}`} anchor="middle" size={9} />
         <Value at={[X, 182]} text="TOP BIT SET:" size={9} cls="k-value--label" />
         <Value at={[X, 195]} text="i ≥ 2³¹, HARDENED" size={9} cls="k-value--label" />
-        <Value at={[X, 218]} text="BOTH KEYED BY THE PARENT’S" size={8.5} cls="k-value--muted" />
-        <Value at={[X, 230]} text="CHAIN CODE c" size={8.5} cls="k-value--muted" />
+        <Value at={[X, 218]} text="BOTH KEYED BY THE PARENT’S" size={9} cls="k-value--muted" />
+        <Value at={[X, 230]} text="CHAIN CODE c" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact HMAC data, both steps</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           {rows.map((r) => (
             <><dt>{r.child.path} ({r.child.hardened ? "hardened" : "normal"})</dt><dd><code class="atlas-break">{r.child.hmacDataHex}</code></dd></>
           ))}

@@ -46,7 +46,8 @@ export function WeaknessStory({ fixture }: { fixture: DerivedBip32Fixture }) {
       desc: `HMAC-SHA512 keyed by the chain code over the public key and index ${child.childNumberHex} gives I_L = ${r.iLHex}. No private key is needed.`,
       draw: (ids) => (
         <>
-          {bar(14, 8, 132, "public", `K ‖ ${child.childNumberHex}`)}
+          {bar(14, 8, 74, "public", `K ${parent.publicKeyHex.slice(0, 4)}…`)}
+          {bar(88, 8, 58, "plain", child.childNumberHex)}
           {bar(166, 8, 120, "public", "c (HMAC key)")}
           <Arrow d="M80 30 V44 H110" ids={ids} />
           <Arrow d="M226 30 V44 H196" ids={ids} />
@@ -76,18 +77,18 @@ export function WeaknessStory({ fixture }: { fixture: DerivedBip32Fixture }) {
       draw: (ids) => (
         <>
           <rect class="k-outline" x="135" y="8" width="30" height="14" style={`fill:${ids.hatch}`} />
-          <Value at={[172, 19]} text={`${grand} · SAFE`} size={9} />
+          <Value at={[172, 19]} text={`${grand} · NOT RECOVERABLE`} size={9} />
           <line class="k-line" x1="148.4" y1="24" x2="148.4" y2="56" />
           <line class="k-line" x1="151.6" y1="24" x2="151.6" y2="56" />
           <rect class="k-outline k-mark--plain" x="142" y="36" width="16" height="8" />
-          <Value at={[166, 44]} text="HARDENED: STOPS HERE" size={8} cls="k-value--label" />
+          <Value at={[166, 44]} text="HARDENED: STOPS HERE" size={9} cls="k-value--label" />
           <KeyGlyph at={[135, 58]} role="secret" />
           <Value at={[172, 68]} text={`${parent.path} · RECOVERED`} size={9} />
           <line class="k-line" x1="150" y1="74" x2="96" y2="104" />
           <line class="k-line" x1="150" y1="74" x2="204" y2="104" />
           <KeyGlyph at={[81, 106]} role="secret" />
           <KeyGlyph at={[189, 106]} role="secret" />
-          <Value at={[150, 140]} text="AND EVERYTHING BELOW IT" anchor="middle" size={8.5} cls="k-value--label" />
+          <Value at={[150, 140]} text="AND EVERYTHING BELOW IT" anchor="middle" size={9} cls="k-value--label" />
         </>
       ),
     },
@@ -97,7 +98,7 @@ export function WeaknessStory({ fixture }: { fixture: DerivedBip32Fixture }) {
       <Storyboard id="a02-weak" title="An xpub plus one leaked child key" width={300} height={146} frames={frames} />
       <details class="atlas-disclosure">
         <summary>Exact values</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           <dt>xpub of {parent.path} (BIP 32 line {parent.vectorLine! + 1})</dt><dd><code class="atlas-break">{parent.xpub}</code></dd>
           <dt>Leaked private key of {child.path}</dt><dd><code class="atlas-break">{child.privateKeyHex}</code></dd>
           <dt>I_L, from the xpub alone</dt><dd><code class="atlas-break">{r.iLHex}</code></dd>

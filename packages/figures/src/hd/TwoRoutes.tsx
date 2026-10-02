@@ -50,12 +50,12 @@ export function TwoRoutes({ fixture }: { fixture: DerivedBip32Fixture }) {
         <Arrow d="M255 134 V192 H194" ids={ids} />
         <KeyGlyph at={[157, 186]} role="public" />
         <Value at={[172, 220]} text={`K′  ${short(child.publicKeyHex)}`} anchor="middle" size={10} />
-        <Value at={[172, 236]} text="THE SAME PUBLIC KEY BOTH WAYS" anchor="middle" size={8.5} cls="k-value--label" />
-        <Value at={[172, 252]} text="THE BUILD CHECKS EVERY NORMAL CHILD IN THE TREE" anchor="middle" size={8} cls="k-value--muted" />
+        <Value at={[172, 236]} text="THE SAME PUBLIC KEY BOTH WAYS" anchor="middle" size={9} cls="k-value--label" />
+        <Value at={[172, 252]} text="THE BUILD CHECKS EVERY NORMAL CHILD IN THE TREE" anchor="middle" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           <dt>I_L</dt><dd><code class="atlas-break">{iL}</code></dd>
           <dt>k of {parent.path}</dt><dd><code class="atlas-break">{parent.privateKeyHex}</code></dd>
           <dt>K of {parent.path}</dt><dd><code class="atlas-break">{parent.publicKeyHex}</code></dd>

@@ -39,7 +39,7 @@ export function ChildStory({ fixture }: { fixture: DerivedBip32Fixture }) {
           {bar(14, 28, 272, "secret", `k  ${short(parent.privateKeyHex)}   private key`)}
           {bar(14, 56, 272, "public", `K  ${short(parent.publicKeyHex)}   public key`)}
           {bar(14, 84, 272, "public", `c  ${short(parent.chainCodeHex)}   chain code`)}
-          <Value at={[14, 128]} text={`LISTED ON BIP 32 LINES ${parentLine + 1}–${parentLine + 2}`} size={8} cls="k-value--muted" />
+          <Value at={[14, 128]} text={`IN THE XPUB AND XPRV ON BIP 32 LINES ${parentLine + 1}–${parentLine + 2}`} size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -50,11 +50,11 @@ export function ChildStory({ fixture }: { fixture: DerivedBip32Fixture }) {
         <>
           {bar(14, 14, 186, "public", `K  ${short(parts[0].hex)}`)}
           {bar(200, 14, 70, "plain", child.childNumberHex)}
-          <Value at={[14, 46]} text="DATA" size={8} cls="k-value--muted" />
+          <Value at={[14, 46]} text="DATA" size={9} cls="k-value--muted" />
           <Arrow d="M120 36 V64" ids={ids} />
           <Machine at={[92, 94]} w={88} d={30} h={24} label="HMAC-SHA512" />
           {bar(204, 88, 84, "public", `c ${parent.chainCodeHex.slice(0, 6)}…`, 18)}
-          <Value at={[204, 120]} text="KEY" size={8} cls="k-value--muted" />
+          <Value at={[204, 120]} text="KEY" size={9} cls="k-value--muted" />
           <Arrow d="M204 97 H172" ids={ids} />
         </>
       ),
@@ -84,7 +84,7 @@ export function ChildStory({ fixture }: { fixture: DerivedBip32Fixture }) {
           <Value at={[14, 52]} text="= (mod n)" size={9} cls="k-value--muted" />
           {bar(14, 58, 272, "secret", `k′  ${short(child.privateKeyHex)}   ${child.path} private key`)}
           {bar(14, 92, 272, "public", `c′  ${short(child.chainCodeHex)}   = I_R, chain code`)}
-          <Value at={[14, 132]} text={`MATCHES BIP 32 LINE ${childLine + 2}`} size={8} cls="k-value--muted" />
+          <Value at={[14, 132]} text={`MATCHES BIP 32 LINE ${childLine + 2}`} size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -94,7 +94,7 @@ export function ChildStory({ fixture }: { fixture: DerivedBip32Fixture }) {
       <Storyboard id="a02-child" title={`One step: ${parent.path} to ${child.path}`} width={300} height={146} frames={frames} />
       <details class="atlas-disclosure">
         <summary>Exact values, step by step</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           <dt>Parent {parent.path}: private key k</dt><dd><code class="atlas-break">{parent.privateKeyHex}</code></dd>
           <dt>Public key K</dt><dd><code class="atlas-break">{parent.publicKeyHex}</code></dd>
           <dt>Chain code c</dt><dd><code class="atlas-break">{parent.chainCodeHex}</code></dd>

@@ -87,7 +87,7 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
 
   // What this holder can say about the opened branch.
   const outcome = !parentHeld
-    ? `out of reach: its parent ${parent.path} is already behind the hardened edge ${parent.hardenedAncestor}, so M cannot derive it.`
+    ? `out of reach: its parent ${parent.path} lies across the hardened edge into ${parent.hardenedAncestor}, so M cannot derive it.`
     : sel.hardened && pub
       ? `hardened. Its HMAC input is 00, the private key of ${parent.path} and ${sel.childNumberHex}. M holds no private key, so ${sel.path} and everything below it cannot be derived.`
       : sel.hardened
@@ -155,7 +155,7 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
                 <line class={cls} x1={x1} y1={y1} x2={x2} y2={y2} />
               )}
               <Value at={[lx - ox * 8, ly - oy * 8 + 3]} text={s.node.indexLabel} anchor={side > 0 ? "end" : "start"} size={9} cls="k-value--muted" />
-              {open ? magGlyph(along(0.16)[0] + ox * 13, along(0.16)[1] + oy * 13) : null}
+              {open ? (closed ? magGlyph(along(0.4)[0] - ox * 14, along(0.4)[1] - oy * 14) : magGlyph(along(0.5)[0] + ox * 14, along(0.5)[1] + oy * 14)) : null}
             </g>
           );
         })}
@@ -168,7 +168,7 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
                 const [gx, gy] = along(0.42);
                 const right = x2 >= x1;
                 const ox = right ? -nx : nx, oy = right ? -ny : ny;
-                return <Value at={[gx + ox * 10 + (right ? 4 : -4), gy + oy * 10 + 3]} text="CKDPUB STOPS" anchor={right ? "start" : "end"} size={8} cls="k-value--label" />;
+                return <Value at={[gx + ox * 10 + (right ? 4 : -4), gy + oy * 10 + 3]} text="CKDPUB STOPS" anchor={right ? "start" : "end"} size={9} cls="k-value--label" />;
               })
           : null}
         {/* Nodes */}
@@ -218,14 +218,14 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
         <rect class="k-outline k-fill--plain" x={x} y={y} width={w} height={h} />
         {magGlyph(x + 16, y + 13)}
         <Value at={[x + 30, y + 16]} text={`${name(parent)} → ${name(sel)} · ${sel.hardened ? "HARDENED" : "NORMAL"} · i = ${idx}`} size={9} cls="k-value--label" />
-        <Value at={[x + 12, y + 32]} text="HMAC KEY: CHAIN CODE c" size={8} cls="k-value--muted" />
+        <Value at={[x + 12, y + 32]} text="HMAC KEY: CHAIN CODE c" size={9} cls="k-value--muted" />
         <rect class="k-cell k-fill--public" x={x + 12} y={y + 37} width={inner} height="16" style={parentHeld ? undefined : hatch} />
         {parentHeld ? <Value at={[x + 18, y + 49]} text={`c  ${short(parent.chainCodeHex)}`} size={9} /> : chip(x + 18, y + 49, "not known to M")}
-        <Value at={[x + 12, dataY - 5]} text={`HMAC DATA · 37 BYTES`} size={8} cls="k-value--muted" />
+        <Value at={[x + 12, dataY - 5]} text={`HMAC DATA · 37 BYTES`} size={9} cls="k-value--muted" />
         {sel.hardened ? (
           <>
             <rect class="k-cell k-fill--plain" x={x + 12} y={dataY} width="16" height="18" />
-            <Value at={[x + 20, dataY + 13]} text="00" anchor="middle" size={8} />
+            <Value at={[x + 20, dataY + 13]} text="00" anchor="middle" size={9} />
             <rect class="k-cell k-fill--secret" x={x + 28} y={dataY} width={inner - 16 - idxW} height="18" style={derivable ? undefined : hatch} />
             {derivable ? <Value at={[x + 34, dataY + 13]} text={`k  ${short(parent.privateKeyHex)}`} size={9} /> : chip(x + 34, dataY + 13, "k: not held")}
           </>
@@ -244,14 +244,14 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
             <Value at={[x + 124, y + 138]} text={pub ? "K′ = point(I_L) + K" : "k′ = I_L + k  (mod n)"} size={9} />
             <Value at={[x + 124, y + 154]} text="c′ = I_R" size={9} />
             <KeyGlyph at={[x + w - 44, y + 150]} role={pub ? "public" : "secret"} scale={0.8} />
-            <Value at={[x + w - 12, y + 170]} text={shown(sel.path, view, childHeld)} anchor="end" size={8.5} />
+            <Value at={[x + w - 12, y + 170]} text={shown(sel.path, view, childHeld)} anchor="end" size={9} />
           </>
         ) : (
           <>
             <rect class="k-outline k-mark--plain" x={x + 124} y={y + 120} width="16" height="10" />
             <Value at={[x + 146, y + 129]} text="CANNOT DERIVE" size={9} cls="k-value--label" />
-            <Value at={[x + 124, y + 148]} text={parentHeld ? "NEEDS A PRIVATE KEY" : "PARENT NOT REACHABLE"} size={8} cls="k-value--muted" />
-            <Value at={[x + 124, y + 160]} text="M DOES NOT HOLD" size={8} cls="k-value--muted" />
+            <Value at={[x + 124, y + 148]} text={parentHeld ? "NEEDS A PRIVATE KEY:" : "PARENT OUT OF REACH:"} size={9} cls="k-value--muted" />
+            <Value at={[x + 124, y + 160]} text={parentHeld ? "M HOLDS NONE" : "M HOLDS NO KEY OR c HERE"} size={9} cls="k-value--muted" />
           </>
         )}
       </g>
@@ -285,7 +285,7 @@ export function DerivationTree({ fixture, figureId, initial }: Props) {
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">
         <summary>Exact values for this branch</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           {parentHeld ? (
             <>
               <dt>Chain code of {name(parent)}</dt><dd><code class="atlas-break">{parent.chainCodeHex}</code></dd>

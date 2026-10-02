@@ -29,3 +29,19 @@ Branch: the batch-1 worktree branch. These four chapters were redrawn in the ill
 | A02.10 | `hd-fingerprint.v1` **new** | static | Public key → Hash160 machine → 20-byte identifier → first 4 bytes → the child's parent-fingerprint field. | tv1 m, m/0H (`identifierHex`) | identifier, fingerprint-collisions |
 
 Retired: `Bip32Worked`, its export and its `worked` dispatch line; its content is A02.3.
+
+### HD wallets — independent review
+
+A fresh read-only subagent recomputed every drawn value in pure Python (its own secp256k1, RIPEMD-160, hashlib and hmac): all four published chains, I for the master and both steps, the recovery of m/0H's key from its xpub and m/0H/1's private key, both checksums, the identifier and fingerprint, and CKDpub = CKDpriv for every normal child. **No wrong values.** It drove all 12 public-view hero states (branch 1 normal and hardened × every opened branch) at 1440 and 375 and scanned the hero's outer HTML: **no leaks** from the m/0H or m/1H subtrees and no private key anywhere in the M view.
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| 1 | must-fix | `.atlas-hexlist dt` is uppercase, so disclosure labels turned k into K and m into M. | New `.atlas-hexlist--case` modifier (no transform) on every HD disclosure list. |
+| 2 | must-fix | "CKDPUB STOPS" overprinted the 0H edge label in the M view. | Index labels sit on the inner side of an edge, gate labels on the outer side. |
+| 3 | should-fix | A02.4's magnifier pointed at bytes 2–3 of the index and clipped its text. | Source on the first byte; the bit reading moved below the lens. |
+| 4 | should-fix | Several labels rendered below 9 px. | Every label in the HD figures is now at least 9 units. |
+| 5 | should-fix | The hero's magnifier glyph collided with node labels. | Placed at the edge's middle, outer side (inner side on a closed gate). |
+| 6 | should-fix | Status wording for out-of-reach branches was circular; "M DOES NOT HOLD" was incomplete. | "lies across the hardened edge into …"; "M HOLDS NONE" / "M HOLDS NO KEY OR c HERE". |
+| 7–12 | nits | "LISTED ON" lines; the K ‖ i bar all green; "m · SAFE"; the breach line dropped BIP 32's "at most"; the serialization title sat far from its rows; the chain-code engraving was hidden. | "IN THE XPUB AND XPRV ON …"; K and index split; "m · NOT RECOVERABLE"; "AT MOST SEES INCOMING PAYMENTS"; row labels beside each packet; engraving moved. |
+| 13 | nit | The hero caption describes the M view while the hero opens in the m view. | Kept: the caption names the state ("Holding M, …") and the first strip switches to it. |
+| 14 | note | The island's props carry every node's private key, as the m view needs them. | Recorded here. All of it is BIP 32 test vector 1, public test material. |

@@ -43,7 +43,7 @@ export function MasterKeySplit({ fixture }: { fixture: DerivedBip32Fixture }) {
         <Arrow d={`M172 ${seedBottom + 4} V${mTop - 2}`} ids={ids} />
         <Machine at={[147.75, oy]} w={96} d={40} h={26} label="HMAC-SHA512" />
         <rect class="k-outline k-fill--plain" x="246" y={oy - 36} width="88" height="30" />
-        <Value at={[252, oy - 25]} text="KEY" size={7.5} cls="k-value--muted" />
+        <Value at={[252, oy - 25]} text="KEY" size={9} cls="k-value--muted" />
         <Value at={[252, oy - 12]} text={`"Bitcoin seed"`} size={9} />
         <Arrow d={`M270 ${oy - 6} V${oy + 12} H${236}`} ids={ids} />
         <Arrow d={`M172 ${oy + 58} V${outY - 38}`} ids={ids} />
@@ -54,7 +54,7 @@ export function MasterKeySplit({ fixture }: { fixture: DerivedBip32Fixture }) {
         <Bracket x1={lx} x2={lx + gridW} y={outY + gridH + 4} text="I_L → master private key" />
         <Bracket x1={rx} x2={rx + gridW} y={outY + gridH + 4} text="I_R → master chain code" />
         <Value at={[172, outY + gridH + 52]} text={`(k, c) = m · ${master.xprv.slice(0, 12)}…`} anchor="middle" size={9.5} />
-        <Value at={[172, outY + gridH + 66]} text={`MATCHES BIP 32 LINE ${master.vectorLine + 2}`} anchor="middle" size={8} cls="k-value--muted" />
+        <Value at={[172, outY + gridH + 66]} text={`MATCHES BIP 32 LINE ${master.vectorLine + 2}`} anchor="middle" size={9} cls="k-value--muted" />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact master extended private key</summary>

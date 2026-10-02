@@ -66,23 +66,24 @@ export function ExtendedKeyLayout({ fixture }: { fixture: DerivedBip32Fixture })
           return (
             <g class="k-label">
               <line class="k-leader" x1={cx} y1={Y1 - 2} x2={cx} y2={ly + 3} />
-              <text x={cx + 3} y={ly} style="font-size:8.5px">{`${f.name.toUpperCase()} · ${f.bytes} B`}</text>
+              <text x={cx + 3} y={ly} style="font-size:9px">{`${f.name.toUpperCase()} · ${f.bytes} B`}</text>
             </g>
           );
         })}
-        <Value at={[X, 12]} text={`${serialization.path} · xpub`} size={9.5} />
+        <Value at={[X + PER * UNIT, Y1 - 6]} text="xpub" anchor="end" size={9.5} />
         <Packet x={X} y={Y1} fields={packet(pub)} perRow={PER} unit={UNIT} />
-        <Value at={[X, Y2 - 12]} text={`${serialization.path} · xprv`} size={9.5} />
+        <Value at={[X, 14]} text={`NODE ${serialization.path}`} size={9.5} cls="k-value--label" />
+        <Value at={[X + PER * UNIT, Y2 - 6]} text="xprv" anchor="end" size={9.5} />
         <Packet x={X} y={Y2} fields={packet(prv)} perRow={PER} unit={UNIT} />
-        <Value at={[X + PER * UNIT, Y2 + 58]} text="CHECKSUM · 4 B" anchor="end" size={8.5} cls="k-value--label" />
+        <Value at={[X + PER * UNIT, Y2 + 58]} text="CHECKSUM · 4 B" anchor="end" size={9} cls="k-value--label" />
         <line class="k-leader" x1={X + PER * UNIT - 16} y1={Y2 + 44} x2={X + PER * UNIT - 16} y2={Y2 + 49} />
-        <Value at={[X, Y2 + 58]} text="HEAVY OUTLINE: DIFFERS" size={8.5} cls="k-value--label" />
-        <Value at={[X, Y2 + 76]} text={`BASE58CHECK → ${pub.base58.length} CHARACTERS EACH`} size={8.5} cls="k-value--muted" />
+        <Value at={[X, Y2 + 58]} text="HEAVY OUTLINE: DIFFERS" size={9} cls="k-value--label" />
+        <Value at={[X, Y2 + 76]} text={`BASE58CHECK → ${pub.base58.length} CHARACTERS EACH`} size={9} cls="k-value--muted" />
         <Value at={[X, Y2 + 90]} text={`${pub.base58.slice(0, 14)}…   ${prv.base58.slice(0, 14)}…`} size={9} />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>Exact values, field by field</summary>
-        <dl class="atlas-hexlist">
+        <dl class="atlas-hexlist atlas-hexlist--case">
           {pub.fields.map((f, i) => (
             <>
               <dt>{f.name} · {f.bytes} B{differs(i) ? "" : " · same in both"}</dt>

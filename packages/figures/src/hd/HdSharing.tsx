@@ -26,7 +26,7 @@ export function HdSharing() {
         <Computer at={[owner[0], owner[1]]} label="wallet owner" />
         <KeyGlyph at={[owner[0] - 2, owner[1] + 52]} role="secret" />
         <Value at={[owner[0] + 34, owner[1] + 62]} text="seed, m" size={9} />
-        <Value at={[owner[0] - 2, owner[1] + 80]} text="CAN SPEND" size={8} cls="k-value--label" />
+        <Value at={[owner[0] - 2, owner[1] + 80]} text="CAN SPEND" size={9} cls="k-value--label" />
         {wide ? <Boundary x={bx - 18} y1={8} y2={208} label="shared" /> : <line class="k-boundary__line" x1={8} y1={124} x2={322} y2={124} />}
         {wide ? HOLDERS.map((_, i) => <line class="k-leader" x1={owner[0] + 30} y1={owner[1] + 10} x2={bx - 4} y2={rowY(i) + 12} />) : null}
         {wide ? null : <Value at={[14, 140]} text="SHARED: XPUBS ONLY" size={9} cls="k-value--label" />}
@@ -47,8 +47,8 @@ export function HdSharing() {
             </g>
           );
         })}
-        <Value at={wide ? [bx, 222] : [14, 444]} text="NONE OF THEM HOLDS A KEY THAT CAN SPEND" size={8.5} cls="k-value--label" />
-        <Value at={wide ? [bx, 236] : [14, 458]} text="SERVER BROKEN INTO: SEES INCOMING PAYMENTS, NOTHING MORE" size={8} cls="k-value--muted" />
+        <Value at={wide ? [bx, 222] : [14, 444]} text="NONE OF THEM HOLDS A KEY THAT CAN SPEND" size={9} cls="k-value--label" />
+        <Value at={wide ? [bx, 236] : [14, 458]} text="SERVER BROKEN INTO: AT MOST SEES INCOMING PAYMENTS" size={9} cls="k-value--muted" />
       </>
     );
   };
