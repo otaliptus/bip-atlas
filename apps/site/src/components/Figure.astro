@@ -10,6 +10,13 @@ import {
   DerivationTree,
   EntropyWordLab,
   ExtendedKeyLayout,
+  ExtendedKeyPlates,
+  HmacInputs,
+  ChildStory,
+  TwoRoutes,
+  HdSharing,
+  WeaknessStory,
+  Fingerprint,
   MasterKeySplit,
   MnemonicCard,
   ProgramRegrouping,
@@ -27,7 +34,6 @@ import {
   TransactionAnatomy,
   TwoSerializations,
   WeightMeter,
-  Bip32Worked,
   TxWorked,
   AddressWorked,
   PsbtWorked,
@@ -187,6 +193,13 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
   {figure.recipe === "derivation-tree.v1" && <DerivationTree client:visible fixture={hd[0]} figureId={figureId} />}
   {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
+  {figure.recipe === "hd-extended-key.v1" && <ExtendedKeyPlates fixture={hd[0]} />}
+  {figure.recipe === "hd-hmac-inputs.v1" && <HmacInputs fixture={hd[0]} />}
+  {figure.recipe === "hd-child-story.v1" && <ChildStory fixture={hd[0]} />}
+  {figure.recipe === "hd-two-routes.v1" && <TwoRoutes fixture={hd[0]} />}
+  {figure.recipe === "hd-sharing.v1" && <HdSharing />}
+  {figure.recipe === "hd-weakness-story.v1" && <WeaknessStory fixture={hd[0]} />}
+  {figure.recipe === "hd-fingerprint.v1" && <Fingerprint fixture={hd[0]} />}
   {figure.recipe === "two-serializations.v1" && <TwoSerializations fixture={tx[0]} />}
   {figure.recipe === "transaction-anatomy.v1" && <TransactionAnatomy client:visible fixtures={tx} figureId={figureId} />}
   {figure.recipe === "weight-meter.v1" && <WeightMeter fixtures={tx} />}
@@ -239,7 +252,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {recipe.interactive && !recipe.drawing && (
     <Fragment slot="worked">
       {figure.recipe === "address-checksum-lab.v1" && <AddressWorked fixtures={address} />}
-      {figure.recipe === "derivation-tree.v1" && <Bip32Worked fixture={hd[0]} />}
       {figure.recipe === "transaction-anatomy.v1" && <TxWorked fixture={tx[0]} />}
       {figure.recipe === "psbt-envelope.v1" && <PsbtWorked fixture={trace[0]} />}
       {figure.recipe === "schnorr-verification.v1" && <SchnorrWorked fixtures={sig} />}

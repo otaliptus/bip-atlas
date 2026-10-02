@@ -65,6 +65,8 @@ export interface Bip32SeedFixture extends BaseFixture {
   vectorChains: Array<{ path: string; line: number; xpub: string; xprv: string }>;
   tree: { paths: string[]; toggle: { normal: string; hardened: string } };
   serializePath: string;
+  /** A normal child whose private key, with its parent's xpub, recovers the parent's private key (BIP 32's weakness). */
+  recoveryPath: string;
 }
 
 export interface Bip32NodeDerived {
@@ -83,6 +85,10 @@ export interface Bip32NodeDerived {
   privateKeyHex: string;
   /** HMAC input used to derive this node from its parent (null for the master). */
   hmacDataHex: string | null;
+  /** HMAC-SHA512 output I = I_L ‖ I_R of that step (null for the master). */
+  hmacOutHex: string | null;
+  /** Hash160 of the public key (20 bytes); its first 4 bytes are the fingerprint. */
+  identifierHex: string;
   /** Line in the BIP's test vector that lists this node, if any. */
   vectorLine: number | null;
   /** First hardened path segment, if any; public-only derivation from M stops there. */
@@ -92,6 +98,12 @@ export interface Bip32NodeDerived {
 export interface Bip32Derived {
   masterIHex: string;
   nodes: Bip32NodeDerived[];
+  /**
+   * BIP 32's stated weakness, computed: the parent's extended public key plus
+   * a normal child's private key give back the parent's private key. The build
+   * throws unless `recoveredHex` equals the parent's private key.
+   */
+  recovery: { parentPath: string; childPath: string; index: number; iLHex: string; childPrivateKeyHex: string; recoveredHex: string };
   serialization: {
     path: string;
     rows: Array<{ kind: "public" | "private"; rawHex: string; checksumHex: string; base58: string }>;

@@ -7,7 +7,6 @@
 import { analyzeSegwitAddress } from "@bip-atlas/models/bech32";
 import type {
   AddressFixture,
-  DerivedBip32Fixture,
   DerivedMnemonicFixture,
   DerivedPsbtTraceFixture,
   DerivedSchnorrFixture,
@@ -29,33 +28,6 @@ import type {
 import { WorkedExample, type WorkedStep } from "./WorkedExample";
 
 const bits = (s: string) => s.match(/.{1,11}/g)?.join(" ") ?? s;
-
-/* ---------- BIP 39 ---------- */
-export function Bip32Worked({ fixture: f }: { fixture: DerivedBip32Fixture }) {
-  const chain = ["m", "m/0H", "m/0H/1", "m/0H/1/2H"];
-  const nodes = chain.map((p) => f.derived.nodes.find((n) => n.path === p)).filter((n): n is NonNullable<typeof n> => !!n);
-  const steps: WorkedStep[] = [
-    {
-      title: "Seed → master key and chain code",
-      values: [{ label: "seed", value: f.seedHex }, { label: "HMAC-SHA512, key “Bitcoin seed”", value: f.derived.masterIHex }],
-      note: "Left 32 bytes: master private key. Right 32 bytes: master chain code.",
-      layer: { size: 0.75, tone: "plain", cells: 2 },
-    },
-    ...nodes.map((n): WorkedStep => ({
-      title: n.path === "m" ? "Master node m" : `${n.path} — ${n.hardened ? "hardened child: needs the parent’s private key" : "normal child: derivable from the parent’s extended public key too"}`,
-      values: [{ label: "xpub", value: n.xpub }, { label: "own key fingerprint", value: n.fingerprintHex }],
-      layer: { size: 0.9 - n.depth * 0.12, tone: n.path === "m" ? "accent" : n.hardened ? "hatch" : "wash" },
-    })),
-  ];
-  return (
-    <WorkedExample
-      intro={<>Walking one branch of <strong>{f.label}</strong>, from the seed to {chain[chain.length - 1]}. Hatched layers are hardened steps.</>}
-      steps={steps}
-      label="Seed, master node and three child derivations, drawn as stacked layers."
-      source={<>Source: BIP 32 test vector 1; every xpub matches the vector where the BIP lists it.</>}
-    />
-  );
-}
 
 /* ---------- BIPs 141/143 ---------- */
 export function TxWorked({ fixture: f }: { fixture: DerivedTransactionFixture }) {
