@@ -1,6 +1,6 @@
-import { BECH32M_CONST, BECH32_CONST, analyzeSegwitAddress, formatResidue } from "@bip-atlas/models/bech32";
+import { BECH32M_CONST, BECH32_CONST, CHARSET, analyzeSegwitAddress, formatResidue } from "@bip-atlas/models/bech32";
 import { Drawing, Machine, Value } from "../kit";
-import { stageLabel } from "../describe";
+import { familyName, stageLabel } from "../describe";
 import type { AddressFixture } from "../types";
 
 const short = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 8)}…${s.slice(-6)}` : s);
@@ -17,11 +17,12 @@ export function TwoConstants({ fixtures }: { fixtures: AddressFixture[] }) {
   const v1 = rows.find((r) => r.a.valid && r.a.witnessVersion === 1);
   const wrong = rows.find((r) => r.a.failedStage === "family");
   if (!v0 || !v1 || !wrong) throw new Error("address-two-constants.v1 needs a v0, a v1 and a wrong-family fixture");
-  const list = [
-    { r: v0, verdict: "VERSION 0 + BECH32 ✓ ACCEPTED" },
-    { r: v1, verdict: "VERSION 1 + BECH32M ✓ ACCEPTED" },
-    { r: wrong, verdict: `VERSION 1 + BECH32 ✕ REFUSED AT ${stageLabel("family").toUpperCase()}` },
-  ];
+  const verdict = (a: (typeof rows)[number]["a"]) => {
+    // A refused string still decodes far enough to read its version from the data part.
+    const version = a.valid ? a.witnessVersion : CHARSET.indexOf(a.input.toLowerCase()[a.input.lastIndexOf("1") + 1]);
+    return `VERSION ${version} + ${familyName(a.encoding!).toUpperCase()} ${a.valid ? "✓ ACCEPTED" : `✕ REFUSED AT ${stageLabel(a.failedStage!).toUpperCase()}`}`;
+  };
+  const list = [v0, v1, wrong].map((r) => ({ r, verdict: verdict(r.a) }));
   const desc =
     list.map(({ r }) => `${r.f.address}: residue ${formatResidue(r.a.residue!)}${r.a.valid ? `, version ${r.a.witnessVersion}, accepted` : `, refused: ${r.a.reason}`}`).join(". ") +
     `. Bech32's constant is ${formatResidue(BECH32_CONST)}, Bech32m's ${formatResidue(BECH32M_CONST)}.`;
@@ -30,6 +31,8 @@ export function TwoConstants({ fixtures }: { fixtures: AddressFixture[] }) {
       <Drawing id="a04-const" width={344} height={250} title="Two constants" desc={desc}>
         <Machine at={[40, 46]} w={80} d={28} h={22} label="POLYMOD" role="check" />
         <Value at={[14, 112]} text="ONE FUNCTION" size={9} cls="k-value--label" />
+        <path class="k-line" d="M128 46 H166" marker-end="url(#a04-const-arrow)" />
+        <path class="k-line" d="M128 56 H146 V93 H166" marker-end="url(#a04-const-arrow)" />
         {[BECH32_CONST, BECH32M_CONST].map((c, k) => (
           <g>
             <rect class="k-cell k-fill--check k-cell--em" x={170 + k * 0} y={18 + k * 40} width="160" height="30" />

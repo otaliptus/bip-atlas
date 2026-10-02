@@ -8,7 +8,7 @@ import { bytesToHex, hexToBytes } from "@bip-atlas/models/hex";
 import { ChildStory } from "../src/hd/ChildStory";
 import { DerivationTree, DerivationTreeValues, derivationTreeSpec, layoutHdTree, visibleNodes } from "../src/hd/DerivationTree";
 import { StateHero } from "../src/StateHero";
-import { matches } from "../src/heroLayers";
+import { matches, nextState, stateKey } from "../src/heroLayers";
 import { ExtendedKeyLayout, splitXkey } from "../src/hd/ExtendedKeyLayout";
 import { ExtendedKeyPlates } from "../src/hd/ExtendedKeyPlates";
 import { Fingerprint } from "../src/hd/Fingerprint";
@@ -250,6 +250,13 @@ describe("DerivationTree (hero)", () => {
     expect(leaks(s, privates)).toEqual([]);
     for (const p of ["m/1H", "m/1H/0"]) expect(leaks(s, valuesOf(p)), p).toEqual([]);
     expect(s).not.toContain(">M/1<");
+  });
+  it("hardening branch 1 moves an opened m/1 branch to m/1H, and back", () => {
+    const spec = derivationTreeSpec(d, "fig-a02-5");
+    const a = nextState(spec, { view: "public", toggle: "normal", branch: "m/1/0" }, "toggle", "hardened");
+    expect(a.branch).toBe("m/1H/0");
+    expect(nextState(spec, a, "toggle", "normal").branch).toBe("m/1/0");
+    expect(spec.status[stateKey(spec.keys, a)]).toContain("is a hardened child, which M cannot derive");
   });
   it("throws for a branch that is not drawn", () => {
     expect(() => renderAt({ view: "private", hardenedBranch: false, branch: "m/1H" })).toThrow();

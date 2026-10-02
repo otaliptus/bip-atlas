@@ -1,7 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
 import { holdFocus } from "./focus";
-import { matches, stateKey, type HeroSpec, type HeroState, type StripControl } from "./heroLayers";
+import { matches, nextState, stateKey, type HeroSpec, type HeroState, type StripControl } from "./heroLayers";
 
 /**
  * The client half of a layered hero (see stateHero.ts): it holds the state,
@@ -20,17 +20,7 @@ export function StateHero({ spec, children, values }: { spec: HeroSpec; children
   }, [state, hydrated]);
 
   const visible = (c: StripControl, s: HeroState) => c.options.filter((o) => !o.when || matches(o.when, s));
-  const set = (key: string, value: string) => {
-    let next: HeroState = { ...state, [key]: value, ...(spec.resets?.[key] ?? {}) };
-    for (const c of spec.controls) {
-      if (c.kind !== "strip") continue;
-      const opts = visible(c, next);
-      if (opts.some((o) => o.value === next[c.key])) continue;
-      const group = c.options.find((o) => o.value === next[c.key])?.group;
-      next = { ...next, [c.key]: (opts.find((o) => group && o.group === group) ?? opts[0]).value };
-    }
-    setState(next);
-  };
+  const set = (key: string, value: string) => setState(nextState(spec, state, key, value));
   const attrs = Object.fromEntries(spec.keys.map((k) => [`data-s-${k}`, state[k]]));
   const scrub = spec.controls.find((c) => c.kind === "scrub");
 

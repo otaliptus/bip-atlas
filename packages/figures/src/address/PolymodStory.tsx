@@ -44,7 +44,7 @@ export function PolymodStory({ fixture }: { fixture: AddressFixture }) {
           <Cells x={14} y={44} values={expanded.map(String)} size={30} roleOf={(i) => (i === hrp.length ? "plain" : "net")} />
           <Bracket x1={14} x2={14 + hrp.length * 30} y={78} text="code ÷ 32" align="start" />
           <Bracket x1={14 + (hrp.length + 1) * 30} x2={14 + expanded.length * 30} y={78} text="code mod 32" align="start" />
-          <Value at={[14, 126]} text="A TYPO IN THE PREFIX IS CAUGHT TOO" size={9} cls="k-value--muted" />
+          <Value at={[14, 126]} text="THE PREFIX IS CHECKSUMMED TOO" size={9} cls="k-value--muted" />
         </>
       ),
     },
@@ -55,7 +55,7 @@ export function PolymodStory({ fixture }: { fixture: AddressFixture }) {
         <>
           <Cells x={14} y={14} values={Array(expanded.length).fill("")} size={10} roleOf={() => "net"} text={false} />
           <Cells x={14 + expanded.length * 10 + 4} y={14} values={Array(values.length).fill("")} size={5.5} roleOf={(i) => (i >= values.length - 6 ? "check" : "plain")} text={false} />
-          <Value at={[14, 46]} text={`${expanded.length} + ${values.length} = ${expanded.length + values.length} VALUES`} size={9} cls="k-value--label" />
+          <Value at={[14, 46]} text={`${expanded.length} + ${values.length} = ${expanded.length + values.length} VALUES · LAST 6 = CHECKSUM`} size={9} cls="k-value--label" />
           <Arrow d="M190 30 V48" ids={ids} />
           <Machine at={[164, 76]} w={84} d={30} h={22} label="POLYMOD" role="check" />
         </>

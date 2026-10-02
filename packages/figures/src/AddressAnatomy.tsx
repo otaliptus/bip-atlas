@@ -1,5 +1,5 @@
 import { analyzeSegwitAddress } from "@bip-atlas/models/bech32";
-import { Drawing, Responsive, Value } from "./kit";
+import { Drawing, Responsive } from "./kit";
 import { ROLE_FILL } from "./AddressChecksumLab";
 import { familyName, roleRuns } from "./describe";
 import type { AddressFixture } from "./types";

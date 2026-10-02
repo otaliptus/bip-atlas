@@ -16,7 +16,7 @@ export function AddressCase({ fixtures }: { fixtures: AddressFixture[] }) {
   const lower = rows.find((r) => r.a.valid && r.f.address === r.f.address.toLowerCase());
   const upper = rows.find((r) => r.a.valid && r.f.address === r.f.address.toUpperCase());
   const mixed = rows.find((r) => r.a.failedStage === "characters");
-  if (!lower || !upper || !mixed) throw new Error("address-case.v1 needs a lowercase, an uppercase and a mixed-case fixture");
+  if (!lower || !upper || !mixed || !/mix/i.test(mixed.a.reason ?? "")) throw new Error("address-case.v1 needs a lowercase, an uppercase and a mixed-case fixture");
   if (lower.a.scriptPubKeyHex !== upper.a.scriptPubKeyHex) throw new Error("the two spellings should decode to the same script");
   // Show the mixed string around its odd-case letters, shortened with an ellipsis.
   const m = mixed.f.address;

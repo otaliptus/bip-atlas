@@ -57,7 +57,7 @@ export function walletWalkSpec(fixtures: DerivedWalletPathFixture[], figureId: s
     initial: start,
     controls: [
       { kind: "strip", key: "scheme", label: "Path scheme", options: fixtures.map((x) => ({ value: x.id, text: `BIP ${x.derived.scheme}` })) },
-      { kind: "strip", key: "addr", label: "Receive or change", options: f0.derived.addresses.map((x, k) => ({ value: String(k), text: `${x.change === 0 ? "receive" : "change"} ${x.index}` })) },
+      { kind: "strip", key: "addr", label: "Receive or change", options: f0.derived.addresses.map((x, k) => ({ value: String(k), text: `${x.change === 0 ? "receive" : "change"} · index ${x.index}` })) },
       { kind: "scrub", key: "step", label: "Path level", min: 0, max: a.nodes.length, prev: "Up a level", next: "Down a level" },
     ],
     status,

@@ -127,3 +127,39 @@ The coordinator set the batch budget at ≤ 1 KB net (the site total must stay u
 - Without JavaScript, the initial state's layers are the visible ones, so the static view is unchanged.
 - Hidden layers are `display: none`, so assistive technology does not read them. As before, the island's props and the page source hold every state's values; for the HD hero the M view's layers are built from public values only, and tests check the visible M-view render for leaks.
 - Measured after the batch: **49,523 bytes** gzipped across `apps/site/dist/_astro/*.js`, against about 51,860 before the batch: about 2.3 KB **less** than before.
+
+## Addresses (A04) — plan as built
+
+| Fig. | Recipe | Kind | Drawing | Data | Claims |
+|---|---|---|---|---|---|
+| A04.1 | `address-anatomy.v1` (redraw) | static, opening | BIP 173's example as a ribbon of character cells (prefix cyan for network, checksum purple, version outlined), each part bracketed and named; two-row narrow composition. | `v0-p2wpkh` via the bech32 model | string-shape, segwit-hrp, version-char, checksum-six, fixture-v0 |
+| A04.2 | `address-alphabet.v1` **new** | static | The 32 data characters in value order (model's CHARSET) and the four left out, struck. | none | alphabet |
+| A04.3 | `address-case.v1` **new** | static | Lowercase and uppercase spellings decode to one script; a mixed-case vector refused at the first stage. | `v0-p2wpkh`, `v0-upper` (**new fixture**, BIP 173 line 306), `mixed-case` | case-rules, fixture-v0 |
+| A04.4 | `address-polymod-story.v1` **new** | storyboard, 4 frames | Characters → values; prefix expanded (high bits, 0, low bits); 5 + 39 values into POLYMOD; result 0x00000001. | `v0-p2wpkh` | checksum-computation, fixture-v0 |
+| A04.5 | `address-checksum-lab.v1` (hero, redraw; still a computing island) | interactive | Ribbon with the edited cell dark and a caret; the decoder's six stages as gates (passed, stopped here, not reached = hatched); POLYMOD residue held against both constants; the scriptPubKey or "REFUSED · NO CORRECTED VERSION". Sample strip, position slider, next/previous letter, restore. | 4 lab fixtures | substitution-guarantee, no-correction, family-rule, fixture-typo, fixture-wrong-family |
+| A04.6 | `address-typo-story.v1` **new** (worked tab → storyboard) | storyboard, 4 frames | Valid → one character changed (residue matches neither) → rejected without position → no "did you mean". | `v0-p2wpkh`, `v0-typo` | fixture-typo, no-correction, checksum-computation |
+| A04.7 | `address-q-weakness.v1` **new** | static, schematic | q characters inserted before a final p, still valid; why v0 escaped. | none | q-weakness, v0-unaffected |
+| A04.8 | `address-two-constants.v1` **new** | static | One POLYMOD, two accepted constants; v0, v1 and the wrong-family vector with their residues and verdicts. | `v0-p2wpkh`, `v1-32byte`, `v1-bech32-checksum` | bech32m-constant, family-rule, fixture-wrong-family, fixture-v1 |
+| A04.9 | `program-regrouping.v1` (redraw) | static | Bits as black/white cells under byte brackets and over 5-bit groups with their values and characters; padding bits dashed. | `v0-p2wpkh`, `v1-32byte` | program-regrouping, padding-rule, fixture-v0, fixture-v1 |
+| A04.10 | `address-script.v1` **new** | static | Version character → number → opcode byte, push length, program, for v0 and v1. | `v0-p2wpkh`, `v1-32byte` | script-opcodes, fixture-v0, fixture-v1 |
+
+Retired: `AddressWorked`; its content is A04.6. Dead address CSS removed (ribbon, residue, script, regrouping, anatomy); the shared card-lab rules still used by other chapters' card heroes (`.atlas-pipeline`, `.atlas-stage`, `.atlas-choice`, `.atlas-panel`, `.atlas-lab__*`) stay.
+
+### Addresses and the layered heroes — independent review
+
+A fresh read-only subagent decoded all 13 address fixtures with its own BIP 173/350 reference Python (stage, residue and scriptPubKey all match the model), confirmed `v0-upper` is verbatim BIP 173 line 306, tried every single substitution on the lab samples (all stop at the checksum stage), and drove every state of the three layered heroes (24 HD, 63 wallet, 26 descriptor) at 1440 and 375: exactly one layer per group visible, status matching the drawing, no-JS showing only the initial state, and in the HD M view none of 29 sensitive values in any visible text, title/desc, status or open disclosure.
+
+| # | Severity | Finding | Change |
+|---|---|---|---|
+| B1 | must-fix | Two descriptors without keys could not be selected: the strip fix-up in `StateHero` threw on a strip with no options. | The transition is now a pure, tested `nextState()` in `heroLayers.ts` that leaves an empty strip alone; tests switch to every descriptor and harden/unharden an opened m/1 branch. |
+| A1 | should-fix | A04.7 said an inserted q "is refused" for v0; the BIP gives only the two-length reason, and 20 inserted q can make a valid 62-character v0 string. | "Only two lengths, 42 or 62 · a few inserted q give a length v0 forbids"; "checksum still valid". |
+| A2 | should-fix | The lab caption said the decoder cannot learn where (Bech32m can locate errors). | "This decoder reports that the string is wrong, not where…". |
+| A3 | should-fix | The live status read "Accepted Accepted: …". | The verdict chip is `aria-hidden`. |
+| A4 | should-fix | Verdicts in A04.8 and the mixed-case label in A04.3 were typed by hand. | Built from the model's version, family and failed stage; A04.3 throws unless the reason is mixed case. |
+| A5 | should-fix | Prefix and checksum in the lab ribbon were told apart by colour only. | Brackets "PREFIX" and "CHECKSUM" on the ribbon; "LAST 6 = CHECKSUM" in A04.4. The family gate says what the version needs. |
+| A6 | should-fix | "A typo in the prefix is caught too" had no quote in the ledger. | The figure says "THE PREFIX IS CHECKSUMMED TOO"; `checksum-computation` now quotes BIP 173 lines 156–158. |
+| A7 | should-fix | Two prose sentences overstate BIP 350 ("states … within one checksum family"; "overwhelming odds otherwise"). | **Not changed here:** both predate this batch and the brief limits prose edits to figure pointers. Flagged for the chapter's next editorial pass. |
+| A8–A10 | nits | Ledger quotes for BIP 173 line 306 and BIP 350 line 208; figure claims citing the fixtures; crowded alphabet cells; "BLACK = 1" on one panel only; an unused import; no arrows from POLYMOD in A04.8. | All applied. |
+| B2–B3 | nits | Circular HD status when the parent is itself the hardened node; "change 0" readable as chain 0. | "is a hardened child, which M cannot derive"; "change · index 0". |
+
+Client JS after these fixes: **49,715 bytes** gzipped in total.

@@ -74,8 +74,8 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
     const x0 = (W - perRow * cell) / 2;
     const rows = Math.ceil(chars.length / perRow);
     const rib = 26;
-    const at = (i: number): [number, number] => [x0 + (i % perRow) * cell, rib + Math.floor(i / perRow) * (cell + 10)];
-    const legendY = rib + rows * (cell + 10) + 6;
+    const at = (i: number): [number, number] => [x0 + (i % perRow) * cell, rib + Math.floor(i / perRow) * (cell + 28)];
+    const legendY = rib + rows * (cell + 28) + 6;
     const gatesY = legendY + (wide ? 38 : 54);
     const perGate = wide ? 6 : 3;
     const gw = (W - 24) / perGate;
@@ -110,6 +110,20 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
             </g>
           );
         })}
+        {/* Brackets name the prefix and the checksum on the ribbon itself (colour is not the only cue). */}
+        {(["hrp", "checksum"] as const).map((role) => {
+          const idx = roles.map((r, i) => (r === role ? i : -1)).filter((i) => i >= 0);
+          if (!idx.length) return null;
+          const [x1, y] = at(idx[0]);
+          const x2 = at(idx[idx.length - 1])[0] + cell;
+          const yb = y + cell + 9;
+          return (
+            <g class="k-label">
+              <path class="k-leader" d={`M${x1} ${yb} V${yb + 3} H${x2} V${yb}`} />
+              <text x={role === "hrp" ? x1 : x2} y={yb + 13} text-anchor={role === "hrp" ? "start" : "end"} style="font-size:9px">{role === "hrp" ? "PREFIX" : "CHECKSUM"}</text>
+            </g>
+          );
+        })}
         {parts.map((p, k) => {
           const lx = x0 + (wide ? k * 100 : (k % 3) * 104);
           const ly = legendY + (wide ? 0 : Math.floor(k / 3) * 16);
@@ -132,7 +146,7 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
               <rect class={`k-cell ${fail ? "k-mark--plain" : "k-fill--plain"}`} x={x + 2} y={y} width={gw - 6} height="34" style={hidden ? `fill:${ids.hatch}` : undefined} />
               {hidden ? <rect class="k-hd-chip" x={x + 5} y={y + 4} width={gw - 14} height="27" /> : null}
               <Value at={[x + 8, y + 14]} text={`${String(k + 1).padStart(2, "0")} ${stageLabel(s.id).toUpperCase()}`} size={9} cls={fail ? "k-value--on" : ""} />
-              <Value at={[x + 8, y + 27]} text={s.status === "pass" ? "✓ PASSED" : fail ? "✕ STOPPED HERE" : "NOT REACHED"} size={9} cls={fail ? "k-value--on" : hidden ? "k-value--muted" : "k-value--label"} />
+              <Value at={[x + 8, y + 27]} text={s.status === "pass" ? "✓ PASSED" : fail ? (s.id === "family" ? `✕ NEEDS ${analysis.witnessVersion === 0 ? "BECH32" : "BECH32M"}` : "✕ STOPPED HERE") : "NOT REACHED"} size={9} cls={fail ? "k-value--on" : hidden ? "k-value--muted" : "k-value--label"} />
             </g>
           );
         })}
@@ -229,7 +243,7 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
         </div>
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">
-        <span class="atlas-lab__verdict" data-valid={analysis.valid ? "true" : "false"}>{analysis.valid ? "✓ Accepted" : "✕ Rejected"}</span> {status}
+        <span class="atlas-lab__verdict" data-valid={analysis.valid ? "true" : "false"} aria-hidden="true">{analysis.valid ? "✓ Accepted" : "✕ Rejected"}</span> {status}
       </p>
       <details class="atlas-disclosure">
         <summary>Exact values for this string</summary>

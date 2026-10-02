@@ -66,6 +66,23 @@ export interface HeroSpec {
   source: string;
 }
 
+/**
+ * The state after one control changes: apply the key's resets, then move any
+ * strip whose value is no longer offered to an option of the same group, or
+ * to its first option. A strip with no options in this state is left alone.
+ */
+export function nextState(spec: Pick<HeroSpec, "controls" | "resets">, state: HeroState, key: string, value: string): HeroState {
+  let next: HeroState = { ...state, [key]: value, ...(spec.resets?.[key] ?? {}) };
+  for (const c of spec.controls) {
+    if (c.kind !== "strip") continue;
+    const opts = c.options.filter((o) => !o.when || matches(o.when, next));
+    if (!opts.length || opts.some((o) => o.value === next[c.key])) continue;
+    const group = c.options.find((o) => o.value === next[c.key])?.group;
+    next = { ...next, [c.key]: (opts.find((o) => group && o.group === group) ?? opts[0]).value };
+  }
+  return next;
+}
+
 /** Every reachable state, for building status tables and tests. */
 export function allStates(keys: string[], values: Record<string, string[]>, valid: (s: HeroState) => boolean = () => true): HeroState[] {
   let out: HeroState[] = [{}];

@@ -180,13 +180,15 @@
             "v1-bech32-checksum",
             "v0-typo"
           ],
-          "caption": "Any single change you make to a valid sample is stopped at the checksum stage. The decoder learns that the string is wrong, not where: the dark cell is your edit, which the decoder never sees.",
+          "caption": "Any single change you make to a valid sample is stopped at the checksum stage. This decoder reports that the string is wrong, not where: the dark cell marks your edit, and the decoder is not told its position.",
           "claims": [
             "substitution-guarantee",
             "no-correction",
             "family-rule",
             "fixture-typo",
-            "fixture-wrong-family"
+            "fixture-wrong-family",
+            "fixture-v0",
+            "fixture-v1"
           ],
           "layout": "wide"
         },
@@ -255,7 +257,8 @@
           "claims": [
             "fixture-typo",
             "no-correction",
-            "checksum-computation"
+            "checksum-computation",
+            "fixture-v0"
           ],
           "layout": "prose"
         },
@@ -349,6 +352,7 @@
             "bech32m-constant",
             "family-rule",
             "fixture-wrong-family",
+            "fixture-v0",
             "fixture-v1"
           ],
           "layout": "prose"

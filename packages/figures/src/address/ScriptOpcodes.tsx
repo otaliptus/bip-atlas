@@ -44,7 +44,7 @@ export function ScriptOpcodes({ fixtures }: { fixtures: AddressFixture[] }) {
               <Value at={[14, y + 38]} text="VERSION" size={9} cls="k-value--label" />
               <Value at={[96, y + 38]} text={`OP_${a.witnessVersion}`} size={9} cls="k-value--label" />
               <Value at={[140, y + 38]} text={`PUSH ${a.programHex!.length / 2}`} size={9} cls="k-value--label" />
-              <Value at={[184, y + 38]} text="PROGRAM" size={9} cls="k-value--label" />
+              <Value at={[192, y + 38]} text="PROGRAM" size={9} cls="k-value--label" />
             </g>
           );
         })}

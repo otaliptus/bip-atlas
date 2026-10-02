@@ -7,6 +7,7 @@ import { ALLOWED, expand, keyAt, parseDescriptor } from "@bip-atlas/models/descr
 import { bytesToHex } from "@bip-atlas/models/hex";
 import { DescriptorAnatomy, DescriptorValues, descriptorSpec } from "../src/descriptors/DescriptorAnatomy";
 import { StateHero } from "../src/StateHero";
+import { nextState, stateKey } from "../src/heroLayers";
 import { DescriptorChecksum } from "../src/descriptors/DescriptorChecksum";
 import { DescriptorIndex } from "../src/descriptors/DescriptorIndex";
 import { DescriptorNesting } from "../src/descriptors/DescriptorNesting";
@@ -179,6 +180,15 @@ describe("DescriptorAnatomy (hero)", () => {
     expect(s).toContain("{ } BRANCH");
     expect(s).toContain("x-only df12b703");
     expect(at({ fixtureId: "bip386-tr-tree", key: 0, checked: false })).toContain("INTERNAL KEY");
+  });
+  it("can switch to descriptors with no keys, and every reachable state has a status", () => {
+    const spec = descriptorSpec(all, "fig-a13-5");
+    for (const f of all) {
+      const s = nextState(spec, { desc: "bip386-tr-tree", key: "3", check: "1" }, "desc", f.id);
+      expect(s.desc).toBe(f.id);
+      expect(s.key).toBe("0");
+      expect(spec.status[stateKey(spec.keys, s)], f.id).toBeTruthy();
+    }
   });
   it("shows a payload typo as rejected, with no scripts", () => {
     const s = at({ fixtureId: "bip380-raw-typo", key: 0, checked: true });

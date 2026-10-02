@@ -55,7 +55,7 @@ export function hdState(fixture: DerivedBip32Fixture, view: View, hardenedBranch
   const derivable = parentHeld && (!sel.hardened || !pub);
   // What this holder can say about the opened branch.
   const outcome = !parentHeld
-    ? `out of reach: its parent ${parent.path} lies across the hardened edge into ${parent.hardenedAncestor}, so M cannot derive it.`
+    ? `out of reach: its parent ${parent.path} ${parent.hardenedAncestor === parent.path ? "is a hardened child, which M cannot derive" : `lies below the hardened edge into ${parent.hardenedAncestor}, which M cannot cross`}.`
     : sel.hardened && pub
       ? `hardened. Its HMAC input is 00, the private key of ${parent.path} and ${sel.childNumberHex}. M holds no private key, so ${sel.path} and everything below it cannot be derived.`
       : sel.hardened

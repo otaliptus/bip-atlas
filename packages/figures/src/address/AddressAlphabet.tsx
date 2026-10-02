@@ -22,8 +22,8 @@ export function AddressAlphabet() {
         return (
           <g>
             <rect class="k-cell k-fill--plain" x={x} y={y} width={C} height={C} />
-            <Value at={[x + C / 2, y + 20]} text={c} anchor="middle" size={14} />
-            <Value at={[x + C - 3, y + 10]} text={String(v)} anchor="end" size={9} cls="k-value--muted" />
+            <Value at={[x + C / 2 - 3, y + 24]} text={c} anchor="middle" size={13} />
+            <Value at={[x + C - 2, y + 9]} text={String(v)} anchor="end" size={9} cls="k-value--muted" />
           </g>
         );
       })}

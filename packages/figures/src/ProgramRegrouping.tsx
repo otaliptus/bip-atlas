@@ -107,7 +107,7 @@ function panel(slice: Slice) {
           {Array.from({ length: Math.floor(dataBits / 40) + 1 }, (_, k) => k * 40).filter((b) => b <= dataBits && b > 0).map((b) => (
             <line class="k-cut" x1={X + b * B} y1={yb - 10} x2={X + b * B} y2={yb + B + 48} />
           ))}
-          <text class="k-value k-value--muted" x={X} y={yb + B + 66} style="font-size:9px">{pad ? `DASHED: ${pad} ZERO BITS OF PADDING` : "BLACK = 1 · BYTES ALIGN WITH CHARACTERS EVERY 40 BITS"}</text>
+          <text class="k-value k-value--muted" x={X} y={yb + B + 66} style="font-size:9px">{pad ? `BLACK = 1 · DASHED: ${pad} ZERO BITS OF PADDING` : "BLACK = 1 · BYTES ALIGN WITH CHARACTERS EVERY 40 BITS"}</text>
         </g>
       );
     },
