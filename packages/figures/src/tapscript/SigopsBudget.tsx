@@ -1,4 +1,4 @@
-import { BUDGET_BASE, SIGOP_COST } from "@bip-atlas/models/tapscript";
+import { BUDGET_BASE, SIGOP_COST } from "@bip-atlas/models/tapscript-budget";
 import { Drawing, Value } from "../kit";
 import type { DerivedTapscriptFixture } from "../types";
 

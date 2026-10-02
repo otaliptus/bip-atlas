@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Arrow, Drawing, Lamp, Responsive, Value, idsFor, wrapLines } from "../kit";
+import { Arrow, Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor, wrapLines } from "../kit";
 import type { DerivedSchnorrFixture, SchnorrTraceView } from "../types";
 import { SCHNORR_STAGES, short, stageNote } from "./stages";
 
@@ -150,46 +150,23 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
     );
   };
 
-  const strip = (label: string, name: string, options: Array<{ value: string; text: string; aria: string }>, current: string, set: (v: string) => void) => (
-    <div class="atlas-strip" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
-        <label class="atlas-strip__opt">
-          <input type="radio" name={`${figureId}-${name}`} aria-label={o.aria} checked={current === o.value} onChange={() => set(o.value)} />
-          <span aria-hidden="true">{o.text}</span>
-        </label>
-      ))}
-    </div>
-  );
-
   return (
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {strip("Public BIP 340 vector", "vector", fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}: ${f.expected ? "" : "invalid, "}${f.label}` })), fixtureId, chooseFixture)}
-          {strip("Message", "message", fixture.derived.messages.map((m) => ({
+          {Strip({ label: "Public BIP 340 vector", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: `V${f.vectorIndex} ${f.expected ? "✓" : "✕"}`, aria: `Vector ${f.vectorIndex}: ${f.expected ? "" : "invalid, "}${f.label}` })) })}
+          {Strip({ label: "Message", name: `${figureId}-message`, current: messageKey, onPick: setMessageKey, options: fixture.derived.messages.map((m) => ({
             value: m.key,
             text: m.key === fixture.derived.ownMessage ? `Own m · ${m.bytes} B` : `m of V${m.fromVector} · ${m.bytes} B`,
             aria: m.key === fixture.derived.ownMessage ? `Its own message, ${m.bytes} bytes` : `The message of vector ${m.fromVector}, ${m.bytes} bytes`,
-          })), messageKey, setMessageKey)}
+          })) })}
         </div>
       ) : (
         <p class="atlas-hero__static">Static view: vector {fixtures[0].vectorIndex} checked against its own message, every gate shown. With JavaScript you can choose any of the {fixtures.length} published vectors, swap in another vector’s message, and step through the gates.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       {hydrated ? (
-        <div class="atlas-scrub" role="group" aria-label="Reveal verifier stages">
-          <button type="button" class="atlas-scrub__btn" onClick={() => setRevealed(Math.max(1, revealed - 1))} disabled={revealed <= 1} aria-label="Previous gate">←</button>
-          <input
-            type="range"
-            min={1}
-            max={N}
-            value={revealed}
-            aria-label="Gates revealed"
-            aria-valuetext={`gate ${revealed} of ${N}: ${SCHNORR_STAGES[revealed - 1].label}, ${STATUS_WORD[statusOf(revealed - 1)]}`}
-            onInput={(e) => setRevealed(Number((e.currentTarget as HTMLInputElement).value))}
-          />
-          <button type="button" class="atlas-scrub__btn" onClick={() => setRevealed(Math.min(N, revealed + 1))} disabled={revealed >= N} aria-label="Next gate">→</button>
-        </div>
+        <Scrub label="Reveal verifier stages" value={revealed} min={1} max={N} unit="gate" valueText={`gate ${revealed} of ${N}: ${SCHNORR_STAGES[revealed - 1].label}, ${STATUS_WORD[statusOf(revealed - 1)]}`} onSet={setRevealed} />
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">

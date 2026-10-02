@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Computer, Drawing, Lamp, Responsive, Value, idsFor } from "../kit";
+import { Computer, Drawing, Lamp, Responsive, Strip, Value, idsFor } from "../kit";
 import type { Role } from "../kit";
 import type { DerivedSpFixture, SpDerived } from "../types";
 import { Chip, kindOf, short } from "./common";
@@ -154,24 +154,13 @@ export function SpDerivation({ fixtures, figureId }: Props) {
     );
   };
 
-  const strip = (label: string, name: string, options: Array<{ value: string; text: string }>, current: string, set: (x: string) => void) => (
-    <div class="atlas-strip" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
-        <label class="atlas-strip__opt">
-          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} onChange={() => set(o.value)} />
-          <span>{o.text}</span>
-        </label>
-      ))}
-    </div>
-  );
-
   return (
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {strip("Choose a published vector", "case", fixtures.map((x) => ({ value: x.id, text: x.label })), id, setId)}
-          {strip("Switch sender/receiver view", "view", [{ value: "sender", text: "Sender" }, { value: "receiver", text: "Receiver" }, { value: "observer", text: "Outside observer" }], view, (x) => setView(x as SpView))}
-          {strip("Reveal shared-secret steps", "steps", [{ value: "no", text: "Result only" }, { value: "yes", text: "Every step" }], steps ? "yes" : "no", (x) => setSteps(x === "yes"))}
+          <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={setId} />
+          <Strip label="Switch sender/receiver view" name={`${figureId}-view`} options={[{ value: "sender", text: "Sender" }, { value: "receiver", text: "Receiver" }, { value: "observer", text: "Outside observer" }]} current={view} onPick={(x) => setView(x as SpView)} />
+          <Strip label="Reveal shared-secret steps" name={`${figureId}-steps`} options={[{ value: "no", text: "Result only" }, { value: "yes", text: "Every step" }]} current={steps ? "yes" : "no"} onPick={(x) => setSteps(x === "yes")} />
         </div>
       ) : (
         <p class="atlas-hero__static">Static view: the sender’s side of the first vector, every step shown. With JavaScript you can switch to the receiver or an outside observer, pick other vectors and hide the intermediate steps.</p>

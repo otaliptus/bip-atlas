@@ -181,3 +181,22 @@ describe("Lamp and wrapLines (batch 3)", () => {
     expect(wrapLines("", 5)).toEqual([]);
   });
 });
+
+describe("Strip and Scrub (batch 3)", () => {
+  it("Strip is a labelled radiogroup; a terse option gets an accessible name", async () => {
+    const { Strip } = await import("../src/kit");
+    const s = html(h(Strip, { label: "Vector", name: "v", current: "b", onPick: () => {}, options: [{ value: "a", text: "A" }, { value: "b", text: "V7 ✕", aria: "Vector 7, invalid" }] }));
+    expect(s).toContain('role="radiogroup" aria-label="Vector"');
+    expect(s).toContain('aria-label="Vector 7, invalid"');
+    expect(count(s, 'type="radio"')).toBe(2);
+    expect(count(s, "checked")).toBe(1);
+  });
+  it("Scrub disables the ends and names its buttons by unit", async () => {
+    const { Scrub } = await import("../src/kit");
+    const s = html(h(Scrub, { label: "Steps", value: 0, max: 3, unit: "step", valueText: "start", onSet: () => {} }));
+    expect(s).toContain('aria-label="Previous step"');
+    expect(s).toContain('aria-label="Next step"');
+    expect(s).toContain('aria-valuetext="start"');
+    expect(count(s, "disabled")).toBe(1);
+  });
+});

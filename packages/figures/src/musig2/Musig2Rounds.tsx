@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Drawing, Responsive, Value, idsFor } from "../kit";
+import { Drawing, Responsive, Scrub, Strip, Value, idsFor } from "../kit";
 import type { DerivedMusig2SessionFixture, Musig2SessionDerived } from "../types";
 import { ONE, Scene, sceneHeight, stagesFor } from "./scene";
 
@@ -71,41 +71,15 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          <div class="atlas-strip" role="radiogroup" aria-label="Choose a published vector">
-            {fixtures.map((x) => (
-              <label class="atlas-strip__opt">
-                <input type="radio" name={`${figureId}-case`} checked={x.id === id} onChange={() => (setId(x.id), setAt(0))} />
-                <span>{x.label}</span>
-              </label>
-            ))}
-          </div>
-          <div class="atlas-strip" role="radiogroup" aria-label="Reveal aggregated values">
-            {[{ v: false, t: "Each signer only" }, { v: true, t: "With aggregated values" }].map((o) => (
-              <label class="atlas-strip__opt">
-                <input type="radio" name={`${figureId}-reveal`} checked={reveal === o.v} onChange={() => setReveal(o.v)} />
-                <span>{o.t}</span>
-              </label>
-            ))}
-          </div>
+          <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={(v) => (setId(v), setAt(0))} />
+          <Strip label="Reveal aggregated values" name={`${figureId}-reveal`} options={[{ value: "no", text: "Each signer only" }, { value: "yes", text: "With aggregated values" }]} current={reveal ? "yes" : "no"} onPick={(v) => setReveal(v === "yes")} />
         </div>
       ) : (
         <p class="atlas-hero__static">Static view: the first vector with every stage and the aggregated values shown. With JavaScript you can choose among {fixtures.length} published vectors, step through the rounds and hide the aggregated values.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       {hydrated ? (
-        <div class="atlas-scrub" role="group" aria-label="Step through signing rounds">
-          <button type="button" class="atlas-scrub__btn" onClick={() => setAt(Math.max(0, step - 1))} disabled={step === 0} aria-label="Previous stage">←</button>
-          <input
-            type="range"
-            min={0}
-            max={stages.length - 1}
-            value={step}
-            aria-label="Stage"
-            aria-valuetext={`stage ${step + 1} of ${stages.length}: ${stage.title}`}
-            onInput={(e) => setAt(Number((e.currentTarget as HTMLInputElement).value))}
-          />
-          <button type="button" class="atlas-scrub__btn" onClick={() => setAt(Math.min(stages.length - 1, step + 1))} disabled={step === stages.length - 1} aria-label="Next stage">→</button>
-        </div>
+        <Scrub label="Step through signing rounds" value={step} max={stages.length - 1} unit="stage" valueText={`stage ${step + 1} of ${stages.length}: ${stage.title}`} onSet={setAt} />
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">

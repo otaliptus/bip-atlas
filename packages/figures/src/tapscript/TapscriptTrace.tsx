@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Drawing, Lamp, Responsive, Value, idsFor } from "../kit";
+import { Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor } from "../kit";
 import type { DerivedTapscriptFixture, TapscriptTraceView } from "../types";
 import { StackPlates, stackHeight } from "./common";
 
@@ -128,43 +128,19 @@ export function TapscriptTrace({ fixtures, figureId }: Props) {
     );
   };
 
-  const strip = (label: string, name: string, options: Array<{ value: string; text: string }>, current: string, set: (v: string) => void) => (
-    <div class="atlas-strip" role="radiogroup" aria-label={label}>
-      {options.map((o) => (
-        <label class="atlas-strip__opt">
-          <input type="radio" name={`${figureId}-${name}`} checked={current === o.value} onChange={() => set(o.value)} />
-          <span>{o.text}</span>
-        </label>
-      ))}
-    </div>
-  );
-
   return (
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {strip("Bitcoin Core test case", "case", fixtures.map((f) => ({ value: f.id, text: f.label })), fixtureId, (id) => (setFixtureId(id), setAt(0)))}
-          {strip("Compare success/failure fixtures", "witness", [{ value: "success", text: "✓ Success witness" }, { value: "failure", text: "✕ Failure witness" }], which, (w) => (setWhich(w as Which), setAt(0)))}
+          <Strip label="Bitcoin Core test case" name={`${figureId}-case`} options={fixtures.map((f) => ({ value: f.id, text: f.label }))} current={fixtureId} onPick={(id) => (setFixtureId(id), setAt(0))} />
+          <Strip label="Compare success/failure fixtures" name={`${figureId}-witness`} options={[{ value: "success", text: "✓ Success witness" }, { value: "failure", text: "✕ Failure witness" }]} current={which} onPick={(w) => (setWhich(w as Which), setAt(0))} />
         </div>
       ) : (
         <p class="atlas-hero__static">Static view: the success witness of the first case, played to the end. With JavaScript you can step through each of the {fixtures.length} cases opcode by opcode, compare the success and failure witnesses, and watch the budget.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       {hydrated ? (
-        <div class="atlas-scrub" role="group" aria-label="Step a reviewed trace">
-          <button type="button" class="atlas-scrub__btn" onClick={() => setAt(Math.max(0, p - 1))} disabled={p === 0} aria-label="Previous step">←</button>
-          <input
-            type="range"
-            min={0}
-            max={L}
-            value={p}
-            disabled={L === 0}
-            aria-label="Steps run"
-            aria-valuetext={p === 0 ? "start, nothing run" : `step ${p} of ${L}: ${v.steps[p - 1].name}`}
-            onInput={(e) => setAt(Number((e.currentTarget as HTMLInputElement).value))}
-          />
-          <button type="button" class="atlas-scrub__btn" onClick={() => setAt(Math.min(L, p + 1))} disabled={p >= L} aria-label="Next step">→</button>
-        </div>
+        <Scrub label="Step a reviewed trace" value={p} max={L} unit="step" valueText={p === 0 ? "start, nothing run" : `step ${p} of ${L}: ${v.steps[p - 1].name}`} onSet={setAt} />
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">

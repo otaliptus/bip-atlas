@@ -17,9 +17,8 @@ import { SigMsgError, checkControlBlock, compactSize, sigMsg, tapLeafHash, tapro
 
 export class TraceScopeError extends Error {}
 
-/** BIP 342: each input's budget starts at 50 plus its serialized witness size; each non-empty signature checked costs 50. */
-export const BUDGET_BASE = 50;
-export const SIGOP_COST = 50;
+import { BUDGET_BASE, SIGOP_COST } from "./tapscript-budget";
+export { BUDGET_BASE, SIGOP_COST };
 
 const OP = {
   OP_0: 0x00, OP_PUSHDATA1: 0x4c, OP_PUSHDATA2: 0x4d, OP_PUSHDATA4: 0x4e, OP_1NEGATE: 0x4f,

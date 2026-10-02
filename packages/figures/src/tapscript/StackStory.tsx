@@ -1,4 +1,4 @@
-import { BUDGET_BASE } from "@bip-atlas/models/tapscript";
+import { BUDGET_BASE } from "@bip-atlas/models/tapscript-budget";
 import { Lamp, Storyboard, Value, type Frame } from "../kit";
 import type { DerivedTapscriptFixture } from "../types";
 import { StackPlates } from "./common";

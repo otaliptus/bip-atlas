@@ -1,4 +1,4 @@
-import { SIGOP_COST } from "@bip-atlas/models/tapscript";
+import { SIGOP_COST } from "@bip-atlas/models/tapscript-budget";
 import { Arrow, Drawing, Value, idsFor } from "../kit";
 import type { DerivedTapscriptFixture, TapscriptElement } from "../types";
 import { itemSize } from "./common";

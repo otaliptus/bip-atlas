@@ -1,15 +1,15 @@
 import type { DerivedSchnorrFixture, SchnorrStageId, SchnorrTraceView } from "../types";
 
 /** The eight steps of Verify(pk, m, sig), in the order BIP 340 lists them. `gate` is the label on a drawn gate. */
-export const SCHNORR_STAGES: ReadonlyArray<{ id: SchnorrStageId; label: string; gate: string; question: string }> = [
-  { id: "lift-x", label: "Lift the key", gate: "LIFT P", question: "Is pk a valid x coordinate, below p and with a curve point? Take the point P with even y." },
-  { id: "r-range", label: "Read r", gate: "r < p", question: "r is the first 32 bytes of the signature. Is r below the field size p?" },
-  { id: "s-range", label: "Read s", gate: "s < n", question: "s is the last 32 bytes. Is s below the group order n?" },
-  { id: "challenge", label: "Hash the challenge", gate: "HASH e", question: "e = hash tagged BIP0340/challenge of r ‖ P ‖ m, reduced mod n." },
-  { id: "compute-r", label: "Compute R", gate: "R", question: "R = s⋅G − e⋅P, in secp256k1 point arithmetic." },
-  { id: "infinity", label: "R is not infinity", gate: "R ≠ ∞", question: "Fail if R is the point at infinity." },
-  { id: "even-y", label: "R has even y", gate: "EVEN y", question: "Fail if the y coordinate of R is odd." },
-  { id: "x-match", label: "x(R) equals r", gate: "x = r", question: "Fail unless the x coordinate of R equals r." },
+export const SCHNORR_STAGES: ReadonlyArray<{ id: SchnorrStageId; label: string; gate: string }> = [
+  { id: "lift-x", label: "Lift the key", gate: "LIFT P" },
+  { id: "r-range", label: "Read r", gate: "r < p" },
+  { id: "s-range", label: "Read s", gate: "s < n" },
+  { id: "challenge", label: "Hash the challenge", gate: "HASH e" },
+  { id: "compute-r", label: "Compute R", gate: "R" },
+  { id: "infinity", label: "R is not infinity", gate: "R ≠ ∞" },
+  { id: "even-y", label: "R has even y", gate: "EVEN y" },
+  { id: "x-match", label: "x(R) equals r", gate: "x = r" },
 ];
 
 /** First 8 hex digits and an ellipsis; every figure that uses it also lists the exact value. */
