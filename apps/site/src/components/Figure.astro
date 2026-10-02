@@ -54,7 +54,10 @@ import {
   Musig2Rounds,
   Musig2KeyAgg,
   Musig2PsigChecks,
-  Musig2Worked,
+  ChainView,
+  Coefficients,
+  RoundStory,
+  NonceOnce,
   SpDerivation,
   SpAddress,
   SpEligibility,
@@ -246,6 +249,10 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
   {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
   {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
   {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
+  {figure.recipe === "musig2-chain-view.v1" && <ChainView fixture={musig[0]} />}
+  {figure.recipe === "musig2-coefficients.v1" && <Coefficients fixture={musig[0]} />}
+  {figure.recipe === "musig2-round-story.v1" && <RoundStory fixture={musig[0]} />}
+  {figure.recipe === "musig2-nonce-once.v1" && <NonceOnce fixture={musig[0]} />}
   {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
   {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
   {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
@@ -269,7 +276,6 @@ const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
       {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsWorked fixtures={vbAny} />}
       {figure.recipe === "wallet-path-walk.v1" && <WalletPathWorked fixtures={wallet} />}
       {figure.recipe === "descriptor-anatomy.v1" && <DescriptorWorked fixtures={desc} />}
-      {figure.recipe === "musig2-rounds.v1" && <Musig2Worked fixtures={musig} />}
       {figure.recipe === "silent-payment-derivation.v1" && <SpWorked fixtures={sp} />}
       {figure.recipe === "gcs-filter.v1" && <BfWorked fixtures={bfBlocks} />}
       {figure.recipe === "v2-handshake.v1" && <V2Worked fixtures={v2} />}

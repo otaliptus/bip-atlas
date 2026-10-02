@@ -975,60 +975,6 @@ button.atlas-vb-period:focus-visible { outline: 2px solid var(--manual-focus); o
 
 /* ---------- MuSig2 (BIP 327) ---------- */
 .atlas-chapter[data-chapter="musig2"] { --atlas-accent: #1d6f5f; }
-.atlas-mu-lab, .atlas-mu-lab > * { min-inline-size: 0; }
-.atlas-mu-reveal { display: inline-flex; gap: 0.5rem; align-items: center; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-mu-stages { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 3px; }
-.atlas-mu-stages li > * { display: flex; gap: 0.4rem; align-items: baseline; inline-size: 100%; padding: 0.45rem 0.5rem; border: 1px solid var(--manual-rule); background: var(--manual-surface); font: inherit; font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-ink); text-align: start; }
-.atlas-mu-stages li > button { cursor: pointer; }
-.atlas-mu-stages li > button:focus-visible { outline: 2px solid var(--manual-focus); outline-offset: 2px; }
-.atlas-mu-stages li[data-state="done"] > * { border-color: var(--atlas-accent); }
-.atlas-mu-stages li[data-state="current"] > * { border: 2px solid var(--atlas-accent); background: var(--atlas-accent-wash); font-weight: 600; }
-.atlas-mu-stages li[data-state="ahead"] > * { border-style: dashed; color: var(--manual-muted); }
-.atlas-mu-stages__n { color: var(--atlas-accent); }
-.atlas-mu-note { margin: 0; padding: 0.4rem 0.6rem; border-inline-start: 3px solid var(--atlas-accent); background: var(--atlas-accent-wash); font-size: 0.9375rem; }
-.atlas-mu-lanes { display: grid; gap: 3px; }
-.atlas-mu-lanes__head, .atlas-mu-lanes__row { display: grid; grid-template-columns: 4rem minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr); gap: 0.5rem; align-items: start; }
-.atlas-mu-lanes__head { font-family: var(--manual-code); font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--manual-muted); }
-.atlas-mu-lanes__row { padding: 0.45rem 0.5rem; border: 1px solid var(--manual-ink); background: var(--manual-surface); }
-.atlas-mu-lanes__row > span { display: grid; gap: 0.15rem; min-inline-size: 0; font-size: 0.8125rem; }
-.atlas-mu-lanes__row small { color: var(--manual-muted); font-size: 0.75rem; }
-.atlas-mu-lanes__row small[data-ok="true"] { color: var(--manual-success); }
-.atlas-mu-lanes__row em { color: var(--manual-muted); }
-.atlas-mu-lanes__who { font-family: var(--manual-code); font-weight: 700; color: var(--atlas-accent); font-size: 1rem !important; }
-.atlas-mu-dl { display: grid; gap: 0.3rem; margin: 0.4rem 0 0; }
-.atlas-mu-dl > div { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 0.4rem; align-items: baseline; }
-.atlas-mu-dl dt { font-family: var(--manual-code); font-size: 0.75rem; color: var(--manual-muted); }
-.atlas-mu-dl dd { margin: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: baseline; min-inline-size: 0; }
-.atlas-mu-dl dd small { color: var(--manual-muted); }
-.atlas-mu-dl dd[data-ok="true"] { color: var(--manual-success); }
-.atlas-mu-ka { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--manual-space-3); }
-.atlas-mu-ka__col { display: grid; gap: 0.4rem; align-content: start; padding: 0.6rem; border: 1px solid var(--manual-ink); background: var(--manual-surface); min-inline-size: 0; }
-.atlas-mu-ka__col[data-kind="naive"] { border-style: dashed; background: var(--atlas-hatch), var(--manual-surface); }
-.atlas-mu-ka__head { margin: 0; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--atlas-accent); }
-.atlas-mu-ka__terms { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-mu-ka__terms li { display: flex; flex-wrap: wrap; gap: 0 0.35rem; }
-.atlas-mu-ka__a { color: var(--manual-muted); }
-.atlas-mu-ka__p { font-weight: 700; }
-.atlas-mu-ka__terms-flat { margin: 0; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-mu-ka__q { margin: 0; font-size: 0.875rem; }
-.atlas-mu-ka .atlas-lab__source { grid-column: 1 / -1; }
-.atlas-mu-checks__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
-.atlas-mu-checks__list li { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 0.1rem 0.6rem; padding: 0.4rem 0.5rem; border: 1px solid var(--manual-rule); background: var(--manual-surface); }
-.atlas-mu-checks__list li[data-verdict="valid"] { border-color: var(--atlas-accent); }
-.atlas-mu-checks__list li[data-verdict="invalid"], .atlas-mu-checks__list li[data-verdict="error"] { border-color: var(--atlas-edit); }
-.atlas-mu-checks__mark { grid-row: span 2; font-family: var(--manual-code); font-size: 0.8125rem; }
-.atlas-mu-checks__list li[data-verdict="valid"] .atlas-mu-checks__mark { color: var(--manual-success); }
-.atlas-mu-checks__list li:not([data-verdict="valid"]) .atlas-mu-checks__mark { color: var(--atlas-edit); }
-.atlas-mu-checks__label { font-size: 0.9375rem; }
-.atlas-mu-checks__detail { font-size: 0.8125rem; color: var(--manual-muted); }
-@media (max-width: 47.99rem) {
-  .atlas-mu-lanes__head { display: none; }
-  .atlas-mu-lanes__row { grid-template-columns: 2.5rem minmax(0, 1fr); }
-  .atlas-mu-lanes__row > span:nth-child(n+3) { grid-column: 2; }
-  .atlas-mu-dl > div { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
-  .atlas-mu-ka { grid-template-columns: minmax(0, 1fr); }
-  .atlas-mu-checks__list li { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* ---------- Silent payments (BIP 352) ---------- */
 .atlas-chapter[data-chapter="silent-payments"] { --atlas-accent: #6a3d7a; }
