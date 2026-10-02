@@ -13,6 +13,7 @@ import { PERIODS, START, WINDOW, optionsFor, ranges, runFor } from "./Versionbit
  */
 export function VersionbitsBip8({ fixture }: { fixture: DerivedVersionbitsGuidelineFixture }) {
   const t = fixture.derived.threshold;
+  if (fixture.derived.timeoutPeriods !== WINDOW) throw new Error(`${fixture.id}: the drawn window (${WINDOW} periods) differs from BIP 8's ${fixture.derived.timeoutPeriods}`);
   const none = Array.from({ length: PERIODS }, () => false);
   const tracks = optionsFor([fixture]).map((o) => ({ lot: o.lot, states: runFor(o, none) }));
   const timeoutPeriod = START + WINDOW;
@@ -28,9 +29,9 @@ export function VersionbitsBip8({ fixture }: { fixture: DerivedVersionbitsGuidel
   const desc =
     `BIP 8 with its suggested threshold of ${num(t)} and a window of ${WINDOW} periods, starting at period ${START}; no period reaches the threshold. ` +
     tracks.map((k) => `lockinontimeout ${k.lot}: ${ranges(k.states)}`).join(". ") +
-    `. In a MUST_SIGNAL period, ${num(PERIOD)} − ${num(t)} = ${num(allowed)} blocks may fail to signal; the ${ordinal(allowed + 1)} that fails is invalid, so at least ${num(t)} signal.`;
+    `. In a MUST_SIGNAL period, ${num(PERIOD)} − ${num(t)} = ${num(allowed)} blocks may fail to signal; the ${ordinal(allowed + 1)} that fails is invalid, so at least ${num(t)} signal. minimum_activation_height is 0, so LOCKED_IN lasts one period.`;
   return (
-    <Drawing id="a11-bip8" width={344} height={300} title="Two endings for a stalled deployment" desc={desc}>
+    <Drawing id="a11-bip8" width={344} height={304} title="Two endings for a stalled deployment" desc={desc}>
       {tracks.map((k, r) => {
         const y = 40 + r * 76;
         return (
@@ -50,19 +51,21 @@ export function VersionbitsBip8({ fixture }: { fixture: DerivedVersionbitsGuidel
           </g>
         );
       })}
-      <line class="k-leader k-dashed" x1={xOf(shown.indexOf(timeoutPeriod)) - 2} y1={20} x2={xOf(shown.indexOf(timeoutPeriod)) - 2} y2={172} />
-      <Value at={[xOf(shown.indexOf(timeoutPeriod)) + 2, 172]} text="TIMEOUTHEIGHT" size={8} cls="k-value--label" />
-      <Value at={[14, 10]} text={`ORANGE: THE WINDOW · ${WINDOW} PERIODS = ${num(WINDOW * PERIOD)} BLOCKS`} size={7.5} cls="k-value--muted" />
-      <Magnifier id="a11-bip8-mag" from={[msX, 127]} fromR={14} at={[72, 250]} r={44}>
-        <rect class="k-cell k-fill--plain k-dashed" x={36} y={232} width={32} height={26} />
-        <text class="k-vb-lbl" x={52} y={249} text-anchor="middle">{num(allowed)}</text>
-        <rect class="k-cell k-fill--plain k-cell--em" x={74} y={232} width={32} height={26} />
-        <path class="k-leader" d="M77 255 L103 235 M77 235 L103 255" />
+      <line class="k-leader k-dashed" x1={xOf(shown.indexOf(timeoutPeriod)) - 2} y1={18} x2={xOf(shown.indexOf(timeoutPeriod)) - 2} y2={160} />
+      <Value at={[xOf(shown.indexOf(timeoutPeriod)) + 2, 27]} text="TIMEOUTHEIGHT" size={8} cls="k-value--label" />
+      <Value at={[14, 10]} text={`BAR ABOVE TILES: THE WINDOW · ${fixture.derived.timeoutPeriods} PERIODS = ${num(fixture.derived.timeoutPeriods * PERIOD)} BLOCKS`} size={8.5} cls="k-value--muted" />
+      <Magnifier id="a11-bip8-mag" from={[msX, 133]} fromR={9} at={[290, 262]} r={42}>
+        <rect class="k-cell k-fill--plain k-dashed" x={254} y={249} width={32} height={26} />
+        <text class="k-vb-lbl" x={270} y={266} text-anchor="middle">{num(allowed)}</text>
+        <rect class="k-cell k-fill--plain k-cell--em" x={292} y={249} width={32} height={26} />
+        <path class="k-leader" d="M295 272 L321 252 M295 252 L321 272" />
       </Magnifier>
-      <Value at={[128, 236]} text={`${num(PERIOD)} − ${num(t)} = ${num(allowed)} BLOCKS`} size={8.5} cls="k-value--label" />
-      <Value at={[128, 248]} text="MAY FAIL TO SIGNAL" size={8.5} cls="k-value--label" />
-      <Value at={[128, 266]} text={`THE ${ordinal(allowed + 1).toUpperCase()} THAT FAILS`} size={8.5} cls="k-value--label" />
-      <Value at={[128, 278]} text="IS INVALID" size={8.5} cls="k-value--label" />
+      <Value at={[14, 214]} text="MINIMUM ACTIVATION HEIGHT 0:" size={8.5} cls="k-value--muted" />
+      <Value at={[14, 226]} text="LOCKED_IN LASTS ONE PERIOD" size={8.5} cls="k-value--muted" />
+      <Value at={[14, 244]} text={`${num(PERIOD)} − ${num(t)} = ${num(allowed)} BLOCKS`} size={8.5} cls="k-value--label" />
+      <Value at={[14, 256]} text="MAY FAIL TO SIGNAL" size={8.5} cls="k-value--label" />
+      <Value at={[14, 274]} text={`THE ${ordinal(allowed + 1).toUpperCase()} THAT FAILS`} size={8.5} cls="k-value--label" />
+      <Value at={[14, 286]} text="IS INVALID" size={8.5} cls="k-value--label" />
     </Drawing>
   );
 }

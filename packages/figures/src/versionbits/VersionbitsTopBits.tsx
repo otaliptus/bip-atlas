@@ -20,7 +20,7 @@ export function VersionbitsTopBits() {
   const sig = drawers.find((d) => d.kind === "signal")!;
   if (sig.lo !== VERSION_MIN || sig.hi !== VERSION_MAX) throw new Error("version-bits: drawer 001 disagrees with VERSION_MIN/MAX");
   const x0 = 24, w = 96, rowH = 22, y0 = 30;
-  const label = { signal: "BIP 9 SIGNALLING", future: "KEPT FOR A FUTURE MECHANISM", none: "COUNTS AS NO SIGNAL" } as const;
+  const label = { signal: "BIP 9 SIGNALLING", future: "KEPT FOR A FUTURE MECHANISM", none: "NOT 001: NO BIP 9 SIGNAL" } as const;
   const desc =
     `The 32-bit version space split into eight equal ranges by its top three bits. ` +
     drawers.map((d) => `${d.pattern}: ${hex32(d.lo)} to ${hex32(d.hi)}, ${label[d.kind].toLowerCase()}`).join("; ") +

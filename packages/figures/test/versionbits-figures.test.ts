@@ -84,7 +84,7 @@ describe("version-bits figures", () => {
     const s = html(h(VersionbitsThreshold, { fixtures: [csv, g] }));
     for (const [t, pct] of [[1916, 95], [1512, 75], [1815, 90]]) {
       expect(s).toContain(`≥ ${t.toLocaleString("en-US")} · ${pct}%`);
-      expect(s).toContain(`${PERIOD - t + 1} NOT SIGNALLING`);
+      expect(s).toContain(`${PERIOD - t} MAY WITHHOLD · ${PERIOD - t + 1} STOP LOCK-IN`);
     }
     expect([BIP9_THRESHOLD.mainnet, BIP9_THRESHOLD.testnet, BIP8_THRESHOLD.mainnet]).toEqual([1916, 1512, 1815]);
   });
@@ -106,7 +106,7 @@ describe("version-bits figures", () => {
     const i = bip9Implied(419_328);
     for (const n of [i.tallyFrom, i.tallyTo, i.lockedInFrom, 419_328]) expect(s).toContain(n.toLocaleString("en-US"));
     expect(s).toContain("0x20000001");
-    expect(s).toContain("EXACT COUNT NOT RECORDED");
+    expect(s).toContain("COUNT NOT RECORDED");
     expect(s).toContain("2016-05-01 → 2017-05-01");
   });
 
@@ -164,7 +164,7 @@ describe("version-bits captions", () => {
   const text = readFileSync(new URL("content/chapters/version-bits.json", root), "utf8");
   it("states only model numbers", () => {
     expect(text).toContain("One period of 2,016 blocks, to scale");
-    expect(text).toContain("only that it reached 1,916");
+    expect(text).toContain("BIP 9's rules imply at least 1,916");
     expect(text).toContain("010 and 011 are kept for two future mechanisms");
     expect(text).toContain("the other 29 are free for deployments");
     expect(PERIOD).toBe(2016);

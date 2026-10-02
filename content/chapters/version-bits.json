@@ -40,7 +40,7 @@
         "bip9-csv",
         "bip9-segwit"
       ],
-      "caption": "The version of a block signalling for both recorded deployments: the top three bits must be 001, and the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
+      "caption": "A hypothetical version that would signal for both recorded deployments at once: the top three bits must be 001, and the other 29 are free for deployments. csv used bit 0 and segwit bit 1.",
       "claims": [
         "top-bits",
         "29-bits",
@@ -93,7 +93,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Reuse is allowed but not encouraged. A later deployment may take a bit once the previous one has timed out or activated, and BIP 9 recommends a pause in between. The authors give that fallow period two jobs: it helps detect buggy software still acting on the old meaning, and it leaves time for warnings and upgrades after a soft fork succeeds.",
+          "text": "Reuse is allowed but not encouraged. A later deployment may take a bit once the previous one has timed out or activated, and BIP 9 recommends a pause in between. The authors give that fallow period two jobs: it helps detect buggy clients, and it leaves time for warnings and upgrades after a soft fork succeeds.",
           "claims": [
             "bit-reuse"
           ]
@@ -135,7 +135,7 @@
         },
         {
           "type": "paragraph",
-          "text": "At each boundary in STARTED, nodes count how many of the previous 2,016 blocks set the bit. At least 1,916 of them, 95 percent, moves the deployment to LOCKED_IN; on testnet the threshold was 1,512. If the timeout has passed, the deployment fails instead, and that check comes first.",
+          "text": "At each boundary in STARTED, nodes count how many of the previous 2,016 blocks set the bit. At least 1,916 of them, 95 percent, moves the deployment to LOCKED_IN; on testnet the threshold was 1,512. If the timeout has been reached, the deployment fails instead, and that check comes first.",
           "claims": [
             "threshold"
           ]
@@ -173,7 +173,7 @@
           "fixtures": [
             "bip9-csv"
           ],
-          "caption": "Three trains at the same junction, routed by the tested model with csv's parameters. Past the timeout, even a full count fails.",
+          "caption": "Three trains at the same junction, routed by the tested model with csv's parameters; the counts are hypothetical. At or past the timeout, even a full count fails.",
           "claims": [
             "threshold",
             "precedence-why",
@@ -197,7 +197,10 @@
             "threshold",
             "lockin-active",
             "bip8-must-signal",
-            "bip8-fail"
+            "bip8-fail",
+            "bip8-min-activation",
+            "mtp-clock",
+            "params"
           ],
           "layout": "wide"
         },
@@ -217,7 +220,7 @@
           "fixtures": [
             "bip9-csv"
           ],
-          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9's rules. The count that locked it in is not recorded, only that it reached 1,916.",
+          "caption": "csv on mainnet, read back from its recorded activation height with BIP 9's rules. The count that locked it in is not recorded; BIP 9's rules imply at least 1,916.",
           "claims": [
             "assignments",
             "implied",
@@ -331,7 +334,7 @@
           "fixtures": [
             "bip8-guidelines"
           ],
-          "caption": "BIP 8's suggested parameters, run by the tested model with no period reaching the threshold. Only lockinontimeout differs.",
+          "caption": "BIP 8's suggested parameters, run by the tested model with no STARTED period reaching the threshold. Only lockinontimeout differs.",
           "claims": [
             "bip8-must-signal",
             "bip8-fail",

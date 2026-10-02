@@ -21,7 +21,7 @@ export function PeriodTile({ x, y, w, h, state, current = false, text = true }: 
       <rect class={`${cls}${current ? " k-cell--em" : ""}`} x={x} y={y} width={w} height={h} />
       {state === "FAILED" ? <path class="k-leader" d={`M${x + 2} ${y + h - 2} L${x + w - 2} ${y + 2}`} /> : null}
       {state && text ? (
-        <text class={`k-vb-tile__t${state === "ACTIVE" ? " k-cell__t--on" : ""}`} x={x + w / 2} y={y + h / 2 + 3.2} text-anchor="middle">{CODE[state]}</text>
+        <text class={`k-vb-tile__t${state === "ACTIVE" ? " k-cell__t--on" : state === "FAILED" ? " k-vb-tile__t--f" : ""}`} x={x + w / 2} y={y + h / 2 + 3.2} text-anchor="middle">{CODE[state]}</text>
       ) : null}
     </g>
   );

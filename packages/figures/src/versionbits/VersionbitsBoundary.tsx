@@ -39,11 +39,11 @@ export function VersionbitsBoundary({ fixture }: { fixture: DerivedVersionbitsDe
         c.t.to === "FAILED"
           ? `Median time past ${c.clock}: FAILED, even with all ${num(c.count)} blocks signalling. The clock is checked first.`
           : `Median time past ${c.clock}, ${num(c.count)} of ${num(PERIOD)} signal: ${c.t.to === "LOCKED_IN" ? "LOCKED_IN." : "still STARTED, one short."}`,
-      desc: `A ${fixture.derived.name} deployment in STARTED reaches a period boundary with the median time past ${c.clock} and ${num(c.count)} of the previous ${num(PERIOD)} blocks signalling. First switch: is the median time past at or after the timeout? ${c.t.to === "FAILED" ? "Yes, so the train turns to FAILED." : `No. Second switch: is the count at least ${num(m.threshold)}? ${c.t.to === "LOCKED_IN" ? "Yes: LOCKED_IN." : "No: it stays STARTED."}`} The model's rule: ${c.t.rule}.`,
+      desc: `A deployment with ${fixture.derived.name}'s parameters, in STARTED, reaches a period boundary with the median time past ${c.clock} and a hypothetical ${num(c.count)} of the previous ${num(PERIOD)} blocks signalling. First switch: is the median time past at or after the timeout? ${c.t.to === "FAILED" ? "Yes, so the train turns to FAILED." : `No. Second switch: is the count at least ${num(m.threshold)}? ${c.t.to === "LOCKED_IN" ? "Yes: LOCKED_IN." : "No: it stays STARTED."}`} The model's rule: ${c.t.rule}.`,
       draw: () => (
         <>
           <Value at={[8, 14]} text={`MTP ${c.clock.toUpperCase()}`} size={8.5} cls="k-value--label" />
-          <Value at={[8, 26]} text={`COUNT ${num(c.count)} / ${num(PERIOD)}`} size={8.5} cls="k-value--label" />
+          <Value at={[8, 27]} text={`COUNT ${num(c.count)} / ${num(PERIOD)} · HYPOTHETICAL`} size={8.5} cls="k-value--label" />
           {Object.entries(TRACK).map(([k, d]) => (
             <path class={route.includes(k) ? "k-vb-route" : "k-vb-rail"} d={d} />
           ))}
@@ -55,7 +55,7 @@ export function VersionbitsBoundary({ fixture }: { fixture: DerivedVersionbitsDe
           <circle class="k-vb-switch" cx="92" cy="74" r="3.5" />
           <text class="k-vb-lbl" x="92" y="54" text-anchor="middle">1 · MTP ≥ TIMEOUT?</text>
           <circle class="k-vb-switch" cx="184" cy="74" r="3.5" />
-          <text class="k-vb-lbl" x="164" y="96" text-anchor="middle">{`2 · COUNT ≥ ${num(m.threshold)}?`}</text>
+          <text class="k-vb-lbl" x="178" y="68" text-anchor="end">{`2 · COUNT ≥ ${num(m.threshold)}?`}</text>
           {STATIONS.map((st) => (
             <g data-arrived={st.s === c.t.to ? "true" : undefined}>
               <rect class={`k-outline k-fill--plain${st.s === c.t.to ? " k-cell--em" : " k-dashed"}`} x={st.x} y={st.y} width="74" height="20" />

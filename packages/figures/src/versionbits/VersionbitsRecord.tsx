@@ -17,7 +17,7 @@ export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDe
     if (m.activeHeight === null || !m.implied) throw new Error(`${f.id}: needs a recorded mainnet activation height`);
     const i = m.implied;
     const tiles = [
-      { state: "STARTED" as const, a: `${num(i.tallyFrom)}–`, b: num(i.tallyTo), note: `≥ ${num(m.threshold)}` },
+      { state: "STARTED" as const, a: `${num(i.tallyFrom)}–`, b: num(i.tallyTo), note: `≥ ${num(m.threshold)} SIGNALLED` },
       { state: "LOCKED_IN" as const, a: num(i.lockedInFrom), b: "", note: "" },
       { state: "ACTIVE" as const, a: num(m.activeHeight), b: "onward", note: "" },
     ];
@@ -36,7 +36,7 @@ export function VersionbitsRecord({ fixtures }: { fixtures: DerivedVersionbitsDe
             <text class={`k-vb-lbl${t.state === "ACTIVE" ? " k-cell__t--on" : ""}`} x={14 + k * 106 + 50} y={y + 69.5} text-anchor="middle">{t.state}</text>
             <text class="k-vb-height" x={14 + k * 106} y={y + 88}>{t.a}</text>
             <text class="k-vb-height" x={14 + k * 106} y={y + 98}>{t.b}</text>
-            {t.note ? <text class="k-vb-range" x={14 + k * 106 + 100} y={y + 88} text-anchor="end">{t.note}</text> : null}
+            {t.note ? <text class="k-vb-range" x={14 + k * 106} y={y + 109}>{t.note}</text> : null}
           </g>
         ))}
       </g>

@@ -36,7 +36,7 @@ export function VersionbitsLifecycle({ fixture }: { fixture: DerivedVersionbitsD
   const bitsOf = (v: number) => Array.from({ length: 32 }, (_, k) => String((v >>> (31 - k)) & 1));
   const frames: Frame[] = [
     {
-      note: `Parameters: bit ${d.bit}, a start and a timeout in median time past, and a threshold of ${num(m.threshold)} of ${num(PERIOD)}.`,
+      note: `Parameters: bit ${d.bit}, and a start and a timeout in median time past. BIP 9 fixes the threshold: ${num(m.threshold)} of ${num(PERIOD)}.`,
       desc: `The ${d.name} deployment: bit ${d.bit}, starttime ${m.start} UTC (${m.startEpoch}), timeout ${m.expire} UTC (${m.expireEpoch}), mainnet threshold ${m.threshold} of ${PERIOD} blocks.`,
       draw: () => (
         <>
@@ -45,7 +45,7 @@ export function VersionbitsLifecycle({ fixture }: { fixture: DerivedVersionbitsD
           <rect class="k-cell k-fill--time" x="20" y="32" width="260" height="14" />
           <Value at={[24, 42.5]} text={`${m.start.slice(0, 10)} → ${m.expire.slice(0, 10)}`} size={8.5} />
           <Value at={[276, 42.5]} text="WINDOW (MTP)" size={7.5} anchor="end" cls="k-value--muted" />
-          <Value at={[20, 64]} text={`THRESHOLD ${num(m.threshold)} / ${num(PERIOD)}`} size={8.5} cls="k-value--label" />
+          <Value at={[20, 64]} text={`THRESHOLD, FIXED BY BIP 9: ${num(m.threshold)} / ${num(PERIOD)}`} size={8.5} cls="k-value--label" />
           {strip(0)}
         </>
       ),
@@ -56,7 +56,8 @@ export function VersionbitsLifecycle({ fixture }: { fixture: DerivedVersionbitsD
       draw: () => (
         <>
           <Value at={[12, 18]} text={`A SIGNALLING BLOCK · ${hex32(d.signalVersion)}`} size={8.5} cls="k-value--label" />
-          <Cells x={12} y={28} values={bitsOf(d.signalVersion)} size={8.6} strong={(k) => bitsOf(d.signalVersion)[k] === "1"} emphasis={(k) => k === 31 - d.bit} />
+          <Cells x={12} y={28} values={bitsOf(d.signalVersion)} size={8.6} text={false} strong={(k) => bitsOf(d.signalVersion)[k] === "1"} emphasis={(k) => k === 31 - d.bit} />
+          <Value at={[12, 50]} text="BIT 31" size={8} cls="k-value--muted" />
           <line class="k-leader" x1={12 + (31 - d.bit) * 8.6 + 4.3} y1={37} x2={12 + (31 - d.bit) * 8.6 + 4.3} y2={56} />
           <Value at={[12 + (31 - d.bit) * 8.6 + 1, 66]} text={`BIT ${d.bit}`} size={8.5} anchor="end" cls="k-value--label" />
           {strip(0)}
@@ -69,8 +70,8 @@ export function VersionbitsLifecycle({ fixture }: { fixture: DerivedVersionbitsD
       draw: () => (
         <>
           <Gauge cx={70} cy={66} r={46} period={PERIOD} threshold={m.threshold} count={null} />
-          <Value at={[156, 40]} text={`≥ ${num(m.threshold)} SIGNALLED`} size={8.5} cls="k-value--label" />
-          <Value at={[156, 54]} text="EXACT COUNT NOT RECORDED" size={8} cls="k-value--muted" />
+          <Value at={[172, 34]} text={`≥ ${num(m.threshold)} SIGNALLED`} size={8.5} cls="k-value--label" />
+          <Value at={[172, 48]} text="COUNT NOT RECORDED" size={8} cls="k-value--muted" />
           {strip(1)}
         </>
       ),
@@ -82,7 +83,7 @@ export function VersionbitsLifecycle({ fixture }: { fixture: DerivedVersionbitsD
         <>
           <Value at={[12, 30]} text="NOTHING COUNTED" size={9} cls="k-value--label" />
           <Value at={[12, 46]} text="RULES NOT YET ENFORCED" size={9} cls="k-value--label" />
-          <Value at={[12, 62]} text={`BIT ${d.bit} STILL SET, FOR VISIBILITY`} size={8} cls="k-value--muted" />
+          <Value at={[12, 62]} text={`BIT ${d.bit} SHOULD STAY SET`} size={8} cls="k-value--muted" />
           {strip(2)}
         </>
       ),

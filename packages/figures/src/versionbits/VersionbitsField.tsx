@@ -20,11 +20,11 @@ export function VersionbitsField({ fixtures }: { fixtures: DerivedVersionbitsDep
   // x of bit position k (0 = bit 31), with a small gap between nibbles.
   const xOf = (k: number) => x0 + k * cell + Math.floor(k / 4) * gap;
   const nibbles = hex32(all).slice(2);
-  const rows = [...deps.map((f) => ({ name: `${f.derived.name} only`, v: f.derived.signalVersion })), { name: "both", v: all }];
+  const rows = [...deps.map((f) => ({ name: `${f.derived.name} only`, v: f.derived.signalVersion })), { name: "both (hypothetical)", v: all }];
   const desc =
     `The 32-bit block version, bit 31 on the left. Bits 31 to ${32 - topLen} must read ${bitsOf(TOP_BITS).slice(0, topLen).join("")}; bits ${MAX_BIT} to 0 are the ${MAX_BIT + 1} deployment bits. ` +
     deps.map((f) => `Bit ${f.derived.bit} is ${f.derived.name}.`).join(" ") +
-    ` The value drawn is ${hex32(all)}, a block signalling for both. ` +
+    ` The value drawn is ${hex32(all)}, a hypothetical version signalling for both. ` +
     rows.map((r) => `${r.name}: ${hex32(r.v)}`).join("; ") + ".";
   return (
     <Drawing id="a11-field" width={344} height={210} title="One bit per deployment" desc={desc}>

@@ -43,7 +43,7 @@ export function VersionbitsThreshold({ fixtures }: { fixtures: Fx[] }) {
             <rect class="k-cell k-fill--plain" x={x0 + wSig} y={y} width={W - wSig} height={18} />
             <line class="k-cut" x1={x0 + wSig} y1={y - 3} x2={x0 + wSig} y2={y + 21} />
             <text class="k-vb-lbl" x={x0 + 5} y={y + 12.5}>{`${b.name} · ≥ ${num(b.t)} · ${pct(b.t)}%`}</text>
-            <text class="k-vb-range" x={x0 + W} y={y + 31} text-anchor="end">{`${num(PERIOD - b.t + 1)} NOT SIGNALLING: NO LOCK-IN`}</text>
+            <text class="k-vb-range" x={x0 + W} y={y + 31} text-anchor="end">{`${num(PERIOD - b.t)} MAY WITHHOLD · ${num(PERIOD - b.t + 1)} STOP LOCK-IN`}</text>
           </g>
         );
       })}

@@ -34,6 +34,7 @@ export function runFor(o: Option, meets: boolean[]): Bip8State[] {
 export const thresholdOf = (f: Fx) => (f.kind === "versionbits-deployment" ? f.derived.mainnet.threshold : f.derived.threshold);
 
 export function optionsFor(fixtures: Fx[]): Option[] {
+  for (const f of fixtures) if (f.kind === "versionbits-guideline" && f.derived.timeoutPeriods !== WINDOW) throw new Error(`${f.id}: window differs from BIP 8's suggestion`);
   return fixtures.flatMap((f): Option[] =>
     f.kind === "versionbits-deployment"
       ? [{ key: f.id, f, lot: false, text: f.derived.name, name: `${f.derived.name} (BIP 9, bit ${f.derived.bit}, mainnet parameters)` }]
@@ -87,10 +88,10 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
   };
 
   const next = current + 1 < PERIODS ? states[current + 1] : null;
-  const count = state === "MUST_SIGNAL" || (counted(state) && meets[current]) ? threshold : counted(state) ? threshold - 1 : null;
-  const countText = count === null ? (state === "ACTIVE" ? "the rules are enforced" : "nothing is counted") : state === "MUST_SIGNAL" ? `at least ${num(threshold)} must signal` : `${num(count)} of ${num(PERIOD)} signal (hypothetical)`;
+  const count = state === "STARTED" ? (meets[current] ? threshold : threshold - 1) : null;
+  const countText = state === "MUST_SIGNAL" ? `at least ${num(threshold)} must signal` : count === null ? (state === "ACTIVE" ? "the rules are enforced" : "nothing is counted") : `${num(count)} of ${num(PERIOD)} signal (hypothetical)`;
   const status = `Period ${current}: ${state}; ${countText}.${next && next !== state ? ` Next: ${next}.` : ""}`;
-  const desc = `Schematic run of ${PERIODS} periods for ${opt.name}, threshold ${num(threshold)}; window from period ${START} to ${START + WINDOW}. So far: ${ranges(states.slice(0, current + 1))}. ${status}`;
+  const desc = `Schematic run of ${PERIODS} periods for ${opt.name}, threshold ${num(threshold)}; window periods ${START}–${START + WINDOW - 1}, timeout reached at period ${START + WINDOW}; ${isBip9 ? "" : "minimum_activation_height 0; "}period heights are schematic. So far: ${ranges(states.slice(0, current + 1))}. ${status}`;
 
   // Stations: the main line, then a branch (FAILED, or MUST_SIGNAL for BIP 8 with lockinontimeout).
   const branch: Bip8State = opt.lot ? "MUST_SIGNAL" : "FAILED";
@@ -100,7 +101,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
   const edgeLabel: Record<string, string> = {
     "DEFINED>STARTED": isBip9 ? "MTP ≥ STARTTIME" : "HEIGHT ≥ START",
     "STARTED>LOCKED_IN": `≥ ${num(threshold)} SIGNAL`,
-    "LOCKED_IN>ACTIVE": "AFTER ONE PERIOD",
+    "LOCKED_IN>ACTIVE": isBip9 ? "AFTER ONE PERIOD" : "ONE PERIOD (MIN. HEIGHT 0)",
   };
 
   const railway = (x0: number, y0: number) => {
@@ -121,8 +122,8 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
         })}
         {seg(`M${tx} ${by} H${bx}`, went("STARTED", branch))}
         <text class="k-vb-range" x={tx + 8} y={by - 5}>{opt.lot ? "LAST PERIOD" : isBip9 ? "MTP ≥ TIMEOUT" : "TIMEOUT HEIGHT"}</text>
-        {isBip9 ? seg(`M${tx} ${sy("DEFINED")} H${bx + 48} V${by - 10}`, went("DEFINED", "FAILED")) : null}
-        {opt.lot ? seg(`M${bx + 48} ${by + 10} V${sy("LOCKED_IN")} H${tx}`, went("MUST_SIGNAL", "LOCKED_IN")) : null}
+        {isBip9 ? <>{seg(`M${tx} ${sy("DEFINED")} H${bx + 48} V${by - 10}`, went("DEFINED", "FAILED"))}<text class="k-vb-range" x={bx - 60} y={sy("DEFINED") - 5}>MTP ≥ TIMEOUT</text></> : null}
+        {opt.lot ? <>{seg(`M${bx + 48} ${by + 10} V${sy("LOCKED_IN")} H${tx}`, went("MUST_SIGNAL", "LOCKED_IN"))}<text class="k-vb-range" x={bx + 54} y={sy("LOCKED_IN") - 5}>ALWAYS</text></> : null}
         {[...main.map((s) => ({ s, x: x0, y: sy(s) })), { s: branch, x: bx, y: by }].map(({ s, x, y }) => (
           <g data-station={s} data-current={s === state ? "true" : undefined}>
             <circle class="k-vb-switch" cx={x === bx ? bx : tx} cy={y} r="3" />
@@ -133,7 +134,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
         {/* The train, at the current state */}
         {(() => {
           const y = state === branch ? by : sy(state);
-          const x = state === branch ? bx + 24 : tx;
+          const x = state === branch ? bx - 16 : tx;
           return (
             <g class="k-vb-train">
               <rect class="k-outline k-mark--plain" x={x - 7} y={y - 13} width="14" height="26" rx="3" />
@@ -169,21 +170,21 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
     <g>
       <Gauge cx={x + 52} cy={y + 56} r={48} period={PERIOD} threshold={threshold} count={count} />
       <Value at={[x + 142, y + 20]} text={`PERIOD ${current}`} size={9.5} cls="k-value--label" />
-      <Value at={[x + 142, y + 33]} text={`blocks ${num(current * PERIOD)}–${num(current * PERIOD + PERIOD - 1)}`} size={8.5} />
+      <Value at={[x + 142, y + 33]} text={`schematic blocks ${num(current * PERIOD)}–${num(current * PERIOD + PERIOD - 1)}`} size={8.5} />
       <Value at={[x + 142, y + 46]} text={state} size={9.5} cls="k-value--label" />
-      <Value at={[x + 142, y + 59]} text={count === null ? "NOT COUNTED" : state === "MUST_SIGNAL" ? "MUST SIGNAL" : "HYPOTHETICAL"} size={8} cls="k-value--muted" />
+      <Value at={[x + 142, y + 59]} text={state === "MUST_SIGNAL" ? "≥ THRESHOLD REQUIRED" : count === null ? "NOT COUNTED" : "HYPOTHETICAL"} size={8} cls="k-value--muted" />
     </g>
   );
 
-  const legend = (x: number, y: number) => <Value at={[x, y]} text="D DEFINED · S STARTED · M MUST_SIGNAL · L LOCKED_IN · A ACTIVE · F FAILED" size={7.5} cls="k-value--muted" />;
+  const legend = (x: number, y: number) => <Value at={[x, y]} text="D DEFINED · S STARTED · M MUST_SIGNAL · L LOCKED_IN · A ACTIVE · F FAILED" size={8.5} cls="k-value--muted" />;
 
   const wide = (
     <Drawing id={`${figureId}-wide`} width={640} height={262} title="From signalling to rules" desc={desc}>
       {railway(8, 14)}
       <Value at={[344, 14]} text={`RETARGET PERIODS · ${num(PERIOD)} BLOCKS EACH`} size={8.5} cls="k-value--label" />
       {ribbon(360, 34, 10, 24, 22, 38)}
-      <Value at={[360, 144]} text="ORANGE BAR: THE WINDOW, START TO TIMEOUT" size={7.5} cls="k-value--muted" />
-      {readout(344, 160)}
+      <Value at={[360, 152]} text="BAR ABOVE TILES: THE WINDOW, START TO TIMEOUT" size={8.5} cls="k-value--muted" />
+      {readout(344, 166)}
       {legend(8, 256)}
     </Drawing>
   );
@@ -192,10 +193,10 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
       {railway(6, 14)}
       <Value at={[6, 258]} text={`PERIODS · ${num(PERIOD)} BLOCKS EACH`} size={8.5} cls="k-value--label" />
       {ribbon(22, 274, 15, 18, 20, 36)}
-      <Value at={[6, 354]} text="ORANGE BAR: START TO TIMEOUT" size={7.5} cls="k-value--muted" />
-      {readout(6, 362)}
-      <Value at={[6, 448]} text="D DEFINED · S STARTED · M MUST_SIGNAL" size={7.5} cls="k-value--muted" />
-      <Value at={[6, 460]} text="L LOCKED_IN · A ACTIVE · F FAILED" size={7.5} cls="k-value--muted" />
+      <Value at={[6, 358]} text="BAR ABOVE TILES: THE WINDOW" size={8.5} cls="k-value--muted" />
+      {readout(6, 366)}
+      <Value at={[6, 448]} text="D DEFINED · S STARTED · M MUST_SIGNAL" size={8.5} cls="k-value--muted" />
+      <Value at={[6, 460]} text="L LOCKED_IN · A ACTIVE · F FAILED" size={8.5} cls="k-value--muted" />
     </Drawing>
   );
 
@@ -222,7 +223,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
           </div>
         </div>
       ) : (
-        <p class="atlas-hero__static">Static view: a hypothetical csv run, period 10 reaching the threshold, played to the end. With JavaScript you can pick a deployment, step through periods and set the counts.</p>
+        <p class="atlas-hero__static">Static view: a hypothetical {options[0].text} run, period {defaultMeets(options[0]).indexOf(true)} reaching the threshold, played to the end. With JavaScript you can pick a deployment, step through periods and set the counts.</p>
       )}
       <Responsive wide={wide} narrow={narrow} />
       {hydrated ? (
@@ -233,7 +234,7 @@ export function VersionbitsMachine({ fixtures, figureId }: Props) {
         </div>
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
-      <p class="atlas-hero__source">{isBip9 ? "BIP 9 table" : "BIP 8 guidelines"}, line {opt.f.source.line}. Schematic clock and hypothetical counts (none are in the pinned sources); states from the tested model.</p>
+      <p class="atlas-hero__source">{isBip9 ? "BIP 9 table" : "BIP 8 guidelines, minimum_activation_height 0"}, line {opt.f.source.line}. Schematic clock and hypothetical counts (none are in the pinned sources); states from the tested model.</p>
     </div>
   );
 }
