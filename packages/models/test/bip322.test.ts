@@ -7,13 +7,52 @@ import { createBase58check } from "@scure/base";
 import { bytesToHex, hexToBytes } from "../src/hex";
 import { sigMsg, taprootSighash, tweakSeckey } from "../src/taproot";
 import { parseTransaction } from "../src/tx";
-import { addressScript, decodeSignature, messageHash, toSign, toSpend, verify } from "../src/bip322";
+import { addressScript, Bip322Error, decodeSignature, messageHash, toSign, toSpend, verify } from "../src/bip322";
 
 const root = new URL("../../../", import.meta.url);
 const raw = "sources/research-2026-10-01-phase3/raw/";
 const basic = JSON.parse(readFileSync(new URL(raw + "bip-0322/basic-test-vectors.json", root), "utf8"));
 const gen = JSON.parse(readFileSync(new URL(raw + "bip-0322/generated-test-vectors.json", root), "utf8"));
 const CHECKED = ["p2pkh", "p2wpkh", "p2tr", "p2tr-time-lock", "p2sh-p2wpkh", "p2wsh-time-lock", "p2wsh-multisig-2of2", "p2wsh-multisig-3of3", "p2sh-p2wsh-multisig-2of2", "p2sh-multisig-2of2"];
+
+describe("address validation", () => {
+  const examples = [
+    basic.simple.find((v: { type: string }) => v.type === "p2wpkh"),
+    gen.simple.find((v: { type: string }) => v.type === "p2tr"),
+  ];
+
+  it("accepts lowercase and uppercase addresses, but rejects mixed case before verification", () => {
+    for (const v of examples) {
+      expect(addressScript(v.address.toUpperCase())).toEqual(addressScript(v.address));
+      expect(verify(v.address.toUpperCase(), v.message, v.bip322_signatures[0]).state).toBe("valid");
+      const mixed = "B" + v.address.slice(1);
+      expect(() => addressScript(mixed)).toThrow(Bip322Error);
+      expect(() => verify(mixed, v.message, v.bip322_signatures[0])).toThrow(/uppercase and lowercase/);
+    }
+  });
+
+  it("rejects published invalid witness versions and program lengths", () => {
+    const { vectors } = JSON.parse(readFileSync(new URL("fixtures/bip173-350-vectors.json", root), "utf8"));
+    const invalid = vectors.filter((v: { bip: number; family: string; validity: string; string: string; reason: string }) =>
+      v.bip === 350 && v.family === "segwit" && v.validity === "invalid" && /^bc1/i.test(v.string) && /^Invalid (witness version|program length)/.test(v.reason),
+    );
+    expect(invalid).toHaveLength(4);
+    for (const v of invalid) expect(() => addressScript(v.string), v.reason).toThrow(Bip322Error);
+  });
+
+  it("requires a 20-byte hash in Base58Check addresses even when the checksum is correct", () => {
+    const codec = createBase58check(sha256);
+    const address = "13vU5PUSuArDXJdCWZvUFEbgJ2wcmtSJWn";
+    const payload = codec.decode(address);
+    expect(addressScript(address).kind).toBe("p2pkh");
+    for (const version of [0x00, 0x05]) {
+      for (const hash of [payload.slice(1, -1), new Uint8Array([...payload.slice(1), 0])]) {
+        const malformed = codec.encode(new Uint8Array([version, ...hash]));
+        expect(() => addressScript(malformed)).toThrow(Bip322Error);
+      }
+    }
+  });
+});
 
 describe("BIP 322 message hash and virtual transactions", () => {
   for (const v of basic.tx_hashes) {

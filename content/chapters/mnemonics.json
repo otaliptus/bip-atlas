@@ -22,10 +22,11 @@
       },
       {
         "type": "paragraph",
-        "text": "The proposal, assigned in 2013 and recorded as deployed, has two halves: turning random bits into words, and turning words into a binary seed for later wallet machinery. This chapter follows both, using only published test phrases that anyone can look up, and values computed from them.",
+        "text": "The words are a way to write down random bits. The wallet then uses their text, together with an optional passphrase, to make a seed. Keeping those steps separate explains both what the backup preserves and why a different passphrase opens a different wallet.",
         "claims": [
-          "preamble-dates",
-          "two-parts"
+          "two-parts",
+          "pbkdf2",
+          "deniability"
         ]
       }
     ],
@@ -136,9 +137,12 @@
         },
         {
           "type": "paragraph",
-          "text": "The figure below starts from the bits of a public sample. Move the slider to cut them into groups of 11 and watch each group pick its word.",
+          "text": "Start with the all-zero sample below. Move the slider through its word groups and stop at the last one. Watch the checksum bits join the entropy bits inside that final word.",
           "claims": [
-            "split-11"
+            "zero-example",
+            "split-11",
+            "last-word-split",
+            "checksum-def"
           ]
         },
         {
@@ -481,10 +485,24 @@
           "layout": "prose"
         },
         {
-          "type": "paragraph",
-          "text": "BIP 39 lists other shortcomings too, including the lack of a versioning scheme, which it notes is now largely mitigated by descriptor wallets. Its authors proposed a scheme called SLIP-0039 as an intended successor.",
-          "claims": [
-            "versioning-successor"
+          "type": "details",
+          "summary": "Proposal history and alternatives",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The proposal, assigned in 2013 and recorded as deployed, has two halves: turning random bits into words, and turning words into a binary seed for later wallet machinery. This chapter follows both, using only published test phrases that anyone can look up, and values computed from them.",
+              "claims": [
+                "preamble-dates",
+                "two-parts"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 39 lists other shortcomings too, including the lack of a versioning scheme, which it notes is now largely mitigated by descriptor wallets. Its authors proposed a scheme called SLIP-0039 as an intended successor.",
+              "claims": [
+                "versioning-successor"
+              ]
+            }
           ]
         }
       ]

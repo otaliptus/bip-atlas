@@ -82,11 +82,13 @@
     },
     {
      "type": "paragraph",
-     "text": "That distinction is the point of the interactive tree. First look at everything the wallet knows. Then pick a spending path and switch to the proof view. Watch how much disappears. The two views describe different knowledge about the same output.",
+     "text": "Choose Script path and Only the proof in the tree below. Pick a different leaf and watch which script and hashes remain visible. Then choose Key path: the spend reveals no script tree at all.",
      "claims": [
       "vector5",
       "vectors-reproduced",
-      "privacy"
+      "privacy",
+      "key-or-script",
+      "control-contents"
      ]
     },
     {

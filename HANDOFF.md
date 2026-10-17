@@ -1,9 +1,12 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 2 October 2026, after the BIP relevance revision. If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 17 October 2026, after the first-read editorial pass and BIP 322 address-validation fix. Deployment status is tracked by the latest `main` run in [GitHub Actions](https://github.com/otaliptus/bip-atlas/actions/workflows/deploy.yml). If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
+- **Reader goal:** the user wants a proper, engaging illustrated explainer, kept simple. Favor concise prose and static drawings with a few purposeful interactions. Do not add controls, modes or animations for their own sake. Focused teaching examples are intentional; complete BIP implementations and exhaustive test-case coverage are not the product goal.
+- **First-read pass:** all eighteen chapters give a specific action for the existing main demonstration. Several openings and endings are clearer; historical and algorithm details remain in disclosures. Extra example controls in Schnorr and MuSig2, and the example/calculation controls in Silent Payments, now sit in optional disclosures. Silent Payments starts with the result rather than every intermediate step. No new interactive figures, scenarios or illustrations were added. `chapterOrder` in `content/reading-policy.json` brings related chapters together; the contents and previous/next links use it. Figure IDs stay stable. See `review/first-read.md` for checks and screenshots.
+- **BIP 322 address validation:** `addressScript` now uses the address chapter's shared SegWit checks. Mixed-case addresses, invalid witness versions and invalid program lengths are rejected; valid all-uppercase addresses still work. Base58Check addresses must carry a version byte and a 20-byte hash. Three regression tests reproduced the old failures before the fix.
 - **Eighteen chapters are drafted.**
   - All eighteen are merged to `main` and live: phases one and two (BIPs 39, 32, 141, 143, 173, 350, 174, 340, 341, 342) and phase three (PR #2).
   - Phase three follows `catalog-phase3.json`. Chapters, with figure prefixes A9–A18:
@@ -21,7 +24,7 @@ Last updated: 2 October 2026, after the BIP relevance revision. If you were aske
     | `v2-transport` | 324 |
     | `message-signing` | 322 |
 
-  - Each chapter had an independent technical review before the editorial revisions. Seventeen chapters are now `draft-unreviewed`, pending a fresh review; SegWit remains `in-review`. No chapter is marked approved.
+  - Each chapter had an independent technical review before the editorial revisions. All eighteen are now `draft-unreviewed` after the first-read pass, pending a fresh review. No chapter is marked approved.
   - **Editorial revisions:** fourteen chapters have tighter prose and fewer repeated figures. Detailed rules remain in disclosures, and all evidence claims remain cited. Records and screenshots: `review/editorial-four-chapters.md`, `review/editorial-descriptors.md`, and `review/editorial-nine-chapters.md`. These author and automated checks do not replace an independent technical review.
   - **Clarity revision:** nine chapters now use more literal wording, shorter explanations, and clearer terminology. Timelocks has explicit condition lists. See `review/editorial-clarity.md` for scope and checks.
   - **BIP relevance revision:** seven chapters have clearer proposal framing. Compact Filters leads with the wallet workflow; Timelocks separates script checks from block eligibility; P2SH centers its original spend; Schnorr leads with motivation. Titles and the BIP 322 opening were corrected. See `review/bip-relevance.md`. Editorial titles live in `content/title-policy.json`; the kit catalog remains frozen.

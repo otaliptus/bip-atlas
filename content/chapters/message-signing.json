@@ -14,16 +14,6 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Legacy Bitcoin message signing was specified only for P2PKH addresses. It could not express the spending conditions of other address types. BIP 322 uses Bitcoin Script itself, so message signing can cover SegWit, Taproot and multisignature scripts as well.",
-        "claims": [
-          "legacy-limits",
-          "abstract",
-          "full",
-          "signature-def"
-        ]
-      },
-      {
-        "type": "paragraph",
         "text": "Someone asks you to prove you can use a Bitcoin address. Sending a payment would demonstrate a spend, but it would also move coins. BIP 322 instead builds a pair of virtual transactions around a message and asks for the data that would satisfy the address’s script.",
         "claims": [
           "abstract",
@@ -31,6 +21,16 @@
           "to-spend",
           "to-sign",
           "never-broadcast"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Legacy Bitcoin message signing was specified only for P2PKH addresses. It could not express the spending conditions of other address types. BIP 322 uses Bitcoin Script itself, so message signing can cover SegWit, Taproot and multisignature scripts as well.",
+        "claims": [
+          "legacy-limits",
+          "abstract",
+          "full",
+          "signature-def"
         ]
       },
       {
@@ -112,6 +112,16 @@
           "type": "paragraph",
           "text": "The first virtual transaction, to_spend, pays to the address’s script and commits to the message. Its input names an output that does not exist. The second, to_sign, spends that virtual output. Satisfying its input script produces the message signature.",
           "claims": [
+            "to-spend",
+            "to-sign",
+            "signature-def"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Follow a valid example through the virtual transactions, then choose Wrong message. Rebuilding the proof for that message changes the commitment, so the response no longer verifies. The proof belongs to the message it was made for.",
+          "claims": [
+            "vectors",
             "to-spend",
             "to-sign",
             "signature-def"
@@ -402,6 +412,16 @@
                 "basic-validation"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A useful message proof answers a specific challenge for a specific address. Its meaning comes from that challenge and the script it satisfies; identity and a lasting balance do not follow from the signature alone.",
+          "claims": [
+            "signature-def",
+            "no-timestamp",
+            "no-proof",
+            "not-sender"
           ]
         }
       ]

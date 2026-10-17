@@ -324,7 +324,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The interactive example brings those pieces together. Follow the sender’s calculation, then switch to the receiver. Finally inspect the observer’s view. Both participants can recognise the payment; the public transaction alone does not provide the secret used to connect it to the address.",
+     "text": "Start with the sender, then switch to the receiver and finally the outside observer. The transaction stays the same. Watch who can identify the payment and who cannot. Open the calculation after comparing those views.",
      "claims": [
       "derive",
       "vectors",

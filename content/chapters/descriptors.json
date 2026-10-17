@@ -168,11 +168,12 @@
         },
         {
           "type": "paragraph",
-          "text": "Try a different expression in the example. Notice whether the output changes, whether the descriptor contains a private key, and whether it describes one script or several. The short strings in the drawing are abbreviations; the full descriptor and resulting scripts are available underneath.",
+          "text": "Choose the BIP 384 example below and compare its output scripts with the starting example. One descriptor can describe several script forms; the key alone does not choose the form.",
           "claims": [
+            "b384",
+            "b381",
             "expansion-tested",
-            "secret-or-not",
-            "b384"
+            "templates"
           ]
         },
         {
@@ -414,6 +415,15 @@
                 "layer-violation"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "A key is one ingredient. A descriptor records how that key and any others fit into an output script. Keeping the description lets another wallet reproduce the same scripts.",
+          "claims": [
+            "abstract",
+            "solution",
+            "templates"
           ]
         }
       ]

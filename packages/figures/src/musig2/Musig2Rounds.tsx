@@ -69,12 +69,7 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
 
   return (
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
-      {hydrated ? (
-        <div class="atlas-hero__controls">
-          <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={(v) => (setId(v), setAt(0))} />
-          <Strip label="Reveal aggregated values" name={`${figureId}-reveal`} options={[{ value: "no", text: "Each signer only" }, { value: "yes", text: "With aggregated values" }]} current={reveal ? "yes" : "no"} onPick={(v) => setReveal(v === "yes")} />
-        </div>
-      ) : (
+      {!hydrated && (
         <p class="atlas-hero__static">Static view: the first vector with every stage and the aggregated values shown. With JavaScript you can choose among {fixtures.length} published vectors, step through the rounds and hide the aggregated values.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
@@ -82,6 +77,15 @@ export function Musig2Rounds({ fixtures, figureId }: Props) {
         <Scrub label="Step through signing rounds" value={step} max={stages.length - 1} unit="stage" valueText={`stage ${step + 1} of ${stages.length}: ${stage.title}`} onSet={setAt} />
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      {hydrated && (
+        <details class="atlas-disclosure">
+          <summary>Explore other signing sessions</summary>
+          <div class="atlas-hero__controls">
+            <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={(v) => (setId(v), setAt(0))} />
+            <Strip label="Reveal aggregated values" name={`${figureId}-reveal`} options={[{ value: "no", text: "Each signer only" }, { value: "yes", text: "With aggregated values" }]} current={reveal ? "yes" : "no"} onPick={(v) => setReveal(v === "yes")} />
+          </div>
+        </details>
+      )}
       <details class="atlas-disclosure">
         <summary>Exact values for this stage</summary>
         <p class="atlas-hexlist" style="overflow-wrap:anywhere">{describeSession(d, step, show)}</p>

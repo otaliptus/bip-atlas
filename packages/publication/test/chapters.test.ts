@@ -19,7 +19,7 @@ const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
 const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
 const policy = read("content/figure-policy.json") as { hero: number; supportingMin: number; supportingMax: number };
-const readingPolicy = read("content/reading-policy.json") as { chapterRanges: Record<string, { min: number; max: number }> };
+const readingPolicy = read("content/reading-policy.json") as { chapterOrder: string[]; chapterRanges: Record<string, { min: number; max: number }> };
 const titlePolicy = read("content/title-policy.json") as { chapterTitles: Record<string, string> };
 const externalLock = read("sources/external/external.lock.json");
 const chapterIds = readdirSync(new URL("content/chapters/", root)).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5));
@@ -131,6 +131,10 @@ for (const id of chapterIds) {
 }
 
 describe("shared contracts", () => {
+  it("gives every chapter one place in the reading order", () => {
+    expect([...readingPolicy.chapterOrder].sort()).toEqual([...chapterIds].sort());
+  });
+
   it("documents reference coverage, additional checks and limits for every chapter", () => {
     const coverage = read("content/model-coverage.json");
     expect(Object.keys(coverage).sort()).toEqual([...chapterIds].sort());

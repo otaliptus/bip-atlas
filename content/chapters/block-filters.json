@@ -86,6 +86,17 @@
           ]
         },
         {
+          "type": "paragraph",
+          "text": "Compare a match, a miss and the illustrated false alarm. Follow each to the wallet’s next step. Watch when it skips the block and when it must fetch the block to inspect the transactions.",
+          "claims": [
+            "vectors",
+            "query",
+            "scope-of-miss",
+            "gcs-def",
+            "reverse"
+          ]
+        },
+        {
           "type": "figure",
           "figure": "A16.2",
           "recipe": "gcs-filter.v1",
@@ -408,6 +419,16 @@
                 "gcs-def"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The filter helps the wallet decide where to look. A match still needs the block and its transactions; a miss is useful only for the included set in a correctly constructed filter.",
+          "claims": [
+            "gcs-def",
+            "query",
+            "scope-of-miss",
+            "reverse"
           ]
         }
       ]

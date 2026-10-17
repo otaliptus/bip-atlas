@@ -178,9 +178,11 @@
         },
         {
           "type": "paragraph",
-          "text": "Explore the alternatives below: enough signals, one short, or a deadline reached first. BIP 9 checks the timeout before the count, so even a full period of signals cannot rescue an attempt whose timeout has arrived.",
+          "text": "Step forward to STARTED, choose enough signals and advance through LOCKED_IN to ACTIVE. Reaching the threshold starts a wait; it does not activate the new rules immediately. BIP 9 still checks the timeout before the count.",
           "claims": [
+            "states",
             "threshold",
+            "lockin-active",
             "precedence-why"
           ]
         },
@@ -379,6 +381,15 @@
                 "abstract"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The signal, the waiting period and enforcement are separate steps. Following the deployment’s state tells a node which rules apply.",
+          "claims": [
+            "states",
+            "lockin-active",
+            "bip8-must-signal"
           ]
         }
       ]

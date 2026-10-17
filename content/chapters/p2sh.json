@@ -132,10 +132,11 @@
         },
         {
           "type": "paragraph",
-          "text": "Step through the legacy P2SH spend below. Its redeem script requires both keys to sign. Each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
+          "text": "Start with the redeem script hidden, then reveal it and step through the spend. First watch the hash check, then watch the revealed script run. The script must match the commitment and satisfy its spending rules.",
           "claims": [
-            "multisig-order",
-            "spends-verified"
+            "rules",
+            "spends-verified",
+            "trace-spends"
           ]
         },
         {
@@ -154,6 +155,20 @@
             "trace-spends"
           ],
           "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "Signature order in this example",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Step through the legacy P2SH spend below. Its redeem script requires both keys to sign. Each signature must match a key in order. The tests behind this page swap the two signatures and the spend fails, even though both are valid signatures by the right keys. CHECKMULTISIG also takes one extra item off the stack; in this spend it is empty.",
+              "claims": [
+                "multisig-order",
+                "spends-verified"
+              ]
+            }
+          ]
         },
         {
           "type": "paragraph",
@@ -339,6 +354,15 @@
                 "standard-only"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "P2SH gives the sender a fixed payment form while leaving the recipient to choose the spending conditions. Spending later brings those conditions into view and proves they were satisfied.",
+          "claims": [
+            "motivation",
+            "template",
+            "rules"
           ]
         }
       ]

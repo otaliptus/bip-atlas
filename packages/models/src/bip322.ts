@@ -14,10 +14,12 @@
  * Proof-of-funds PSBTs are outside this model and report inconclusive.
  *
  * Verification only: it never signs. Hashing from @noble/hashes, base58 and
- * bech32 from @scure/base; curves and sighashes via the interpreter.
+ * base64 from @scure/base; SegWit addresses use the shared address model;
+ * curves and sighashes via the interpreter.
  */
 import { sha256 } from "@noble/hashes/sha2.js";
-import { base64, bech32, bech32m, createBase58check } from "@scure/base";
+import { base64, createBase58check } from "@scure/base";
+import { analyzeSegwitAddress } from "./bech32";
 import { InterpreterScopeError, ScriptError, verifyInput, type InputResult } from "./interpreter";
 import { bytesToHex, hexToBytes } from "./hex";
 import { tagged } from "./taproot";
@@ -38,17 +40,15 @@ export const messageHash = (message: string) => bytesToHex(tagged(MESSAGE_TAG, e
 /** scriptPubKey for a mainnet address (P2PKH, P2SH, segwit v0, v1). */
 export function addressScript(address: string): { spk: string; kind: "p2pkh" | "p2sh" | "p2wpkh" | "p2wsh" | "p2tr" | "witness" } {
   if (/^bc1/i.test(address)) {
-    const lower = address.toLowerCase();
-    let d: { words: number[] };
-    try { d = bech32.decode(lower as `${string}1${string}`); if (d.words[0] !== 0) throw 0; }
-    catch { d = bech32m.decode(lower as `${string}1${string}`); if (d.words[0] === 0) throw new Bip322Error("v0 address with a bech32m checksum"); }
-    const v = d.words[0];
-    const prog = bytesToHex(Uint8Array.from((v === 0 ? bech32 : bech32m).fromWords(d.words.slice(1))));
-    const spk = (v === 0 ? "00" : (0x50 + v).toString(16)) + push(prog);
-    const kind = v === 0 ? (prog.length === 40 ? "p2wpkh" : "p2wsh") : v === 1 && prog.length === 64 ? "p2tr" : "witness";
-    return { spk, kind };
+    // Use the same checks as the address explainer, before normalizing case.
+    const decoded = analyzeSegwitAddress(address, "bc");
+    if (!decoded.valid) throw new Bip322Error(decoded.reason!);
+    const v = decoded.witnessVersion!;
+    const kind = v === 0 ? (decoded.programHex!.length === 40 ? "p2wpkh" : "p2wsh") : v === 1 && decoded.programHex!.length === 64 ? "p2tr" : "witness";
+    return { spk: decoded.scriptPubKeyHex!, kind };
   }
   const raw = base58check.decode(address);
+  if (raw.length !== 21) throw new Bip322Error("a Base58Check address must contain a version byte and a 20-byte hash");
   const h = bytesToHex(raw.slice(1));
   if (raw[0] === 0x00) return { spk: `76a914${h}88ac`, kind: "p2pkh" };
   if (raw[0] === 0x05) return { spk: `a914${h}87`, kind: "p2sh" };

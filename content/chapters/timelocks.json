@@ -9,7 +9,7 @@
   ],
   "specimenLabel": "BIPs 0065 · 0068 · 0112 · 0113",
   "title": "When is a coin allowed to move?",
-  "dek": "nLockTime delays a transaction until a specified block height or time. Each input’s nSequence can require a minimum age for the spent output. Script opcodes can enforce these requirements.",
+  "dek": "A coin can require a wait before it is spent. The delay can name a block height or time, or count from when the coin was created.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -17,13 +17,12 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A payment channel, an escrow with a deadline, a refund that must wait: each needs a coin that cannot move yet. Bitcoin gets there with four specifications from 2014 and 2015, all consensus soft forks recorded as deployed. BIP 65 lets an output demand a date or a block height. BIP 68 repurposes each input’s sequence number as a relative lock, BIP 112 lets an output demand it, and BIP 113 decides which clock time locks read.",
+        "text": "An escrow can have a deadline, and a refund can be made to wait. Bitcoin can make a delay part of a coin’s spending conditions. An absolute lock names a block height or time; a relative lock requires the coin to reach a minimum age.",
         "claims": [
-          "preambles",
           "cltv-abstract",
           "csv-abstract",
-          "mtp",
-          "repurposed"
+          "bip68-age",
+          "bip68-type"
         ]
       },
       {
@@ -168,6 +167,18 @@
           "claims": [
             "cltv-rules",
             "final-disables"
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "In the absolute-lock view, change nLockTime and follow the first check that fails. Then compare a relative lock. Passing the script check satisfies the script’s comparison; the transaction must also meet the separate conditions for inclusion in a block.",
+          "claims": [
+            "core-cases",
+            "cltv-rules",
+            "csv-rules",
+            "cltv-indirect",
+            "bip68-age",
+            "last-invalid"
           ]
         },
         {
@@ -385,19 +396,48 @@
           "layout": "prose"
         },
         {
-          "type": "paragraph",
-          "text": "The rollout is recorded in the BIPs. BIP 65 used the older switchover for version-4 blocks: enforced once 750 of the previous 1,000 blocks signalled, with older versions rejected at 950. BIPs 68, 112 and 113 were to deploy together through BIP 9 on bit 0, with a mainnet start of 1 May 2016.",
-          "claims": [
-            "cltv-deploy",
-            "csv-deploy"
-          ]
-        },
-        {
           "type": "callout",
           "label": "Note",
           "text": "The figures here check fields against fields, as the opcodes do. Whether a block may include a transaction also depends on the chain’s height and median time past, which this site never sees.",
           "claims": [
             "cltv-indirect",
+            "mtp"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "The proposals and their rollout",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A payment channel, an escrow with a deadline, a refund that must wait: each needs a coin that cannot move yet. Bitcoin gets there with four specifications from 2014 and 2015, all consensus soft forks recorded as deployed. BIP 65 lets an output demand a date or a block height. BIP 68 repurposes each input’s sequence number as a relative lock, BIP 112 lets an output demand it, and BIP 113 decides which clock time locks read.",
+              "claims": [
+                "preambles",
+                "cltv-abstract",
+                "csv-abstract",
+                "mtp",
+                "repurposed"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "The rollout is recorded in the BIPs. BIP 65 used the older switchover for version-4 blocks: enforced once 750 of the previous 1,000 blocks signalled, with older versions rejected at 950. BIPs 68, 112 and 113 were to deploy together through BIP 9 on bit 0, with a mainnet start of 1 May 2016.",
+              "claims": [
+                "cltv-deploy",
+                "csv-deploy"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "For a script-enforced delay, the opcode checks the transaction’s fields. The block-inclusion rules check the transaction against the chain. Both must pass before the transaction can be included.",
+          "claims": [
+            "cltv-indirect",
+            "cltv-rules",
+            "csv-rules",
+            "bip68-age",
+            "last-invalid",
             "mtp"
           ]
         }

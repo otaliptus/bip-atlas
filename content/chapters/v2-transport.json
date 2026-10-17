@@ -162,6 +162,15 @@
      ]
     },
     {
+     "type": "paragraph",
+     "text": "Step through the handshake below. Watch what crosses the open network and what stays inside each node. Public encodings cross the wire; the keys derived from the exchange stay at its ends.",
+     "claims": [
+      "ecdh",
+      "hkdf",
+      "vectors"
+     ]
+    },
+    {
      "type": "figure",
      "figure": "A17.3",
      "recipe": "v2-handshake.v1",

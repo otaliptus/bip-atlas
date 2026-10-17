@@ -9,7 +9,7 @@
   "title": "Why does a Bitcoin transaction have two identifiers?",
   "dek": "SegWit separates what a transaction does from the proof that it is allowed, and gives the transaction a second name that also covers the proof. Signing and block space changed along the way.",
   "authorship": "hand-authored",
-  "reviewState": "in-review",
+  "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
   "opening": {
     "blocks": [
@@ -140,10 +140,12 @@
         },
         {
           "type": "paragraph",
-          "text": "The figure below shows the native P2WPKH example from BIP 143, a transaction with one ordinary input and one SegWit input. Switch lenses to see which bytes each identifier covers.",
+          "text": "The example below has an ordinary input and a SegWit input. Switch between txid and wtxid. Watch the witness bytes leave or enter the highlighted hash input, while the transaction still describes the same payment.",
           "claims": [
             "examples-published",
-            "fixture-inputs"
+            "fixture-inputs",
+            "two-ids",
+            "effects"
           ]
         },
         {

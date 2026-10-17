@@ -8,7 +8,7 @@
   ],
   "specimenLabel": "BIPs 0044 · 0084 · 0086",
   "title": "Where in the tree do wallet keys live?",
-  "dek": "BIP 32 derives a tree of keys from one seed. BIP 44 specifies the wallet’s paths. BIPs 84 and 86 specify paths and output types for SegWit and Taproot.",
+  "dek": "A seed gives a wallet a tree of keys. Shared path conventions tell it where to look, and output conventions tell it which coins those keys can spend.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01-phase3",
@@ -150,9 +150,11 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Follow the same mnemonic down a BIP 84 or BIP 86 path below. Both proposals publish the root, account and address values. The explorer lets you see where the paths share a structure and where their keys differ.",
+          "text": "Follow the same seed down the published BIP 84 and BIP 86 paths. Step from the account to a receiving key, then switch to a change key. Watch where the route changes and how the final key becomes an output.",
           "claims": [
-            "vectors"
+            "vectors",
+            "levels",
+            "script-by-purpose"
           ]
         },
         {
@@ -324,7 +326,7 @@
         },
         {
           "type": "paragraph",
-          "text": "These conventions help a wallet recover funds from a seed backup. The wallet still needs to search the correct paths and output types. Each convention uses BIP 32 derivation and specifies where to find the keys. BIPs 84 and 86 also specify which outputs to build from them.",
+          "text": "A seed gives the wallet its tree of keys. A path convention tells it where to look, and an output convention tells it what to look for. Restoring the keys and finding their coins are related, but separate, jobs.",
           "claims": [
             "b86-why",
             "easy",

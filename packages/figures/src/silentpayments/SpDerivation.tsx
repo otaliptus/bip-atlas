@@ -118,11 +118,11 @@ export function SpDerivation({ fixtures, figureId }: Props) {
   useEffect(() => setHydrated(true), []);
   const [id, setId] = useState(fixtures[0].id);
   const [view, setView] = useState<SpView>("sender");
-  const [steps, setSteps] = useState(true);
+  const [steps, setSteps] = useState(false);
   const f = fixtures.find((x) => x.id === id)!;
   const d = f.derived;
   const v: SpView = hydrated ? view : "sender";
-  const st = hydrated ? steps : true;
+  const st = hydrated ? steps : false;
   const p = spPanels(d, v, st);
   const status =
     v === "sender"
@@ -165,15 +165,22 @@ export function SpDerivation({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={setId} />
           <Strip label="Switch sender/receiver view" name={`${figureId}-view`} options={[{ value: "sender", text: "Sender" }, { value: "receiver", text: "Receiver" }, { value: "observer", text: "Outside observer" }]} current={view} onPick={(x) => setView(x as SpView)} />
-          <Strip label="Reveal shared-secret steps" name={`${figureId}-steps`} options={[{ value: "no", text: "Result only" }, { value: "yes", text: "Every step" }]} current={steps ? "yes" : "no"} onPick={(x) => setSteps(x === "yes")} />
         </div>
       ) : (
-        <p class="atlas-hero__static">Static view: the sender’s side of the first vector, every step shown. With JavaScript you can switch to the receiver or an outside observer, pick other vectors and hide the intermediate steps.</p>
+        <p class="atlas-hero__static">Static view: the sender’s side of the first payment, showing the result. With JavaScript you can switch to the receiver or an outside observer, reveal the calculation and explore other payments.</p>
       )}
       <Responsive wide={draw("wide")} narrow={draw("narrow")} />
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      {hydrated && (
+        <details class="atlas-disclosure">
+          <summary>See the calculation and other payments</summary>
+          <div class="atlas-hero__controls">
+            <Strip label="Reveal shared-secret steps" name={`${figureId}-steps`} options={[{ value: "no", text: "Result only" }, { value: "yes", text: "Every step" }]} current={steps ? "yes" : "no"} onPick={(x) => setSteps(x === "yes")} />
+            <Strip label="Choose a published vector" name={`${figureId}-case`} options={fixtures.map((x) => ({ value: x.id, text: x.label }))} current={id} onPick={setId} />
+          </div>
+        </details>
+      )}
       <details class="atlas-disclosure">
         <summary>Exact values for this view</summary>
         <p class="atlas-hexlist" style="overflow-wrap:anywhere">{describeView(d, v, st)}</p>

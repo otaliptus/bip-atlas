@@ -151,6 +151,16 @@
           ]
         },
         {
+          "type": "paragraph",
+          "text": "Step through the first signing session from the shared key list to the finished signature. Watch each signer’s contribution arrive, then see them combine. The result can be checked as an ordinary Schnorr signature.",
+          "claims": [
+            "flow",
+            "vectors",
+            "aggregate",
+            "bip340-compat"
+          ]
+        },
+        {
           "type": "figure",
           "figure": "A14.3",
           "recipe": "musig2-rounds.v1",
@@ -298,6 +308,14 @@
                 "compact-private",
                 "abstract"
               ]
+            },
+            {
+              "type": "paragraph",
+              "text": "MuSig2 produces BIP 340 signatures only. It does not work with ECDSA, and it cannot make progress without every signer whose key contributed to the aggregate.",
+              "claims": [
+                "n-of-n",
+                "ecdsa"
+              ]
             }
           ]
         }
@@ -346,10 +364,11 @@
         },
         {
           "type": "paragraph",
-          "text": "MuSig2 produces BIP 340 signatures only. It does not work with ECDSA, and it cannot make progress without every signer whose key contributed to the aggregate.",
+          "text": "The signers cooperate off chain so that the chain needs only their aggregate key and ordinary Schnorr signature. The compact result still depends on every member taking part.",
           "claims": [
-            "n-of-n",
-            "ecdsa"
+            "compact-private",
+            "bip340-compat",
+            "n-of-n"
           ]
         }
       ]

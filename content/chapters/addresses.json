@@ -22,9 +22,12 @@
       },
       {
         "type": "paragraph",
-        "text": "Addresses that begin with `bc1` were designed the other way round. BIP 173, assigned in 2017, defined their format, Bech32. BIP 350, assigned in 2020, amended it with a variant called Bech32m. Together they say what every character means and what a decoder must do when one of them is wrong.",
+        "text": "The bc1 format separates an address’s contents from a short checksum. A decoder checks both before accepting the string. Bech32 and Bech32m have the same overall shape, with different checksum rules for different witness versions.",
         "claims": [
-          "preamble-dates"
+          "string-shape",
+          "checksum-six",
+          "bech32m-constant",
+          "family-rule"
         ]
       }
     ],
@@ -163,10 +166,12 @@
         },
         {
           "type": "paragraph",
-          "text": "The figure below runs the checks a decoder runs, in the order it runs them. Choose one of the public samples, then change any character after the separator and watch where the string is stopped.",
+          "text": "Choose the valid version 0 sample below and change a character in its data. Watch the checksum check fail, then restore the sample. The decoder notices the error; it does not choose a replacement address for you.",
           "claims": [
-            "family-rule",
-            "padding-rule"
+            "fixture-v0",
+            "fixture-typo",
+            "no-correction",
+            "checksum-computation"
           ]
         },
         {
@@ -523,6 +528,27 @@
             "bech32m-constant",
             "q-weakness",
             "family-rule"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "How the address formats changed",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Addresses that begin with `bc1` were designed the other way round. BIP 173, assigned in 2017, defined their format, Bech32. BIP 350, assigned in 2020, amended it with a variant called Bech32m. Together they say what every character means and what a decoder must do when one of them is wrong.",
+              "claims": [
+                "preamble-dates"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The checksum helps a wallet catch a copying mistake. It cannot establish who controls the destination or decide what you meant to type. A valid encoding is the start of interpreting an address.",
+          "claims": [
+            "no-correction",
+            "validity-scope"
           ]
         }
       ]

@@ -14,11 +14,13 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Bitcoin already had ECDSA signatures. BIP 340 standardizes Schnorr signatures over the same curve, secp256k1. Its authors point to security proofs under established assumptions and non-malleability: a third party cannot turn a valid signature into a different valid signature for the same key and message under those assumptions.",
+        "text": "A signature lets someone check that a message was authorized by a particular key. BIP 340 adds Schnorr signatures to Bitcoin: a compact format with precisely specified checks, so different verifiers can agree on the same result.",
         "claims": [
           "abstract",
-          "security-rationale",
-          "non-malleable"
+          "verify-inputs",
+          "verify-steps",
+          "completely-specified",
+          "encodings"
         ]
       },
       {
@@ -138,23 +140,9 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Verification starts by converting the public key into a curve point. The function *lift_x* reads the key’s 32 bytes as an x coordinate. It returns the point with that x coordinate and an even y coordinate. It fails if x is too large or no such point exists. The verifier then reads r and s from the signature. It rejects r at or above the field size *p*, and s at or above the curve order *n*.",
+          "text": "Keep the original key and signature, then switch from Original message to Different message. The signature no longer passes. Step through the gates to see where the changed message breaks the check.",
           "claims": [
-            "verify-steps",
-            "lift-x"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Next, compute the challenge e from a tagged hash of r, the public key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Reject the signature if R is the point at infinity, its y coordinate is odd, or its x coordinate differs from r. Accept it only if every check passes.",
-          "claims": [
-            "verify-steps"
-          ]
-        },
-        {
-          "type": "paragraph",
-          "text": "Choose a valid vector below, then switch to an invalid one. The verifier stops at the first failure. A key with no curve point fails before hashing; a later failure means the inputs passed those earlier checks.",
-          "claims": [
+            "message-swap",
             "verify-steps",
             "vectors-reproduced"
           ]
@@ -188,8 +176,29 @@
           "layout": "wide"
         },
         {
+          "type": "details",
+          "summary": "The verification algorithm, step by step",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Verification starts by converting the public key into a curve point. The function *lift_x* reads the key’s 32 bytes as an x coordinate. It returns the point with that x coordinate and an even y coordinate. It fails if x is too large or no such point exists. The verifier then reads r and s from the signature. It rejects r at or above the field size *p*, and s at or above the curve order *n*.",
+              "claims": [
+                "verify-steps",
+                "lift-x"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Next, compute the challenge e from a tagged hash of r, the public key and the message, reduced modulo n. Use it to compute R = s⋅G − e⋅P. Reject the signature if R is the point at infinity, its y coordinate is odd, or its x coordinate differs from r. Accept it only if every check passes.",
+              "claims": [
+                "verify-steps"
+              ]
+            }
+          ]
+        },
+        {
           "type": "paragraph",
-          "text": "Try the verifier’s message control on a valid vector. The key and signature stay the same, but another message changes e, which changes R. For every valid vector in the figure, that is enough to fail, at either the even-y check or the x comparison. Nothing in the verifier knows which message was “meant”; it only checks the one it is given.",
+          "text": "For a valid signature in this figure, changing the message leaves the early input checks intact and makes a later gate fail. The verifier checks the message it is given; it cannot know which one was intended.",
           "claims": [
             "message-swap",
             "verify-steps"
@@ -404,6 +413,30 @@
                 "preamble"
               ]
             }
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "Why add another signature scheme?",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Bitcoin already had ECDSA signatures. BIP 340 standardizes Schnorr signatures over the same curve, secp256k1. Its authors point to security proofs under established assumptions and non-malleability: a third party cannot turn a valid signature into a different valid signature for the same key and message under those assumptions.",
+              "claims": [
+                "abstract",
+                "security-rationale",
+                "non-malleable"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The signature binds a public key to a message. Changing the message changes what the verifier checks, even when the key and signature stay untouched.",
+          "claims": [
+            "verify-inputs",
+            "verify-steps",
+            "message-swap"
           ]
         }
       ]

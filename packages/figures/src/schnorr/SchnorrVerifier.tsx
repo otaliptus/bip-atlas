@@ -154,7 +154,6 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
     <div class="atlas-hero" data-hydrated={hydrated ? "true" : "false"} onClickCapture={hydrated ? holdFocus : undefined}>
       {hydrated ? (
         <div class="atlas-hero__controls">
-          {Strip({ label: "Signature example", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: f.label, aria: `${f.label}, vector ${f.vectorIndex}${f.expected ? "" : ", invalid"}` })) })}
           {Strip({ label: "Message", name: `${figureId}-message`, current: messageKey, onPick: setMessageKey, options: fixture.derived.messages.map((m) => ({
             value: m.key,
             text: m.key === fixture.derived.ownMessage ? `Original message · ${m.bytes} B` : `Different message · ${m.bytes} B`,
@@ -169,6 +168,12 @@ export function SchnorrVerifier({ fixtures, figureId }: Props) {
         <Scrub label="Reveal verifier stages" value={revealed} min={1} max={N} unit="gate" valueText={`gate ${revealed} of ${N}: ${SCHNORR_STAGES[revealed - 1].label}, ${STATUS_WORD[statusOf(revealed - 1)]}`} onSet={setRevealed} />
       ) : null}
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
+      {hydrated && (
+        <details class="atlas-disclosure">
+          <summary>Explore other signature examples</summary>
+          {Strip({ label: "Signature example", name: `${figureId}-vector`, current: fixtureId, onPick: chooseFixture, options: fixtures.map((f) => ({ value: f.id, text: f.label, aria: `${f.label}, vector ${f.vectorIndex}${f.expected ? "" : ", invalid"}` })) })}
+        </details>
+      )}
       <details class="atlas-disclosure">
         <summary>Exact values for this view</summary>
         <dl class="atlas-hexlist">

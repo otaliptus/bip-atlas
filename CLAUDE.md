@@ -2,6 +2,8 @@
 
 An illustrated, evidence-checked field guide to selected Bitcoin Improvement Proposals. Static Astro site with small Preact islands, deployed to Cloudflare Pages. The product brief is `BIP_ATLAS_SPEC.md`; the chapter briefs are `catalog.json`. **Read `HANDOFF.md` first** for the current state and the next task. Phase-three chapter briefs are in `catalog-phase3.json`; review records in `review/phase-three.md`.
 
+The reader's goal is a clear, engaging explainer of what each proposal changes and why. Keep it simple: favor concise prose and static drawings, with a few purposeful interactions. Do not add controls, modes or animations just to make a chapter feel engaging. Model and test coverage support the explanation; reproducing a whole BIP or all its test cases is not a chapter-completion goal. Keep deeper technical detail available in disclosures, and expand implementation scope when it improves the explanation or fixes incorrect behavior.
+
 ## Commands
 
 ```sh
@@ -35,6 +37,7 @@ CI (`.github/workflows/deploy.yml`) runs check, test and build on every push and
 - Every paragraph cites at least one claim; every ledger claim is cited; every quote appears verbatim (whitespace-normalized) at its cited lines.
 - Chapter title, BIPs, hero recipe and its `controls` must match the catalogs, except explicit editorial titles in `content/title-policy.json`; figure budget from `content/figure-policy.json` (1 interactive hero + 3 to 12 static figures, decision D1 in `review/decisions.md`; the catalog's own 1–2 is overridden).
 - Default reading path follows the catalog's word range, with chapter-specific editorial overrides in `content/reading-policy.json` (`defaultPathWordCount`; details blocks, captions and tables excluded). Do not pad prose to hit the original minimum.
+- `chapterOrder` in that same reading policy sets the contents and previous/next navigation. Keep figure IDs stable when changing chapter order.
 - Every exact value shown comes from a model; numbers written in prose need a test that checks them (see `bip39.test.ts`, `tx.test.ts`).
 - Fixtures are copied from pinned sources, never invented or edited to make code pass.
 

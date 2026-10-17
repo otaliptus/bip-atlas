@@ -1,5 +1,25 @@
 {
-  "reason": "Editorial revision requested 2 October 2026: these chapters use shorter main narratives, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum. The BIP relevance revision moves P2SH’s later SegWit details off the main reading path.",
+  "reason": "The October 2026 editorial revisions prioritize a clear first reading, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum. The reading order follows keys and addresses, spending and signatures, then privacy and network mechanisms; the original kit catalog stays frozen.",
+  "chapterOrder": [
+    "mnemonics",
+    "hd-wallets",
+    "wallet-paths",
+    "addresses",
+    "p2sh",
+    "segwit",
+    "timelocks",
+    "psbt",
+    "schnorr",
+    "taproot",
+    "tapscript",
+    "musig2",
+    "descriptors",
+    "silent-payments",
+    "message-signing",
+    "block-filters",
+    "v2-transport",
+    "version-bits"
+  ],
   "chapterRanges": {
     "psbt": {
       "min": 900,
@@ -46,8 +66,8 @@
       "max": 1400
     },
     "wallet-paths": {
-      "min": 900,
-      "max": 1400
+      "min": 750,
+      "max": 1200
     },
     "p2sh": {
       "min": 550,

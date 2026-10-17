@@ -80,6 +80,16 @@
      ]
     },
     {
+     "type": "paragraph",
+     "text": "Step through the document’s handoffs. Watch the signers add their contributions, then see the Combiner bring them together. The unsigned transaction stays the same while the document gains what it needs.",
+     "claims": [
+      "trace-reproduced",
+      "trace-published",
+      "signer",
+      "combiner"
+     ]
+    },
+    {
      "type": "figure",
      "figure": "A05.2",
      "recipe": "psbt-envelope.v1",
@@ -365,15 +375,6 @@
      "layout": "wide"
     },
     {
-     "type": "paragraph",
-     "text": "An unknown PSBT version is a different situation. The parser should stop immediately: it cannot assume that it understands the document’s rules. Version 2 PSBTs and Taproot fields are defined in other proposals. This chapter follows BIP 174’s version 0, with field names taken from the shared type registry.",
-     "claims": [
-      "version-exit",
-      "generic-v0",
-      "registry"
-     ]
-    },
-    {
      "type": "details",
      "summary": "Source and example notes",
      "blocks": [
@@ -385,7 +386,26 @@
         "trace-published",
         "trace-reproduced"
        ]
+      },
+      {
+       "type": "paragraph",
+       "text": "An unknown PSBT version is a different situation. The parser should stop immediately: it cannot assume that it understands the document’s rules. Version 2 PSBTs and Taproot fields are defined in other proposals. This chapter follows BIP 174’s version 0, with field names taken from the shared type registry.",
+       "claims": [
+        "version-exit",
+        "generic-v0",
+        "registry"
+       ]
       }
+     ]
+    },
+    {
+     "type": "paragraph",
+     "text": "The PSBT is the shared work in progress. Each participant can add its part while keeping its private keys separate. Finalization and extraction turn those contributions into the transaction the network expects.",
+     "claims": [
+      "signer",
+      "combiner",
+      "finalizer",
+      "extractor"
      ]
     }
    ]

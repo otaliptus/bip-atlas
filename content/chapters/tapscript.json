@@ -177,11 +177,11 @@
         },
         {
           "type": "paragraph",
-          "text": "Try an accepted witness and its rejected counterpart below. Follow the stack until they diverge: an empty signature, an empty key and an invalid signature lead to different outcomes.",
+          "text": "Start with the empty-signature example below. Compare its accepted and rejected witnesses, then step to the first difference. An empty signature and an empty public key have different effects.",
           "claims": [
             "traces-agree",
             "case-empty",
-            "case-checksigadd"
+            "sig-empty"
           ]
         },
         {
@@ -421,6 +421,14 @@
                 "traces-agree"
               ]
             }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "Taproot checks that the revealed script belongs to the output. Tapscript then checks whether the witness data satisfies that script. A commitment proof and successful execution do different jobs.",
+          "claims": [
+            "scope",
+            "order"
           ]
         }
       ]

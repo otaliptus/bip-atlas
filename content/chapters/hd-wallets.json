@@ -6,7 +6,7 @@
   ],
   "specimenLabel": "BIP 0032",
   "title": "How can one seed grow an entire wallet?",
-  "dek": "A seed can reproduce a tree of keys. Each key has a 32-byte chain code. An extended public key can derive public descendants through normal branches, but not hardened branches.",
+  "dek": "One seed can reproduce a whole tree of keys. Sharing a branch can let another system derive receiving keys while the spending keys stay private.",
   "authorship": "hand-authored",
   "reviewState": "draft-unreviewed",
   "sourceSnapshot": "sources/research-2026-10-01",
@@ -14,18 +14,20 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "When BIP 32 was written, the reference wallet generated each key at random. To avoid needing a new backup after every transaction, it kept a pool of a hundred spare keys. Every key was independent, so every key had to be saved.",
+        "text": "A wallet needs fresh keys as it receives payments. Backing up every key separately would make that wallet harder to preserve. BIP 32 lets a single seed reproduce a whole tree of keys, so the backup does not have to grow with the tree.",
         "claims": [
-          "random-keys-history"
+          "abstract",
+          "random-keys-history",
+          "reconstruction"
         ]
       },
       {
         "type": "paragraph",
-        "text": "BIP 32, assigned in 2012 and recorded as deployed, takes another route: derive every key from one seed, arranged as a tree. Branches of that tree can be shared with other systems, entirely or in part, with or without the ability to spend.",
+        "text": "The tree can also be shared in parts. A server can derive receiving keys from an extended public key without holding the private keys that spend the money. Hardened branches set a boundary on what that public key can reach.",
         "claims": [
-          "preamble-dates",
-          "two-parts",
-          "abstract"
+          "webshop",
+          "ckdpub",
+          "pub-to-priv"
         ]
       }
     ],
@@ -131,10 +133,12 @@
         },
         {
           "type": "paragraph",
-          "text": "In rare cases a step produces an invalid key, and the wallet moves on to the next index. BIP 32 puts the odds below one in 2¹²⁷. That one difference in the HMAC input, public key or private key, is what the figure below is about.",
+          "text": "Switch from holding the extended private key to holding only the extended public key. Then toggle the normal and hardened branch. Watch which keys that holder can derive and which branches it cannot reach.",
           "claims": [
-            "invalid-rare",
-            "ckdpriv-hardened"
+            "ckdpub",
+            "pub-to-priv",
+            "reconstruction",
+            "vectors"
           ]
         },
         {
@@ -153,6 +157,20 @@
             "vectors"
           ],
           "layout": "wide"
+        },
+        {
+          "type": "details",
+          "summary": "When derivation skips a child",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "In rare cases a step produces an invalid key, and the wallet moves on to the next index. BIP 32 puts the odds below one in 2¹²⁷.",
+              "claims": [
+                "invalid-rare",
+                "ckdpriv-hardened"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -365,6 +383,38 @@
             "indices",
             "reconstruction",
             "master"
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "The wallet-backup problem BIP 32 addressed",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "When BIP 32 was written, the reference wallet generated each key at random. To avoid needing a new backup after every transaction, it kept a pool of a hundred spare keys. Every key was independent, so every key had to be saved.",
+              "claims": [
+                "random-keys-history"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 32, assigned in 2012 and recorded as deployed, takes another route: derive every key from one seed, arranged as a tree. Branches of that tree can be shared with other systems, entirely or in part, with or without the ability to spend.",
+              "claims": [
+                "preamble-dates",
+                "two-parts",
+                "abstract"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "text": "The seed preserves the tree. The branch you share determines which descendants another system can derive, and whether it can derive public keys or private ones.",
+          "claims": [
+            "reconstruction",
+            "abstract",
+            "ckdpub",
+            "pub-to-priv"
           ]
         }
       ]
