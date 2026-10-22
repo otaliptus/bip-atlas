@@ -1,5 +1,7 @@
 # BIP Atlas implementation kit
 
+BIP Atlas is heavily inspired by [makingsoftware.com](https://makingsoftware.com).
+
 Start with **BIP_ATLAS_SPEC.md**, then **catalog.json**, then **prompts/BUILD_AND_COMPILER_PROMPTS.md**. The proposal is eight chapters covering ten primary BIPs, with a five-chapter first phase covering seven of them. Five additional BIPs are supporting context only.
 
 ## Included
