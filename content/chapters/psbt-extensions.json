@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "psbt-extensions",
+  "primaryBips": [370, 371, 373],
+  "specimenLabel": "BIP 0370 + 0371 + 0373",
+  "title": "How does a PSBT learn to sign Taproot and MuSig2?",
+  "dek": "PSBTv2 changes how a transaction is assembled. BIP 371 adds Taproot’s keys, trees and signatures, and BIP 373 adds MuSig2 participants, nonces and partial signatures. All three are record formats, not signing instructions by themselves.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01-expansion",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "PSBTv0 packages one global unsigned transaction with maps of signing information. That makes the transaction fixed: you cannot add another input or output later. PSBTv2 removes that global transaction and replaces it with explicit fields for versions, counts, transaction data and modification rules.",
+        "claims": ["v2-purpose", "unsigned-excluded", "global-fields"]
+      },
+      {
+        "type": "paragraph",
+        "text": "Taproot and MuSig2 add different kinds of information to that package. Taproot needs internal keys, Merkle roots, leaf scripts and signatures. MuSig2 needs participant public keys, public nonces and partial signatures. BIP 371 and BIP 373 define those fields for both PSBT versions; they do not turn the package into a signer.",
+        "claims": ["taproot-fields", "musig2-fields", "scope-no-sign"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A19.1",
+      "recipe": "psbt-overview.v1",
+      "title": "A valid PSBTv2, at a glance",
+      "fixtures": ["bip370-25-1-input-2-output-psbtv2-required-fields-only"],
+      "caption": "Version 2, explicit input and output counts, previous-output references and output amounts. The model validates these fields without signing or broadcasting anything.",
+      "claims": ["global-fields", "input-fields", "output-fields", "scope-no-sign"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "version",
+      "heading": "PSBTv2 is a different construction",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "PSBTv2 exists to let constructors add inputs and outputs after creation. It also moves information about each input and output into that input or output’s own map. Version 1 is skipped because people had already been calling v0 ‘version 1’ informally.",
+          "claims": ["v2-purpose", "v2-not-v1"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The inclusion rules are deliberately different. PSBTv0 needs its global unsigned transaction, while PSBTv2 must exclude that record and carry an explicit version of 2. A v2 input or output construction record is likewise forbidden in v0. These are version boundaries, not two names for the same envelope: a decoder must not silently reinterpret a v0 package as v2.",
+          "claims": ["unsigned-excluded", "validation-vectors", "input-fields", "output-fields"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Required global fields include transaction version, input count and output count. Modifiable flags say whether inputs or outputs may change and whether SIGHASH_SINGLE pairing needs care. A constructor checks those flags before adding anything and increments the corresponding count. The published valid cases include an undefined flag bit: that bit is not an error merely because this specification does not assign it a meaning. Preserving an unknown bit is different from understanding or acting on it.",
+          "claims": ["global-fields", "modifiable-flags", "undefined-flags"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.2",
+          "recipe": "psbt-v2-comparison.v1",
+          "title": "PSBTv0 and PSBTv2 construction compared",
+          "fixtures": ["bip370-25-1-input-2-output-psbtv2-required-fields-only"],
+          "caption": "Version 0 carries one fixed unsigned transaction. Version 2 carries the construction in records, including counts and modification rules.",
+          "claims": ["v2-purpose", "unsigned-excluded", "global-fields"],
+          "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A19.3",
+          "recipe": "psbt-v2-globals.v1",
+          "title": "The global records that replace the transaction envelope",
+          "fixtures": ["bip370-38-1-input-2-output-updated-psbtv2-with-all-psbtv2-"],
+          "caption": "Version, fallback locktime, input and output counts, and modifiable flags. This published vector also includes per-input and per-output construction data.",
+          "claims": ["global-fields", "modifiable-flags"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "construction",
+      "heading": "Every input and output describes itself",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Each PSBTv2 input names a previous transaction and output index. The 32-byte txid uses standard byte order, not display byte order, and the index is a 32-bit little-endian integer. An omitted sequence means `0xffffffff`; an explicit sequence or required time or height locktime lives in that input’s map. Each output has an amount and script. Missing previous-output or output-creation fields is invalid.",
+          "claims": ["input-fields", "output-fields"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Locktime selection has its own algorithm. If every input can use height, height wins. Otherwise, if every input can use time, time wins. Inputs with no locktime field can accept either, and inputs with both do not force a choice. The chosen value is the maximum of that type; with no required fields, the fallback or zero is used.",
+          "claims": ["locktime"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The vectors make the choices concrete. Height requirements of 10000 and 9000 produce 10000. Where every input can accept time, the larger example is 1657048460. With no requirements, a missing fallback means zero. But a height-only input paired with a time-only input has no common type, so the locktime cannot be computed; choosing the numerically larger value would ignore the algorithm.",
+          "claims": ["locktime", "locktime-vectors"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.4",
+          "recipe": "psbt-locktime.v1",
+          "title": "Height, time or fallback",
+          "fixtures": ["bip370-41-input-1-has-psbt-in-required-height-locktime-of-"],
+          "caption": "One input requires height 10000; the other has no locktime field and can accept either. Height is supported by every input, so the computed locktime is 10000.",
+          "claims": ["locktime"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "taproot",
+      "heading": "Taproot needs more than a signature",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 371 adds key-spend and script-spend signatures, leaf scripts, derivation paths, internal keys and Merkle roots. Input fields describe spending evidence; output fields describe an internal key, tree and derivations. The fields have different scopes even though their names sound similar. A signer may need more than a single signature: it may need to recognize a derived key or identify a leaf and its script.",
+          "claims": ["taproot-fields", "scope-no-sign"]
+        },
+        {
+          "type": "paragraph",
+          "text": "An output’s Taproot tree is a sequence of depth, leaf version and script tuples in depth-first order, with a CompactSize script length before each script. That ordering lets a reader reconstruct the tree rather than treating the value as an opaque blob. The inspector reports leaf depths from those tuples; it does not infer a tree from the illustration or from a list of unrelated scripts.",
+          "claims": ["taproot-tree"]
+        },
+        {
+          "type": "paragraph",
+          "text": "These construction and signing records are not all destined for the final transaction. Once an input has enough evidence, a finalizer constructs its final script fields and clears the other understood input data, while retaining UTXO and unknown fields. PSBTv2 additionally retains the construction records needed to extract the transaction. Signing information and final witness data are stages of the package, not the same record.",
+          "claims": ["taproot-finalization"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Taproot inputs can use only the witness UTXO rather than the full previous transaction. A Taproot signature commits to every input amount and output script, so lying about those values makes the signature invalid. That explains why the smaller UTXO record can suffice; it is not permission to skip checking the input or call a parsed package safe to sign.",
+          "claims": ["taproot-utxo", "scope-no-sign"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.5",
+          "recipe": "psbt-taproot-fields.v1",
+          "title": "The Taproot signing package",
+          "fixtures": ["bip371-16-psbt-with-one-p2tr-script-path-only-output-with-"],
+          "caption": "Internal key, Taproot tree and script-key derivation paths in one published output example. The tree is decoded from its depth-first tuples rather than inferred from the picture.",
+          "claims": ["taproot-fields", "taproot-tree"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "musig2",
+      "heading": "MuSig2 adds rounds to the package",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 373 adds participant public keys, public nonces and partial signatures. Participant lists preserve the order required for aggregation. Nonces and partial signatures identify both the participant and aggregate key, with an optional leaf hash for a script spend. Output-side participant fields help an updater describe an aggregate key and support change detection.",
+          "claims": ["musig2-fields", "musig2-output"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The aggregate key is a full compressed public key, not an x-only key. BIP 32 derivation and fingerprints need its evenness byte. Carrying the full key lets a signer recognize keys derived from the aggregate and apply the right tweaks. It is not permission to treat MuSig2 as simply adding unweighted public keys: BIP 327’s aggregation uses key-dependent coefficients, and the participant list’s order matters.",
+          "claims": ["musig2-full-pubkey", "musig2-not-sum"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Internal key, output key and aggregate key describe roles, not interchangeable labels. A MuSig2 aggregate may be the Taproot internal key, output key or a key in a script, or it may be the parent from which the used key was derived. The participant record keeps that aggregate identity available instead of assuming that the key printed in an output tells the whole derivation story.",
+          "claims": ["aggregate-key-role", "musig2-fields"]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 373 also warns that improper nonce usage can compromise private keys. A PSBT can carry public nonces from one signing round and partial signatures from the next, but it does not generate nonces, retain secret nonce state or enforce safe nonce hygiene. The format supports the rounds; it is not permission to reuse a nonce or replace the protocol’s safety requirements.",
+          "claims": ["nonce-safety", "scope-no-sign"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.6",
+          "recipe": "psbt-musig2-fields.v1",
+          "title": "Participants, nonces and partial signatures",
+          "fixtures": ["bip373-01-spend-of-a-taproot-output-where-the-output-key-i", "bip373-01-spend-of-a-taproot-output-where-the-output-key-i-all-pubnonces", "bip373-01-spend-of-a-taproot-output-where-the-output-key-i-all-partial-signatures"],
+          "caption": "Three published vectors show the same output-key aggregate with participant public keys, then all public nonces, then all partial signatures. Nothing is signed by this chapter.",
+          "claims": ["musig2-fields", "musig2-full-pubkey", "nonce-safety"],
+          "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A19.7",
+          "recipe": "psbt-extension-validation.v1",
+          "title": "Where an invalid record stops",
+          "fixtures": ["bip371-01-psbt-with-tt-psbt-in-tap-internal-key-tt-key-tha"],
+          "caption": "This published invalid example serializes an internal key with an incorrectly long compressed-DER key. The model stops at the field’s size and encoding check instead of accepting it as a public key.",
+          "claims": ["validation-vectors", "scope-no-sign"],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A19.8",
+          "recipe": "psbt-extension-records.v1",
+          "title": "PSBT extension record inspector",
+          "fixtures": ["bip370-25-1-input-2-output-psbtv2-required-fields-only", "bip370-38-1-input-2-output-updated-psbtv2-with-all-psbtv2-", "bip371-12-psbt-with-one-p2tr-key-only-input-with-internal-", "bip371-16-psbt-with-one-p2tr-script-path-only-output-with-", "bip373-01-spend-of-a-taproot-output-where-the-output-key-i", "bip373-13-psbt-with-invalid-public-nonce-valuedata-length"],
+          "caption": "Choose a published vector and inspect its version, scope, field reading, validation errors and locktime. Nothing is signed or broadcast.",
+          "claims": ["validation-vectors", "scope-no-sign"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "validation",
+      "heading": "Parsing is not permission to sign",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The published invalid cases cover missing v2 fields, v0 records in the wrong version, oversized keys, short signatures and malformed control blocks. Separate locktime examples end with no computable value when inputs share no locktime type. The useful decoder reports the failed field and rule instead of treating every map as opaque key-value data, so you can see what went wrong rather than receiving an unexplained yes or no.",
+          "claims": ["validation-vectors"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Extensibility needs a different treatment from a malformed known field. Old software may ignore new fields, and a tool carrying a package forward should not silently discard records it does not understand. But ignoring an extension or preserving its bytes is not evidence that its semantics are safe. The inspector labels unknown fields separately from the reviewed rules instead of converting them into signing instructions.",
+          "claims": ["unknown-fields", "scope-no-sign"]
+        },
+        {
+          "type": "paragraph",
+          "text": "That is where the model stops. It checks map structure, version-specific inclusion and exclusion, sizes, selected encodings and locktime selection. Reading modification flags does not enact the constructor or signer state machine, and a syntactically present signature is not a cryptographic audit. The lab does not verify every signature or extension, add inputs, sign, finalize, broadcast or decide that a transaction is good to sign.",
+          "claims": ["scope-no-sign", "modifiable-flags", "validation-vectors"]
+        }
+      ]
+    }
+  ]
+}

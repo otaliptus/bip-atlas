@@ -3,9 +3,25 @@ import { holdFocus } from "../focus";
 import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
 import type { DerivedTaprootTreeFixture, TaprootLeafView } from "../types";
 import { layoutTree, pruneForView, seenMap, type Seen } from "./treeLayout";
+import { readFigureView } from "../share";
+import { ShareView } from "../ShareView";
 
-type Path = "key" | "script";
-type View = "wallet" | "proof";
+export type Path = "key" | "script";
+export type View = "wallet" | "proof";
+
+export function taprootViewFromSearch<T extends { path: Path; leafId: number; view: View }>(search: string, figureId: string, fixture: DerivedTaprootTreeFixture, initial: T): T {
+  const shared = readFigureView(search, figureId);
+  if (!Object.keys(shared).length) return initial;
+  if (shared.path !== undefined && shared.path !== "key" && shared.path !== "script") return initial;
+  if (shared.view !== undefined && shared.view !== "wallet" && shared.view !== "proof") return initial;
+  let leafId = initial.leafId;
+  if (shared.leaf !== undefined) {
+    const candidate = Number(shared.leaf);
+    if (!Number.isInteger(candidate) || !fixture.derived.leaves.some((leaf) => leaf.id === candidate)) return initial;
+    leafId = candidate;
+  }
+  return { ...initial, path: (shared.path as Path | undefined) ?? initial.path, leafId, view: (shared.view as View | undefined) ?? initial.view };
+}
 
 interface Props {
   fixture: DerivedTaprootTreeFixture;
@@ -29,12 +45,18 @@ const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
  */
 export function TaprootCommitment({ fixture, figureId, initial }: Props) {
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
   const d = fixture.derived;
   const start = initial ?? { path: "script" as Path, leafId: d.leaves[d.leaves.length > 1 ? 1 : 0]?.id ?? 0, view: "wallet" as View };
   const [path, setPath] = useState<Path>(start.path);
   const [leafId, setLeafId] = useState(start.leafId);
   const [view, setView] = useState<View>(start.view);
+  useEffect(() => {
+    const restored = taprootViewFromSearch(window.location.search, figureId, fixture, start);
+    setPath(restored.path);
+    setLeafId(restored.leafId);
+    setView(restored.view);
+    setHydrated(true);
+  }, [figureId, fixture]);
   const leaf: TaprootLeafView = d.leaves.find((l) => l.id === leafId) ?? d.leaves[0];
   const proof = view === "proof";
   const seen = d.root ? seenMap(d.root, path, leaf.id, proof) : new Map<string, Seen>();
@@ -50,14 +72,20 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
       ? `Key path: the witness is one ${sig.length / 2}-byte signature for Q. ${proof ? "Nothing about the internal key or the tree is revealed." : "The wallet knows the whole tree; the spend shows none of it."}`
       : `${leafName(leaf.id)}: the witness carries its script (${scriptBytes} bytes) and a ${cbBytes}-byte control block with ${m} sibling hash${m === 1 ? "" : "es"}; the verifier recomputes ${m} hash${m === 1 ? "" : "es"} up to the root, then the tweak, and checks Q.`;
 
-  const describe = () => {
+  const describe = (focused = false) => {
+    if (focused && path === "key") return `Output key Q ${d.outputKeyHex} and its ${sig.length / 2}-byte key-path signature. ${proof ? "No internal key or tree is revealed." : "The complete wallet tree is available in a separate disclosure."} ${status}`;
     if (keyOnlyView) return `What a key-path spend shows: the output key Q, ${d.outputKeyHex}, and a ${sig.length / 2}-byte signature. No internal key and no tree.`;
     const drawn = [...seen.entries()].filter(([, s]) => s !== "absent").length;
-    return `Output key Q ${d.outputKeyHex}, made from internal key P ${d.internalKeyHex} tweaked by the Merkle root. ${proof ? `Only the proof is drawn: ${drawn} tree nodes.` : `The whole tree is drawn: ${d.leaves.map((l) => `${leafName(l.id)}, ${l.scriptReading}`).join("; ")}.`} ${status}`;
+    const composition = proof
+      ? `Only the proof is drawn: ${drawn} tree nodes.`
+      : focused
+        ? `The selected ${leafName(leaf.id)} proof path is drawn large; the complete tree is available in a separate disclosure.`
+        : `The whole tree is drawn: ${d.leaves.map((l) => `${leafName(l.id)}, ${l.scriptReading}`).join("; ")}.`;
+    return `Output key Q ${d.outputKeyHex}, made from internal key P ${d.internalKeyHex} tweaked by the Merkle root. ${composition} ${status}`;
   };
 
-  const draw = (w: "wide" | "narrow") => {
-    const wide = w === "wide";
+  const draw = (w: "wide" | "narrow" | "tree") => {
+    const wide = w !== "narrow";
     const W = wide ? 640 : 330;
     const id = `${figureId}-${w}`;
     const ids = idsFor(id);
@@ -164,6 +192,78 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
     );
   };
 
+  const drawFocused = () => {
+    const id = `${figureId}-focus`;
+    const ids = idsFor(id);
+    const W = 330;
+    const cx = W / 2;
+    if (path === "key") {
+      return (
+        <Drawing id={id} width={W} height={240} title="The key-path spend" desc={describe(true)}>
+          <KeyGlyph at={[cx - 15, 8]} role="public" />
+          <Value at={[cx + 24, 16]} text="OUTPUT KEY Q" size={8.5} cls="k-value--label" />
+          <Value at={[cx + 24, 28]} text={short(d.outputKeyHex)} size={9.5} />
+          <Value at={[cx, 96]} text="KEY PATH · ONE SIGNATURE" size={8.5} anchor="middle" cls="k-value--label" />
+          <Arrow d={`M${cx} 104 V38`} ids={ids} />
+          <rect class="k-cell k-mark--sig" x={cx - 105} y={110} width={210} height={34} />
+          <Value at={[cx, 131]} text={`signature · ${sig.length / 2} B`} size={10} anchor="middle" cls="k-value--on" />
+          <Value at={[cx, 174]} text={proof ? "NO INTERNAL KEY OR TREE IS REVEALED" : "THE WALLET KNOWS THE TREE; THE SPEND REVEALS NONE OF IT"} size={8} anchor="middle" cls="k-value--muted" />
+          <Value at={[cx, 214]} text="WITNESS · KEY PATH · 1 ITEM" size={8.5} anchor="middle" cls="k-value--label" />
+        </Drawing>
+      );
+    }
+
+    const siblings = [...leaf.path].reverse();
+    const rootY = 180;
+    const firstY = 236;
+    const leafY = firstY + siblings.length * 72;
+    const stripY = leafY + 76;
+    const H = stripY + 68;
+    return (
+      <Drawing id={id} width={W} height={H} title="The selected Taproot proof path" desc={describe(true)}>
+        <KeyGlyph at={[cx - 15, 8]} role="public" />
+        <Value at={[cx + 24, 16]} text="OUTPUT KEY Q" size={8.5} cls="k-value--label" />
+        <Value at={[cx + 24, 28]} text={short(d.outputKeyHex)} size={9.5} />
+        <Arrow d={`M${cx} 66 V34`} ids={ids} />
+        <Value at={[cx + 8, 54]} text="P + t·G" size={9} />
+        <Machine at={[cx - 28, 88]} w={64} d={34} h={26} label="TapTweak" sub="hash" role="hash" />
+        <KeyGlyph at={[14, 74]} role="public" />
+        <Value at={[14, 102]} text="INTERNAL KEY P" size={8.5} cls="k-value--label" />
+        <Value at={[14, 114]} text={short(d.internalKeyHex)} size={9.5} />
+        <Arrow d={`M48 80 H${cx - 62}`} ids={ids} />
+        <Arrow d={`M${cx} ${rootY - 24} V124`} ids={ids} />
+        <IsoBox at={[cx, rootY]} w={22} d={22} h={14} role="hash" cls="k-iso--dashed" />
+        <Value at={[cx + 24, rootY + 4]} text="MERKLE ROOT" size={8.5} cls="k-value--label" />
+        {siblings.map((sibling, index) => {
+          const y = firstY + index * 72;
+          const previousY = index === 0 ? rootY : firstY + (index - 1) * 72;
+          const sideX = index % 2 === 0 ? 8 : 222;
+          const pathIndex = siblings.length - 1 - index;
+          return (
+            <g>
+              <Arrow d={`M${cx} ${y - 24} V${previousY + 24}`} ids={ids} />
+              <IsoBox at={[cx, y]} w={22} d={22} h={14} role="hash" cls="k-iso--dashed" />
+              <Value at={[cx + (sideX === 8 ? 24 : -24), y + 4]} text="RECOMPUTED" size={8} anchor={sideX === 8 ? "start" : "end"} cls="k-value--label" />
+              <line class="k-leader k-dashed" x1={sideX === 8 ? sideX + 100 : sideX} y1={y} x2={cx} y2={y} />
+              <rect class="k-cell k-fill--hash" x={sideX} y={y - 18} width={100} height={38} />
+              <Value at={[sideX + 6, y - 3]} text={`SIBLING e${pathIndex}`} size={8} cls="k-value--label" />
+              <Value at={[sideX + 6, y + 11]} text={short(sibling)} size={8.5} cls="k-value--hash" />
+            </g>
+          );
+        })}
+        <Arrow d={`M${cx} ${leafY - 30} V${(siblings.length ? firstY + (siblings.length - 1) * 72 : rootY) + 24}`} ids={ids} />
+        <rect class="k-outline k-fill--plain k-cell--em" x={cx - 70} y={leafY - 28} width={140} height={55} />
+        <Value at={[cx - 62, leafY - 14]} text={leafName(leaf.id).toUpperCase()} size={8.5} cls="k-value--label" />
+        <Value at={[cx - 62, leafY - 1]} text={leaf.scriptReading.split(" ")[0]} size={8.5} />
+        <Value at={[cx - 62, leafY + 11]} text={leaf.scriptReading.split(" ").slice(1).join(" ")} size={8.5} />
+        <rect class="k-outline k-mark--plain" x={cx - 70} y={leafY + 13} width={140} height={14} />
+        <Value at={[cx, leafY + 23]} text="IN THE WITNESS" size={7.5} anchor="middle" cls="k-value--on" />
+        <Value at={[24, stripY - 8]} text={`WITNESS · SCRIPT PATH · ${leafName(leaf.id).toUpperCase()}`} size={8.5} cls="k-value--label" />
+        {witnessStrip(ids, 24, stripY, W - 48, scriptBytes, cbBytes, m, false)}
+      </Drawing>
+    );
+  };
+
   const strip = (label: string, name: string, options: Array<{ value: string; text: string; disabled?: boolean }>, current: string, set: (v: string) => void) => (
     <div class="atlas-strip" role="radiogroup" aria-label={label}>
       {options.map((o) => (
@@ -184,9 +284,24 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
           {strip("Show", "view", [{ value: "wallet", text: "Everything" }, { value: "proof", text: "Only the proof" }], view, (v) => setView(v as View))}
         </div>
       ) : (
-        <p class="atlas-hero__static">Static view: the script path for {leafName(start.leafId)}, with the whole tree shown. With JavaScript you can switch to the key path, pick another leaf, and show only what the spend reveals.</p>
+        <p class="atlas-hero__static">Static view: the script path for {leafName(start.leafId)}. With JavaScript you can switch to the key path, pick another leaf, and show only what the spend reveals.</p>
       )}
-      <Responsive wide={draw("wide")} narrow={draw("narrow")} />
+      <Responsive
+        wide={draw("wide")}
+        narrow={
+          <>
+            {drawFocused()}
+            {d.root && !keyOnlyView ? (
+              <details class="atlas-disclosure atlas-tap-full">
+                <summary>{proof ? "Inspect the proof layout" : "See the whole tree"}</summary>
+                <div class="atlas-table-wrap atlas-tap-full__scroll" tabIndex={0} role="region" aria-label="Complete Taproot tree, scrollable">
+                  {draw("tree")}
+                </div>
+              </details>
+            ) : null}
+          </>
+        }
+      />
       <p class="atlas-hero__status" aria-live="polite">{status}</p>
       <details class="atlas-disclosure">
         <summary>Exact values for this view</summary>
@@ -206,6 +321,7 @@ export function TaprootCommitment({ fixture, figureId, initial }: Props) {
           )}
         </dl>
       </details>
+      {hydrated ? <ShareView figureId={figureId} values={{ path, leaf: String(leafId), view }} /> : null}
       <p class="atlas-hero__source">BIP 341 wallet-test-vectors.json, {fixture.source.pointer}. Every hash, tweak and control block was recomputed and checked at build time.</p>
     </div>
   );

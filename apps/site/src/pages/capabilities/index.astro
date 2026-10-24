@@ -1,0 +1,54 @@
+---
+import Base from "../../layouts/Base.astro";
+import CapabilityPlate from "../../components/CapabilityPlate.astro";
+import { loadAtlasExperience } from "../../lib/atlas";
+
+const { capabilities } = loadAtlasExperience();
+const classLabel = {
+  secret: "Secret key material",
+  watch: "Public derivation",
+  public: "Public destination",
+  variable: "Context dependent",
+  coordination: "Coordination data",
+  proof: "Bound proof",
+};
+---
+<Base title="What am I holding? · BIP Atlas" description="A capability atlas for wallet artifacts: what each one can do, what it cannot establish, and what sharing it can reveal." current="capabilities">
+  <div class="manual-page atlas-flow capability-intro">
+    <p class="atlas-specimen">FIELD NOTE · C01</p>
+    <h1>What am I holding?</h1>
+    <p class="atlas-dek">A mnemonic, an xpub, a descriptor, an address and a PSBT can all look like wallet strings. Their capability boundaries are very different.</p>
+    <p>
+      This atlas compares what each artifact is made for, what it can do, what it cannot establish and what sharing it can reveal.
+      It is a conceptual guide, not a classifier. Never paste real wallet material into a website to identify it.
+    </p>
+    <aside class="capability-caveat" aria-label="Important scope limits">
+      <span>READ THE BOUNDARY, NOT JUST THE LABEL</span>
+      <p>Descriptors may contain private keys. PSBTs vary in completeness and contents; a final signed transaction is not an unsigned PSBT. A valid encoding never proves ownership or safety.</p>
+    </aside>
+    <nav class="capability-index" aria-label="Artifact index">
+      <p class="capability-index__label">THE SPECIMEN INDEX</p>
+      <ol>
+        {capabilities.artifacts.map((artifact, index) => (
+          <li>
+            <a href={`#${artifact.id}`} data-classification={artifact.classification}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{artifact.label}</strong>
+              <small>{classLabel[artifact.classification]}</small>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  </div>
+
+  <div class="manual-page capability-atlas">
+    {capabilities.artifacts.map((artifact, index) => <CapabilityPlate artifact={artifact} index={index} />)}
+  </div>
+
+  <div class="manual-page atlas-flow capability-outro">
+    <h2>Keep the distinctions</h2>
+    <p>Validity is not ownership. Public derivation is not zero privacy cost. A signing package is not a payment. A proof is not an identity.</p>
+    <p class="atlas-small">Every plate above leads into the chapter sections that carry the full explanation and its evidence. For relationships between mechanisms, open the <a href="/map/">relationship atlas</a>.</p>
+  </div>
+</Base>

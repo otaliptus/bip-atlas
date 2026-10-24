@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "compact-blocks",
+  "warning": "Synthetic teaching block, not a published compact-block vector and not a valid block to mine or broadcast. The two referenced transactions are public BIP 143 examples; the coinbase-shaped transaction is synthetic structure only.",
+  "fixtures": [
+    {
+      "id": "compact-all-local",
+      "kind": "compact-block",
+      "label": "All transactions local (synthetic)",
+      "origin": "synthetic",
+      "headerHex": "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f",
+      "nonceHex": "0807060504030201",
+      "transactions": [
+        { "id": "coinbase", "ref": "synthetic-coinbase", "prefilled": true },
+        { "id": "native", "ref": "native-p2wpkh", "prefilled": false },
+        { "id": "nested", "ref": "p2sh-p2wpkh", "prefilled": false }
+      ],
+      "available": ["coinbase", "native", "nested"],
+      "source": { "bip": 152, "line": 102, "quote": "# single-SHA256 hashing the block header with the nonce appended (in little-endian)" }
+    },
+    {
+      "id": "compact-one-missing",
+      "kind": "compact-block",
+      "label": "One transaction missing (synthetic)",
+      "origin": "synthetic",
+      "headerHex": "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f",
+      "nonceHex": "0807060504030201",
+      "transactions": [
+        { "id": "coinbase", "ref": "synthetic-coinbase", "prefilled": true },
+        { "id": "native", "ref": "native-p2wpkh", "prefilled": false },
+        { "id": "nested", "ref": "p2sh-p2wpkh", "prefilled": false }
+      ],
+      "available": ["coinbase", "nested"],
+      "source": { "bip": 152, "line": 129, "quote": "# After finding already-available transactions, nodes which do not have all transactions available to reconstruct the full block SHOULD request the missing transactions using a getblocktxn message." }
+    },
+    {
+      "id": "compact-collision",
+      "kind": "compact-block",
+      "label": "Injected short-ID ambiguity (synthetic)",
+      "origin": "synthetic",
+      "headerHex": "000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f",
+      "nonceHex": "0807060504030201",
+      "transactions": [
+        { "id": "coinbase", "ref": "synthetic-coinbase", "prefilled": true },
+        { "id": "native", "ref": "native-p2wpkh", "prefilled": false },
+        { "id": "nested", "ref": "p2sh-p2wpkh", "prefilled": false }
+      ],
+      "available": ["native", "nested"],
+      "collision": { "mode": "injected", "shortIdOf": "native", "alsoMatches": "nested" },
+      "source": { "bip": 152, "line": 142, "quote": "short transaction IDs are expected to occasionally collide, and that nodes MUST NOT be penalized for such collisions, wherever they appear." }
+    }
+  ],
+  "syntheticCoinbaseHex": "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff00ffffffff0100000000000000000000000000"
+}

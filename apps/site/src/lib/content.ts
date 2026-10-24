@@ -51,7 +51,7 @@ export interface Catalog {
 }
 
 /** Catalog files in order: the kit's original, then extensions kept separate because kit files are frozen. */
-export const CATALOG_FILES = ["catalog.json", "catalog-phase3.json"] as const;
+export const CATALOG_FILES = ["catalog.json", "catalog-phase3.json", "catalog-expansion.json"] as const;
 
 export function loadCatalog(): Catalog {
   const [base, ...extensions] = CATALOG_FILES.map((f) => readJson<Catalog>(f));

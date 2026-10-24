@@ -1,0 +1,1116 @@
+{
+ "labStates": 110,
+ "responsive": [
+  {
+   "chapter": "addresses",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "addrv2",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "block-filters",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "descriptors",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "hd-wallets",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "message-signing",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "mnemonics",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "musig2",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "p2sh",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "psbt",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "rbf",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "schnorr",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "segwit",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "silent-payments",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "taproot",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "tapscript",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "timelocks",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "v2-transport",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "version-bits",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "wallet-paths",
+   "width": 1440,
+   "viewport": 1440,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "addresses",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "addrv2",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "block-filters",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "descriptors",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "hd-wallets",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "message-signing",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "mnemonics",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "musig2",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "p2sh",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "psbt",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "rbf",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "schnorr",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "segwit",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "silent-payments",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "taproot",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "tapscript",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "timelocks",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "v2-transport",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "version-bits",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "wallet-paths",
+   "width": 1024,
+   "viewport": 1024,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": false
+  },
+  {
+   "chapter": "addresses",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "addrv2",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "block-filters",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "descriptors",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "hd-wallets",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "message-signing",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "mnemonics",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "musig2",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "p2sh",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "rbf",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "schnorr",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "segwit",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "silent-payments",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "taproot",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "tapscript",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "timelocks",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "v2-transport",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "version-bits",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "wallet-paths",
+   "width": 768,
+   "viewport": 768,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "addresses",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "addrv2",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "block-filters",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "descriptors",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "hd-wallets",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "message-signing",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "mnemonics",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "musig2",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "p2sh",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "rbf",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "schnorr",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "segwit",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "silent-payments",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "taproot",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "tapscript",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "timelocks",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "v2-transport",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "version-bits",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "wallet-paths",
+   "width": 390,
+   "viewport": 390,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "addresses",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "addrv2",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "block-filters",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "descriptors",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "hd-wallets",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "message-signing",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "mnemonics",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "musig2",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "p2sh",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "rbf",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "schnorr",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "segwit",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "silent-payments",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "taproot",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "tapscript",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "timelocks",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "v2-transport",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "version-bits",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  },
+  {
+   "chapter": "wallet-paths",
+   "width": 320,
+   "viewport": 320,
+   "duplicateIds": [],
+   "figureFirst": true,
+   "mobileToc": true
+  }
+ ],
+ "links": [
+  "/",
+  "/capabilities/",
+  "/learn/addresses/",
+  "/learn/addrv2/",
+  "/learn/block-filters/",
+  "/learn/compact-blocks/",
+  "/learn/descriptors/",
+  "/learn/hd-wallets/",
+  "/learn/message-signing/",
+  "/learn/mnemonics/",
+  "/learn/musig2/",
+  "/learn/p2sh/",
+  "/learn/payment-instructions/",
+  "/learn/psbt-extensions/",
+  "/learn/psbt/",
+  "/learn/rbf/",
+  "/learn/schnorr/",
+  "/learn/segwit/",
+  "/learn/silent-payments/",
+  "/learn/taproot/",
+  "/learn/tapscript/",
+  "/learn/timelocks/",
+  "/learn/v2-transport/",
+  "/learn/version-bits/",
+  "/learn/wallet-paths/",
+  "/map/",
+  "/methodology/"
+ ],
+ "aliases": [
+  21,
+  125,
+  152,
+  155,
+  321,
+  370,
+  371,
+  373
+ ],
+ "axe": [
+  {
+   "chapter": "psbt-extensions",
+   "width": 1440,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 1440,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 390,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "psbt-extensions",
+   "width": 390,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 1440,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 1440,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 390,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "compact-blocks",
+   "width": 390,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "rbf",
+   "width": 1440,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "rbf",
+   "width": 1440,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "rbf",
+   "width": 390,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "rbf",
+   "width": 390,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 1440,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 1440,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 390,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "payment-instructions",
+   "width": 390,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "addrv2",
+   "width": 1440,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "addrv2",
+   "width": 1440,
+   "js": false,
+   "violations": []
+  },
+  {
+   "chapter": "addrv2",
+   "width": 390,
+   "js": true,
+   "violations": []
+  },
+  {
+   "chapter": "addrv2",
+   "width": 390,
+   "js": false,
+   "violations": []
+  }
+ ],
+ "nojs": [
+  "psbt-extensions",
+  "compact-blocks",
+  "rbf",
+  "payment-instructions",
+  "addrv2"
+ ],
+ "failures": [],
+ "javascript": [
+  {
+   "name": "client.DFwnAVBq.js",
+   "gzipBytes": 1239
+  },
+  {
+   "name": "figures.ssCjMXrd.js",
+   "gzipBytes": 38460
+  },
+  {
+   "name": "hooks.module.B6Bl1fq7.js",
+   "gzipBytes": 1165
+  },
+  {
+   "name": "preact.module.BTqC4RwC.js",
+   "gzipBytes": 4477
+  },
+  {
+   "name": "signals.module.CmrmyFEi.js",
+   "gzipBytes": 3075
+  }
+ ]
+}

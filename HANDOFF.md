@@ -1,78 +1,69 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 17 October 2026, after the first-read editorial pass and BIP 322 address-validation fix. Deployment status is tracked by the latest `main` run in [GitHub Actions](https://github.com/otaliptus/bip-atlas/actions/workflows/deploy.yml). If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 24 October 2026, after the five-chapter expansion on `feat/atlas-experience`. Production still serves `main`; this branch is a preview, not an approved release. Read `CLAUDE.md` for the project rules and `review/expansion.md` for the review evidence. If asked to **continue**, work through **Next steps** rather than treating the branch as approved.
 
 ## State
 
-- **Reader goal:** the user wants a proper, engaging illustrated explainer, kept simple. Favor concise prose and static drawings with a few purposeful interactions. Do not add controls, modes or animations for their own sake. Focused teaching examples are intentional; complete BIP implementations and exhaustive test-case coverage are not the product goal.
-- **First-read pass:** all eighteen chapters give a specific action for the existing main demonstration. Several openings and endings are clearer; historical and algorithm details remain in disclosures. Extra example controls in Schnorr and MuSig2, and the example/calculation controls in Silent Payments, now sit in optional disclosures. Silent Payments starts with the result rather than every intermediate step. No new interactive figures, scenarios or illustrations were added. `chapterOrder` in `content/reading-policy.json` brings related chapters together; the contents and previous/next links use it. Figure IDs stay stable. See `review/first-read.md` for checks and screenshots.
-- **BIP 322 address validation:** `addressScript` now uses the address chapter's shared SegWit checks. Mixed-case addresses, invalid witness versions and invalid program lengths are rejected; valid all-uppercase addresses still work. Base58Check addresses must carry a version byte and a 20-byte hash. Three regression tests reproduced the old failures before the fix.
-- **Eighteen chapters are drafted.**
-  - All eighteen are merged to `main` and live: phases one and two (BIPs 39, 32, 141, 143, 173, 350, 174, 340, 341, 342) and phase three (PR #2).
-  - Phase three follows `catalog-phase3.json`. Chapters, with figure prefixes A9–A18:
+- **Reader goal:** a clear, engaging illustrated explainer, kept simple. Favor concise prose and static drawings with purposeful interactions. Focused teaching examples are intentional; complete protocol implementations and exhaustive coverage are not the product goal.
+- **Atlas experience:** the branch has five trails, searchable contents, a relationship map with an HTML ledger, a capability atlas, mobile figure-first chapters and a mobile TOC, and exact-state sharing for the address and Taproot labs. Earlier editorial history is in `review/first-read.md` and the other review records.
+- **Twenty-three chapters, 158 figures:** the original eighteen plus these five, all on `feat/atlas-experience`:
 
-    | Chapter | BIPs |
-    |---|---|
-    | `p2sh` | 16 |
-    | `timelocks` | 65/68/112/113 |
-    | `version-bits` | 9/8 |
-    | `wallet-paths` | 44/84/86 |
-    | `descriptors` | 380–386 |
-    | `musig2` | 327 |
-    | `silent-payments` | 352 |
-    | `block-filters` | 157/158 |
-    | `v2-transport` | 324 |
-    | `message-signing` | 322 |
+  | Chapter | Primary BIPs | Teaching focus |
+  |---|---|---|
+  | `psbt-extensions` | 370/371/373 | PSBTv2 construction, Taproot fields, actual MuSig2 signing rounds |
+  | `compact-blocks` | 152 | Short IDs, exact prefilled bytes, reconstruction and collision fallback |
+  | `rbf` | 125 | Explicit and inherited signaling, fee and eviction gates, receiver policy |
+  | `payment-instructions` | 21/321 | Modern payment instructions and local callback construction/refusal |
+  | `addrv2` | 155 | Variable-length peer addresses, network-specific rules and negotiation |
 
-  - Each chapter had an independent technical review before the editorial revisions. All eighteen are now `draft-unreviewed` after the first-read pass, pending a fresh review. No chapter is marked approved.
-  - **Editorial revisions:** fourteen chapters have tighter prose and fewer repeated figures. Detailed rules remain in disclosures, and all evidence claims remain cited. Records and screenshots: `review/editorial-four-chapters.md`, `review/editorial-descriptors.md`, and `review/editorial-nine-chapters.md`. These author and automated checks do not replace an independent technical review.
-  - **Clarity revision:** nine chapters now use more literal wording, shorter explanations, and clearer terminology. Timelocks has explicit condition lists. See `review/editorial-clarity.md` for scope and checks.
-  - **BIP relevance revision:** seven chapters have clearer proposal framing. Compact Filters leads with the wallet workflow; Timelocks separates script checks from block eligibility; P2SH centers its original spend; Schnorr leads with motivation. Titles and the BIP 322 opening were corrected. See `review/bip-relevance.md`. Editorial titles live in `content/title-policy.json`; the kit catalog remains frozen.
-- **Phase-three sources:**
-  - Snapshot: `sources/research-2026-10-01-phase3`, the same `bitcoin/bips` commit, including each BIP's auxiliary vector files.
-  - External pinned files: `sources/external/` holds Bitcoin Core v29.0 locktime cases (an excerpt; `tools/extract-locktime-cases.mjs` rebuilds it).
-  - Fixtures cite their source line; the build re-checks each quote.
-- **Scope limits worth knowing:**
-  - **ElligatorSwift** (BIP 324) is not implemented, because no audited JS library has it and the crypto rule forbids hand-rolling. The v2 model takes decoded X coordinates from the vectors and says so everywhere.
-  - **SipHash-2-4** (BIP 158) comes from the `siphash` npm package (Frank Denis). It is not `@noble`, but it is not hand-rolled either; it passes the SipHash paper vector, and SipHash is not security-critical here.
-  - **BIP 322 verification** runs every simple and full signature through a reviewed-opcode interpreter (`packages/models/src/interpreter.ts`, PR #3): all published simple and full vectors verify. Scripts or spend shapes outside its reviewed set (once a script is known to be the committed one) and proof-of-funds PSBTs report `inconclusive`.
-  - **Recorders** (`p2sh.ts`, `tapscript.ts`) and other narrow models throw a scope error for anything outside their reviewed set.
-- **Tests:** vitest covers models, figures, content contracts and prose-number tests (about 1,100), plus the kit's Python suite, all green. `pnpm check` and `pnpm build` are clean. Each model has a deliberate-breakage table in the review record.
-- **Visual checks:**
-  - Desktop 1440 and mobile 375 screenshots of every phase-three chapter and its key figure states are in `review/screenshots/phase3/`, with no horizontal overflow.
-  - axe-core (WCAG 2.1 A/AA + best practice) is clean at 1440, 375, no-JS, the worked tab and interactive states.
-  - Client JS is about 44.6 KB gzipped across `apps/site/dist/_astro/*.js`, under the 60 KB budget.
-  - Per-batch screenshots of the redrawn figures are in `review/screenshots/` (`pilot/`, `batch1/` … `batch4/`). They were taken on each batch branch, not retaken on the merged `main`.
-- **Illustration redesign (done):** every chapter is drawn in the Making Software-style kit. Spec: `docs/superpowers/specs/2026-10-02-illustration-redesign-design.md`. Decisions D1–D5: `review/decisions.md`.
-  - The kit is `packages/figures/src/kit/`; its placement CSS and palette tokens are in `atlas.css`. All 153 recipes are `drawing: true`.
-  - Records: `review/illustration-pilot-*.md` (Mnemonics, Taproot) and `review/illustration-batch1.md` … `batch4.md`, each with figure tables and an independent review.
-  - The worked-example tabs are gone (`packages/figures/src/worked/`, the tab code in `Plate.astro`, the `slot="worked"` block in `Figure.astro`, and their CSS). Their content lives on as static storyboard figures.
-  - `content/figure-policy.json`: 1 hero plus 3–12 static figures per chapter. Editorial revisions reduced the chapter-specific counts; `content/reading-policy.json` records their shorter prose targets.
-  - Two layered-hero patterns exist side by side: batch 1's `StateHero.tsx` + `heroLayers.ts` (a small Preact island that shows server-rendered layers) and batch 2's `heroStates.ts` + `HeroStates.astro` (every state pre-rendered, switched by an inline script, no island).
-- **Live:** https://bip-atlas.pages.dev serves `main`. `_headers` sends `X-Robots-Tag: noindex` until a chapter is signed off.
+- **Design:** the existing editorial system stays intact. Each new opening has a distinct mechanism motif. Flow, packet, comparison and gate layouts share the illustration kit. Long example lists use native selects; every lab state is pre-rendered, with a static no-JavaScript view and exact-value disclosures. MuSig2 uses a static three-stage sequence. No new Preact island or runtime dependency was added.
+- **Sources:** `sources/research-2026-10-01-expansion` pins the same `bitcoin/bips` commit `3a10b5b5f0a7586df8928d580a3009744ebb2079`, with 14 BIPs and 52 files. Payment instructions has 26 published URI cases and six callbacks. PSBT has 89 published cases with hex/Base64 checks and all three stages for the first four MuSig2 spends.
+- **Synthetic fixtures:** Compact Blocks uses two BIP 143 transactions and a synthetic coinbase-shaped transaction; ambiguity is injected, not claimed as a natural collision. RBF uses declared synthetic policy scenarios and eviction counts from the initial BIP 125 policy, not current-node conformance. Addr v2 uses byte patterns, not endpoints to contact.
+- **Source errata:** the extractor records three BIP 371 leading-`<` normalizations verified against Base64, and two upstream duplicate cases. BIP 373's duplicated output-participant bytes are not independent participant-key coverage. `tools/extract-expansion-vectors.mjs` replays deterministically and preserves case boundaries and signing stages.
+- **Independent review:** both technical reviewers checked the chapters, ledgers, models and sources, and their findings were applied. Follow-up checks resolved the collision fallback/request inconsistency and confirmed the fixture and callback fixes. These reviews do not constitute human approval. All 23 chapters remain `draft-unreviewed`, and `_headers` still sends `X-Robots-Tag: noindex`.
+
+## Verification
+
+- `pnpm check` passes.
+- `pnpm test` passes: **1,385 Vitest tests and one optional pre-existing skip**, plus **36 Python tests**.
+- `pnpm build` produces **68 static pages**. The existing third-party Rollup annotation warning remains.
+- Client JavaScript is **47.28 KiB gzipped** across the five emitted files, below the 60 KB budget. The new labs add no Preact chunk.
+- `review/expansion.md` records the complete browser matrix, source/link checks and accessibility results. Selected screenshots are in `review/screenshots/expansion/`; the cover is `docs/images/cover.png`.
+- A live VoiceOver/NVDA session has **not** been performed. Automated axe and keyboard checks are not a substitute for one.
+
+## Scope limits worth knowing
+
+- **ElligatorSwift** (BIP 324) is not implemented because no audited JS library in the project provides it. The v2 model uses decoded public X coordinates from published vectors. SipHash-2-4 comes from the existing `siphash` package; hashing, curves and ciphers otherwise use `@noble/*`.
+- **BIP 322** verification is deliberately partial: reviewed scripts and spend shapes only. Unsupported committed scripts/spend shapes and proof-of-funds PSBTs can be `inconclusive`.
+- **PSBT extensions** validate map structure, field inclusion/exclusion, selected encodings and locktimes, not every signature or every future extension. They do not sign, finalize, broadcast or declare a transaction safe to sign. Proprietary and unknown records are not semantic approval.
+- **Compact Blocks** is a synthetic reconstruction model, not block-header/transaction validation or a live relay implementation. Injected ambiguity does not produce a missing-transaction request; full-block fallback is explicit.
+- **RBF** separates ancestry from the transactions actually replaced. Passing the teaching gates does not guarantee relay, replacement or confirmation.
+- **Payment instructions** uses only public, deliberately bogus examples. Only the three local placeholder application schemes in published callbacks are supported; unknown and browser schemes are refused rather than probed. Nothing decodes Lightning invoices, launches an app, sends a payment or makes an external callback.
+- **Addr v2** checks packet structure and selected reserved ranges, not address-book trust, endpoint ownership or reachability. It never contacts peers.
 
 ## Next steps
 
-1. **The user reviews the redrawn chapters** on the live site (or a branch preview) and signs off the look. No human has approved any figure beyond the two pilots.
-2. **Optional: fold the two layered-hero patterns into one.** `StateHero.tsx`/`heroLayers.ts` (batch 1) and `heroStates.ts`/`HeroStates.astro` (batch 2) solve the same problem; the pre-rendered one costs no island JS. Moving batch 1's heroes onto it would remove an island chunk. Keep every hero's states, accessible names, `aria-live` status and no-JS state identical, and retake that batch's screenshots.
-3. **Retake screenshots on `main`** (1440 / 768 / 375, no-JS heroes) and re-run `tools/a11y-tablet-audit.mjs`; the batch screenshots predate the merges.
-4. **Open items:**
-   - a live VoiceOver/NVDA session;
-   - BIP 324 ElligatorSwift, still blocked: `@noble/curves` 2.4.0 has none;
-   - milestone 3 (generation from the ledger), only after sign-off.
+1. **Human review of all 23 chapters** on the branch preview. Do not merge or call the work approved merely because tests and independent review passed.
+2. **Optional:** consolidate the older `StateHero.tsx`/`heroLayers.ts` heroes onto the pre-rendered `HeroStates.astro` pattern, preserving every state, accessible name and no-JS view. The expansion already uses that pattern.
+3. **Run a live screen-reader session** and retake the relevant captures after any future changes.
+4. **Only after sign-off:** set `reviewState: "approved"` and remove `noindex`. Do not change these settings as part of a feature deployment.
 
 ## Things a cloud session should know
 
-- **Setup:** `pnpm install` (pnpm 9 via corepack, Node ≥ 20), plus Python 3 for `pnpm test`.
-- **`pnpm check` coverage:** it typechecks the packages, not `apps/site/src/lib/derive.ts`. The build catches errors there, so run `pnpm build` too.
-- **Visual checks:**
-  - Serve the build first (launch config `site-preview`, port 4322), then run `tools/screenshots.mjs` and `tools/a11y-tablet-audit.mjs`. Locally, a cached Playwright with Chromium lives at `~/.npm/_npx/b234c773f454f454/node_modules/playwright/index.mjs` (set `PLAYWRIGHT_MODULE`); do not run `playwright install`.
-  - Islands hydrate on `client:visible`: scroll the figure in and wait for `[data-hydrated=true]` before driving it. Pre-rendered heroes (`HeroStates.astro`) set `data-hydrated="true"` from their inline script.
-  - `{"label": …}` actions match accessible names by substring. Pick unique text, because a `<section aria-label>` can match too.
-- **CSV sources:** some pinned CSVs have CRLF line endings. Split on `/\r?\n/`, or the last column's name keeps a `\r` and its checks are silently skipped. This happened once with BIP 324.
-- **Out of scope unless the user asks:** don't remove `noindex`, mark chapters `approved`, edit the kit originals, or add input fields for real keys, phrases, addresses, PSBTs or messages to sign.
+- **Setup:** `pnpm install` with pnpm 9 and Node ≥ 20; Python 3 for `pnpm test`.
+- **Always run:** `pnpm check && pnpm test && pnpm build`. `pnpm check` does not cover `apps/site/src/lib/derive.ts`; the build catches errors there.
+- **Production checks:** `pnpm preview` serves `apps/site/dist` on port 4322. Set `PLAYWRIGHT_MODULE=/home/taliwork/kimi-test/.browser-tools/playwright-system.mjs` and `AXE_PATH=/home/taliwork/kimi-test/.browser-tools/node_modules/axe-core/axe.min.js`. Do not install a new browser or runtime dependency.
+- **Browser tools:** `tools/screenshots.mjs` captures named figure states; `tools/a11y-tablet-audit.mjs <outdir> [chapter ...]` covers tablet layout, keyboard focus and axe. Islands hydrate on `client:visible`; wait for `[data-hydrated=true]` before driving them. Pre-rendered heroes use inline scripts, not islands.
+- **Fixtures:** `node tools/extract-expansion-vectors.mjs` rebuilds the payment and PSBT fixtures from the pinned snapshot. Some other pinned CSVs use CRLF, so split on `/\r?\n/`.
+- **Boundaries:** don't remove `noindex`, mark chapters `approved`, edit kit originals, or add real keys, phrases, addresses, messages, PSBT uploads, signing, broadcast or application execution.
 
-## User actions pending
+## Deployment
 
-- If deploys are still skipped, add a Cloudflare API token with **Account → Cloudflare Pages → Edit** as the repo secret `CLOUDFLARE_API_TOKEN`. `CLOUDFLARE_ACCOUNT_ID` is already set.
-- Sign off chapters when ready: set `reviewState: "approved"` and drop `noindex`.
+- CI (`.github/workflows/deploy.yml`) runs install, typecheck, tests and build on `main` pushes, pull requests and manual runs. With `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, `main` goes to production and other refs to previews.
+- For an explicit branch preview, use the repository's pinned Wrangler after the checks above:
+
+  ```sh
+  pnpm exec wrangler pages deploy apps/site/dist --project-name bip-atlas --branch=feat/atlas-experience
+  ```
+
+- Do not force-deploy or replace `main`. Production remains https://bip-atlas.pages.dev until an approved merge. The user reviews sign-off and any production changes.

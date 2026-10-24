@@ -92,13 +92,22 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
 
     <div class="manual-reader atlas-reader">
       <aside class="manual-toc atlas-toc" aria-label="On this page">
-        <nav>
+        <nav class="atlas-toc__desktop">
           <p class="atlas-toc__label">In this chapter</p>
           <ol>
             {pub.sections.map((s) => <li><a href={`#${s.id}`}>{s.heading}</a></li>)}
             <li><a href="#evidence">Evidence</a></li>
           </ol>
         </nav>
+        <details class="atlas-details atlas-toc__mobile">
+          <summary>In this chapter <span class="atlas-toc__mobile-count">{pub.sections.length + 1} links</span></summary>
+          <div class="atlas-details__body">
+            <ol>
+              {pub.sections.map((s) => <li><a href={`#${s.id}`}>{s.heading}</a></li>)}
+              <li><a href="#evidence">Evidence</a></li>
+            </ol>
+          </div>
+        </details>
       </aside>
       <div class="manual-reader-main">
         {pub.sections.map((section) => (
@@ -122,7 +131,7 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
                 <p>
                   <span class="atlas-backrefs">
                     {(citations.get(claim.id) ?? []).map((c, k, all) => (
-                      <a href={`#${c.anchor}`} aria-label={`Back to the text: ${c.where}${all.length > 1 ? `, citation ${k + 1} of ${all.length}` : ""}`} title={c.where}>
+                      <a href={`#${c.anchor}`} aria-label={`${all.length === 1 ? "↩" : k === 0 ? `↩ ${String.fromCharCode(97 + k)}` : String.fromCharCode(97 + k)} Back to the text: ${c.where}${all.length > 1 ? `, citation ${k + 1} of ${all.length}` : ""}`} title={c.where}>
                         {all.length === 1 ? "↩" : k === 0 ? `↩ ${String.fromCharCode(97 + k)}` : String.fromCharCode(97 + k)}
                       </a>
                     ))}

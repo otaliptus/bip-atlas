@@ -2,6 +2,8 @@
  * Registered figure recipes. A publication may only name recipes listed
  * here; each recipe's component is trusted code reviewed with this repo.
  */
+import { EXPANSION_RECIPES } from "./expansion/recipes";
+
 export interface RecipeDefinition {
   id: string;
   description: string;
@@ -1560,6 +1562,7 @@ export const RECIPES: readonly RecipeDefinition[] = [
     fixtureKind: "bip322-verdicts",
     drawing: true,
   },
+  ...EXPANSION_RECIPES,
 ];
 
 export const RECIPE_MAP = /* @__PURE__ */ new Map(/* @__PURE__ */ RECIPES.map((r) => [r.id, r]));

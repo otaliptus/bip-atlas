@@ -1,52 +1,152 @@
 ---
 import Base from "../layouts/Base.astro";
+import { walkBlocks } from "@bip-atlas/publication";
 import { listChapterIds, loadCatalog, loadChapter, shortCommit } from "../lib/content";
+import { loadAtlasExperience } from "../lib/atlas";
+import { formatBips } from "../lib/format";
 
 const catalog = loadCatalog();
+const { atlas } = loadAtlasExperience();
 const available = new Map(listChapterIds().map((id) => [id, loadChapter(id)]));
 const chapters = [...catalog.chapters].sort((a, b) => a.readingOrder - b.readingOrder);
+const chapterById = new Map(chapters.map((chapter) => [chapter.id, chapter]));
+const nodeById = new Map(atlas.nodes.map((node) => [node.chapter, node]));
+const figuresFor = (id: string) => [...walkBlocks(available.get(id)!.publication)].filter(({ block }) => block.type === "figure").length;
+const totalFigures = chapters.reduce((total, chapter) => total + figuresFor(chapter.id), 0);
+const sourceCommit = shortCommit(available.get(chapters[0].id)!.lock.commit);
+const draftCount = [...available.values()].filter((chapter) => chapter.publication.reviewState !== "approved").length;
+const reviewLabel = (id: string) => {
+  const state = available.get(id)!.publication.reviewState;
+  return state === "approved" ? "Reviewed" : state === "in-review" ? "Review applied" : "Draft";
+};
 ---
 <Base title="BIP Atlas" description="An illustrated field guide to selected Bitcoin Improvement Proposals." current="contents">
   <div class="manual-page atlas-cover">
+    <h1 class="manual-sr-only">BIP Atlas</h1>
     <div class="atlas-cover__intro">
       <p class="atlas-lede">
-        A field guide to a few Bitcoin Improvement Proposals: what each one changes, why, and where its explanation
-        deliberately stops. Read the idea, try the mechanism, inspect the evidence.
-        Follow the chapters from wallet backups to spending and network upgrades, or pick a question below.
-        Heavily inspired by <a href="https://makingsoftware.com">makingsoftware.com</a>.
+        A field guide to selected Bitcoin Improvement Proposals. Read the idea, try the mechanism, inspect the evidence.
+        Choose a trail below, or see how the mechanisms meet.
       </p>
+      <div class="atlas-cover__links">
+        <a href="/map/">
+          <span class="atlas-cover__link-code">MAP 01</span>
+          <span class="atlas-cover__link-title">How the mechanisms meet</span>
+          <span class="atlas-cover__link-dek">Open the relationship atlas →</span>
+        </a>
+        <a href="/capabilities/">
+          <span class="atlas-cover__link-code">FIELD NOTE</span>
+          <span class="atlas-cover__link-title">What am I holding?</span>
+          <span class="atlas-cover__link-dek">A capability atlas for wallet artifacts →</span>
+        </a>
+      </div>
       <p class="atlas-small">
-        Explanations are written independently from the proposals, pinned to an exact revision of
-        <code>bitcoin/bips</code>, and checked against the proposals’ own test vectors. This is an early draft:
-        {available.size} of {chapters.length} chapters exist.
+        {available.size} chapters · {totalFigures} illustrated figures · source <code>{sourceCommit}</code>.
+        Every explanation links to pinned source lines and uses public fixtures.
+        {draftCount > 0 ? ` ${draftCount} chapters await fresh review or formal sign-off.` : " Every chapter has formal sign-off."}
       </p>
+      <p class="atlas-small atlas-cover__credit">Heavily inspired by <a href="https://makingsoftware.com">makingsoftware.com</a>.</p>
     </div>
-    <ol class="atlas-contents" aria-label="Chapters, in reading order">
-      {chapters.map((ch, index) => {
-        const loaded = available.get(ch.id);
-        return (
-          <li class="atlas-contents__item" data-available={loaded ? "true" : "false"}>
-            <a class="atlas-contents__link" href={loaded ? `/learn/${ch.id}/` : undefined} aria-labelledby={`chapter-${ch.id}-title`}>
-              {loaded && <img
-                class="atlas-contents__thumbnail"
-                src={`/thumbnails/${ch.id}.png`}
-                alt=""
-                width="352"
-                height="264"
-                loading={index < 4 ? "eager" : "lazy"}
-                decoding="async"
-              />}
-              <span class="atlas-contents__heading">
-                <span class="atlas-contents__bips">BIP {ch.primaryBips.map((n) => String(n).padStart(4, "0")).join(" + ")}</span>
-                <span class="atlas-contents__title" id={`chapter-${ch.id}-title`}>{ch.questionTitle}</span>
-                <span class="atlas-contents__state">
-                  {loaded ? `Draft · source ${shortCommit(loaded.lock.commit)} · ${loaded.publication.reviewState === "in-review" ? "technical review applied" : loaded.publication.reviewState === "approved" ? "signed off" : "not yet reviewed"}` : `Not yet written · phase ${ch.phase}`}
-                </span>
-              </span>
-            </a>
-          </li>
-        );
-      })}
-    </ol>
+
+    <div class="atlas-index" data-atlas-index>
+      <div class="atlas-search" data-atlas-search hidden>
+        <label for="atlas-query">Find a BIP, mechanism or question</label>
+        <div class="atlas-search__field">
+          <input id="atlas-query" type="search" placeholder="Try “341”, “xpub” or “checksum”" autocomplete="off" spellcheck="false" />
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+        <p class="atlas-search__count" data-search-count aria-live="polite">{chapters.length} chapters</p>
+      </div>
+
+      <div class="atlas-trails">
+        {atlas.trails.map((trail, trailIndex) => (
+          <section class="atlas-trail" id={`trail-${trail.id}`} data-trail aria-labelledby={`trail-${trail.id}-title`}>
+            <header class="atlas-trail__head">
+              <div>
+                <p class="atlas-trail__number">TRAIL {String(trailIndex + 1).padStart(2, "0")}</p>
+                <h2 id={`trail-${trail.id}-title`}>{trail.title}</h2>
+                <p>{trail.dek}</p>
+              </div>
+              <span class="atlas-trail__count">{trail.chapters.length} chapters</span>
+            </header>
+            <ol class="atlas-contents" aria-label={`${trail.title} chapters`}>
+              {trail.chapters.map((id) => {
+                const ch = chapterById.get(id)!;
+                const loaded = available.get(id)!;
+                const node = nodeById.get(id)!;
+                const search = [
+                  id,
+                  ch.questionTitle,
+                  loaded.publication.dek,
+                  trail.title,
+                  node.label,
+                  ...node.aliases,
+                  ...ch.primaryBips.flatMap((n) => [String(n), String(n).padStart(4, "0"), `bip${n}`, `bip ${n}`, `bip ${String(n).padStart(4, "0")}`]),
+                ].join(" ").toLowerCase().replace(/\s+/g, " ");
+                return (
+                  <li class="atlas-contents__item" data-chapter-card data-search={search}>
+                    <a class="atlas-contents__link" href={`/learn/${id}/`}>
+                      <img
+                        class="atlas-contents__thumbnail"
+                        src={`/thumbnails/${id}.png`}
+                        alt=""
+                        width="352"
+                        height="264"
+                        loading={ch.readingOrder <= 4 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
+                      <span class="atlas-contents__heading">
+                        <span class="atlas-contents__bips"><span class="atlas-contents__number">CH. {String(ch.readingOrder).padStart(2, "0")}</span> {formatBips(ch.primaryBips)}</span>
+                        <span class="atlas-contents__title" id={`chapter-${id}-title`}>{ch.questionTitle}</span>
+                        <span class="atlas-contents__state">{figuresFor(id)} figures · Interactive lab · {reviewLabel(id)}</span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ))}
+      </div>
+      <div class="atlas-empty" data-search-empty hidden>
+        <p>No chapter matches that search.</p>
+        <button type="button" class="manual-plate-button" data-search-clear>Clear search</button>
+      </div>
+    </div>
   </div>
+
+  <script>
+    const index = document.querySelector<HTMLElement>("[data-atlas-index]");
+    const controls = document.querySelector<HTMLElement>("[data-atlas-search]");
+    if (index && controls) {
+      const input = controls.querySelector<HTMLInputElement>("input")!;
+      const count = controls.querySelector<HTMLElement>("[data-search-count]")!;
+      const empty = index.querySelector<HTMLElement>("[data-search-empty]")!;
+      const clear = empty.querySelector<HTMLButtonElement>("button")!;
+      const cards = [...index.querySelectorAll<HTMLElement>("[data-chapter-card]")];
+      const trails = [...index.querySelectorAll<HTMLElement>("[data-trail]")];
+      const update = () => {
+        const query = input.value.toLowerCase().trim().replace(/\s+/g, " ");
+        let matches = 0;
+        for (const card of cards) {
+          const show = card.dataset.search!.includes(query);
+          card.hidden = !show;
+          if (show) matches += 1;
+        }
+        for (const trail of trails) trail.hidden = ![...trail.querySelectorAll<HTMLElement>("[data-chapter-card]")].some((card) => !card.hidden);
+        empty.hidden = matches !== 0;
+        count.textContent = query ? `${matches} ${matches === 1 ? "chapter" : "chapters"} found` : `${cards.length} chapters`;
+      };
+      input.addEventListener("input", update);
+      clear.addEventListener("click", () => { input.value = ""; update(); input.focus(); });
+      document.addEventListener("keydown", (event) => {
+        const target = event.target as HTMLElement | null;
+        if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !target?.closest("input, textarea, select, [contenteditable=true]")) {
+          event.preventDefault();
+          input.focus();
+        }
+      });
+      controls.hidden = false;
+    }
+  </script>
 </Base>

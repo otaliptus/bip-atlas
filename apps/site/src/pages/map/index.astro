@@ -1,0 +1,62 @@
+---
+import Base from "../../layouts/Base.astro";
+import AtlasMap from "../../components/AtlasMap.astro";
+import { loadAtlasExperience } from "../../lib/atlas";
+import { loadCatalog } from "../../lib/content";
+
+const { atlas } = loadAtlasExperience();
+const catalog = loadCatalog();
+const chapters = new Map(catalog.chapters.map((chapter) => [chapter.id, {
+  title: chapter.questionTitle,
+  bips: chapter.primaryBips,
+  readingOrder: chapter.readingOrder,
+}]));
+const trailFor = new Map(atlas.trails.flatMap((trail) => trail.chapters.map((chapter) => [chapter, trail])));
+---
+<Base title="How the mechanisms meet · BIP Atlas" description="A relationship atlas for the wallet, transaction, signature, privacy and network mechanisms covered by BIP Atlas." current="map">
+  <div class="manual-page atlas-flow atlas-map-page">
+    <p class="atlas-specimen">THE ATLAS · A00</p>
+    <h1>Where do the mechanisms meet?</h1>
+    <p class="atlas-dek">A BIP rarely lives alone. Follow the object it consumes, the rule it supplies, or the later mechanism that reuses it.</p>
+    <p>
+      This is a map of explanations, not a chronology or a claim that every chapter is a prerequisite.
+      Follow a solid arrow when one mechanism supplies something the next chapter uses. Follow a dashed arrow for a useful comparison.
+    </p>
+  </div>
+  <div class="manual-page atlas-map-page__plate">
+    <AtlasMap atlas={atlas} chapters={chapters} />
+  </div>
+  <div class="manual-page atlas-map-page__ledger">
+    <section class="atlas-flow" aria-labelledby="relationship-ledger-title">
+      <h2 id="relationship-ledger-title">The relationship ledger</h2>
+      <p class="atlas-small">Every line on the plate, written out. “Builds on” describes a mechanism dependency; “Related” is a comparison, not a required reading order.</p>
+      <ol class="atlas-relations">
+        {atlas.relationships.map((edge, index) => (
+          <li>
+            <div class="atlas-relations__route">
+              <span class="atlas-relations__number">{String(index + 1).padStart(2, "0")}</span>
+              <span class="atlas-tag" data-kind={edge.kind}>{edge.kind === "dependency" ? "Builds on" : "Related"}</span>
+              <a href={`/learn/${edge.from}/`}>{atlas.nodes.find((node) => node.chapter === edge.from)!.label}</a>
+              <span class="atlas-relations__arrow" aria-hidden="true">→</span>
+              <a href={`/learn/${edge.to}/`}>{atlas.nodes.find((node) => node.chapter === edge.to)!.label}</a>
+            </div>
+            <h3>{edge.label}</h3>
+            <p>{edge.reason}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+    <section class="atlas-flow atlas-map-trails" aria-labelledby="map-trails-title">
+      <h2 id="map-trails-title">Prefer a guided route?</h2>
+      <div class="atlas-map-trails__links">
+        {atlas.trails.map((trail, index) => (
+          <a href={`/#trail-${trail.id}`}>
+            <span>TRAIL {String(index + 1).padStart(2, "0")}</span>
+            <strong>{trail.title}</strong>
+            <small>{trailFor.get(trail.chapters[0])!.dek}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Base>

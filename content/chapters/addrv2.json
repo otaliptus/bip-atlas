@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "addrv2",
+  "primaryBips": [155],
+  "specimenLabel": "BIP 0155",
+  "title": "How do nodes share addresses that do not fit in 16 bytes?",
+  "dek": "Addr v2 replaces the fixed 16-byte IP field with a network ID and a variable-length address. Peers can gossip Tor v3, I2P, CJDNS and Yggdrasil endpoints without pretending every address has the same shape.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01-expansion",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The legacy `addr` message has 16 bytes for an IP address. Tor v3 needs 32 bytes for its public key, and I2P also needs 32. BIP 155 introduces `addrv2`: each entry carries a network ID, an address length and the address itself, so those endpoints no longer have to be squeezed into IPv6.",
+        "claims": ["motivation", "entry-shape"]
+      },
+      {
+        "type": "paragraph",
+        "text": "The examples in this chapter are synthetic single-entry packets. Their addresses are byte patterns for reading the format and its checks, not endpoints to contact. A packet can decode perfectly and still be refused for a deprecated form, an unknown network, a wrong length or a reserved range.",
+        "claims": ["synthetic-fixture", "length-rule", "scope-reachability"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A23.1",
+      "recipe": "addrv2-packet.v1",
+      "title": "One addrv2 entry as a byte packet",
+      "fixtures": ["addr-torv3"],
+      "caption": "Time, CompactSize services, network ID, address length, 32 address bytes and port. The synthetic key is a layout example, not a real hidden service.",
+      "claims": ["entry-shape", "synthetic-fixture", "torv3-encoding"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "packet",
+      "heading": "One entry, several kinds of field",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Each entry starts with a 32-bit little-endian time and a CompactSize services field. Then comes a one-byte network ID, a CompactSize address length, the address bytes and a big-endian port. A message can hold up to 1,000 entries; one address can be at most 512 bytes.",
+          "claims": ["entry-shape", "count-limit", "size-limit"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Time records when the node was last seen connected, services describe its capabilities as a 64-bit bit field, and port is the network port, or zero when irrelevant. Those fields sit beside the address but answer different questions. The model checks their integer ranges and encoding; that is not the same as proving the advertised services or last-seen time are honest.",
+          "claims": ["entry-shape", "model-validation", "scope-reachability"]
+        },
+        {
+          "type": "paragraph",
+          "text": "CompactSize lets a small services value occupy fewer bytes than a fixed eight-byte field. This teaching decoder requires the shortest encoding and rejects truncated fields and trailing bytes before interpreting an address. Those are explicit packet-validation choices, separate from whether a peer is useful or reachable.",
+          "claims": ["compact-size", "model-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.2",
+          "recipe": "addrv2-networks.v1",
+          "title": "A registry of exact lengths",
+          "fixtures": ["addr-ipv4", "addr-ipv6", "addr-torv3", "addr-i2p", "addr-cjdns", "addr-yggdrasil"],
+          "caption": "IPv4 and IPv6 have fixed sizes too, but Tor v2, Tor v3, I2P, CJDNS and Yggdrasil each have their own. The network ID tells the decoder which length to expect.",
+          "claims": ["network-table", "length-rule"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "networks",
+      "heading": "Network ID decides the reading",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 155 reserves IPv4 (4 bytes), IPv6 (16), Tor v2 (10), Tor v3 (32), I2P (32), CJDNS (16) and Yggdrasil (16). A different length for that ID is meaningless and should be rejected. Unknown IDs should not be gossiped because the receiver cannot validate them; this teaching decoder reports them as unsupported rather than inventing a length.",
+          "claims": ["network-table", "length-rule", "unknown-network", "model-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Tor v2 is a special case: its 10-byte form still has a reserved ID, but it is no longer operational. Clients must not gossip or relay it and must ignore it on receive. Tor v3’s 32-byte public key, by contrast, is enough to reconstruct the hidden-service address.",
+          "claims": ["torv2-deprecated", "torv3-encoding"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Tor v3 and I2P both use 32 address bytes, but those bytes are not interchangeable. Tor v3 carries the public key; the known version and checksum process allow the onion address to be reconstructed. I2P carries the decoded SHA-256 hash represented by the 52-character base32 name before `.b32.i2p`. The network ID preserves that distinction even when the length is identical.",
+          "claims": ["torv3-encoding", "i2p-encoding", "network-table"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.3",
+          "recipe": "addrv2-reserved.v1",
+          "title": "Deprecated and embedded forms",
+          "fixtures": ["addr-torv2", "addr-reserved-ipv6"],
+          "caption": "Tor v2 is ignored despite its reserved ID. An IPv4-in-IPv6 address is ignored as IPv6 because IPv4 already has a canonical encoding of its own.",
+          "claims": ["torv2-deprecated", "reserved-ranges"],
+          "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A23.4",
+          "recipe": "addrv2-packet-lab.v1",
+          "title": "Packet and validation lab",
+          "fixtures": ["addr-ipv4", "addr-ipv6", "addr-torv2", "addr-torv3", "addr-i2p", "addr-cjdns", "addr-yggdrasil", "addr-unknown", "addr-wrong-length", "addr-reserved-ipv6"],
+          "caption": "Choose a network fixture and compare its packet fields with its outcome: accept, ignore or reject. Every entry is synthetic and no connection is attempted.",
+          "claims": ["network-table", "length-rule", "torv2-deprecated", "reserved-ranges", "synthetic-fixture"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "negotiation",
+      "heading": "Ask for the new message at the right time",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "`sendaddrv2` means ‘send me addrv2’. It must be sent only in response to the peer’s `version` message and before `verack`. Sending or not sending it does not express a preference about unrequested address messages.",
+          "claims": ["sendaddrv2"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Older peers that never send `sendaddrv2` keep receiving legacy `addr` messages. Any address types introduced by addrv2 are simply omitted there. The new format is negotiated, not imposed on every peer.",
+          "claims": ["legacy-fallback"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Addr v2 also separates knowing an address from currently using that network. Clients are recommended to gossip addresses from all known networks even when they are not connected to some of them. That can help multi-homed nodes distribute every way to reach them, and makes it harder for an observer to infer a node’s active networks from its address gossip alone.",
+          "claims": ["multi-homed", "scope-reachability"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.5",
+          "recipe": "addrv2-negotiation.v1",
+          "title": "version → sendaddrv2 → verack",
+          "fixtures": ["addr-torv3"],
+          "caption": "The capability signal sits between version and verack. The lab uses one correctly placed signal and tests its own early, late and duplicate sequences.",
+          "claims": ["sendaddrv2", "legacy-fallback", "model-validation"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "reserved",
+      "heading": "Canonical addresses, not duplicates",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Some IPv6 ranges embed another network. IPv4-in-IPv6 must not be sent with the IPv6 network ID; the IPv4 form is canonical. OnionCat-wrapped Tor addresses are ignored for the same reason: treating the embedded form and the native form as different peers would duplicate an identity.",
+          "claims": ["reserved-ranges"]
+        },
+        {
+          "type": "paragraph",
+          "text": "CJDNS and Yggdrasil also reuse the 16-byte IPv6 shape, but each has a reserved range and its own network ID. CJDNS belongs to `fc00::/8`; Yggdrasil belongs to `0200::/7`. The model checks those prefixes instead of accepting any 16-byte value for either network. Equal lengths do not make the networks interchangeable.",
+          "claims": ["cjdns-encoding", "yggdrasil-encoding", "model-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "These checks keep representations canonical and meanings distinct. They do not establish that an address is globally routed, that an overlay network will accept it, or that the endpoint belongs to the sender. An address can pass a length or range check while remaining unusable in practice; decoding is only the first layer of validation.",
+          "claims": ["reserved-ranges", "scope-reachability", "model-validation"]
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "Where decoding stops",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The message and address limits are concrete. One message can hold up to 1,000 entries; more should be rejected. One address can be at most 512 bytes, regardless of network ID. The model enforces both boundaries in its packet encoder and parser: 1,000 entries or 512 address bytes fit the format, while 1,001 or 513 do not.",
+          "claims": ["count-limit", "size-limit", "model-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Unknown networks are not an escape hatch for inventing new address shapes. Future IDs must be reserved in another BIP document, and clients should not gossip unknown addresses they cannot validate. A decoder can expose an unrecognized network ID and its bytes, but that does not give the bytes a known meaning or make them safe to relay. This lab marks that case unsupported rather than guessing a new format.",
+          "claims": ["unknown-network", "model-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "A correct packet says nothing about whether an endpoint exists, is reachable or belongs to the peer that sent it. The model validates structure and a small set of reserved ranges; it does not perform address-book validation or contact anyone. Its accept, ignore and reject labels describe this teaching evaluation, not a promise to connect or a complete policy for every node.",
+          "claims": ["scope-reachability", "model-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.6",
+          "recipe": "addrv2-limits.v1",
+          "title": "Decodable does not mean reachable",
+          "fixtures": ["addr-unknown"],
+          "caption": "The format has count and size limits, unknown-network handling and no reachability guarantee. This is the boundary between parsing and contact.",
+          "claims": ["count-limit", "size-limit", "scope-reachability"],
+          "layout": "prose"
+        }
+      ]
+    }
+  ]
+}

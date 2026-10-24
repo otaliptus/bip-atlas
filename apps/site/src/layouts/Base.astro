@@ -4,7 +4,7 @@ import "../styles/atlas.css";
 interface Props {
   title: string;
   description: string;
-  current?: "contents" | "methodology" | "chapter";
+  current?: "contents" | "map" | "capabilities" | "methodology" | "chapter";
 }
 const { title, description, current } = Astro.props;
 ---
@@ -24,6 +24,8 @@ const { title, description, current } = Astro.props;
       <a class="manual-wordmark" href="/" aria-label="BIP Atlas, contents">BIP ATLAS</a>
       <nav class="atlas-nav" aria-label="Site">
         <a href="/" aria-current={current === "contents" ? "page" : undefined}>Contents</a>
+        <a href="/map/" aria-current={current === "map" ? "page" : undefined}>Map</a>
+        <a href="/capabilities/" aria-current={current === "capabilities" ? "page" : undefined}>Capabilities</a>
         <a href="/methodology/" aria-current={current === "methodology" ? "page" : undefined}>Methodology</a>
       </nav>
     </header>
@@ -37,6 +39,7 @@ const { title, description, current } = Astro.props;
         implementation reference, and not affiliated with bips.dev or the BIP authors. Every address shown is public test
         material; never send funds to it.
       </p>
+      <p class="atlas-footer__links"><a href="https://github.com/otaliptus/bip-atlas">Source &amp; corrections on GitHub ↗</a></p>
     </footer>
   </body>
 </html>

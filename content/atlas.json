@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "bip-atlas.atlas.v1",
+  "map": { "width": 1200, "height": 900, "nodeWidth": 172, "nodeHeight": 64 },
+  "trails": [
+    {
+      "id": "wallet-foundations",
+      "title": "Wallet foundations",
+      "dek": "From recorded entropy to keys, paths, scripts and destinations.",
+      "chapters": ["mnemonics", "hd-wallets", "wallet-paths", "addresses", "payment-instructions", "descriptors"]
+    },
+    {
+      "id": "spending-transactions",
+      "title": "Spending & transactions",
+      "dek": "How spending rules are committed, signed, timed and carried between devices.",
+      "chapters": ["p2sh", "segwit", "timelocks", "psbt", "psbt-extensions", "rbf"]
+    },
+    {
+      "id": "signatures-policies",
+      "title": "Signatures & spending policies",
+      "dek": "From one verification equation to hidden branches and shared signing.",
+      "chapters": ["schnorr", "taproot", "tapscript", "musig2"]
+    },
+    {
+      "id": "privacy-coordination",
+      "title": "Privacy & coordination",
+      "dek": "Receiving, proving and finding payments without asking the whole network for everything.",
+      "chapters": ["silent-payments", "message-signing", "block-filters"]
+    },
+    {
+      "id": "network-upgrades",
+      "title": "Network & upgrades",
+      "dek": "The connections between nodes, and the state machines that change their rules.",
+      "chapters": ["v2-transport", "compact-blocks", "addrv2", "version-bits"]
+    }
+  ],
+  "nodes": [
+    { "chapter": "mnemonics", "label": "Mnemonic", "aliases": ["bip39", "seed phrase", "recovery words", "entropy", "pbkdf2"], "x": 30, "y": 60 },
+    { "chapter": "hd-wallets", "label": "HD keys", "aliases": ["bip32", "xpub", "xprv", "extended key", "hardened"], "x": 30, "y": 180 },
+    { "chapter": "wallet-paths", "label": "Wallet paths", "aliases": ["bip44", "bip84", "bip86", "account", "receive", "change"], "x": 30, "y": 300 },
+    { "chapter": "descriptors", "label": "Descriptors", "aliases": ["bip380", "bip381", "bip382", "bip383", "bip384", "bip385", "bip386", "output script", "watch only"], "x": 30, "y": 420 },
+    { "chapter": "addresses", "label": "Addresses", "aliases": ["bip173", "bip350", "bech32", "bech32m", "checksum", "bc1"], "x": 30, "y": 540 },
+    { "chapter": "payment-instructions", "label": "Payment URIs", "aliases": ["bip21", "bip321", "payment uri", "bitcoin uri", "pop", "proof of payment", "lightning"], "x": 30, "y": 660 },
+    { "chapter": "p2sh", "label": "P2SH", "aliases": ["bip16", "redeem script", "script hash"], "x": 270, "y": 60 },
+    { "chapter": "segwit", "label": "SegWit", "aliases": ["bip141", "bip143", "witness", "txid", "wtxid", "weight"], "x": 270, "y": 200 },
+    { "chapter": "psbt", "label": "PSBT", "aliases": ["bip174", "partially signed", "offline signing", "coordinator"], "x": 270, "y": 340 },
+    { "chapter": "psbt-extensions", "label": "PSBT extensions", "aliases": ["bip370", "bip371", "bip373", "psbtv2", "taproot psbt", "musig2 psbt"], "x": 270, "y": 620 },
+    { "chapter": "rbf", "label": "RBF", "aliases": ["bip125", "replace by fee", "replace-by-fee", "mempool", "fee bump", "full rbf"], "x": 270, "y": 740 },
+    { "chapter": "timelocks", "label": "Timelocks", "aliases": ["bip65", "bip68", "bip112", "bip113", "nlocktime", "nsequence", "cltv", "csv"], "x": 270, "y": 480 },
+    { "chapter": "schnorr", "label": "Schnorr", "aliases": ["bip340", "signature", "x-only", "verification"], "x": 510, "y": 60 },
+    { "chapter": "taproot", "label": "Taproot", "aliases": ["bip341", "key path", "script path", "merkle tree", "tweak"], "x": 510, "y": 200 },
+    { "chapter": "tapscript", "label": "Tapscript", "aliases": ["bip342", "script", "stack", "opcode", "sigops"], "x": 510, "y": 340 },
+    { "chapter": "musig2", "label": "MuSig2", "aliases": ["bip327", "multisig", "key aggregation", "nonce", "partial signature"], "x": 510, "y": 480 },
+    { "chapter": "silent-payments", "label": "Silent Payments", "aliases": ["bip352", "reusable address", "scanning", "ecdh"], "x": 750, "y": 140 },
+    { "chapter": "message-signing", "label": "Message signing", "aliases": ["bip322", "proof of funds", "virtual transaction", "signed message"], "x": 750, "y": 560 },
+    { "chapter": "block-filters", "label": "Block filters", "aliases": ["bip157", "bip158", "compact filters", "golomb", "light client"], "x": 750, "y": 360 },
+    { "chapter": "v2-transport", "label": "v2 transport", "aliases": ["bip324", "encryption", "handshake", "ellswift", "packets"], "x": 990, "y": 250 },
+    { "chapter": "compact-blocks", "label": "Compact Blocks", "aliases": ["bip152", "compact block", "compact block relay", "short id", "block relay", "mempool reconstruction"], "x": 990, "y": 440 },
+    { "chapter": "addrv2", "label": "Addr v2", "aliases": ["bip155", "addrv2", "addr v2", "tor v3", "i2p", "cjdns", "yggdrasil", "peer addresses"], "x": 990, "y": 630 },
+    { "chapter": "version-bits", "label": "Version bits", "aliases": ["bip8", "bip9", "soft fork", "activation", "signalling"], "x": 990, "y": 60 }
+  ],
+  "relationships": [
+    { "from": "mnemonics", "to": "hd-wallets", "kind": "dependency", "label": "seed becomes keys", "reason": "BIP 39 derives a seed from words; BIP 32 uses seed material to begin an extended-key tree." },
+    { "from": "hd-wallets", "to": "wallet-paths", "kind": "dependency", "label": "give the tree a layout", "reason": "BIP 32 supplies derivation; wallet-path BIPs assign meanings to particular branches and script families." },
+    { "from": "wallet-paths", "to": "descriptors", "kind": "dependency", "label": "paths inside expressions", "reason": "Descriptors combine key origins, derivation paths and script templates into a wallet-readable expression." },
+    { "from": "descriptors", "to": "addresses", "kind": "related", "label": "scripts become destinations", "reason": "Descriptors describe the scripts a wallet watches; addresses encode particular output destinations for senders." },
+    { "from": "addresses", "to": "taproot", "kind": "dependency", "label": "v1 uses Bech32m", "reason": "Taproot outputs use witness version 1; the address chapter explains the Bech32m rule their addresses require.", "path": "M202 572 H235 V20 H480 V232 H510" },
+    { "from": "addresses", "to": "payment-instructions", "kind": "dependency", "label": "destinations become instructions", "reason": "Payment URIs wrap an address and add amounts, metadata and alternative payment methods. The address and the instruction are different validity questions." },
+    { "from": "silent-payments", "to": "payment-instructions", "kind": "dependency", "label": "sp becomes a query key", "reason": "BIP 321 names sp for BIP 352 Silent Payment addresses, including forms with no on-chain fallback.", "path": "M750 172 H720 V820 H202 V692 H202" },
+    { "from": "p2sh", "to": "segwit", "kind": "related", "label": "compatibility wrapper", "reason": "P2SH can wrap SegWit programs, separating the outer hash commitment from the witness program inside." },
+    { "from": "segwit", "to": "psbt", "kind": "dependency", "label": "toward a signed transaction", "reason": "PSBT carries a transaction and signing information; SegWit explains the serialization and witness a completed spend can produce." },
+    { "from": "psbt", "to": "psbt-extensions", "kind": "dependency", "label": "extend the signing package", "reason": "PSBTv2 changes construction, while Taproot and MuSig2 fields add the metadata modern signing rounds need.", "path": "M442 372 C475 372 475 652 442 652" },
+    { "from": "musig2", "to": "psbt-extensions", "kind": "dependency", "label": "rounds inside a PSBT", "reason": "BIP 373 carries MuSig2 participants, public nonces and partial signatures inside the PSBT package introduced by the earlier chapters." },
+    { "from": "timelocks", "to": "rbf", "kind": "related", "label": "one sequence field, two jobs", "reason": "BIP 68 uses nSequence for relative locks; BIP 125 uses it for replaceability signaling. Consensus locktimes and mempool replacement policy must stay separate.", "path": "M442 512 C475 512 475 772 442 772" },
+    { "from": "timelocks", "to": "tapscript", "kind": "related", "label": "locks inside scripts", "reason": "Absolute and relative lock opcodes can appear inside the Taproot scripts that Tapscript executes." },
+    { "from": "schnorr", "to": "taproot", "kind": "dependency", "label": "verify the key path", "reason": "Taproot key-path spends rely on the BIP 340 Schnorr signature rules." },
+    { "from": "taproot", "to": "tapscript", "kind": "dependency", "label": "run the revealed leaf", "reason": "Taproot commits to and reveals a script leaf; Tapscript supplies the rules for executing it." },
+    { "from": "schnorr", "to": "musig2", "kind": "dependency", "label": "one ordinary signature", "reason": "MuSig2 produces a signature that a BIP 340 verifier checks like a single-signer Schnorr signature.", "path": "M510 92 C455 92 455 512 510 512" },
+    { "from": "taproot", "to": "silent-payments", "kind": "dependency", "label": "fresh Taproot outputs", "reason": "Silent Payments let senders derive fresh Taproot outputs from a reusable address and transaction data." },
+    { "from": "segwit", "to": "message-signing", "kind": "dependency", "label": "virtual transactions", "reason": "BIP 322 builds virtual transactions and verifies script and witness rules; SegWit explains the transaction pieces those proofs reuse.", "path": "M442 232 H470 V700 H960 V592 H922" },
+    { "from": "segwit", "to": "compact-blocks", "kind": "dependency", "label": "wtxid enters relay", "reason": "Compact Block Relay v2 computes six-byte short IDs from wtxid rather than txid, linking relay to the SegWit serialization model.", "path": "M442 232 H490 V740 H960 V440 H990" },
+    { "from": "compact-blocks", "to": "v2-transport", "kind": "related", "label": "compact relay on the wire", "reason": "Compact block messages travel over peer connections; v2 transport changes their encryption, not their reconstruction rules." },
+    { "from": "addrv2", "to": "v2-transport", "kind": "related", "label": "addresses before encryption", "reason": "Addr v2 tells peers where to connect; v2 transport then protects the connection, not the endpoint’s identity or reachability.", "path": "M1162 662 C1190 662 1190 282 1162 282" },
+    { "from": "block-filters", "to": "v2-transport", "kind": "related", "label": "filters on the wire", "reason": "Compact filters are queried from peers; v2 transport changes the connection carrying those messages, not the filter rules." },
+    { "from": "version-bits", "to": "taproot", "kind": "related", "label": "activation context", "reason": "Version bits explains deployment state machines; Taproot is the upgrade whose activation context readers can investigate next.", "path": "M990 92 H960 V20 H712 V232 H682" }
+  ]
+}

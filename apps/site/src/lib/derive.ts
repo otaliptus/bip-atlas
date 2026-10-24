@@ -200,10 +200,12 @@ import type {
 import type { FieldName, Psbt, PsbtRecord } from "@bip-atlas/models";
 
 import { REVIEWED as B322_REVIEWED, reviewedOpName as b322OpName } from "@bip-atlas/models/interpreter";
+import { deriveExpansionFixture } from "./expansion";
 import { ROOT } from "./root";
 const SNAPSHOT = "sources/research-2026-10-01";
 /** Phase-three BIPs, snapshotted separately at the same bitcoin/bips commit. */
 export const SNAPSHOT_PHASE3 = "sources/research-2026-10-01-phase3";
+export const SNAPSHOT_EXPANSION = "sources/research-2026-10-01-expansion";
 
 /** A raw file from a pinned snapshot, checked against that snapshot's lock. */
 export function pinnedText(path: string, snapshot: string = SNAPSHOT): string {
@@ -1718,6 +1720,7 @@ export function deriveFixtures<T extends BaseFixture>(fixtures: T[]): T[] {
     if (f.kind === "transaction") return deriveTransaction(f as unknown as TransactionFixture) as unknown as T;
     if (f.kind === "psbt-trace") return derivePsbtTrace(f as unknown as PsbtTraceFixture) as unknown as T;
     if (f.kind === "psbt-combine") return derivePsbtCombine(f as unknown as PsbtCombineFixture) as unknown as T;
+    if (["payment-instruction", "compact-block", "rbf-case", "addrv2", "psbt-extension"].includes(f.kind)) return deriveExpansionFixture(f) as unknown as T;
     return f;
   });
 }

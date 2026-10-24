@@ -106,5 +106,35 @@
     "published": "BIP 322 basic and generated vectors: message and virtual-transaction hashes, every simple and full signature case, and published error cases.",
     "additional": "Reviewed interpreter rules, changed messages and addresses, commitment checks and unsupported spend shapes.",
     "limits": "A partial verifier: committed scripts or spend shapes outside its reviewed set and proof-of-funds PSBTs can be inconclusive; earlier invalidity still takes precedence."
+  },
+  "psbt-extensions": {
+    "name": "PSBT extensions",
+    "published": "Eighty-nine BIP 370/371/373 PSBT cases, checked against their hex and adjacent Base64. Includes all participant, public-nonce and partial-signature stages for the first four MuSig2 spends, plus three documented leading-character normalizations and two upstream duplicate cases.",
+    "additional": "Version-specific inclusion/exclusion, map counts, signed numeric fields, compressed-key shapes, standard proprietary records, empty-tree refusal and all published locktime outcomes.",
+    "limits": "Structural and field-specific validation only, not full PSBT or cryptographic signature validation. No signing, finalization, broadcast or claim that a parsed transaction is safe to sign. The duplicated BIP 373 output-participant vector is a source erratum, not independent participant-key coverage."
+  },
+  "compact-blocks": {
+    "name": "Compact Blocks",
+    "published": "No ready-made vector pack exists in the pinned BIP 152 text. A labelled synthetic block uses two BIP 143 transactions and a synthetic coinbase-shaped transaction.",
+    "additional": "Independently pinned short IDs, differential indexes, exact prefilled byte widths, local and missing reconstruction, and an explicitly injected ambiguity between non-prefilled candidates.",
+    "limits": "The synthetic block is not a published vector or a valid block to mine, and injected ambiguity is not a naturally computed collision. No block validation, network propagation or current-node conformance claim."
+  },
+  "rbf": {
+    "name": "RBF",
+    "published": "No complete replacement vectors exist in the pinned BIP 125 text. Synthetic cases exercise explicit and inherited signaling plus all five policy gates and the BIP's 500-byte example.",
+    "additional": "Inherited-only ancestry outside the replacement set, multiple signaling ancestors, exact nSequence and eviction boundaries, fractional-rate rounding, unknown ancestors and cycles.",
+    "limits": "The examples teach BIP 125's initial policy with declared eviction counts, not live mempool inspection or current-node conformance. Passing does not guarantee relay, replacement or confirmation."
+  },
+  "payment-instructions": {
+    "name": "Payment instructions",
+    "published": "Every valid and invalid BIP 321 URI example and all documented proof-of-payment callbacks, including BIP 21's superseded URI form.",
+    "additional": "Exact decimal-BTC arithmetic including optional digit positions, duplicate and case rules, empty bodies, network placement, unknown required parameters and refusal of unknown or browser callback schemes.",
+    "limits": "Published addresses and invoices are intentionally bogus. Only the three local placeholder schemes in published callbacks are supported; other schemes are refused rather than probed. No Lightning decoding, payment execution, external callback, application launch or network request."
+  },
+  "addrv2": {
+    "name": "Addr v2",
+    "published": "No packet vectors exist in the pinned BIP 155 text. Synthetic single-entry packets cover every reserved network plus unknown, deprecated, embedded and wrong-length cases.",
+    "additional": "CompactSize and packet round trips, non-minimal and truncated encodings, count/address limits, negotiation order and reserved-range checks.",
+    "limits": "Addresses are byte patterns, not endpoints. The model does not perform address-book validation, prove reachability or contact peers."
   }
 }

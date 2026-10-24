@@ -210,3 +210,5 @@ export function validatePublication(pub: Publication, ctx: ValidationContext): s
   if (unique.size !== figureIds.length) problems.push("duplicate figure numbers");
   return problems;
 }
+
+export * from "./atlas";

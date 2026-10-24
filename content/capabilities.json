@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "bip-atlas.capabilities.v1",
+  "artifacts": [
+    {
+      "id": "mnemonic",
+      "label": "Mnemonic phrase",
+      "marker": "ROOT BACKUP",
+      "classification": "secret",
+      "madeFor": "Transcribing computer-generated entropy as words a person can record.",
+      "canDo": "With the right passphrase, derivation paths and wallet software, recover the seed and the wallet secrets beneath it.",
+      "cannotEstablish": "A word list is not itself a private key. Its checksum does not make a human-chosen phrase safe.",
+      "sharing": "Treat a photographed, spoken or pasted phrase as a full wallet compromise. An optional passphrase does not make casual sharing safe.",
+      "sources": [
+        { "chapter": "mnemonics", "section": "randomness", "label": "Why the words come from randomness" },
+        { "chapter": "mnemonics", "section": "checksum", "label": "What the checksum does" },
+        { "chapter": "mnemonics", "section": "passphrase", "label": "How a passphrase changes the wallet" }
+      ]
+    },
+    {
+      "id": "seed",
+      "label": "BIP 39 seed",
+      "marker": "BINARY ROOT",
+      "classification": "secret",
+      "madeFor": "Carrying the result of the mnemonic and optional passphrase into deterministic key derivation.",
+      "canDo": "Feed an HD wallet’s master-key derivation and, with paths and software, reproduce the same key tree.",
+      "cannotEstablish": "The 64-byte seed does not tell you which paths, script types or accounts the wallet uses.",
+      "sharing": "Treat it with the same care as the mnemonic. Anyone who obtains it and the relevant wallet layout may be able to take the funds.",
+      "sources": [
+        { "chapter": "mnemonics", "section": "seed", "label": "From words to a 64-byte seed" },
+        { "chapter": "mnemonics", "section": "next", "label": "The boundary between seed and keys" },
+        { "chapter": "hd-wallets", "section": "seed", "label": "Back to the seed" }
+      ]
+    },
+    {
+      "id": "xprv",
+      "label": "Extended private key",
+      "marker": "SUBTREE SECRET",
+      "classification": "secret",
+      "madeFor": "Deriving private and public children within one branch of an HD key tree, including hardened children.",
+      "canDo": "Reproduce child private keys, public keys and chain codes below its node when the derivation path is known.",
+      "cannotEstablish": "An xprv does not by itself name the wallet’s path convention or output-script type, and it says nothing about other seeds or branches.",
+      "sharing": "Treat every key in its subtree as compromised. The chain code travels with the key and is required for derivation; it is not an optional checksum.",
+      "sources": [
+        { "chapter": "hd-wallets", "section": "extended-keys", "label": "Why an extended key has two parts" },
+        { "chapter": "hd-wallets", "section": "hardened", "label": "The hardened derivation boundary" },
+        { "chapter": "hd-wallets", "section": "serialization", "label": "How extended keys are written down" }
+      ]
+    },
+    {
+      "id": "xpub",
+      "label": "Extended public key",
+      "marker": "PUBLIC DERIVATION",
+      "classification": "watch",
+      "madeFor": "Sharing public derivation without sharing the corresponding private key.",
+      "canDo": "Derive non-hardened child public keys and chain codes in its subtree; with paths and script rules, watch the resulting addresses.",
+      "cannotEstablish": "It cannot derive hardened children, parent keys or signatures. Holding one is not proof that the holder controls the wallet.",
+      "sharing": "Sharing can expose current and future addresses and wallet structure in the derived subtree. A parent xpub combined with a leaked non-hardened child private key is much worse.",
+      "sources": [
+        { "chapter": "hd-wallets", "section": "public", "label": "What an xpub can derive" },
+        { "chapter": "hd-wallets", "section": "hardened", "label": "Why hardened keys exist" },
+        { "chapter": "hd-wallets", "section": "serialization", "label": "Reading xpub and xprv serialization" }
+      ]
+    },
+    {
+      "id": "descriptor",
+      "label": "Output descriptor",
+      "marker": "SCRIPT RECIPE",
+      "classification": "variable",
+      "madeFor": "Naming the output scripts a wallet should create and watch.",
+      "canDo": "Describe script templates, keys, origin information, paths and ranges; public descriptors can derive and watch destinations.",
+      "cannotEstablish": "Its checksum catches copying mistakes but does not authenticate the wallet or prove that a script is safe. Most descriptors contain only public material, but the format permits private keys.",
+      "sharing": "A public descriptor can reveal scripts, keys, addresses and a multiparty policy. A descriptor containing private keys is secret.",
+      "sources": [
+        { "chapter": "descriptors", "section": "shape", "label": "Choose the script, not just the key" },
+        { "chapter": "descriptors", "section": "sharing", "label": "What sharing a descriptor reveals" },
+        { "chapter": "descriptors", "section": "checksum", "label": "What the checksum does and does not do" }
+      ]
+    },
+    {
+      "id": "address",
+      "label": "Bitcoin address",
+      "marker": "DESTINATION",
+      "classification": "public",
+      "madeFor": "Encoding one destination so wallet software can construct the intended output script.",
+      "canDo": "Let a decoder check the encoding, checksum, network and version before constructing an output script.",
+      "cannotEstablish": "It cannot identify the controller, prove ownership, show a balance or establish that a payment is wise.",
+      "sharing": "Publishing is its purpose. Reusing it can link payments; a valid checksum is not a safety endorsement.",
+      "sources": [
+        { "chapter": "addresses", "section": "four-parts", "label": "Read the parts of an address" },
+        { "chapter": "addresses", "section": "contents", "label": "How characters become an output script" },
+        { "chapter": "addresses", "section": "what-it-does-not-say", "label": "What a valid address does not tell you" }
+      ]
+    },
+    {
+      "id": "silent-payment-address",
+      "label": "Silent Payments address",
+      "marker": "REUSABLE DESTINATION",
+      "classification": "public",
+      "madeFor": "Letting senders derive fresh Taproot outputs from one reusable destination and information in each transaction.",
+      "canDo": "Help senders create fresh outputs while the receiver uses a private scan key and transaction data to find them.",
+      "cannotEstablish": "It does not eliminate scanning, make every payment unlinkable or give the publisher’s spending key to a sender.",
+      "sharing": "It is intended to be published. Ordinary address reuse is avoided, but labels, eligible inputs, scanning and transaction context still matter.",
+      "sources": [
+        { "chapter": "silent-payments", "section": "address", "label": "Two keys with different jobs" },
+        { "chapter": "silent-payments", "section": "secret", "label": "How sender and receiver reach a shared secret" },
+        { "chapter": "silent-payments", "section": "limits", "label": "What still needs care" }
+      ]
+    },
+    {
+      "id": "psbt",
+      "label": "Unsigned or partial PSBT",
+      "marker": "SIGNING PACKAGE",
+      "classification": "coordination",
+      "madeFor": "Carrying an unfinished transaction and the information coordinators and signers need to complete it.",
+      "canDo": "Move between roles, collect signatures and metadata, preserve unknown fields and eventually allow a finalizer to produce a transaction.",
+      "cannotEstablish": "An unsigned or partially signed PSBT is not a broadcast transaction, proof that payment happened or a statement that it is complete and safe to sign.",
+      "sharing": "It can reveal UTXOs, amounts, outputs, keys, derivation paths, scripts and wallet policy. It does not by itself authorize spending without the required keys; a fully signed final transaction is different.",
+      "sources": [
+        { "chapter": "psbt", "section": "roles", "label": "Follow the document between roles" },
+        { "chapter": "psbt", "section": "signing", "label": "What a signer must inspect" },
+        { "chapter": "psbt", "section": "adds", "label": "When the package is ready to finalize" },
+        { "chapter": "psbt-extensions", "section": "version", "label": "How PSBTv2 changes construction" },
+        { "chapter": "psbt-extensions", "section": "musig2", "label": "MuSig2 fields inside the package" }
+      ]
+    },
+    {
+      "id": "signature",
+      "label": "Digital signature",
+      "marker": "BOUND PROOF",
+      "classification": "proof",
+      "madeFor": "Committing a key to one particular message or transaction digest.",
+      "canDo": "Let a verifier check the key, message and signature equation. Message signing can show control at signing time within the verifier’s supported scope.",
+      "cannotEstablish": "It does not prove present ownership, legal identity, intent beyond the signed message or the safety of what was signed.",
+      "sharing": "Signatures are normally public with the transaction or message and can link activity. A signature is not a wallet backup and cannot reconstruct its private key.",
+      "sources": [
+        { "chapter": "schnorr", "section": "inputs", "label": "The three inputs a verifier checks" },
+        { "chapter": "schnorr", "section": "limits", "label": "What a passing signature check does not say" },
+        { "chapter": "message-signing", "section": "limits", "label": "Make the message say what you need" },
+        { "chapter": "message-signing", "section": "verify", "label": "When a verifier cannot decide" }
+      ]
+    }
+  ]
+}

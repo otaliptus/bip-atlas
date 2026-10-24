@@ -1,0 +1,219 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "payment-instructions",
+  "primaryBips": [21, 321],
+  "specimenLabel": "BIP 0021 + 0321",
+  "title": "How does a link become a payment instruction?",
+  "dek": "A bitcoin: URI can carry an address, an amount and several payment methods. BIP 321 says how to read that instruction, where it can lead next, and why a proof callback is not a web request.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01-expansion",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A payment link looks like a button that sends money. It is not. BIP 321 describes an instruction that wallet software may read, present and ask the user to approve. The client must not act on it without authorization.",
+        "claims": ["user-authorization", "instruction-not-payment"]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 321 replaces BIP 21 rather than merely adding a new query key. It makes modern payment instructions, duplicate rules and proof-of-payment callbacks explicit. The examples in this chapter use the proposal’s deliberately invalid addresses and bogus invoices, not real destinations.",
+        "claims": ["replacement", "example-bogus", "instruction-shape"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A22.1",
+      "recipe": "payment-uri-anatomy.v1",
+      "title": "Anatomy of a payment instruction",
+      "fixtures": ["uri-03-request-20-30-btc-to-luke-jr"],
+      "caption": "Scheme, address body, amount and query keys have different jobs. A decoder can understand them without making a payment. The published address is intentionally invalid.",
+      "claims": ["instruction-shape", "example-bogus", "user-authorization"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "from-21-to-321",
+      "heading": "From a payment link to an instruction",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 21 made the `bitcoin:` scheme familiar: put an address in the path, then add an amount, a label or a message. BIP 321 keeps that shape but calls the result a payment instruction, not a personal identity or a guaranteed transaction. It is a modification and intended replacement of the older proposal.",
+          "claims": ["replacement", "instruction-shape", "instruction-not-payment"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Scheme and query-key matching is case-insensitive in BIP 321. That matters for QR codes, which often use all-uppercase URIs: `BITCOIN:` and `AMOUNT=` still count, while address values and invoice contents may remain case-sensitive. Lowercasing an entire instruction would be a different and potentially unsafe operation.",
+          "claims": ["case-insensitive"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The address body may now be Base58, Bech32 or Bech32m. It may also be empty, but only when a query parameter supplies at least one payment instruction. That allows a recipient to offer Lightning, Silent Payments or another method without an on-chain fallback.",
+          "claims": ["body-empty", "modern-keys"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.2",
+          "recipe": "payment-uri-history.v1",
+          "title": "BIP 21 to BIP 321: what changed",
+          "fixtures": ["uri-05-request-funds-to-be-paid-over-lightning-to-a-bol"],
+          "caption": "The older URI remains recognizable while the instruction keys become more capable. This example offers Lightning with an on-chain fallback.",
+          "claims": ["replacement", "modern-keys", "body-empty"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "instruction-keys",
+      "heading": "Modern instructions and required keys",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 321 names `lightning` for BOLT 11 invoices, `lno` for BOLT 12 offers, `pay` for BIP 351 private payment addresses and `sp` for BIP 352 Silent Payments. New Bech32 or Bech32m instruction types should reuse their address format’s human-readable prefix as the query key. That is why `bc` and `tb` can carry SegWit destinations as parameters.",
+          "claims": ["modern-keys", "future-hrp"]
+        },
+        {
+          "type": "paragraph",
+          "text": "A single URI can also offer alternatives. With an address body present, a wallet might pay on-chain; with `lightning` present, it might choose that invoice instead. Remove the address body and the fallback disappears: only the query-provided methods remain. The body is an on-chain instruction, not a mandatory settlement layer.",
+          "claims": ["modern-keys", "body-empty"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Reuse follows the payment method, not the fact that everything is called a URI. An on-chain address belongs to a one-time payment instruction, not to an exchange of personal information. A URI made only from reusable, non-address-reusing instructions, such as a BOLT 12 offer or Silent Payments, may be reused as the wallet sees fit.",
+          "claims": ["identifier-reuse"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Parameters representing payment instructions may repeat. Unknown optional parameters may also repeat and may be ignored. Unknown parameters prefixed with `req-` are different: if the wallet does not implement them, the whole URI is invalid. This lets old software skip an optional method while refusing an instruction it cannot safely understand.",
+          "claims": ["duplicate-instructions", "unknown-optional", "unknown-required"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.3",
+          "recipe": "payment-uri-duplicates.v1",
+          "title": "Which keys may repeat?",
+          "fixtures": ["uri-20-multiple-proof-of-payment-uris-must-not-appear-e"],
+          "caption": "Payment-instruction keys and unknown optional keys may repeat. `label`, `message`, `amount` and `pop` must not. Two proof-of-payment parameters are invalid even when one is prefixed with `req-`.",
+          "claims": ["duplicate-instructions", "duplicate-singletons", "duplicate-pop"],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A22.4",
+          "recipe": "payment-uri-amount.v1",
+          "title": "Decimal BTC, exact satoshis",
+          "fixtures": ["uri-03-request-20-30-btc-to-luke-jr"],
+          "caption": "The amount is written in decimal BTC with a period, never a comma. The teaching model converts the decimal representation to satoshis with integer arithmetic.",
+          "claims": ["decimal-amount"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "duplicates-and-amount",
+      "heading": "Amounts and duplicate keys",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "An amount is optional, but when present it must be decimal BTC. `amount=20.3` and `amount=20.30` mean the same thing. A comma is not a thousands separator; it makes the amount invalid. The model also refuses more than eight decimal places, values above 21 million BTC and non-decimal forms.",
+          "claims": ["decimal-amount"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Singleton rules apply even when the value is identical. Two `amount=42` parameters are just as invalid as `amount=42&amount=10`. Repeated `label`, `message` and `pop` parameters are rejected too, whether the proof-of-payment key appears as `pop`, `req-pop` or both.",
+          "claims": ["duplicate-singletons", "duplicate-amount", "duplicate-label", "duplicate-pop"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Display is a separate concern from validation. A wallet can show BTC, mBTC or satoshis, as long as the presentation does not mislead the user. The requested amount remains decimal BTC in the URI; changing units on screen must not silently change the value being approved.",
+          "claims": ["decimal-amount", "user-authorization"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.5",
+          "recipe": "payment-uri-examples.v1",
+          "title": "Required unknown, refused",
+          "fixtures": ["uri-11-some-future-version-that-has-variables-which-are"],
+          "caption": "The unknown required parameters make this URI invalid. Optional unknown parameters would be safe to ignore instead.",
+          "claims": ["unknown-required", "unknown-optional"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "proof-of-payment",
+      "heading": "Proof of payment, safely",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A `pop` parameter supplies a percent-encoded URI prefix. After payment, a supporting wallet decodes it once, appends the instruction key and an equals sign, then appends the payment information. An on-chain payment uses `onchain` as that key; a BOLT 11 payment uses `lightning`. The resulting URI can carry the full broadcast transaction or the payment preimage.",
+          "claims": ["pop-purpose", "pop-build", "pop-onchain-key", "pop-payment-info", "lightning-preimage"]
+        },
+        {
+          "type": "paragraph",
+          "text": "When a URI offers both on-chain and Lightning, the method actually used determines the callback key and payload. Paying on-chain uses `onchain` as the key and the full transaction as its value; paying the BOLT 11 invoice uses `lightning` and its preimage. The same `pop` prefix can therefore produce two different but well-formed callbacks.",
+          "claims": ["pop-onchain-key", "pop-payment-info", "lightning-preimage"]
+        },
+        {
+          "type": "paragraph",
+          "text": "That does not give the callback permission to open a website. HTTP, HTTPS, file, JavaScript, mailto and other browser-opening schemes must be rejected. If the parameter was `req-pop` and the wallet cannot or will not open it, the wallet must not initiate payment. An optional `pop` can be skipped instead. This lab supports only the local placeholder schemes in the published callbacks and treats every other scheme as unsupported rather than guessing how the operating system will open it.",
+          "claims": ["pop-schemes", "req-pop-stop", "no-web-ip", "scope-no-execute"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.6",
+          "recipe": "payment-uri-pop.v1",
+          "title": "A callback is not a web request",
+          "fixtures": ["uri-23-if-the-original-uri-is"],
+          "caption": "The callback prefix is decoded once and completed with the method used and its payment information. A browser scheme is refused; a required callback that cannot be used stops payment.",
+          "claims": ["pop-build", "pop-schemes", "req-pop-stop", "no-web-ip"],
+          "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A22.7",
+          "recipe": "payment-instruction-lab.v1",
+          "title": "Instruction and callback lab",
+          "fixtures": [
+            "uri-03-request-20-30-btc-to-luke-jr",
+            "uri-05-request-funds-to-be-paid-over-lightning-to-a-bol",
+            "uri-09-request-funds-to-be-paid-to-a-silent-payments-ad",
+            "uri-11-some-future-version-that-has-variables-which-are",
+            "uri-17-labels-must-not-appear-twice",
+            "uri-26-if-the-original-uri-is"
+          ],
+          "caption": "Choose a published URI. The first view parses its instruction; the second constructs or refuses its callback. Every value is computed from the BIP’s examples, and nothing is opened or paid.",
+          "claims": ["pop-build", "pop-schemes", "req-pop-stop", "example-bogus"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "Where the instruction stops",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A valid instruction is not proof of a safe destination. BIP 321’s own addresses are intentionally invalid to prevent accidental transactions. A URI can be structurally valid while an address is unusable, a Lightning invoice is bogus or a callback should never be opened. Those are separate checks, not one green ‘valid’ badge.",
+          "claims": ["example-bogus", "valid-not-safe"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Network placement matters too. A testnet SegWit address belongs in the `tb` parameter, not `bc`. The model checks that network shape without pretending to establish who controls an address or whether paying it is wise.",
+          "claims": ["network-mismatch", "valid-not-safe"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Finally, a URI does not pay by itself. There is no invoice decoding, signature verification, broadcast or proof of identity here. The useful boundary is precise: parse the instruction, show its choices, refuse unsupported requirements and keep callback construction local.",
+          "claims": ["instruction-not-payment", "scope-no-execute", "user-authorization"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Characters outside the query’s valid range are encoded as UTF-8 first, and each resulting octet is percent-encoded. The lab reverses that encoding locally and rejects malformed escapes rather than treating the query as an HTML form. Even after decoding, the user still chooses whether to proceed; parsing never replaces that approval.",
+          "claims": ["percent-encoding", "user-authorization"]
+        }
+      ]
+    }
+  ]
+}

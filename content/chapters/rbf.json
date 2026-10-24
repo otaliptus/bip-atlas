@@ -1,0 +1,187 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "rbf",
+  "primaryBips": [125],
+  "specimenLabel": "BIP 0125",
+  "title": "When can an unconfirmed transaction be replaced?",
+  "dek": "Opt-in full-RBF lets a spender replace an unconfirmed transaction under specific signaling, input, fee and eviction rules. It is a mempool policy, not a promise of propagation or confirmation.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01-expansion",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A transaction can look replaceable until a fee needs to rise. BIP 125 describes an opt-in full-RBF policy: a replacement may spend the same inputs, but only when the original signaled replaceability and the new transaction pays for its own relay and the evicted set stays within the limit.",
+        "claims": ["replacement-purpose", "same-input", "eviction-limit"]
+      },
+      {
+        "type": "paragraph",
+        "text": "The examples here are synthetic policy cases, not current-node conformance vectors or live mempool contents. Each one isolates a rule: missing opt-in, a new unconfirmed input, a lower absolute fee, an inadequate bandwidth bump, a confirmed signaling ancestor, or 101 evictions.",
+        "claims": ["synthetic-fixture", "policy-not-consensus"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A21.1",
+      "recipe": "rbf-overview.v1",
+      "title": "A replacement at the exact boundary",
+      "fixtures": ["rbf-explicit-pass"],
+      "caption": "Original fee 500 sat, candidate fee 700 sat, minimum relay fee 1 sat/vB and 200 vbytes: the candidate pays the exact required total. Passing these checks still guarantees no confirmation.",
+      "claims": ["absolute-fee", "bandwidth-bump", "replacement-not-guaranteed"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "signal",
+      "heading": "Opt in directly or through ancestry",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Explicit signaling uses nSequence. If any input has a sequence below `0xfffffffe`, the transaction opts in to full-RBF. The maximum sequence `0xffffffff` and the locktime-compatible `0xfffffffe` do not signal it.",
+          "claims": ["signal-explicit", "spending-policy"]
+        },
+        {
+          "type": "paragraph",
+          "text": "That boundary leaves room for locktime users to opt out; it does not turn RBF into a consensus locktime rule. BIP 125 reports no known problematic interaction with absolute locktime, BIP 68 relative locktimes or BIP 112’s sequence check. A sequence value can therefore participate in consensus-enforced timing and in this separate mempool signal; neither mechanism substitutes for the other.",
+          "claims": ["sequence-compatibility"]
+        },
+        {
+          "type": "paragraph",
+          "text": "A transaction can also inherit replaceability from an ancestor that opted in, but only while that ancestor remains unconfirmed. Confirmation removes that ancestor’s contribution; inheritance ends only when no opt-in ancestor remains unconfirmed. The model checks ancestry separately from the transactions actually being replaced and rejects unknown references and cycles.",
+          "claims": ["signal-inherited", "ancestor-confirmed", "model-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A21.2",
+          "recipe": "rbf-signals.v1",
+          "title": "Two ways replaceability arrives",
+          "fixtures": ["rbf-inherited-pass"],
+          "caption": "The child does not opt in directly, but its unconfirmed parent did. The child may be replaced while the parent remains unconfirmed; confirming the parent removes this route.",
+          "claims": ["signal-inherited", "ancestor-confirmed"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "inputs",
+      "heading": "Same inputs, no new unconfirmed ones",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Full-RBF replaces an existing spend, so the candidate must spend at least one input from the original transactions. A completely different transaction with better fees is not a replacement under this rule.",
+          "claims": ["same-input"]
+        },
+        {
+          "type": "paragraph",
+          "text": "An unconfirmed input spends an output of a transaction that is itself still unconfirmed. The candidate may include such an input only if it was already in the original set. A newly introduced unconfirmed outpoint is refused even when the candidate shares another input with the original and passes every fee check. The rule is about the candidate’s ancestry, not about whether the new input has a high value or an attractive fee rate.",
+          "claims": ["new-unconfirmed"]
+        },
+        {
+          "type": "paragraph",
+          "text": "This is also why the chapter shows the input set explicitly. In the failing example, sharing input A is enough to pass the shared-input gate but not enough to authorize the new unconfirmed input X. Those are separate questions. The model checks the declared inputs against the original set; it does not infer mempool dependencies from an arbitrary transaction or a live node.",
+          "claims": ["same-input", "new-unconfirmed", "synthetic-fixture"]
+        },
+        {
+          "type": "figure",
+          "figure": "A21.3",
+          "recipe": "rbf-replacement-examples.v1",
+          "title": "A new unconfirmed input stops the replacement",
+          "fixtures": ["rbf-new-unconfirmed-input"],
+          "caption": "The candidate shares input A but also introduces X, which was not in the original. The input gate is the first failure; the lab still shows the remaining independent checks.",
+          "claims": ["new-unconfirmed", "synthetic-fixture"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "fees",
+      "heading": "Two fee checks, not one",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "First, the absolute fee cannot decrease: the candidate must pay at least the sum paid by every original transaction. Second, it must pay for its own bandwidth at the node’s minimum relay fee rate. In the teaching model, the required total is original fees plus the candidate’s vbytes multiplied by that rate, rounded up to a whole satoshi.",
+          "claims": ["absolute-fee", "bandwidth-bump", "synthetic-fixture"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Suppose the original fee is 500 sat, the candidate is 200 vbytes and the minimum relay rate is 1 sat/vB. The bandwidth increment is 200 sat, so the required total is exactly 700 sat. A candidate paying 700 sat passes both fee comparisons: ‘at least’ includes equality. At 650 sat it passes the original-total comparison but misses the bandwidth requirement by 50 sat.",
+          "claims": ["absolute-fee", "bandwidth-bump"]
+        },
+        {
+          "type": "paragraph",
+          "text": "A higher fee rate alone is not enough. A candidate can pay a better rate per vbyte and still fail because its absolute increment is too small. BIP 125’s own historical example uses bytes: at 1 satoshi/byte and 500 bytes, the replacement must pay at least 500 satoshis more than the originals. The lesson is the arithmetic, not a universal fee setting.",
+          "claims": ["bandwidth-bump", "example-500", "fee-rate-not-enough", "policy-not-consensus"]
+        },
+        {
+          "type": "figure",
+          "figure": "A21.4",
+          "recipe": "rbf-fee-arithmetic.v1",
+          "title": "Original fees plus the bandwidth bump",
+          "fixtures": ["rbf-low-bandwidth-bump"],
+          "caption": "Original total 500 sat and a 200-vbyte candidate at 1 sat/vB require 700 sat. A 650-sat candidate has a higher fee rate but still fails the bandwidth gate.",
+          "claims": ["absolute-fee", "bandwidth-bump", "fee-rate-not-enough"],
+          "layout": "wide"
+        },
+        {
+          "type": "figure",
+          "figure": "A21.5",
+          "recipe": "rbf-replacement-gates.v1",
+          "title": "The five-gate replacement lab",
+          "fixtures": ["rbf-explicit-pass", "rbf-inherited-pass", "rbf-no-signal", "rbf-new-unconfirmed-input", "rbf-low-absolute-fee", "rbf-low-bandwidth-bump", "rbf-eviction-overflow", "rbf-ancestor-confirmed"],
+          "caption": "Choose a synthetic replacement and step through opt-in, inputs, absolute fee, bandwidth and evictions. Every gate shows the values behind its result.",
+          "claims": ["signal-explicit", "new-unconfirmed", "absolute-fee", "bandwidth-bump", "eviction-limit", "synthetic-fixture"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "evictions",
+      "heading": "The eviction budget",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Replacement also evicts the original transactions and their descendants. BIP 125’s initial implementation caps that set at 100 transactions. At exactly 100 the gate passes; at 101 it fails, even when the fee is exactly right. Paying more does not buy an exemption from the eviction budget.",
+          "claims": ["eviction-limit"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The count is about the whole displaced package, not just the one transaction directly conflicting with the candidate. A descendant spends an output of an evicted transaction, so removing the ancestor changes its position in the mempool too. The scenarios supply this count explicitly: the model is explaining the rule, not inspecting a live mempool or claiming that every current implementation has the same setting.",
+          "claims": ["eviction-limit", "synthetic-fixture", "policy-not-consensus"]
+        },
+        {
+          "type": "figure",
+          "figure": "A21.6",
+          "recipe": "rbf-policy-limits.v1",
+          "title": "Policy is not a confirmation promise",
+          "fixtures": ["rbf-explicit-pass"],
+          "caption": "The model can accept a replacement while saying nothing about whether peers relay it, miners include it or a recipient should trust it before confirmation.",
+          "claims": ["policy-not-consensus", "replacement-not-guaranteed", "receiver-policy"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "receiver",
+      "heading": "What a recipient should wait for",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 125 tells receiving wallets to treat opt-in full-RBF transactions with additional suspicion or ignore them until confirmed. ‘First seen’ is not a promise that this exact payment will survive: an allowed replacement may spend the same input differently. Waiting for confirmation is a receiver’s policy choice, not something the signal itself arranges.",
+          "claims": ["receiver-policy", "replacement-not-guaranteed"]
+        },
+        {
+          "type": "paragraph",
+          "text": "That caution travels through unconfirmed ancestry. A descendant can inherit replaceability, so a recipient’s handling should follow it while an opt-in ancestor remains unconfirmed. A spending wallet that does not want replacement is advised to avoid other people’s unconfirmed replaceable inputs; setting its own sequence to `0xffffffff` or `0xfffffffe` does not erase an ancestor’s signal.",
+          "claims": ["spending-policy", "signal-inherited", "receiver-policy"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Finally, BIP 125 is policy, not consensus. The five gates shown here come from its initial Bitcoin Core 0.12.0 implementation description, not a measurement of today’s mempool settings. Nodes may choose not to replace, a replacement may lack a relay path to miners, and miners may not include it. The BIP’s deployment expectations belong to their historical context; neither signaling nor passing the model guarantees replacement or confirmation.",
+          "claims": ["policy-not-consensus", "replacement-not-guaranteed", "synthetic-fixture"]
+        }
+      ]
+    }
+  ]
+}

@@ -18,3 +18,8 @@ export * from "./silentpayments";
 export * from "./blockfilter";
 export * from "./v2transport";
 export * from "./bip322";
+export * from "./paymentInstructions";
+export * from "./compactBlock";
+export * from "./rbf";
+export * from "./addrv2";
+export * from "./psbtExtensions";

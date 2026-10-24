@@ -193,6 +193,10 @@ import { WitnessCommitment } from "@bip-atlas/figures/tx/WitnessCommitment.tsx";
 import { WitnessField } from "@bip-atlas/figures/tx/WitnessField.tsx";
 import { TimelockFields, timelockHeroSpec } from "@bip-atlas/figures/timelock/TimelockFields.tsx";
 import { TimelockCsvStory, TimelockMtp, TimelockNotALock, TimelockPinned, TimelockRanges, TimelockSequenceBits } from "@bip-atlas/figures/timelock/TimelockStatics.tsx";
+import { ExpansionHero } from "@bip-atlas/figures/expansion/ExpansionHero.tsx";
+import { expansionHeroSpec } from "@bip-atlas/figures/expansion/ExpansionHeroSpec.ts";
+import { EXPANSION_STATIC_VIEWS } from "@bip-atlas/figures/expansion/recipes.ts";
+import type { DerivedExpansionFixture } from "@bip-atlas/figures/expansion/types.ts";
 import type { Figure } from "@bip-atlas/publication";
 import { deriveFixtures } from "../lib/derive";
 import Plate from "./Plate.astro";
@@ -244,6 +248,12 @@ const v2Rekey = picked as DerivedV2RekeyFixture[];
 const b322 = picked as DerivedBip322Fixture[];
 const b322Formats = picked as DerivedBip322FormatsFixture[];
 const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
+const expansion = picked as DerivedExpansionFixture[];
+const expansionViewName = EXPANSION_STATIC_VIEWS[figure.recipe];
+const expansionStaticView = expansionViewName ? expansion[0].derived.views[expansionViewName] : null;
+const expansionSpec = ["psbt-extension-records.v1", "compact-block-relay.v1", "rbf-replacement-gates.v1", "payment-instruction-lab.v1", "addrv2-packet-lab.v1"].includes(figure.recipe)
+  ? expansionHeroSpec(expansion)
+  : null;
 // Batch 2 heroes are pre-rendered: every state on the server, switched by HeroStates' script.
 const txSpec = figure.recipe === "transaction-anatomy.v1" ? transactionHeroSpec(tx) : null;
 const psbtSpec = figure.recipe === "psbt-envelope.v1" ? psbtHeroSpec(trace[0]) : null;
@@ -452,4 +462,30 @@ const tlSpec = figure.recipe === "timelock-fields.v1" ? timelockHeroSpec(timeloc
   {figure.recipe === "bip322-verify-story.v1" && <Bip322VerifyStory fixture={b322[0]} />}
   {figure.recipe === "bip322-interpreter.v1" && <Bip322Rack fixture={b322Verdicts[0]} />}
   {figure.recipe === "bip322-limits.v1" && <Bip322Limits />}
+  {expansionSpec && (
+    <HeroStates figureId={figureId} spec={expansionSpec}>
+      {expansionSpec.states.map((state) => {
+        const fixture = expansion.find((item) => item.id === state.state.split("/")[0])!;
+        return (
+          <div data-state data-keys={state.keys.join(" ")} data-valuetext={state.valueText} hidden={state.id !== expansionSpec.noJsId}>
+            <ExpansionHero figureId={`${figureId}-${state.id}`} view={fixture.derived.views[state.state]} />
+          </div>
+        );
+      })}
+    </HeroStates>
+  )}
+  {figure.recipe === "psbt-musig2-fields.v1" ? (
+    <div class="atlas-musig-rounds">
+      {["participant pubkeys only", "all pubnonces", "all partial signatures"].map((stage, index) => {
+        const fixture = expansion.find((item) => "stage" in item && item.stage === stage);
+        if (!fixture) throw new Error(`Missing MuSig2 stage ${stage}`);
+        return (
+          <section>
+            <h3>{String(index + 1).padStart(2, "0")} · {["Participant public keys", "Public nonces", "Partial signatures"][index]}</h3>
+            <ExpansionHero figureId={`${figureId}-round-${index + 1}`} view={fixture.derived.views.musig2} />
+          </section>
+        );
+      })}
+    </div>
+  ) : expansionStaticView && <ExpansionHero figureId={figureId} view={expansionStaticView} />}
 </Plate>

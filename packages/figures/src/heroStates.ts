@@ -9,17 +9,18 @@
  */
 
 /**
- * A segmented strip (radiogroup), a stepper (range plus previous/next
- * buttons) or a toggle (a checkbox that only sets a data attribute on the
- * hero, for layers every state draws; toggles are not part of the key).
+ * A segmented strip (radiogroup), a native select for longer example lists,
+ * a stepper (range plus previous/next buttons) or a toggle (a checkbox that
+ * only sets a data attribute on the hero, for layers every state draws;
+ * toggles are not part of the key).
  */
 export interface HeroControl {
-  kind: "strip" | "stepper" | "toggle";
-  /** Strips only: shown only while another control has this value. */
+  kind: "strip" | "select" | "stepper" | "toggle";
+  /** Strips and selects only: shown only while another control has this value. */
   showWhen?: { name: string; value: string };
-  /** Short id; also part of each radio's name. */
+  /** Short id; also part of the control's name. */
   name: string;
-  /** Accessible name of the radiogroup or range. */
+  /** Accessible name of the radiogroup, select or range. */
   label: string;
   options: Array<{ value: string; text: string; /** Controls reset to their first option when this one is chosen. */ resets?: string[] }>;
   /** Stepper only: other controls set when the stepper moves (e.g. reveal=shown). */

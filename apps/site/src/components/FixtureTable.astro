@@ -2,6 +2,7 @@
 import { analyzeSegwitAddress } from "@bip-atlas/models";
 import ClaimRefs from "./ClaimRefs.astro";
 import { stageVerdict, type AddressFixture, type BaseFixture } from "@bip-atlas/figures";
+import { figureViewQuery } from "@bip-atlas/figures/share.ts";
 
 interface Props {
   fixtures: BaseFixture[];
@@ -30,7 +31,10 @@ const rows = fixtures.map((f) => ({ f, a: analyzeSegwitAddress(f.address, f.netw
     <tbody>
       {rows.map(({ f, a }) => (
         <tr data-valid={a.valid ? "true" : "false"}>
-          <th scope="row">{f.label}</th>
+          <th scope="row">
+            <span class="atlas-fixture-sample">{f.label}</span>
+            {f.lab && <a class="atlas-fixture-lab-link" href={`?${figureViewQuery("fig-a04-5", { sample: f.id })}#fig-a04-5`}>Open in lab →</a>}
+          </th>
           <td><code class="atlas-break">{f.address}</code></td>
           <td class="atlas-outcome">{a.valid ? "✓ " : "✕ "}{stageVerdict(a)}</td>
           <td>{a.valid ? <>v{a.witnessVersion}, <code>{a.scriptPubKeyHex!.slice(0, 4)}…</code> ({a.programHex!.length / 2}-byte program)</> : a.reason}</td>

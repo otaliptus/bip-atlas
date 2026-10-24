@@ -1,0 +1,428 @@
+{
+  "fixtures": [
+    {
+      "id": "uri-01-just-the-address",
+      "kind": "payment-instruction",
+      "label": "Just the address:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 150,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W"
+      }
+    },
+    {
+      "id": "uri-02-address-with-recipient-s-name-as-label",
+      "kind": "payment-instruction",
+      "label": "Address with recipient's name as label:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 153,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr"
+      }
+    },
+    {
+      "id": "uri-03-request-20-30-btc-to-luke-jr",
+      "kind": "payment-instruction",
+      "label": "Request 20.30 BTC to \"Luke-Jr\":",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=20.3&label=Luke-Jr",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 156,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=20.3&label=Luke-Jr"
+      }
+    },
+    {
+      "id": "uri-04-request-50-btc-with-message",
+      "kind": "payment-instruction",
+      "label": "Request 50 BTC with message:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 159,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz"
+      }
+    },
+    {
+      "id": "uri-05-request-funds-to-be-paid-over-lightning-to-a-bol",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid over lightning to a BOLT 11 invoice with a fallback to on-chain payments:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 162,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice"
+      }
+    },
+    {
+      "id": "uri-06-request-funds-to-be-paid-over-lightning-to-a-bol",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid over lightning to a BOLT 11 invoice with no fallback:",
+      "uri": "bitcoin:?lightning=lnbc420bogusinvoice",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 165,
+        "quote": "bitcoin:?lightning=lnbc420bogusinvoice"
+      }
+    },
+    {
+      "id": "uri-07-request-funds-to-be-paid-over-lightning-to-a-bol",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid over lightning to a BOLT 12 offer with no fallback:",
+      "uri": "bitcoin:?lno=lno1bogusoffer",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 168,
+        "quote": "bitcoin:?lno=lno1bogusoffer"
+      }
+    },
+    {
+      "id": "uri-08-request-funds-to-be-paid-over-lightning-to-a-bol",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid over lightning to a BOLT 12 offer or silent payments address with no fallback:",
+      "uri": "bitcoin:?lno=lno1bogusoffer&sp=sp1qsilentpayment",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 171,
+        "quote": "bitcoin:?lno=lno1bogusoffer&sp=sp1qsilentpayment"
+      }
+    },
+    {
+      "id": "uri-09-request-funds-to-be-paid-to-a-silent-payments-ad",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid to a silent payments address with no fallback:",
+      "uri": "bitcoin:?sp=sp1qsilentpayment",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 174,
+        "quote": "bitcoin:?sp=sp1qsilentpayment"
+      }
+    },
+    {
+      "id": "uri-10-request-funds-to-be-paid-to-a-silent-payments-ad",
+      "kind": "payment-instruction",
+      "label": "Request funds to be paid to a silent payments address with a fallback:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?sp=sp1qsilentpayment",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 177,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?sp=sp1qsilentpayment"
+      }
+    },
+    {
+      "id": "uri-11-some-future-version-that-has-variables-which-are",
+      "kind": "payment-instruction",
+      "label": "Some future version that has variables which are (currently) not understood and required and thus invalid:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 180,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999"
+      }
+    },
+    {
+      "id": "uri-12-some-future-version-that-has-variables-which-are",
+      "kind": "payment-instruction",
+      "label": "Some future version that has variables which are (currently) not understood but not required and thus valid:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?somethingyoudontunderstand=50&somethingelseyoudontget=999",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 183,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?somethingyoudontunderstand=50&somethingelseyoudontget=999"
+      }
+    },
+    {
+      "id": "uri-13-multiple-segwit-addresses-may-be-included-for-va",
+      "kind": "payment-instruction",
+      "label": "Multiple segwit addresses may be included for various versions of segwit, note that the human-readable part for all of them is `bc`",
+      "uri": "bitcoin:?bc=bc1qufgy354j3kmvuch987xe4s40836x3h0lg8f5nq&bc=bc1p5swkugezn97763tl0yty6556856uug0q6jflljvep9m4p7339x5qzyrh4q",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 186,
+        "quote": "bitcoin:?bc=bc1qufgy354j3kmvuch987xe4s40836x3h0lg8f5nq&bc=bc1p5swkugezn97763tl0yty6556856uug0q6jflljvep9m4p7339x5qzyrh4q"
+      }
+    },
+    {
+      "id": "uri-14-many-qr-codes-utilize-all-uppercase-uris-which-s",
+      "kind": "payment-instruction",
+      "label": "Many QR codes utilize all-uppercase URIs, which should be handled fine",
+      "uri": "BITCOIN:BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ?BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 189,
+        "quote": "BITCOIN:BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ?BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q"
+      }
+    },
+    {
+      "id": "uri-15-bitcoin-bc1qufgy354j3kmvuch987xe4s40836x3h0lg8f5",
+      "kind": "payment-instruction",
+      "label": "BITCOIN:BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ?BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q",
+      "uri": "BITCOIN:?BC=BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ&BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 190,
+        "quote": "BITCOIN:?BC=BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ&BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q"
+      }
+    },
+    {
+      "id": "uri-16-a-testnet-segwit-addresses-must-be-included-in-t",
+      "kind": "payment-instruction",
+      "label": "A testnet segwit addresses must be included in the `tb` parameter",
+      "uri": "bitcoin:?tb=tb1qghfhmd4zh7ncpmxl3qzhmq566jk8ckq4gafnmq",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 193,
+        "quote": "bitcoin:?tb=tb1qghfhmd4zh7ncpmxl3qzhmq566jk8ckq4gafnmq"
+      }
+    },
+    {
+      "id": "uri-17-labels-must-not-appear-twice",
+      "kind": "payment-instruction",
+      "label": "Labels must not appear twice:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr&label=Matt",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 200,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr&label=Matt"
+      }
+    },
+    {
+      "id": "uri-18-amounts-must-not-appear-twice",
+      "kind": "payment-instruction",
+      "label": "Amounts must not appear twice:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=42&amount=10",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 203,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=42&amount=10"
+      }
+    },
+    {
+      "id": "uri-19-amounts-must-not-appear-twice-even-if-they-are-t",
+      "kind": "payment-instruction",
+      "label": "Amounts must not appear twice even if they are the same:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=42&amount=42",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 206,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=42&amount=42"
+      }
+    },
+    {
+      "id": "uri-20-multiple-proof-of-payment-uris-must-not-appear-e",
+      "kind": "payment-instruction",
+      "label": "Multiple proof of payment URIs must not appear, even if they are sometimes prefixed with req-:",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=callback%3a&req-pop=callback%3a",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 209,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=callback%3a&req-pop=callback%3a"
+      }
+    },
+    {
+      "id": "uri-21-a-testnet-segwit-addresses-must-be-included-in-t",
+      "kind": "payment-instruction",
+      "label": "A testnet segwit addresses must be included in the `tb` parameter, not the `bc` parameter.",
+      "uri": "bitcoin:?bc=tb1qghfhmd4zh7ncpmxl3qzhmq566jk8ckq4gafnmq",
+      "expected": "invalid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 212,
+        "quote": "bitcoin:?bc=tb1qghfhmd4zh7ncpmxl3qzhmq566jk8ckq4gafnmq"
+      }
+    },
+    {
+      "id": "uri-22-if-the-original-uri-is",
+      "kind": "payment-instruction",
+      "label": "If the original URI is",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 217,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a"
+      }
+    },
+    {
+      "id": "uri-23-if-the-original-uri-is",
+      "kind": "payment-instruction",
+      "label": "If the original URI is",
+      "uri": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop=",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 222,
+        "quote": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop="
+      }
+    },
+    {
+      "id": "uri-24-if-the-original-uri-is",
+      "kind": "payment-instruction",
+      "label": "If the original URI is",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 227,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f"
+      }
+    },
+    {
+      "id": "uri-25-if-the-original-uri-is",
+      "kind": "payment-instruction",
+      "label": "If the original URI is",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 234,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com"
+      }
+    },
+    {
+      "id": "uri-26-if-the-original-uri-is",
+      "kind": "payment-instruction",
+      "label": "If the original URI is",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com",
+      "expected": "valid",
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 238,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com"
+      }
+    }
+  ],
+  "callbacks": [
+    {
+      "id": "pop-onchain",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a",
+      "paymentMethod": "onchain",
+      "expectedCallback": "initiatingapp:onchain=$HEX_ENCODED_TRANSACTION",
+      "paymentAllowed": true,
+      "opensCallback": true,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 217,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a"
+      }
+    },
+    {
+      "id": "pop-lightning",
+      "uri": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop=",
+      "paymentMethod": "lightning",
+      "expectedCallback": "callbackuri:body?pop=lightning=$HEX_ENCODED_PAYMENT_PREIMAGE",
+      "paymentAllowed": true,
+      "opensCallback": true,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 222,
+        "quote": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop="
+      }
+    },
+    {
+      "id": "pop-choice-onchain",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f",
+      "paymentMethod": "onchain",
+      "expectedCallback": "app:?onchain=$HEX_ENCODED_TRANSACTION",
+      "paymentAllowed": true,
+      "opensCallback": true,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 227,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f"
+      }
+    },
+    {
+      "id": "pop-choice-lightning",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f",
+      "paymentMethod": "lightning",
+      "expectedCallback": "app:?lightning=$HEX_ENCODED_PAYMENT_PREIMAGE",
+      "paymentAllowed": true,
+      "opensCallback": true,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 227,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice&pop=app%3a%3f"
+      }
+    },
+    {
+      "id": "pop-web",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com",
+      "paymentMethod": "onchain",
+      "expectedCallback": null,
+      "paymentAllowed": true,
+      "opensCallback": false,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 234,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com"
+      }
+    },
+    {
+      "id": "req-pop-web",
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com",
+      "paymentMethod": "onchain",
+      "expectedCallback": null,
+      "paymentAllowed": false,
+      "opensCallback": false,
+      "origin": "published",
+      "source": {
+        "bip": 321,
+        "line": 238,
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com"
+      }
+    }
+  ]
+}

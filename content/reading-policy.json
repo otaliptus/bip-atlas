@@ -18,7 +18,12 @@
     "message-signing",
     "block-filters",
     "v2-transport",
-    "version-bits"
+    "version-bits",
+    "psbt-extensions",
+    "compact-blocks",
+    "rbf",
+    "payment-instructions",
+    "addrv2"
   ],
   "chapterRanges": {
     "psbt": {
@@ -75,6 +80,26 @@
     },
     "hd-wallets": {
       "min": 900,
+      "max": 1400
+    },
+    "psbt-extensions": {
+      "min": 1100,
+      "max": 1700
+    },
+    "compact-blocks": {
+      "min": 900,
+      "max": 1500
+    },
+    "rbf": {
+      "min": 850,
+      "max": 1400
+    },
+    "payment-instructions": {
+      "min": 900,
+      "max": 1500
+    },
+    "addrv2": {
+      "min": 850,
       "max": 1400
     }
   }

@@ -17,7 +17,7 @@ import {
 
 const root = new URL("../../../", import.meta.url);
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, root), "utf8"));
-const catalog = { chapters: ["catalog.json", "catalog-phase3.json"].flatMap((f) => read(f).chapters) };
+const catalog = { chapters: ["catalog.json", "catalog-phase3.json", "catalog-expansion.json"].flatMap((f) => read(f).chapters) };
 const policy = read("content/figure-policy.json") as { hero: number; supportingMin: number; supportingMax: number };
 const readingPolicy = read("content/reading-policy.json") as { chapterOrder: string[]; chapterRanges: Record<string, { min: number; max: number }> };
 const titlePolicy = read("content/title-policy.json") as { chapterTitles: Record<string, string> };

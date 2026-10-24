@@ -1,0 +1,75 @@
+---
+import type { AtlasData } from "@bip-atlas/publication";
+
+interface Props {
+  atlas: AtlasData;
+  chapters: Map<string, { title: string; bips: number[]; readingOrder: number }>;
+}
+const { atlas, chapters } = Astro.props;
+const { width, height, nodeWidth, nodeHeight } = atlas.map;
+const nodes = new Map(atlas.nodes.map((node) => [node.chapter, node]));
+const edgePath = (from: string, to: string, explicit?: string) => {
+  if (explicit) return explicit;
+  const a = nodes.get(from)!;
+  const b = nodes.get(to)!;
+  if (a.x === b.x) {
+    const forward = a.y < b.y;
+    const x = a.x + nodeWidth / 2;
+    return `M${x} ${forward ? a.y + nodeHeight : a.y} V${forward ? b.y : b.y + nodeHeight}`;
+  }
+  const forward = a.x < b.x;
+  const ax = forward ? a.x + nodeWidth : a.x;
+  const bx = forward ? b.x : b.x + nodeWidth;
+  return `M${ax} ${a.y + nodeHeight / 2} H${bx} V${b.y + nodeHeight / 2}`;
+};
+---
+<figure class="atlas-map" aria-labelledby="atlas-map-title">
+  <figcaption class="atlas-map__caption">
+    <p class="atlas-fig__title" id="atlas-map-title"><span class="atlas-fig__num">FIG. A00.1</span> A map of mechanisms, not a timeline</p>
+    <p>Solid arrows carry a mechanism into the next chapter. Dashed arrows mark a useful comparison. Every arrow is explained in the relationship ledger below.</p>
+  </figcaption>
+  <div class="atlas-map__canvas">
+    <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-labelledby="atlas-map-svg-title atlas-map-svg-desc">
+      <title id="atlas-map-svg-title">How the {atlas.nodes.length} BIP Atlas chapters relate</title>
+      <desc id="atlas-map-svg-desc">Chapter nodes with dependency and related-mechanism arrows. The same relationships and chapter links follow in HTML.</desc>
+      <defs>
+        <pattern id="atlas-map-grid" width="12" height="12" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="0.65" class="atlas-map__grid-dot" />
+        </pattern>
+        <marker id="atlas-map-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M1 1 L7 4 L1 7" class="atlas-map__arrowhead" />
+        </marker>
+        <marker id="atlas-map-arrow-related" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M1 1 L7 4 L1 7" class="atlas-map__arrowhead atlas-map__arrowhead--related" />
+        </marker>
+      </defs>
+      <rect width={width} height={height} fill="url(#atlas-map-grid)" />
+      <g class="atlas-map__legend" transform={`translate(${width - 360} ${height - 46})`}>
+        <path d="M0 0 H42" class="atlas-map__edge" />
+        <text x="52" y="4">BUILDS ON</text>
+        <path d="M150 0 H192" class="atlas-map__edge" data-kind="related" />
+        <text x="202" y="4">RELATED</text>
+      </g>
+      {atlas.relationships.map((edge) => (
+        <path
+          d={edgePath(edge.from, edge.to, edge.path)}
+          class="atlas-map__edge"
+          data-kind={edge.kind}
+          marker-end={`url(#atlas-map-arrow${edge.kind === "related" ? "-related" : ""})`}
+        ><title>{chapters.get(edge.from)!.title} → {chapters.get(edge.to)!.title}: {edge.label}</title></path>
+      ))}
+      {atlas.nodes.map((node) => {
+        const chapter = chapters.get(node.chapter)!;
+        return (
+          <a href={`/learn/${node.chapter}/`} class="atlas-map__node">
+            <title>{node.label}: {chapter.title}</title>
+            <rect x={node.x} y={node.y} width={nodeWidth} height={nodeHeight} />
+            <text class="atlas-map__node-label" x={node.x + 13} y={node.y + 25}>{node.label}</text>
+            <text class="atlas-map__node-meta" x={node.x + 13} y={node.y + 47}>CH. {String(chapter.readingOrder).padStart(2, "0")} · BIP {chapter.bips.map((n) => String(n).padStart(2, "0")).join("+")}</text>
+          </a>
+        );
+      })}
+    </svg>
+  </div>
+  <p class="atlas-map__mobile-note">The full plate stays on larger screens. On this screen, use the relationship ledger below: every arrow is written out with both chapter links.</p>
+</figure>

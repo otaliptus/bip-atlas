@@ -1,63 +1,98 @@
-# BIP Atlas implementation kit
+# BIP Atlas
 
-BIP Atlas is heavily inspired by [makingsoftware.com](https://makingsoftware.com).
+An illustrated, evidence-checked field guide to selected Bitcoin Improvement Proposals. Read the idea, try the mechanism, inspect the evidence.
 
-Start with **BIP_ATLAS_SPEC.md**, then **catalog.json**, then **prompts/BUILD_AND_COMPILER_PROMPTS.md**. The proposal is eight chapters covering ten primary BIPs, with a five-chapter first phase covering seven of them. Five additional BIPs are supporting context only.
+**[Open the live site](https://bip-atlas.pages.dev)** · [Relationship map](https://bip-atlas.pages.dev/map/) · [Capability atlas](https://bip-atlas.pages.dev/capabilities/) · [Methodology](https://bip-atlas.pages.dev/methodology/)
 
-## Included
+![The BIP Atlas cover, showing chapter search and the wallet-foundations trail](docs/images/cover.png)
 
-- `BIP_ATLAS_SPEC.md`: approximately 6,500-word BIP-specific specification.
-- `catalog.json`: chapter questions, scope, recipes, controls, misconceptions, and test families.
-- `design-tokens.css`: proposed visual tokens retained from the earlier Field Guide specification; no font files.
-- `prompts/BUILD_AND_COMPILER_PROMPTS.md`: coding kickoff and six generation/review roles.
-- `scripts/snapshot_sources.py`: immutable source snapshots from a complete local Git checkout.
-- `scripts/demo_models.py`: small deterministic teaching models for selected BIP39/141/173/350 behavior.
-- `tests/test_starter.py`: 36 offline unit tests, including selected published encoding vectors and a local Git snapshot test.
-- `tests/last-run.txt`: actual recorded test output.
-- `examples/address-fixtures.json`: values computed by the included decoder from selected public BIP350 examples.
+BIP Atlas is heavily inspired by [makingsoftware.com](https://makingsoftware.com). It uses static Astro pages, local Preact interactive islands, self-hosted fonts, and no analytics or third-party runtime services.
 
-## Run the actual starter tests
+## Current status
 
-Requires Python 3.10+ and Git. No Python third-party package is needed.
+- Twenty-three hand-authored chapters are implemented on `feat/atlas-experience`, with 158 illustrated figures. The five expansion chapters cover PSBTv2/Taproot/MuSig2 records (BIPs 370/371/373), Compact Block Relay (152), opt-in full-RBF (125), payment instructions (21/321), and addrv2 (155).
+- Every chapter currently remains a draft awaiting fresh technical review or formal sign-off. Independent technical review and automated checks do not constitute human approval.
+- `noindex` stays enabled until human sign-off. Passing tests and building the site do not constitute technical approval.
+- The models are teaching models, not wallets, production signers or full protocol-conformance suites.
 
-```sh
-python -m unittest discover -s tests -v
-```
+See [HANDOFF.md](HANDOFF.md) for the current engineering and review state. The site’s [methodology page](https://bip-atlas.pages.dev/methodology/) describes published vectors, additional checks and model limits chapter by chapter.
 
-These tests cover only the supplied starter. They are not a full BIP conformance suite or a website/accessibility/security audit. The generic publication schema from the previous kit is not silently extended by this package.
+## Explore the project
 
-## Snapshot real sources on your machine
+- **Five trails** organize the 23 chapters by wallet foundations, transactions, signatures, privacy, and network upgrades. Cover search accepts BIP numbers, mechanism names, aliases and questions.
+- **The relationship map** connects chapters through explicit mechanism dependencies and comparisons, with a complete HTML relationship ledger.
+- **“What am I holding?”** compares wallet artifacts by purpose, capability boundary, sharing consequence, and links into the evidence-bearing chapters.
+- **Mobile chapter layouts** put the opening figure before the long introduction and retain a disclosure TOC. Taproot uses a focused proof path on small screens.
+- **Exact figure URLs** round-trip the address checksum lab’s sample, position and edited character, and Taproot’s spending path, leaf and proof view. Eligible address fixtures link directly into the lab.
+- **Expansion figures** give each new chapter a distinct mechanism drawing. Labs pre-render every scenario and stage, use native selects for long example lists, and preserve a static reading path without JavaScript. MuSig2 shows participant keys, public nonces and partial signatures as a three-stage static sequence.
 
-Obtain a complete local checkout. Do not use a partial clone for the snapshot tool.
+The trails, map and capability atlas render without JavaScript. Cover search and interactive figures use JavaScript only where it adds behavior. The expansion adds no new Preact island or runtime dependency.
 
-```sh
-git clone https://github.com/bitcoin/bips.git vendor/bitcoin-bips
-```
+## Develop
 
-The research observed commit `3a10b5b5f0a7586df8928d580a3009744ebb2079` on 1 October 2026. To reproduce that source choice:
+Requirements: Node.js 20+, pnpm 9, and Python 3.10+ for the complete test suite. Git is also needed for source-snapshot tooling.
 
 ```sh
-python scripts/snapshot_sources.py \
-  --repo vendor/bitcoin-bips \
-  --revision 3a10b5b5f0a7586df8928d580a3009744ebb2079 \
-  --catalog catalog.json \
-  --out sources/research-2026-10-01
+pnpm install
+pnpm dev
 ```
 
-Use a fresh output directory. The script intentionally refuses an existing output path. For a future refresh, resolve and record a new full commit deliberately rather than replacing the revision with a mutable branch name.
+The development server runs on port 4321.
 
-The result includes original BIP files, their same-BIP auxiliary files, raw metadata, candidate headings, source hashes, Git blob IDs, and pinned canonical links. External fixture repositories are not automatically fetched. Raw source content retains its own licensing; inspect and preserve its notices before distribution.
+```sh
+pnpm check       # TypeScript checks
+pnpm test        # Vitest plus the Python starter/vector suite
+pnpm build       # Static production build
+pnpm preview     # Serve the build on port 4322
+```
 
-The parser is a preamble/heading starter, not a full MediaWiki AST. Complete the source adapter before generating articles automatically.
+CI runs the same install, typecheck, test and build sequence on pushes to `main`, pull requests, and manual runs. It deploys when the Cloudflare secrets are present: `main` to production, other refs to preview URLs.
 
-## What to build first
+For an explicit non-production branch deployment using the repository’s pinned Wrangler:
 
-Give the coding kickoff prompt to the coding model together with the spec and catalog. The first milestone is the **addresses** chapter, covering BIPs173 and 350, rendered from a manually prepared typed article. Connect the automated writer only after the first page's actual screenshots and correct fixture behavior are accepted.
+```sh
+pnpm build
+pnpm exec wrangler pages deploy apps/site/dist --project-name bip-atlas --branch=feat/atlas-experience
+```
 
-The larger `atlas ...` CLI in the spec describes commands to implement; this kit does not supply them. No LLM API is connected, no website is generated, no hosting is configured, and no external repository is modified.
+The branch flag keeps the `main` production deployment separate. Do not use a force deploy or change review states as part of deployment.
 
-## Research and execution boundaries
+## Repository map
 
-Research used bips.dev plus the connected GitHub repository and official documentation. Local execution could not access the network, so source acquisition was tested against a temporary local Git repository, not a downloaded current full BIPs repository. The inspected upstream commit is recorded as a research observation, not represented as a fully distributed source lock.
+- `apps/site/`: Astro routes, layouts, components, content loaders and styles.
+- `content/chapters/`: typed, question-led chapter publications.
+- `content/evidence/`: claim ledgers with exact source spans and quotations.
+- `content/atlas.json`: validated trails, map nodes and chapter relationships.
+- `content/capabilities.json`: artifact capability boundaries and source-section links.
+- `fixtures/`: published inputs and explicitly labelled synthetic teaching cases, with source-errata metadata where needed.
+- `packages/publication/`: publication and atlas contracts plus content tests.
+- `packages/models/`: deterministic teaching models, including the five expansion protocol models and their published-vector and boundary tests.
+- `packages/figures/`: illustration kit, chapter-specific mechanism motifs, pre-rendered lab states, and figure-view URL support.
+- `sources/`: pinned upstream files, hashes and source locks.
+- `review/`: editorial, technical, visual and accessibility review records.
+- `tools/`: screenshot, accessibility/tablet audit and vector-extraction scripts, including the stage-preserving expansion extractor.
 
-The demonstration models do not sign, broadcast, accept wallet credentials, or establish that an address is safe to receive money. Only public examples are appropriate for the proposed reader. No real recovery phrases, private keys, or arbitrary PSBT uploads belong in the first release.
+## Evidence and safety
+
+Chapters cite an exact `bitcoin/bips` revision. Validation checks claim references, verbatim source quotations, source commits, fixture provenance, external-vector hashes, figure recipes, and atlas/chapter links. PSBT fixtures also check hex against adjacent Base64; documented source typos and duplicates are recorded rather than hidden.
+
+Only public test vectors and explicitly marked synthetic fixtures belong in the project. The site does not accept real recovery phrases, private keys, arbitrary addresses, messages to sign, or PSBT uploads. It does not sign or broadcast transactions. Valid encodings do not establish ownership, balance, recipient safety or current consensus policy.
+
+BIP 321 supersedes BIP 21 in the payment-instructions chapter. Proof-of-payment callbacks are constructed locally, with only the published placeholder application schemes supported; browser and unknown schemes are refused. Nothing opens an application, sends a payment, contacts a peer or requests an external callback.
+
+Raw upstream source files retain their own licenses and notices. Do not replace those notices when refreshing snapshots.
+
+## Change or review content
+
+1. Read the chapter and its evidence ledger, not just the rendered page.
+2. Preserve source-line accuracy, fixture provenance, scope limits and the typed publication contract.
+3. Keep trails, map relationships and capability source links synchronized with chapter additions or section renames.
+4. Run `pnpm check`, `pnpm test`, and `pnpm build`.
+5. Inspect the actual production page at desktop, tablet and phone widths, including no-JavaScript reading and keyboard interaction.
+6. Leave review-state changes to the human review process. Do not treat editorial revisions, automated checks or screenshots as approval.
+
+The optional browser-audit tooling and its setup are documented in [HANDOFF.md](HANDOFF.md). Automated accessibility checks are not a substitute for a real screen-reader session.
+
+## Original implementation kit
+
+The original specification and starter artifacts remain in the repository, including `BIP_ATLAS_SPEC.md`, `catalog.json`, `catalog-phase3.json`, `design-tokens.css`, `prompts/`, `scripts/`, and the Python starter tests. They are design and research inputs, not the current application quick start. Expansion briefs live separately in `catalog-expansion.json`. [HANDOFF.md](HANDOFF.md) is the authoritative starting point for current implementation work.

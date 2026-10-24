@@ -1,0 +1,75 @@
+import type { RecipeDefinition } from "../registry";
+
+const lab = (id: string, description: string, fixtureKind: string, controls: string[]): RecipeDefinition => ({ id, description, minFixtures: 2, maxFixtures: 12, interactive: true, controls, fixtureKind, drawing: true });
+const plate = (id: string, description: string, fixtureKind: string): RecipeDefinition => ({ id, description, minFixtures: 1, maxFixtures: 12, interactive: false, controls: [], fixtureKind, drawing: true });
+
+export const EXPANSION_RECIPES: RecipeDefinition[] = [
+  lab("psbt-extension-records.v1", "Inspect published v2, Taproot and MuSig2 records and their validation state.", "psbt-extension", ["Choose published record family", "Inspect scope and key data", "Step through validation"]),
+  plate("psbt-overview.v1", "PSBT version, record count, locktime and validation summary.", "psbt-extension"),
+  plate("psbt-v2-globals.v1", "PSBTv2 global records and counts.", "psbt-extension"),
+  plate("psbt-v2-comparison.v1", "PSBTv0 and PSBTv2 construction compared.", "psbt-extension"),
+  plate("psbt-taproot-fields.v1", "Taproot keys, scripts, signatures and derivation fields.", "psbt-extension"),
+  plate("psbt-musig2-fields.v1", "MuSig2 participant keys, nonces and partial signatures.", "psbt-extension"),
+  plate("psbt-locktime.v1", "PSBTv2 locktime selection.", "psbt-extension"),
+  plate("psbt-extension-validation.v1", "Published PSBT extension errors and where they stop.", "psbt-extension"),
+
+  lab("compact-block-relay.v1", "Reconstruct a synthetic compact block, request missing transactions and compare short IDs.", "compact-block", ["Choose reconstruction scenario", "Step through relay and reconstruction", "Compare txid and wtxid"]),
+  plate("compact-block-overview.v1", "Full and compact block sizes compared.", "compact-block"),
+  plate("compact-short-id.v1", "Header and nonce into a six-byte short transaction ID.", "compact-block"),
+  plate("compact-relay-flow.v1", "High and low bandwidth relay flows and their best-case round trips.", "compact-block"),
+  plate("compact-differential-indexes.v1", "Absolute and differential transaction indexes.", "compact-block"),
+  plate("compact-collision.v1", "An ambiguous short-ID match and the safe fallback.", "compact-block"),
+
+  lab("rbf-replacement-gates.v1", "Step a synthetic replacement through the five BIP 125 policy gates.", "rbf-case", ["Choose a synthetic replacement", "Step through five policy gates", "Inspect fee and eviction arithmetic"]),
+  plate("rbf-overview.v1", "Original and replacement fees, signal and required total.", "rbf-case"),
+  plate("rbf-signals.v1", "Explicit and inherited opt-in signaling.", "rbf-case"),
+  plate("rbf-fee-arithmetic.v1", "Absolute fee and bandwidth-bump arithmetic.", "rbf-case"),
+  plate("rbf-policy-limits.v1", "Mempool policy, receiver caution and confirmation limits.", "rbf-case"),
+  plate("rbf-replacement-examples.v1", "A synthetic replacement and its gate results.", "rbf-case"),
+
+  lab("payment-instruction-lab.v1", "Parse a published URI, then construct or refuse its proof-of-payment callback.", "payment-instruction", ["Choose a published URI", "Switch instruction and callback view", "Inspect required-parameter refusal"]),
+  plate("payment-uri-anatomy.v1", "A payment URI split into scheme, address body, instructions and amount.", "payment-instruction"),
+  plate("payment-uri-history.v1", "BIP 21 to BIP 321: what changed.", "payment-instruction"),
+  plate("payment-uri-amount.v1", "Exact decimal BTC to satoshi conversion.", "payment-instruction"),
+  plate("payment-uri-duplicates.v1", "Singleton, payment-instruction and unknown-optional duplicates.", "payment-instruction"),
+  plate("payment-uri-pop.v1", "Proof-of-payment callback construction and scheme refusal.", "payment-instruction"),
+  plate("payment-uri-examples.v1", "A published URI and its expected outcome.", "payment-instruction"),
+
+  lab("addrv2-packet-lab.v1", "Inspect one addrv2 entry and its network-specific validation.", "addrv2", ["Choose a network fixture", "Inspect packet fields", "Compare acceptance and refusal"]),
+  plate("addrv2-packet.v1", "One addrv2 entry as a byte packet.", "addrv2"),
+  plate("addrv2-networks.v1", "Network IDs and exact address lengths.", "addrv2"),
+  plate("addrv2-negotiation.v1", "version, sendaddrv2 and verack ordering.", "addrv2"),
+  plate("addrv2-reserved.v1", "Deprecated Tor v2 and embedded-address ranges.", "addrv2"),
+  plate("addrv2-limits.v1", "Count, address-size and reachability limits.", "addrv2"),
+];
+
+export const EXPANSION_STATIC_VIEWS: Readonly<Record<string, string>> = {
+  "psbt-overview.v1": "overview",
+  "psbt-v2-globals.v1": "globals",
+  "psbt-v2-comparison.v1": "v2",
+  "psbt-taproot-fields.v1": "taproot",
+  "psbt-musig2-fields.v1": "musig2",
+  "psbt-locktime.v1": "locktime",
+  "psbt-extension-validation.v1": "validation",
+  "compact-block-overview.v1": "overview",
+  "compact-short-id.v1": "short-id",
+  "compact-relay-flow.v1": "flow",
+  "compact-differential-indexes.v1": "indexes",
+  "compact-collision.v1": "collision",
+  "rbf-overview.v1": "overview",
+  "rbf-signals.v1": "signals",
+  "rbf-fee-arithmetic.v1": "fees",
+  "rbf-policy-limits.v1": "policy",
+  "rbf-replacement-examples.v1": "examples",
+  "payment-uri-anatomy.v1": "overview",
+  "payment-uri-history.v1": "history",
+  "payment-uri-amount.v1": "amount",
+  "payment-uri-duplicates.v1": "duplicates",
+  "payment-uri-pop.v1": "pop",
+  "payment-uri-examples.v1": "examples",
+  "addrv2-packet.v1": "overview",
+  "addrv2-networks.v1": "networks",
+  "addrv2-negotiation.v1": "negotiation",
+  "addrv2-reserved.v1": "reserved",
+  "addrv2-limits.v1": "limits",
+};

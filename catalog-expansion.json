@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "bip-atlas.catalog.v1",
+  "projectName": "BIP Atlas (working name)",
+  "sourceRepository": "bitcoin/bips",
+  "observedResearchCommit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "observedResearchCommitDate": "2026-09-28T15:24:34Z",
+  "researchedAt": "2026-10-24",
+  "researchNote": "Five-chapter expansion at the same immutable source revision used by the existing atlas. Synthetic teaching fixtures are explicitly labelled and never presented as published vectors.",
+  "supportingBips": [141, 143, 144, 174, 327, 352],
+  "chapters": [
+    {
+      "id": "psbt-extensions",
+      "primaryBips": [370, 371, 373],
+      "phase": 4,
+      "readingOrder": 19,
+      "buildOrder": 19,
+      "questionTitle": "How does a PSBT learn to sign Taproot and MuSig2?",
+      "heroRecipe": "psbt-extension-records.v1",
+      "primitiveFamilies": ["key-value-map", "record-inspector", "role-flow"],
+      "allowedControls": ["Choose published record family", "Inspect scope and key data", "Step through validation"],
+      "misconceptionChecklist": [
+        "PSBTv2 is not PSBTv1; the next version after v0 is v2",
+        "Taproot and MuSig2 fields extend both PSBT versions",
+        "Parsing a record does not establish that signing is safe"
+      ],
+      "requiredTestFamilies": ["Published valid and invalid PSBTv2 globals", "Taproot field and tree vectors", "MuSig2 participant, nonce and partial-signature vectors"],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": { "min": 1100, "max": 1700 },
+      "figureBudget": { "hero": 1, "supportingMin": 3, "supportingMax": 8 },
+      "sourceLinks": ["https://bips.dev/370/", "https://bips.dev/371/", "https://bips.dev/373/"]
+    },
+    {
+      "id": "compact-blocks",
+      "primaryBips": [152],
+      "phase": 4,
+      "readingOrder": 20,
+      "buildOrder": 20,
+      "questionTitle": "How can a block arrive without every transaction?",
+      "heroRecipe": "compact-block-relay.v1",
+      "primitiveFamilies": ["packet-ribbon", "set-reconstruction", "role-flow"],
+      "allowedControls": ["Choose reconstruction scenario", "Step through relay and reconstruction", "Compare txid and wtxid"],
+      "misconceptionChecklist": [
+        "A short ID is not a cryptographic transaction identifier",
+        "A missing transaction needs a round trip, not a guessed replacement",
+        "Collisions fall back rather than banning a peer"
+      ],
+      "requiredTestFamilies": ["Independent short-ID values", "Differential index arithmetic", "Missing, mismatched and colliding reconstruction scenarios"],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": { "min": 900, "max": 1500 },
+      "figureBudget": { "hero": 1, "supportingMin": 3, "supportingMax": 8 },
+      "sourceLinks": ["https://bips.dev/152/"]
+    },
+    {
+      "id": "rbf",
+      "primaryBips": [125],
+      "phase": 4,
+      "readingOrder": 21,
+      "buildOrder": 21,
+      "questionTitle": "When can an unconfirmed transaction be replaced?",
+      "heroRecipe": "rbf-replacement-gates.v1",
+      "primitiveFamilies": ["mempool-comparison", "validation-gates", "fee-meter"],
+      "allowedControls": ["Choose a synthetic replacement", "Step through five policy gates", "Inspect fee and eviction arithmetic"],
+      "misconceptionChecklist": [
+        "Opt-in signaling is not a promise of replacement",
+        "Higher fee rate alone does not satisfy every rule",
+        "Mempool policy is not consensus or confirmation"
+      ],
+      "requiredTestFamilies": ["Explicit and inherited signals", "Every replacement gate and boundary", "The BIP's 500-byte bandwidth example"],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": { "min": 850, "max": 1400 },
+      "figureBudget": { "hero": 1, "supportingMin": 3, "supportingMax": 8 },
+      "sourceLinks": ["https://bips.dev/125/"]
+    },
+    {
+      "id": "payment-instructions",
+      "primaryBips": [21, 321],
+      "phase": 4,
+      "readingOrder": 22,
+      "buildOrder": 22,
+      "questionTitle": "How does a link become a payment instruction?",
+      "heroRecipe": "payment-instruction-lab.v1",
+      "primitiveFamilies": ["uri-anatomy", "instruction-router", "callback-gate"],
+      "allowedControls": ["Choose a published URI", "Switch instruction and callback view", "Inspect required-parameter refusal"],
+      "misconceptionChecklist": [
+        "BIP 21 is superseded by BIP 321",
+        "An empty address body still needs a payment instruction",
+        "A callback is not permission to open a web URL"
+      ],
+      "requiredTestFamilies": ["Every published valid and invalid URI", "Duplicate and case rules", "Proof-of-payment construction and refused schemes"],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": { "min": 900, "max": 1500 },
+      "figureBudget": { "hero": 1, "supportingMin": 3, "supportingMax": 8 },
+      "sourceLinks": ["https://bips.dev/21/", "https://bips.dev/321/"]
+    },
+    {
+      "id": "addrv2",
+      "primaryBips": [155],
+      "phase": 4,
+      "readingOrder": 23,
+      "buildOrder": 23,
+      "questionTitle": "How do nodes share addresses that do not fit in 16 bytes?",
+      "heroRecipe": "addrv2-packet-lab.v1",
+      "primitiveFamilies": ["packet-ribbon", "network-registry", "validation-gates"],
+      "allowedControls": ["Choose a network fixture", "Inspect packet fields", "Compare acceptance and refusal"],
+      "misconceptionChecklist": [
+        "Variable address length does not mean arbitrary length",
+        "Tor v2 is deprecated and must not be relayed",
+        "A decodable endpoint is not proof of reachability"
+      ],
+      "requiredTestFamilies": ["Every network length and round trip", "Non-minimal and truncated encodings", "Unknown, reserved and oversized inputs"],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": { "min": 850, "max": 1400 },
+      "figureBudget": { "hero": 1, "supportingMin": 3, "supportingMax": 8 },
+      "sourceLinks": ["https://bips.dev/155/"]
+    }
+  ],
+  "supportingNote": "BIPs 141, 143, 144, 174, 327 and 352 provide transaction, PSBT, signing and payment-instruction context. Their full chapters live elsewhere in the atlas."
+}

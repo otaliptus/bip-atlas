@@ -124,7 +124,7 @@ async function walkKeyboard(page, figSel, shots) {
     const beforeText = await page.evaluate(heroText, figSel);
     const beforeLive = await page.evaluate(liveText, figSel);
     let key = null;
-    if (info.type === "radio") key = "ArrowDown";
+    if (info.type === "radio" || info.tag === "select") key = "ArrowDown";
     else if (info.type === "checkbox") key = "Space";
     else if (info.role === "tab") key = "ArrowRight";
     else if (info.tag === "button" || info.role === "button" || info.tag === "summary") key = "Enter";

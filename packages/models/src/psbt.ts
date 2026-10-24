@@ -139,6 +139,52 @@ export function parsePsbt(hex: string): Psbt {
   }
 }
 
+export interface PsbtMapSequence {
+  global: PsbtRecord[];
+  inputs: PsbtRecord[][];
+  outputs: PsbtRecord[][];
+}
+
+function mapCount(global: PsbtRecord[], keyType: number): number {
+  const record = global.find((r) => r.keyType === keyType);
+  if (!record) throw new PsbtError(`Missing required count field 0x${keyType.toString(16)}.`);
+  const { value, length } = readCompactSizeFrom(hexToBytes(record.valueHex));
+  if (length !== record.valueHex.length / 2) throw new PsbtError(`Count field 0x${keyType.toString(16)} has trailing bytes.`);
+  return value;
+}
+
+/** Parse global, input and output maps using v2 counts or the v0 unsigned transaction for map counts. */
+export function parsePsbtMapSequence(hex: string, counts?: { inputs: number; outputs: number }): PsbtMapSequence {
+  const bytes = hexToBytes(hex);
+  if (bytesToHex(bytes.slice(0, 5)) !== PSBT_MAGIC) throw new PsbtError("Missing the psbt magic bytes 70 73 62 74 ff.");
+  const r = new Reader(bytes);
+  r.take(5);
+  const global = readMap(r, "global");
+  global.forEach((rec) => {
+    checkKey("global", rec);
+    checkValue("global", rec);
+  });
+  const txRecord = global.find((g) => g.keyType === 0x00);
+  const resolved = counts ?? (txRecord
+    ? (() => { const tx = parseUnsignedTx(txRecord.valueHex); return { inputs: tx.inputs.length, outputs: tx.outputs.length }; })()
+    : { inputs: mapCount(global, 0x04), outputs: mapCount(global, 0x05) });
+  if (!Number.isInteger(resolved.inputs) || !Number.isInteger(resolved.outputs) || resolved.inputs < 0 || resolved.outputs < 0) throw new PsbtError("Invalid map counts.");
+  const inputs: PsbtRecord[][] = [];
+  for (let i = 0; i < resolved.inputs; i++) {
+    const map = readMap(r, `input ${i}`);
+    map.forEach((rec) => { checkKey("input", rec); checkValue("input", rec); });
+    inputs.push(map);
+  }
+  const outputs: PsbtRecord[][] = [];
+  for (let i = 0; i < resolved.outputs; i++) {
+    const map = readMap(r, `output ${i}`);
+    map.forEach((rec) => { checkKey("output", rec); checkValue("output", rec); });
+    outputs.push(map);
+  }
+  if (!r.done) throw new PsbtError("Unexpected data after the last output map.");
+  return { global, inputs, outputs };
+}
+
 /** The unsigned transaction must use the old serialization: it must parse as one, consuming every byte. */
 function parseUnsignedTx(valueHex: string): Transaction {
   try {

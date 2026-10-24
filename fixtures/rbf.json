@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "rbf",
+  "warning": "Synthetic policy cases, not real mempool contents or current-node conformance vectors. Fees and virtual sizes are chosen to make the BIP 125 rules inspectable.",
+  "fixtures": [
+    {
+      "id": "rbf-explicit-pass",
+      "kind": "rbf-case",
+      "label": "Explicit signal and exact fee boundary (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967293], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a"], "unconfirmedInputs": [], "feeSats": 700, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 40, "quote": "any of its inputs have an nSequence number less than (0xffffffff - 1)" }
+    },
+    {
+      "id": "rbf-inherited-pass",
+      "kind": "rbf-case",
+      "label": "Replaceability inherited from an unconfirmed ancestor (synthetic)",
+      "origin": "synthetic",
+      "ancestry": [
+        { "id": "parent", "inputs": ["a"], "sequences": [4294967293], "feeSats": 300, "vbytes": 150, "unconfirmed": true, "ancestors": [] }
+      ],
+      "originals": [
+        { "id": "child", "inputs": ["b"], "sequences": [4294967295], "feeSats": 200, "vbytes": 150, "unconfirmed": true, "ancestors": ["parent"] }
+      ],
+      "candidate": { "inputs": ["b"], "unconfirmedInputs": [], "feeSats": 700, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 42, "quote": "as long as any one of their ancestors signals replaceability and remains unconfirmed" }
+    },
+    {
+      "id": "rbf-no-signal",
+      "kind": "rbf-case",
+      "label": "No explicit or inherited opt-in (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967295], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a"], "unconfirmedInputs": [], "feeSats": 1000, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 40, "quote": "any of its inputs have an nSequence number less than (0xffffffff - 1)" }
+    },
+    {
+      "id": "rbf-new-unconfirmed-input",
+      "kind": "rbf-case",
+      "label": "A new unconfirmed input (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967293], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a", "x"], "unconfirmedInputs": ["x"], "feeSats": 1000, "vbytes": 250 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 54, "quote": "The replacement transaction may only include an unconfirmed input if that input was included in one of the original transactions." }
+    },
+    {
+      "id": "rbf-low-absolute-fee",
+      "kind": "rbf-case",
+      "label": "Absolute fee goes down (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967293], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a"], "unconfirmedInputs": [], "feeSats": 400, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 56, "quote": "The replacement transaction pays an absolute fee of at least the sum paid by the original transactions." }
+    },
+    {
+      "id": "rbf-low-bandwidth-bump",
+      "kind": "rbf-case",
+      "label": "Higher fee rate, insufficient absolute bandwidth bump (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967293], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a"], "unconfirmedInputs": [], "feeSats": 650, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 58, "quote": "For example, if the minimum relay fee is 1 satoshi/byte and the replacement transaction is 500 bytes total, then the replacement must pay a fee at least 500 satoshis higher than the sum of the originals." }
+    },
+    {
+      "id": "rbf-eviction-overflow",
+      "kind": "rbf-case",
+      "label": "One eviction too many (synthetic)",
+      "origin": "synthetic",
+      "originals": [{ "id": "original", "inputs": ["a"], "sequences": [4294967293], "feeSats": 500, "vbytes": 200, "unconfirmed": true, "ancestors": [] }],
+      "candidate": { "inputs": ["a"], "unconfirmedInputs": [], "feeSats": 700, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 101,
+      "source": { "bip": 125, "line": 60, "quote": "must not exceed a total of 100 transactions" }
+    },
+    {
+      "id": "rbf-ancestor-confirmed",
+      "kind": "rbf-case",
+      "label": "The signaling ancestor has confirmed (synthetic)",
+      "origin": "synthetic",
+      "ancestry": [
+        { "id": "parent", "inputs": ["a"], "sequences": [4294967293], "feeSats": 300, "vbytes": 150, "unconfirmed": false, "ancestors": [] }
+      ],
+      "originals": [
+        { "id": "child", "inputs": ["b"], "sequences": [4294967295], "feeSats": 200, "vbytes": 150, "unconfirmed": true, "ancestors": ["parent"] }
+      ],
+      "candidate": { "inputs": ["b"], "unconfirmedInputs": [], "feeSats": 700, "vbytes": 200 },
+      "minRelayFeeRate": 1,
+      "evictedCount": 1,
+      "source": { "bip": 125, "line": 42, "quote": "as long as any one of their ancestors signals replaceability and remains unconfirmed" }
+    }
+  ]
+}

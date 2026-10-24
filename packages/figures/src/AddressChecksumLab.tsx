@@ -5,6 +5,37 @@ import { Drawing, Machine, Responsive, Value, idsFor } from "./kit";
 import type { Role } from "./kit";
 import { ROLE_LABELS, familyName, stageLabel, summarize } from "./describe";
 import type { AddressFixture } from "./types";
+import { readFigureView } from "./share";
+import { ShareView } from "./ShareView";
+
+export interface AddressViewState {
+  fixtureId: string;
+  edit: { index: number; char: string } | null;
+  cursor: number;
+}
+
+export function addressViewFromSearch(search: string, figureId: string, fixtures: AddressFixture[], initial: AddressViewState): AddressViewState {
+  const shared = readFigureView(search, figureId);
+  if (!Object.keys(shared).length) return initial;
+  const fixture = shared.sample === undefined ? fixtures.find((f) => f.id === initial.fixtureId) : fixtures.find((f) => f.id === shared.sample);
+  if (!fixture) return initial;
+  const original = fixture.address;
+  const dataStart = original.lastIndexOf("1") + 1;
+  let cursor = fixture.id === initial.fixtureId ? initial.cursor : original.length - 1;
+  if (shared.at !== undefined) {
+    const at = Number(shared.at);
+    if (!Number.isInteger(at) || at < dataStart || at >= original.length) return initial;
+    cursor = at;
+  }
+  if (cursor < dataStart || cursor >= original.length) return initial;
+  let edit: AddressViewState["edit"] = null;
+  if (shared.char !== undefined) {
+    const char = shared.char.toLowerCase();
+    if (char.length !== 1 || !CHARSET.includes(char)) return initial;
+    if (char !== original[cursor].toLowerCase()) edit = { index: cursor, char: original === original.toUpperCase() ? char.toUpperCase() : char };
+  }
+  return { fixtureId: fixture.id, cursor, edit };
+}
 
 interface Props {
   fixtures: AddressFixture[];
@@ -29,7 +60,6 @@ export const ROLE_FILL: Record<CharacterRole, Role> = { hrp: "net", separator: "
  */
 export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
   const start = initial ?? { fixtureId: fixtures[0].id, edit: null };
   const [fixtureId, setFixtureId] = useState(start.fixtureId);
   const fixture = fixtures.find((f) => f.id === fixtureId);
@@ -38,6 +68,18 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
   const dataStart = original.lastIndexOf("1") + 1;
   const [edit, setEdit] = useState(start.edit);
   const [cursor, setCursor] = useState(start.cursor ?? original.length - 1);
+  useEffect(() => {
+    const startFixture = fixtures.find((f) => f.id === start.fixtureId) ?? fixtures[0];
+    const restored = addressViewFromSearch(window.location.search, figureId, fixtures, {
+      fixtureId: start.fixtureId,
+      edit: start.edit,
+      cursor: start.cursor ?? startFixture.address.length - 1,
+    });
+    setFixtureId(restored.fixtureId);
+    setEdit(restored.edit);
+    setCursor(restored.cursor);
+    setHydrated(true);
+  }, [figureId, fixtures]);
   const text = edit ? original.slice(0, edit.index) + edit.char + original.slice(edit.index + 1) : original;
   const analysis = useMemo(() => analyzeSegwitAddress(text, fixture.network), [text, fixture.network]);
   const roles = useMemo(() => analyzeSegwitAddress(original, fixture.network).roles, [original, fixture.network]);
@@ -242,6 +284,7 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
           <button type="button" class="atlas-scrub__btn" onClick={() => moveTo(Math.min(original.length - 1, cursor + 1))} disabled={cursor >= original.length - 1} aria-label="Next position">→</button>
         </div>
       ) : null}
+      {hydrated ? <p class="atlas-hero__position">Position {cursor + 1} of {original.length} · {ROLE_LABELS[roles[cursor]].toLowerCase()} · “{chars[cursor]}”</p> : null}
       <p class="atlas-hero__status" aria-live="polite">
         <span class="atlas-lab__verdict" data-valid={analysis.valid ? "true" : "false"} aria-hidden="true">{analysis.valid ? "✓ Accepted" : "✕ Rejected"}</span> {status}
       </p>
@@ -253,6 +296,7 @@ export function AddressChecksumLab({ fixtures, figureId, initial }: Props) {
           {analysis.valid ? <><dt>Witness program</dt><dd><code class="atlas-break">{analysis.programHex}</code></dd><dt>scriptPubKey</dt><dd><code class="atlas-break">{analysis.scriptPubKeyHex}</code></dd></> : null}
         </dl>
       </details>
+      {hydrated ? <ShareView figureId={figureId} values={{ sample: fixtureId, at: String(cursor), char: edit?.char ?? null }} /> : null}
       <p class="atlas-hero__source">Sample: BIP {fixture.source.bip}, line {fixture.source.line} ({fixture.source.section}). Public test material; never send funds to it.</p>
     </div>
   );

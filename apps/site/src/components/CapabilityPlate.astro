@@ -1,0 +1,44 @@
+---
+import type { CapabilityArtifact } from "@bip-atlas/publication";
+
+interface Props {
+  artifact: CapabilityArtifact;
+  index: number;
+}
+const { artifact, index } = Astro.props;
+---
+<article class="capability" id={artifact.id} data-classification={artifact.classification} aria-labelledby={`capability-${artifact.id}-title`}>
+  <header class="capability__head">
+    <span class="capability__number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+    <div class="capability__identity">
+      <p class="capability__marker">{artifact.marker} · {artifact.classification}</p>
+      <h2 id={`capability-${artifact.id}-title`}>{artifact.label}</h2>
+      <p>{artifact.madeFor}</p>
+    </div>
+  </header>
+  <div class="capability__boundaries">
+    <section class="capability__gate" data-gate="can">
+      <span class="capability__gate-index">01</span>
+      <h3>What it can do</h3>
+      <p>{artifact.canDo}</p>
+    </section>
+    <section class="capability__gate" data-gate="cannot">
+      <span class="capability__gate-index">02</span>
+      <h3>What it cannot establish</h3>
+      <p>{artifact.cannotEstablish}</p>
+    </section>
+    <section class="capability__gate" data-gate="sharing">
+      <span class="capability__gate-index">03</span>
+      <h3>What sharing costs</h3>
+      <p>{artifact.sharing}</p>
+    </section>
+  </div>
+  <footer class="capability__sources">
+    <span class="capability__sources-label">EVIDENCE TRAIL</span>
+    <ol>
+      {artifact.sources.map((source) => (
+        <li><a href={`/learn/${source.chapter}/#${source.section}`}>{source.label}<span aria-hidden="true"> →</span></a></li>
+      ))}
+    </ol>
+  </footer>
+</article>

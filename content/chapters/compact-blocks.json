@@ -1,0 +1,208 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "compact-blocks",
+  "primaryBips": [152],
+  "specimenLabel": "BIP 0152",
+  "title": "How can a block arrive without every transaction?",
+  "dek": "Compact Block Relay sends short transaction IDs and a few full transactions. A receiver matches what it already has, asks only for what is missing, and falls back when a match is ambiguous.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-10-01-expansion",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Nodes often learn about most of a block’s transactions before the block itself arrives. Sending those transactions again wastes bandwidth. BIP 152 lets a peer send a compact description instead: an 80-byte header, a nonce, six-byte short IDs and selected full transactions.",
+        "claims": ["relay-purpose", "header-shape"]
+      },
+      {
+        "type": "paragraph",
+        "text": "This chapter uses a synthetic teaching block, not a published compact-block vector or a block to mine. Two transactions come from BIP 143’s public examples; the coinbase-shaped transaction is synthetic structure only. The model computes native short IDs and byte counts. One scenario explicitly injects an ambiguous match so the fallback can be inspected without claiming a naturally occurring collision.",
+        "claims": ["synthetic-fixture", "published-transactions"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A20.1",
+      "recipe": "compact-block-overview.v1",
+      "title": "A block without every transaction",
+      "fixtures": ["compact-all-local"],
+      "caption": "The synthetic full block and compact announcement, to scale. Short IDs and one prefilled transaction avoid sending the other two transactions again when they are already local.",
+      "claims": ["relay-purpose", "synthetic-fixture"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "relay",
+      "heading": "Send a sketch, not the whole block",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Compact relay has two modes. In high-bandwidth mode, a peer can announce a compact block immediately, potentially before full validation. If the receiver already has every transaction, reconstruction can avoid another transaction round trip. Low-bandwidth mode starts with an ordinary announcement and asks for the compact block only when wanted.",
+          "claims": ["high-bandwidth", "low-bandwidth"]
+        },
+        {
+          "type": "paragraph",
+          "text": "`sendcmpct` negotiates this exchange before the compact block arrives. A node must not request a compact block before receiving that message, or before sending all of its own intended version announcements. An unknown version is treated as though that announcement had not arrived, not as permission to guess an encoding.",
+          "claims": ["sendcmpct"]
+        },
+        {
+          "type": "paragraph",
+          "text": "A compact block is not just a smaller block header. It also carries short IDs and prefilled transactions. Prefilled entries let the sender include the coinbase and anything the receiver probably lacks. BIP 152 recommends keeping prefilled data to at most 10 KB and, when in doubt, including only the coinbase.",
+          "claims": ["prefill-purpose", "prefill-limit"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The reply to a request for missing transactions is exact too. A `blocktxn` response contains exactly the transactions at the requested indexes, in the requested order, and nothing else. Those returned transactions can then join the prefilled entries and local matches during reconstruction; the receiver does not need to accept an approximate block or a second copy of everything.",
+          "claims": ["missing-request", "reconstruct-order"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.2",
+          "recipe": "compact-relay-flow.v1",
+          "title": "Two ways to start",
+          "fixtures": ["compact-all-local"],
+          "caption": "High-bandwidth mode can send short IDs in the first announcement. Low-bandwidth mode asks for them first. Missing transactions add a round trip in either mode.",
+          "claims": ["high-bandwidth", "low-bandwidth"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "short-ids",
+      "heading": "Six bytes stand for a transaction",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The short ID starts with SHA-256 of the 80-byte header followed by the 8-byte nonce. The first 16 bytes supply two little-endian 64-bit SipHash-2-4 keys. Hash the transaction ID and keep only 48 bits, serialized as six bytes. A per-connection nonce can make matching contexts independent, limiting a block creator’s control over where collisions occur.",
+          "claims": ["short-id-key", "nonce-purpose"]
+        },
+        {
+          "type": "paragraph",
+          "text": "That does not require a fresh announcement for every peer. A node may choose one nonce per block and reuse the resulting compact message for all its peers, but it should not reuse that nonce across different blocks. The nonce is not a secret or a signature; it is an input to matching. The header-and-nonce key must be computed again for the next block rather than treated as a permanent connection key.",
+          "claims": ["nonce-reuse", "nonce-purpose", "short-id-key"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Version 1 computes short IDs from txid. Version 2 uses wtxid for SegWit transactions, so the witness participates in compact-block matching. The truncated ID is still a lookup hint, not a replacement for the transaction’s full cryptographic identity or proof that the transaction belongs in the block.",
+          "claims": ["v2-wtxid", "short-id-not-unique", "scope-not-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.3",
+          "recipe": "compact-short-id.v1",
+          "title": "Header and nonce into a short ID",
+          "fixtures": ["compact-all-local"],
+          "caption": "SHA-256 of header and nonce supplies the SipHash key. The low 48 bits become the six-byte short ID shown here. This is a computed synthetic example, not a published vector.",
+          "claims": ["short-id-key", "synthetic-fixture"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "reconstruct",
+      "heading": "Match, request, rebuild",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The receiver computes short IDs for transactions it already knows. A unique match supplies a transaction locally. If no match exists, the receiver asks for that full transaction with `getblocktxn`. If more than one available transaction matches, the receiver cannot choose between them; the teaching model takes the full-block fallback rather than treating the first match as authoritative.",
+          "claims": ["local-match", "missing-request", "collision-fallback"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The request identifies gaps by their positions in the announced block. Indexes are differentially encoded: the previous index starts at −1, and each value is `index − previous − 1`. Thus 0, 1, 3, 10 becomes 0, 0, 1, 6. Consecutive gaps are cheap to encode, while the positions still identify exactly which full transactions are needed.",
+          "claims": ["differential-indexes", "missing-request"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Reassembly keeps the original order. Prefilled transactions occupy their marked positions; the other positions are filled in short-ID order using local matches or the returned `blocktxn` transactions. The requested indexes therefore describe locations in the final block, not a request to append missing transactions at the end. Only after reconstruction does ordinary block processing take over.",
+          "claims": ["reconstruct-order", "scope-not-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.4",
+          "recipe": "compact-differential-indexes.v1",
+          "title": "Absolute indexes to differential indexes",
+          "fixtures": ["compact-one-missing"],
+          "caption": "The missing transaction is at absolute index 1, so its differential index is 1. The model also shows the BIP’s 0, 1, 3, 10 example becoming 0, 0, 1, 6.",
+          "claims": ["differential-indexes", "reconstruct-order"],
+          "layout": "prose"
+        },
+        {
+          "type": "figure",
+          "figure": "A20.5",
+          "recipe": "compact-block-relay.v1",
+          "title": "Reconstruction lab",
+          "fixtures": ["compact-all-local", "compact-one-missing", "compact-collision"],
+          "caption": "Choose a scenario, then move from announcement to matching, reconstruction and identifier comparison. Native short IDs and indexes are computed; the ambiguity scenario injects a match between two non-prefilled transactions.",
+          "claims": ["local-match", "missing-request", "reconstruct-order", "synthetic-fixture"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "collision",
+      "heading": "When a short ID is not enough",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Six bytes cannot make every transaction unique. BIP 152 explicitly expects occasional collisions and says peers must not be penalized for them. A collision is not permission to pick the first match, and it is not a reason to ban the peer.",
+          "claims": ["short-id-not-unique", "collision-fallback"]
+        },
+        {
+          "type": "paragraph",
+          "text": "When this model sees several available transactions with the same short ID, it stops and requests the full block. That is its conservative fallback, not a universal requirement to fetch the whole block for every collision. BIP 152’s rationale instead distinguishes what the receiver can know from the short IDs alone:",
+          "claims": ["collision-fallback", "collision-cases"]
+        },
+        {
+          "type": "list",
+          "items": [
+            "Exactly one match, and it is correct: reconstruction can use it.",
+            "No matches: request the full transaction.",
+            "Several matches, including the correct one: uncertainty calls for full data.",
+            "Several matches, all incorrect: uncertainty still calls for full data.",
+            "Exactly one match, but it is incorrect: reconstruction fails."
+          ],
+          "claims": ["collision-cases"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Only the last case looks unambiguous locally while being wrong. The first four can be resolved by requesting data, but the fifth needs the failure to be discovered and ordinary relay to take over. This is why a diagram showing no ambiguous match is not a proof that every selected transaction is correct, and why collision handling ends in normal validation rather than a special exemption.",
+          "claims": ["collision-cases", "scope-not-validation"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.6",
+          "recipe": "compact-collision.v1",
+          "title": "Ambiguity forces a safe fallback",
+          "fixtures": ["compact-collision"],
+          "caption": "The fixture injects the native transaction’s short ID onto the nested transaction, so both available candidates match. Their native IDs differ; the model refuses to guess and requests the full block.",
+          "claims": ["collision-fallback", "synthetic-fixture"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "Where the saving stops",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Compact relay changes bandwidth use, not the requirement to validate. High-bandwidth mode may send a compact block before full validation, but it does not prove that the block’s transactions are valid. BIP 152 calls out the additional care required for SPV nodes.",
+          "claims": ["prevalidation", "scope-not-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "For nodes with enough inbound bandwidth, BIP 152 recommends high-bandwidth mode with up to three peers, preferably those that have delivered recent blocks quickly. It forbids enabling that mode for more than three peers because repeated early announcements waste outbound bandwidth. Selecting a fast peer is a latency optimization, not a reason to trust its transactions; the validation boundary still applies.",
+          "claims": ["peer-limit", "prevalidation", "scope-not-validation"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The practical lesson is not ‘six bytes are enough’. It is that a node can avoid resending what it already knows, request only the gaps, and still refuse to reconstruct when those gaps become ambiguous.",
+          "claims": ["relay-purpose", "collision-fallback", "scope-not-validation"]
+        }
+      ]
+    }
+  ]
+}

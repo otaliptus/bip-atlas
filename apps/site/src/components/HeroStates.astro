@@ -16,6 +16,7 @@ const { figureId, spec } = Astro.props;
 const keyed = spec.controls.filter((c) => c.kind !== "toggle");
 const controls = keyed.map((c) => ({ kind: c.kind, name: c.name, options: c.options.map((o) => ({ value: o.value, resets: o.resets ?? [] })), sets: c.sets ?? {}, showWhen: c.showWhen ?? null }));
 const strips = spec.controls.filter((c) => c.kind === "strip");
+const selects = spec.controls.filter((c) => c.kind === "select");
 const toggles = spec.controls.filter((c) => c.kind === "toggle");
 const stepper = spec.controls.find((c) => c.kind === "stepper");
 const initial = spec.initialKey.split("|");
@@ -33,6 +34,14 @@ const at = (name: string) => initial[keyed.findIndex((c) => c.name === name)];
           </label>
         ))}
       </div>
+    ))}
+    {selects.map((c) => (
+      <label class="atlas-select">
+        <span>{c.label}</span>
+        <select data-choice={c.name} aria-label={c.label}>
+          {c.options.map((o) => <option value={o.value} selected={at(c.name) === o.value}>{o.text}</option>)}
+        </select>
+      </label>
     ))}
     {toggles.map((c) => (
       <label class="atlas-toggle"><input type="checkbox" data-toggle={c.name} /> <span>{c.label}</span></label>
@@ -72,6 +81,10 @@ const at = (name: string) => initial[keyed.findIndex((c) => c.name === name)];
         if (c.kind === "strip") {
           for (const i of radios(c)) i.checked = i.value === value[c.name];
           root.querySelector<HTMLElement>(`[data-strip="${c.name}"]`)!.hidden = !!c.showWhen && value[c.showWhen.name] !== c.showWhen.value;
+        } else if (c.kind === "select") {
+          const select = root.querySelector<HTMLSelectElement>(`[data-choice="${c.name}"]`)!;
+          select.value = value[c.name];
+          select.closest("label")!.hidden = !!c.showWhen && value[c.showWhen.name] !== c.showWhen.value;
         } else if (range) {
           const at = c.options.findIndex((o) => o.value === value[c.name]);
           range.value = String(at);
@@ -90,6 +103,7 @@ const at = (name: string) => initial[keyed.findIndex((c) => c.name === name)];
       show();
     };
     for (const c of controls.filter((x) => x.kind === "strip")) for (const i of radios(c)) i.addEventListener("change", () => set(c.name, i.value));
+    for (const select of root.querySelectorAll<HTMLSelectElement>("[data-choice]")) select.addEventListener("change", () => set(select.dataset.choice!, select.value));
     const step = controls.find((x) => x.kind === "stepper");
     if (step && range) {
       range.addEventListener("input", () => set(step.name, step.options[Number(range.value)].value, true));
