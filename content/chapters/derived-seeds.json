@@ -6,7 +6,7 @@
   "title": "How can one backup create separate seeds for other wallets?",
   "dek": "BIP 85 turns one BIP 32 root key into separate entropy for each wallet, key or password. A hardened path names each use, and HMAC-SHA512 keeps an output from leading back to the root.",
   "authorship": "hand-authored",
-  "reviewState": "draft-unreviewed",
+  "reviewState": "in-review",
   "sourceSnapshot": "sources/research-2026-11-08-phase4",
   "opening": {
     "blocks": [
@@ -17,7 +17,7 @@
       },
       {
         "type": "paragraph",
-        "text": "With BIP 85 the user keeps a single backup, a BIP 32 root key, and each application derives its own entropy from it. The receiving wallet uses that entropy the way it would use freshly generated randomness: as a BIP 39 mnemonic, a private key, an extended key or a password.",
+        "text": "With BIP 85 the user keeps a single backup, a BIP 32 root key, and the software holding it derives separate entropy for each application. The receiving wallet uses that entropy the way it would use freshly generated randomness: as a BIP 39 mnemonic, a private key, an extended key or a password.",
         "claims": ["entropy-for-wallets", "one-root"]
       }
     ],
@@ -27,8 +27,8 @@
       "recipe": "bip85-applications.v1",
       "title": "One root, a separate output for each application",
       "fixtures": ["bip85-bip39-12", "bip85-bip39-24", "bip85-wif", "bip85-xprv", "bip85-hex", "bip85-pwd", "bip85-dice"],
-      "caption": "Choose an application. Its path leads to a child key k; HMAC-SHA512 turns k into 64 bytes, and the application reads only the bytes it needs. Every value is one of BIP 85's published vectors, recomputed by the model. The toggle hatches what someone holding only the output cannot know.",
-      "claims": ["k-hmac", "truncate", "vectors", "hmac-rationale"],
+      "caption": "Choose an application. Its path leads to a child key k; HMAC-SHA512 turns k into 64 bytes, and the application reads only the bytes it needs. Every output, and every byte BIP 85 prints, is a published vector the model recomputes; k and the bytes the vectors do not print are computed by the same model. The toggle hatches what someone holding only the output cannot know.",
+      "claims": ["k-hmac", "truncate", "vectors", "hmac-rationale", "root-recomputes"],
       "layout": "wide"
     }
   },
@@ -39,7 +39,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Every BIP 85 path starts at the purpose 83696968'. The next level is the application number, then that application's own parameters, and last an index. Application numbers are meant to be meaningful, such as a BIP number or ASCII codes: 39' makes BIP 39 mnemonics, 32' extended keys. Read two digits at a time as ASCII codes, 83696968 itself spells SEED.",
+          "text": "Every BIP 85 path starts at the purpose 83696968'. The next level is the application number, then that application's own parameters and an index. Application numbers are meant to be meaningful, such as a BIP number or ASCII codes: 39' makes BIP 39 mnemonics, 32' extended keys. Read two digits at a time as ASCII codes, 83696968 itself spells SEED.",
           "claims": ["path-format", "semantic-numbers", "seed-ascii"]
         },
         {
@@ -70,8 +70,8 @@
         },
         {
           "type": "paragraph",
-          "text": "The authors give two reasons for the extra step. If k were ever compromised, the HMAC keeps the rest of the key tree from leaking; the specification requires hardened derivation, but software cannot enforce that, and the HMAC makes the derived entropy hardened either way. And the application wants entropy, not a key, so the child key should be transformed first.",
-          "claims": ["hmac-rationale"]
+          "text": "The authors give three reasons for the extra step. It prevents leakage of the parent tree should k be compromised: the specification requires hardened derivation, which would do that, but the authors cannot enforce it on implementations, so the HMAC makes the derived entropy hardened either way. The application wants entropy, not a key, so the child key has to be transformed. And it guards against side effects should k also be used for another purpose, such as a nonce. The application only ever sees the HMAC's output, never k.",
+          "claims": ["hmac-rationale", "k-hmac"]
         },
         {
           "type": "paragraph",
@@ -84,7 +84,7 @@
           "recipe": "bip85-story.v1",
           "title": "From root key to twelve words",
           "fixtures": ["bip85-bip39-12"],
-          "caption": "BIP 85's 12-word vector, step by step. The vector does not publish k for this path; the model computes it, and the build checks the kept bytes and the words against the vector.",
+          "caption": "BIP 85's 12-word vector, step by step. The vector does not publish k for this path, or the 48 bytes it drops; the model computes it, and the build checks the kept bytes and the words against the vector.",
           "claims": ["vectors", "k-hmac", "bip39-app"],
           "layout": "wide"
         }
@@ -96,12 +96,12 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Applications differ only in what they do with the 64 bytes. The HD-seed WIF uses the first 256 bits as a private key, encoded as a compressed WIF for Bitcoin Core wallets. An extended private key takes the first 32 bytes as its chain code and the second 32 as its key, with depth, parent fingerprint and child number set to zero. BIP 85 warns that this reverses BIP 32's order.",
+          "text": "Apart from their paths, applications differ only in what they do with their 64 bytes. The HD-seed WIF uses the first 256 bits as a private key, encoded as a compressed WIF, which BIP 85 intends as the hdseed of Bitcoin Core wallets. An extended private key takes the first 32 bytes as its chain code and the second 32 as its key, with depth, parent fingerprint and child number set to zero. BIP 85 warns that this reverses BIP 32's order.",
           "claims": ["wif-app", "xprv-app"]
         },
         {
           "type": "paragraph",
-          "text": "Some applications serve uses beyond wallets. HEX outputs 16 to 64 bytes. A password Base64-encodes all 64 bytes and keeps the first 20 to 86 characters. Dice rolls, for PINs and other numeric secrets, read from BIP85-DRNG: a SHAKE256 stream seeded with the 64 bytes, for uses that need more input than that.",
+          "text": "Some applications serve uses beyond wallets. HEX outputs 16 to 64 bytes. The Base64 password application encodes all 64 bytes and keeps the first 20 to 86 characters. Dice rolls, for PINs and other numeric secrets, read from BIP85-DRNG: a SHAKE256 stream seeded with the 64 bytes, for uses that need more input than that.",
           "claims": ["hex-app", "pwd-app", "drng", "dice-app"]
         },
         {
@@ -125,7 +125,7 @@
             },
             {
               "type": "paragraph",
-              "text": "A die with N sides reads just enough bits from the DRNG to cover N values, ceil(log2 N) of them. A trial that comes out N or more is skipped, and the next one read. BIP 85's six-sided vector rolls `1,0,0,2,0,1,5,5,2,4`, zero-indexed.",
+              "text": "A die with N sides needs ceil(log2 N) bits a roll. Each roll reads whole bytes from the DRNG, as many as those bits need, and keeps only their top ceil(log2 N) bits: for a six-sided die, one byte, of which the top three bits count. A trial that comes out N or more is skipped, and the next one read. BIP 85's six-sided vector rolls `1,0,0,2,0,1,5,5,2,4`, zero-indexed.",
               "claims": ["dice-app", "vectors"]
             }
           ]
@@ -138,7 +138,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Every output is computed from the root key and its path alone. Whoever holds the root can recompute every output, which is what makes one backup enough. One output does not reveal k, the root, or the output of another path.",
+          "text": "Every output is computed from the root key and its path alone. Whoever holds the root can recompute every output, which is what makes one backup enough, as long as the user also knows which application, index and length each wallet used. One output does not reveal k, the root, or the output of another path.",
           "claims": ["root-recomputes", "hmac-rationale"]
         },
         {
@@ -158,7 +158,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "The authors point out that some wallets are inherently less secure, such as hot wallets on phones or Lightning nodes. A wallet that shares the main mnemonic exposes everything the mnemonic controls; a wallet with a derived mnemonic exposes only its own.",
+              "text": "The authors point out that some wallets may be inherently less secure, such as hot wallets on phones or Lightning nodes. A wallet that shares the main mnemonic exposes everything the mnemonic controls; a wallet with a derived mnemonic exposes only its own.",
               "claims": ["hot-wallets", "root-recomputes"]
             },
             {

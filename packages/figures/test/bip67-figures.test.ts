@@ -70,10 +70,10 @@ describe("A20.2 to A20.4", () => {
     expect(s).toContain(v4.address);
     expect(s.split("push the next 33 bytes").length - 1).toBe(3);
   });
-  it("A20.4 marks hardened levels and what changes between the examples", () => {
+  it("A20.4 fills the public-derivation levels and marks what changes between the examples", () => {
     const s = html(h(Bip48Paths, { fixtures: paths }));
     expect(paths.map((p) => p.derived.path)).toEqual(["m/48'/0'/0'/2'/0/0", "m/48'/0'/0'/1'/0/0", "m/48'/0'/0'/2'/1/0"]);
-    expect(s.split("k-fill--public").length - 1).toBe(12);
+    expect(s.split("k-fill--public").length - 1).toBe(6);
     expect(s.split("k-cell--em").length - 1).toBe(2);
   });
 });

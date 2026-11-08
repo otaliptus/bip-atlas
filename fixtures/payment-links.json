@@ -1,7 +1,7 @@
 {
   "schemaVersion": "bip-atlas.fixtures.v1",
   "chapterId": "payment-links",
-  "warning": "BIP 321's published example URIs. Their addresses and invoices are intentionally invalid, as the BIP notes; never treat them as payment requests.",
+  "warning": "BIP 321's published example URIs. Their addresses are intentionally invalid, as the BIP notes, and their invoices are placeholders; never treat them as payment requests.",
   "fixtures": [
     {
       "id": "bip321-address",

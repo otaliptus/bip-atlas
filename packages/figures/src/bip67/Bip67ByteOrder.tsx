@@ -22,7 +22,7 @@ export function Bip67ByteOrder({ fixtures }: { fixtures: DerivedBip67Fixture[] }
   const descOf = (f: DerivedBip67Fixture) =>
     `${f.label}, sorted: ${f.derived.sorted.join(", ")}. ` + f.derived.firstDifferences.map((b, i) => `Keys ${i + 1} and ${i + 2} first differ at byte ${b + 1}, where key ${i + 1} is smaller`).join("; ") + ".";
   return (
-    <Drawing id="a20-bytes" width={344} height={H} title="Sorting compares bytes from the left" desc={fixtures.map(descOf).join(" ")}>
+    <Drawing id="a20-bytes" width={344} height={H} title="The first different byte decides" desc={fixtures.map(descOf).join(" ")}>
       <Value at={[x0, 14]} text="BYTES 1–3 … 33 OF EACH KEY · OUTLINED: THE BYTE THAT DECIDES" size={8} cls="k-value--muted" />
       {blocks.map(({ f, top }) => (
         <g data-vector={f.id}>

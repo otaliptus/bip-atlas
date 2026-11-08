@@ -4,9 +4,9 @@
   "primaryBips": [321, 21],
   "specimenLabel": "BIPs 0321 · 0021",
   "title": "What can a bitcoin: link ask a wallet to do?",
-  "dek": "A bitcoin: link carries an address, an amount and other ways to pay, in a form any wallet can open. BIP 321 says which parts a wallet must understand and which it may ignore.",
+  "dek": "A bitcoin: link carries an address, an amount and other ways to pay, all in one link. BIP 321 says which parts a wallet must understand and which it may ignore.",
   "authorship": "hand-authored",
-  "reviewState": "draft-unreviewed",
+  "reviewState": "in-review",
   "sourceSnapshot": "sources/research-2026-11-08-phase4",
   "opening": {
     "blocks": [
@@ -17,8 +17,8 @@
       },
       {
         "type": "paragraph",
-        "text": "BIP 21 defined the scheme in 2012. BIP 321 replaces it and describes how links are used now: several ways to pay in one link, keys in any letter case, and room for new payment methods that older wallets can safely skip.",
-        "claims": ["preamble21", "preamble321", "replacement", "future-in-query"]
+        "text": "BIP 21, from 2012, set out the scheme. BIP 321 replaces it and describes how links were used by 2024: several ways to pay in one link, keys in any letter case, and room for new payment methods that older wallets can safely skip.",
+        "claims": ["preamble21", "preamble321", "replacement", "future-in-query", "req"]
       }
     ],
     "figure": {
@@ -39,7 +39,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A link is `bitcoin:`, an address, and optional parameters after a question mark, joined by ampersands. The address may be a base58 P2SH or P2PKH address, a bech32 or bech32m SegWit address, or nothing at all.",
+          "text": "A link is `bitcoin:`, an address, and optional parameters after a question mark, joined by ampersands. The address MUST be a base58 P2SH or P2PKH address, a bech32 SegWit version 0 or bech32m SegWit address, or empty.",
           "claims": ["grammar"]
         },
         {
@@ -68,7 +68,7 @@
           "recipe": "bip321-case.v1",
           "title": "Lowercase and uppercase",
           "fixtures": ["bip321-bc-pair", "bip321-bc-pair-upper"],
-          "caption": "The same two SegWit addresses as a lowercase and an uppercase link, both from BIP 321's examples. With case-insensitive keys, both give the same payment instructions.",
+          "caption": "The same two SegWit addresses as a lowercase and an uppercase link, both from BIP 321's examples. Keys are case-insensitive, and BIP 321 says all-uppercase links should be handled fine; read in either case, both give the same payment instructions.",
           "claims": ["case", "qr-uppercase", "hrp-keys", "examples-model"],
           "layout": "prose"
         }
@@ -80,7 +80,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Parameters can carry other ways to pay: `lightning` for a BOLT 11 invoice, `lno` for a BOLT 12 offer, `pay` for BIP 351 and `sp` for a Silent Payments address. These keys may repeat. New bech32 formats SHOULD use their human-readable part as the key, which is why two SegWit addresses can appear as two `bc` parameters.",
+          "text": "Parameters can carry other ways to pay: `lightning` for a BOLT 11 invoice, `lno` for a BOLT 12 offer, `pay` for BIP 351 and `sp` for a Silent Payments address. These keys may repeat. New bech32 and bech32m formats SHOULD use their human-readable part as the key, which is why two SegWit addresses can appear as two `bc` parameters.",
           "claims": ["keys-instructions", "duplicates", "hrp-keys"]
         },
         {
@@ -90,7 +90,7 @@
         },
         {
           "type": "paragraph",
-          "text": "One rule makes this safe. A wallet may ignore any parameter it does not implement, unless the key starts with `req-`: a required key the wallet does not implement makes the whole link invalid. The hero's first wallet shows both sides. It pays a Lightning link's on-chain fallback, and it refuses a link with a `req-` key it does not know.",
+          "text": "One rule makes this safe. A wallet can safely ignore any parameter it does not implement, unless the key starts with `req-`: if it does not implement a required key, it MUST consider the whole link invalid. The hero's first wallet shows both sides. It pays a Lightning link's on-chain fallback, and it refuses a link with a `req-` key it does not know.",
           "claims": ["req", "wallets-illustrative"]
         },
         {
@@ -106,7 +106,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A link may include `pop`, a percent-encoded URI prefix. After paying, a wallet that supports it decodes the prefix, appends the key it paid with (`onchain` for the address), an equals sign and the payment information, and opens the result. The payment information is the transaction in hex, or the payment preimage of a Lightning invoice.",
+          "text": "A link MAY include `pop`, a percent-encoded URI prefix. After paying, a wallet that supports it SHOULD decode the prefix once, append the key it paid with (`onchain` for the address), an equals sign and the payment information, and open the result. The payment information is the full transaction, witness data included, in hex, or, for a BOLT 11 invoice, the hex-encoded payment preimage.",
           "claims": ["pop-build", "pop-info"]
         },
         {
@@ -115,13 +115,13 @@
           "recipe": "bip321-pop.v1",
           "title": "Proof of payment",
           "fixtures": ["bip321-pop-app", "bip321-pop-lightning", "bip321-pop-https", "bip321-req-pop-https"],
-          "caption": "BIP 321's four proof-of-payment examples. The model builds both published callbacks, and follows the rules for the two that point at a web page.",
+          "caption": "Four of BIP 321's five proof-of-payment examples. The model builds the two published callbacks shown here (its tests build all four the BIP publishes), and follows the rules for the two that point at a web page.",
           "claims": ["pop-build", "pop-safety", "examples-model"],
           "layout": "wide"
         },
         {
           "type": "paragraph",
-          "text": "A wallet MUST NOT open a callback that would open a web browser, such as an `https` one. The author's reason is privacy: the callback should only switch back to the local app that started the payment, without revealing the sender's IP address to the recipient. If such a callback was required with `req-pop`, the wallet MUST NOT pay at all.",
+          "text": "A wallet MUST NOT open a callback that would open a web browser, such as an `https` one. The author's reason is privacy: proof URIs must only be opened when they will simply switch back to the local app that started the payment, without revealing the sender's IP address to the recipient. If the parameter was `req-pop` and the wallet will not open it, because the scheme is unsafe or it cannot return payment information for the method it used, the wallet MUST NOT pay at all.",
           "claims": ["pop-safety", "pop-rationale"]
         }
       ]
@@ -132,13 +132,13 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A link with an on-chain address is a one-time payment instruction, not a way to share contact details, since an address should not be reused. A link that carries only reusable instructions, such as a BOLT 12 offer or a Silent Payments address, MAY be reused.",
+          "text": "Best practice is a fresh address for every on-chain payment, so a link with an on-chain address MUST NOT stand for personal details, but for a one-time payment instruction. A link that carries only reusable instructions, such as a BOLT 12 offer or a Silent Payments address, MAY be reused.",
           "claims": ["one-time"]
         },
         {
           "type": "callout",
           "label": "Caveat",
-          "text": "The example links use deliberately invalid addresses and invoices, as BIP 321 notes. Never treat them as payment requests.",
+          "text": "The example links use deliberately invalid addresses, as BIP 321 notes, and placeholder invoices. Never treat them as payment requests.",
           "claims": ["examples-invalid-addresses"]
         },
         {
@@ -147,7 +147,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "BIP 21's grammar required a base58 address and treated parameter keys as case-sensitive. Compared with it, BIP 321 adds standard keys for other payment instructions, makes keys case-insensitive, allows bech32 and bech32m addresses and an empty address, and adds proof of payment.",
+              "text": "BIP 21 allowed only base58 addresses, and its text made parameter keys case-sensitive. Compared with it, BIP 321 adds standard keys for other payment instructions, makes keys case-insensitive, allows bech32 and bech32m addresses and an empty address, and adds proof of payment.",
               "claims": ["bip21-original", "bip21-changes", "pop-build"]
             },
             {

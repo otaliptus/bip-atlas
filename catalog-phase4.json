@@ -151,6 +151,94 @@
         "https://bips.dev/321/",
         "https://bips.dev/21/"
       ]
+    },
+    {
+      "id": "psbt-v2",
+      "primaryBips": [
+        370
+      ],
+      "phase": 4,
+      "readingOrder": 22,
+      "buildOrder": 22,
+      "questionTitle": "Why did PSBT need a second version?",
+      "heroRecipe": "psbt-v2-locktime.v1",
+      "primitiveFamilies": [
+        "information-envelope",
+        "stage-pipeline",
+        "comparison"
+      ],
+      "allowedControls": [
+        "Choose a published lock-time vector"
+      ],
+      "misconceptionChecklist": [
+        "PSBT version 2 is a container format, not a new transaction version",
+        "Inputs and outputs can be added only while the modifiable flags allow it",
+        "A PSBT's required lock times can conflict, and then no lock time can be chosen"
+      ],
+      "requiredTestFamilies": [
+        "BIP 370 invalid and valid vectors",
+        "Lock-time determination vectors",
+        "Modifiable flags"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 450,
+        "max": 1100
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 3,
+        "supportingMax": 5
+      },
+      "sourceLinks": [
+        "https://bips.dev/370/"
+      ]
+    },
+    {
+      "id": "strict-signatures",
+      "primaryBips": [
+        66,
+        146
+      ],
+      "phase": 4,
+      "readingOrder": 23,
+      "buildOrder": 23,
+      "questionTitle": "Why must a signature have exactly one encoding?",
+      "heroRecipe": "der-signature-checks.v1",
+      "primitiveFamilies": [
+        "byte-ribbon",
+        "stage-pipeline",
+        "number-line"
+      ],
+      "allowedControls": [
+        "Choose a change to a published signature"
+      ],
+      "misconceptionChecklist": [
+        "A malleated signature is still valid; it changes the transaction's identifier, not who can spend",
+        "BIP 146 is recorded as Closed: its low-S rule was proposed as consensus, not deployed by this BIP",
+        "SegWit moves witness signatures out of the txid, not out of the wtxid"
+      ],
+      "requiredTestFamilies": [
+        "BIP 66 encoding rules",
+        "Signed BIP 143 examples",
+        "Low-S arithmetic"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 450,
+        "max": 1100
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 3,
+        "supportingMax": 5
+      },
+      "sourceLinks": [
+        "https://bips.dev/66/",
+        "https://bips.dev/146/"
+      ]
     }
   ]
 }

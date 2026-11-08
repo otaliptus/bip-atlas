@@ -73,20 +73,23 @@ export function readBitcoinUri(uri: string, implemented: readonly string[] = [..
   const address = q < 0 ? rest : rest.slice(0, q);
   const query = q < 0 ? "" : rest.slice(q + 1);
   const addressForm = address === "" ? "empty" : isBech32(address) ? "bech32" : BASE58.test(address) ? "base58" : "other";
-  const params: UriParam[] = query === "" ? [] : query.split("&").map((raw) => {
+  const params: Array<UriParam & { malformed: boolean }> = query === "" ? [] : query.split("&").map((raw) => {
     const eq = raw.indexOf("=");
     const rawKey = (eq < 0 ? raw : raw.slice(0, eq)).toLowerCase();
     const required = rawKey.startsWith("req-");
     const key = required ? rawKey.slice(4) : rawKey;
     let value: string | null = eq < 0 ? null : raw.slice(eq + 1);
+    let malformed = false;
     try {
       value = value === null ? null : decodeURIComponent(value);
     } catch {
-      /* left as written; reported below */
+      malformed = true; // left as written; the link is refused below
     }
-    return { raw, key, required, value, kind: kindOf(key) };
+    return { raw, key, required, value, kind: kindOf(key), malformed };
   });
-  const base = { scheme, address, addressForm, params } as const;
+  const base = { scheme, address, addressForm, params: params.map(({ malformed: _, ...p }) => p) } as const;
+  const bad = params.find((p) => p.malformed);
+  if (bad) return fail(`The value of ${bad.key} is not valid percent-encoding.`, base);
   if (addressForm === "other") return fail("The body is not a base58 or bech32 address.", base);
   for (const k of SINGLE_KEYS) {
     if (params.filter((p) => p.key === k).length > 1) return fail(`The key ${k} appears more than once${k === "pop" ? ", counting req-pop" : ""}.`, base);
@@ -112,7 +115,9 @@ export function readBitcoinUri(uri: string, implemented: readonly string[] = [..
 /** The proof-of-payment rule: which callback a wallet may open, and whether it may pay at all. */
 export function popRule(r: UriReading): { callback: string | null; mayOpen: boolean; mayPay: boolean } {
   const p = r.params.find((x) => x.key === "pop");
-  if (!p || p.value === null) return { callback: null, mayOpen: false, mayPay: r.valid };
+  if (!p) return { callback: null, mayOpen: false, mayPay: r.valid };
+  // A pop key with no value gives nothing to open; as req-pop, the wallet must not pay.
+  if (p.value === null) return { callback: null, mayOpen: false, mayPay: r.valid && !p.required };
   const scheme = p.value.slice(0, p.value.indexOf(":")).toLowerCase();
   const mayOpen = p.value.includes(":") && !(BLOCKED_POP_SCHEMES as readonly string[]).includes(scheme);
   return { callback: p.value, mayOpen, mayPay: r.valid && (mayOpen || !p.required) };

@@ -16,7 +16,7 @@ export function Bip85Uses({ fixtures }: { fixtures: DerivedBip85Fixture[] }) {
       id="a19-uses"
       width={344}
       height={H}
-      title="One 64-byte result, read differently by each application"
+      title="Each application's own 64 bytes, and the part it reads"
       desc={fixtures.map((f) => `${f.label} (${f.path}): ${usesText(f).join("; ").toLowerCase()}; its ${OUTPUT_NAME[f.derived.outputKind]} begins ${short(f.derived.output, 12)}`).join(". ") + "."}
     >
       <Value at={[x0, 14]} text="EACH ROW: ONE APPLICATION'S 64 BYTES · FILLED = READ" size={8} cls="k-value--muted" />

@@ -93,7 +93,7 @@ export function Bip321LinkReader({ fixtures, figureId, initial }: Props) {
           {d.wallets.map((w) => <><dt>{w.name}</dt><dd><code>{w.implemented.join(", ")}</code>{w.ignored.length ? <> · ignores <code>{w.ignored.join(", ")}</code></> : null}</dd></>)}
         </dl>
       </details>
-      <p class="atlas-hero__source">BIP 321 line {f.source.line}: “{f.note}”. The example addresses are intentionally invalid. The three wallets are illustrations, not part of BIP 321; each reading applies its rules.</p>
+      <p class="atlas-hero__source">BIP 321 line {f.noteLine}: “{f.note}”, and the link on line {f.source.line}. The example addresses are intentionally invalid. The three wallets are illustrations, not part of BIP 321; each reading applies its rules.</p>
     </>
   );
 }

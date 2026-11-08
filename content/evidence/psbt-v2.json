@@ -1,0 +1,737 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "psbt-v2",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-11-08-phase4",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-four snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 370 (Ava Chow), PSBT Version 2, was assigned in 2021 and is recorded as Deployed; it is a Specification in the Applications layer.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            3,
+            8
+          ],
+          "quote": "Layer: Applications Title: PSBT Version 2 Authors: Ava Chow <me@achow101.com> Status: Deployed Type: Specification Assigned: 2021-01-14"
+        }
+      ]
+    },
+    {
+      "id": "abstract",
+      "statement": "BIP 370 proposes a second version of BIP 174's PSBT format that allows inputs and outputs to be added after the PSBT is created.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            16,
+            17
+          ],
+          "quote": "This document proposes a second version of the Partially Signed Bitcoin Transaction format described in BIP 174 which allows for inputs and outputs to be added to the PSBT after creation."
+        }
+      ]
+    },
+    {
+      "id": "motivation",
+      "statement": "The author's motivation: a version 0 PSBT cannot have inputs or outputs added, because its global unsigned transaction is fixed and cannot be changed.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            25,
+            28
+          ],
+          "quote": "Partially Signed Bitcoin Transaction Version 0 as described in BIP 174 is unable to have new inputs and outputs be added to the transaction. The fixed global unsigned transaction cannot be changed which prevents any additional inputs or outputs to be added. PSBT Version 2 is intended to rectify this problem."
+        }
+      ]
+    },
+    {
+      "id": "one-place",
+      "statement": "The author notes a side effect: in version 2 all information for an input or output is in its own map, where version 0 split it between that map and the global unsigned transaction.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            30,
+            34
+          ],
+          "quote": "An additional beneficial side effect is that all information for a given input or output will be provided by its <tt><input-map></tt> or <tt><output-map></tt>. With Version 0, to retrieve all of the information for an input or output, data would need to be found in two locations: the <tt><input-map></tt>/<tt><output-map></tt> and the global unsigned transaction. PSBT Version 2 now moves all related information to one place."
+        }
+      ]
+    },
+    {
+      "id": "only-fields",
+      "statement": "BIP 370 specifies only new fields and which versions must include or exclude them; PSBT_GLOBAL_UNSIGNED_TX must be excluded in version 2, and PSBT_GLOBAL_VERSION included and set to 2.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            38,
+            41
+          ],
+          "quote": "PSBT Version 2 (PSBTv2) only specifies new fields and field inclusion/exclusion requirements. <tt>PSBT_GLOBAL_UNSIGNED_TX</tt> must be excluded in PSBTv2. <tt>PSBT_GLOBAL_VERSION</tt> must be included in PSBTv2 and set to version number 2"
+        }
+      ]
+    },
+    {
+      "id": "version-one",
+      "statement": "The author's reason for skipping version number 1: version 0 had been called version 1 informally, and this proposal version 2 during its design.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            41,
+            44
+          ],
+          "quote": "Version number 1 is skipped because PSBT Version 0 has been colloquially referred to as version 1. Originally this BIP was to be version 1, but because it has been colloquially referred to as version 2 during its design phase, it was decided to change the version number to 2 so that there would not be any confusion"
+        }
+      ]
+    },
+    {
+      "id": "required-fields",
+      "statement": "Version 2 requires the transaction version, input count and output count in the global map, the previous txid and output index in each input map, and the amount and script in each output map; version 0 must exclude every field BIP 370 adds.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            55,
+            57
+          ],
+          "quote": "! Versions Requiring Inclusion ! Versions Requiring Exclusion ! Versions Allowing Inclusion"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            59,
+            67
+          ],
+          "quote": "| Transaction Version | <tt>PSBT_GLOBAL_TX_VERSION = 0x02</tt> | None | No key data | <tt><32-bit little endian int version></tt> | The 32-bit little endian signed integer representing the version number of the transaction being created. Note that this is not the same as the PSBT version number specified by the PSBT_GLOBAL_VERSION field. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            69,
+            77
+          ],
+          "quote": "| Fallback Locktime | <tt>PSBT_GLOBAL_FALLBACK_LOCKTIME = 0x03</tt> | None | No key data | <tt><32-bit little endian uint locktime></tt> | The 32-bit little endian unsigned integer representing the transaction locktime to use if no inputs specify a required locktime. | | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            79,
+            87
+          ],
+          "quote": "| Input Count | <tt>PSBT_GLOBAL_INPUT_COUNT = 0x04</tt> | None | No key data | <tt><compact size uint input count></tt> | Compact size unsigned integer representing the number of inputs in this PSBT. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            89,
+            97
+          ],
+          "quote": "| Output Count | <tt>PSBT_GLOBAL_OUTPUT_COUNT = 0x05</tt> | None | No key data | <tt><compact size uint output count></tt> | Compact size unsigned integer representing the number of outputs in this PSBT. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            99,
+            107
+          ],
+          "quote": "| Transaction Modifiable Flags | <tt>PSBT_GLOBAL_TX_MODIFIABLE = 0x06</tt> | None | No key data | <tt><8-bit uint flags></tt> | An 8 bit unsigned integer as a bitfield for various transaction modification flags. Bit 0 is the Inputs Modifiable Flag, set to 1 to indicate whether inputs can be added or removed. Bit 1 is the Outputs Modifiable Flag, set to 1 to indicate whether outputs can be added or removed. Bit 2 is the Has SIGHASH_SINGLE flag, set to 1 to indicate whether the transaction has a SIGHASH_SINGLE signature who's input and output pairing must be preserved. Bit 2 essentially indicates that the Constructor must iterate the inputs to determine whether and how to add or remove an input. | | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            123,
+            131
+          ],
+          "quote": "| Previous TXID | <tt>PSBT_IN_PREVIOUS_TXID = 0x0e</tt> | None | No key data | <tt><32 byte txid></tt> | 32 byte txid in standard byte order, not display byte order, of the previous transaction whose output at PSBT_IN_OUTPUT_INDEX is being spent. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            133,
+            141
+          ],
+          "quote": "| Spent Output Index | <tt>PSBT_IN_OUTPUT_INDEX = 0x0f</tt> | None | No key data | <tt><32-bit little endian uint index></tt> | 32 bit little endian integer representing the index of the output being spent in the transaction with the txid of PSBT_IN_PREVIOUS_TXID. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            143,
+            151
+          ],
+          "quote": "| Sequence Number | <tt>PSBT_IN_SEQUENCE = 0x10</tt> | None | No key data | <tt><32-bit little endian uint sequence></tt> | The 32 bit unsigned little endian integer for the sequence number of this input. If omitted, the sequence number is assumed to be the final sequence number (0xffffffff). | | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            153,
+            161
+          ],
+          "quote": "| Required Time-based Locktime | <tt>PSBT_IN_REQUIRED_TIME_LOCKTIME = 0x11</tt> | None | No key data | <tt><32-bit little endian uint locktime></tt> | 32 bit unsigned little endian integer greater than or equal to 500000000 representing the minimum Unix timestamp that this input requires to be set as the transaction's lock time. | | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            163,
+            171
+          ],
+          "quote": "| Required Height-based Locktime | <tt>PSBT_IN_REQUIRED_HEIGHT_LOCKTIME = 0x12</tt> | None | No key data | <tt><32-bit uint locktime></tt> | 32 bit unsigned little endian integer greater than 0 and less than 500000000 representing the minimum block height that this input requires to be set as the transaction's lock time. | | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            187,
+            195
+          ],
+          "quote": "| Output Amount | <tt>PSBT_OUT_AMOUNT = 0x03</tt> | None | No key data | <tt><64-bit little endian int amount></tt> | 64 bit signed little endian integer representing the output's amount in satoshis. | 2 | 0 | 2"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            197,
+            205
+          ],
+          "quote": "| Output Script | <tt>PSBT_OUT_SCRIPT = 0x04</tt> | None | No key data | <tt><bytes script></tt> | The script for this output, also known as the scriptPubKey. | 2 | 0 | 2"
+        }
+      ]
+    },
+    {
+      "id": "tx-version",
+      "statement": "PSBT_GLOBAL_TX_VERSION holds the version of the transaction being created, which is not the PSBT's own version number in PSBT_GLOBAL_VERSION.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "The 32-bit little endian signed integer representing the version number of the transaction being created. Note that this is not the same as the PSBT version number specified by the PSBT_GLOBAL_VERSION field."
+        }
+      ]
+    },
+    {
+      "id": "sequence",
+      "statement": "PSBT_IN_SEQUENCE is optional; when it is omitted the sequence is assumed to be 0xffffffff. In version 2 an Updater can set it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            148,
+            148
+          ],
+          "quote": "If omitted, the sequence number is assumed to be the final sequence number (0xffffffff)."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            272,
+            272
+          ],
+          "quote": "For PSBTv2, an Updater can set the sequence number."
+        }
+      ]
+    },
+    {
+      "id": "input-locks",
+      "statement": "An input can state a required time lock (a Unix timestamp of at least 500000000) or a required height lock (a block height greater than 0 and less than 500000000), each the minimum it needs as the transaction's lock time.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            158,
+            158
+          ],
+          "quote": "32 bit unsigned little endian integer greater than or equal to 500000000 representing the minimum Unix timestamp that this input requires to be set as the transaction's lock time."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            168,
+            168
+          ],
+          "quote": "32 bit unsigned little endian integer greater than 0 and less than 500000000 representing the minimum block height that this input requires to be set as the transaction's lock time."
+        }
+      ]
+    },
+    {
+      "id": "fallback",
+      "statement": "PSBT_GLOBAL_FALLBACK_LOCKTIME is the lock time to use if no input requires one; if no input requires a lock time it must be used, and without it the lock time is 0.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            74,
+            74
+          ],
+          "quote": "The 32-bit little endian unsigned integer representing the transaction locktime to use if no inputs specify a required locktime."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            211,
+            212
+          ],
+          "quote": "If none of the inputs have a PSBT_IN_REQUIRED_TIME_LOCKTIME and PSBT_IN_REQUIRED_HEIGHT_LOCKTIME, then PSBT_GLOBAL_FALLBACK_LOCKTIME must be used. If PSBT_GLOBAL_FALLBACK_LOCKTIME is not provided, then it is assumed to be 0."
+        }
+      ]
+    },
+    {
+      "id": "choose",
+      "statement": "If any input requires a lock time, the type chosen is the one every requiring input supports; inputs with no lock-time field, and inputs with both, take either type; the lock time is the maximum value of the chosen type.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            214,
+            217
+          ],
+          "quote": "If one or more inputs have a PSBT_IN_REQUIRED_TIME_LOCKTIME or PSBT_IN_REQUIRED_HEIGHT_LOCKTIME, then the field chosen is the one which is supported by all of the inputs. This can be determined by looking at all of the inputs which specify a locktime in either of those fields, and choosing the field which is present in all of those inputs. Inputs not specifying a lock time field can take both types of lock times, as can those that specify both. The lock time chosen is then the maximum value of the chosen type of lock time."
+        }
+      ]
+    },
+    {
+      "id": "tie",
+      "statement": "When both types are possible because inputs specify both, the height-based lock time must be chosen.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            219,
+            219
+          ],
+          "quote": "If a PSBT has both types of locktimes possible because one or more inputs specify both PSBT_IN_REQUIRED_TIME_LOCKTIME and PSBT_IN_REQUIRED_HEIGHT_LOCKTIME, then locktime determined by looking at the PSBT_IN_REQUIRED_HEIGHT_LOCKTIME fields of the inputs must be chosen."
+        }
+      ]
+    },
+    {
+      "id": "tie-rationale",
+      "statement": "The author's rationale for the tie rule: signatures commit to the lock time, so signers must know which one is used, and height is preferred because block height is Bitcoin's unit of time.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            220,
+            221
+          ],
+          "quote": "In the event of a tie for the locktime type, signers need to be able to know which locktime to use as their signatures will commit to the locktime in the transaction, so choosing the wrong one will result in an invalid transaction. Height based locktime is preferred over time based as Bitcoin's unit of time is the block height, so a height makes more sense in the context of Bitcoin."
+        }
+      ]
+    },
+    {
+      "id": "no-common",
+      "statement": "BIP 370's last lock-time vector, where input 1 requires a height and input 2 a time, is listed as one whose lock time cannot be computed.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            503,
+            505
+          ],
+          "quote": "The timelock for the following PSBTs cannot be computed: * Case: Input 1 has PSBT_IN_REQUIRED_HEIGHT_LOCKTIME of 10000, Input 2 has PSBT_IN_REQUIRED_TIME_LOCKTIME of 1657048460"
+        }
+      ]
+    },
+    {
+      "id": "unique-id",
+      "statement": "A version 2 PSBT is identified by the txid of the unsigned transaction its fields describe, with every sequence set to 0 because Updaters and Combiners can change PSBT_IN_SEQUENCE, and the lock time computed as described.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            225,
+            227
+          ],
+          "quote": "PSBTv2s can be uniquely identified by constructing an unsigned transaction given the information provided in the PSBT, and computing the transaction ID of that transaction. Since PSBT_IN_SEQUENCE can be changed by Updaters and Combiners, the sequence number in this unsigned transaction must be set to 0 (not final, nor the sequence in PSBT_IN_SEQUENCE). The lock time in this unsigned transaction must be computed as described previously."
+        }
+      ]
+    },
+    {
+      "id": "conflict",
+      "statement": "When one input requiring a lock time states only a height and another only a time, no type is supported by all of them, so no lock time can be chosen; an input that states both does not cause a conflict.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            214,
+            216
+          ],
+          "quote": "the field chosen is the one which is supported by all of the inputs. This can be determined by looking at all of the inputs which specify a locktime in either of those fields, and choosing the field which is present in all of those inputs. Inputs not specifying a lock time field can take both types of lock times, as can those that specify both."
+        }
+      ]
+    },
+    {
+      "id": "id-changes",
+      "statement": "Because the unique ID is the txid of the transaction the PSBT describes, adding an input or output, or changing the lock time, changes the ID; in the model, the all-fields vector, whose input requires a lock time, has a different ID from the otherwise matching vectors.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            225,
+            225
+          ],
+          "quote": "PSBTv2s can be uniquely identified by constructing an unsigned transaction given the information provided in the PSBT, and computing the transaction ID of that transaction."
+        }
+      ]
+    },
+    {
+      "id": "creator",
+      "statement": "In version 2 the Creator starts with 0 inputs and 0 outputs and should set the fallback lock time; if others will add inputs and outputs, PSBT_GLOBAL_TX_MODIFIABLE must be present with its flags set appropriately and the transaction version must be at least 2; a Creator that is also the Constructor, with no one else adding inputs or outputs, may omit the field.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            235,
+            238
+          ],
+          "quote": "In PSBTv2, the Creator initializes the PSBT with 0 inputs and 0 outputs. The PSBT version number is set to 2. The Creator should also set PSBT_GLOBAL_FALLBACK_LOCKTIME. If the Creator is not also a Constructor and will be giving the PSBT to others to add inputs and outputs, the PSBT_GLOBAL_TX_MODIFIABLE field must be present and the Inputs Modifiable and Outputs Modifiable flags set appropriately; moreover, the transaction version number must be set to at least 2."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            239,
+            239
+          ],
+          "quote": "If the Creator is a Constructor and no inputs and outputs will be added by other entities, PSBT_GLOBAL_TX_MODIFIABLE may be omitted."
+        }
+      ]
+    },
+    {
+      "id": "constructor",
+      "statement": "The Constructor, a role only in version 2, adds inputs and outputs: it must check PSBT_GLOBAL_TX_MODIFIABLE first, adding inputs only if the Inputs Modifiable flag is set and outputs only if the Outputs Modifiable flag is set.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            243,
+            247
+          ],
+          "quote": "This Constructor is only present for PSBTv2. Once a Creator initializes the PSBT, a constructor will add inputs and outputs. Before any input or output may be added, the constructor must check the PSBT_GLOBAL_TX_MODIFIABLE field. Inputs may only be added if the Inputs Modifiable flag is True. Outputs may only be added if the Outputs Modifiable flag is True."
+        }
+      ]
+    },
+    {
+      "id": "constructor-locks",
+      "statement": "A Constructor adding an input with a required lock time must check that the lock-time types stay compatible, must not add an incompatible input, and must not add one that changes the lock time when inputs already have signatures.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            258,
+            261
+          ],
+          "quote": "If an input being added specifies a required time lock, then the Constructor must iterate through all of the existing inputs and ensure that the time lock types are compatible. Additionally, if during this iteration, it finds that any inputs have signatures, it must ensure that the newly added input does not change the transaction's locktime. If the newly added input has an incompatible time lock, then it must not be added. If it changes the transaction's locktime when there are existing signatures, it must not be added."
+        }
+      ]
+    },
+    {
+      "id": "constructor-close",
+      "statement": "A Constructor may declare that no more inputs and outputs can be added by setting the flags to 0 or removing the field; one entity is likely to be both Creator and Constructor.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            266,
+            268
+          ],
+          "quote": "A Constructor may choose to declare that no further inputs and outputs can be added to the transaction by setting the appropriate bits in PSBT_GLOBAL_TX_MODIFIABLE to 0 or by removing the field entirely. A single entity is likely to be both a Creator and Constructor."
+        }
+      ]
+    },
+    {
+      "id": "modifiable-bits",
+      "statement": "PSBT_GLOBAL_TX_MODIFIABLE is an 8-bit field: bit 0 says inputs can be added or removed, bit 1 outputs, and bit 2 that a SIGHASH_SINGLE signature's input and output pairing must be preserved.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            104,
+            104
+          ],
+          "quote": "An 8 bit unsigned integer as a bitfield for various transaction modification flags. Bit 0 is the Inputs Modifiable Flag, set to 1 to indicate whether inputs can be added or removed. Bit 1 is the Outputs Modifiable Flag, set to 1 to indicate whether outputs can be added or removed. Bit 2 is the Has SIGHASH_SINGLE flag, set to 1 to indicate whether the transaction has a SIGHASH_SINGLE signature who's input and output pairing must be preserved."
+        }
+      ]
+    },
+    {
+      "id": "signer",
+      "statement": "After signing, a version 2 Signer must update the flags: a signature without SIGHASH_ANYONECANPAY clears Inputs Modifiable, one without SIGHASH_NONE clears Outputs Modifiable, and one with SIGHASH_SINGLE sets Has SIGHASH_SINGLE.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            276,
+            279
+          ],
+          "quote": "For PSBTv2s, a signer must update the PSBT_GLOBAL_TX_MODIFIABLE field after signing inputs so that it accurately reflects the state of the PSBT. If the Signer added a signature that does not use SIGHASH_ANYONECANPAY, the Input Modifiable flag must be set to False. If the Signer added a signature that does not use SIGHASH_NONE, the Outputs Modifiable flag must be set to False. If the Signer added a signature that uses SIGHASH_SINGLE, the Has SIGHASH_SINGLE flag must be set to True."
+        }
+      ]
+    },
+    {
+      "id": "finalizer-extractor",
+      "statement": "The Input Finalizer must keep the version 2 input fields, and the Transaction Extractor builds the transaction from them with the lock time determined as described.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            283,
+            284
+          ],
+          "quote": "For PSBTv2s, when the Input Finalizer clears a finalized input's fields as BIP 174 asks, it must keep PSBT_IN_PREVIOUS_TXID, PSBT_IN_OUTPUT_INDEX, PSBT_IN_SEQUENCE, PSBT_IN_REQUIRED_TIME_LOCKTIME and PSBT_IN_REQUIRED_HEIGHT_LOCKTIME. The Transaction Extractor constructs the transaction from these fields, and an input missing either PSBT_IN_PREVIOUS_TXID or PSBT_IN_OUTPUT_INDEX is invalid."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            288,
+            289
+          ],
+          "quote": "For PSBTv2s, the transaction is constructed using the PSBTv2 fields. The lock time for this transaction is determined as described in the Determining Lock Time section."
+        }
+      ]
+    },
+    {
+      "id": "same-format",
+      "statement": "Version 2 shares BIP 174's generic format, so version 0 parsers should be able to read it with only support for the new fields added.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            294,
+            295
+          ],
+          "quote": "PSBTv2 shares the same generic format as PSBTv0 as defined in BIP 174. Parsers for PSBTv0 should be able to deserialize PSBTv2 with only changes to support the new fields."
+        }
+      ]
+    },
+    {
+      "id": "incompatible",
+      "statement": "Versions 0 and 2 are intentionally incompatible through PSBT_GLOBAL_VERSION, so that the unsigned transaction could be removed; a version 2 PSBT can be converted to version 0 by building the unsigned transaction from its fields.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            297,
+            300
+          ],
+          "quote": "However PSBTv2 is incompatible with PSBTv0, and vice versa due to the use of the PSBT_GLOBAL_VERSION. This incompatibility is intentional so that PSBT_GLOBAL_UNSIGNED_TX could be removed in PSBTv2. However it is possible to convert a PSBTv2 to a PSBTv0 by creating an unsigned transaction from the PSBTv2 fields."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "This site's model reads all 24 of BIP 370's invalid PSBTs as invalid and all 14 valid PSBTs as valid version 2 PSBTs. Twelve invalid ones are version 0 PSBTs carrying a field version 2 adds; the first, a version 0 PSBT relabelled as version 2, is read as version 2 and rejected for still holding its unsigned transaction; the other eleven are version 2 PSBTs. The model rejects each vector except the first for the field its case names.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            304,
+            306
+          ],
+          "quote": "The following are invalid PSBTs: * Case: PSBTv0 but with PSBT_GLOBAL_VERSION set to 2."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            402,
+            402
+          ],
+          "quote": "The following are valid PSBTs"
+        }
+      ]
+    },
+    {
+      "id": "locktime-vectors",
+      "statement": "The model computes the lock time of all ten of BIP 370's lock-time vectors as the BIP gives it, including the vector on line 500, which is printed without a case line; its bytes show that only input 2 requires a lock time, a time of 1657048460.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            460,
+            460
+          ],
+          "quote": "The following tests are the timelock determination algorithm."
+        },
+        {
+          "bip": 370,
+          "lines": [
+            490,
+            490
+          ],
+          "quote": "The timelock for the following PSBTs should be computed to be 1657048460:"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            500,
+            500
+          ],
+          "quote": "** Bytes in Hex: <pre>70736274ff0102040200000001030400000000"
+        }
+      ]
+    },
+    {
+      "id": "lock-date",
+      "statement": "As a Unix time, 1657048460 is 5 July 2022 at 19:14:20 UTC.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            158,
+            158
+          ],
+          "quote": "representing the minimum Unix timestamp that this input requires to be set as the transaction's lock time."
+        }
+      ]
+    },
+    {
+      "id": "all-fields-tx",
+      "statement": "In the model, BIP 370's vector with all version 2 fields describes a 113-byte unsigned transaction whose lock time is 10000: its one input requires both a height and a time, so the height is used.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            456,
+            456
+          ],
+          "quote": "* Case: 1 input, 2 output updated PSBTv2, with all PSBTv2 fields"
+        }
+      ]
+    },
+    {
+      "id": "flags-computed",
+      "statement": "In the model, BIP 370's vector with both modifiable flags set (0x03) allows adding inputs and outputs; one signature leaves 0x00 for SIGHASH_ALL, 0x02 for NONE, 0x04 for SINGLE, 0x01 for ALL|ANYONECANPAY, 0x03 for NONE|ANYONECANPAY and 0x05 for SINGLE|ANYONECANPAY. BIP 370 calls bit 3 undefined, and its vector with all eight bits set is valid.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            436,
+            436
+          ],
+          "quote": "* Case: 1 input, 2 output updated PSBTv2, with both Inputs Modifiable Flag (bit 0) and Outputs Modifiable Flag (bit 1) of PSBT_GLOBAL_TX_MODIFIABLE set"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            432,
+            432
+          ],
+          "quote": "* Case: 1 input, 2 output updated PSBTv2, with an undefined flag (bit 3) of PSBT_GLOBAL_TX_MODIFIABLE set"
+        },
+        {
+          "bip": 370,
+          "lines": [
+            452,
+            452
+          ],
+          "quote": "* Case: 1 input, 2 output updated PSBTv2, with all possible PSBT_GLOBAL_TX_MODIFIABLE flags set"
+        }
+      ]
+    },
+    {
+      "id": "unique-id-computed",
+      "statement": "In the model, valid vectors that differ only in PSBT_IN_SEQUENCE or in their modifiable flags have the same unique ID; the vector whose inputs require a lock time has a different one.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 370,
+          "lines": [
+            226,
+            226
+          ],
+          "quote": "Since PSBT_IN_SEQUENCE can be changed by Updaters and Combiners, the sequence number in this unsigned transaction must be set to 0 (not final, nor the sequence in PSBT_IN_SEQUENCE)."
+        }
+      ]
+    },
+    {
+      "id": "unsigned-v0",
+      "statement": "In BIP 174, a version 0 PSBT must include PSBT_GLOBAL_UNSIGNED_TX, one global field holding the transaction in network serialization with every scriptSig and witness empty.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 174,
+          "lines": [
+            97,
+            102
+          ],
+          "quote": "| Unsigned Transaction | <tt>PSBT_GLOBAL_UNSIGNED_TX = 0x00</tt> | None | No key data | <tt><bytes transaction></tt> | The transaction in network serialization. The scriptSigs and witnesses for each input must be empty."
+        },
+        {
+          "bip": 174,
+          "lines": [
+            390,
+            390
+          ],
+          "quote": "Version 0 PSBTs must include PSBT_GLOBAL_UNSIGNED_TX, if omitted, the PSBT is invalid."
+        }
+      ]
+    }
+  ]
+}

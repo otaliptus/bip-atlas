@@ -92,6 +92,11 @@ describe("proof of payment examples", () => {
       expect(popCallback(r, key, info), uri).toBe(callback);
     }
   });
+  it("refuses malformed percent-encoding, and will not pay for a req-pop it cannot open", () => {
+    expect(readBitcoinUri("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?message=%ZZbad")).toMatchObject({ valid: false });
+    expect(popRule(readBitcoinUri("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop", ["pop"])).mayPay).toBe(false);
+    expect(popRule(readBitcoinUri("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop")).mayPay).toBe(true);
+  });
   it("pays but opens nothing for an https pop, and refuses to pay for an https req-pop", () => {
     const soft = popRule(readBitcoinUri(block[block.findIndex((l) => l.includes("pop=https%3aiwantyouripaddress.com"))].trim()));
     expect([soft.mayOpen, soft.mayPay]).toEqual([false, true]);

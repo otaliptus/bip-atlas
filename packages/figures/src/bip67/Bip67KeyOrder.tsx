@@ -53,7 +53,7 @@ export function Bip67KeyOrder({ fixtures, figureId, initial }: Props) {
   const distinct = new Set(tally).size;
   const status = sorted
     ? `Received ${o.letters.split("").join(", ")}, sorted to ${d.sorted.map(L).join(", ")}: the script gives ${address}, BIP 67's published address. All six orders give this one address.`
-    : `Received ${o.letters.split("").join(", ")} and used as received: the script gives ${address}${same ? ", which happens to be the sorted order" : ", not BIP 67's address"}. The six orders give ${distinct} different addresses.`;
+    : `Received ${o.letters.split("").join(", ")} and used as received: the script gives ${address}${same ? ": this order is already sorted, so it gives BIP 67's address" : ", not BIP 67's address"}. The six orders give ${distinct} different addresses.`;
   const desc =
     `Three compressed public keys, A ${short(f.list[0], 10)}, B ${short(f.list[1], 10)}, C ${short(f.list[2], 10)}, arrive in the order ${o.letters}. ` +
     (sorted ? `They are sorted by their bytes into ${d.sorted.map(L).join(", ")}.` : "They are used in that order.") +
@@ -92,7 +92,7 @@ export function Bip67KeyOrder({ fixtures, figureId, initial }: Props) {
     const H = tallyY + Math.ceil(6 / perRow) * 40 + 8;
     return (
       <Drawing id={fid} width={W} height={H} title="Six orders, one address once the keys are sorted" desc={desc}>
-        <Value at={[x0, 14]} text={wide ? "BIP 67 VECTOR 4 · 2-OF-3 · A, B, C AS THE VECTOR LISTS THEM" : "VECTOR 4 · 2-OF-3 · A, B, C AS LISTED"} size={8.5} cls="k-value--label" />
+        <Value at={[x0, 14]} text={wide ? `BIP 67 ${(f.shortLabel ?? f.label).toUpperCase()} · 2-OF-3 · A, B, C AS THE VECTOR LISTS THEM` : `${(f.shortLabel ?? f.label).toUpperCase()} · 2-OF-3 · A, B, C AS LISTED`} size={8.5} cls="k-value--label" />
         <Value at={[rx, top - 6]} text="RECEIVED IN THIS ORDER" size={8} cls="k-value--muted" />
         {o.keys.map((k, i) => chip(k, rx, top + i * 28, chipW))}
         {sorted ? (
@@ -151,7 +151,7 @@ export function Bip67KeyOrder({ fixtures, figureId, initial }: Props) {
           <dt>Address</dt><dd><code class="atlas-break">{address}</code></dd>
         </dl>
       </details>
-      <p class="atlas-hero__source">BIP 67 line {f.source.line} (vector 4). Sorted keys, script and address equal the vector; unsorted orders are built by the same tested model. Public test keys: never send funds to these addresses.</p>
+      <p class="atlas-hero__source">BIP 67 line {f.source.line} ({(f.shortLabel ?? f.label).toLowerCase()}). Sorted keys, script and address equal the vector; unsorted orders are built by the same tested model. Public test keys: never send funds to these addresses.</p>
     </>
   );
 }

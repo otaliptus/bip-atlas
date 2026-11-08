@@ -1,10 +1,10 @@
-# Phase four: five new chapters (three done, two designed)
+# Phase four: five new chapters
 
 Started 8 November 2026 at the user's request ("find good 5 more topics… and add them properly"). Topics follow the curriculum research in `docs/research/2026-10-bip-map` (entropy derivation, multisig wallet setup, payment instructions, PSBT extensions, ECDSA encoding rules), chosen because each has public test material at the pinned commit.
 
 - **Sources:** `sources/research-2026-11-08-phase4`, made by the kit's own `scripts/snapshot_sources.py` from `bitcoin/bips` at the same commit as every other chapter (`3a10b5b5…`). 15 BIPs: primaries 85, 67, 48, 321, 21, 370, 66, 146, and supporting 16, 32, 39, 62, 141, 143, 174.
-- **Catalog:** `catalog-phase4.json` (a separate extension catalog, like phase three). It lists only finished chapters, because the loader requires every catalog chapter to have content; the two remaining briefs are below.
-- **Figure prefixes:** A19 derived seeds, A20 sorted multisig, A21 payment links; A22 and A23 are reserved for the remaining two.
+- **Catalog:** `catalog-phase4.json` (a separate extension catalog, like phase three), with all five briefs.
+- **Figure prefixes:** A19 derived seeds, A20 sorted multisig, A21 payment links, A22 PSBT version 2, A23 strict signatures.
 
 ## Done
 
@@ -24,114 +24,48 @@ Each has a hand-built ledger (22–27 claims; quotes verified at their lines), f
 - BIP 321's own example addresses are deliberately invalid, so the model reads addresses by form only. The three wallets in A21.1 are our illustration and are labelled as such (`wallets-illustrative` claim).
 - The purpose number 83696968 spelling SEED in ASCII is our reading, labelled as editorial analysis and tested.
 
-**Not done: independent technical review.** CLAUDE.md asks for a fresh-subagent review after writing a chapter; the user asked for no subagents in this session. All three chapters stay `draft-unreviewed` until that review runs.
+The first session ran no independent review (the user asked for no subagents then); it ran on 8 November 2026 with the last two chapters, below.
 
-## Remaining: `psbt-v2` (BIP 370), figure prefix A22
+## Done in the second session (8 November 2026)
 
-- **Model** `psbtv2.ts`: export `Reader`/`readMap` from `psbt.ts` and reuse them. Parse a PSBT of either version: version 2 must exclude `PSBT_GLOBAL_UNSIGNED_TX` and include `TX_VERSION` (0x02), `INPUT_COUNT` (0x04), `OUTPUT_COUNT` (0x05), and per input `PREVIOUS_TXID` (0x0e) and `OUTPUT_INDEX` (0x0f), per output `AMOUNT` (0x03) and `SCRIPT` (0x04). Version 0 must exclude every one of those. A required time lock is ≥ 500000000; a required height lock is > 0 and < 500000000. `TX_MODIFIABLE` (0x06) bits: 0 inputs, 1 outputs, 2 has SIGHASH_SINGLE; undefined bits are valid. Lock-time determination (L208–220): with no requirements use the fallback (or 0); otherwise pick the type every requiring input supports, height on a tie, and take the maximum; with no common type, it cannot be computed. Unique ID (L223–227): the txid of the unsigned transaction with every sequence 0.
-- **Vectors** (all as one-line hex): 24 invalid (L306–399), 14 valid (L404–457), lock time 0 / 10000 / 1657048460 / not computable (L462–507; note that L500 is a hex line with no `* Case:` line).
-- **Figures:** A22.1 hero, lock-time determination (one strip of the nine lock-time vectors); A22.2 the same 1-input, 2-output transaction as v2 maps and as a v0 unsigned transaction (BIP 370 L297–300 allows the conversion); A22.3 `TX_MODIFIABLE` bits and what Constructor and Signer may do (L241–279); A22.4 a grid of invalid vectors and the rule each breaks.
+| Chapter | BIPs | Model and tests | Figures |
+|---|---|---|---|
+| `psbt-v2` | 370 | `psbtv2.ts` (reuses `psbt.ts`'s exported `Reader`, `readMap`, `checkRecord`): all 24 invalid vectors rejected for the field their case names, all 14 valid ones read, all 10 lock-time vectors (including the one at L500 with no case line); hex and Base64 agree; unique ID; Signer and Constructor flag rules | A22.1 maps and the 113-byte unsigned transaction they describe (opening), A22.2 invalid-vector table, A22.3 `TX_MODIFIABLE` bits and the flags after one signature, A22.4 hero (10 lock-time vectors) |
+| `strict-signatures` | 66, 146 | `der.ts`: BIP 66's fourteen checks in order (each tied to its line), LOW_S, n − S re-encoded, the signature put back into its transaction; both signatures of BIP 143's native P2WPKH example verify (input 1 against the published digest, input 0 against the computed legacy one) | A23.1 hero (published, R pad removed, zero added to S, length byte off by one, S replaced by its twin), A23.2 DER anatomy, A23.3 S / n − S number line, A23.4 txid and wtxid after a flip |
 
-## Remaining: `strict-signatures` (BIPs 66, 146), figure prefix A23
+Fixtures are copied from the pinned text by line (the BIP 370 vectors as one-line hex, BIP 143's transaction, signatures, key, scriptCode and digest); the derive steps fail the build if a hex string is not on its line, if an invalid vector is rejected for another field, if a lock time differs from its heading, or if a computed change does not behave as the prose says. Ledgers: 34 claims (psbt-v2) and 30 (strict-signatures), every quote verified at its lines. Both heroes are pre-rendered (`HeroStates`), so no island JavaScript was added (about 58 KB gzipped across all files, unchanged).
 
-- **Model** `der.ts`: BIP 66's `IsValidSignatureEncoding` (L41–103) as a step list that names the failing check; low-S (BIP 146 L42–46, half order `7FFF…20A0`); `S' = n − S` for the high-S twin. ECDSA via `ecdsaVerify` in `p2sh.ts` (noble, `lowS: false`); the legacy digest via `legacySighash` in `p2sh.ts`.
-- **Test material:** BIP 143's signed native P2WPKH example (line 190 of the phase-four `bip-0143.mediawiki`; `fixtures/segwit.json` shows its shape). Input 0's scriptSig signature has a padded R (`3045022100 8b9d…`); input 1's witness signature `3044 0220 3609…` verifies against sighash `c37af311…`. Flipping input 0's S changes the txid; flipping input 1's changes only the wtxid (BIP 146 L19). Computed variants are allowed as computed fixtures, as the address chapter's character substitution is.
-- **Editorial care:** BIP 146 is Closed and its deployment says "Details TBD". Present LOW_S and NULLFAIL as proposed consensus that its compatibility section (L107–109) records as relay policy as of 2016, not as current rules. BIP 66 deployed with the BIP 34 supermajority (L127–129).
-- **Figures:** A23.1 hero (choose a change to a published signature: as published, pad removed, extra zero in S, wrong length byte, S flipped; each through BIP 66's checks, ECDSA and LOW_S); A23.2 DER anatomy; A23.3 the S / n − S number line; A23.4 txid versus wtxid after a flip.
+**Findings worth keeping:**
+- BIP 370 prints the lock-time vector on line 500 without a `* Case:` line; its bytes show only input 2 requiring a time lock (1657048460). The vector at L409 says "Bytes in HEx".
+- The first invalid vector (L307, "PSBTv0 but with PSBT_GLOBAL_VERSION set to 2") carries no BIP 370 field: read as version 2, it fails because it still holds `PSBT_GLOBAL_UNSIGNED_TX`. Figures group the invalid vectors by how the model reads them (12 version 0, 12 version 2).
+- BIP 370's v2 vectors share their input with the v0 vectors, but not their change output, so the chapter does not call them "the same transaction".
+- Input 0's signature in BIP 143's example has a padded R (`0x8b…`); its twin n − S also needs a pad and is 73 bytes, BIP 66's maximum.
+- BIP 146 is Closed with "Details TBD" deployment and records LOW_S and NULLFAIL as relay policy; the chapter calls LOW_S a proposed rule and says BIP 146 did not make either a consensus rule.
 
-## Briefs to add to `catalog-phase4.json` when each chapter lands
+**Also fixed:** the homepage had no thumbnails for the three earlier phase-four chapters (the `<img>` 404'd): `scripts/capture_thumbnails.mjs` picked a hidden state's drawing in pre-rendered heroes. It now skips `[data-state][hidden]`; thumbnails for all five phase-four chapters are added, the other eighteen left unchanged.
 
-Then add the chapter to `chapterOrder` in `content/reading-policy.json` (`psbt-v2` after `psbt`; `strict-signatures` after `sorted-multisig`, before `segwit`) and to `content/model-coverage.json`.
+**Checks:** `pnpm check`, `pnpm test` (1,299 vitest passing plus the kit's 36 Python tests), `pnpm build`; screenshots at 1440 and 375 of every new figure and state in `review/screenshots/phase4/`, reviewed by eye and fixed (an unreadable byte packet in A22.1 became a part list, A22.2's grid overflowed and became a table, label collisions in A22.3, a result line clipped at 375 in A22.4, small type in A23.1); `scrollWidth` equals the viewport at 1440 and 375 on all five chapters; axe-core and the keyboard audit (`tools/a11y-tablet-audit.mjs`, 768 and 1024) found no violations on the five heroes.
 
-```json
-[
-  {
-    "id": "psbt-v2",
-    "primaryBips": [
-      370
-    ],
-    "phase": 4,
-    "readingOrder": 22,
-    "buildOrder": 22,
-    "questionTitle": "Why did PSBT need a second version?",
-    "heroRecipe": "psbt-v2-locktime.v1",
-    "primitiveFamilies": [
-      "information-envelope",
-      "stage-pipeline",
-      "comparison"
-    ],
-    "allowedControls": [
-      "Choose a published lock-time vector"
-    ],
-    "misconceptionChecklist": [
-      "PSBT version 2 is a container format, not a new transaction version",
-      "Inputs and outputs can be added only while the modifiable flags allow it",
-      "A PSBT's required lock times can conflict, and then no lock time can be chosen"
-    ],
-    "requiredTestFamilies": [
-      "BIP 370 invalid and valid vectors",
-      "Lock-time determination vectors",
-      "Modifiable flags"
-    ],
-    "briefStatus": "proposed-editorial-brief",
-    "releaseState": "not-generated",
-    "targetWords": {
-      "min": 450,
-      "max": 1100
-    },
-    "figureBudget": {
-      "hero": 1,
-      "supportingMin": 3,
-      "supportingMax": 5
-    },
-    "sourceLinks": [
-      "https://bips.dev/370/"
-    ]
-  },
-  {
-    "id": "strict-signatures",
-    "primaryBips": [
-      66,
-      146
-    ],
-    "phase": 4,
-    "readingOrder": 23,
-    "buildOrder": 23,
-    "questionTitle": "Why must a signature have exactly one encoding?",
-    "heroRecipe": "der-signature-checks.v1",
-    "primitiveFamilies": [
-      "byte-ribbon",
-      "stage-pipeline",
-      "number-line"
-    ],
-    "allowedControls": [
-      "Choose a change to a published signature"
-    ],
-    "misconceptionChecklist": [
-      "A malleated signature is still valid; it changes the transaction's identifier, not who can spend",
-      "BIP 146 is recorded as Closed: its low-S rule was proposed as consensus, not deployed by this BIP",
-      "SegWit moves witness signatures out of the txid, not out of the wtxid"
-    ],
-    "requiredTestFamilies": [
-      "BIP 66 encoding rules",
-      "Signed BIP 143 examples",
-      "Low-S arithmetic"
-    ],
-    "briefStatus": "proposed-editorial-brief",
-    "releaseState": "not-generated",
-    "targetWords": {
-      "min": 450,
-      "max": 1100
-    },
-    "figureBudget": {
-      "hero": 1,
-      "supportingMin": 3,
-      "supportingMax": 5
-    },
-    "sourceLinks": [
-      "https://bips.dev/66/",
-      "https://bips.dev/146/"
-    ]
-  }
-]
-```
+## Independent technical review (8 November 2026)
+
+Five fresh subagents, one per chapter, each with CLAUDE.md, the chapter, its ledger, model, tests, fixtures, derive step, figures and the pinned BIP text; report-only. None found a model bug against the BIPs. What held up was applied; what was not is listed.
+
+**`psbt-v2`** (1 error, 2 misleading, 12 nits)
+- Applied: the A22.2 caption and grouping wrongly counted L307 as a version 0 PSBT with a version 2 field (now "twelve … the first vector is relabelled"); `required-fields` now quotes every row it summarises (OUTPUT_COUNT, OUTPUT_INDEX, OUT_SCRIPT and the five optional fields); new claims `id-changes` (the unique ID changes when inputs or outputs are added) and `conflict` (only-height versus only-time); "should be able to read version 2"; "flags set as appropriate"; MUSTs restored ("must be chosen", "must be set to 0"); "adding or removing"; "one signature", not "one more"; inputs numbered from 1 in A22.1 as in BIP 370's case lines; singular step text for one requiring input; L432 quoted for undefined bits; `signerUpdate` accepts Taproot's `SIGHASH_DEFAULT` (clears both flags); a Creator that is its own Constructor may omit the field (L239).
+
+**`strict-signatures`** (1 error, 3 misleading, 7 nits)
+- Applied: the NULLFAIL paragraph said a failing signature "used to" push FALSE, implying a consensus change BIP 146 never made; LOW_S is now "proposed" everywhere (caption, hero lamp, verdict, status), and a new `not-consensus` claim says BIP 146 did not make LOW_S or NULLFAIL consensus rules; "same numbers" corrected for the removed R pad (same digits, read as negative in DER); BIP 66's empty-signature exemption stated; the hero shows LOW_S before ECDSA (BIP 146 L56); "except the sighash byte"; "whose releases had until then accepted"; "for the script types in actual use"; `soft-fork`, `malleability`, `two-sources` re-scoped to author-rationale; `deployment146` quotes L100; "VALID SIGNATURE" for "THE MATHS HOLDS"; a test now verifies both inputs after flipping input 0.
+
+**`derived-seeds`** (1 error, 7 misleading, nits)
+- Applied: the dice paragraph said the DRNG is read bit by bit; BIP 85 L410–415 reads whole bytes per roll and keeps the top bits (the dice vector skips 4 of 14 trials, now tested); the HMAC paragraph now gives the authors' three reasons (ledger quote extended), "the authors cannot enforce it on implementations", and that the application sees only the HMAC output; the hero's leak notes say the root stays unknown because it would need k, and k would not give it (hardened); the leak layer now hatches the root key and k text and the unread bytes; captions and the hero source no longer say every value is published (k and unprinted bytes are computed); the password reads bytes 1–16 (21 characters carry 126 bits; tested by Base64-encoding those 16 bytes alone); A19.4's drawing title matches its caption; the WIF is "intended as the hdseed of Bitcoin Core wallets"; "may be inherently less secure"; "the Base64 password application"; "parameters and an index"; "apart from their paths"; the opening says the software holding the root derives the entropy; one backup is enough "as long as the user also knows which application, index and length"; the 12-word storyboard caption says the 48 dropped bytes are not published; HEX and password ranges now tested.
+- Not applied (recorded): a `tprv` root still yields mainnet WIF and XPRV outputs; `rootKey` checks depth but not parent fingerprint or child number; dice edge ranges (rolls 0, sides 2^32) untested. None affects a published vector.
+
+**`sorted-multisig`** (0 errors, 5 misleading, nits)
+- Applied: "only the threshold and master public keys" attributed to BIP 67's authors, with a new `bip48-xpub` claim (BIP 48's hardened levels mean cosigners share the extended public key at the script-type level); BIP 67's 2(n!) count attributed to its authors (`many-scripts` is now author-rationale) and the circular test replaced by order counts; "each cosigner derives a key at the same path" replaced by a new `bip48-per-address` claim (keys sorted per address, so a cosigner's place can change); A20.4 now fills the public-derivation levels green, as BIP 48 L122/L129 and the wallet-paths chapter do; "a P2SH address shows only a hash … the authors conclude" (`not-enforceable`, `mixed-group` re-scoped); "As written, it covers two script types"; `multisigScript` caps n at 15 (16 compressed keys exceed the 520-byte push; tested); the docstring credits BIP 13 for the address encoding; the hero status no longer calls an address an order; the hero reads the vector's name instead of hard-coding "vector 4"; drawing titles match figure titles.
+- Not applied: a `sortedmulti()` cross-reference (BIP 383 is in the phase-three snapshot, not this ledger's) and the reviewer's 2ⁿ·n! bound (the chapter attributes the BIP's own count instead of correcting it).
+
+**`payment-links`** (1 error, 6 misleading, nits)
+- Applied: the A21.4 caption miscounted (BIP 321 has five proof-of-payment examples and four callbacks; the figure shows four examples and two callbacks, the tests build all four); the ledger and methodology now say "the 21 URIs in its URIs and Invalid URIs lists"; MUST, SHOULD and MAY restored for the address body, pop decoding, `req-` handling and one-time links; the `req-pop` rule covers both reasons a wallet will not open a callback, and proof URIs "must only be opened when they will simply switch back"; the payment information is the full transaction with witness data, or a BOLT 11 preimage; the A21.3 caption credits BIP 321's note on all-uppercase links, not key case alone; "BIP 21, from 2012, set out the scheme … used by 2024"; "allowed only base58 addresses, and its text made keys case-sensitive"; "bech32 and bech32m"; the dek no longer claims any wallet can open a link; invoices are "placeholders", not something BIP 321 notes; the model now refuses malformed percent-encoding and will not pay for a `req-pop` with no value (both tested); the hero source cites the note's own line.
+- Not applied: a mixed-case bech32 body without 0/O/I/l is classed as base58 (form-only reading, as documented); `chrome:`-style browser schemes cannot be listed (the model blocks the five BIP 321 names); `future-in-query` and `one-time` keep their normative scope (both quote MUST/SHOULD sentences).
+
+All five chapters are now `in-review` (shown as "technical review applied"): the independent review is applied, but no human has signed them off, so none is `approved`.

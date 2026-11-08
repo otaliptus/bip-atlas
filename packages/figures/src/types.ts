@@ -1033,3 +1033,121 @@ export interface Bip321Derived {
   pop: { callback: string | null; mayOpen: boolean; mayPay: boolean; opened: string | null } | null;
 }
 export type DerivedBip321Fixture = Bip321UriFixture & { derived: Bip321Derived };
+
+/* ---------- BIP 370 ---------- */
+export interface PsbtV2VectorFixture extends BaseFixture {
+  kind: "psbtv2-vector";
+  /** Where BIP 370 lists it: invalid PSBTs, valid PSBTs, or the lock-time determination tests. */
+  group: "invalid" | "valid" | "locktime";
+  /** The heading line above an invalid or valid vector. */
+  groupLine?: number;
+  /** Lock-time tests: the lock time the heading above says to compute (null: cannot be computed), and its line. */
+  expectedLockTime?: number | null;
+  expectedLine?: number;
+  hexLine: number;
+  hex: string;
+}
+export interface PsbtV2RecordView {
+  keyType: number;
+  /** The registry's constant (PSBT_IN_PREVIOUS_TXID) or the key type in hex. */
+  name: string;
+  /** Added by BIP 370 for version 2. */
+  v2: boolean;
+  bytes: number;
+  valueHex: string;
+}
+export interface PsbtV2MapView { scope: "global" | "input" | "output"; index?: number; records: PsbtV2RecordView[] }
+export interface PsbtV2Violation { rule: "v0-excludes" | "v2-excludes" | "v2-requires" | "time-range" | "height-range" | "format" | "structure"; field: string; scope: string; index?: number; value?: number; message: string }
+export interface PsbtV2LockTime {
+  requiring: number[];
+  accepted: { height: boolean; time: boolean };
+  kind: "fallback" | "height" | "time" | null;
+  value: number | null;
+  /** A time lock as a UTC date (ISO 8601), for reading. */
+  date: string | null;
+}
+export interface PsbtV2Derived {
+  version: number;
+  valid: boolean;
+  violation: PsbtV2Violation | null;
+  /** Valid version 2 PSBTs only (empty or null otherwise). */
+  maps: PsbtV2MapView[];
+  txVersion: number | null;
+  fallbackLocktime: number | null;
+  modifiable: number | null;
+  inputs: Array<{ txidHex: string; outputIndex: number; sequence: number | null; requiredTime: number | null; requiredHeight: number | null }>;
+  outputs: Array<{ amountSats: string; scriptHex: string }>;
+  lockTime: PsbtV2LockTime | null;
+  /** The unsigned transaction it describes, part by part, when the lock time can be computed. */
+  unsignedTx: { hex: string; parts: Array<{ id: string; label: string; scope: string; field: string; hex: string; index?: number }> } | null;
+  /** BIP 370's unique ID: the txid (display order) with every sequence 0. */
+  uniqueIdHex: string | null;
+  /** From this PSBT's flags: what a Constructor may add now, and the flags after one more signature of each sighash type. */
+  modifiableView: {
+    may: { addInputs: boolean; addOutputs: boolean; checkSighashSingle: boolean };
+    afterSigning: Array<{ sighash: string; flags: number; may: { addInputs: boolean; addOutputs: boolean; checkSighashSingle: boolean } }>;
+  } | null;
+}
+export type DerivedPsbtV2Fixture = PsbtV2VectorFixture & { derived: PsbtV2Derived };
+
+/* ---------- BIPs 66 and 146 ---------- */
+export interface DerSignatureFixture extends BaseFixture {
+  kind: "der-signature";
+  txHex: string;
+  txLine: number;
+  inputIndex: number;
+  /** Where the input carries its signature. */
+  where: "scriptSig" | "witness";
+  /** The DER signature with its sighash byte, as printed, and its line. */
+  signatureHex: string;
+  signatureLine: number;
+  /** P2PK: the spent script (the key is inside it, and it is the legacy scriptCode). */
+  scriptPubKeyHex?: string;
+  scriptPubKeyLine?: number;
+  /** P2WPKH: the public key, scriptCode, amount and published BIP 143 digest. */
+  pubkeyHex?: string;
+  pubkeyLine?: number;
+  scriptCodeHex?: string;
+  scriptCodeLine?: number;
+  amountSats?: string;
+  amountLine?: number;
+  amountQuote?: string;
+  sighashHex?: string;
+  sighashLine?: number;
+  digest: "legacy" | "bip143";
+}
+export type DerChangeId = "published" | "pad-removed" | "zero-added" | "length-byte" | "s-flipped";
+export interface DerFieldView { id: "seq" | "total" | "r-tag" | "r-len" | "r" | "s-tag" | "s-len" | "s" | "hashtype"; hex: string; label: string }
+export interface DerVariantView {
+  id: DerChangeId;
+  label: string;
+  hex: string;
+  bytes: number;
+  fields: DerFieldView[];
+  /** Fields whose bytes differ from the published signature. */
+  changed: string[];
+  encoding: { valid: boolean; ran: number; failed: { id: string; line: number; label: string } | null };
+  /** R and S as numbers read by their length bytes (hex), and whether they equal the published ones. */
+  rHex: string;
+  sHex: string;
+  sameNumbers: boolean;
+  /** Only run once BIP 66's check passes (null: not reached). */
+  ecdsa: boolean | null;
+  lowS: boolean | null;
+  /** The transaction with this signature in place: its identifiers (display order). */
+  txidHex: string;
+  wtxidHex: string;
+}
+export interface DerDerived {
+  pubkeyHex: string;
+  digestHex: string;
+  checks: Array<{ id: string; line: number; label: string }>;
+  /** S as a fraction of n, for the number line. */
+  sFraction: number;
+  flippedFraction: number;
+  halfOrderHex: string;
+  orderHex: string;
+  published: { txidHex: string; wtxidHex: string };
+  variants: DerVariantView[];
+}
+export type DerivedDerFixture = DerSignatureFixture & { derived: DerDerived };

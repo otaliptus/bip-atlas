@@ -29,7 +29,8 @@ export function bip85HeroSpec(fixtures: DerivedBip85Fixture[]): HeroSpec<Bip85He
 const LEAK = [
   "IF THIS OUTPUT LEAKS:",
   "k STAYS UNKNOWN (HMAC IS ONE-WAY)",
-  "THE ROOT STAYS UNKNOWN (HARDENED PATH)",
+  "THE ROOT STAYS UNKNOWN: IT WOULD NEED k,",
+  "AND k WOULD NOT GIVE IT (HARDENED)",
   "OTHER PATHS' OUTPUTS STAY UNRELATED",
 ];
 
@@ -40,7 +41,8 @@ const LEAK = [
  * the child key k, HMAC-SHA512 keyed with "bip-entropy-from-k", the 64 bytes
  * it returns and the part each application reads, and the output BIP 85's
  * vector prints. Every value was recomputed by the tested model at build
- * time; the toggle hatches what someone holding only the output cannot know.
+ * time (the vectors print the outputs, not k); the toggle hatches what
+ * someone holding only the output cannot know.
  */
 export function Bip85Applications({ fixtures, figureId, initial }: Props) {
   const f = fixtures.find((x) => x.id === (initial?.id ?? fixtures[0].id));
@@ -52,7 +54,7 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
   const desc =
     `Published root key ${short(f.rootXprv, 12)}. Path ${f.path}, every level hardened: ${d.levels.map((l) => `${l.value} ${l.meaning}`).join(", ")}. ` +
     `Hardened derivation gives the private key k = ${d.derivedKeyHex}. HMAC-SHA512 keyed with bip-entropy-from-k turns k into 64 bytes, ${d.entropyHex}. ` +
-    `The application reads ${read}. The ${OUTPUT_NAME[d.outputKind]} is ${d.output}. If this output leaks, k stays unknown because HMAC-SHA512 is one-way, the root stays unknown because every level is hardened, and other paths' outputs stay unrelated.`;
+    `The application reads ${read}. The ${OUTPUT_NAME[d.outputKind]} is ${d.output}. If this output leaks, k stays unknown because HMAC-SHA512 is one-way; the root stays unknown because finding it would need k, and even k would not give it, as every level is hardened; and other paths' outputs stay unrelated. The hatching covers what someone holding only the output cannot know: the root, k and the bytes the application does not read.`;
 
   const draw = (wide: boolean) => {
     const W = wide ? 640 : 330;
@@ -80,8 +82,9 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
     const lines = outputLines(f, W - 2 * x0 - 16);
     const outH = 24 + lines.length * 14;
     // Wide: the leak notes sit right of the HMAC box, so hiding them leaves no gap; narrow: below the output.
-    const leak = wide ? { x: 450, y: 142 } : { x: x0, y: outY + outH + 18 };
-    const H = wide ? outY + outH + 8 : leak.y + LEAK.length * 13 + 6;
+    const leak = wide ? { x: 450, y: 140 } : { x: x0, y: outY + outH + 18 };
+    const H = wide ? outY + outH + 8 : leak.y + LEAK.length * 12 + 6;
+    const unread = Array.from({ length: 64 }, (_, i) => i).filter((i) => !d.uses.some((u) => i >= u.from && i < u.to));
     return (
       <Drawing id={fid} width={W} height={H} title="One root, a separate output for each application" desc={desc}>
         <Value at={[x0, 14]} text={`PUBLIC TEST VECTOR · ${f.label.toUpperCase()}`} size={8.5} cls="k-value--label" />
@@ -92,11 +95,13 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
           <>
             <Value at={[x0, 90]} text="ROOT KEY" size={8.5} cls="k-value--label" />
             <Value at={[x0, 102]} text={short(f.rootXprv, 11)} size={8.5} />
+            <rect class="k-leak" x={x0 - 2} y={93} width={74} height={13} style={hatch} />
           </>
         ) : (
           <>
             <Value at={[x0 + 78, 40]} text="ROOT KEY · THE ONE BACKUP" size={8.5} cls="k-value--label" />
             <Value at={[x0 + 78, 54]} text={short(f.rootXprv, 20)} size={8.5} />
+            <rect class="k-leak" x={x0 + 76} y={45} width={124} height={13} style={hatch} />
           </>
         )}
         {wide ? <Arrow d={`M${x0 + 64} 45 H${ribbonX - 4}`} ids={ids} /> : null}
@@ -109,6 +114,7 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
         <KeyGlyph at={[kX, rowY + 4]} role="secret" label="k" />
         <rect class="k-leak" x={kX - 4} y={rowY - 2} width={40} height={36} style={hatch} />
         <Value at={[kX, rowY + 44]} text={short(d.derivedKeyHex, 10)} size={8.5} />
+        <rect class="k-leak" x={kX - 2} y={rowY + 35} width={68} height={13} style={hatch} />
         <Value at={[kX, rowY + 56]} text="32-BYTE CHILD KEY" size={7.5} cls="k-value--muted" />
         {wide ? <Arrow d={`M${kX + 36} ${rowY + 10} H${hmacX - 30}`} ids={ids} /> : <Arrow d={`M${kX + 14} ${rowY + 62} V${rowY + 70} H${hmacX + 20} V${hmacY - 22}`} ids={ids} />}
         <Machine at={[hmacX, hmacY]} w={96} d={26} h={20} label="HMAC-SHA512" role="hash" />
@@ -118,6 +124,9 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
         {/* The 64 bytes and the part this application reads. */}
         <Value at={[wide ? x0 : x0 + 64, barY - 6]} text="64 BYTES OF ENTROPY · FILLED = READ" size={7.5} cls="k-value--muted" />
         <ByteBar x={x0} y={barY} f={f} size={size} perRow={perRow} />
+        <g class="k-leak">
+          {unread.map((i) => <rect x={x0 + (i % perRow) * size} y={barY + Math.floor(i / perRow) * (size + 3)} width={size} height={size} style={hatch} />)}
+        </g>
         {uses.map((u, i) => <Value at={[x0, usesY + i * 13]} text={u} size={8} cls="k-value--label" />)}
         {/* The output */}
         <rect class="k-outline k-fill--secret" x={x0} y={outY} width={W - 2 * x0} height={outH} />
@@ -125,7 +134,7 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
         {lines.map((l, i) => <Value at={[x0 + 8, outY + 30 + i * 14]} text={l} size={wide ? 9 : 8.5} />)}
         {/* What a leaked output reveals: a layer every state draws; the toggle shows it. */}
         <g class="k-leak">
-          {LEAK.map((l, i) => <Value at={[leak.x, leak.y + i * 13]} text={l} size={7.5} cls={i === 0 ? "k-value--label" : "k-value--muted"} />)}
+          {LEAK.map((l, i) => <Value at={[leak.x, leak.y + i * 12]} text={l} size={7.5} cls={i === 0 ? "k-value--label" : "k-value--muted"} />)}
         </g>
       </Drawing>
     );
@@ -145,7 +154,7 @@ export function Bip85Applications({ fixtures, figureId, initial }: Props) {
           <dt>Output ({OUTPUT_NAME[d.outputKind]})</dt><dd><code class="atlas-break">{d.output}</code></dd>
         </dl>
       </details>
-      <p class="atlas-hero__source">BIP 85 line {f.source.line}. Recomputed by the tested model and equal to the published vector at build time. Public test material: never use it for funds or passwords.</p>
+      <p class="atlas-hero__source">BIP 85 line {f.source.line}. The output, and every byte BIP 85 prints, equal the published vector at build time; k and the bytes the vector does not print are computed by the same tested model. Public test material: never use it for funds or passwords.</p>
     </>
   );
 }

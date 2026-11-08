@@ -58,7 +58,8 @@ export function deriveBip85(f: Bip85VectorFixture): DerivedBip85Fixture {
     : f.app === "wif" ? [{ from: 0, to: 32, as: "private key" }]
     : f.app === "xprv" ? [{ from: 0, to: 32, as: "chain code" }, { from: 32, to: 64, as: "private key" }]
     : f.app === "hex" ? [{ from: 0, to: p.numBytes!, as: "the hex output" }]
-    : f.app === "pwd-base64" ? [{ from: 0, to: 64, as: `Base64, cut to ${p.length} characters` }]
+    // All 64 bytes are Base64-encoded, but pwd_len characters only carry 6 · pwd_len bits: the first bytes.
+    : f.app === "pwd-base64" ? [{ from: 0, to: Math.ceil((p.length! * 6) / 8), as: `Base64, cut to ${p.length} characters` }]
     : f.app === "dice" ? [{ from: 0, to: 64, as: "seed of the DRNG" }]
     : [{ from: 0, to: 64, as: "all 64 bytes" }];
   const outputKind = ({ "test-case": "entropy", bip39: "words", wif: "wif", xprv: "xprv", hex: "hex", "pwd-base64": "password", dice: "rolls" } as const)[f.app];

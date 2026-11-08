@@ -69,10 +69,15 @@ describe("why sorting matters", () => {
     expect(() => checkCompressedKey(uncompressed)).toThrow(Bip67Error);
     expect(() => sortKeys([vectors[0].List[0], uncompressed])).toThrow(/Uncompressed/);
   });
-  it("counts as many as 2(n!) scripts for n keys in either encoding", () => {
-    const n = 3;
-    expect(2 * permutations([1, 2, 3]).length).toBe(2 * [1, 2, 3].reduce((a, b) => a * b, 1));
-    expect(2 * permutations(Array.from({ length: n }, (_, i) => i)).length).toBe(12);
+  it("orders alone give n! scripts: six for three keys (BIP 67 counts as many as 2(n!) with encodings)", () => {
+    expect(b67[21]).toContain("there are as many as 2(n!) possible standard redeem scripts");
+    expect(permutations([1, 2, 3])).toHaveLength(6);
+    expect(permutations([1, 2, 3, 4])).toHaveLength(24);
+  });
+  it("stops at 15 keys, the most a P2SH redeem script can hold", () => {
+    const keys = Array.from({ length: 16 }, (_, i) => `02${(i + 1).toString(16).padStart(64, "0")}`);
+    expect(multisigScript(1, keys.slice(0, 15)).length / 2).toBe(513);
+    expect(() => multisigScript(1, keys)).toThrow(Bip67Error);
   });
 });
 

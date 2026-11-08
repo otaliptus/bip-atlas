@@ -22,3 +22,5 @@ export * from "./bip85";
 export * from "./bip67";
 export * from "./bip48";
 export * from "./bip321";
+export * from "./psbtv2";
+export * from "./der";

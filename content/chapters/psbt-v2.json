@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "psbt-v2",
+  "primaryBips": [370],
+  "specimenLabel": "BIP 0370",
+  "title": "Why did PSBT need a second version?",
+  "dek": "A version 0 PSBT fixes its transaction when it is created, so nobody can add an input or an output later. Version 2 drops that transaction and keeps each input's and output's details in its own map.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-11-08-phase4",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A version 0 PSBT, the format BIP 174 defines, carries the whole unsigned transaction in one global field. That transaction is fixed: once the PSBT exists, nobody who receives it can add an input or an output. BIP 370 defines a second version of the format that allows both.",
+        "claims": ["unsigned-v0", "motivation", "abstract"]
+      },
+      {
+        "type": "paragraph",
+        "text": "Version 2 must leave the unsigned transaction out. Its global map gives the transaction's version and the number of inputs and outputs. Each input map names the output it spends, by previous txid and index, and each output map gives an amount and a script. As the author notes, everything about one input or output is now in one place.",
+        "claims": ["only-fields", "required-fields", "one-place"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A22.1",
+      "recipe": "psbt-v2-maps.v1",
+      "title": "Each field in its own map",
+      "fixtures": ["bip370-l457"],
+      "caption": "BIP 370's vector with every version 2 field. Outlined rows are BIP 370's; the others are BIP 174's. The model builds the 113-byte unsigned transaction these fields describe. Converted to version 0, those bytes would become the single global field PSBT_GLOBAL_UNSIGNED_TX.",
+      "claims": ["required-fields", "all-fields-tx", "incompatible", "unsigned-v0"],
+      "layout": "prose"
+    }
+  },
+  "sections": [
+    {
+      "id": "versions",
+      "heading": "Two versions, one format",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Both versions use BIP 174's key-value format, so a version 0 parser should be able to read version 2 once it supports the new fields. They are still deliberately incompatible. A version 2 PSBT sets `PSBT_GLOBAL_VERSION` to 2, and a version 0 PSBT must carry none of the fields version 2 adds. Going back is possible: build the unsigned transaction from the version 2 fields.",
+          "claims": ["same-format", "incompatible", "required-fields"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The PSBT's version is not the transaction's. The transaction being built has its own version, in `PSBT_GLOBAL_TX_VERSION`.",
+          "claims": ["tx-version"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.2",
+          "recipe": "psbt-v2-invalid.v1",
+          "title": "Every invalid vector and the rule it breaks",
+          "fixtures": ["bip370-l307", "bip370-l311", "bip370-l315", "bip370-l319", "bip370-l323", "bip370-l327", "bip370-l331", "bip370-l335", "bip370-l339", "bip370-l343", "bip370-l347", "bip370-l351", "bip370-l355", "bip370-l359", "bip370-l363", "bip370-l367", "bip370-l371", "bip370-l375", "bip370-l379", "bip370-l383", "bip370-l387", "bip370-l391", "bip370-l395", "bip370-l399"],
+          "caption": "BIP 370's 24 invalid PSBTs. Twelve are version 0 PSBTs carrying a field version 2 adds. The first vector is a version 0 PSBT relabelled as version 2: read as version 2, it still holds its unsigned transaction. The other eleven are version 2 PSBTs that hold the unsigned transaction, miss a required field, or state a lock time out of range. The model rejects each of the others for the field its case names.",
+          "claims": ["vectors", "required-fields", "only-fields", "input-locks"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "adding",
+      "heading": "Adding inputs and outputs",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "In version 2 the Creator starts with no inputs and no outputs. A new role, the Constructor, adds them, but only while `PSBT_GLOBAL_TX_MODIFIABLE` allows it: bit 0 permits adding or removing inputs, bit 1 outputs. A Creator who passes the PSBT on for others to fill must include that field with the inputs and outputs flags set as appropriate, and must set the transaction version to at least 2.",
+          "claims": ["creator", "constructor", "modifiable-bits"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Signing narrows what may change. After signing, a Signer must update the flags. A signature without `SIGHASH_ANYONECANPAY` clears the inputs flag, and one without `SIGHASH_NONE` clears the outputs flag. One that uses `SIGHASH_SINGLE` sets bit 2, which warns Constructors that an input and its output must stay paired.",
+          "claims": ["signer", "modifiable-bits"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.3",
+          "recipe": "psbt-v2-modifiable.v1",
+          "title": "Flags that say what may still change",
+          "fixtures": ["bip370-l437", "bip370-l453"],
+          "caption": "BIP 370's vector with both modifiable bits set, and the flags one signature of each sighash type leaves under BIP 370's Signer rules. BIP 370 calls bits beyond 2 undefined; its vector with all eight bits set is still valid.",
+          "claims": ["modifiable-bits", "signer", "flags-computed"],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "A Constructor can also close the PSBT itself, by clearing the bits or removing the field. One wallet will often be both Creator and Constructor; if no one else will add inputs or outputs, it may leave the field out.",
+          "claims": ["constructor-close", "creator"]
+        }
+      ]
+    },
+    {
+      "id": "lock-time",
+      "heading": "Choosing the lock time",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Without an unsigned transaction there is no `nLockTime` field to read. Each input can state the lock time it needs instead: a minimum block height, a minimum Unix time, or both. The global map may hold a fallback for when no input states one; without it, the fallback is 0.",
+          "claims": ["input-locks", "fallback"]
+        },
+        {
+          "type": "paragraph",
+          "text": "If any input states a lock time, the type chosen is the one every such input accepts. An input that states both accepts either, as does one that states none. The lock time is then the largest value of that type. When both types would work, the height must be chosen. The author's reason: signatures commit to the lock time, so every signer must reach the same choice, and a block height is Bitcoin's own unit of time.",
+          "claims": ["choose", "tie", "tie-rationale"]
+        },
+        {
+          "type": "figure",
+          "figure": "A22.4",
+          "recipe": "psbt-v2-locktime.v1",
+          "title": "One lock time from the inputs' requirements",
+          "fixtures": ["bip370-l465", "bip370-l469", "bip370-l475", "bip370-l479", "bip370-l483", "bip370-l487", "bip370-l493", "bip370-l497", "bip370-l500", "bip370-l506"],
+          "caption": "BIP 370's ten lock-time vectors; those with requirements are named by what input 1 and input 2 require. Choose one: the model finds the inputs that require a lock time, the type all of them accept, and the largest value. Its result matches the one BIP 370 gives for every vector. The vector on line 500 is printed without a case line, so its label is read from its bytes.",
+          "claims": ["choose", "tie", "fallback", "locktime-vectors", "lock-date"],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "If one input needs only a height and another only a time, no lock time satisfies both, and BIP 370's last vector says its lock time cannot be computed. A Constructor must check for this before adding an input. It must not add an input whose lock time is incompatible, or one that would change the lock time once there are signatures.",
+          "claims": ["conflict", "no-common", "constructor-locks"]
+        }
+      ]
+    },
+    {
+      "id": "identity",
+      "heading": "Naming the transaction",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A version 2 PSBT is identified by the transaction it describes: build the unsigned transaction from its fields and take its txid. So the ID changes whenever an input or output is added or the lock time changes. Every sequence must be set to 0 for this, because Updaters and Combiners can still change `PSBT_IN_SEQUENCE`. In the model, BIP 370's vectors that differ only in their sequence or their modifiable flags share one ID.",
+          "claims": ["unique-id", "id-changes", "sequence", "unique-id-computed"]
+        },
+        {
+          "type": "details",
+          "summary": "Finalizing and extracting",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "When the Input Finalizer clears a finalized input as BIP 174 asks, it must keep the version 2 input fields: previous txid, output index, sequence and both lock-time requirements. The Transaction Extractor builds the transaction from those fields, with the lock time chosen as above. An omitted sequence means `0xffffffff`.",
+              "claims": ["finalizer-extractor", "sequence"]
+            }
+          ]
+        },
+        {
+          "type": "details",
+          "summary": "The proposal",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 370 (Ava Chow) was assigned in 2021 and is recorded as Deployed. Version number 1 was skipped: version 0 had been called version 1 informally, and this proposal version 2 while it was designed.",
+              "claims": ["preamble", "version-one"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

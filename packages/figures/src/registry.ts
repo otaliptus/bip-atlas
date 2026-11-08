@@ -98,6 +98,12 @@ export const RECIPES: readonly RecipeDefinition[] = [
   fig("bip67-script-story.v1", "bip67-vector", 1, "Storyboard: sorted keys, the 2-of-n script byte by byte, HASH160, the Base58Check address."),
   fig("bip48-paths.v1", "bip48-example", [1, 3], "BIP 48's example paths level by level, hardened levels filled."),
 
+  // strict-signatures
+  hero("der-signature-checks.v1", "der-signature", 1, ["Choose a change to a published signature"], "A published signature as published or with one byte-level change, through BIP 66's checks, ECDSA and BIP 146's LOW_S."),
+  fig("der-anatomy.v1", "der-signature", [1, 2], "Published DER signatures field by field, R's zero pad explained."),
+  fig("der-low-s.v1", "der-signature", [1, 2], "A number line from 0 to n: each published S in the lower half, its twin n − S in the upper."),
+  fig("der-txid-flip.v1", "der-signature", 2, "Storyboard: flipping S in the scriptSig changes the txid; in the witness, only the wtxid."),
+
   // segwit
   fig("two-serializations.v1", "transaction", 1, "Storyboard: the serialized tape hashed whole (wtxid), then without marker, flag and witness (txid)."),
   fig("witness-field.v1", "transaction", 1, "The witness section byte by byte: an empty field, then count, lengths, signature and key."),
@@ -127,6 +133,12 @@ export const RECIPES: readonly RecipeDefinition[] = [
   fig("psbt-combine.v1", "psbt-trace", 1, "Two signers' copies of one input map merged by the Combiner."),
   fig("psbt-finalize.v1", "psbt-trace", 1, "Input maps after the Input Finalizer: kept, added and cleared records."),
   fig("unknown-fields.v1", "psbt-combine", 1, "Two PSBTs with unknown key-value pairs combined without losing them."),
+
+  // psbt-v2
+  hero("psbt-v2-locktime.v1", "psbtv2-vector", [2, 10], ["Choose a published lock-time vector"], "One of BIP 370's lock-time vectors: each input's required height or time, the common type, the maximum, and the published result."),
+  fig("psbt-v2-maps.v1", "psbtv2-vector", 1, "A version 2 PSBT's maps record by record, and the unsigned transaction built from BIP 370's fields."),
+  fig("psbt-v2-modifiable.v1", "psbtv2-vector", [1, 2], "PSBT_GLOBAL_TX_MODIFIABLE as eight bits, and the flags after one signature of each sighash type."),
+  fig("psbt-v2-invalid.v1", "psbtv2-vector", [2, 24], "BIP 370's invalid vectors as a grid: the field each names and the rule the model finds broken."),
 
   // schnorr
   fig("schnorr-signature-layout.v1", "schnorr-vector", 1, "The verifier as a machine with three input slots: a 32-byte x-only key, a message of any length, and a 64-byte signature r ‖ s."),

@@ -47,7 +47,7 @@
     },
     {
       "id": "hot-wallets",
-      "statement": "The authors note that some wallets are inherently less secure, such as hot wallets on smartphones or Lightning Network nodes, so sharing one mnemonic with them is unsatisfactory.",
+      "statement": "The authors note that some wallets may be inherently less secure, such as hot wallets on smartphones or Lightning Network nodes, so sharing one mnemonic with them is unsatisfactory.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -119,7 +119,7 @@
     },
     {
       "id": "hmac-rationale",
-      "statement": "The authors' reason for HMAC-SHA512: to prevent leakage of the parent tree should k be compromised. Hardened derivation is required but cannot be enforced, so the HMAC makes the entropy hardened regardless, and the purpose is entropy, not a key.",
+      "statement": "The authors give three reasons for HMAC-SHA512: to prevent leakage of the parent tree should k be compromised, since hardened derivation is required but the authors cannot enforce it, so the HMAC makes the entropy hardened regardless; the purpose is entropy, not a private key, so the child key must be transformed; and, out of caution, to avoid unwanted interactions should k be used for a dual purpose, such as a nonce.",
       "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
@@ -129,7 +129,7 @@
             58,
             58
           ],
-          "quote": "The reason for running the derived key through HMAC-SHA512 and truncating the result as necessary is to prevent leakage of the parent tree should the derived key (''k'') be compromised. While the specification requires the use of hardened key derivation which would prevent this, we cannot enforce hardened derivation, so this method ensures the derived entropy is hardened. Also, from a semantic point of view, since the purpose is to derive entropy and not a private key, we are required to transform the child key."
+          "quote": "The reason for running the derived key through HMAC-SHA512 and truncating the result as necessary is to prevent leakage of the parent tree should the derived key (''k'') be compromised. While the specification requires the use of hardened key derivation which would prevent this, we cannot enforce hardened derivation, so this method ensures the derived entropy is hardened. Also, from a semantic point of view, since the purpose is to derive entropy and not a private key, we are required to transform the child key. This is done out of an abundance of caution, in order to ward off unwanted side effects should ''k'' be used for a dual purpose, including as a nonce ''hash(k)'', where undesirable and unforeseen interactions could occur."
         }
       ]
     },
@@ -247,7 +247,7 @@
     },
     {
       "id": "wif-app",
-      "statement": "Application 2' uses the most significant 256 bits as a private key, encoded as a compressed WIF for use as the hdseed of Bitcoin Core wallets.",
+      "statement": "Application 2' uses the most significant 256 bits as a private key, encoded as a compressed WIF that BIP 85 says will be used as the hdseed for Bitcoin Core wallets.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -399,7 +399,7 @@
     },
     {
       "id": "dice-app",
-      "statement": "Application 89101' rolls an N-sided die for PINs and other numeric secrets: rolls are zero-indexed and read from the DRNG, and a trial that is not below N is skipped.",
+      "statement": "Application 89101' rolls an N-sided die for PINs and other numeric secrets: rolls are zero-indexed; each trial reads ceil(ceil(log2 N) / 8) whole bytes from the DRNG and keeps their most significant ceil(log2 N) bits; a trial that is not below N is skipped.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
