@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "sorted-multisig",
+  "primaryBips": [67, 48],
+  "specimenLabel": "BIPs 0067 · 0048",
+  "title": "How do cosigners end up with the same multisig address?",
+  "dek": "A 2-of-3 script lists three keys in some order, and each order gives a different address. BIP 67 sorts the keys by their bytes first, so every cosigner builds the same script.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-11-08-phase4",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A multisignature script lists its public keys in an order, and the order is part of the script. Change the order and the script's hash changes, and with it the P2SH address. BIP 16 sets no order or encoding, so one set of keys and one threshold allow as many as 2(n!) standard scripts, each with its own address.",
+        "claims": ["many-scripts"]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIP 67 removes the choice. Keys must arrive compressed, and they are sorted by their bytes before the script is built. Wallets that follow it get one script and one address from the same keys and threshold, without the cosigners ever agreeing on an order.",
+        "claims": ["abstract67", "compressed", "sort-binary"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A20.1",
+      "recipe": "bip67-key-order.v1",
+      "title": "Six orders, one address once the keys are sorted",
+      "fixtures": ["bip67-v4"],
+      "caption": "BIP 67's vector 4: three keys, called A, B and C in the order the vector lists them. Choose the order they arrive in. Used as received, the six orders give six addresses; sorted first, all six give the vector's address. The model builds every script; BIP 67 publishes only the sorted one.",
+      "claims": ["six-orders", "vectors67", "sort-binary"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "sorting",
+      "heading": "Sorting by bytes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The sort is lexicographic on the keys' binary form: compare the first bytes, and only if they are equal compare the next ones. A compressed key starts with `02` or `03`, so every key with the prefix `02` comes before every key with `03`, whatever follows.",
+          "claims": ["sort-binary", "first-byte"]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 67's third vector shows both cases: four keys that differ only in their prefix and in their last byte. In the sorted list, neighbouring keys first differ at byte 33, then at byte 1, then at byte 33 again.",
+          "claims": ["first-byte", "vectors67"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.2",
+          "recipe": "bip67-byte-order.v1",
+          "title": "The first different byte decides",
+          "fixtures": ["bip67-v1", "bip67-v3"],
+          "caption": "Two published vectors' keys in sorted order, shown by their first three bytes and their last. Between neighbours, the first byte that differs is outlined; that byte alone decides their order.",
+          "claims": ["first-byte", "sort-binary", "vectors67"],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "Only compressed keys take part. An uncompressed key from a cosigner is a sign of an incompatible implementation, and a wallet should not compress it on its own.",
+          "claims": ["compressed", "no-auto-compress"]
+        }
+      ]
+    },
+    {
+      "id": "script",
+      "heading": "From keys to an address",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "The sorted keys go into the standard script: `OP_2` for the threshold, one push per key, `OP_3` for the number of keys, and `OP_CHECKMULTISIG`. For vector 4 that is 105 bytes. Hashing it as BIP 16 specifies gives the P2SH address `3Q4sF6tv9wsdqu2NtARzNCpQgwifm2rAba`.",
+          "claims": ["script-bytes", "hash-p2sh", "vectors67"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.3",
+          "recipe": "bip67-script-story.v1",
+          "title": "From sorted keys to an address",
+          "fixtures": ["bip67-v4"],
+          "caption": "Vector 4 step by step. The sorted keys, the script and the address are the vector's; the model rebuilds each and the build checks them.",
+          "claims": ["script-bytes", "hash-p2sh", "vectors67"],
+          "layout": "wide"
+        },
+        {
+          "type": "paragraph",
+          "text": "The authors' aim is that compliant wallets always produce the same address for the same keys, which also makes the account's transactions easier to recognize. For an HD multisig wallet, the cosigners then only need to share the threshold and their master public keys.",
+          "claims": ["canonical"]
+        }
+      ]
+    },
+    {
+      "id": "paths",
+      "heading": "Where the keys come from",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 48 names the paths multisig wallets derive those keys at: `m / purpose' / coin_type' / account' / script_type' / change / address_index`, with purpose `48'`. The first four levels are hardened; change and index are not. BIP 48 writes down a practice wallets already followed.",
+          "claims": ["bip48-levels", "bip48-change-index", "bip48-practice"]
+        },
+        {
+          "type": "paragraph",
+          "text": "It covers two script types: P2WSH at script type `2'`, the recommended default, and P2SH-wrapped P2WSH at `1'`. Each cosigner derives a key at the same path from their own seed, and BIP 48 wallets sort the keys as BIP 67 describes.",
+          "claims": ["bip48-scripts", "bip48-sorting"]
+        },
+        {
+          "type": "figure",
+          "figure": "A20.4",
+          "recipe": "bip48-paths.v1",
+          "title": "BIP 48's example paths",
+          "fixtures": ["bip48-p2wsh-external-first", "bip48-p2sh-p2wsh-external-first", "bip48-p2wsh-change-first"],
+          "caption": "Three of BIP 48's example paths; the model reproduces every path in its table. These script types are SegWit, so the sorted keys end up in a witness script rather than BIP 67's original P2SH script.",
+          "claims": ["bip48-levels", "bip48-scripts", "bip48-sorting", "vectors48"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "limits",
+      "heading": "What sorting cannot do",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A P2SH output shows only a hash, so the network cannot tell whether the keys were sorted, and BIP 67 cannot be a network rule. It works only when every cosigner's wallet follows it. A participant whose wallet does not may derive an address the others do not recognize as part of their account.",
+          "claims": ["not-enforceable", "mixed-group"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Sorting decides which of the possible scripts the keys produce. It does not change how many signatures a spend needs or whose keys can provide them.",
+          "claims": ["threshold-unchanged"]
+        },
+        {
+          "type": "callout",
+          "label": "Note",
+          "text": "The authors expect the convention to help a user of a 2-of-3 wallet service recover the wallet without that service.",
+          "claims": ["recovery"]
+        },
+        {
+          "type": "details",
+          "summary": "The two proposals",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "BIP 67 (Thomas Kerin, Jean-Pierre Rupp and Ruben de Vries) was assigned in 2015 and is recorded as Complete. BIP 48 (Fontaine) was assigned in 2020 and is recorded as Deployed.",
+              "claims": ["preamble67", "preamble48"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

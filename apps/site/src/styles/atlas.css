@@ -27,6 +27,8 @@ html { -webkit-text-size-adjust: 100%; }
 body.manual { min-block-size: 100vh; }
 .manual code { font-size: 0.86em; font-feature-settings: "zero" 1; }
 .manual p code, .manual li code, .manual td code { padding: 0.05em 0.25em; background: var(--manual-blue-wash); border-radius: 2px; }
+/* Long values (addresses, hashes) in prose and hero status lines wrap instead of widening the page. */
+.manual p code, .manual li code, .atlas-hero__status { overflow-wrap: anywhere; }
 .atlas-skip { position: absolute; inset-inline-start: 1rem; inset-block-start: -4rem; padding: 0.5rem 1rem; background: var(--manual-ink); color: var(--manual-paper); z-index: 10; }
 .atlas-skip:focus { inset-block-start: 1rem; }
 .atlas-small { font-size: 0.9375rem; line-height: 1.55; color: var(--manual-muted); }
@@ -142,7 +144,6 @@ body.manual { min-block-size: 100vh; }
 .atlas-strip-row { display: flex; flex-wrap: wrap; gap: var(--manual-space-2); }
 .atlas-ad-btn { padding-inline: 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .atlas-ad-btn:disabled { opacity: 0.35; cursor: default; }
-.atlas-chapter[data-chapter="addresses"] .atlas-hero__status { overflow-wrap: anywhere; }
 
 /* ---------- shared card-lab styles (still used by card-style heroes) ---------- */
 .atlas-lab { display: grid; gap: var(--manual-space-5); }
@@ -280,6 +281,7 @@ body.manual { min-block-size: 100vh; }
 .atlas-hero.atlas-hero--compact .k-drawing { max-inline-size: 28rem; }
 /* The "compare units" toggle: the layer shows without JavaScript and when the box is ticked. */
 [data-hero-states][data-compare="off"] .k-compare { display: none; }
+[data-hero-states][data-leak="off"] .k-leak { display: none; }
 .atlas-toggle { display: inline-flex; gap: 0.5rem; align-items: center; min-block-size: 2.75rem; font-family: var(--manual-code); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; }
 .atlas-toggle input { inline-size: 1.1rem; block-size: 1.1rem; accent-color: var(--atlas-ink); }
 .k-card__name--on { fill: #ffffff !important; font-weight: 500; }
@@ -324,7 +326,6 @@ body.manual { min-block-size: 100vh; }
 .atlas-hero[data-s-step="4"] [data-plate="4"] .k-face,
 .atlas-hero[data-s-step="5"] [data-plate="5"] .k-face { stroke-width: 2; }
 /* The status names a full address: let it wrap on a phone. */
-.atlas-chapter[data-chapter="wallet-paths"] .atlas-hero__status { overflow-wrap: anywhere; }
 
 /* ---------- Descriptors (BIPs 380–386) ---------- */
 .k-ds-fn { font-weight: 600; }
@@ -336,7 +337,6 @@ body.manual { min-block-size: 100vh; }
 .atlas-hero[data-s-key="3"] .k-ds-key[data-key="3"] .k-cell,
 .atlas-hero[data-s-key="4"] .k-ds-key[data-key="4"] .k-cell,
 .atlas-hero[data-s-key="5"] .k-ds-key[data-key="5"] .k-cell { stroke-width: 2; }
-.atlas-chapter[data-chapter="descriptors"] .atlas-hero__status { overflow-wrap: anywhere; }
 
 /* ---------- Block filters (BIPs 157/158) ---------- */
 .k-bf-hex { font-size: 8.5px !important; }

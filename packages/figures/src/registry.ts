@@ -60,6 +60,12 @@ export const RECIPES: readonly RecipeDefinition[] = [
   fig("wallet-spend-layouts.v1", "wallet-path-vector", 0, "Schematic: the scriptSig and witness a BIP 84 and a BIP 86 spend carry."),
   fig("wallet-path-schemes.v1", "wallet-path-vector", 3, "The same five-level tower under purposes 44, 84 and 86, and what comes out at the bottom."),
 
+  // derived-seeds
+  hero("bip85-applications.v1", "bip85-vector", [2, 8], ["Choose an application", "Show what one leaked output reveals"], "One root key, a hardened path per application, HMAC-SHA512 to 64 bytes, and what each application makes of them."),
+  fig("bip85-path.v1", "bip85-vector", 2, "Two published BIP 85 paths read level by level, the purpose number decoded as ASCII."),
+  fig("bip85-story.v1", "bip85-vector", 1, "Storyboard: root key, hardened derivation to k, HMAC-SHA512, the bytes kept, the BIP 39 words."),
+  fig("bip85-uses.v1", "bip85-vector", [3, 8], "Each application's own 64 bytes, filled where the application reads them."),
+
   // addresses
   fig("address-anatomy.v1", "address", 1, "One valid address as a ribbon of characters, its five parts bracketed and named."),
   fig("address-alphabet.v1", "address", 0, "Bech32's 32 data characters in value order, and the four left out."),
@@ -72,6 +78,12 @@ export const RECIPES: readonly RecipeDefinition[] = [
   fig("program-regrouping.v1", "address", 2, "Witness program bits regrouped from 8-bit bytes into 5-bit characters."),
   fig("address-script.v1", "address", 2, "From address to output script: version character to opcode, then push length and program."),
 
+  // payment-links
+  hero("bip321-link-reader.v1", "bip321-uri", [2, 10], ["Choose a published example link"], "One of BIP 321's example links cut into its parts, decoded, and read by three illustrative wallets."),
+  fig("bip321-anatomy.v1", "bip321-uri", 1, "One published link part by part, its message percent-decoded."),
+  fig("bip321-case.v1", "bip321-uri", 2, "The lowercase and uppercase forms of one link, read alike."),
+  fig("bip321-pop.v1", "bip321-uri", [1, 4], "Storyboard: BIP 321's proof-of-payment examples and what the wallet opens or refuses."),
+
   // p2sh
   fig("p2sh-commitment.v1", "p2sh-spend", 1, "The output as a box locked by a 20-byte hash; the redeem script hashes back to it."),
   fig("p2sh-shape.v1", "p2sh-spend", [1, 4], "Redeem scripts hashed into a fixed 23-byte output shape."),
@@ -79,6 +91,12 @@ export const RECIPES: readonly RecipeDefinition[] = [
   fig("p2sh-failures.v1", "p2sh-spend", 1, "Storyboard: the same spend broken three ways, each failing at a different stage."),
   fig("p2sh-wrapped.v1", "p2sh-spend", [2, 4], "Where pinned P2SH spends carry their signatures: scriptSig or witness, with their weight."),
   fig("p2sh-limit.v1", "p2sh-spend", 1, "The 520-byte push limit and the fifteen-key multisig it allows."),
+
+  // sorted-multisig
+  hero("bip67-key-order.v1", "bip67-vector", 1, ["Choose the order the keys arrive in", "Sort the keys first"], "One vector's three keys in each of six orders, used as received or sorted first, with the script and P2SH address each gives."),
+  fig("bip67-byte-order.v1", "bip67-vector", [1, 2], "Published vectors' sorted keys as bytes 1–3 and 33, the byte that decides between neighbours outlined."),
+  fig("bip67-script-story.v1", "bip67-vector", 1, "Storyboard: sorted keys, the 2-of-n script byte by byte, HASH160, the Base58Check address."),
+  fig("bip48-paths.v1", "bip48-example", [1, 3], "BIP 48's example paths level by level, hardened levels filled."),
 
   // segwit
   fig("two-serializations.v1", "transaction", 1, "Storyboard: the serialized tape hashed whole (wtxid), then without marker, flag and witness (txid)."),

@@ -1,11 +1,14 @@
 import type { BaseFixture } from "@bip-atlas/figures";
 import { deriveBfBlock } from "./block-filters";
 import { deriveDescriptor, deriveDescriptorIndex } from "./descriptors";
+import { deriveBip85 } from "./derived-seeds";
 import { deriveBip32 } from "./hd-wallets";
 import { deriveBip322, deriveBip322Formats, deriveBip322Verdicts } from "./message-signing";
 import { deriveMnemonic } from "./mnemonics";
 import { deriveMusig2Keyagg, deriveMusig2PsigChecks, deriveMusig2Session } from "./musig2";
 import { deriveP2sh } from "./p2sh";
+import { deriveBip321 } from "./payment-links";
+import { deriveBip48, deriveBip67 } from "./sorted-multisig";
 import { derivePsbtCombine, derivePsbtTrace } from "./psbt";
 import { deriveSchnorr } from "./schnorr";
 import { deriveTransaction } from "./segwit";
@@ -21,8 +24,10 @@ import { deriveWalletPath } from "./wallet-paths";
 const DERIVE: Record<string, (f: any, group: any[]) => unknown> = {
   // Address figures run the bech32 model on the published string themselves.
   address: (f) => f,
+  "bip321-uri": deriveBip321,
   mnemonic: deriveMnemonic,
   "bip32-seed": deriveBip32,
+  "bip85-vector": deriveBip85,
   transaction: deriveTransaction,
   "psbt-trace": derivePsbtTrace,
   "psbt-combine": derivePsbtCombine,
@@ -31,6 +36,8 @@ const DERIVE: Record<string, (f: any, group: any[]) => unknown> = {
   "taproot-keyspend": deriveTaprootKeyspend,
   "tapscript-case": deriveTapscript,
   "p2sh-spend": deriveP2sh,
+  "bip67-vector": deriveBip67,
+  "bip48-example": deriveBip48,
   "timelock-case": deriveTimelockCase,
   "timelock-bip-tx": deriveTimelockBipTx,
   "timelock-encoding": deriveTimelockEncoding,

@@ -910,3 +910,126 @@ export interface Bip322VerdictsDerived {
   rows: Array<{ label: string; message: string; address: string; state: string; detail: string }>;
 }
 export type DerivedBip322VerdictsFixture = Bip322VerdictsFixture & { derived: Bip322VerdictsDerived };
+
+/* ---------- BIP 85 ---------- */
+export type Bip85App = "test-case" | "bip39" | "wif" | "xprv" | "hex" | "pwd-base64" | "dice";
+export interface Bip85VectorFixture extends BaseFixture {
+  kind: "bip85-vector";
+  app: Bip85App;
+  /** Application parameters, as the path encodes them. */
+  params: { words?: number; numBytes?: number; length?: number; sides?: number; rolls?: number };
+  path: string;
+  /** The published root key, on the line before the path. */
+  rootXprv: string;
+  /** The vector's OUTPUT lines, copied; `lines` gives each one's line number. */
+  published: { derivedKey?: string; entropy: string; output?: string; lines: Record<string, number> };
+}
+export interface Bip85Derived {
+  /** The path's levels after m, each with what BIP 85 says it selects. */
+  levels: Array<{ value: string; meaning: string }>;
+  /** k, the private key at the path (secret). */
+  derivedKeyHex: string;
+  /** HMAC-SHA512("bip-entropy-from-k", k): 64 bytes. */
+  entropyHex: string;
+  /** Byte ranges of the 64 the application reads, and what each becomes. */
+  uses: Array<{ from: number; to: number; as: string }>;
+  application: string;
+  output: string;
+  outputKind: "entropy" | "words" | "wif" | "xprv" | "hex" | "password" | "rolls";
+  /** Dice only: trials skipped because they were not below the number of sides. */
+  skipped?: number;
+}
+export type DerivedBip85Fixture = Bip85VectorFixture & { derived: Bip85Derived };
+
+/* ---------- BIPs 67 and 48 ---------- */
+export interface Bip67VectorFixture extends BaseFixture {
+  kind: "bip67-vector";
+  /** Signatures required; BIP 67's vectors are all 2-of-n. */
+  m: number;
+  /** The keys in the order the vector lists them, and its four published results. */
+  list: string[];
+  sorted: string[];
+  scriptHex: string;
+  address: string;
+  lines: { list: number[]; sorted: number[]; script: number; address: number };
+}
+export interface Bip67Order {
+  /** Letters of the vector's keys (A = first listed) in this order. */
+  letters: string;
+  keys: string[];
+  /** The script and address built from this order without sorting. */
+  scriptHex: string;
+  address: string;
+}
+export interface Bip67Derived {
+  /** Letter of each key: A for the first one the vector lists. */
+  letterOf: Record<string, string>;
+  sorted: string[];
+  scriptHex: string;
+  hash160Hex: string;
+  address: string;
+  /** For neighbouring sorted keys, the first byte at which they differ. */
+  firstDifferences: number[];
+  /** Every order of up to three keys, built as received (empty for more keys). */
+  orders: Bip67Order[];
+}
+export type DerivedBip67Fixture = Bip67VectorFixture & { derived: Bip67Derived };
+
+export interface Bip48ExampleFixture extends BaseFixture {
+  kind: "bip48-example";
+  network: "mainnet" | "testnet";
+  account: "first" | "second";
+  script: "p2sh-p2wsh" | "p2wsh";
+  chain: "external" | "change";
+  address: "first" | "second";
+  /** The path column as printed ("m / 48' / …"). */
+  path: string;
+}
+export interface Bip48Derived {
+  levels: Array<{ name: string; value: string; hardened: boolean }>;
+  path: string;
+}
+export type DerivedBip48Fixture = Bip48ExampleFixture & { derived: Bip48Derived };
+
+/* ---------- BIPs 321 and 21 ---------- */
+export interface Bip321UriFixture extends BaseFixture {
+  kind: "bip321-uri";
+  uri: string;
+  /** Where BIP 321 lists it: valid examples, invalid examples, or proof-of-payment examples. */
+  group: "example" | "invalid" | "pop";
+  expect: "valid" | "invalid";
+  /** The BIP's sentence introducing the example, and its line. */
+  note: string;
+  noteLine: number;
+  /** Proof-of-payment examples: the callback the BIP says to open, or the rule it states. */
+  callback?: string;
+  callbackLine?: number;
+  paidWith?: "onchain" | "lightning";
+  rule?: string;
+  ruleLine?: number;
+}
+export interface Bip321Param { raw: string; key: string; required: boolean; value: string | null; kind: "amount" | "label" | "message" | "pop" | "instruction" | "unknown" }
+export interface Bip321WalletView {
+  name: string;
+  implemented: string[];
+  valid: boolean;
+  reason: string | null;
+  /** Payment instructions this wallet can use: "onchain" for the body address, else the key. */
+  pays: string[];
+  ignored: string[];
+}
+export interface Bip321Derived {
+  reading: {
+    valid: boolean;
+    reason: string | null;
+    scheme: string;
+    address: string;
+    addressForm: "base58" | "bech32" | "empty" | "other";
+    params: Bip321Param[];
+    instructions: Array<{ key: string; value: string }>;
+  };
+  /** The same URI read by three illustrative wallets that implement different keys. */
+  wallets: Bip321WalletView[];
+  pop: { callback: string | null; mayOpen: boolean; mayPay: boolean; opened: string | null } | null;
+}
+export type DerivedBip321Fixture = Bip321UriFixture & { derived: Bip321Derived };

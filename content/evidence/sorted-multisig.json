@@ -1,0 +1,513 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "sorted-multisig",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-11-08-phase4",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-four snapshot.",
+  "claims": [
+    {
+      "id": "preamble67",
+      "statement": "BIP 67 (Kerin, Rupp, de Vries) was assigned in 2015 and is recorded as Complete; it is a Specification in the Applications layer.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            3,
+            10
+          ],
+          "quote": "Layer: Applications Title: Deterministic Pay-to-script-hash multi-signature addresses through public key sorting Authors: Thomas Kerin <me@thomaskerin.io> Jean-Pierre Rupp <root@haskoin.com> Ruben de Vries <ruben@rubensayshi.com> Status: Complete Type: Specification Assigned: 2015-02-08"
+        }
+      ]
+    },
+    {
+      "id": "preamble48",
+      "statement": "BIP 48 (Fontaine) was assigned in 2020 and is recorded as Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            4,
+            8
+          ],
+          "quote": "Title: Multi-Script Hierarchy for Multi-Sig Wallets Authors: Fontaine <dentondevelopment@protonmail.com> Status: Deployed Type: Specification Assigned: 2020-12-16"
+        }
+      ]
+    },
+    {
+      "id": "abstract67",
+      "statement": "BIP 67 defines how the public keys are encoded and sorted, so that a given set of keys and required signatures always gives the same redeem script and P2SH address.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "It focuses on defining how the public keys must be encoded and sorted so that the redeem script and corresponding P2SH address are always the same for a given set of keys and number of required signatures."
+        }
+      ]
+    },
+    {
+      "id": "many-scripts",
+      "statement": "BIP 16's redeem script needs no particular key order or encoding, so a key set and threshold allow as many as 2(n!) standard redeem scripts, each with its own P2SH address.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "The redeem script does not require a particular ordering or encoding for public keys. This means that for a given set of keys and number of required signatures, there are as many as 2(n!) possible standard redeem scripts, each with its separate P2SH address."
+        }
+      ]
+    },
+    {
+      "id": "canonical",
+      "statement": "The authors' motivation: compliant wallets always produce the same address for the same keys and threshold, which makes the account's transactions easier to recognize; for HD multisig wallets only the threshold and the participants' master public keys need sharing.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            24,
+            24
+          ],
+          "quote": "compliant wallets will always produce the same P2SH address for the same given set of keys and required signature count, making it easier to recognize transactions involving that multi-signature account. This is particularly attractive for multisignature hierarchical-deterministic wallets, as less state is required to setup multi-signature accounts: only the number of required signatures and master public keys of participants need to be shared"
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "statement": "The authors expect the convention to let someone other than a 2-of-3 wallet service recover the wallet without the service's help.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            28,
+            29
+          ],
+          "quote": "Many wallet as a service providers use a 2of3 multi-signature schema where the user stores 1 of the keys (offline) as backup while using the other key for daily use and letting the service cosign his transactions. This standard will help in enabling a party other than the service provider to recover the wallet without any help from the service provider."
+        }
+      ]
+    },
+    {
+      "id": "compressed",
+      "statement": "BIP 67 starts by making sure every key was received in compressed form.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            33,
+            33
+          ],
+          "quote": "For a set of public keys, ensure that they have been received in compressed form:"
+        }
+      ]
+    },
+    {
+      "id": "sort-binary",
+      "statement": "The keys are sorted lexicographically by their binary representation before the standard multisig redeem script is built.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            39,
+            39
+          ],
+          "quote": "Sort them lexicographically according to their binary representation:"
+        },
+        {
+          "bip": 67,
+          "lines": [
+            45,
+            45
+          ],
+          "quote": "..before using the resulting list of keys in a standard multisig redeem script:"
+        }
+      ]
+    },
+    {
+      "id": "hash-p2sh",
+      "statement": "The redeem script is hashed as BIP 16 specifies to give the P2SH address.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            49,
+            49
+          ],
+          "quote": "Hash the redeem script according to BIP-0016 to get the P2SH address."
+        }
+      ]
+    },
+    {
+      "id": "no-auto-compress",
+      "statement": "Uncompressed keys are incompatible: an implementation should not compress them automatically, and an uncompressed key from a participant signals an incompatible implementation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            54,
+            54
+          ],
+          "quote": "Uncompressed keys are incompatible with this specification. A compatible implementation should not automatically compress keys. Receiving an uncompressed key from a multisig participant should be interpreted as a sign that the user has an incompatible implementation."
+        }
+      ]
+    },
+    {
+      "id": "not-enforceable",
+      "statement": "A P2SH address reveals nothing about its script, so BIP 67 cannot be enforced as a network rule; doing so would also be a hard fork.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            55,
+            55
+          ],
+          "quote": "P2SH addresses do not reveal information about the script that is receiving the funds. For this reason it is not technically possible to enforce this BIP as a rule on the network. Also, it would cause a hard fork."
+        }
+      ]
+    },
+    {
+      "id": "mixed-group",
+      "statement": "If a group is not entirely compliant, a participant may derive an address the others do not recognize as part of their shared account.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "If a group of users were not entirely compliant, there is the possibility that a participant will derive an address that the others will not recognize as part of the common multisig account."
+        }
+      ]
+    },
+    {
+      "id": "vectors67",
+      "statement": "The model reproduces all four BIP 67 vectors, each 2-of-n: the sorted lists, the redeem scripts and the P2SH addresses.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            61,
+            61
+          ],
+          "quote": "Two signatures are required in each of these test vectors."
+        },
+        {
+          "bip": 67,
+          "lines": [
+            105,
+            105
+          ],
+          "quote": "Vector 4: (from bitcore)"
+        },
+        {
+          "bip": 67,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "3Q4sF6tv9wsdqu2NtARzNCpQgwifm2rAba"
+        }
+      ]
+    },
+    {
+      "id": "six-orders",
+      "statement": "For vector 4's three keys, the six possible orders give six different scripts and addresses when used as received; sorted first, all six give the vector's address. The model computes the unsorted ones; BIP 67 publishes only the sorted result.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "there are as many as 2(n!) possible standard redeem scripts, each with its separate P2SH address."
+        },
+        {
+          "bip": 67,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "3Q4sF6tv9wsdqu2NtARzNCpQgwifm2rAba"
+        }
+      ]
+    },
+    {
+      "id": "first-byte",
+      "statement": "Sorting compares the keys' bytes from the left, and the first byte that differs decides: vector 3's sorted keys first differ at byte 33, then byte 1, then byte 33.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            39,
+            39
+          ],
+          "quote": "Sort them lexicographically according to their binary representation:"
+        },
+        {
+          "bip": 67,
+          "lines": [
+            96,
+            99
+          ],
+          "quote": "** 020000000000000000000000000000000000004141414141414141414141414140 ** 020000000000000000000000000000000000004141414141414141414141414141 ** 030000000000000000000000000000000000004141414141414141414141414140 ** 030000000000000000000000000000000000004141414141414141414141414141"
+        }
+      ]
+    },
+    {
+      "id": "script-bytes",
+      "statement": "Vector 4's redeem script is OP_2, three 33-byte key pushes, OP_3 and OP_CHECKMULTISIG: 105 bytes.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            47,
+            47
+          ],
+          "quote": "OP_2 021f2f6e1e50cb6a953935c3601284925decd3fd21bc445712576873fb8c6ebc18 022df8750480ad5b26950b25c7ba79d3e37d75f640f8e5d9bcd5b150a0f85014da 03e3818b65bcc73a7d64064106a859cc1a5a728c4345ff0b641209fba0d90de6e9 OP_3 OP_CHECKMULTISIG"
+        },
+        {
+          "bip": 67,
+          "lines": [
+            115,
+            115
+          ],
+          "quote": "5221021f2f6e1e50cb6a953935c3601284925decd3fd21bc445712576873fb8c6ebc1821022df8750480ad5b26950b25c7ba79d3e37d75f640f8e5d9bcd5b150a0f85014da2103e3818b65bcc73a7d64064106a859cc1a5a728c4345ff0b641209fba0d90de6e953ae"
+        }
+      ]
+    },
+    {
+      "id": "bip48-sorting",
+      "statement": "BIP 48 wallets inherently sort keys as BIP 67 describes, so every multisig address and script they make comes from sorted public keys.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            50,
+            51
+          ],
+          "quote": "Any wallet that supports BIP48 inherently supports deterministic key sorting as per BIP67 so that all possible multi-signature addresses/scripts are derived from deterministically sorted public keys."
+        }
+      ]
+    },
+    {
+      "id": "bip48-practice",
+      "statement": "BIP 48 writes down the existing industry practice of m/48' paths for multisig wallets, and lets future script types be appended without a new BIP.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            27,
+            30
+          ],
+          "quote": "The motivation of this BIP is to define the existing industry wide practice of utilizing m/48' derivation paths in hierarchical deterministic multi-sig wallets so that other developers may benefit from a standard. This BIP allows for future script types to easily be appended to the specification so that a new BIP is not required for every future script type."
+        }
+      ]
+    },
+    {
+      "id": "bip48-levels",
+      "statement": "BIP 48 paths are m / purpose' / coin_type' / account' / script_type' / change / address_index, with purpose 48' and coin type 0 for mainnet or 1 for testnet; an apostrophe marks hardened derivation.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "m / purpose' / coin_type' / account' / script_type' / change / address_index"
+        },
+        {
+          "bip": 48,
+          "lines": [
+            61,
+            61
+          ],
+          "quote": "<code>h</code> or <code>'</code> in the path indicates that BIP32 hardened derivation is used."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            67,
+            67
+          ],
+          "quote": "Purpose is a constant set to 48' following the BIP43 recommendation."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            79,
+            79
+          ],
+          "quote": "Coin type <code>0</code> for mainnet and <code>1</code> for testnet."
+        }
+      ]
+    },
+    {
+      "id": "bip48-scripts",
+      "statement": "BIP 48 covers two script types: native SegWit P2WSH at script type 2' and nested P2SH-P2WSH at 1'; P2WSH, m/48'/0'/0'/2', is the recommended default.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            103,
+            104
+          ],
+          "quote": "Currently the only script types covered by this BIP are Native Segwit (p2wsh) and Nested Segwit (p2sh-p2wsh)."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            107,
+            107
+          ],
+          "quote": "<code>1'</code>: Nested Segwit (p2sh-p2wsh)"
+        },
+        {
+          "bip": 48,
+          "lines": [
+            110,
+            110
+          ],
+          "quote": "<code>2'</code>: Native Segwit (p2wsh)"
+        },
+        {
+          "bip": 48,
+          "lines": [
+            112,
+            112
+          ],
+          "quote": "The recommended default for wallets is pay to witness script hash <code>m/48'/0'/0'/2'</code>."
+        }
+      ]
+    },
+    {
+      "id": "bip48-change-index",
+      "statement": "The last two levels use public (normal) derivation: change is 0 for receiving addresses and 1 for change, and addresses are numbered from 0.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            116,
+            117
+          ],
+          "quote": "Constant 0 is used for external chain and constant 1 for internal chain (also known as change addresses)."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            122,
+            122
+          ],
+          "quote": "Public derivation is used at this level."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            126,
+            126
+          ],
+          "quote": "Addresses are numbered from index 0 in sequentially increasing manner."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            129,
+            129
+          ],
+          "quote": "Public derivation is used at this level."
+        }
+      ]
+    },
+    {
+      "id": "vectors48",
+      "statement": "The model reproduces every path in BIP 48's examples table from the table's other columns.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            131,
+            131
+          ],
+          "quote": "==Examples=="
+        },
+        {
+          "bip": 48,
+          "lines": [
+            153,
+            153
+          ],
+          "quote": "m / 48' / 0' / 0' / 2' / 0 / 0"
+        }
+      ]
+    },
+    {
+      "id": "threshold-unchanged",
+      "statement": "The key order inside the script decides which of the possible scripts a key set produces; it does not change the number of required signatures or the keys that can provide them. This follows from BIP 67 fixing only order and encoding; it does not say so in these words.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 67,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "how the public keys must be encoded and sorted so that the redeem script and corresponding P2SH address are always the same for a given set of keys and number of required signatures."
+        },
+        {
+          "bip": 67,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "The redeem script does not require a particular ordering or encoding for public keys."
+        }
+      ]
+    }
+  ]
+}

@@ -12,6 +12,15 @@ import { ScriptOpcodes } from "./address/ScriptOpcodes";
 import { TwoConstants } from "./address/TwoConstants";
 import { TypoStory } from "./address/TypoStory";
 import { AddressAnatomy } from "./AddressAnatomy";
+import { Bip321Anatomy } from "./bip321/Bip321Anatomy";
+import { Bip321Case } from "./bip321/Bip321Case";
+import { Bip321Pop } from "./bip321/Bip321Pop";
+import { Bip48Paths } from "./bip67/Bip48Paths";
+import { Bip67ByteOrder } from "./bip67/Bip67ByteOrder";
+import { Bip67ScriptStory } from "./bip67/Bip67ScriptStory";
+import { Bip85Path } from "./bip85/Bip85Path";
+import { Bip85Story } from "./bip85/Bip85Story";
+import { Bip85Uses } from "./bip85/Bip85Uses";
 import { Bip322Formats } from "./bip322/Bip322Formats";
 import { Bip322Hash } from "./bip322/Bip322Hash";
 import { Bip322Limits } from "./bip322/Bip322Limits";
@@ -139,6 +148,11 @@ export const STATIC_FIGURES: Record<string, StaticFigure> = {
   "wallet-spend-layouts.v1": none(WalletSpendLayouts),
   "wallet-path-schemes.v1": all(WalletPathSchemes),
 
+  // derived-seeds
+  "bip85-path.v1": all(Bip85Path),
+  "bip85-story.v1": one(Bip85Story),
+  "bip85-uses.v1": all(Bip85Uses),
+
   // addresses
   "address-anatomy.v1": one(AddressAnatomy),
   "address-alphabet.v1": none(AddressAlphabet),
@@ -156,6 +170,16 @@ export const STATIC_FIGURES: Record<string, StaticFigure> = {
   "p2sh-failures.v1": one(P2shFailures),
   "p2sh-wrapped.v1": all(P2shWrapped),
   "p2sh-limit.v1": one(P2shLimit),
+
+  // payment-links
+  "bip321-anatomy.v1": one(Bip321Anatomy),
+  "bip321-case.v1": all(Bip321Case),
+  "bip321-pop.v1": all(Bip321Pop),
+
+  // sorted-multisig
+  "bip67-byte-order.v1": all(Bip67ByteOrder),
+  "bip67-script-story.v1": one(Bip67ScriptStory),
+  "bip48-paths.v1": all(Bip48Paths),
 
   // segwit
   "two-serializations.v1": one(TwoSerializations),
