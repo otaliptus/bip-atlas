@@ -1,0 +1,857 @@
+{
+  "schemaVersion": "bip-atlas.research-notes.v1",
+  "notes": [
+    {
+      "number": 1,
+      "teachingPoint": "Explain the original proposal process and how its publication model differs from present BIP3."
+    },
+    {
+      "number": 2,
+      "teachingPoint": "Explain the revised process and licensing framework that BIP3 later replaced."
+    },
+    {
+      "number": 3,
+      "teachingPoint": "Separate editorial publication, document status, implementation, adoption and Bitcoin consensus; relate the workflow to BIP123 layers."
+    },
+    {
+      "number": 8,
+      "teachingPoint": "Explain height-based version-bit deployment and optional mandatory lock-in, contrasting BIP9 time-based timeout."
+    },
+    {
+      "number": 9,
+      "teachingPoint": "Explain parallel soft-fork signaling, threshold windows, lock-in delay and bit reuse."
+    },
+    {
+      "number": 10,
+      "teachingPoint": "Explain the earlier multisig transaction-exchange format and compare its collaboration role with PSBT."
+    },
+    {
+      "number": 11,
+      "teachingPoint": "Explain bare threshold multisig standardness and why script-hash funding later helped hide complex spending conditions."
+    },
+    {
+      "number": 12,
+      "teachingPoint": "Explain OP_EVAL as an alternative script-hash design and why evaluating supplied code differs from BIP16 verification."
+    },
+    {
+      "number": 13,
+      "teachingPoint": "Explain Base58Check script-hash addresses as the recipient encoding, distinct from BIP16 spending rules."
+    },
+    {
+      "number": 14,
+      "teachingPoint": "Separate protocol version from user-agent identification in the peer handshake."
+    },
+    {
+      "number": 15,
+      "teachingPoint": "Explain the alias-resolution proposal and contrast its naming/trust model with DNS Payment Instructions."
+    },
+    {
+      "number": 16,
+      "teachingPoint": "Explain committing to a redeem script, revealing it when spent and applying the second evaluation."
+    },
+    {
+      "number": 17,
+      "teachingPoint": "Explain OP_CHECKHASHVERIFY as an alternative to OP_EVAL and P2SH, with its distinct validation sequence."
+    },
+    {
+      "number": 18,
+      "teachingPoint": "Explain the alternative input/output layout using dataSig, scriptCheck and hashScriptCheck; Complete does not establish adoption."
+    },
+    {
+      "number": 19,
+      "teachingPoint": "Explain the alternative low-sigop multisig script patterns and distinguish them from bare CHECKMULTISIG standardness."
+    },
+    {
+      "number": 20,
+      "teachingPoint": "Explain the early payment URI design and the changes represented by its BIP21 successor."
+    },
+    {
+      "number": 21,
+      "teachingPoint": "Explain bitcoin: payment instructions, optional versus required parameters, and its successor BIP321."
+    },
+    {
+      "number": 22,
+      "teachingPoint": "Explain how getblocktemplate gives a miner block structure rather than just a header to hash."
+    },
+    {
+      "number": 23,
+      "teachingPoint": "Explain pooled-mining extensions to the block-template exchange, including pool constraints and submission."
+    },
+    {
+      "number": 30,
+      "teachingPoint": "Explain why duplicate transaction identifiers can overwrite unspent outputs and what duplicate protection checks."
+    },
+    {
+      "number": 31,
+      "teachingPoint": "Explain nonce-bearing ping/pong as liveness measurement, separate from peer capability negotiation."
+    },
+    {
+      "number": 32,
+      "teachingPoint": "Explain seed-derived key trees, chain codes, extended keys and the hardened derivation boundary."
+    },
+    {
+      "number": 33,
+      "teachingPoint": "Explain the proposed specialization of node roles and compare its service/trust assumptions with light-client designs."
+    },
+    {
+      "number": 34,
+      "teachingPoint": "Explain height commitment in the coinbase and its relationship to uniqueness and early version-based deployment."
+    },
+    {
+      "number": 35,
+      "teachingPoint": "Explain asking a peer for its mempool inventory, without treating that inventory as consensus or a complete network view."
+    },
+    {
+      "number": 36,
+      "teachingPoint": "Explain the earlier proposal for extensible custom-service announcements alongside modern peer feature negotiation."
+    },
+    {
+      "number": 37,
+      "teachingPoint": "Explain server-side Bloom matching, false positives and what the wallet reveals when it sends a filter."
+    },
+    {
+      "number": 38,
+      "teachingPoint": "Explain passphrase-encrypted individual private keys and the distinction from encrypting or sharing a wallet seed."
+    },
+    {
+      "number": 39,
+      "teachingPoint": "Explain entropy, mnemonic checksum, seed derivation and why the passphrase changes the derived wallet."
+    },
+    {
+      "number": 42,
+      "teachingPoint": "Explain the real subsidy-shift arithmetic fix behind the satirical account of endless future inflation."
+    },
+    {
+      "number": 43,
+      "teachingPoint": "Explain the hardened purpose field as a namespace for wallet conventions, rather than another derivation algorithm."
+    },
+    {
+      "number": 44,
+      "teachingPoint": "Explain purpose, coin, account, change and address levels, together with account discovery and its limits."
+    },
+    {
+      "number": 45,
+      "teachingPoint": "Explain the earlier cosigner-index P2SH multisig hierarchy and contrast it with later multisig conventions."
+    },
+    {
+      "number": 46,
+      "teachingPoint": "Explain deterministic timelocked fidelity-bond addresses and certificate signing as a costly identity mechanism."
+    },
+    {
+      "number": 47,
+      "teachingPoint": "Explain reusable payment codes, notification and derived payment addresses, contrasting Silent Payments scanning."
+    },
+    {
+      "number": 48,
+      "teachingPoint": "Explain multiscript multisig derivation and the script-type level in the wallet hierarchy."
+    },
+    {
+      "number": 49,
+      "teachingPoint": "Explain the dedicated hierarchy for P2SH-wrapped SegWit and distinguish it from native witness accounts."
+    },
+    {
+      "number": 50,
+      "teachingPoint": "Explain how a database lock limit became an accidental validation boundary in the March 2013 chain split."
+    },
+    {
+      "number": 52,
+      "teachingPoint": "Explain the proposed optical proof-of-work change and separate the authors energy rationale from established security properties."
+    },
+    {
+      "number": 53,
+      "teachingPoint": "Explain ambiguity between 64-byte transaction data and internal Merkle nodes and the proposed narrow consensus restriction."
+    },
+    {
+      "number": 54,
+      "teachingPoint": "Explain the broader cleanup package: timewarp, worst-case validation, Merkle ambiguity and duplicate-transaction handling."
+    },
+    {
+      "number": 60,
+      "teachingPoint": "Explain the proposed fixed-length version-message relay flag and its relationship to BIP37 optional relay signaling."
+    },
+    {
+      "number": 61,
+      "teachingPoint": "Explain peer rejection messages and their limited diagnostic role; source status does not guarantee present node support."
+    },
+    {
+      "number": 62,
+      "teachingPoint": "Explain the earlier collection of transaction-malleability restrictions and which ideas appear in narrower later proposals."
+    },
+    {
+      "number": 64,
+      "teachingPoint": "Explain peer UTXO queries, the information returned and the absence of a general trustless UTXO proof."
+    },
+    {
+      "number": 65,
+      "teachingPoint": "Explain absolute lock checking in Script and its relationship to transaction locktime."
+    },
+    {
+      "number": 66,
+      "teachingPoint": "Explain strict DER signature encoding as a validation constraint rather than a new signing equation."
+    },
+    {
+      "number": 67,
+      "teachingPoint": "Explain compressed-key sorting before multisig script construction so cosigners derive the same script and address."
+    },
+    {
+      "number": 68,
+      "teachingPoint": "Explain relative sequence-lock semantics and their dependence on the age of the spent outputs."
+    },
+    {
+      "number": 69,
+      "teachingPoint": "Explain lexicographic input/output ordering and the privacy/auditability rationale without calling it a universal wallet rule."
+    },
+    {
+      "number": 70,
+      "teachingPoint": "Explain merchant PaymentRequest, Payment and PaymentACK exchanges and their authentication assumptions."
+    },
+    {
+      "number": 71,
+      "teachingPoint": "Explain the MIME types used to identify Payment Protocol messages, rather than a separate payment mechanism."
+    },
+    {
+      "number": 72,
+      "teachingPoint": "Explain the URI link from a bitcoin: request to a BIP70 payment request."
+    },
+    {
+      "number": 73,
+      "teachingPoint": "Explain HTTP content negotiation for short payment-request URLs without requiring every client to implement all BIP70 messages."
+    },
+    {
+      "number": 74,
+      "teachingPoint": "Explain the closed extension allowing zero-value OP_RETURN outputs in PaymentRequests."
+    },
+    {
+      "number": 75,
+      "teachingPoint": "Explain encrypted out-of-band address exchange as an extension to the merchant Payment Protocol."
+    },
+    {
+      "number": 77,
+      "teachingPoint": "Explain asynchronous Payjoin using a directory, encrypted payloads and sender/receiver checks relative to BIP78."
+    },
+    {
+      "number": 78,
+      "teachingPoint": "Explain sender/receiver collaborative transaction construction and the checks required before accepting the negotiated payment."
+    },
+    {
+      "number": 79,
+      "teachingPoint": "Explain Bustapay as a predecessor collaborative-payment design, with its own construction and safety choices."
+    },
+    {
+      "number": 80,
+      "teachingPoint": "Explain the historical deterministic multisig hierarchy for non-colored voting pools and its relationship to BIP44."
+    },
+    {
+      "number": 81,
+      "teachingPoint": "Explain the corresponding colored voting-pool hierarchy and identify the extra convention instead of merging it with BIP80."
+    },
+    {
+      "number": 83,
+      "teachingPoint": "Explain the proposed dynamic HD key hierarchy and contrast it with fixed purpose/account path conventions."
+    },
+    {
+      "number": 84,
+      "teachingPoint": "Explain native P2WPKH derivation and its dedicated account hierarchy and extended-key encoding."
+    },
+    {
+      "number": 85,
+      "teachingPoint": "Explain deriving application-specific entropy from hardened BIP32 children, distinct from directly reusing a seed across applications."
+    },
+    {
+      "number": 86,
+      "teachingPoint": "Explain single-key Taproot derivation and the internal-key to output-key tweak."
+    },
+    {
+      "number": 87,
+      "teachingPoint": "Explain a descriptor/PSBT-era multisig derivation hierarchy and compare its recovery assumptions with BIP45 and BIP48."
+    },
+    {
+      "number": 88,
+      "teachingPoint": "Explain path templates and constraints for describing permitted derivation paths, rather than a new wallet derivation scheme."
+    },
+    {
+      "number": 89,
+      "teachingPoint": "Explain withholding chain codes and supplying per-input tweaks so a cosigner can authorize without wallet-wide scanning visibility."
+    },
+    {
+      "number": 90,
+      "teachingPoint": "Explain replacing historical activation logic with fixed buried activation heights after deployment."
+    },
+    {
+      "number": 91,
+      "teachingPoint": "Explain the lower-threshold signaling mechanism used to coordinate the existing SegWit deployment."
+    },
+    {
+      "number": 93,
+      "teachingPoint": "Explain checksummed codex32 seed encoding and optional threshold shares, distinct from a mnemonic passphrase."
+    },
+    {
+      "number": 94,
+      "teachingPoint": "Explain Testnet4 difficulty and block-storm mitigations as test-network rules rather than mainnet changes."
+    },
+    {
+      "number": 95,
+      "teachingPoint": "Explain the proposed Testnet5 difficulty changes and BIP54 rules from block one, contrasting Testnet4 and Draft status."
+    },
+    {
+      "number": 98,
+      "teachingPoint": "Explain the proposed Fast Merkle Tree construction and its use by branch verification; do not identify it with Taproot hashing."
+    },
+    {
+      "number": 99,
+      "teachingPoint": "Explain the historical taxonomy and proposed deployment guidance for soft and hard forks, separate from modern BIP workflow."
+    },
+    {
+      "number": 100,
+      "teachingPoint": "Explain setting a dynamic block-size limit through miner coinbase voting."
+    },
+    {
+      "number": 101,
+      "teachingPoint": "Explain a scheduled maximum-block-size growth proposal and its timing/limit rule."
+    },
+    {
+      "number": 102,
+      "teachingPoint": "Explain the simple one-time two-megabyte maximum-block-size proposal."
+    },
+    {
+      "number": 103,
+      "teachingPoint": "Explain scheduled block-size growth tied to the authors technological-growth assumptions."
+    },
+    {
+      "number": 104,
+      "teachingPoint": "Explain a feedback rule targeting average block fullness rather than a fixed limit schedule."
+    },
+    {
+      "number": 105,
+      "teachingPoint": "Explain the proposed consensus-driven size-retargeting mechanism and what participants can influence."
+    },
+    {
+      "number": 106,
+      "teachingPoint": "Explain proposed dynamic size limits responding to previous size and, in one variant, fee information."
+    },
+    {
+      "number": 107,
+      "teachingPoint": "Explain a transaction-volume-based dynamic block-size ceiling and contrast its feedback inputs with other proposals."
+    },
+    {
+      "number": 109,
+      "teachingPoint": "Explain the two-megabyte proposal together with its signature-operation and hashing-resource limits."
+    },
+    {
+      "number": 110,
+      "teachingPoint": "Explain the closed temporary consensus data-restriction proposal and distinguish it from older block-size increases."
+    },
+    {
+      "number": 111,
+      "teachingPoint": "Explain the service bit that advertises Bloom-filter support and makes it optional for serving peers."
+    },
+    {
+      "number": 112,
+      "teachingPoint": "Explain checking relative age in Script in combination with BIP68 sequence semantics."
+    },
+    {
+      "number": 113,
+      "teachingPoint": "Explain median-time-past as the monotonic chain clock used for time-based lock eligibility."
+    },
+    {
+      "number": 114,
+      "teachingPoint": "Explain the earlier MAST witness-program design and contrast its branch disclosure and validation with Taproot."
+    },
+    {
+      "number": 115,
+      "teachingPoint": "Explain the proposed block-at-height commitment for chain-specific replay protection."
+    },
+    {
+      "number": 116,
+      "teachingPoint": "Explain verifying Merkle inclusion inside Script using the BIP98 tree design."
+    },
+    {
+      "number": 117,
+      "teachingPoint": "Explain tail-call execution of supplied code and how it composes with branch verification; it is not Taproot execution."
+    },
+    {
+      "number": 118,
+      "teachingPoint": "Explain signatures that omit the exact spent outpoint and the compatible-state/rebinding use case."
+    },
+    {
+      "number": 119,
+      "teachingPoint": "Explain checking a predetermined transaction template hash through OP_CHECKTEMPLATEVERIFY and its commitment limits."
+    },
+    {
+      "number": 120,
+      "teachingPoint": "Explain proving control of credentials used in a prior payment, distinct from proving a new arbitrary message."
+    },
+    {
+      "number": 121,
+      "teachingPoint": "Explain the proposed URI request/response entry point for Proof of Payment."
+    },
+    {
+      "number": 122,
+      "teachingPoint": "Explain chain-qualified blockchain reference URIs and how they differ from payment instructions."
+    },
+    {
+      "number": 123,
+      "teachingPoint": "Explain the consensus, peer-service, API and application classification layers used by BIP metadata."
+    },
+    {
+      "number": 124,
+      "teachingPoint": "Explain the earlier deterministic script-template approach and compare it with descriptors and structured Miniscript."
+    },
+    {
+      "number": 125,
+      "teachingPoint": "Explain opt-in replacement signaling and policy conditions; a signal is neither a consensus rule nor a present network-wide promise."
+    },
+    {
+      "number": 126,
+      "teachingPoint": "Explain the privacy rationale and limits of conventional transaction shapes when inputs use heterogeneous script types."
+    },
+    {
+      "number": 127,
+      "teachingPoint": "Explain proof-of-reserves transaction construction and its PSBT field; reserve control alone is not proof of liabilities or solvency."
+    },
+    {
+      "number": 128,
+      "teachingPoint": "Explain portable alert/recovery transaction plans, timelocks and monitoring data without presenting the format as a new covenant."
+    },
+    {
+      "number": 129,
+      "teachingPoint": "Explain exchanging and confirming multisig setup records so all devices agree on the same wallet configuration."
+    },
+    {
+      "number": 130,
+      "teachingPoint": "Explain requesting direct header announcements rather than inventory announcements for new blocks."
+    },
+    {
+      "number": 131,
+      "teachingPoint": "Explain the proposed coalescing transaction and wildcard-input construction as a distinct closed transaction design."
+    },
+    {
+      "number": 132,
+      "teachingPoint": "Explain the closed committee-based BIP acceptance proposal and contrast it with publication without an adoption authority."
+    },
+    {
+      "number": 133,
+      "teachingPoint": "Explain per-peer fee-filter announcements as relay preferences, not transaction consensus limits."
+    },
+    {
+      "number": 134,
+      "teachingPoint": "Explain the proposed extensible transaction serialization and its malleability and format goals."
+    },
+    {
+      "number": 135,
+      "teachingPoint": "Explain generalized configurable version-bit voting and distinguish it from deployed BIP9 rules."
+    },
+    {
+      "number": 136,
+      "teachingPoint": "Explain Bech32 transaction-position references and why a chain position is a weaker locator than a transaction hash."
+    },
+    {
+      "number": 137,
+      "teachingPoint": "Explain legacy recoverable compact message signatures and their address-type flags, compared with generic Script-based BIP322 proofs."
+    },
+    {
+      "number": 138,
+      "teachingPoint": "Explain encrypted non-secret wallet metadata backups and why the payload must exclude private-key material."
+    },
+    {
+      "number": 140,
+      "teachingPoint": "Explain normalized transaction identities that remove signature scripts for hashing and contrast them with SegWit txids."
+    },
+    {
+      "number": 141,
+      "teachingPoint": "Explain witness separation, output programs, transaction identities, commitments and block weight."
+    },
+    {
+      "number": 142,
+      "teachingPoint": "Explain the earlier proposed witness-address encoding and its replacement by Bech32."
+    },
+    {
+      "number": 143,
+      "teachingPoint": "Explain the version-zero witness signature message, input amounts and hashing work reuse."
+    },
+    {
+      "number": 144,
+      "teachingPoint": "Explain witness-aware peer services, transaction serialization and block/transaction inventory requests."
+    },
+    {
+      "number": 145,
+      "teachingPoint": "Explain how witness commitments and resource accounting change the block-template interface."
+    },
+    {
+      "number": 146,
+      "teachingPoint": "Explain the closed LOW_S/NULLFAIL consensus proposal and distinguish its scope from deployed strict-DER and NULLDUMMY rules."
+    },
+    {
+      "number": 147,
+      "teachingPoint": "Explain requiring the CHECKMULTISIG dummy element to be empty, across applicable legacy and witness scripts."
+    },
+    {
+      "number": 148,
+      "teachingPoint": "Explain the flag-day mandatory-signaling SegWit deployment and its relationship to BIP9."
+    },
+    {
+      "number": 149,
+      "teachingPoint": "Explain the unused second SegWit deployment proposal and its guaranteed-lock-in design."
+    },
+    {
+      "number": 150,
+      "teachingPoint": "Explain the earlier peer-authentication scheme layered over BIP151, separate from v2 opportunistic encryption."
+    },
+    {
+      "number": 151,
+      "teachingPoint": "Explain the earlier encrypted-peer-transport design and its replacement relationship with BIP324."
+    },
+    {
+      "number": 152,
+      "teachingPoint": "Explain compact-block short IDs, local reconstruction and requests for missing transactions."
+    },
+    {
+      "number": 154,
+      "teachingPoint": "Explain proof-of-work connection-admission challenges as an anti-resource-abuse proposal, separate from mining and encryption."
+    },
+    {
+      "number": 155,
+      "teachingPoint": "Explain larger peer-address encodings for Tor v3, I2P and other networks in addrv2 gossip."
+    },
+    {
+      "number": 156,
+      "teachingPoint": "Explain Dandelion stem/fluff routing and its transaction-source privacy goal, distinct from encrypting a link."
+    },
+    {
+      "number": 157,
+      "teachingPoint": "Explain the peer protocol for fetching filters and blocks, including trust and omission limitations."
+    },
+    {
+      "number": 158,
+      "teachingPoint": "Explain compact filter construction with Golomb-Rice coding as the encoding paired with BIP157."
+    },
+    {
+      "number": 159,
+      "teachingPoint": "Explain pruned peers advertising a limited recent block-serving range without claiming full historical availability."
+    },
+    {
+      "number": 171,
+      "teachingPoint": "Explain the proposed exchange-rate API and distinguish external price information from on-chain amount units."
+    },
+    {
+      "number": 172,
+      "teachingPoint": "Explain the proposal to standardize satoshi/sats terminology without changing consensus denominations."
+    },
+    {
+      "number": 173,
+      "teachingPoint": "Explain Bech32 witness-address encoding and checksum rules; after BIP350 it remains the encoding for witness v0."
+    },
+    {
+      "number": 174,
+      "teachingPoint": "Explain PSBT key-value maps, transaction roles, offline signing information and version-zero construction."
+    },
+    {
+      "number": 175,
+      "teachingPoint": "Explain how contract hashes and payment_base determine non-hardened BIP32 path components and a derived payment address; distinguish this from a single additive pay-to-contract key tweak."
+    },
+    {
+      "number": 176,
+      "teachingPoint": "Explain the bits denomination of one hundred satoshis and its display-only scope."
+    },
+    {
+      "number": 177,
+      "teachingPoint": "Explain the proposed base-unit terminology redefinition and distinguish display language from changing UTXO values."
+    },
+    {
+      "number": 178,
+      "teachingPoint": "Explain the proposed WIF extension carrying intended script/address type, not a new recipient address scheme."
+    },
+    {
+      "number": 179,
+      "teachingPoint": "Explain the proposed invoice-address terminology for recipient identifiers and its distinction from reusable identities."
+    },
+    {
+      "number": 180,
+      "teachingPoint": "Explain the proposed block size/weight fraud proof and exactly which invalidity claim it could demonstrate to a light client."
+    },
+    {
+      "number": 197,
+      "teachingPoint": "Explain the collateralized debt-contract application of hash/time-locked transaction branches."
+    },
+    {
+      "number": 199,
+      "teachingPoint": "Explain the closed HTLC script patterns, preimage claims and timeout refunds without claiming a full payment-channel protocol."
+    },
+    {
+      "number": 300,
+      "teachingPoint": "Explain the proposed hashrate escrow withdrawal mechanism, slow miner decisions and sidechain-user trust assumptions."
+    },
+    {
+      "number": 301,
+      "teachingPoint": "Explain blind merged-mining bids and block-selection commitments, separate from BIP300 withdrawal control."
+    },
+    {
+      "number": 310,
+      "teachingPoint": "Explain Stratum extension negotiation and version rolling, not the entirety of either Stratum generation."
+    },
+    {
+      "number": 320,
+      "teachingPoint": "Explain the proposed reservation of sixteen header-version bits for general-purpose use and the later BIP323 alternative."
+    },
+    {
+      "number": 321,
+      "teachingPoint": "Explain modern bitcoin: instructions supporting payment-method choices while preserving applicable BIP21 compatibility."
+    },
+    {
+      "number": 322,
+      "teachingPoint": "Explain Script-based arbitrary-message proofs, virtual transactions and the exact control claim a successful proof establishes."
+    },
+    {
+      "number": 323,
+      "teachingPoint": "Explain the proposed twenty-four version bits for extra-nonce space and its relationship to soft-fork signaling allocations."
+    },
+    {
+      "number": 324,
+      "teachingPoint": "Explain opportunistic encrypted peer transport, handshake, packet protection and the limits of unauthenticated connections."
+    },
+    {
+      "number": 325,
+      "teachingPoint": "Explain Signet signed-block admission layered over proof of work and its coordinated testing purpose."
+    },
+    {
+      "number": 326,
+      "teachingPoint": "Explain Taproot wallet locktime/sequence behavior intended to blend anti-fee-sniping patterns across off-chain protocol transactions."
+    },
+    {
+      "number": 327,
+      "teachingPoint": "Explain n-of-n aggregate keys, two-round signing, tweaks and nonce discipline for BIP340-compatible signatures."
+    },
+    {
+      "number": 328,
+      "teachingPoint": "Explain constructing derivable extended keys from MuSig2 aggregate public keys and the fixed aggregate-key chain-code convention."
+    },
+    {
+      "number": 329,
+      "teachingPoint": "Explain portable wallet labels and references as non-secret metadata distinct from seed or descriptor backups."
+    },
+    {
+      "number": 330,
+      "teachingPoint": "Explain reconciling transaction-announcement sets between peers, distinct from transmitting transaction bodies."
+    },
+    {
+      "number": 331,
+      "teachingPoint": "Explain requesting and relaying unconfirmed ancestor packages and transaction batches through peer messages."
+    },
+    {
+      "number": 332,
+      "teachingPoint": "Explain stale-tip announcements, branch headers and data availability without altering best-chain selection."
+    },
+    {
+      "number": 337,
+      "teachingPoint": "Explain transaction compression, including optional potentially lossy outpoint references and required decompression context."
+    },
+    {
+      "number": 338,
+      "teachingPoint": "Explain the closed per-connection transaction-relay disabling proposal and its block-relay-only motivation."
+    },
+    {
+      "number": 339,
+      "teachingPoint": "Explain negotiating transaction relay by witness transaction ID rather than the base transaction ID."
+    },
+    {
+      "number": 340,
+      "teachingPoint": "Explain x-only public keys, Schnorr verification, tagged hashes and the exact message authenticated by a signature."
+    },
+    {
+      "number": 341,
+      "teachingPoint": "Explain Taproot key/script paths, output tweaks, control blocks and spending commitments."
+    },
+    {
+      "number": 342,
+      "teachingPoint": "Explain initial tapscript validation semantics, CHECKSIGADD, signature budgets and upgrade hooks."
+    },
+    {
+      "number": 343,
+      "teachingPoint": "Explain the closed mandatory Taproot deployment proposal using BIP8, distinct from Taproot spending rules."
+    },
+    {
+      "number": 345,
+      "teachingPoint": "Explain the closed specialized vault/recovery opcode design and its proposed replacement by BIP443."
+    },
+    {
+      "number": 346,
+      "teachingPoint": "Explain configurable transaction introspection hashes through OP_TXHASH and their composition with stack-message signatures."
+    },
+    {
+      "number": 347,
+      "teachingPoint": "Explain concatenating stack values in tapscript; Complete describes the BIP document rather than OP_CAT activation."
+    },
+    {
+      "number": 348,
+      "teachingPoint": "Explain checking BIP340 signatures against stack-provided messages, not necessarily a transaction signature digest."
+    },
+    {
+      "number": 349,
+      "teachingPoint": "Explain exposing the Taproot internal key to script and its role in the proposed rebindable-transaction package."
+    },
+    {
+      "number": 350,
+      "teachingPoint": "Explain the checksum change for witness versions one and above while keeping Bech32 for witness zero."
+    },
+    {
+      "number": 351,
+      "teachingPoint": "Explain the closed Private Payments code/notification design and compare its on-chain footprint with BIP47 and BIP352."
+    },
+    {
+      "number": 352,
+      "teachingPoint": "Explain static payment addresses, input-derived ECDH output discovery, sender requirements and receiver scanning tradeoffs."
+    },
+    {
+      "number": 353,
+      "teachingPoint": "Explain DNSSEC-protected TXT payment instructions and the separation of name resolution from human identity assurance."
+    },
+    {
+      "number": 360,
+      "teachingPoint": "Explain the proposed Merkle-root output without a Taproot key path; removing exposed keys is not a post-quantum signature scheme."
+    },
+    {
+      "number": 361,
+      "teachingPoint": "Explain the proposed migration/sunset policy and its explicitly unspecified prerequisite post-quantum signature proposal."
+    },
+    {
+      "number": 370,
+      "teachingPoint": "Explain PSBT version two construction fields and input/output mutability compared with the version-zero unsigned-transaction container."
+    },
+    {
+      "number": 371,
+      "teachingPoint": "Explain Taproot-specific PSBT input/output fields supported in both version zero and version two."
+    },
+    {
+      "number": 372,
+      "teachingPoint": "Explain PSBT pay-to-contract tweak fields that let an external signer apply the matching private-key tweak."
+    },
+    {
+      "number": 373,
+      "teachingPoint": "Explain MuSig2 participants, nonces and partial signatures carried in PSBTs of either supported version."
+    },
+    {
+      "number": 374,
+      "teachingPoint": "Explain proving that the same scalar relates two point pairs without revealing it, particularly for Silent Payment ECDH shares."
+    },
+    {
+      "number": 375,
+      "teachingPoint": "Explain Silent Payment sending fields and changed PSBTv2 responsibilities when outputs depend on the final input set."
+    },
+    {
+      "number": 376,
+      "teachingPoint": "Explain PSBTv2 fields for spending Silent Payment outputs and distinguish that workflow from creating such outputs."
+    },
+    {
+      "number": 379,
+      "teachingPoint": "Explain structured, analyzable script composition for P2WSH and tapscript and distinguish Miniscript from a policy or descriptor."
+    },
+    {
+      "number": 380,
+      "teachingPoint": "Explain descriptor syntax, key expressions, origins, ranges and checksums as wallet script descriptions."
+    },
+    {
+      "number": 381,
+      "teachingPoint": "Explain pk(), pkh() and sh() descriptor expressions for non-witness script constructions."
+    },
+    {
+      "number": 382,
+      "teachingPoint": "Explain wpkh() and wsh() descriptor expressions and their witness-script boundaries."
+    },
+    {
+      "number": 383,
+      "teachingPoint": "Explain multi() versus sortedmulti() as descriptors for ordered or deterministically sorted threshold multisig scripts."
+    },
+    {
+      "number": 384,
+      "teachingPoint": "Explain combo() expanding one key into the applicable collection of output-script forms."
+    },
+    {
+      "number": 385,
+      "teachingPoint": "Explain raw() script encapsulation and addr() address encapsulation, including information those representations do not recover."
+    },
+    {
+      "number": 386,
+      "teachingPoint": "Explain tr() descriptors with an internal key and optional script tree."
+    },
+    {
+      "number": 387,
+      "teachingPoint": "Explain multi_a()/sortedmulti_a() tapscript threshold expressions and their difference from CHECKMULTISIG-based descriptors."
+    },
+    {
+      "number": 388,
+      "teachingPoint": "Explain compact, reviewable account policies for constrained signers and how they instantiate output descriptors."
+    },
+    {
+      "number": 389,
+      "teachingPoint": "Explain multipath key expressions grouping receive/change or other corresponding derivation steps in one descriptor."
+    },
+    {
+      "number": 390,
+      "teachingPoint": "Explain musig() aggregate key expressions and their BIP328 derivation behavior inside descriptors."
+    },
+    {
+      "number": 391,
+      "teachingPoint": "Explain the closed binary descriptor container proposal and its metadata maps, distinct from textual descriptor annotations."
+    },
+    {
+      "number": 392,
+      "teachingPoint": "Explain sp() descriptors for Silent Payment key material whose concrete scripts also depend on sender inputs."
+    },
+    {
+      "number": 393,
+      "teachingPoint": "Explain operational descriptor annotations such as scan height and gap limit that affect recovery without changing generated scripts."
+    },
+    {
+      "number": 431,
+      "teachingPoint": "Explain topology restrictions intended to reduce pinning and improve replacement reliability as mempool policy, not consensus."
+    },
+    {
+      "number": 433,
+      "teachingPoint": "Explain a keyless anyone-can-spend anchor output made usable through standardness policy, not a new signature scheme or soft fork."
+    },
+    {
+      "number": 434,
+      "teachingPoint": "Explain extensible peer feature negotiation so new P2P features need not each consume a new global protocol-version threshold."
+    },
+    {
+      "number": 440,
+      "teachingPoint": "Explain the proposed generalized execution-cost budget and its relationship to current tapscript signature budgeting."
+    },
+    {
+      "number": 441,
+      "teachingPoint": "Explain the proposed new tapleaf version restoring disabled script operations and expanding resources subject to BIP440 budgeting."
+    },
+    {
+      "number": 442,
+      "teachingPoint": "Explain tagged, length-delimited commitments to a pair of stack values and why that differs from plain concatenation."
+    },
+    {
+      "number": 443,
+      "teachingPoint": "Explain dynamic contract-data commitments and future output restrictions through OP_CHECKCONTRACTVERIFY, including vault applications."
+    },
+    {
+      "number": 446,
+      "teachingPoint": "Explain pushing a fixed transaction-template hash onto the stack and contrast it with CTV checking and TXHASH configurability."
+    },
+    {
+      "number": 448,
+      "teachingPoint": "Explain the joint deployment proposal for TEMPLATEHASH, CHECKSIGFROMSTACK and INTERNALKEY, not an independently specified fourth opcode."
+    },
+    {
+      "number": 449,
+      "teachingPoint": "Explain x-only public-key tweak addition inside script, distinct from doing a Taproot tweak outside script."
+    },
+    {
+      "number": 450,
+      "teachingPoint": "Explain themed sentence encodings and their BIP39 re-encoding step without adopting the authors memorability claims as proven."
+    },
+    {
+      "number": 451,
+      "teachingPoint": "Explain the proposed dust-disposal transaction/signature convention and assess privacy claims under its batching and linking assumptions."
+    },
+    {
+      "number": 461,
+      "teachingPoint": "Explain standardized deterministic ECDSA signing with low-r grinding and low-s normalization, distinct from consensus validity rules."
+    }
+  ]
+}

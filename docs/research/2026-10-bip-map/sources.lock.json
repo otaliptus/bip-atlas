@@ -1,0 +1,3238 @@
+{
+  "schemaVersion": "bip-atlas.research-sources.v1",
+  "repository": "https://github.com/bitcoin/bips",
+  "commit": "927b6de9915c9262615a6399de51b200f81e5aa4",
+  "commitDate": "2026-10-02T06:27:57-07:00",
+  "retrievedAt": "2026-10-17",
+  "scope": "README index and every root numbered BIP document; auxiliary implementations/vectors are not part of this catalogue study.",
+  "indexEntries": [
+    {
+      "number": 1,
+      "path": "bip-0001.mediawiki",
+      "layer": null,
+      "title": "BIP Purpose and Guidelines",
+      "authors": "Amir Taaki",
+      "type": "Process",
+      "status": "Closed"
+    },
+    {
+      "number": 2,
+      "path": "bip-0002.mediawiki",
+      "layer": null,
+      "title": "BIP process, revised",
+      "authors": "Luke Dashjr",
+      "type": "Process",
+      "status": "Closed"
+    },
+    {
+      "number": 3,
+      "path": "bip-0003.md",
+      "layer": null,
+      "title": "Updated BIP Process",
+      "authors": "Murch",
+      "type": "Process",
+      "status": "Deployed"
+    },
+    {
+      "number": 8,
+      "path": "bip-0008.mediawiki",
+      "layer": null,
+      "title": "Version bits with lock-in by height",
+      "authors": "Shaolin Fry, Luke Dashjr",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 9,
+      "path": "bip-0009.mediawiki",
+      "layer": null,
+      "title": "Version bits with timeout and delay",
+      "authors": "Pieter Wuille, Peter Todd, Greg Maxwell, Rusty Russell",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 10,
+      "path": "bip-0010.mediawiki",
+      "layer": "Applications",
+      "title": "Multi-Sig Transaction Distribution",
+      "authors": "Alan Reiner",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 11,
+      "path": "bip-0011.mediawiki",
+      "layer": "Applications",
+      "title": "M-of-N Standard Transactions",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 12,
+      "path": "bip-0012.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_EVAL",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 13,
+      "path": "bip-0013.mediawiki",
+      "layer": "Applications",
+      "title": "Address Format for pay-to-script-hash",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 14,
+      "path": "bip-0014.mediawiki",
+      "layer": "Peer Services",
+      "title": "Protocol Version and User Agent",
+      "authors": "Amir Taaki, Patrick Strateman",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 15,
+      "path": "bip-0015.mediawiki",
+      "layer": "Applications",
+      "title": "Aliases",
+      "authors": "Amir Taaki",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 16,
+      "path": "bip-0016.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Pay to Script Hash",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 17,
+      "path": "bip-0017.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_CHECKHASHVERIFY (CHV)",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 18,
+      "path": "bip-0018.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "hashScriptCheck",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 19,
+      "path": "bip-0019.mediawiki",
+      "layer": "Applications",
+      "title": "M-of-N Standard Transactions (Low SigOp)",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 20,
+      "path": "bip-0020.mediawiki",
+      "layer": "Applications",
+      "title": "URI Scheme",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 21,
+      "path": "bip-0021.mediawiki",
+      "layer": "Applications",
+      "title": "URI Scheme",
+      "authors": "Nils Schneider, Matt Corallo",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 22,
+      "path": "bip-0022.mediawiki",
+      "layer": "API/RPC",
+      "title": "getblocktemplate - Fundamentals",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 23,
+      "path": "bip-0023.mediawiki",
+      "layer": "API/RPC",
+      "title": "getblocktemplate - Pooled Mining",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 30,
+      "path": "bip-0030.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Duplicate transactions",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 31,
+      "path": "bip-0031.mediawiki",
+      "layer": "Peer Services",
+      "title": "Pong message",
+      "authors": "Mike Hearn",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 32,
+      "path": "bip-0032.mediawiki",
+      "layer": "Applications",
+      "title": "Hierarchical Deterministic Wallets",
+      "authors": "Pieter Wuille",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 33,
+      "path": "bip-0033.mediawiki",
+      "layer": "Peer Services",
+      "title": "Stratized Nodes",
+      "authors": "Amir Taaki",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 34,
+      "path": "bip-0034.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Block v2, Height in Coinbase",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 35,
+      "path": "bip-0035.mediawiki",
+      "layer": "Peer Services",
+      "title": "mempool message",
+      "authors": "Jeff Garzik",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 36,
+      "path": "bip-0036.mediawiki",
+      "layer": "Peer Services",
+      "title": "Custom Services",
+      "authors": "Stefan Thomas",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 37,
+      "path": "bip-0037.mediawiki",
+      "layer": "Peer Services",
+      "title": "Connection Bloom filtering",
+      "authors": "Mike Hearn, Matt Corallo",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 38,
+      "path": "bip-0038.mediawiki",
+      "layer": "Applications",
+      "title": "Passphrase-protected private key",
+      "authors": "Mike Caldwell, Aaron Voisine",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 39,
+      "path": "bip-0039.mediawiki",
+      "layer": "Applications",
+      "title": "Mnemonic code for generating deterministic keys",
+      "authors": "Marek Palatinus, Pavol Rusnak, Aaron Voisine, Sean Bowe",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 40,
+      "path": null,
+      "layer": "API/RPC",
+      "title": "Stratum wire protocol",
+      "authors": "Marek Palatinus",
+      "type": "Standard",
+      "status": "BIP number allocated"
+    },
+    {
+      "number": 41,
+      "path": null,
+      "layer": "API/RPC",
+      "title": "Stratum mining protocol",
+      "authors": "Marek Palatinus",
+      "type": "Standard",
+      "status": "BIP number allocated"
+    },
+    {
+      "number": 42,
+      "path": "bip-0042.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "A finite monetary supply for Bitcoin",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 43,
+      "path": "bip-0043.mediawiki",
+      "layer": "Applications",
+      "title": "Purpose Field for Deterministic Wallets",
+      "authors": "Marek Palatinus, Pavol Rusnak",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 44,
+      "path": "bip-0044.mediawiki",
+      "layer": "Applications",
+      "title": "Multi-Account Hierarchy for Deterministic Wallets",
+      "authors": "Marek Palatinus, Pavol Rusnak",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 45,
+      "path": "bip-0045.mediawiki",
+      "layer": "Applications",
+      "title": "Structure for Deterministic P2SH Multisignature Wallets",
+      "authors": "Manuel Araoz, Ryan X. Charles, Matias Alejo Garcia",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 46,
+      "path": "bip-0046.mediawiki",
+      "layer": "Applications",
+      "title": "Address Scheme for Timelocked Fidelity Bonds",
+      "authors": "Chris Belcher, Thebora Kompanioni",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 47,
+      "path": "bip-0047.mediawiki",
+      "layer": "Applications",
+      "title": "Reusable Payment Codes for Hierarchical Deterministic Wallets",
+      "authors": "Justus Ranvier",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 48,
+      "path": "bip-0048.mediawiki",
+      "layer": "Applications",
+      "title": "Multi-Script Hierarchy for Multi-Sig Wallets",
+      "authors": "Fontaine",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 49,
+      "path": "bip-0049.mediawiki",
+      "layer": "Applications",
+      "title": "Derivation scheme for P2WPKH-nested-in-P2SH based accounts",
+      "authors": "Daniel Weigl",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 50,
+      "path": "bip-0050.mediawiki",
+      "layer": null,
+      "title": "March 2013 Chain Fork Post-Mortem",
+      "authors": "Gavin Andresen",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 52,
+      "path": "bip-0052.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Durable, Low Energy Bitcoin PoW",
+      "authors": "Michael Dubrovsky, Bogdan Penkovsky",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 53,
+      "path": "bip-0053.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Disallow 64-byte transactions",
+      "authors": "Chris Stewart",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 54,
+      "path": "bip-0054.md",
+      "layer": "Consensus (soft fork)",
+      "title": "Consensus Cleanup",
+      "authors": "Antoine Poinsot, Matt Corallo",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 60,
+      "path": "bip-0060.mediawiki",
+      "layer": "Peer Services",
+      "title": "Fixed Length \"version\" Message (Relay-Transactions Field)",
+      "authors": "Amir Taaki",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 61,
+      "path": "bip-0061.mediawiki",
+      "layer": "Peer Services",
+      "title": "Reject P2P message",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 62,
+      "path": "bip-0062.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Dealing with malleability",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 63,
+      "path": null,
+      "layer": "Applications",
+      "title": "Stealth Addresses",
+      "authors": "Peter Todd",
+      "type": "Standard",
+      "status": "BIP number allocated"
+    },
+    {
+      "number": 64,
+      "path": "bip-0064.mediawiki",
+      "layer": "Peer Services",
+      "title": "getutxo message",
+      "authors": "Mike Hearn",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 65,
+      "path": "bip-0065.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_CHECKLOCKTIMEVERIFY",
+      "authors": "Peter Todd",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 66,
+      "path": "bip-0066.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Strict DER signatures",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 67,
+      "path": "bip-0067.mediawiki",
+      "layer": "Applications",
+      "title": "Deterministic Pay-to-script-hash multi-signature addresses through public key sorting",
+      "authors": "Thomas Kerin, Jean-Pierre Rupp, Ruben de Vries",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 68,
+      "path": "bip-0068.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Relative lock-time using consensus-enforced sequence numbers",
+      "authors": "Mark Friedenbach, BtcDrak, Nicolas Dorier, kinoshitajona",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 69,
+      "path": "bip-0069.mediawiki",
+      "layer": "Applications",
+      "title": "Lexicographical Indexing of Transaction Inputs and Outputs",
+      "authors": "Kristov Atlas",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 70,
+      "path": "bip-0070.mediawiki",
+      "layer": "Applications",
+      "title": "Payment Protocol",
+      "authors": "Gavin Andresen, Mike Hearn",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 71,
+      "path": "bip-0071.mediawiki",
+      "layer": "Applications",
+      "title": "Payment Protocol MIME types",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 72,
+      "path": "bip-0072.mediawiki",
+      "layer": "Applications",
+      "title": "bitcoin: uri extensions for Payment Protocol",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 73,
+      "path": "bip-0073.mediawiki",
+      "layer": "Applications",
+      "title": "Use \"Accept\" header for response type negotiation with Payment Request URLs",
+      "authors": "Stephen Pair",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 74,
+      "path": "bip-0074.mediawiki",
+      "layer": "Applications",
+      "title": "Allow zero value OP_RETURN in Payment Protocol",
+      "authors": "Toby Padilla",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 75,
+      "path": "bip-0075.mediawiki",
+      "layer": "Applications",
+      "title": "Out of Band Address Exchange using Payment Protocol Encryption",
+      "authors": "Justin Newton, Matt David, Aaron Voisine, James MacWhyte",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 77,
+      "path": "bip-0077.md",
+      "layer": "Applications",
+      "title": "Async Payjoin",
+      "authors": "Dan Gould, Yuval Kogman",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 78,
+      "path": "bip-0078.mediawiki",
+      "layer": "Applications",
+      "title": "A Simple Payjoin Proposal",
+      "authors": "Nicolas Dorier",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 79,
+      "path": "bip-0079.mediawiki",
+      "layer": "Applications",
+      "title": "Bustapay :: a practical coinjoin protocol",
+      "authors": "Ryan Havar",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 80,
+      "path": "bip-0080.mediawiki",
+      "layer": null,
+      "title": "Hierarchy for Non-Colored Voting Pool Deterministic Multisig Wallets",
+      "authors": "Justus Ranvier, Jimmy Song",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 81,
+      "path": "bip-0081.mediawiki",
+      "layer": null,
+      "title": "Hierarchy for Colored Voting Pool Deterministic Multisig Wallets",
+      "authors": "Justus Ranvier, Jimmy Song",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 83,
+      "path": "bip-0083.mediawiki",
+      "layer": "Applications",
+      "title": "Dynamic Hierarchical Deterministic Key Trees",
+      "authors": "Eric Lombrozo",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 84,
+      "path": "bip-0084.mediawiki",
+      "layer": "Applications",
+      "title": "Derivation scheme for P2WPKH based accounts",
+      "authors": "Pavol Rusnak",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 85,
+      "path": "bip-0085.mediawiki",
+      "layer": "Applications",
+      "title": "Deterministic Entropy From BIP32 Keychains",
+      "authors": "Ethan Kosakovsky, Aneesh Karve",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 86,
+      "path": "bip-0086.mediawiki",
+      "layer": "Applications",
+      "title": "Key Derivation for Single Key P2TR Outputs",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 87,
+      "path": "bip-0087.mediawiki",
+      "layer": "Applications",
+      "title": "Hierarchy for Deterministic Multisig Wallets",
+      "authors": "Robert Spigler",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 88,
+      "path": "bip-0088.mediawiki",
+      "layer": "Applications",
+      "title": "Hierarchical Deterministic Path Templates",
+      "authors": "Dmitry Petukhov",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 89,
+      "path": "bip-0089.mediawiki",
+      "layer": "Applications",
+      "title": "Chain Code Delegation",
+      "authors": "Jesse Posner, Jurvis Tan",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 90,
+      "path": "bip-0090.mediawiki",
+      "layer": null,
+      "title": "Buried Deployments",
+      "authors": "Suhas Daftuar",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 91,
+      "path": "bip-0091.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Reduced threshold Segwit MASF",
+      "authors": "James Hilliard",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 93,
+      "path": "bip-0093.mediawiki",
+      "layer": "Applications",
+      "title": "codex32: Checksummed SSSS-aware BIP32 seeds",
+      "authors": "Leon Olsson Curr, Pearlwort Sneed, Andrew Poelstra",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 94,
+      "path": "bip-0094.mediawiki",
+      "layer": "Applications",
+      "title": "Testnet 4",
+      "authors": "Fabian Jahr",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 95,
+      "path": "bip-0095.md",
+      "layer": "Applications",
+      "title": "Testnet 5",
+      "authors": "Pol Espinasa, Fabian Jahr",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 98,
+      "path": "bip-0098.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Fast Merkle Trees",
+      "authors": "Mark Friedenbach, Kalle Alm, BtcDrak",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 99,
+      "path": "bip-0099.mediawiki",
+      "layer": null,
+      "title": "Motivation and deployment of consensus rule changes ([soft/hard]forks)",
+      "authors": "Jorge Timón",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 100,
+      "path": "bip-0100.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Dynamic maximum block size by miner vote",
+      "authors": "Jeff Garzik, Tom Harding, Dagur Valberg Johannsson",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 101,
+      "path": "bip-0101.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Increase maximum block size",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 102,
+      "path": "bip-0102.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Block size increase to 2MB",
+      "authors": "Jeff Garzik",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 103,
+      "path": "bip-0103.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Block size following technological growth",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 104,
+      "path": "bip-0104.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "'Block75' - Max block size like difficulty",
+      "authors": "t.khan",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 105,
+      "path": "bip-0105.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Consensus based block size retargeting algorithm",
+      "authors": "BtcDrak",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 106,
+      "path": "bip-0106.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Dynamically Controlled Bitcoin Block Size Max Cap",
+      "authors": "Upal Chakraborty",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 107,
+      "path": "bip-0107.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Dynamic limit on the block size",
+      "authors": "Washington Y. Sanchez",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 109,
+      "path": "bip-0109.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Two million byte size limit with sigop and sighash limits",
+      "authors": "Gavin Andresen",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 110,
+      "path": "bip-0110.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Reduced Data Temporary Softfork",
+      "authors": "Dathon Ohm",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 111,
+      "path": "bip-0111.mediawiki",
+      "layer": "Peer Services",
+      "title": "NODE_BLOOM service bit",
+      "authors": "Matt Corallo, Peter Todd",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 112,
+      "path": "bip-0112.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "CHECKSEQUENCEVERIFY",
+      "authors": "BtcDrak, Mark Friedenbach, Eric Lombrozo",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 113,
+      "path": "bip-0113.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Median time-past as endpoint for lock-time calculations",
+      "authors": "Thomas Kerin, Mark Friedenbach",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 114,
+      "path": "bip-0114.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Merkelized Abstract Syntax Tree",
+      "authors": "Johnson Lau",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 115,
+      "path": "bip-0115.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Generic anti-replay protection using Script",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 116,
+      "path": "bip-0116.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "MERKLEBRANCHVERIFY",
+      "authors": "Mark Friedenbach, Kalle Alm, BtcDrak",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 117,
+      "path": "bip-0117.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Tail Call Execution Semantics",
+      "authors": "Mark Friedenbach, Kalle Alm, BtcDrak",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 118,
+      "path": "bip-0118.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "SIGHASH_ANYPREVOUT for Taproot Scripts",
+      "authors": "Christian Decker, Anthony Towns",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 119,
+      "path": "bip-0119.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "CHECKTEMPLATEVERIFY",
+      "authors": "Jeremy Rubin",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 120,
+      "path": "bip-0120.mediawiki",
+      "layer": "Applications",
+      "title": "Proof of Payment",
+      "authors": "Kalle Rosenbaum",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 121,
+      "path": "bip-0121.mediawiki",
+      "layer": "Applications",
+      "title": "Proof of Payment URI scheme",
+      "authors": "Kalle Rosenbaum",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 122,
+      "path": "bip-0122.mediawiki",
+      "layer": "Applications",
+      "title": "URI scheme for Blockchain references / exploration",
+      "authors": "Marco Pontello",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 123,
+      "path": "bip-0123.mediawiki",
+      "layer": null,
+      "title": "BIP Classification",
+      "authors": "Eric Lombrozo",
+      "type": "Process",
+      "status": "Deployed"
+    },
+    {
+      "number": 124,
+      "path": "bip-0124.mediawiki",
+      "layer": "Applications",
+      "title": "Hierarchical Deterministic Script Templates",
+      "authors": "Eric Lombrozo, William Swanson",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 125,
+      "path": "bip-0125.mediawiki",
+      "layer": "Applications",
+      "title": "Opt-in Full Replace-by-Fee Signaling",
+      "authors": "David A. Harding, Peter Todd",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 126,
+      "path": "bip-0126.mediawiki",
+      "layer": null,
+      "title": "Best Practices for Heterogeneous Input Script Transactions",
+      "authors": "Kristov Atlas",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 127,
+      "path": "bip-0127.mediawiki",
+      "layer": "Applications",
+      "title": "Simple Proof-of-Reserves Transactions",
+      "authors": "Steven Roose",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 128,
+      "path": "bip-0128.mediawiki",
+      "layer": "Applications",
+      "title": "Timelock-Recovery Storage Format",
+      "authors": "Oren Z",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 129,
+      "path": "bip-0129.mediawiki",
+      "layer": "Applications",
+      "title": "Bitcoin Secure Multisig Setup (BSMS)",
+      "authors": "Hugo Nguyen, Peter Gray, Marko Bencun, Aaron Chen, Rodolfo Novak",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 130,
+      "path": "bip-0130.mediawiki",
+      "layer": "Peer Services",
+      "title": "sendheaders message",
+      "authors": "Suhas Daftuar",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 131,
+      "path": "bip-0131.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "\"Coalescing Transaction\" Specification (wildcard inputs)",
+      "authors": "Chris Priest",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 132,
+      "path": "bip-0132.mediawiki",
+      "layer": null,
+      "title": "Committee-based BIP Acceptance Process",
+      "authors": "Andy Chase",
+      "type": "Process",
+      "status": "Closed"
+    },
+    {
+      "number": 133,
+      "path": "bip-0133.mediawiki",
+      "layer": "Peer Services",
+      "title": "feefilter message",
+      "authors": "Alex Morcos",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 134,
+      "path": "bip-0134.mediawiki",
+      "layer": "Consensus (hard fork)",
+      "title": "Flexible Transactions",
+      "authors": "Tom Zander",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 135,
+      "path": "bip-0135.mediawiki",
+      "layer": null,
+      "title": "Generalized version bits voting",
+      "authors": "Sancho Panza",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 136,
+      "path": "bip-0136.mediawiki",
+      "layer": "Applications",
+      "title": "Bech32 Encoded Tx Position References",
+      "authors": "Велеслав, Jonas Schnelli, Daniel Pape",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 137,
+      "path": "bip-0137.mediawiki",
+      "layer": "Applications",
+      "title": "Signatures of Messages using Private Keys",
+      "authors": "Christopher Gilliard",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 138,
+      "path": "bip-0138.md",
+      "layer": "Applications",
+      "title": "Compact Encryption Scheme for Non-seed Wallet Data",
+      "authors": "Pyth",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 140,
+      "path": "bip-0140.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Normalized TXID",
+      "authors": "Christian Decker",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 141,
+      "path": "bip-0141.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Segregated Witness (Consensus layer)",
+      "authors": "Eric Lombrozo, Johnson Lau, Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 142,
+      "path": "bip-0142.mediawiki",
+      "layer": "Applications",
+      "title": "Address Format for Segregated Witness",
+      "authors": "Johnson Lau",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 143,
+      "path": "bip-0143.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Transaction Signature Verification for Version 0 Witness Program",
+      "authors": "Johnson Lau, Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 144,
+      "path": "bip-0144.mediawiki",
+      "layer": "Peer Services",
+      "title": "Segregated Witness (Peer Services)",
+      "authors": "Eric Lombrozo, Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 145,
+      "path": "bip-0145.mediawiki",
+      "layer": "API/RPC",
+      "title": "getblocktemplate Updates for Segregated Witness",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 146,
+      "path": "bip-0146.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Dealing with signature encoding malleability",
+      "authors": "Johnson Lau, Pieter Wuille",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 147,
+      "path": "bip-0147.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Dealing with dummy stack element malleability",
+      "authors": "Johnson Lau",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 148,
+      "path": "bip-0148.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Mandatory activation of segwit deployment",
+      "authors": "Shaolin Fry",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 149,
+      "path": "bip-0149.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Segregated Witness (second deployment)",
+      "authors": "Shaolin Fry",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 150,
+      "path": "bip-0150.mediawiki",
+      "layer": "Peer Services",
+      "title": "Peer Authentication",
+      "authors": "Jonas Schnelli",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 151,
+      "path": "bip-0151.mediawiki",
+      "layer": "Peer Services",
+      "title": "Peer-to-Peer Communication Encryption",
+      "authors": "Jonas Schnelli",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 152,
+      "path": "bip-0152.mediawiki",
+      "layer": "Peer Services",
+      "title": "Compact Block Relay",
+      "authors": "Matt Corallo",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 154,
+      "path": "bip-0154.mediawiki",
+      "layer": "Peer Services",
+      "title": "Rate Limiting via peer specified challenges",
+      "authors": "Karl-Johan Alm",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 155,
+      "path": "bip-0155.mediawiki",
+      "layer": "Peer Services",
+      "title": "addrv2 message",
+      "authors": "Wladimir J. van der Laan",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 156,
+      "path": "bip-0156.mediawiki",
+      "layer": "Peer Services",
+      "title": "Dandelion - Privacy Enhancing Routing",
+      "authors": "Brad Denby, Andrew Miller, Giulia Fanti, Surya Bakshi, Shaileshh Bojja Venkatakrishnan, Pramod Viswanath",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 157,
+      "path": "bip-0157.mediawiki",
+      "layer": "Peer Services",
+      "title": "Client Side Block Filtering",
+      "authors": "Olaoluwa Osuntokun, Alex Akselrod, Jim Posen",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 158,
+      "path": "bip-0158.mediawiki",
+      "layer": "Peer Services",
+      "title": "Compact Block Filters for Light Clients",
+      "authors": "Olaoluwa Osuntokun, Alex Akselrod",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 159,
+      "path": "bip-0159.mediawiki",
+      "layer": "Peer Services",
+      "title": "NODE_NETWORK_LIMITED service bit",
+      "authors": "Jonas Schnelli",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 171,
+      "path": "bip-0171.mediawiki",
+      "layer": "Applications",
+      "title": "Currency/exchange rate information API",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 172,
+      "path": "bip-0172.mediawiki",
+      "layer": "Applications",
+      "title": "Define Bitcoin Subunits as Satoshis",
+      "authors": "OceanSlim",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 173,
+      "path": "bip-0173.mediawiki",
+      "layer": "Applications",
+      "title": "Base32 address format for native v0-16 witness outputs",
+      "authors": "Pieter Wuille, Greg Maxwell",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 174,
+      "path": "bip-0174.mediawiki",
+      "layer": "Applications",
+      "title": "Partially Signed Bitcoin Transaction Format",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 175,
+      "path": "bip-0175.mediawiki",
+      "layer": "Applications",
+      "title": "Pay to Contract Protocol",
+      "authors": "Omar Shibli, Nicholas Gregory",
+      "type": "Informational",
+      "status": "Closed"
+    },
+    {
+      "number": 176,
+      "path": "bip-0176.mediawiki",
+      "layer": null,
+      "title": "Bits Denomination",
+      "authors": "Jimmy Song",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 177,
+      "path": "bip-0177.mediawiki",
+      "layer": null,
+      "title": "Redefine Bitcoin's Base Unit",
+      "authors": "John Carvalho",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 178,
+      "path": "bip-0178.mediawiki",
+      "layer": "Applications",
+      "title": "Version Extended WIF",
+      "authors": "Karl-Johan Alm",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 179,
+      "path": "bip-0179.mediawiki",
+      "layer": null,
+      "title": "Name for payment recipient identifiers",
+      "authors": "Emil Engler, Luke Dashjr",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 180,
+      "path": "bip-0180.mediawiki",
+      "layer": "Peer Services",
+      "title": "Block size/weight fraud proof",
+      "authors": "Luke Dashjr",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 197,
+      "path": "bip-0197.mediawiki",
+      "layer": "Applications",
+      "title": "Hashed Time-Locked Collateral Contract",
+      "authors": "Matthew Black, Tony Cai",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 199,
+      "path": "bip-0199.mediawiki",
+      "layer": "Applications",
+      "title": "Hashed Time-Locked Contract transactions",
+      "authors": "Sean Bowe, Daira Hopwood",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 300,
+      "path": "bip-0300.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Hashrate Escrows (Consensus layer)",
+      "authors": "Paul Sztorc, CryptAxe",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 301,
+      "path": "bip-0301.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Blind Merged Mining (Consensus layer)",
+      "authors": "Paul Sztorc, CryptAxe",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 310,
+      "path": "bip-0310.mediawiki",
+      "layer": "Applications",
+      "title": "Stratum protocol extensions",
+      "authors": "Pavel Moravec, Jan Čapek",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 320,
+      "path": "bip-0320.mediawiki",
+      "layer": null,
+      "title": "nVersion bits for general purpose use",
+      "authors": "BtcDrak",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 321,
+      "path": "bip-0321.mediawiki",
+      "layer": "Applications",
+      "title": "URI Scheme",
+      "authors": "Matt Corallo",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 322,
+      "path": "bip-0322.mediawiki",
+      "layer": "Applications",
+      "title": "Generic Signed Message Format",
+      "authors": "Karl-Johan Alm, Oliver Gugger",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 323,
+      "path": "bip-0323.mediawiki",
+      "layer": null,
+      "title": "24 nVersion bits for general purpose use",
+      "authors": "Matt Corallo",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 324,
+      "path": "bip-0324.mediawiki",
+      "layer": "Peer Services",
+      "title": "Version 2 P2P Encrypted Transport Protocol",
+      "authors": "Dhruv Mehta, Tim Ruffing, Jonas Schnelli, Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 325,
+      "path": "bip-0325.mediawiki",
+      "layer": "Applications",
+      "title": "Signet",
+      "authors": "Karl-Johan Alm, Anthony Towns",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 326,
+      "path": "bip-0326.mediawiki",
+      "layer": "Applications",
+      "title": "Anti-fee-sniping in taproot transactions",
+      "authors": "Chris Belcher",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 327,
+      "path": "bip-0327.mediawiki",
+      "layer": null,
+      "title": "MuSig2 for BIP340-compatible Multi-Signatures",
+      "authors": "Jonas Nick, Tim Ruffing, Elliott Jin",
+      "type": "Informational",
+      "status": "Deployed"
+    },
+    {
+      "number": 328,
+      "path": "bip-0328.mediawiki",
+      "layer": "Applications",
+      "title": "Derivation Scheme for MuSig2 Aggregate Keys",
+      "authors": "Ava Chow",
+      "type": "Informational",
+      "status": "Complete"
+    },
+    {
+      "number": 329,
+      "path": "bip-0329.mediawiki",
+      "layer": "Applications",
+      "title": "Wallet Labels Export Format",
+      "authors": "Craig Raw",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 330,
+      "path": "bip-0330.mediawiki",
+      "layer": "Peer Services",
+      "title": "Transaction announcements reconciliation",
+      "authors": "Gleb Naumenko, Pieter Wuille",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 331,
+      "path": "bip-0331.mediawiki",
+      "layer": "Peer Services",
+      "title": "Ancestor Package Relay",
+      "authors": "Gloria Zhao",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 332,
+      "path": "bip-0332.md",
+      "layer": "Peer Services",
+      "title": "Stale Tip Relay",
+      "authors": "Anthony Towns, w0xlt, Ram",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 337,
+      "path": "bip-0337.mediawiki",
+      "layer": "API/RPC",
+      "title": "Compressed Transactions",
+      "authors": "Tom Briar",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 338,
+      "path": "bip-0338.mediawiki",
+      "layer": "Peer Services",
+      "title": "Disable transaction relay message",
+      "authors": "Suhas Daftuar",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 339,
+      "path": "bip-0339.mediawiki",
+      "layer": "Peer Services",
+      "title": "WTXID-based transaction relay",
+      "authors": "Suhas Daftuar",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 340,
+      "path": "bip-0340.mediawiki",
+      "layer": null,
+      "title": "Schnorr Signatures for secp256k1",
+      "authors": "Pieter Wuille, Jonas Nick, Tim Ruffing",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 341,
+      "path": "bip-0341.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Taproot: SegWit version 1 spending rules",
+      "authors": "Pieter Wuille, Jonas Nick, Anthony Towns",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 342,
+      "path": "bip-0342.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Validation of Taproot Scripts",
+      "authors": "Pieter Wuille, Jonas Nick, Anthony Towns",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 343,
+      "path": "bip-0343.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Mandatory activation of taproot deployment",
+      "authors": "Shinobius, Michael Folkson",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 345,
+      "path": "bip-0345.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_VAULT",
+      "authors": "James O'Beirne, Greg Sanders",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 346,
+      "path": "bip-0346.md",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_TXHASH",
+      "authors": "Steven Roose, Brandon Black",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 347,
+      "path": "bip-0347.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_CAT in Tapscript",
+      "authors": "Ethan Heilman, Armin Sabouri",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 348,
+      "path": "bip-0348.md",
+      "layer": "Consensus (soft fork)",
+      "title": "CHECKSIGFROMSTACK",
+      "authors": "Brandon Black, Jeremy Rubin",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 349,
+      "path": "bip-0349.md",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_INTERNALKEY",
+      "authors": "Brandon Black, Jeremy Rubin",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 350,
+      "path": "bip-0350.mediawiki",
+      "layer": "Applications",
+      "title": "Bech32m format for v1+ witness addresses",
+      "authors": "Pieter Wuille",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 351,
+      "path": "bip-0351.mediawiki",
+      "layer": "Applications",
+      "title": "Private Payments",
+      "authors": "Alfred Hodler, Clark Moody",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 352,
+      "path": "bip-0352.mediawiki",
+      "layer": "Applications",
+      "title": "Silent Payments",
+      "authors": "josibake, Ruben Somsen, Sebastian Falbesoner",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 353,
+      "path": "bip-0353.mediawiki",
+      "layer": "Applications",
+      "title": "DNS Payment Instructions",
+      "authors": "Matt Corallo, Bastien Teinturier",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 360,
+      "path": "bip-0360.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Pay-to-Merkle-Root (P2MR)",
+      "authors": "Hunter Beast, Ethan Heilman, Isabel Foxen Duke",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 361,
+      "path": "bip-0361.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Post Quantum Migration and Legacy Signature Sunset",
+      "authors": "Jameson Lopp, Christian Papathanasiou, Ian Smith, Joe Ross, Steve Vaile, Pierre-Luc Dallaire-Demers",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 370,
+      "path": "bip-0370.mediawiki",
+      "layer": "Applications",
+      "title": "PSBT Version 2",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 371,
+      "path": "bip-0371.mediawiki",
+      "layer": "Applications",
+      "title": "Taproot Fields for PSBT",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 372,
+      "path": "bip-0372.mediawiki",
+      "layer": "Applications",
+      "title": "Pay-to-contract tweak fields for PSBT",
+      "authors": "Maxim Orlovsky",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 373,
+      "path": "bip-0373.mediawiki",
+      "layer": "Applications",
+      "title": "MuSig2 PSBT Fields",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 374,
+      "path": "bip-0374.mediawiki",
+      "layer": "Applications",
+      "title": "Discrete Log Equality Proofs",
+      "authors": "Andrew Toth, Ruben Somsen, Sebastian Falbesoner",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 375,
+      "path": "bip-0375.mediawiki",
+      "layer": "Applications",
+      "title": "Sending Silent Payments with PSBTs",
+      "authors": "Andrew Toth, Ava Chow, josibake",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 376,
+      "path": "bip-0376.mediawiki",
+      "layer": "Applications",
+      "title": "Spending Silent Payment outputs with PSBTs",
+      "authors": "nymius",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 379,
+      "path": "bip-0379.md",
+      "layer": "Applications",
+      "title": "Miniscript",
+      "authors": "Pieter Wuille, Andrew Poelstra, Sanket Kanjalkar, Antoine Poinsot, Ava Chow",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 380,
+      "path": "bip-0380.mediawiki",
+      "layer": "Applications",
+      "title": "Output Script Descriptors General Operation",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 381,
+      "path": "bip-0381.mediawiki",
+      "layer": "Applications",
+      "title": "Non-Segwit Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 382,
+      "path": "bip-0382.mediawiki",
+      "layer": "Applications",
+      "title": "Segwit Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 383,
+      "path": "bip-0383.mediawiki",
+      "layer": "Applications",
+      "title": "Multisig Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 384,
+      "path": "bip-0384.mediawiki",
+      "layer": "Applications",
+      "title": "combo() Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 385,
+      "path": "bip-0385.mediawiki",
+      "layer": "Applications",
+      "title": "raw() and addr() Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 386,
+      "path": "bip-0386.mediawiki",
+      "layer": "Applications",
+      "title": "tr() Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 387,
+      "path": "bip-0387.mediawiki",
+      "layer": "Applications",
+      "title": "Tapscript Multisig Output Script Descriptors",
+      "authors": "Pieter Wuille, Ava Chow",
+      "type": "Specification",
+      "status": "Deployed"
+    },
+    {
+      "number": 388,
+      "path": "bip-0388.mediawiki",
+      "layer": "Applications",
+      "title": "Wallet Policies for Descriptor Wallets",
+      "authors": "Salvatore Ingala",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 389,
+      "path": "bip-0389.mediawiki",
+      "layer": "Applications",
+      "title": "Multipath Descriptor Key Expressions",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 390,
+      "path": "bip-0390.mediawiki",
+      "layer": "Applications",
+      "title": "musig() Descriptor Key Expression",
+      "authors": "Ava Chow",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 391,
+      "path": "bip-0391.mediawiki",
+      "layer": "Applications",
+      "title": "Binary Output Descriptors",
+      "authors": "SeedHammer",
+      "type": "Specification",
+      "status": "Closed"
+    },
+    {
+      "number": 392,
+      "path": "bip-0392.mediawiki",
+      "layer": "Applications",
+      "title": "Silent Payment Output Script Descriptors",
+      "authors": "Craig Raw",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 393,
+      "path": "bip-0393.mediawiki",
+      "layer": "Applications",
+      "title": "Output Script Descriptor Annotations",
+      "authors": "Craig Raw",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 431,
+      "path": "bip-0431.mediawiki",
+      "layer": "Applications",
+      "title": "Topology Restrictions for Pinning",
+      "authors": "Gloria Zhao",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 433,
+      "path": "bip-0433.mediawiki",
+      "layer": "Applications",
+      "title": "Pay to Anchor (P2A)",
+      "authors": "Gregory Sanders",
+      "type": "Informational",
+      "status": "Draft"
+    },
+    {
+      "number": 434,
+      "path": "bip-0434.md",
+      "layer": "Peer Services",
+      "title": "Peer Feature Negotiation",
+      "authors": "Anthony Towns",
+      "type": "Specification",
+      "status": "Complete"
+    },
+    {
+      "number": 440,
+      "path": "bip-0440.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Varops Budget For Script Runtime Constraint",
+      "authors": "Rusty Russell, Julian Moik",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 441,
+      "path": "bip-0441.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "Restoration of disabled script (Tapleaf 0xC2)",
+      "authors": "Rusty Russell, Julian Moik",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 442,
+      "path": "bip-0442.md",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_PAIRCOMMIT",
+      "authors": "moonsettler, Brandon Black",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 443,
+      "path": "bip-0443.mediawiki",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_CHECKCONTRACTVERIFY",
+      "authors": "Salvatore Ingala",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 446,
+      "path": "bip-0446.md",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_TEMPLATEHASH",
+      "authors": "Gregory Sanders, Antoine Poinsot, Steven Roose",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 448,
+      "path": "bip-0448.md",
+      "layer": "Consensus (soft fork)",
+      "title": "Taproot-native (Re)bindable Transactions",
+      "authors": "Gregory Sanders, Antoine Poinsot, Steven Roose",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 449,
+      "path": "bip-0449.md",
+      "layer": "Consensus (soft fork)",
+      "title": "OP_TWEAKADD - x-only key tweak addition",
+      "authors": "Jeremy Rubin",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 450,
+      "path": "bip-0450.mediawiki",
+      "layer": "Applications",
+      "title": "Formosa—Seed encoding by themed mnemonic stories",
+      "authors": "Yuri S Villas Boas, André Fidencio Gonçalves",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 451,
+      "path": "bip-0451.md",
+      "layer": "Applications",
+      "title": "Dust UTXO Disposal Protocol",
+      "authors": "bubb1es, haris",
+      "type": "Specification",
+      "status": "Draft"
+    },
+    {
+      "number": 461,
+      "path": "bip-0461.md",
+      "layer": "Applications",
+      "title": "Deterministic ECDSA Signatures",
+      "authors": "Liam Gilligan",
+      "type": "Specification",
+      "status": "Draft"
+    }
+  ],
+  "files": [
+    {
+      "path": "README.mediawiki",
+      "sha256": "4c915db64cef973125df10efd946d6aa2dad71e8b85a21409a1ba0f153ef770d"
+    },
+    {
+      "number": 1,
+      "path": "bip-0001.mediawiki",
+      "sha256": "4c3165d7b17bdea9c8461d22fe8f5a13e7528c696a04dcc41f6aeedab35a4c41",
+      "bytes": 16562
+    },
+    {
+      "number": 2,
+      "path": "bip-0002.mediawiki",
+      "sha256": "0cd7bfaed9285cd0a84eba504ddcadbeac7aa33c7318dae35418dbce40e00c66",
+      "bytes": 35098
+    },
+    {
+      "number": 3,
+      "path": "bip-0003.md",
+      "sha256": "b8501ea3aa4f91d7e503c14f514b8a03dec10636b9480a71b7a867b48efdb0ae",
+      "bytes": 53765
+    },
+    {
+      "number": 8,
+      "path": "bip-0008.mediawiki",
+      "sha256": "e86abe98ea522c919377db46206fac2bbb34c007c67ddbb2f92bcab9d2d617a2",
+      "bytes": 18814
+    },
+    {
+      "number": 9,
+      "path": "bip-0009.mediawiki",
+      "sha256": "0ffa7b1ad84e1f32c7499d8a8756721c737037cbc91c825d05d11640ed5fedda",
+      "bytes": 14058
+    },
+    {
+      "number": 10,
+      "path": "bip-0010.mediawiki",
+      "sha256": "9582e4ee1c90cf7db0ba47a413806316654c31507d22fadd11ea412d0e312978",
+      "bytes": 9272
+    },
+    {
+      "number": 11,
+      "path": "bip-0011.mediawiki",
+      "sha256": "1b5984ac90873c19121aaa6da190eb0ab1b19ed2f19ccf1b9e2a577774ac7b70",
+      "bytes": 4249
+    },
+    {
+      "number": 12,
+      "path": "bip-0012.mediawiki",
+      "sha256": "5689d2081cc8a5fab2f6158f43b4988b795150a08f2db38fc942ebc5f314bee7",
+      "bytes": 5918
+    },
+    {
+      "number": 13,
+      "path": "bip-0013.mediawiki",
+      "sha256": "cebc58a4347dd51fa93d3c7538293aa909dc98abb01e97f9c00faba2feb90b29",
+      "bytes": 3576
+    },
+    {
+      "number": 14,
+      "path": "bip-0014.mediawiki",
+      "sha256": "caac3e3871a8eaf44353ed3444872049a5d83799fca0316f827e27eb728d1b8b",
+      "bytes": 7153
+    },
+    {
+      "number": 15,
+      "path": "bip-0015.mediawiki",
+      "sha256": "6635a1a43f37dd5e15051ce54f120666a9b2c1603217c7a86561f91951f86fec",
+      "bytes": 19073
+    },
+    {
+      "number": 16,
+      "path": "bip-0016.mediawiki",
+      "sha256": "9f89c0731bd718ae084802c897c95eb6f85ed2730d01fbc3233ee963b4679feb",
+      "bytes": 8795
+    },
+    {
+      "number": 17,
+      "path": "bip-0017.mediawiki",
+      "sha256": "9feab8d0b020b259848e7b3671227825eb6645572d4830bee4a34751e9934a32",
+      "bytes": 7060
+    },
+    {
+      "number": 18,
+      "path": "bip-0018.mediawiki",
+      "sha256": "55016aba65179c33b9c64d8ea2a41ff368f385029f27a250f13873318dae9bd1",
+      "bytes": 8801
+    },
+    {
+      "number": 19,
+      "path": "bip-0019.mediawiki",
+      "sha256": "681d6bb09df1e340052d0cf06e59624feb43e62c5abb8b0338de20e509de36b1",
+      "bytes": 3801
+    },
+    {
+      "number": 20,
+      "path": "bip-0020.mediawiki",
+      "sha256": "c11b02dea93c1b99c3d67fff08800a7064bc9c9c8acfedf1e9850eea9fc07350",
+      "bytes": 8908
+    },
+    {
+      "number": 21,
+      "path": "bip-0021.mediawiki",
+      "sha256": "4505e28fb572ca8b336c7563b34670dfdb9cdf95e398ad5e7a5c350015bac962",
+      "bytes": 6831
+    },
+    {
+      "number": 22,
+      "path": "bip-0022.mediawiki",
+      "sha256": "6338d8e3602db6e55d62838fe1095fca37a461de34116c9eec86729ff128450b",
+      "bytes": 12552
+    },
+    {
+      "number": 23,
+      "path": "bip-0023.mediawiki",
+      "sha256": "63956485d59e67d37c0ac751087ceb2db94c85a8552fc820dba3fd55cc1cd776",
+      "bytes": 13829
+    },
+    {
+      "number": 30,
+      "path": "bip-0030.mediawiki",
+      "sha256": "f127283ca167a54af81c046f72226e2e1707b2e3dc3062ae6ff9ea84082f0f89",
+      "bytes": 4262
+    },
+    {
+      "number": 31,
+      "path": "bip-0031.mediawiki",
+      "sha256": "602e3eed6e9ace1c3ec47a564f0f11a24cd0dfe6154c33bf053fca207c32655f",
+      "bytes": 2789
+    },
+    {
+      "number": 32,
+      "path": "bip-0032.mediawiki",
+      "sha256": "e5e00a8289db2f681052cf24a745320afc225e66b25d1e489a7c884d2fc7f11f",
+      "bytes": 28032
+    },
+    {
+      "number": 33,
+      "path": "bip-0033.mediawiki",
+      "sha256": "8f30b434132e244309e7a869fa6ad463909a798489c4331b7897750178894e5e",
+      "bytes": 6697
+    },
+    {
+      "number": 34,
+      "path": "bip-0034.mediawiki",
+      "sha256": "592c4956dfeedb369f995c51ebc225df4711929a0096d349300b99ef84d1f809",
+      "bytes": 2135
+    },
+    {
+      "number": 35,
+      "path": "bip-0035.mediawiki",
+      "sha256": "2cc0da8a4a98bcccc693220ba0ce8173451c59f01719d21d15d8ca70b4a80f76",
+      "bytes": 1678
+    },
+    {
+      "number": 36,
+      "path": "bip-0036.mediawiki",
+      "sha256": "23f4bc69dec69de54100bcf9a894cf586d54f5257b36478de6fe0bae186c8b1a",
+      "bytes": 10044
+    },
+    {
+      "number": 37,
+      "path": "bip-0037.mediawiki",
+      "sha256": "e65bddc35eb2f91b009733bdeed2ffa9319e1e58e8b0d41f7a5b42d1a5057a87",
+      "bytes": 17639
+    },
+    {
+      "number": 38,
+      "path": "bip-0038.mediawiki",
+      "sha256": "4b9b605ceab78c69d209033db24f252730e680e0b351476f5163d67fc2063c85",
+      "bytes": 31571
+    },
+    {
+      "number": 39,
+      "path": "bip-0039.mediawiki",
+      "sha256": "afcbcbed36fe9eb734bd607398a8c124683ded2a75c3830e1b16c47b043a9134",
+      "bytes": 6842
+    },
+    {
+      "number": 42,
+      "path": "bip-0042.mediawiki",
+      "sha256": "22b8f25411371b965abb1f39c54d37ac090b0a582a52749993ff7d26e0d4d987",
+      "bytes": 4477
+    },
+    {
+      "number": 43,
+      "path": "bip-0043.mediawiki",
+      "sha256": "462314ea42a4190bd7d7fee56b6bf52eb17b6997e9478d407bd0cb5b0fffaff4",
+      "bytes": 2437
+    },
+    {
+      "number": 44,
+      "path": "bip-0044.mediawiki",
+      "sha256": "6a541c79f94077ac529941a8cbd373ce077a5d6e97b6dd8209b45ac10f737eaf",
+      "bytes": 6710
+    },
+    {
+      "number": 45,
+      "path": "bip-0045.mediawiki",
+      "sha256": "5acd9ff1f55f5ab576d4f0f01a6ba6adf1a0559d833c0fc14f61a3ace6342628",
+      "bytes": 9546
+    },
+    {
+      "number": 46,
+      "path": "bip-0046.mediawiki",
+      "sha256": "fbdd2e0da08c3308c2aef29c93742bff4f46503f1733e6c3b9d718007a3044ca",
+      "bytes": 13497
+    },
+    {
+      "number": 47,
+      "path": "bip-0047.mediawiki",
+      "sha256": "7c23bfb640da750735e1b4f55495af489177c997588607263af04c7a04cea158",
+      "bytes": 22753
+    },
+    {
+      "number": 48,
+      "path": "bip-0048.mediawiki",
+      "sha256": "32ee972760fb72eb9a4ff047c6847c810ee84e0282f962f943544f3ab9c7d5ad",
+      "bytes": 6251
+    },
+    {
+      "number": 49,
+      "path": "bip-0049.mediawiki",
+      "sha256": "307b62faf7b9927233b5112e93d591272ba0c48303b5dbb6f0bbfbaf2347e695",
+      "bytes": 5546
+    },
+    {
+      "number": 50,
+      "path": "bip-0050.mediawiki",
+      "sha256": "556392738755ea6c71e208e6e8105c73e3a434671ef5b9a03e715a588049836f",
+      "bytes": 6716
+    },
+    {
+      "number": 52,
+      "path": "bip-0052.mediawiki",
+      "sha256": "55deb344d7f4d7f26c190d9ebade028612f104a7ba0011be88e40c1022cb4e49",
+      "bytes": 22973
+    },
+    {
+      "number": 53,
+      "path": "bip-0053.mediawiki",
+      "sha256": "e34b6ed699d37170680aecd6f231a91ea3365371c9f86719665043e68c95a8de",
+      "bytes": 12228
+    },
+    {
+      "number": 54,
+      "path": "bip-0054.md",
+      "sha256": "6cb659a11692dc0e0f2837df9c43746121684b8aa5f12b3cb095f0c3e2cb029d",
+      "bytes": 19163
+    },
+    {
+      "number": 60,
+      "path": "bip-0060.mediawiki",
+      "sha256": "b0be43d072b35a1e24c2b7cf32b71696ee9a629a561eef5c736f6bfbbb0fa5a8",
+      "bytes": 4458
+    },
+    {
+      "number": 61,
+      "path": "bip-0061.mediawiki",
+      "sha256": "57bba156c13de454400e80af9b7e708c12350626222eaa56838d4ec8f4310c05",
+      "bytes": 4686
+    },
+    {
+      "number": 62,
+      "path": "bip-0062.mediawiki",
+      "sha256": "7b418d5236cd3bfd0188002656ec3d4aee72ab3fddf859408e9ca4219bca0e22",
+      "bytes": 10783
+    },
+    {
+      "number": 64,
+      "path": "bip-0064.mediawiki",
+      "sha256": "7d8a47815fa3b475024f5d72eefa00d9675aa51439ed95086ce43e9391738124",
+      "bytes": 5140
+    },
+    {
+      "number": 65,
+      "path": "bip-0065.mediawiki",
+      "sha256": "717400aef7789a795bbc86a67e0f40ea94966aea13975052e1fc31a047207399",
+      "bytes": 13054
+    },
+    {
+      "number": 66,
+      "path": "bip-0066.mediawiki",
+      "sha256": "c42d25a3aa18341212c53065131d415f6ed3bb10166a63def9002f300c98a3be",
+      "bytes": 8151
+    },
+    {
+      "number": 67,
+      "path": "bip-0067.mediawiki",
+      "sha256": "4cc48c5c159c05585962a8eb264b05ccb4ad710b1a16c870232e0f0eb1428991",
+      "bytes": 8686
+    },
+    {
+      "number": 68,
+      "path": "bip-0068.mediawiki",
+      "sha256": "ec5a50cc66fff7b4e4bc1f2e24587d7876649d1b5329ef73ffa2e5a3f647281b",
+      "bytes": 14055
+    },
+    {
+      "number": 69,
+      "path": "bip-0069.mediawiki",
+      "sha256": "a06ef233371cf3750dd2a069144ca8918e5d927cb17cc08d65c72c37c395f9ce",
+      "bytes": 11831
+    },
+    {
+      "number": 70,
+      "path": "bip-0070.mediawiki",
+      "sha256": "ad851fd08c3fbe592cd705e6cd54e919fa0ac3cda3cdaf37f7313c8af23fd5c4",
+      "bytes": 16234
+    },
+    {
+      "number": 71,
+      "path": "bip-0071.mediawiki",
+      "sha256": "38ce4ca3c618f3255ee35ba1798783d0b0ad6c9e759b3b261054cbb5ace63836",
+      "bytes": 1075
+    },
+    {
+      "number": 72,
+      "path": "bip-0072.mediawiki",
+      "sha256": "57e0089528f2f3bb766d1ea1df56b4c900e640569e1f9dc292d1b2f4e89cb403",
+      "bytes": 2397
+    },
+    {
+      "number": 73,
+      "path": "bip-0073.mediawiki",
+      "sha256": "ba2ae1afd42cba352f2af8d0093d16d6f608749a0503c9ab36d4b13c210ef38c",
+      "bytes": 4024
+    },
+    {
+      "number": 74,
+      "path": "bip-0074.mediawiki",
+      "sha256": "9c2296a60efd1167c63dda368d5b99be1b630888e55eb80f3749a7acbc8cfcc3",
+      "bytes": 6141
+    },
+    {
+      "number": 75,
+      "path": "bip-0075.mediawiki",
+      "sha256": "0247dc8606b3d844ee0ca299f63202857279e495beb544c688816a7e24b22c50",
+      "bytes": 29815
+    },
+    {
+      "number": 77,
+      "path": "bip-0077.md",
+      "sha256": "9aee11953409a4bc4fe438e3563cf04ba6a5e07856a80d4f0adfc7e852f69a49",
+      "bytes": 37641
+    },
+    {
+      "number": 78,
+      "path": "bip-0078.mediawiki",
+      "sha256": "1888ea3529a77477820045358e4ff4ce1085020ecc3e1d7e47b39bfd3f0eada2",
+      "bytes": 40237
+    },
+    {
+      "number": 79,
+      "path": "bip-0079.mediawiki",
+      "sha256": "2027170dd25e172529242e6e13bebc9391e8c7292d15d12ed036090e3c04cc7e",
+      "bytes": 11776
+    },
+    {
+      "number": 80,
+      "path": "bip-0080.mediawiki",
+      "sha256": "0ebe8d0a9296fffb037cbbd489c290ad7af1cc8436d91beff928cca1371d7679",
+      "bytes": 2941
+    },
+    {
+      "number": 81,
+      "path": "bip-0081.mediawiki",
+      "sha256": "7aae790f024bd463e57f06d73da3ce2ce3b2fba00a871cbd0a0c9ab1fdc9ddf3",
+      "bytes": 2769
+    },
+    {
+      "number": 83,
+      "path": "bip-0083.mediawiki",
+      "sha256": "71f79e5446b16e5f1815d52f5dd968c6d824f12469d0b4aeb12634e4c4b55eae",
+      "bytes": 5309
+    },
+    {
+      "number": 84,
+      "path": "bip-0084.mediawiki",
+      "sha256": "1900feec6cafca65b8c09906ca0658d2d742b4c9b44cb15678996985b6bfe627",
+      "bytes": 4648
+    },
+    {
+      "number": 85,
+      "path": "bip-0085.mediawiki",
+      "sha256": "dcbeb97709eba4751f4af7dc582c35dff37dc831abb5adc5e2e975d708d1cf7e",
+      "bytes": 23479
+    },
+    {
+      "number": 86,
+      "path": "bip-0086.mediawiki",
+      "sha256": "d8d01dee331da07c2562615bc1f064c1868ec3fce61184973da76d1196c7f5b0",
+      "bytes": 5896
+    },
+    {
+      "number": 87,
+      "path": "bip-0087.mediawiki",
+      "sha256": "c5e9806d644d4737166e3e840509969bd3a027bec8eb86ecceafbaf78b49b942",
+      "bytes": 11646
+    },
+    {
+      "number": 88,
+      "path": "bip-0088.mediawiki",
+      "sha256": "97729c2af0467381e53ad99cc83f4264f1168466732bc0e8366bd5388c1ead13",
+      "bytes": 14141
+    },
+    {
+      "number": 89,
+      "path": "bip-0089.mediawiki",
+      "sha256": "c10802c2641eeb6882261f47c99acf3ac14192f43aeabc759c1a5e81db5e6a6a",
+      "bytes": 31560
+    },
+    {
+      "number": 90,
+      "path": "bip-0090.mediawiki",
+      "sha256": "a281b5b059c6f9286f1ef83f698e38942bd4ad18651404f25da0ad440d9bbc80",
+      "bytes": 6318
+    },
+    {
+      "number": 91,
+      "path": "bip-0091.mediawiki",
+      "sha256": "4f28735675d118cbdf49c995bdc373d737d754c266561bc08f3b4e2ee1b0ed91",
+      "bytes": 6634
+    },
+    {
+      "number": 93,
+      "path": "bip-0093.mediawiki",
+      "sha256": "c847c6e513b64ee6ab10975690757d64a875f77c0e75866a86b733f3985784ec",
+      "bytes": 45041
+    },
+    {
+      "number": 94,
+      "path": "bip-0094.mediawiki",
+      "sha256": "6a490d6266f2dc640ca3e16645fd49f593a07aec8e882cdb8e5fa96f1ca898ab",
+      "bytes": 10706
+    },
+    {
+      "number": 95,
+      "path": "bip-0095.md",
+      "sha256": "1a3d66615909be91822e07ce16f5f1cf3f20819b91c39027d4d98d9798f39d05",
+      "bytes": 9225
+    },
+    {
+      "number": 98,
+      "path": "bip-0098.mediawiki",
+      "sha256": "88e278277090e4b63a2e7922cf7c932a243d62242469ead9bb0a40b9a1b072bb",
+      "bytes": 19932
+    },
+    {
+      "number": 99,
+      "path": "bip-0099.mediawiki",
+      "sha256": "eeb42f0e7c097ce7bd4513691197534544046b9df152a7f38afa744cf01f5545",
+      "bytes": 18588
+    },
+    {
+      "number": 100,
+      "path": "bip-0100.mediawiki",
+      "sha256": "0d542c4319ffcb86795f5e0ad86eabfd5d1bea4f570cc0aeabc0d54d66fc4ea1",
+      "bytes": 5551
+    },
+    {
+      "number": 101,
+      "path": "bip-0101.mediawiki",
+      "sha256": "760a42482cfc4f3adae29f1c0bc75116647442169d60fe174970ce35c8cfacf9",
+      "bytes": 10151
+    },
+    {
+      "number": 102,
+      "path": "bip-0102.mediawiki",
+      "sha256": "b68fcac15382e57619c78e078a5ed7ee223f5cc0340803ab950dc176d5b526de",
+      "bytes": 1240
+    },
+    {
+      "number": 103,
+      "path": "bip-0103.mediawiki",
+      "sha256": "5fa16f3ac5909fbdef7ca1121bff4c05944cb32ed78fba1b76170fc67293c891",
+      "bytes": 6101
+    },
+    {
+      "number": 104,
+      "path": "bip-0104.mediawiki",
+      "sha256": "653c8bfa62cf88eff308c0f8a54790165398f03605b1b059e0305fec1eb41a23",
+      "bytes": 4741
+    },
+    {
+      "number": 105,
+      "path": "bip-0105.mediawiki",
+      "sha256": "390fda00785ed78b16bee028899fbb1be0daef43cffcea8e865adf49fd1ddd4a",
+      "bytes": 4122
+    },
+    {
+      "number": 106,
+      "path": "bip-0106.mediawiki",
+      "sha256": "3df6d1b51c39ad24e9ad085bf2cea36ede19719c0333591be9807aa93f7137b6",
+      "bytes": 5448
+    },
+    {
+      "number": 107,
+      "path": "bip-0107.mediawiki",
+      "sha256": "76b2ee6ecee5a729010877acef0a78f6874eb054ca74b4d64d6c153428ec1bb6",
+      "bytes": 5960
+    },
+    {
+      "number": 109,
+      "path": "bip-0109.mediawiki",
+      "sha256": "baeaf1f1efe01a37487165bf175042d2664cbaf443635368326f53d6ff509075",
+      "bytes": 4585
+    },
+    {
+      "number": 110,
+      "path": "bip-0110.mediawiki",
+      "sha256": "66f12366569ceae99f66b6be5c735f9b1ea67063ef8658f97a30ca705b5342a5",
+      "bytes": 31589
+    },
+    {
+      "number": 111,
+      "path": "bip-0111.mediawiki",
+      "sha256": "dfafbd6ec5023e3250a39997c2291d6a0e5cc56318c8def6d31575603538ec1f",
+      "bytes": 3369
+    },
+    {
+      "number": 112,
+      "path": "bip-0112.mediawiki",
+      "sha256": "61022872545daeb779ef5d38f769d7a155c0f85333653b20c83b0a2329b523c4",
+      "bytes": 16727
+    },
+    {
+      "number": 113,
+      "path": "bip-0113.mediawiki",
+      "sha256": "f0643ba529837a673015a37287c21972bfa24cebfdc67e2844c6ad8d51d1ea69",
+      "bytes": 4656
+    },
+    {
+      "number": 114,
+      "path": "bip-0114.mediawiki",
+      "sha256": "e9cd62e9d363f0f947af846757e79e71cffeab2e3afdc0891cb5f19be3050faf",
+      "bytes": 23578
+    },
+    {
+      "number": 115,
+      "path": "bip-0115.mediawiki",
+      "sha256": "7b308a58b58a0e5fafe0555a3fa9b4458c607787be1b0d223c1a143f569191d0",
+      "bytes": 7458
+    },
+    {
+      "number": 116,
+      "path": "bip-0116.mediawiki",
+      "sha256": "56c5e89285d773fc345b1aee7843208fba99acc074dd4f81a701cc87b15254a7",
+      "bytes": 11648
+    },
+    {
+      "number": 117,
+      "path": "bip-0117.mediawiki",
+      "sha256": "6d01347ede4db1331d77eeefbeab9bd9dc29c048bc73c1feb5af1ad13550a359",
+      "bytes": 15298
+    },
+    {
+      "number": 118,
+      "path": "bip-0118.mediawiki",
+      "sha256": "26a9e7d26b727572ed0ecaa1a8dc1bd450bde0cdb06bf96f4e9f79bd80877076",
+      "bytes": 20418
+    },
+    {
+      "number": 119,
+      "path": "bip-0119.mediawiki",
+      "sha256": "8178117f76cea0fe4b65fb93b45e27f3f1f86589bcd67217f97f192cbd510baa",
+      "bytes": 36474
+    },
+    {
+      "number": 120,
+      "path": "bip-0120.mediawiki",
+      "sha256": "cf297fde06848ac8fa36342055b6d44a24de395addc5614133520dca1833fad5",
+      "bytes": 9439
+    },
+    {
+      "number": 121,
+      "path": "bip-0121.mediawiki",
+      "sha256": "354f6358c5a0b206dcd30a1e8a45f21714c224aafe6c247e9212677858ac62c1",
+      "bytes": 6051
+    },
+    {
+      "number": 122,
+      "path": "bip-0122.mediawiki",
+      "sha256": "dee4fbbaa99b31097fb2673ce0d0edc6fedd97b907fa7dc1f039657a70c2af96",
+      "bytes": 4564
+    },
+    {
+      "number": 123,
+      "path": "bip-0123.mediawiki",
+      "sha256": "0b5f929499402e8a8938fdba24957d33676ccf916e3e65bf8cab882b22bf3ac2",
+      "bytes": 16020
+    },
+    {
+      "number": 124,
+      "path": "bip-0124.mediawiki",
+      "sha256": "c93140af1fe83c77759af8065cb68dc8fc595eb29a99d5a7adf4f401fb48f8c6",
+      "bytes": 5912
+    },
+    {
+      "number": 125,
+      "path": "bip-0125.mediawiki",
+      "sha256": "da53c6f77100581b715befcfcb2e84adc672d205628a4219c77106f66978aad2",
+      "bytes": 9569
+    },
+    {
+      "number": 126,
+      "path": "bip-0126.mediawiki",
+      "sha256": "526adeea83da023c942271d2ee8f9ede391173a657a7ceb6438da2cd10f2bc8f",
+      "bytes": 7749
+    },
+    {
+      "number": 127,
+      "path": "bip-0127.mediawiki",
+      "sha256": "035e1e006bd4b49994cbb1e2c0e07a291ce9e1745bd700f9c7328fc7526c68a3",
+      "bytes": 7239
+    },
+    {
+      "number": 128,
+      "path": "bip-0128.mediawiki",
+      "sha256": "052d4dd01198669cddb15d40456db44a1b766ed069986b00ba21e8bc940fb92b",
+      "bytes": 18845
+    },
+    {
+      "number": 129,
+      "path": "bip-0129.mediawiki",
+      "sha256": "e31e847c6b87f192086c89313f19beae3ac7ace4038e61bde983dcd8ba2e3814",
+      "bytes": 40680
+    },
+    {
+      "number": 130,
+      "path": "bip-0130.mediawiki",
+      "sha256": "c6137bd02b9f6c45b0390fbba782314e77436a81fe1d8343c19c981789a57894",
+      "bytes": 2683
+    },
+    {
+      "number": 131,
+      "path": "bip-0131.mediawiki",
+      "sha256": "8c93181d798d8b4f4e8749e72e722487fcd1c922cc55c03735bbae7f15843e7a",
+      "bytes": 4939
+    },
+    {
+      "number": 132,
+      "path": "bip-0132.mediawiki",
+      "sha256": "306dd2083ea2fd8b4d35e42426fb5819cd4c63b28036498af0fbd776cdee55af",
+      "bytes": 8574
+    },
+    {
+      "number": 133,
+      "path": "bip-0133.mediawiki",
+      "sha256": "98ddd4a6b1d491f640aa762880b6158d1c79c822ae4d49503b8399ce250f89b3",
+      "bytes": 3985
+    },
+    {
+      "number": 134,
+      "path": "bip-0134.mediawiki",
+      "sha256": "821a01a654cab76e2b256439af33ebce45f86e3fa7a73268f0f8d43098325de5",
+      "bytes": 12367
+    },
+    {
+      "number": 135,
+      "path": "bip-0135.mediawiki",
+      "sha256": "0d59412a2617570deabbaedeb234a341c9293becc973c4704769c57a939efe46",
+      "bytes": 17906
+    },
+    {
+      "number": 136,
+      "path": "bip-0136.mediawiki",
+      "sha256": "d416544684b6ae92994f5464302995fe55168cdde3a61777db7397de5c8316ca",
+      "bytes": 30658
+    },
+    {
+      "number": 137,
+      "path": "bip-0137.mediawiki",
+      "sha256": "a03954c83f15b17bd4940d1c0a6c5b7d863e41eb73e14c30c5f837533e5a647d",
+      "bytes": 9444
+    },
+    {
+      "number": 138,
+      "path": "bip-0138.md",
+      "sha256": "5168e7f0fcebb4e60f42d20df581eec15251317644c9f601c1da3c05217a578d",
+      "bytes": 30014
+    },
+    {
+      "number": 140,
+      "path": "bip-0140.mediawiki",
+      "sha256": "d442e3eff87a90be3a4eac6127448d3c460a75a3aa5775011b41f9740870c448",
+      "bytes": 14931
+    },
+    {
+      "number": 141,
+      "path": "bip-0141.mediawiki",
+      "sha256": "d72409335872a32494f75e7547589abf4b3b23b6beebe6bc6999c7a84b135e2c",
+      "bytes": 26314
+    },
+    {
+      "number": 142,
+      "path": "bip-0142.mediawiki",
+      "sha256": "531925cf3f08e27d855bd510baf3c95de6cf59c6817c6e4126be9f559fc3b262",
+      "bytes": 5820
+    },
+    {
+      "number": 143,
+      "path": "bip-0143.mediawiki",
+      "sha256": "62bc71351563e68baeb12643c68355d217953ae9eb6a6e68b2b0323275b6beec",
+      "bytes": 57755
+    },
+    {
+      "number": 144,
+      "path": "bip-0144.mediawiki",
+      "sha256": "7a8e28a18939bf4523b11170eb7988559db3937bd5f49d0afd210e5cb7d6963b",
+      "bytes": 5204
+    },
+    {
+      "number": 145,
+      "path": "bip-0145.mediawiki",
+      "sha256": "2a31df695644c48f8625430cb765e3d98c6554a2e8b2093d07ae5485737b7516",
+      "bytes": 5934
+    },
+    {
+      "number": 146,
+      "path": "bip-0146.mediawiki",
+      "sha256": "51f5279263a3d2948acaa669021f8b220224df09cd1d28576ff5a7cd4332a698",
+      "bytes": 7115
+    },
+    {
+      "number": 147,
+      "path": "bip-0147.mediawiki",
+      "sha256": "bb35027bedbe7c6a875e5febe9ef6249cadebb204bb8853e826271e7fdbf0fee",
+      "bytes": 3587
+    },
+    {
+      "number": 148,
+      "path": "bip-0148.mediawiki",
+      "sha256": "bcea0adbdec3456dd361684f1d01ce6fd9e9b9d06dbed9723e827ed62346889a",
+      "bytes": 4224
+    },
+    {
+      "number": 149,
+      "path": "bip-0149.mediawiki",
+      "sha256": "186ddaf4a895e1b675c89ffb5d4660e4025f57875365b2fa4d2ac8d0246c6451",
+      "bytes": 2601
+    },
+    {
+      "number": 150,
+      "path": "bip-0150.mediawiki",
+      "sha256": "c16e58c558c07a9d50858355bb4cdefb867a8f0ff4f427bdf395a43c99b1d001",
+      "bytes": 10628
+    },
+    {
+      "number": 151,
+      "path": "bip-0151.mediawiki",
+      "sha256": "53f1a4de8b549872c8432c2c0614f55674abc0df93ea31c6a3ba45655b442c5e",
+      "bytes": 10331
+    },
+    {
+      "number": 152,
+      "path": "bip-0152.mediawiki",
+      "sha256": "b710fa0a4ab9ec92d84884adc77df25b974add79dbc23b8158bf3a791e47cd85",
+      "bytes": 31006
+    },
+    {
+      "number": 154,
+      "path": "bip-0154.mediawiki",
+      "sha256": "edf9ee53f85bfc2037d5229f1119130b612c101a1069874d346c53a119a941e6",
+      "bytes": 30603
+    },
+    {
+      "number": 155,
+      "path": "bip-0155.mediawiki",
+      "sha256": "acf8a589041612260ec073dd7d74e4842928cb78204c4a9c8656e1b0618cf174",
+      "bytes": 9740
+    },
+    {
+      "number": 156,
+      "path": "bip-0156.mediawiki",
+      "sha256": "c96785f327c666bb99cb1fb39a2ecba20ca2365e399d81c7661328722a33380c",
+      "bytes": 17322
+    },
+    {
+      "number": 157,
+      "path": "bip-0157.mediawiki",
+      "sha256": "5405acbf04ebd8a1b92ae2b7188022f4c14723ed8a0ae0d077d12a1e6908da9a",
+      "bytes": 21050
+    },
+    {
+      "number": 158,
+      "path": "bip-0158.mediawiki",
+      "sha256": "93a560d966852e081f5e7894f43eddae55ac471ff8bcb99d93eae73f5a859954",
+      "bytes": 16770
+    },
+    {
+      "number": 159,
+      "path": "bip-0159.mediawiki",
+      "sha256": "21d5d310d0b657b594519fd4ebe996eec875fdcf9e764c7104b2e36f150a6768",
+      "bytes": 3361
+    },
+    {
+      "number": 171,
+      "path": "bip-0171.mediawiki",
+      "sha256": "bb3c071311b422cc77b47816efc12dec51bb885ea6a65a7a8de1cd08eae39bd8",
+      "bytes": 13036
+    },
+    {
+      "number": 172,
+      "path": "bip-0172.mediawiki",
+      "sha256": "3953b7098ecfa239cd61db1571814f7b2ec4b21dad1a9de647625c5d3617c3e1",
+      "bytes": 8134
+    },
+    {
+      "number": 173,
+      "path": "bip-0173.mediawiki",
+      "sha256": "b19eab06b264bbd15ad7f7d640fa34de8f4a8809fba8a6ecc3e165545b27a543",
+      "bytes": 20803
+    },
+    {
+      "number": 174,
+      "path": "bip-0174.mediawiki",
+      "sha256": "f2a8e1a9c9e31cc7f607b3c7e2419c63eeccc4bd5b725968cde54ab8cfa1d410",
+      "bytes": 136028
+    },
+    {
+      "number": 175,
+      "path": "bip-0175.mediawiki",
+      "sha256": "49bbd803bfdce3e43b04193431cd3be9131888339d51516896ec4e1434e5a395",
+      "bytes": 10605
+    },
+    {
+      "number": 176,
+      "path": "bip-0176.mediawiki",
+      "sha256": "0c1697d29fe5a5c7444424f990e2840df8098197986a82931805127c5a46d861",
+      "bytes": 3568
+    },
+    {
+      "number": 177,
+      "path": "bip-0177.mediawiki",
+      "sha256": "0a33f3f13ab8fe4d3fc914fa3117741888ce49d0f3f0b563394e87869d4238c4",
+      "bytes": 9377
+    },
+    {
+      "number": 178,
+      "path": "bip-0178.mediawiki",
+      "sha256": "60b77cbed1bd9e1bec79b82559b2c6427e92b86dd42b5cb1f7ed9838421ec033",
+      "bytes": 3691
+    },
+    {
+      "number": 179,
+      "path": "bip-0179.mediawiki",
+      "sha256": "8a545580a7a07451a877332e7c944b730d8b44e64684e58835f5825e3b18d275",
+      "bytes": 2218
+    },
+    {
+      "number": 180,
+      "path": "bip-0180.mediawiki",
+      "sha256": "94fe3406c7afca1d787b6d254242fb80eacae87298b33686950618f8cd824f42",
+      "bytes": 9115
+    },
+    {
+      "number": 197,
+      "path": "bip-0197.mediawiki",
+      "sha256": "aa2ab5ceb4f04ecc76c35cbf75023b1e6b2291330a8e5ea9b0eaa1b76ebc5198",
+      "bytes": 12708
+    },
+    {
+      "number": 199,
+      "path": "bip-0199.mediawiki",
+      "sha256": "1e28bc46b408c1616d0d8054d2a91e2eaf9759f0f1c788a3df24de79134b1d04",
+      "bytes": 3748
+    },
+    {
+      "number": 300,
+      "path": "bip-0300.mediawiki",
+      "sha256": "e38048c58a45679ce573e2ff777a82f1c875cfad88b6c9e4a12117e88bd1110e",
+      "bytes": 16998
+    },
+    {
+      "number": 301,
+      "path": "bip-0301.mediawiki",
+      "sha256": "1f192dab89abf822ceb67ac9b951e9f6cad5e1a2fbaa4c0b2c6f5931cc69c644",
+      "bytes": 6624
+    },
+    {
+      "number": 310,
+      "path": "bip-0310.mediawiki",
+      "sha256": "f130a8f0235e3ff5a1c8780eec4ff45e7dd9206ad90dcd5546468f109fa33103",
+      "bytes": 12090
+    },
+    {
+      "number": 320,
+      "path": "bip-0320.mediawiki",
+      "sha256": "6ce82749971fab0db1e157726ff4eb62abe1bc6976ead2b327d99e6430be8227",
+      "bytes": 3588
+    },
+    {
+      "number": 321,
+      "path": "bip-0321.mediawiki",
+      "sha256": "6fcb782620390c0a60958d983e0ca9ffbd67eadfba37169f94e1228028eee8c4",
+      "bytes": 14941
+    },
+    {
+      "number": 322,
+      "path": "bip-0322.mediawiki",
+      "sha256": "0eb91c5093ef81c462cadffdbe02d4d1638cb270d3ccb47301a6d82860aa0454",
+      "bytes": 21361
+    },
+    {
+      "number": 323,
+      "path": "bip-0323.mediawiki",
+      "sha256": "3aeeb5fc2879dc37f4956381129de10525ab5943e970e3a5b72c0cb3dd1b267a",
+      "bytes": 2740
+    },
+    {
+      "number": 324,
+      "path": "bip-0324.mediawiki",
+      "sha256": "14de484a709946348effa8264991cf124a34ecdaf0a3f9d68a42313287625ad8",
+      "bytes": 67644
+    },
+    {
+      "number": 325,
+      "path": "bip-0325.mediawiki",
+      "sha256": "36471b99209dae19617fbe201654d04d0ebcc9aa5f3dddc5e401ff83151e35b8",
+      "bytes": 8754
+    },
+    {
+      "number": 326,
+      "path": "bip-0326.mediawiki",
+      "sha256": "dee077f1c5ef54fa1bc85ac2fa0edcb479b5198c56e108da4c43f92a9a9683fa",
+      "bytes": 8577
+    },
+    {
+      "number": 327,
+      "path": "bip-0327.mediawiki",
+      "sha256": "918555f9d67bf4c1124b004f43e7cfa2436570ce46466f06f83f836f58e8ff7c",
+      "bytes": 69444
+    },
+    {
+      "number": 328,
+      "path": "bip-0328.mediawiki",
+      "sha256": "490c427d9d3abf7b7eb07eadffdbf8ebcfa22151ae40cb1612b71f0fe1e5a621",
+      "bytes": 4861
+    },
+    {
+      "number": 329,
+      "path": "bip-0329.mediawiki",
+      "sha256": "c0737172679b3d16087d175603ee5314b7f152f388911f743a7c6f36d7f3e015",
+      "bytes": 12198
+    },
+    {
+      "number": 330,
+      "path": "bip-0330.mediawiki",
+      "sha256": "39061751c8a89db0f441de86584db252fc4913b160796c361681513f47f06ede",
+      "bytes": 21708
+    },
+    {
+      "number": 331,
+      "path": "bip-0331.mediawiki",
+      "sha256": "41e672652bd3f337ad492236a1bd2687be900a78eaf8e66c2adf2a9c32e05ed6",
+      "bytes": 28629
+    },
+    {
+      "number": 332,
+      "path": "bip-0332.md",
+      "sha256": "89cc3e5d39774cae1c7ea99cf7a9ea2827c0ed7e426e95d3bc813140ef64c839",
+      "bytes": 37796
+    },
+    {
+      "number": 337,
+      "path": "bip-0337.mediawiki",
+      "sha256": "9fae064e16380360f2526c385e50c6536837819cfd3a8d38a8ff32751b09f1a8",
+      "bytes": 13075
+    },
+    {
+      "number": 338,
+      "path": "bip-0338.mediawiki",
+      "sha256": "360a04ee9b79256a1def467921930d19b146a6c9e83678fb0cef42f1185aaa99",
+      "bytes": 5879
+    },
+    {
+      "number": 339,
+      "path": "bip-0339.mediawiki",
+      "sha256": "610ad9a32b6d10a17d548a50dc900f7fe75000a1be620a53bf523c02b7217a34",
+      "bytes": 3087
+    },
+    {
+      "number": 340,
+      "path": "bip-0340.mediawiki",
+      "sha256": "17d64d6dc6bc97f4ecf178697bf810b92aa2a9e41ef13db809c25bc44a9b8109",
+      "bytes": 39995
+    },
+    {
+      "number": 341,
+      "path": "bip-0341.mediawiki",
+      "sha256": "463690d4c409587759c0ff6e8b8fc3a2bf6cb2cdda0c06ff193d317e0ed898ec",
+      "bytes": 44162
+    },
+    {
+      "number": 342,
+      "path": "bip-0342.mediawiki",
+      "sha256": "29641340adec741b695be99ae3dc6e2fd025ea6566f9d6c2544ed5d47db4d822",
+      "bytes": 23988
+    },
+    {
+      "number": 343,
+      "path": "bip-0343.mediawiki",
+      "sha256": "a30b399b87eacec67561bd49d16371d64c40d9e86d140b9f2bb994941bacde3a",
+      "bytes": 4447
+    },
+    {
+      "number": 345,
+      "path": "bip-0345.mediawiki",
+      "sha256": "3b34c99f269d2890a94e425aa0b80f857aef52829b606b8bcd14959190b93016",
+      "bytes": 44074
+    },
+    {
+      "number": 346,
+      "path": "bip-0346.md",
+      "sha256": "2c37a344e7dea50c65d02d574c2f86a4ce5ee2024db9ce147ec9d0a083d57c9c",
+      "bytes": 18632
+    },
+    {
+      "number": 347,
+      "path": "bip-0347.mediawiki",
+      "sha256": "a95f3d3c305fb0983f78caaac139e42149bcd19e312876c42cfcadc9fd65149a",
+      "bytes": 13151
+    },
+    {
+      "number": 348,
+      "path": "bip-0348.md",
+      "sha256": "be997f3f5ab4d41524253e380204d842b98612affbc540ab84ae7f964800fff0",
+      "bytes": 6507
+    },
+    {
+      "number": 349,
+      "path": "bip-0349.md",
+      "sha256": "e73e7e440e66839aba529b89d7f3cfe5cf0426a0c40b66c2654ca47ad3699421",
+      "bytes": 3680
+    },
+    {
+      "number": 350,
+      "path": "bip-0350.mediawiki",
+      "sha256": "63634b06aa8bae88b31929674736e74964c4598684269ac2b0b140c43a7a0dec",
+      "bytes": 26836
+    },
+    {
+      "number": 351,
+      "path": "bip-0351.mediawiki",
+      "sha256": "776b159db28de2e8aec97a6dce738d5aa0b55ec033f482c595fdf3f3dc640e74",
+      "bytes": 16231
+    },
+    {
+      "number": 352,
+      "path": "bip-0352.mediawiki",
+      "sha256": "a64d3b9ecc004ea4ae4c168e4631571f16e35eaa66595599729c6c066de4cff4",
+      "bytes": 54301
+    },
+    {
+      "number": 353,
+      "path": "bip-0353.mediawiki",
+      "sha256": "b9239e2df8b8551ac4d5ef1aae26a2b9c74981dda0481641333ed782b85bab61",
+      "bytes": 63257
+    },
+    {
+      "number": 360,
+      "path": "bip-0360.mediawiki",
+      "sha256": "988957d7373b3779c05877aaf7aa671ce74f0db66d014c98d69132d12f3b6770",
+      "bytes": 36968
+    },
+    {
+      "number": 361,
+      "path": "bip-0361.mediawiki",
+      "sha256": "9d2f8db497cb0aa7054b05d4da0a74668096a8bbd9ea28b8c02b607e08620b9b",
+      "bytes": 12108
+    },
+    {
+      "number": 370,
+      "path": "bip-0370.mediawiki",
+      "sha256": "b2b6e9099592fa04179383f9a1fd8b201fbeef4470f4c3f1c050d25589979c57",
+      "bytes": 79165
+    },
+    {
+      "number": 371,
+      "path": "bip-0371.mediawiki",
+      "sha256": "c2e8143a3c9aee0ee38d863cf40947ddf8ee67b4f40a748fb6925ccc5ad4b791",
+      "bytes": 33681
+    },
+    {
+      "number": 372,
+      "path": "bip-0372.mediawiki",
+      "sha256": "7a4b3727cca714e38fd2c5652569932d743a41ba486827e6cb6f7ab4706c7093",
+      "bytes": 7505
+    },
+    {
+      "number": 373,
+      "path": "bip-0373.mediawiki",
+      "sha256": "31b77720043969dc52b1c443f6ec48cd28379a11a38a531803422ecbbbd57193",
+      "bytes": 91543
+    },
+    {
+      "number": 374,
+      "path": "bip-0374.mediawiki",
+      "sha256": "359cb40c0fdea212045cbe017f88b80ead9d427e3c8b70f1a79e4a11c913b7cd",
+      "bytes": 8677
+    },
+    {
+      "number": 375,
+      "path": "bip-0375.mediawiki",
+      "sha256": "cfc700b4f0e107b7d7fb64addf39f128877ec9319f14071d0a882d719d75c84e",
+      "bytes": 18144
+    },
+    {
+      "number": 376,
+      "path": "bip-0376.mediawiki",
+      "sha256": "5b727db85ab0e882b443b7ec81706021cfacfc7675241ed877eba0b528e0cbe1",
+      "bytes": 13173
+    },
+    {
+      "number": 379,
+      "path": "bip-0379.md",
+      "sha256": "138abac794798a7614c68ae779febf4e8153eed0e0f8e9afdf9eb926d82c1259",
+      "bytes": 38554
+    },
+    {
+      "number": 380,
+      "path": "bip-0380.mediawiki",
+      "sha256": "34e6510bb2eba9445a68eacf3d24d5a4e5f24481477488d5552f674ac81dd5fe",
+      "bytes": 19681
+    },
+    {
+      "number": 381,
+      "path": "bip-0381.mediawiki",
+      "sha256": "f0f6060332f82454f61015815c824eea4b7b6684ce4892ef42d23e4e782fa817",
+      "bytes": 6707
+    },
+    {
+      "number": 382,
+      "path": "bip-0382.mediawiki",
+      "sha256": "6cd2574998ca0d2141d1c487e70da2dfab47abd6a2dfcc3680af2c241f01fe9d",
+      "bytes": 6541
+    },
+    {
+      "number": 383,
+      "path": "bip-0383.mediawiki",
+      "sha256": "c46f75e5869386c1852dd187725293822b9e3b761342a966fbcf99adaa112aa2",
+      "bytes": 12140
+    },
+    {
+      "number": 384,
+      "path": "bip-0384.mediawiki",
+      "sha256": "9d6b32a619e021f50f4b1a07ed8f9d08cfea599c8f484e6b1360ada9aae8541c",
+      "bytes": 4172
+    },
+    {
+      "number": 385,
+      "path": "bip-0385.mediawiki",
+      "sha256": "8c4963492f1d5b492808e5ece8be75f7f66def37f35d091074fdbfa98a6ddd08",
+      "bytes": 3040
+    },
+    {
+      "number": 386,
+      "path": "bip-0386.mediawiki",
+      "sha256": "770121b4b33a50bfadfebcd94931dd0ad04159b9fbc1d3b3c3ae17fc0cc16de8",
+      "bytes": 6794
+    },
+    {
+      "number": 387,
+      "path": "bip-0387.mediawiki",
+      "sha256": "92a1a95be774be27f3f373e15dcd8bf291f542cd62535dd1ccbd95bd1022464e",
+      "bytes": 7046
+    },
+    {
+      "number": 388,
+      "path": "bip-0388.mediawiki",
+      "sha256": "9f88671cac1fd92d3b9909364632ce0283bcd136ead49bf6072feaaead046b95",
+      "bytes": 32040
+    },
+    {
+      "number": 389,
+      "path": "bip-0389.mediawiki",
+      "sha256": "dfe2d4673bb008565bbb5bcd01438de1c568ba0f46b1dd3bf09ee5df3bd29284",
+      "bytes": 11268
+    },
+    {
+      "number": 390,
+      "path": "bip-0390.mediawiki",
+      "sha256": "9ec36e702689e8c910cc0d06d2950f32b6a6c66725af096a0731de465e3049af",
+      "bytes": 11327
+    },
+    {
+      "number": 391,
+      "path": "bip-0391.mediawiki",
+      "sha256": "c8dae7ffb093fed0115bfa468ade37b8d3b6490bfe6d455d76a51b7512587d4e",
+      "bytes": 9687
+    },
+    {
+      "number": 392,
+      "path": "bip-0392.mediawiki",
+      "sha256": "5be97bb2ebca7a047923a111854fbefea65262107d19afccd218291d00401493",
+      "bytes": 5903
+    },
+    {
+      "number": 393,
+      "path": "bip-0393.mediawiki",
+      "sha256": "b3bf6af51c9c9e430fe095ed28e3302bc9039556f9033b7e0818ed348a0425be",
+      "bytes": 6578
+    },
+    {
+      "number": 431,
+      "path": "bip-0431.mediawiki",
+      "sha256": "0d1420a7f26f3e6be002da06bc8afae358b25ec468d32dccf2ea086bd8f95f5a",
+      "bytes": 27577
+    },
+    {
+      "number": 433,
+      "path": "bip-0433.mediawiki",
+      "sha256": "13bdf181c50564f6fff909bad67e67b008799f928f129c792fbb0b842164f9b7",
+      "bytes": 4038
+    },
+    {
+      "number": 434,
+      "path": "bip-0434.md",
+      "sha256": "f52f1aadd9a660f301c2a9365d08d130640ba01d9425cffe1783e5871727b1f5",
+      "bytes": 16248
+    },
+    {
+      "number": 440,
+      "path": "bip-0440.mediawiki",
+      "sha256": "85e45b233d45bf217a60b569e4408300349600c3688549e2dca8e10880ae3764",
+      "bytes": 15421
+    },
+    {
+      "number": 441,
+      "path": "bip-0441.mediawiki",
+      "sha256": "6150cfc30776276be981f837cfcb67deded996fdd4ee053f715a421b5d5c47e8",
+      "bytes": 24787
+    },
+    {
+      "number": 442,
+      "path": "bip-0442.md",
+      "sha256": "9fbe121bcd9cc70c56b42d1993c417e87545321d6337f9f0c1bff2c5bc96615c",
+      "bytes": 12290
+    },
+    {
+      "number": 443,
+      "path": "bip-0443.mediawiki",
+      "sha256": "53f4b9a7135d19bef93c9c87ee4a019fa08d2f07a9c7edcffe2ac32cf0ee1140",
+      "bytes": 21916
+    },
+    {
+      "number": 446,
+      "path": "bip-0446.md",
+      "sha256": "24dda2500618cfcc7449f142eaea0e22da1f6e8095db1af8f76700f3e2ac6ea6",
+      "bytes": 11867
+    },
+    {
+      "number": 448,
+      "path": "bip-0448.md",
+      "sha256": "3b3addc6fe73f66ceb67281b79ad44e09a6be17361007251795e0009d8067621",
+      "bytes": 5766
+    },
+    {
+      "number": 449,
+      "path": "bip-0449.md",
+      "sha256": "a62ca765f6a37e21fe7b5f5e47cb2975f55424b74fbc6cbadbd896793d6ae33d",
+      "bytes": 27414
+    },
+    {
+      "number": 450,
+      "path": "bip-0450.mediawiki",
+      "sha256": "7733a4951874f93e65bb58e1ab8b3ae722677817cd917cdc888701c3fe236c39",
+      "bytes": 25644
+    },
+    {
+      "number": 451,
+      "path": "bip-0451.md",
+      "sha256": "a8ad564c0250506adcbb565e247c045b4d49f90594188f9fbc4933a153fbd808",
+      "bytes": 18877
+    },
+    {
+      "number": 461,
+      "path": "bip-0461.md",
+      "sha256": "5e460e8395eb084c6ea2de129c03928a979593d75fe28a2f87f05ad30f2ef247",
+      "bytes": 21508
+    }
+  ]
+}
