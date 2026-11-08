@@ -1,7 +1,5 @@
-import { Arrow, Drawing, KeyGlyph, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, KeyGlyph, Machine, Value, idsFor, short } from "../kit";
 import type { DerivedDescriptorFixture } from "../types";
-
-const short = (s: string, n: number) => `${s.slice(0, n)}…`;
 
 /**
  * descriptor-template.v1 — static. pkh(KEY) fills BIP 381's template: the

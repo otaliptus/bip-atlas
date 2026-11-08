@@ -15,14 +15,10 @@ import {
   versionFor,
 } from "@bip-atlas/models/versionbits";
 import { VersionbitsBip8 } from "../src/versionbits/VersionbitsBip8";
-import { VersionbitsBoundary } from "../src/versionbits/VersionbitsBoundary";
 import { VersionbitsField } from "../src/versionbits/VersionbitsField";
-import { VersionbitsLifecycle } from "../src/versionbits/VersionbitsLifecycle";
 import { PERIODS, VersionbitsMachine, defaultMeets, optionsFor, runFor } from "../src/versionbits/VersionbitsMachine";
 import { VersionbitsRecord } from "../src/versionbits/VersionbitsRecord";
-import { VersionbitsReuse } from "../src/versionbits/VersionbitsReuse";
 import { VersionbitsThreshold } from "../src/versionbits/VersionbitsThreshold";
-import { VersionbitsTopBits } from "../src/versionbits/VersionbitsTopBits";
 import { hex32, ordinal } from "../src/versionbits/parts";
 import type { DerivedVersionbitsDeploymentFixture, DerivedVersionbitsGuidelineFixture } from "../src/types";
 
@@ -64,21 +60,7 @@ describe("version-bits figures", () => {
     expect(s.split("k-mark--plain").length - 1).toBe(3);
   });
 
-  it("A11.2 splits the version space into eight drawers and only 001 signals", () => {
-    const s = html(h(VersionbitsTopBits, {}));
-    expect(s.split("data-pattern=").length - 1).toBe(8);
-    expect(s).toContain("0x20000000–0x3fffffff");
-    expect(s.split("KEPT FOR A FUTURE MECHANISM").length - 1).toBe(2);
-    expect(s).toContain("0x40000000–0x5fffffff");
-    expect(s).toContain("0x60000000–0x7fffffff");
-    expect(s).toContain("0xe0000000–0xffffffff");
-  });
 
-  it("A11.3 is schematic: no values", () => {
-    const s = html(h(VersionbitsReuse, {}));
-    expect(s).toContain("SCHEMATIC");
-    expect(s).not.toMatch(/\d{4}-\d{2}-\d{2}/);
-  });
 
   it("A11.4 draws the three thresholds and how many non-signalling blocks stop lock-in", () => {
     const s = html(h(VersionbitsThreshold, { fixtures: [csv, g] }));
@@ -89,26 +71,7 @@ describe("version-bits figures", () => {
     expect([BIP9_THRESHOLD.mainnet, BIP9_THRESHOLD.testnet, BIP8_THRESHOLD.mainnet]).toEqual([1916, 1512, 1815]);
   });
 
-  it("A11.5 routes each train with bip9Next: lock-in, one short, and failure first", () => {
-    const s = html(h(VersionbitsBoundary, { fixture: csv }));
-    const m = csv.derived.mainnet;
-    const p = { bit: 0, starttime: m.startEpoch, timeout: m.expireEpoch, threshold: m.threshold };
-    expect(bip9Next("STARTED", { mtp: m.startEpoch, count: 1916 }, p).to).toBe("LOCKED_IN");
-    expect(bip9Next("STARTED", { mtp: m.startEpoch, count: 1915 }, p).to).toBe("STARTED");
-    expect(bip9Next("STARTED", { mtp: m.expireEpoch, count: 2016 }, p).to).toBe("FAILED");
-    expect(s.split('data-arrived="true"').length - 1).toBe(3);
-    expect(s).toContain("FAILED, even with all 2,016 blocks signalling");
-    expect(s).toContain("1,915 of 2,016 signal: still STARTED");
-  });
 
-  it("A11.7 reads csv back from its activation height", () => {
-    const s = html(h(VersionbitsLifecycle, { fixture: csv }));
-    const i = bip9Implied(419_328);
-    for (const n of [i.tallyFrom, i.tallyTo, i.lockedInFrom, 419_328]) expect(s).toContain(n.toLocaleString("en-US"));
-    expect(s).toContain("0x20000001");
-    expect(s).toContain("COUNT NOT RECORDED");
-    expect(s).toContain("2016-05-01 → 2017-05-01");
-  });
 
   it("A11.8 shows both deployments' windows and implied periods, with the testnet rows in a disclosure", () => {
     const s = html(h(VersionbitsRecord, { fixtures: [csv, segwit] }));

@@ -8,12 +8,8 @@ import { MULTISIG_REQUIRED, MultisigChain, multisigTally } from "../src/tapscrip
 import { OpSuccess } from "../src/tapscript/OpSuccess";
 import { SigPays } from "../src/tapscript/SigPays";
 import { SigRules } from "../src/tapscript/SigRules";
-import { SigopsBudget } from "../src/tapscript/SigopsBudget";
-import { StackStory } from "../src/tapscript/StackStory";
-import { TapscriptOrder } from "../src/tapscript/TapscriptOrder";
 import { TapscriptTrace } from "../src/tapscript/TapscriptTrace";
 import { TapscriptWitness } from "../src/tapscript/TapscriptWitness";
-import { runEnd } from "../src/tapscript/common";
 import type { DerivedTapscriptFixture, TapscriptCaseFixture, TapscriptTraceView } from "../src/types";
 
 const root = new URL("../../../", import.meta.url);
@@ -96,17 +92,6 @@ describe("A08.2 witness", () => {
   });
 });
 
-describe("retained order recipe", () => {
-  it("ends each witness at the gate its recorded verdict names", () => {
-    const s = html(h(TapscriptOrder, { fixtures: all("tapscript-trace.v1") }));
-    expect(s).toContain('data-case="50" data-witness="success" data-end="op-success-3"');
-    expect(s).toContain('data-case="50" data-witness="failure" data-end="fail-6"');
-    expect(s).toContain('data-case="1135" data-witness="success" data-end="valid-6"');
-    expect(s).toContain('data-case="804" data-witness="failure" data-end="fail-5"');
-    expect(runEnd(derived("core-case-662").derived.failure)).toEqual({ gate: 5, how: "fail" });
-  });
-});
-
 describe("A08.3 signature rules", () => {
   it("puts recorded witnesses in the tray their trace shows", () => {
     const s = html(h(SigRules, { fixtures: all("tapscript-sig-rules.v1") }));
@@ -147,17 +132,6 @@ describe("A08.1 multisig", () => {
   });
 });
 
-describe("retained stack storyboard recipe", () => {
-  const d = derived("core-case-1109");
-  const s = html(h(StackStory, { fixture: d }));
-  it("has one frame per opcode plus the start, and the budget after the signature", () => {
-    expect(s.split('class="k-story__frame"').length - 1).toBe(d.derived.success.steps.length + 1);
-    expect(s).toContain(`BUDGET ${d.derived.success.budgetStart}`);
-    expect(s).toContain(`BUDGET ${d.derived.success.budgetStart - SIGOP_COST}`);
-    expect(s).toContain("push n + 1 = 24");
-  });
-});
-
 describe("A08.4 hero (no-JS render)", () => {
   const fx = all("tapscript-trace.v1");
   it("plays the first case to the end with its verdict", () => {
@@ -181,11 +155,6 @@ describe("A08.5 signature cost and retained budget recipe", () => {
     expect(s).toContain(`CHECK −${SIGOP_COST}`);
     expect(s).toContain("NET +15");
     expect(s).toContain("+1 WITNESS BYTES");
-  });
-  it("draws each success witness's budget as 50 + witness size", () => {
-    const fx = all("tapscript-sig-pays.v1");
-    const s = html(h(SigopsBudget, { fixtures: fx }));
-    for (const f of fx) expect(s).toContain(f.derived.success.opSuccess ? "NO BUDGET IN FORCE" : `${BUDGET_BASE} + ${f.derived.success.witness.totalBytes} = ${f.derived.success.budgetStart}`);
   });
 });
 

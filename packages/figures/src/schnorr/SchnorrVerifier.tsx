@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Arrow, Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor, wrapLines } from "../kit";
+import { Arrow, Drawing, Lamp, Responsive, Scrub, Strip, Value, idsFor, short, wrapLines } from "../kit";
 import type { DerivedSchnorrFixture, SchnorrTraceView } from "../types";
-import { SCHNORR_STAGES, short, stageNote } from "./stages";
+import { SCHNORR_STAGES, stageNote } from "./stages";
 
 interface Props {
   fixtures: DerivedSchnorrFixture[];

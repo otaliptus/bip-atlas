@@ -1,8 +1,6 @@
-import { Arrow, KeyGlyph, Machine, Storyboard, Value, type Frame } from "../kit";
+import { Arrow, KeyGlyph, Machine, Storyboard, Value, short, type Frame } from "../kit";
 import type { DerivedBip32Fixture } from "../types";
 import { hdNode } from "./HmacInputs";
-
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 
 function bar(x: number, y: number, w: number, role: string, text: string, h = 20) {
   return (

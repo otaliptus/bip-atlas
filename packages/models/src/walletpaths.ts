@@ -33,7 +33,6 @@ export const SCHEMES = {
   84: { purpose: 84, script: "p2wpkh", note: "P2WPKH: scriptPubKey 0x0014{20-byte key hash}, bech32 address." },
   86: { purpose: 86, script: "p2tr", note: "P2TR key path: output key = internal key tweaked with no script tree, bech32m address." },
 } as const;
-export type SchemeId = keyof typeof SCHEMES;
 
 /** BIP 84's alternate extended-key version bytes ("zpub"/"zprv", testnet "vpub"/"vprv"). */
 export const BIP84_VERSIONS = {

@@ -11,8 +11,8 @@ import { EvenY } from "../src/schnorr/EvenY";
 import { FailGates } from "../src/schnorr/FailGates";
 import { SchnorrVerifier } from "../src/schnorr/SchnorrVerifier";
 import { SignatureLayout } from "../src/schnorr/SignatureLayout";
-import { VerifyStory } from "../src/schnorr/VerifyStory";
-import { SCHNORR_STAGES, gateStatuses, short } from "../src/schnorr/stages";
+import { SCHNORR_STAGES, gateStatuses } from "../src/schnorr/stages";
+import { short } from "../src/kit";
 import type { DerivedSchnorrFixture, SchnorrDerived, SchnorrVectorFixture } from "../src/types";
 
 const root = new URL("../../../", import.meta.url);
@@ -104,14 +104,6 @@ describe("A06.3 Equation", () => {
     }
   });
   it("refuses an invalid vector", () => expect(() => html(h(Equation, { fixture: group(["bip340-v7"])[0] }))).toThrow());
-});
-
-describe("A06.4 VerifyStory", () => {
-  const s = html(h(VerifyStory, { fixture: v1 }));
-  it("has six frames following the trace", () => {
-    expect(s.split('class="k-story__frame"').length - 1).toBe(6);
-    for (const hex of [val("lift-x", "y"), val("challenge", "e"), val("compute-r", "x"), val("compute-r", "y")]) expect(s).toContain(`>${hex}</code>`);
-  });
 });
 
 describe("A06.5 SchnorrVerifier (no-JS render)", () => {

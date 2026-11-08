@@ -1,6 +1,5 @@
-import { Arrow, Drawing, IsoBox, Value, idsFor } from "../kit";
+import { Arrow, Drawing, IsoBox, Value, idsFor, short } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
-import { shortHex } from "./fields";
 
 type Leaf = { name: string; value: string | null; zero?: boolean };
 
@@ -49,7 +48,7 @@ export function WitnessCommitment({ fixture }: { fixture: DerivedTransactionFixt
         width={344}
         height={392}
         title="Two trees in one block"
-        desc={`A schematic block of four transactions, one of them the published example. The txids, ${shortHex(m.txidHex)} among them, are hashed pairwise into the merkle root in the block header. The wtxids, ${shortHex(m.wtxidHex)} among them and with the coinbase's taken as 32 zero bytes, are hashed the same way into a witness root. The double SHA-256 of that root followed by a 32-byte reserved value, which sits in the coinbase input’s witness, is the commitment recorded in an output of the coinbase transaction, which is itself one of the txid leaves.`}
+        desc={`A schematic block of four transactions, one of them the published example. The txids, ${short(m.txidHex)} among them, are hashed pairwise into the merkle root in the block header. The wtxids, ${short(m.wtxidHex)} among them and with the coinbase's taken as 32 zero bytes, are hashed the same way into a witness root. The double SHA-256 of that root followed by a 32-byte reserved value, which sits in the coinbase input’s witness, is the commitment recorded in an output of the coinbase transaction, which is itself one of the txid leaves.`}
       >
         <rect class="k-outline k-fill--plain" x="96" y="8" width="152" height="40" />
         <Value at={[104, 22]} text="BLOCK HEADER" size={9} cls="k-value--label" />
@@ -57,7 +56,7 @@ export function WitnessCommitment({ fixture }: { fixture: DerivedTransactionFixt
         <Value at={[110, 38.5]} text="MERKLE ROOT" size={9} />
         <line class="k-leader" x1="172" y1="48" x2="172" y2="62" />
         <Value at={[14, 96]} text="TXIDS" size={9} cls="k-value--label" />
-        <Tree top={78} leaves={[{ name: "coinbase", value: null }, { name: "example", value: shortHex(m.txidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
+        <Tree top={78} leaves={[{ name: "coinbase", value: null }, { name: "example", value: short(m.txidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
         {/* The coinbase transaction carries the commitment in one of its outputs. */}
         <rect class="k-outline k-fill--hash k-cell--em" x="14" y="214" width="112" height="22" />
         <Value at={[20, 228.5]} text="COINBASE OUTPUT" size={9} />
@@ -66,7 +65,7 @@ export function WitnessCommitment({ fixture }: { fixture: DerivedTransactionFixt
         <Value at={[134, 226]} text="WITNESS ROOT ‖ RESERVED VALUE" size={9} cls="k-value--muted" /><Value at={[134, 238]} text="(32 B, IN THE COINBASE’S WITNESS)" size={8.5} cls="k-value--muted" />
         <Arrow d="M160 262 L120 240" ids={ids} />
         <Value at={[14, 276]} text="WTXIDS" size={9} cls="k-value--label" />
-        <Tree top={258} leaves={[{ name: "coinbase", value: "00…00", zero: true }, { name: "example", value: shortHex(m.wtxidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
+        <Tree top={258} leaves={[{ name: "coinbase", value: "00…00", zero: true }, { name: "example", value: short(m.wtxidHex) }, { name: "other tx", value: null }, { name: "other tx", value: null }]} />
       </Drawing>
       <details class="atlas-disclosure">
         <summary>The example's identifiers (byte order as computed)</summary>

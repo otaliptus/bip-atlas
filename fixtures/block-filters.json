@@ -4,20 +4,6 @@
   "warning": "BIP 158 testnet test vectors: public block data.",
   "fixtures": [
     {
-      "id": "bf-golomb",
-      "kind": "bf-golomb",
-      "label": "Golomb-Rice codes",
-      "shortLabel": "P = 2 table and a P = 19 code",
-      "source": {
-        "bip": 158,
-        "file": "bip-0158.mediawiki",
-        "line": 138,
-        "section": "Golomb-Rice Coding",
-        "quote": "! n !! (q, r) !! c"
-      },
-      "exampleHeight": 1263442
-    },
-    {
       "id": "bf-block-926485",
       "kind": "bf-block",
       "label": "Block 926,485",
@@ -100,24 +86,6 @@
         "quote": "0000000000000027b2b3b3381f114f674f481544ff2be37ae3788d7e078383b1"
       },
       "height": 1414221
-    },
-    {
-      "id": "bf-chain",
-      "kind": "bf-chain",
-      "label": "Filter headers, blocks 0, 2 and 3",
-      "shortLabel": "header chain",
-      "source": {
-        "bip": 158,
-        "file": "bip-0158/testnet-19.json",
-        "line": 3,
-        "section": "Appendix C: Test Vectors",
-        "quote": "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"
-      },
-      "heights": [
-        0,
-        2,
-        3
-      ]
     }
   ]
 }

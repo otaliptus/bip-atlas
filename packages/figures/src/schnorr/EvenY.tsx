@@ -1,6 +1,6 @@
-import { Arrow, Drawing, KeyGlyph, Lamp, Value, idsFor } from "../kit";
+import { Arrow, Drawing, KeyGlyph, Lamp, Value, idsFor, short } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
-import { SCHNORR_STAGES, ownTrace, short, stageValues } from "./stages";
+import { SCHNORR_STAGES, ownTrace, stageValues } from "./stages";
 
 const isEven = (hexY: string) => BigInt(`0x${hexY}`) % 2n === 0n;
 

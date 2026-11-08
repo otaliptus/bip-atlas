@@ -1,9 +1,6 @@
 import { IsoBox, Value } from "../kit";
 import type { Role } from "../kit";
-import type { DerivedTapscriptFixture, TapscriptElement, TapscriptTraceView } from "../types";
-
-/** First 8 hex digits and an ellipsis for long values; every figure that uses it lists the exact value too. */
-export const shortHex = (hex: string) => (hex.length > 16 ? `${hex.slice(0, 8)}…` : hex === "" ? "(empty)" : hex);
+import type { TapscriptElement, TapscriptTraceView } from "../types";
 
 /** Serialized size of one witness item: its compact-size length prefix plus its bytes (as derive.ts counts it). */
 export const itemSize = (bytes: number) => (bytes < 253 ? 1 : 3) + bytes;
@@ -13,17 +10,6 @@ export function elementRole(e: TapscriptElement): Role {
   if (e.label.endsWith("signature")) return "sig";
   if (e.label === "32-byte key" || e.label.includes("key, unknown type")) return "public";
   return "plain";
-}
-
-export const caseName = (f: DerivedTapscriptFixture) => `case ${f.caseIndex}`;
-
-/** Where a run ends, as one of the six gates of BIP 342's order (1-based), and how. */
-export function runEnd(v: TapscriptTraceView): { gate: number; how: "valid" | "op-success" | "fail" } {
-  if (v.opSuccess !== null) return { gate: 3, how: "op-success" };
-  if (v.valid) return { gate: 6, how: "valid" };
-  const gate = { bip141: 1, commitment: 1, decode: 3, "initial-stack": 4, execute: 5, "final-stack": 6 }[v.failStage ?? ""];
-  if (!gate) throw new Error(`unknown fail stage ${v.failStage}`);
-  return { gate, how: "fail" };
 }
 
 /**

@@ -1,8 +1,6 @@
-import { Arrow, Drawing, IsoBox, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, IsoBox, Machine, Value, idsFor, short } from "../kit";
 import type { DerivedP2shFixture } from "../types";
 import { Padlock } from "./stack";
-
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 
 /**
  * p2sh-commitment.v1 — static. The output as a locked box whose lock is

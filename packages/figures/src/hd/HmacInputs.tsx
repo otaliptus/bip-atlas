@@ -1,7 +1,6 @@
-import { Cells, Drawing, Magnifier, Packet, Value, type PacketField } from "../kit";
+import { Cells, Drawing, Magnifier, Packet, Value, short, type PacketField } from "../kit";
 import type { Bip32NodeDerived, DerivedBip32Fixture } from "../types";
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 const UNIT = 8;
 const X = 24;
 

@@ -1,7 +1,7 @@
-import { Drawing, Value } from "../kit";
+import { Drawing, Value, short } from "../kit";
 import type { Role } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
-import { ownTrace, short, stageValues } from "./stages";
+import { ownTrace, stageValues } from "./stages";
 
 function Chip({ x, y, t, role }: { x: number; y: number; t: string; role: Role }) {
   return (

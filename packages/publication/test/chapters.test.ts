@@ -5,7 +5,9 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { PRERENDERED_HEROES } from "../../figures/src/heroes";
 import { RECIPE_MAP } from "../../figures/src/registry";
+import { STATIC_FIGURES } from "../../figures/src/statics";
 import {
   defaultPathWordCount,
   parseInline,
@@ -185,11 +187,18 @@ describe("shared contracts", () => {
     expect(problems).toMatch(/unknown fixture nope/);
   });
 
-  it("draws every interactive recipe in the illustration kit, with no worked-example tab", () => {
+  it("routes every recipe to exactly one renderer, with no worked-example tab", () => {
+    // Static recipes draw through STATIC_FIGURES; heroes are pre-rendered or an island in Figure.astro.
     // Decision D3: heroes carry their worked example as static storyboard figures; the tab code is gone.
-    for (const r of RECIPE_MAP.values()) if (r.interactive) expect(r.drawing, r.id).toBe(true);
     const dispatcher = readFileSync(new URL("apps/site/src/components/Figure.astro", root), "utf8");
     const plate = readFileSync(new URL("apps/site/src/components/Plate.astro", root), "utf8");
+    const islands = new Set([...dispatcher.matchAll(/is\("([^"]+)"\)/g)].map((m) => m[1]));
+    for (const r of RECIPE_MAP.values()) {
+      const routes = [r.id in STATIC_FIGURES, r.id in PRERENDERED_HEROES, islands.has(r.id)];
+      expect(routes.filter(Boolean).length, r.id).toBe(1);
+      expect(routes[0], `${r.id} is static exactly when it is not interactive`).toBe(!r.interactive);
+    }
+    for (const id of [...Object.keys(STATIC_FIGURES), ...Object.keys(PRERENDERED_HEROES), ...islands]) expect(RECIPE_MAP.has(id), id).toBe(true);
     expect(dispatcher).not.toContain('slot="worked"');
     expect(plate).not.toContain('name="worked"');
   });

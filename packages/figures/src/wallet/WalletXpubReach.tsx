@@ -1,7 +1,5 @@
-import { Drawing, KeyGlyph, Value } from "../kit";
+import { Drawing, KeyGlyph, Value, short } from "../kit";
 import type { DerivedWalletPathFixture } from "../types";
-
-const short = (s: string, n: number) => `${s.slice(0, n)}…`;
 
 /**
  * wallet-xpub-reach.v1 — static. One account's extended public key and the

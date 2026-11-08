@@ -1,5 +1,5 @@
 import { checkSpec, type HeroSpec } from "../heroStates";
-import { Arrow, Drawing, IsoBox, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import { Arrow, Drawing, IsoBox, Machine, Responsive, Value, idsFor, short, type DrawingIds } from "../kit";
 import type { DerivedP2shFixture } from "../types";
 import { Padlock, StackPlates, stackHeight } from "./stack";
 
@@ -39,7 +39,6 @@ export function p2shHeroSpec(fixtures: DerivedP2shFixture[]): HeroSpec<P2shHeroS
 
 const KIND: Record<string, string> = { legacy: "legacy P2SH", "p2sh-p2wpkh": "P2SH-wrapped P2WPKH", "p2sh-p2wsh": "P2SH-wrapped P2WSH" };
 const CHIP: Record<string, string> = { "push-only": "push-only", "hash-match": "hash check", redeem: "script runs", witness: "witness checked" };
-const short = (hex: string, n = 8) => `${hex.slice(0, n)}…`;
 
 /**
  * p2sh-two-stage.v1 — the P2SH chapter's hero (drawing-first).

@@ -815,26 +815,6 @@ export interface BfBlockDerived {
 }
 export type DerivedBfBlockFixture = BfBlockFixture & { derived: BfBlockDerived };
 
-export interface BfChainFixture extends BaseFixture {
-  kind: "bf-chain";
-  heights: number[];
-}
-export interface BfChainDerived {
-  rows: Array<{ height: number; hash: string; filterHex: string; filterHash: string; prevHeader: string; header: string; linksToPrevious: boolean | null }>;
-}
-export type DerivedBfChainFixture = BfChainFixture & { derived: BfChainDerived };
-
-export interface BfGolombFixture extends BaseFixture {
-  kind: "bf-golomb";
-  /** A published block whose first delta illustrates P = 19. */
-  exampleHeight: number;
-}
-export interface BfGolombDerived {
-  table: Array<{ n: number; q: number; r: number; code: string }>;
-  example: { height: number; value: string; F: string; code: BfCode };
-}
-export type DerivedBfGolombFixture = BfGolombFixture & { derived: BfGolombDerived };
-
 /* ---------- BIP 324 ---------- */
 export interface V2VectorFixture extends BaseFixture {
   kind: "v2-vector";
@@ -928,7 +908,5 @@ export type DerivedBip322FormatsFixture = Bip322FormatsFixture & { derived: Bip3
 export interface Bip322VerdictsFixture extends BaseFixture { kind: "bip322-verdicts"; cases: string[] }
 export interface Bip322VerdictsDerived {
   rows: Array<{ label: string; message: string; address: string; state: string; detail: string }>;
-  /** The interpreter's reviewed non-push opcodes, by script version (names without OP_). */
-  reviewed: Array<{ version: string; ops: string[] }>;
 }
 export type DerivedBip322VerdictsFixture = Bip322VerdictsFixture & { derived: Bip322VerdictsDerived };

@@ -25,8 +25,6 @@ export function taggedHash(tag: string, ...parts: Uint8Array[]): Uint8Array {
 
 export type VerifyStage = "lift-x" | "r-range" | "s-range" | "challenge" | "compute-r" | "infinity" | "even-y" | "x-match";
 
-export const VERIFY_STAGES: readonly VerifyStage[] = ["lift-x", "r-range", "s-range", "challenge", "compute-r", "infinity", "even-y", "x-match"];
-
 export interface VerifyStep {
   stage: VerifyStage;
   ok: boolean;

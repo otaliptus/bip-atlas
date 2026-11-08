@@ -2,8 +2,7 @@ import { BASIC_M, BASIC_P, filterKey } from "@bip-atlas/models/blockfilter";
 import { bytesToHex } from "@bip-atlas/models/hex";
 import { Arrow, Bracket, Cells, Machine, Storyboard, Value, type Frame } from "../kit";
 import type { DerivedBfBlockFixture } from "../types";
-import { Code } from "./BfGolomb";
-import { along, group, shortHex } from "./parts";
+import { Code, along, group, shortHex } from "./parts";
 
 /**
  * bf-build-story.v1 — static storyboard (was the worked example). One

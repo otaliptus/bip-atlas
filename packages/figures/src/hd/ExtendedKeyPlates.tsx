@@ -1,8 +1,7 @@
-import { Arrow, COS30, Drawing, IsoBox, Responsive, Tag, Value, idsFor, iso, onTop, type DrawingIds } from "../kit";
+import { Arrow, COS30, Drawing, IsoBox, Responsive, Tag, Value, idsFor, iso, onTop, short, type DrawingIds } from "../kit";
 import type { Role } from "../kit";
 import type { DerivedBip32Fixture } from "../types";
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 const PW = 84, PD = 48, PH = 6, GAP = 36;
 
 /**

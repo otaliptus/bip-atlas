@@ -1,7 +1,7 @@
-import { Arrow, Bracket, Drawing, Label, Machine, Value, idsFor, type DrawingIds } from "../kit";
+import { Arrow, Bracket, Drawing, Label, Machine, Value, idsFor, short, type DrawingIds } from "../kit";
 import type { DerivedTransactionFixture, TxInputView } from "../types";
 import { PartsRow, placeParts, type Part, type PlacedPart } from "./PartsRow";
-import { shortHex, txFields } from "./fields";
+import { txFields } from "./fields";
 
 const lenHex = (hex: string) => (hex.length / 2).toString(16).padStart(2, "0");
 
@@ -40,7 +40,7 @@ export function KeyCheck({ ids, keyPart: key, y, input }: { ids: DrawingIds; key
       <Machine at={[mx, y + 76]} w={52} d={28} h={22} label="HASH160" role="hash" />
       <Arrow d={`M${mx - 28} ${y + 84} H${150}`} ids={ids} />
       <Value at={[14, y + 72]} text="= THE 20-BYTE PROGRAM" size={9} cls="k-value--label" />
-      <Value at={[14, y + 86]} text={shortHex(input.programHex, 16)} size={9.5} cls="k-value--hash" />
+      <Value at={[14, y + 86]} text={short(input.programHex, 16)} size={9.5} cls="k-value--hash" />
     </g>
   );
 }

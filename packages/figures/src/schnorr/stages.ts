@@ -12,8 +12,6 @@ export const SCHNORR_STAGES: ReadonlyArray<{ id: SchnorrStageId; label: string; 
   { id: "x-match", label: "x(R) equals r", gate: "x = r" },
 ];
 
-/** First 8 hex digits and an ellipsis; every figure that uses it also lists the exact value. */
-export const short = (hex: string) => `${hex.slice(0, 8)}…`;
 
 export type GateStatus = "pass" | "fail" | "not-reached";
 

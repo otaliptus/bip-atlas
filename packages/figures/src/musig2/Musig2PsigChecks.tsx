@@ -1,6 +1,5 @@
-import { Drawing, Lamp, Machine, Value, wrapLines } from "../kit";
+import { Drawing, Lamp, Machine, Value, short, wrapLines } from "../kit";
 import type { DerivedMusig2PsigChecksFixture } from "../types";
-import { short } from "./scene";
 
 const VERDICT = { valid: "ACCEPTED", invalid: "REJECTED", error: "BLAMED" } as const;
 

@@ -1,198 +1,27 @@
 ---
 /**
- * Recipe dispatcher. Every registered recipe is listed here explicitly so
- * Astro can statically see which components hydrate (client directives
- * cannot be applied to dynamically chosen components).
+ * Recipe dispatcher. Static recipes draw through STATIC_FIGURES and the
+ * pre-rendered heroes through PRERENDERED_HEROES, both on the server only.
+ * Islands are listed one by one because Astro must see which components
+ * hydrate: a client directive cannot go on a dynamically chosen component.
+ * A contract test checks that every registered recipe has exactly one route.
  */
-import {
-  AddressAnatomy,
-  AddressChecksumLab,
-  DerivationTree,
-  DerivationTreeValues,
-  derivationTreeSpec,
-  StateHero,
-  EntropyWordLab,
-  ExtendedKeyLayout,
-  ExtendedKeyPlates,
-  HmacInputs,
-  ChildStory,
-  TwoRoutes,
-  HdSharing,
-  WeaknessStory,
-  Fingerprint,
-  MasterKeySplit,
-  MnemonicCard,
-  ProgramRegrouping,
-  AddressAlphabet,
-  AddressCase,
-  PolymodStory,
-  TypoStory,
-  TwoConstants,
-  QWeakness,
-  ScriptOpcodes,
-  RECIPE_MAP,
-  SeedDerivation,
-  EntropyBits,
-  ChecksumStory,
-  WordlistIndex,
-  LastWordOdds,
-  PassphraseSeeds,
-  MnemonicChain,
-  VersionbitsMachine,
-  VersionbitsField,
-  VersionbitsRecord,
-  VersionbitsTopBits,
-  VersionbitsReuse,
-  VersionbitsThreshold,
-  VersionbitsBoundary,
-  VersionbitsLifecycle,
-  VersionbitsBip8,
-  WalletPathWalk,
-  WalletPathValues,
-  walletWalkSpec,
-  WalletPathLevels,
-  WalletPathSchemes,
-  WalletDiscovery,
-  WalletExamples,
-  WalletXpubReach,
-  WalletP2trStory,
-  WalletSpendLayouts,
-  DescriptorAnatomy,
-  DescriptorValues,
-  descriptorSpec,
-  DescriptorChecksum,
-  DescriptorIndex,
-  DescriptorSentence,
-  DescriptorOutputs,
-  DescriptorNesting,
-  DescriptorTemplate,
-  DescriptorSpellings,
-  DescriptorReadStory,
-  DescriptorTypo,
-  Musig2Rounds,
-  Musig2KeyAgg,
-  Musig2PsigChecks,
-  ChainView,
-  Coefficients,
-  RoundStory,
-  NonceOnce,
-  SpDerivation,
-  SpAddress,
-  SpEligibility,
-  EcdhStory,
-  DeriveStory,
-  ScanLoop,
-  SpLabels,
-  GcsFilter,
-  BfGolomb,
-  BfChain,
-  BfDirections,
-  BfSieve,
-  BfBuildStory,
-  BfSize,
-  BfQueryStory,
-  BfPeerStory,
-  V2Handshake,
-  V2Framing,
-  V2Rekey,
-  V2Eavesdropper,
-  V2Ellswift,
-  V2Detect,
-  V2KeyStory,
-  V2Terminator,
-  V2PacketBytes,
-  Bip322VirtualTx,
-  Bip322Formats,
-  Bip322Verdicts,
-  Bip322Hash,
-  Bip322Witness,
-  Bip322Choice,
-  Bip322VerifyStory,
-  Bip322Rack,
-  Bip322Limits,
-  type DerivedBip322Fixture,
-  type DerivedBip322FormatsFixture,
-  type DerivedBip322VerdictsFixture,
-  type DerivedV2Fixture,
-  type DerivedV2FramingFixture,
-  type DerivedV2RekeyFixture,
-  type DerivedBfBlockFixture,
-  type DerivedBfChainFixture,
-  type DerivedBfGolombFixture,
-  type DerivedSpFixture,
-  type DerivedSpEligibilityFixture,
-  type DerivedMusig2SessionFixture,
-  type DerivedMusig2KeyaggFixture,
-  type DerivedMusig2PsigChecksFixture,
-  type DerivedDescriptorFixture,
-  type DerivedDescriptorIndexFixture,
-  type DerivedWalletPathFixture,
-  type DerivedVersionbitsDeploymentFixture,
-  type DerivedVersionbitsGuidelineFixture,
-  type DerivedTimelockCaseFixture,
-  type DerivedTimelockBipTxFixture,
-  type DerivedTimelockEncodingFixture,
-  type DerivedP2shFixture,
-  SignatureLayout,
-  SchnorrVerifier,
-  ChallengePreimage,
-  ByteSizes,
-  Equation,
-  VerifyStory,
-  FailGates,
-  EvenY,
-  TaprootTweak,
-  TaprootCommitment,
-  SigMsgLayout,
-  WitnessStacks,
-  VerifierStory,
-  SpendReveals,
-  DepthProof,
-  TapscriptWitness,
-  TapscriptTrace,
-  SigopsBudget,
-  TapscriptOrder,
-  SigRules,
-  MultisigChain,
-  StackStory,
-  SigPays,
-  OpSuccess,
-  MinimalIf,
-  type DerivedTapscriptFixture,
-  type DerivedTaprootTreeFixture,
-  type DerivedTaprootKeyspendFixture,
-  type DerivedSchnorrFixture,
-  type AddressFixture,
-  type BaseFixture,
-  type DerivedBip32Fixture,
-  type DerivedMnemonicFixture,
-  type DerivedPsbtCombineFixture,
-  type DerivedPsbtTraceFixture,
-  type DerivedTransactionFixture,
-} from "@bip-atlas/figures";
-// Batch 2 chapters (segwit, psbt, p2sh, timelocks) import their figures by subpath, so their static
-// drawings stay out of the shared client chunk that the package index feeds.
-import { P2shCommitment } from "@bip-atlas/figures/p2sh/P2shCommitment.tsx";
-import { P2shFailures, P2shShape, P2shStackStory } from "@bip-atlas/figures/p2sh/P2shStatics.tsx";
-import { P2shTwoStage, p2shHeroSpec } from "@bip-atlas/figures/p2sh/P2shTwoStage.tsx";
-import { P2shLimit, P2shWrapped } from "@bip-atlas/figures/p2sh/P2shWrapped.tsx";
-import { PsbtEnvelope, psbtHeroSpec } from "@bip-atlas/figures/psbt/PsbtEnvelope.tsx";
-import { PsbtLayout } from "@bip-atlas/figures/psbt/PsbtLayout.tsx";
-import { PsbtCombine, PsbtFinalize, UnknownFields } from "@bip-atlas/figures/psbt/PsbtMerge.tsx";
-import { PsbtRecords } from "@bip-atlas/figures/psbt/PsbtRecords.tsx";
-import { PsbtRoleStory } from "@bip-atlas/figures/psbt/PsbtRoleStory.tsx";
-import { SignerDisplay, UtxoCheck } from "@bip-atlas/figures/psbt/PsbtSigner.tsx";
-import { AmountStory } from "@bip-atlas/figures/tx/AmountStory.tsx";
-import { Bip143Preimage } from "@bip-atlas/figures/tx/Bip143Preimage.tsx";
-import { NestedInput } from "@bip-atlas/figures/tx/NestedInput.tsx";
-import { SighashReuse } from "@bip-atlas/figures/tx/SighashReuse.tsx";
-import { TransactionAnatomy, transactionHeroSpec } from "@bip-atlas/figures/tx/TransactionAnatomy.tsx";
-import { TwoSerializations } from "@bip-atlas/figures/tx/TwoSerializations.tsx";
-import { WeightMeter } from "@bip-atlas/figures/tx/WeightMeter.tsx";
-import { WitnessCommitment } from "@bip-atlas/figures/tx/WitnessCommitment.tsx";
-import { WitnessField } from "@bip-atlas/figures/tx/WitnessField.tsx";
-import { TimelockFields, timelockHeroSpec } from "@bip-atlas/figures/timelock/TimelockFields.tsx";
-import { TimelockCsvStory, TimelockMtp, TimelockNotALock, TimelockPinned, TimelockRanges, TimelockSequenceBits } from "@bip-atlas/figures/timelock/TimelockStatics.tsx";
+import { PRERENDERED_HEROES, RECIPE_MAP, STATIC_FIGURES, type BaseFixture } from "@bip-atlas/figures";
+import { AddressChecksumLab } from "@bip-atlas/figures/AddressChecksumLab.tsx";
+import { Bip322VirtualTx } from "@bip-atlas/figures/bip322/Bip322VirtualTx.tsx";
+import { GcsFilter } from "@bip-atlas/figures/blockfilters/GcsFilter.tsx";
+import { DescriptorAnatomy, DescriptorValues, descriptorSpec } from "@bip-atlas/figures/descriptors/DescriptorAnatomy.tsx";
+import { DerivationTree, DerivationTreeValues, derivationTreeSpec } from "@bip-atlas/figures/hd/DerivationTree.tsx";
+import { EntropyWordLab } from "@bip-atlas/figures/mnemonic/EntropyWordLab.tsx";
+import { Musig2Rounds } from "@bip-atlas/figures/musig2/Musig2Rounds.tsx";
+import { SchnorrVerifier } from "@bip-atlas/figures/schnorr/SchnorrVerifier.tsx";
+import { SpDerivation } from "@bip-atlas/figures/silentpayments/SpDerivation.tsx";
+import { StateHero } from "@bip-atlas/figures/StateHero.tsx";
+import { TaprootCommitment } from "@bip-atlas/figures/taproot/TaprootCommitment.tsx";
+import { TapscriptTrace } from "@bip-atlas/figures/tapscript/TapscriptTrace.tsx";
+import { V2Handshake } from "@bip-atlas/figures/v2/V2Handshake.tsx";
+import { VersionbitsMachine } from "@bip-atlas/figures/versionbits/VersionbitsMachine.tsx";
+import { WalletPathValues, WalletPathWalk, walletWalkSpec } from "@bip-atlas/figures/wallet/WalletPathWalk.tsx";
 import type { Figure } from "@bip-atlas/publication";
 import { deriveFixtures } from "../lib/derive";
 import Plate from "./Plate.astro";
@@ -208,248 +37,54 @@ interface Props {
 const { figure, numbers, fixtures, path } = Astro.props;
 const recipe = RECIPE_MAP.get(figure.recipe);
 if (!recipe) throw new Error(`No recipe ${figure.recipe}`);
-const picked = deriveFixtures(figure.fixtures.map((id) => fixtures.get(id)!));
+// Derived and checked at build time; each component declares the fixture type it draws.
+const picked: any[] = deriveFixtures(figure.fixtures.map((id) => fixtures.get(id)!));
 const figureId = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
-const address = picked as AddressFixture[];
-const mnemonic = picked as DerivedMnemonicFixture[];
-const hd = picked as DerivedBip32Fixture[];
-const tx = picked as DerivedTransactionFixture[];
-const trace = picked as DerivedPsbtTraceFixture[];
-const pair = picked as DerivedPsbtCombineFixture[];
-const sig = picked as DerivedSchnorrFixture[];
-const tap = picked as DerivedTaprootTreeFixture[];
-const keyspend = picked as DerivedTaprootKeyspendFixture[];
-const ts = picked as DerivedTapscriptFixture[];
-const p2sh = picked as DerivedP2shFixture[];
-const timelock = picked as DerivedTimelockCaseFixture[];
-const timelockTx = picked as DerivedTimelockBipTxFixture[];
-const timelockEnc = picked as DerivedTimelockEncodingFixture[];
-const vbAny = picked as Array<DerivedVersionbitsDeploymentFixture | DerivedVersionbitsGuidelineFixture>;
-const vbDep = picked as DerivedVersionbitsDeploymentFixture[];
-const vbGuide = picked as DerivedVersionbitsGuidelineFixture[];
-const wallet = picked as DerivedWalletPathFixture[];
-const desc = picked as DerivedDescriptorFixture[];
-const descIndex = picked as DerivedDescriptorIndexFixture[];
-const musig = picked as DerivedMusig2SessionFixture[];
-const musigKa = picked as DerivedMusig2KeyaggFixture[];
-const musigChecks = picked as DerivedMusig2PsigChecksFixture[];
-const sp = picked as DerivedSpFixture[];
-const spElig = picked as DerivedSpEligibilityFixture[];
-const bfBlocks = picked as DerivedBfBlockFixture[];
-const bfChain = picked as DerivedBfChainFixture[];
-const bfGolomb = picked as DerivedBfGolombFixture[];
-const v2 = picked as DerivedV2Fixture[];
-const v2Framing = picked as DerivedV2FramingFixture[];
-const v2Rekey = picked as DerivedV2RekeyFixture[];
-const b322 = picked as DerivedBip322Fixture[];
-const b322Formats = picked as DerivedBip322FormatsFixture[];
-const b322Verdicts = picked as DerivedBip322VerdictsFixture[];
-// Batch 2 heroes are pre-rendered: every state on the server, switched by HeroStates' script.
-const txSpec = figure.recipe === "transaction-anatomy.v1" ? transactionHeroSpec(tx) : null;
-const psbtSpec = figure.recipe === "psbt-envelope.v1" ? psbtHeroSpec(trace[0]) : null;
-const p2shSpec = figure.recipe === "p2sh-two-stage.v1" ? p2shHeroSpec(p2sh) : null;
-const tlSpec = figure.recipe === "timelock-fields.v1" ? timelockHeroSpec(timelock) : null;
+const drawn = STATIC_FIGURES[figure.recipe];
+const Static = drawn?.component;
+const hero = PRERENDERED_HEROES[figure.recipe];
+const heroSpec = hero?.spec(picked);
+const Hero = hero?.component;
+const is = (id: string) => figure.recipe === id;
 ---
-<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} drawing={recipe.drawing === true} path={path}>
-  {figure.recipe === "address-anatomy.v1" && <AddressAnatomy fixture={address[0]} />}
-  {figure.recipe === "address-checksum-lab.v1" && <AddressChecksumLab client:visible fixtures={address} figureId={figureId} />}
-  {figure.recipe === "program-regrouping.v1" && <ProgramRegrouping fixtures={address} />}
-  {figure.recipe === "address-alphabet.v1" && <AddressAlphabet />}
-  {figure.recipe === "address-case.v1" && <AddressCase fixtures={address} />}
-  {figure.recipe === "address-polymod-story.v1" && <PolymodStory fixture={address[0]} />}
-  {figure.recipe === "address-typo-story.v1" && <TypoStory fixtures={address} />}
-  {figure.recipe === "address-two-constants.v1" && <TwoConstants fixtures={address} />}
-  {figure.recipe === "address-q-weakness.v1" && <QWeakness />}
-  {figure.recipe === "address-script.v1" && <ScriptOpcodes fixtures={address} />}
-  {figure.recipe === "mnemonic-card.v1" && <MnemonicCard fixture={mnemonic[0]} />}
-  {figure.recipe === "entropy-word-pipeline.v1" && <EntropyWordLab client:visible fixtures={mnemonic} figureId={figureId} />}
-  {figure.recipe === "seed-derivation.v1" && <SeedDerivation fixture={mnemonic[0]} />}
-  {figure.recipe === "entropy-bits.v1" && <EntropyBits fixture={mnemonic[0]} />}
-  {figure.recipe === "checksum-storyboard.v1" && <ChecksumStory fixture={mnemonic[0]} />}
-  {figure.recipe === "wordlist-index.v1" && <WordlistIndex fixture={mnemonic[0]} />}
-  {figure.recipe === "last-word-odds.v1" && <LastWordOdds fixture={mnemonic[0]} />}
-  {figure.recipe === "passphrase-seeds.v1" && <PassphraseSeeds fixture={mnemonic[0]} />}
-  {figure.recipe === "mnemonic-chain.v1" && <MnemonicChain fixture={mnemonic[0]} />}
-  {figure.recipe === "master-key-split.v1" && <MasterKeySplit fixture={hd[0]} />}
-  {figure.recipe === "derivation-tree.v1" && (
-    <StateHero client:visible spec={derivationTreeSpec(hd[0], figureId)}>
-      <DerivationTree fixture={hd[0]} figureId={figureId} />
-      <DerivationTreeValues slot="values" fixture={hd[0]} />
+<Plate figure={figure} numbers={numbers} interactive={recipe.interactive} path={path}>
+  {Static && <Static {...drawn.props(picked)} />}
+  {heroSpec && (
+    <HeroStates figureId={figureId} spec={heroSpec}>
+      {heroSpec.states.map((s) => (
+        <div data-state data-keys={s.keys.join(" ")} data-valuetext={s.valueText} hidden={s.id !== heroSpec.noJsId}>
+          <Hero {...hero.props(picked, `${figureId}-${s.id}`, s.state)} />
+        </div>
+      ))}
+    </HeroStates>
+  )}
+  {is("address-checksum-lab.v1") && <AddressChecksumLab client:visible fixtures={picked} figureId={figureId} />}
+  {is("entropy-word-pipeline.v1") && <EntropyWordLab client:visible fixtures={picked} figureId={figureId} />}
+  {is("derivation-tree.v1") && (
+    <StateHero client:visible spec={derivationTreeSpec(picked[0], figureId)}>
+      <DerivationTree fixture={picked[0]} figureId={figureId} />
+      <DerivationTreeValues slot="values" fixture={picked[0]} />
     </StateHero>
   )}
-  {figure.recipe === "extended-key-layout.v1" && <ExtendedKeyLayout fixture={hd[0]} />}
-  {figure.recipe === "hd-extended-key.v1" && <ExtendedKeyPlates fixture={hd[0]} />}
-  {figure.recipe === "hd-hmac-inputs.v1" && <HmacInputs fixture={hd[0]} />}
-  {figure.recipe === "hd-child-story.v1" && <ChildStory fixture={hd[0]} />}
-  {figure.recipe === "hd-two-routes.v1" && <TwoRoutes fixture={hd[0]} />}
-  {figure.recipe === "hd-sharing.v1" && <HdSharing />}
-  {figure.recipe === "hd-weakness-story.v1" && <WeaknessStory fixture={hd[0]} />}
-  {figure.recipe === "hd-fingerprint.v1" && <Fingerprint fixture={hd[0]} />}
-  {figure.recipe === "two-serializations.v1" && <TwoSerializations fixture={tx[0]} />}
-  {txSpec && (
-    <HeroStates figureId={figureId} spec={txSpec}>
-      {txSpec.states.map((s) => (
-        <div data-state data-keys={s.keys.join(" ")} hidden={s.id !== txSpec.noJsId}>
-          <TransactionAnatomy fixtures={tx} figureId={`${figureId}-${s.id}`} initial={s.state} />
-        </div>
-      ))}
-    </HeroStates>
-  )}
-  {figure.recipe === "weight-meter.v1" && <WeightMeter fixtures={tx} />}
-  {figure.recipe === "witness-field.v1" && <WitnessField fixture={tx[0]} />}
-  {figure.recipe === "witness-commitment.v1" && <WitnessCommitment fixture={tx[0]} />}
-  {figure.recipe === "nested-input.v1" && <NestedInput fixture={tx[0]} />}
-  {figure.recipe === "sighash-reuse.v1" && <SighashReuse />}
-  {figure.recipe === "bip143-preimage.v1" && <Bip143Preimage fixture={tx[0]} />}
-  {figure.recipe === "amount-storyboard.v1" && <AmountStory fixture={tx[0]} />}
-  {figure.recipe === "psbt-layout.v1" && <PsbtLayout fixture={trace[0]} />}
-  {psbtSpec && (
-    <HeroStates figureId={figureId} spec={psbtSpec}>
-      {psbtSpec.states.map((s) => (
-        <div data-state data-keys={s.keys.join(" ")} data-valuetext={s.valueText} hidden={s.id !== psbtSpec.noJsId}>
-          <PsbtEnvelope fixture={trace[0]} figureId={`${figureId}-${s.id}`} initial={s.state} />
-        </div>
-      ))}
-    </HeroStates>
-  )}
-  {figure.recipe === "unknown-fields.v1" && <UnknownFields fixture={pair[0]} />}
-  {figure.recipe === "psbt-records.v1" && <PsbtRecords fixture={trace[0]} />}
-  {figure.recipe === "psbt-role-story.v1" && <PsbtRoleStory fixture={trace[0]} />}
-  {figure.recipe === "psbt-signer-display.v1" && <SignerDisplay fixture={trace[0]} />}
-  {figure.recipe === "psbt-utxo-check.v1" && <UtxoCheck fixture={trace[0]} />}
-  {figure.recipe === "psbt-combine.v1" && <PsbtCombine fixture={trace[0]} />}
-  {figure.recipe === "psbt-finalize.v1" && <PsbtFinalize fixture={trace[0]} />}
-  {figure.recipe === "schnorr-signature-layout.v1" && <SignatureLayout fixture={sig[0]} />}
-  {figure.recipe === "schnorr-verification.v1" && <SchnorrVerifier client:visible fixtures={sig} figureId={figureId} />}
-  {figure.recipe === "challenge-preimage.v1" && <ChallengePreimage fixtures={sig} />}
-  {figure.recipe === "schnorr-byte-sizes.v1" && <ByteSizes fixture={sig[0]} />}
-  {figure.recipe === "schnorr-equation.v1" && <Equation fixture={sig[0]} />}
-  {figure.recipe === "schnorr-verify-story.v1" && <VerifyStory fixture={sig[0]} />}
-  {figure.recipe === "schnorr-fail-gates.v1" && <FailGates fixtures={sig} />}
-  {figure.recipe === "schnorr-even-y.v1" && <EvenY fixtures={sig} />}
-  {figure.recipe === "taproot-tweak.v1" && <TaprootTweak fixtures={tap} />}
-  {figure.recipe === "taproot-commitment.v1" && <TaprootCommitment client:visible fixture={tap[0]} figureId={figureId} />}
-  {figure.recipe === "taproot-sigmsg.v1" && <SigMsgLayout fixture={keyspend[0]} />}
-  {figure.recipe === "taproot-witness-stacks.v1" && <WitnessStacks fixture={tap[0]} />}
-  {figure.recipe === "taproot-verifier-story.v1" && <VerifierStory fixture={tap[0]} />}
-  {figure.recipe === "taproot-reveals.v1" && <SpendReveals fixture={tap[0]} />}
-  {figure.recipe === "taproot-depth.v1" && <DepthProof fixture={tap[0]} />}
-  {figure.recipe === "tapscript-witness.v1" && <TapscriptWitness fixture={ts[0]} />}
-  {figure.recipe === "tapscript-trace.v1" && <TapscriptTrace client:visible fixtures={ts} figureId={figureId} />}
-  {figure.recipe === "sigops-budget.v1" && <SigopsBudget fixtures={ts} />}
-  {figure.recipe === "tapscript-order.v1" && <TapscriptOrder fixtures={ts} />}
-  {figure.recipe === "tapscript-sig-rules.v1" && <SigRules fixtures={ts} />}
-  {figure.recipe === "tapscript-multisig.v1" && <MultisigChain fixture={ts[0]} />}
-  {figure.recipe === "tapscript-stack-story.v1" && <StackStory fixture={ts[0]} />}
-  {figure.recipe === "tapscript-sig-pays.v1" && <SigPays fixtures={ts} />}
-  {figure.recipe === "tapscript-op-success.v1" && <OpSuccess fixture={ts[0]} />}
-  {figure.recipe === "tapscript-minimalif.v1" && <MinimalIf fixture={ts[0]} />}
-  {figure.recipe === "p2sh-commitment.v1" && <P2shCommitment fixture={p2sh[0]} />}
-  {p2shSpec && (
-    <HeroStates figureId={figureId} spec={p2shSpec}>
-      {p2shSpec.states.map((s) => (
-        <div data-state data-keys={s.keys.join(" ")} data-valuetext={s.valueText} hidden={s.id !== p2shSpec.noJsId}>
-          <P2shTwoStage fixtures={p2sh} figureId={`${figureId}-${s.id}`} initial={s.state} />
-        </div>
-      ))}
-    </HeroStates>
-  )}
-  {figure.recipe === "p2sh-wrapped.v1" && <P2shWrapped fixtures={p2sh} />}
-  {figure.recipe === "p2sh-limit.v1" && <P2shLimit fixture={p2sh[0]} />}
-  {figure.recipe === "p2sh-shape.v1" && <P2shShape fixtures={p2sh} />}
-  {figure.recipe === "p2sh-stack-story.v1" && <P2shStackStory fixture={p2sh[0]} />}
-  {figure.recipe === "p2sh-failures.v1" && <P2shFailures fixture={p2sh[0]} />}
-  {tlSpec && (
-    <HeroStates figureId={figureId} spec={tlSpec}>
-      {tlSpec.states.map((s) => (
-        <div data-state data-keys={s.keys.join(" ")} hidden={s.id !== tlSpec.noJsId}>
-          <TimelockFields fixtures={timelock} figureId={`${figureId}-${s.id}`} initial={s.state} />
-        </div>
-      ))}
-    </HeroStates>
-  )}
-  {figure.recipe === "timelock-pinned-fields.v1" && <TimelockPinned fixtures={timelockTx} />}
-  {figure.recipe === "timelock-ranges.v1" && <TimelockRanges fixture={timelockEnc[0]} />}
-  {figure.recipe === "timelock-not-a-lock.v1" && <TimelockNotALock />}
-  {figure.recipe === "timelock-sequence-bits.v1" && <TimelockSequenceBits fixture={timelockEnc[0]} />}
-  {figure.recipe === "timelock-csv-story.v1" && <TimelockCsvStory fixture={timelock[0]} />}
-  {figure.recipe === "timelock-mtp.v1" && <TimelockMtp />}
-  {figure.recipe === "versionbits-state-machine.v1" && <VersionbitsMachine client:visible fixtures={vbAny} figureId={figureId} />}
-  {figure.recipe === "versionbits-field.v1" && <VersionbitsField fixtures={vbDep} />}
-  {figure.recipe === "versionbits-record.v1" && <VersionbitsRecord fixtures={vbDep} />}
-  {figure.recipe === "versionbits-top-bits.v1" && <VersionbitsTopBits />}
-  {figure.recipe === "versionbits-bit-reuse.v1" && <VersionbitsReuse />}
-  {figure.recipe === "versionbits-threshold.v1" && <VersionbitsThreshold fixtures={vbAny} />}
-  {figure.recipe === "versionbits-boundary.v1" && <VersionbitsBoundary fixture={vbDep[0]} />}
-  {figure.recipe === "versionbits-lifecycle.v1" && <VersionbitsLifecycle fixture={vbDep[0]} />}
-  {figure.recipe === "versionbits-bip8.v1" && <VersionbitsBip8 fixture={vbGuide[0]} />}
-  {figure.recipe === "wallet-path-walk.v1" && (
-    <StateHero client:visible spec={walletWalkSpec(wallet, figureId)}>
-      <WalletPathWalk fixtures={wallet} figureId={figureId} />
-      <WalletPathValues slot="values" fixtures={wallet} />
+  {is("wallet-path-walk.v1") && (
+    <StateHero client:visible spec={walletWalkSpec(picked, figureId)}>
+      <WalletPathWalk fixtures={picked} figureId={figureId} />
+      <WalletPathValues slot="values" fixtures={picked} />
     </StateHero>
   )}
-  {figure.recipe === "wallet-path-levels.v1" && <WalletPathLevels fixture={wallet[0]} />}
-  {figure.recipe === "wallet-path-schemes.v1" && <WalletPathSchemes fixtures={wallet} />}
-  {figure.recipe === "wallet-discovery.v1" && <WalletDiscovery fixture={wallet[0]} />}
-  {figure.recipe === "wallet-path-examples.v1" && <WalletExamples fixture={wallet[0]} />}
-  {figure.recipe === "wallet-xpub-reach.v1" && <WalletXpubReach fixture={wallet[0]} />}
-  {figure.recipe === "wallet-p2tr-story.v1" && <WalletP2trStory fixture={wallet[0]} />}
-  {figure.recipe === "wallet-spend-layouts.v1" && <WalletSpendLayouts />}
-  {figure.recipe === "descriptor-anatomy.v1" && (
-    <StateHero client:visible spec={descriptorSpec(desc, figureId)}>
-      <DescriptorAnatomy fixtures={desc} figureId={figureId} />
-      <DescriptorValues slot="values" fixtures={desc} />
+  {is("descriptor-anatomy.v1") && (
+    <StateHero client:visible spec={descriptorSpec(picked, figureId)}>
+      <DescriptorAnatomy fixtures={picked} figureId={figureId} />
+      <DescriptorValues slot="values" fixtures={picked} />
     </StateHero>
   )}
-  {figure.recipe === "descriptor-checksum.v1" && <DescriptorChecksum fixture={desc[0]} />}
-  {figure.recipe === "descriptor-expressions.v1" && <DescriptorIndex fixture={descIndex[0]} />}
-  {figure.recipe === "descriptor-outputs.v1" && <DescriptorOutputs fixture={desc[0]} />}
-  {figure.recipe === "descriptor-sentence.v1" && <DescriptorSentence fixture={desc[0]} />}
-  {figure.recipe === "descriptor-nesting.v1" && <DescriptorNesting fixture={desc[0]} />}
-  {figure.recipe === "descriptor-template.v1" && <DescriptorTemplate fixture={desc[0]} />}
-  {figure.recipe === "descriptor-spellings.v1" && <DescriptorSpellings fixtures={desc} />}
-  {figure.recipe === "descriptor-read-story.v1" && <DescriptorReadStory fixture={desc[0]} />}
-  {figure.recipe === "descriptor-typo-forgery.v1" && <DescriptorTypo fixtures={desc} />}
-  {figure.recipe === "musig2-rounds.v1" && <Musig2Rounds client:visible fixtures={musig} figureId={figureId} />}
-  {figure.recipe === "musig2-keyagg.v1" && <Musig2KeyAgg fixture={musigKa[0]} />}
-  {figure.recipe === "musig2-psig-checks.v1" && <Musig2PsigChecks fixture={musigChecks[0]} />}
-  {figure.recipe === "musig2-chain-view.v1" && <ChainView fixture={musig[0]} />}
-  {figure.recipe === "musig2-coefficients.v1" && <Coefficients fixture={musig[0]} />}
-  {figure.recipe === "musig2-round-story.v1" && <RoundStory fixture={musig[0]} />}
-  {figure.recipe === "musig2-nonce-once.v1" && <NonceOnce fixture={musig[0]} />}
-  {figure.recipe === "silent-payment-derivation.v1" && <SpDerivation client:visible fixtures={sp} figureId={figureId} />}
-  {figure.recipe === "sp-address.v1" && <SpAddress fixture={sp[0]} />}
-  {figure.recipe === "sp-input-eligibility.v1" && <SpEligibility fixture={spElig[0]} />}
-  {figure.recipe === "sp-ecdh.v1" && <EcdhStory />}
-  {figure.recipe === "sp-derive-story.v1" && <DeriveStory fixture={sp[0]} />}
-  {figure.recipe === "sp-scan-loop.v1" && <ScanLoop fixture={sp[0]} />}
-  {figure.recipe === "sp-labels.v1" && <SpLabels fixture={sp[0]} />}
-  {figure.recipe === "gcs-filter.v1" && <GcsFilter client:visible fixtures={bfBlocks} figureId={figureId} />}
-  {figure.recipe === "golomb-rice-code.v1" && <BfGolomb fixture={bfGolomb[0]} />}
-  {figure.recipe === "filter-header-chain.v1" && <BfChain fixture={bfChain[0]} />}
-  {figure.recipe === "bf-two-directions.v1" && <BfDirections fixture={bfBlocks[0]} />}
-  {figure.recipe === "bf-element-sieve.v1" && <BfSieve fixture={bfBlocks[0]} />}
-  {figure.recipe === "bf-build-story.v1" && <BfBuildStory fixture={bfBlocks[0]} />}
-  {figure.recipe === "bf-size.v1" && <BfSize fixtures={bfBlocks} />}
-  {figure.recipe === "bf-query-story.v1" && <BfQueryStory fixture={bfBlocks[0]} />}
-  {figure.recipe === "bf-peer-check.v1" && <BfPeerStory />}
-  {figure.recipe === "v2-handshake.v1" && <V2Handshake client:visible fixtures={v2} figureId={figureId} />}
-  {figure.recipe === "v1-v2-framing.v1" && <V2Framing fixture={v2Framing[0]} />}
-  {figure.recipe === "v2-rekey.v1" && <V2Rekey fixture={v2Rekey[0]} />}
-  {figure.recipe === "v2-eavesdropper.v1" && <V2Eavesdropper />}
-  {figure.recipe === "v2-ellswift.v1" && <V2Ellswift fixture={v2[0]} />}
-  {figure.recipe === "v2-detect.v1" && <V2Detect fixture={v2[0]} />}
-  {figure.recipe === "v2-key-story.v1" && <V2KeyStory fixture={v2[0]} />}
-  {figure.recipe === "v2-terminator.v1" && <V2Terminator fixture={v2[0]} />}
-  {figure.recipe === "v2-packet-bytes.v1" && <V2PacketBytes fixture={v2[0]} />}
-  {figure.recipe === "bip322-virtual-tx.v1" && <Bip322VirtualTx client:visible fixtures={b322} figureId={figureId} />}
-  {figure.recipe === "bip322-formats.v1" && <Bip322Formats fixture={b322Formats[0]} />}
-  {figure.recipe === "bip322-verdicts.v1" && <Bip322Verdicts fixture={b322Verdicts[0]} />}
-  {figure.recipe === "bip322-message-hash.v1" && <Bip322Hash fixtures={b322} />}
-  {figure.recipe === "bip322-witness.v1" && <Bip322Witness fixture={b322[0]} />}
-  {figure.recipe === "bip322-choice.v1" && <Bip322Choice />}
-  {figure.recipe === "bip322-verify-story.v1" && <Bip322VerifyStory fixture={b322[0]} />}
-  {figure.recipe === "bip322-interpreter.v1" && <Bip322Rack fixture={b322Verdicts[0]} />}
-  {figure.recipe === "bip322-limits.v1" && <Bip322Limits />}
+  {is("schnorr-verification.v1") && <SchnorrVerifier client:visible fixtures={picked} figureId={figureId} />}
+  {is("taproot-commitment.v1") && <TaprootCommitment client:visible fixture={picked[0]} figureId={figureId} />}
+  {is("tapscript-trace.v1") && <TapscriptTrace client:visible fixtures={picked} figureId={figureId} />}
+  {is("versionbits-state-machine.v1") && <VersionbitsMachine client:visible fixtures={picked} figureId={figureId} />}
+  {is("musig2-rounds.v1") && <Musig2Rounds client:visible fixtures={picked} figureId={figureId} />}
+  {is("silent-payment-derivation.v1") && <SpDerivation client:visible fixtures={picked} figureId={figureId} />}
+  {is("gcs-filter.v1") && <GcsFilter client:visible fixtures={picked} figureId={figureId} />}
+  {is("v2-handshake.v1") && <V2Handshake client:visible fixtures={picked} figureId={figureId} />}
+  {is("bip322-virtual-tx.v1") && <Bip322VirtualTx client:visible fixtures={picked} figureId={figureId} />}
 </Plate>
