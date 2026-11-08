@@ -122,3 +122,16 @@ describe("BIP 85 rules", () => {
     expect(new Set(BIP39_WORD_COUNTS.map((w) => bip39Application(rootKey, w, english).entropyHex)).size).toBe(5);
   });
 });
+
+describe("ranges the chapter states", () => {
+  it("HEX takes 16 to 64 bytes and the Base64 password 20 to 86 characters", () => {
+    expect(() => hexApplication(rootKey, 15)).toThrow();
+    expect(() => hexApplication(rootKey, 65)).toThrow();
+    expect(hexApplication(rootKey, 16).output).toHaveLength(32);
+    expect(hexApplication(rootKey, 64).output).toHaveLength(128);
+    expect(() => base64PasswordApplication(rootKey, 19)).toThrow();
+    expect(() => base64PasswordApplication(rootKey, 87)).toThrow();
+    expect(base64PasswordApplication(rootKey, 20).output).toHaveLength(20);
+    expect(base64PasswordApplication(rootKey, 86).output).toHaveLength(86);
+  });
+});

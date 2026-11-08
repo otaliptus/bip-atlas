@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "strict-signatures",
+  "primaryBips": [66, 146],
+  "specimenLabel": "BIPs 0066 · 0146",
+  "title": "Why must a signature have exactly one encoding?",
+  "dek": "An ECDSA signature is two numbers written as bytes. If the same numbers can be written in more than one way, anyone relaying a transaction can change its bytes, and with them its ID. BIP 66 allows one encoding; BIP 146 proposed closing the gaps that remained.",
+  "authorship": "hand-authored",
+  "reviewState": "in-review",
+  "sourceSnapshot": "sources/research-2026-11-08-phase4",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "An ECDSA signature in a Bitcoin transaction is two numbers, R and S, written in DER, a standard binary encoding. When BIP 66 was written in 2015, the reference client checked signatures with OpenSSL, whose releases had until then accepted various deviations from DER as valid. The same two numbers could be written in more than one way, and which ways a node accepted depended on its OpenSSL version.",
+        "claims": ["format", "openssl", "non-der-malleable"]
+      },
+      {
+        "type": "paragraph",
+        "text": "That caused two problems. When OpenSSL tightened its parsing, some nodes rejected the chain. And anyone relaying a transaction could rewrite a signature's bytes without the private key, changing the transaction's ID. BIP 66 makes exactly one encoding valid. BIP 146 proposed closing the two gaps that strict encoding leaves open.",
+        "claims": ["openssl", "non-der-malleable", "malleability", "abstract66", "abstract146", "two-sources"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A23.1",
+      "recipe": "der-signature-checks.v1",
+      "title": "One signature, four changes",
+      "fixtures": ["input0-p2pk"],
+      "caption": "Input 0's signature from BIP 143's signed example. Choose a change. The first three write the same digits of R and S in different bytes, and BIP 66 rejects each at a different check. The last replaces S by n − S: still strict DER and still a valid signature, so only BIP 146's proposed LOW_S rule would reject it. The model computes every result; ECDSA verification is audited noble.",
+      "claims": ["checks", "changes", "flip-valid", "example", "not-consensus"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "der",
+      "heading": "One encoding",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "BIP 66 applies to every signature passed to `OP_CHECKSIG`, `OP_CHECKSIGVERIFY`, `OP_CHECKMULTISIG` or `OP_CHECKMULTISIGVERIFY` for ECDSA verification. It must be strict DER, as a short reference function in the BIP checks. If that check fails, the whole script fails at once. A strict signature that is simply wrong behaves as it did before.",
+          "claims": ["der-rule", "aim66"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The format is `0x30`, the length of everything after it except the sighash byte, then R and S, each as `0x02`, a length and the number in big-endian bytes. A number may not start with a zero byte, except one zero when the next byte has its top bit set, or it would read as negative. The sighash byte Bitcoin appends sits outside DER. BIP 66 does not run its check on an empty signature, which stays a short, deliberately invalid one.",
+          "claims": ["format", "sighash-outside"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.2",
+          "recipe": "der-anatomy.v1",
+          "title": "A DER signature, field by field",
+          "fixtures": ["input0-p2pk", "input1-p2wpkh"],
+          "caption": "Both signatures in BIP 143's example. Input 0's R begins with 0x8b, whose top bit is set, so it carries one zero byte and is 33 bytes long. Input 1's R begins with 0x36 and carries none.",
+          "claims": ["format", "example"],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "The rule only adds failures, so it could be deployed as a soft fork. It reused BIP 34's mechanism with block version 3: enforced in version 3 blocks once 750 of the previous 1,000 had version 3, and with version 2 blocks invalid once 950 did. The reference client had already refused to relay non-DER signatures since version 0.8.0, and any such signature could be rewritten in strict form.",
+          "claims": ["soft-fork", "deployment66", "compat66"]
+        }
+      ]
+    },
+    {
+      "id": "low-s",
+      "heading": "The twin signature",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Strict DER fixes the bytes, not the numbers. ECDSA has a symmetry: if (R, S) is a valid signature, so is (R, n − S), where n is the order of the curve. Anyone can compute that twin without the private key.",
+          "claims": ["two-sources", "twin"]
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 146's LOW_S rule keeps only the lower half: S must lie between 1 and n / 2, and under the rule a signature outside it makes the script fail at once. Of S and its twin, exactly one is in that half, so for the script types in actual use a signer can always provide a compliant signature.",
+          "claims": ["low-s", "flip-valid", "compat146"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.3",
+          "recipe": "der-low-s.v1",
+          "title": "Each S and its twin",
+          "fixtures": ["input0-p2pk", "input1-p2wpkh"],
+          "caption": "Both published S values lie in the lower half. Each twin n − S lies at the mirror point in the upper half and verifies just as well.",
+          "claims": ["low-s", "twin", "flip-valid"],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 146's NULLFAIL rule addresses the other gap. A failing signature check leaves `FALSE` on the stack and lets the script continue, so, as BIP 146 points out, the failing signature can be any bytes that pass BIP 66. Under NULLFAIL, a check that returns false must have been given an empty signature (for `OP_CHECKMULTISIG`, every signature); otherwise the script fails.",
+          "claims": ["two-sources", "nullfail"]
+        }
+      ]
+    },
+    {
+      "id": "ids",
+      "heading": "What the identifier hashes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "A txid hashes every scriptSig, so changing a signature there changes the txid and breaks any unconfirmed transaction that spends its outputs. SegWit's txid leaves the witness out. A witness signature can still be flipped, but that changes only the wtxid.",
+          "claims": ["malleability", "ids", "flip-ids"]
+        },
+        {
+          "type": "figure",
+          "figure": "A23.4",
+          "recipe": "der-txid-flip.v1",
+          "title": "What a flipped S changes",
+          "fixtures": ["input0-p2pk", "input1-p2wpkh"],
+          "caption": "BIP 143's example transaction with one S flipped at a time. Both flipped transactions still verify; the model recomputes each identifier.",
+          "claims": ["flip-ids", "ids"],
+          "layout": "prose"
+        },
+        {
+          "type": "paragraph",
+          "text": "BIP 66 is recorded as Deployed. BIP 146 is recorded as Closed, and its deployment section was left as \"Details TBD\". Its rules cover legacy and SegWit scripts alike. It records LOW_S and NULLFAIL as relay policy in the reference client as of 2016, so it did not make either one a consensus rule: a high-S signature is not made invalid by BIP 146. It also says users MUST pay extra attention to these rules when designing exotic scripts.",
+          "claims": ["preamble66", "preamble146", "deployment146", "compat146", "not-consensus", "abstract146", "exotic"]
+        },
+        {
+          "type": "callout",
+          "label": "Note",
+          "text": "Both BIPs were extracted from BIP 62, an earlier proposal against malleability that is now recorded as Closed.",
+          "claims": ["bip62"]
+        },
+        {
+          "type": "details",
+          "summary": "A consensus bug, fixed in passing",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "OpenSSL's stricter parsing arrived in versions 1.0.0p and 1.0.1k. After BIP 66 was adopted and enforced across the network, its author disclosed that strict DER signatures had also indirectly fixed a consensus bug he had found earlier.",
+              "claims": ["openssl", "disclosure66"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

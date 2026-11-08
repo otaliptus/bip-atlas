@@ -55,8 +55,8 @@
     },
     {
       "id": "many-scripts",
-      "statement": "BIP 16's redeem script needs no particular key order or encoding, so a key set and threshold allow as many as 2(n!) standard redeem scripts, each with its own P2SH address.",
-      "scope": "normative-rule",
+      "statement": "BIP 67's authors note that the redeem script needs no particular key order or encoding, and count as many as 2(n!) standard redeem scripts for a key set and threshold, each with its own P2SH address.",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -175,8 +175,8 @@
     },
     {
       "id": "not-enforceable",
-      "statement": "A P2SH address reveals nothing about its script, so BIP 67 cannot be enforced as a network rule; doing so would also be a hard fork.",
-      "scope": "normative-rule",
+      "statement": "The authors note that a P2SH address reveals nothing about the script receiving the funds, and conclude that BIP 67 cannot be enforced as a network rule; doing so would also be a hard fork.",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -191,8 +191,8 @@
     },
     {
       "id": "mixed-group",
-      "statement": "If a group is not entirely compliant, a participant may derive an address the others do not recognize as part of their shared account.",
-      "scope": "normative-rule",
+      "statement": "The authors warn that if a group is not entirely compliant, a participant may derive an address the others do not recognize as part of their shared account.",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -326,6 +326,62 @@
       ]
     },
     {
+      "id": "bip48-xpub",
+      "statement": "BIP 48's first four levels are hardened, and BIP 32 defines public derivation only for non-hardened children, so a master public key cannot give a cosigner's keys at a BIP 48 path; what a cosigner can share is the extended public key at the script-type level, below which change and index use public derivation.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            58,
+            61
+          ],
+          "quote": "m / purpose' / coin_type' / account' / script_type' / change / address_index </pre> <code>h</code> or <code>'</code> in the path indicates that BIP32 hardened derivation is used."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            122,
+            122
+          ],
+          "quote": "Public derivation is used at this level."
+        },
+        {
+          "bip": 32,
+          "lines": [
+            87,
+            87
+          ],
+          "quote": "It is only defined for non-hardened child keys."
+        }
+      ]
+    },
+    {
+      "id": "bip48-per-address",
+      "statement": "Each cosigner derives keys under BIP 48's hierarchy from their own seed; for each address the keys sorted are the cosigners' keys at that change and index, so one cosigner's place in the script can differ from one address to the next.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 48,
+          "lines": [
+            50,
+            51
+          ],
+          "quote": "Any wallet that supports BIP48 inherently supports deterministic key sorting as per BIP67 so that all possible multi-signature addresses/scripts are derived from deterministically sorted public keys."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            126,
+            127
+          ],
+          "quote": "Addresses are numbered from index 0 in sequentially increasing manner. This number is used as child index in BIP32 derivation."
+        }
+      ]
+    },
+    {
       "id": "bip48-practice",
       "statement": "BIP 48 writes down the existing industry practice of m/48' paths for multisig wallets, and lets future script types be appended without a new BIP.",
       "scope": "author-rationale",
@@ -383,7 +439,7 @@
     },
     {
       "id": "bip48-scripts",
-      "statement": "BIP 48 covers two script types: native SegWit P2WSH at script type 2' and nested P2SH-P2WSH at 1'; P2WSH, m/48'/0'/0'/2', is the recommended default.",
+      "statement": "As written, BIP 48 covers two script types, native SegWit P2WSH at script type 2' and nested P2SH-P2WSH at 1', and it can be extended with more; P2WSH, m/48'/0'/0'/2', is the recommended default.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
@@ -418,6 +474,14 @@
             112
           ],
           "quote": "The recommended default for wallets is pay to witness script hash <code>m/48'/0'/0'/2'</code>."
+        },
+        {
+          "bip": 48,
+          "lines": [
+            29,
+            30
+          ],
+          "quote": "This BIP allows for future script types to easily be appended to the specification so that a new BIP is not required for every future script type."
         }
       ]
     },

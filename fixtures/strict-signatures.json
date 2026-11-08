@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "strict-signatures",
+  "warning": "Signatures from BIP 143's published native P2WPKH example; its private keys are printed in the BIP, so these are test material only. Changed signatures are computed by the model from these bytes.",
+  "fixtures": [
+    {
+      "id": "input0-p2pk",
+      "kind": "der-signature",
+      "label": "BIP 143's example, input 0: a P2PK spend, signature in the scriptSig",
+      "shortLabel": "Input 0 \u00b7 scriptSig",
+      "source": {
+        "bip": 143,
+        "line": 195,
+        "section": "Example: Native P2WPKH",
+        "quote": "494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01"
+      },
+      "txHex": "01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000",
+      "txLine": 190,
+      "inputIndex": 0,
+      "where": "scriptSig",
+      "signatureHex": "30450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01",
+      "signatureLine": 195,
+      "scriptPubKeyHex": "2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac",
+      "scriptPubKeyLine": 152,
+      "digest": "legacy"
+    },
+    {
+      "id": "input1-p2wpkh",
+      "kind": "der-signature",
+      "label": "BIP 143's example, input 1: a P2WPKH spend, signature in the witness",
+      "shortLabel": "Input 1 \u00b7 witness",
+      "source": {
+        "bip": 143,
+        "line": 188,
+        "section": "Example: Native P2WPKH",
+        "quote": "304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee01"
+      },
+      "txHex": "01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000",
+      "txLine": 190,
+      "inputIndex": 1,
+      "where": "witness",
+      "signatureHex": "304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee01",
+      "signatureLine": 188,
+      "pubkeyHex": "025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee6357",
+      "pubkeyLine": 158,
+      "scriptCodeHex": "1976a9141d0f172a0ecb48aee1be1f2687d2963ae33f71a188ac",
+      "scriptCodeLine": 180,
+      "amountSats": "600000000",
+      "amountLine": 156,
+      "amountQuote": "value: 6",
+      "sighashHex": "c37af31116d1b27caf68aae9e3ac82f1477929014d5b917657d0eb49478cb670",
+      "sighashLine": 187,
+      "digest": "bip143"
+    }
+  ]
+}

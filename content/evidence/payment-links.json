@@ -311,10 +311,18 @@
     },
     {
       "id": "pop-build",
-      "statement": "A pop value is a percent-encoded URI prefix. After paying, a wallet that supports it SHOULD decode the prefix once, append the key the instructions came from (onchain for the body), an equals sign and the payment information, and open the result.",
+      "statement": "A URI MAY include a pop parameter, a percent-encoded URI prefix. After paying, a wallet that supports it SHOULD decode the prefix once, append the key the instructions came from (onchain for the body), an equals sign and the payment information, and open the result.",
       "scope": "normative-rule",
       "support": "explicit",
       "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            92,
+            92
+          ],
+          "quote": "The URI MAY include a \"pop\" (or \"req-pop\") parameter whose value can be used to build a URI which the wallet application can, after payment completes, \"open\" to provide proof the payment was completed or other information about the payment."
+        },
         {
           "bip": 321,
           "lines": [
@@ -423,7 +431,7 @@
     },
     {
       "id": "bip21-original",
-      "statement": "BIP 21's grammar required a base58 address in the body, and made everything after the scheme case-sensitive, parameter keys included.",
+      "statement": "BIP 21 allowed only base58 addresses in the body, and its text made everything after the scheme case-sensitive, parameter keys included.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -447,7 +455,7 @@
     },
     {
       "id": "qr-uppercase",
-      "statement": "Treating keys as case-insensitive was already common practice because QR codes mostly use uppercase URIs, and BIP 321 notes that uppercase URIs should be handled fine.",
+      "statement": "Treating keys as case-insensitive was already common practice because of mostly-uppercase URIs in QR codes, and BIP 321 notes that all-uppercase URIs should be handled fine.",
       "scope": "history",
       "support": "explicit",
       "evidence": [
@@ -472,7 +480,7 @@
     {
       "id": "examples-invalid-addresses",
       "statement": "The addresses in BIP 321's examples are intentionally invalid, to prevent accidental transactions.",
-      "scope": "normative-rule",
+      "scope": "author-rationale",
       "support": "explicit",
       "evidence": [
         {
@@ -487,7 +495,7 @@
     },
     {
       "id": "examples-model",
-      "statement": "The model reads all 21 of BIP 321's example URIs as the BIP labels them, valid or invalid, and builds its four published proof-of-payment callbacks.",
+      "statement": "The model reads the 21 URIs in BIP 321's URIs and Invalid URIs lists as the BIP labels them, valid or invalid, and builds all four callbacks its five proof-of-payment examples publish.",
       "scope": "computed-fixture",
       "support": "inference",
       "evidence": [

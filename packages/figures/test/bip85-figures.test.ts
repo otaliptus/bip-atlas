@@ -28,7 +28,8 @@ describe("derived-seeds fixtures", () => {
   it("read the bytes BIP 85 says each application reads", () => {
     expect(words12.derived.uses).toEqual([{ from: 0, to: 16, as: "entropy for 12 words" }]);
     expect(byId("bip85-xprv").derived.uses.map((u) => [u.from, u.to])).toEqual([[0, 32], [32, 64]]);
-    expect(byId("bip85-dice").derived.skipped).toBeGreaterThanOrEqual(0);
+    // One byte a roll, top three bits kept: four of the fourteen trials are 6 or 7 and are skipped.
+    expect(byId("bip85-dice").derived.skipped).toBe(4);
   });
 });
 
@@ -52,8 +53,9 @@ describe("A19.1 hero", () => {
   });
   it("puts the leak notes and the hatching in a layer the toggle shows", () => {
     const s = state(0);
-    expect(s.split('class="k-leak"').length - 1).toBe(6);
-    expect(s).toContain("THE ROOT STAYS UNKNOWN (HARDENED PATH)");
+    // Per composition: root box, root text, k glyph, k text, unread bytes, notes.
+    expect(s.split('class="k-leak"').length - 1).toBe(12);
+    expect(s).toContain("THE ROOT STAYS UNKNOWN: IT WOULD NEED k,");
     expect(s).toContain("If this output leaks, k stays unknown");
   });
 });
@@ -73,7 +75,13 @@ describe("A19.2 to A19.4", () => {
   });
   it("A19.4 fills exactly the bytes each application reads", () => {
     const s = html(h(Bip85Uses, { fixtures: all }));
-    expect(s.split('data-used="true"').length - 1).toBe(16 + 32 + 32 + 64 + 64 + 64 + 64);
+    expect(s.split('data-used="true"').length - 1).toBe(16 + 32 + 32 + 64 + 64 + 16 + 64);
+  });
+  it("the 21-character password depends only on the first 16 bytes", () => {
+    const pwd = byId("bip85-pwd");
+    expect(pwd.derived.uses).toEqual([{ from: 0, to: 16, as: "Base64, cut to 21 characters" }]);
+    const first16 = Buffer.from(pwd.derived.entropyHex.slice(0, 32), "hex").toString("base64").slice(0, 21);
+    expect(first16).toBe(pwd.derived.output);
   });
   it("refuses a storyboard for an application that makes no words", () => {
     expect(() => html(h(Bip85Story, { fixture: byId("bip85-wif") }))).toThrow();

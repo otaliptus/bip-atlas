@@ -36,16 +36,20 @@ export function sortKeys(keys: readonly string[]): string[] {
   return [...keys].sort(compareKeys);
 }
 
-/** The standard multisig script, OP_m <key>… OP_n OP_CHECKMULTISIG, keys in the order given. */
+/**
+ * The standard multisig script, OP_m <key>… OP_n OP_CHECKMULTISIG, keys in the order given.
+ * At most 15 keys: with 16 compressed keys the script is 547 bytes, over the 520-byte
+ * push limit a P2SH redeem script must fit in.
+ */
 export function multisigScript(m: number, keys: readonly string[]): string {
   const n = keys.length;
-  if (!Number.isInteger(m) || m < 1 || m > n || n > 16) throw new Bip67Error("Need 1 ≤ m ≤ n ≤ 16.");
+  if (!Number.isInteger(m) || m < 1 || m > n || n > 15) throw new Bip67Error("Need 1 ≤ m ≤ n ≤ 15 for a P2SH redeem script.");
   keys.forEach(checkCompressedKey);
   const small = (k: number) => (0x50 + k).toString(16);
   return small(m) + keys.map((k) => `21${k}`).join("") + small(n) + "ae";
 }
 
-/** BIP 16's address for a script: Base58Check of version 0x05 (testnet 0xc4) and HASH160(script). */
+/** The P2SH address for a script (BIP 16's HASH160, BIP 13's encoding): Base58Check of version 0x05 (testnet 0xc4) and HASH160(script). */
 export function p2shAddress(scriptHex: string, network: "mainnet" | "testnet" = "mainnet"): { hash160Hex: string; address: string } {
   const h = hash160(hexToBytes(scriptHex));
   return { hash160Hex: bytesToHex(h), address: base58check.encode(Uint8Array.from([network === "mainnet" ? 0x05 : 0xc4, ...h])) };

@@ -1,0 +1,681 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "strict-signatures",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-11-08-phase4",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-four snapshot.",
+  "claims": [
+    {
+      "id": "preamble66",
+      "statement": "BIP 66 (Pieter Wuille), Strict DER signatures, a consensus soft fork assigned in 2015, is recorded as Deployed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            3,
+            8
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: Strict DER signatures Authors: Pieter Wuille <pieter.wuille@gmail.com> Status: Deployed Type: Specification Assigned: 2015-01-10"
+        }
+      ]
+    },
+    {
+      "id": "preamble146",
+      "statement": "BIP 146 (Johnson Lau and Pieter Wuille), Dealing with signature encoding malleability, a consensus soft fork assigned in 2016, is recorded as Closed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            3,
+            9
+          ],
+          "quote": "Layer: Consensus (soft fork) Title: Dealing with signature encoding malleability Authors: Johnson Lau <jl2012@xbt.hk> Pieter Wuille <pieter.wuille@gmail.com> Status: Closed Type: Specification Assigned: 2016-08-16"
+        }
+      ]
+    },
+    {
+      "id": "bip62",
+      "statement": "Both BIPs were extracted from BIP 62, an earlier proposal on malleability by Pieter Wuille that is recorded as Closed.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 62,
+          "lines": [
+            6,
+            8
+          ],
+          "quote": "Title: Dealing with malleability Authors: Pieter Wuille <pieter.wuille@gmail.com> Status: Closed"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            141,
+            141
+          ],
+          "quote": "This document is extracted from the previous BIP62 proposal"
+        },
+        {
+          "bip": 146,
+          "lines": [
+            132,
+            132
+          ],
+          "quote": "This document is extracted from the previous [https://github.com/bitcoin/bips/blob/master/bip-0062.mediawiki BIP62] proposal which had input from various people."
+        }
+      ]
+    },
+    {
+      "id": "abstract66",
+      "statement": "BIP 66 proposes restricting signatures to strict DER encoding in the transaction validity rules.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            14,
+            14
+          ],
+          "quote": "This document specifies proposed changes to the Bitcoin transaction validity rules to restrict signatures to strict DER encoding."
+        }
+      ]
+    },
+    {
+      "id": "openssl",
+      "statement": "When BIP 66 was written, the reference implementation relied on OpenSSL to validate signatures, so OpenSSL implicitly defined block validity; OpenSSL had accepted various deviations from DER, and when that changed in versions 1.0.0p and 1.0.1k some nodes rejected the chain.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            22,
+            22
+          ],
+          "quote": "Bitcoin's reference implementation currently relies on OpenSSL for signature validation, which means it is implicitly defining Bitcoin's block validity rules."
+        },
+        {
+          "bip": 66,
+          "lines": [
+            24,
+            24
+          ],
+          "quote": "Until recently, OpenSSL's releases would accept various deviations from the DER standard and accept signatures as valid. When this changed in OpenSSL 1.0.0p and 1.0.1k, it made some nodes reject the chain."
+        }
+      ]
+    },
+    {
+      "id": "aim66",
+      "statement": "The author's aim: restrict valid signatures to exactly what DER mandates, so the consensus rules no longer depend on OpenSSL's signature parsing.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            26,
+            26
+          ],
+          "quote": "This document proposes to restrict valid signatures to exactly what is mandated by DER, to make the consensus rules not depend on OpenSSL's signature parsing."
+        }
+      ]
+    },
+    {
+      "id": "non-der-malleable",
+      "statement": "BIP 62 listed non-DER signatures as a source of malleability, because OpenSSL accepted more than strict DER serializations.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 62,
+          "lines": [
+            33,
+            33
+          ],
+          "quote": "As OpenSSL accepts more than serializations that strictly adhere to the DER standard, this is a source of malleability."
+        }
+      ]
+    },
+    {
+      "id": "der-rule",
+      "statement": "Every signature passed to OP_CHECKSIG, OP_CHECKSIGVERIFY, OP_CHECKMULTISIG or OP_CHECKMULTISIGVERIFY for ECDSA verification must be strict DER; a signature that fails the IsValidSignatureEncoding check makes the whole script false immediately, while a valid DER signature that fails ECDSA verification behaves as before.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            30,
+            30
+          ],
+          "quote": "Every signature passed to OP_CHECKSIG, OP_CHECKSIGVERIFY, OP_CHECKMULTISIG, or OP_CHECKMULTISIGVERIFY, to which ECDSA verification is applied, must be encoded using strict DER encoding (see further)."
+        },
+        {
+          "bip": 66,
+          "lines": [
+            32,
+            32
+          ],
+          "quote": "For each such verification, if the signature does not pass the <code>IsValidSignatureEncoding</code> check below, the entire script evaluates to false immediately. If the signature is valid DER, but does not pass ECDSA verification, opcode execution continues as it used to"
+        }
+      ]
+    },
+    {
+      "id": "format",
+      "statement": "The format is 0x30, a total length, then 0x02, R's length and R, 0x02, S's length and S, then the sighash byte; R and S are big-endian and must use the shortest encoding of a positive integer, with no leading zero bytes except one when the next byte has its top bit set.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "// Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S] [sighash]"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            46,
+            48
+          ],
+          "quote": "// * R: arbitrary-length big-endian encoded R value. It must use the shortest //   possible encoding for a positive integers (which means no null bytes at //   the start, except a single one when the next byte has its highest bit set)."
+        }
+      ]
+    },
+    {
+      "id": "sighash-outside",
+      "statement": "The check runs on the signature bytes including Bitcoin's 1-byte sighash flag, which is outside DER and unaffected; it is not called for an empty signature, kept as a short encoding of a deliberately invalid signature.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            36,
+            36
+          ],
+          "quote": "Note that this function tests a signature byte vector which includes the 1-byte sighash flag that Bitcoin adds, even though that flag falls outside of the DER specification, and is unaffected by this proposal. The function is also not called for cases where the length of sig is 0, in order to provide a simple, short and efficiently-verifiable encoding for deliberately invalid signatures."
+        }
+      ]
+    },
+    {
+      "id": "checks",
+      "statement": "BIP 66's reference function checks, in order: 9 to 73 bytes, a 0x30 start, a total length covering the signature, the R and S lengths, each element marked 0x02, non-empty, not negative, and without extra leading zeros.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            54,
+            56
+          ],
+          "quote": "// Minimum and maximum size constraints. if (sig.size() < 9) return false; if (sig.size() > 73) return false;"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            61,
+            62
+          ],
+          "quote": "// Make sure the length covers the entire signature. if (sig[1] != sig.size() - 3) return false;"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            83,
+            84
+          ],
+          "quote": "// Negative numbers are not allowed for R. if (sig[4] & 0x80) return false;"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            99,
+            101
+          ],
+          "quote": "// Null bytes at the start of S are not allowed, unless S would otherwise be //   interpreted as a negative number. if (lenS > 1 && (sig[lenR + 6] == 0x00) && !(sig[lenR + 7] & 0x80)) return false;"
+        }
+      ]
+    },
+    {
+      "id": "soft-fork",
+      "statement": "BIP 66's examples show the change only adds failures, as a soft fork requires.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            125,
+            125
+          ],
+          "quote": "Note that the examples above show that only additional failures are required by this change, as required for a soft forking change."
+        }
+      ]
+    },
+    {
+      "id": "deployment66",
+      "statement": "BIP 66 reused BIP 34's double-threshold switchover for block version 3: the rules apply to version 3 blocks once 750 of the previous 1000 blocks are version 3, and once 950 are, version 2 blocks become invalid.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            129,
+            129
+          ],
+          "quote": "We reuse the double-threshold switchover mechanism from BIP 34, with the same thresholds, but for nVersion = 3. The new rules are in effect for every block (at height H) with nVersion = 3 and at least 750 out of 1000 blocks preceding it (with heights H-1000..H-1) also have nVersion = 3. Furthermore, when 950 out of the 1000 blocks preceding a block do have nVersion = 3, nVersion = 2 blocks become invalid, and all further blocks enforce the new rules."
+        }
+      ]
+    },
+    {
+      "id": "compat66",
+      "statement": "Strict DER had been relay policy in the reference client since v0.8.0, any non-compliant signature can be converted to a compliant one, and the BIP notes the added benefit of reducing malleability.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            133,
+            133
+          ],
+          "quote": "The requirement to have signatures that comply strictly with DER has been enforced as a relay policy by the reference client since v0.8.0, and very few transactions violating it are being added to the chain as of January 2015. In addition, every non-compliant signature can trivially be converted into a compliant one, so there is no loss of functionality by this requirement. This proposal has the added benefit of reducing transaction malleability (see BIP 62)."
+        }
+      ]
+    },
+    {
+      "id": "disclosure66",
+      "statement": "After BIP 66 was adopted and enforced network-wide, its author disclosed that strict DER signatures had indirectly fixed a consensus bug he had found earlier.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            145,
+            145
+          ],
+          "quote": "that strict DER signatures provided an indirect solution to a consensus bug he had previously discovered."
+        }
+      ]
+    },
+    {
+      "id": "malleability",
+      "statement": "Signature malleability is the ability of any relay node to transform a transaction's signatures without the private keys; for non-SegWit transactions it changes the txid and invalidates unconfirmed children, and for SegWit transactions, whose txid is not third-party malleable, it changes the wtxid and may make compact block relay less efficient.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "Signature malleability refers to the ability of any relay node on the network to transform the signature in transactions, with no access to the relevant private keys required. For non-segregated witness transactions, signature malleability will change the <code>txid</code> and invalidate any unconfirmed child transactions. Although the <code>txid</code> of segregated witness ([https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141]) transactions is not third party malleable, this malleability vector will change the <code>wtxid</code> and may reduce the efficiency of compact block relay"
+        }
+      ]
+    },
+    {
+      "id": "two-sources",
+      "statement": "The authors note that after BIP 66 two known sources of ECDSA signature malleability remained: negating S modulo the curve order leaves a signature valid, and a failing signature can be any BIP 66-compliant value, since the failure only pushes FALSE and the script continues.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            22,
+            26
+          ],
+          "quote": "Since the enforcement of Strict DER signatures ([https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki BIP66]), there are 2 remaining known sources of malleability in ECDSA signatures: # '''Inherent ECDSA signature malleability''': ECDSA signatures are inherently malleable as taking the negative of the number S inside (modulo the curve order) does not invalidate it. # '''Malleability of failing signature''': If a signature failed to validate in <code>OP_CHECKSIG</code> or <code>OP_CHECKMULTISIG</code>, a <code>FALSE</code> would be returned to the stack and the script evaluation would continue. The failing signature may take any value, as long as it follows all the rules described in BIP66."
+        }
+      ]
+    },
+    {
+      "id": "abstract146",
+      "statement": "BIP 146 proposes rules against signature malleability related to ECDSA encoding, applied to legacy and SegWit scripts alike.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            15,
+            15
+          ],
+          "quote": "This document specifies proposed changes to the Bitcoin transaction validity rules to fix signature malleability related to ECDSA signature encoding."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            33,
+            33
+          ],
+          "quote": "To fix signature encoding malleability, the following new rules are applied to pre-segregated witness and segregated witness scripts:"
+        }
+      ]
+    },
+    {
+      "id": "low-s",
+      "statement": "LOW_S: every signature passed to an ECDSA signature opcode, including P2WPKH, MUST have S between 0x1 and 0x7FFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF 5D576E73 57A4501D DFE92F46 681B20A0, the curve order divided by 2; a non-empty signature that fails makes the script false immediately.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "We require that the S value inside ECDSA signatures is at most the curve order divided by 2 (essentially restricting this value to its lower half range)."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            38,
+            38
+          ],
+          "quote": "MUST use a S value between <code>0x1</code> and <code>0x7FFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF 5D576E73 57A4501D DFE92F46 681B20A0</code> (inclusive) with strict DER encoding"
+        },
+        {
+          "bip": 146,
+          "lines": [
+            40,
+            40
+          ],
+          "quote": "If a signature passing to ECDSA verification does not pass the Low S value check and is not an empty byte array, the entire script evaluates to false immediately."
+        }
+      ]
+    },
+    {
+      "id": "twin",
+      "statement": "A high S can be trivially replaced by S' = n − S, with n = 0xFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "A high S value in signature could be trivially replaced by <code>S' = 0xFFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFE BAAEDCE6 AF48A03B BFD25E8C D0364141 - S</code>."
+        }
+      ]
+    },
+    {
+      "id": "nullfail",
+      "statement": "NULLFAIL: when OP_CHECKSIG would return FALSE its signature must be empty, and when OP_CHECKMULTISIG would, every signature passed to it must be empty, even ones it skipped; otherwise the script fails immediately.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            47,
+            51
+          ],
+          "quote": "If an <code>OP_CHECKSIG</code> is trying to return a <code>FALSE</code> value to the stack, we require that the relevant signature must be an empty byte array. If an <code>OP_CHECKMULTISIG</code> is trying to return a <code>FALSE</code> value to the stack, we require that all signatures passing to this <code>OP_CHECKMULTISIG</code> must be empty byte arrays, even the processing of some signatures might have been skipped due to early termination of the signature verification. Otherwise, the entire script evaluates to false immediately."
+        }
+      ]
+    },
+    {
+      "id": "deployment146",
+      "statement": "BIP 146's deployment section says it would use BIP 9 version bits and leaves the details, start time and timeout as TBD.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            98,
+            98
+          ],
+          "quote": "This BIP will be deployed by \"version bits\" [https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki BIP9]. Details TBD."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            100,
+            100
+          ],
+          "quote": "For Bitcoin mainnet, the BIP9 starttime will be midnight TBD UTC (Epoch timestamp TBD) and BIP9 timeout will be midnight TBD UTC (Epoch timestamp TBD)."
+        }
+      ]
+    },
+    {
+      "id": "compat146",
+      "statement": "BIP 146 records the reference client producing low-S signatures since v0.9.0, enforcing LOW_S as relay policy since v0.11.1 and NULLFAIL since v0.13.1, and very few violations reaching the chain as of August 2016.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            107,
+            107
+          ],
+          "quote": "The reference client has produced LOW_S compatible signatures since v0.9.0, and the LOW_S rule has been enforced as relay policy by the reference client since v0.11.1. As of August 2016, very few transactions violating the requirement are being added to the chain. For all scriptPubKey types in actual use, non-compliant signatures can trivially be converted into compliant ones, so there is no loss of functionality by these requirements."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            109,
+            109
+          ],
+          "quote": "The NULLFAIL rule has been enforced as relay policy by the reference client since v0.13.1."
+        }
+      ]
+    },
+    {
+      "id": "exotic",
+      "statement": "BIP 146 says users MUST pay extra attention to these rules when designing exotic scripts.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            111,
+            111
+          ],
+          "quote": "Users MUST pay extra attention to these new rules when designing exotic scripts."
+        }
+      ]
+    },
+    {
+      "id": "ids",
+      "statement": "BIP 141 keeps the txid as the double SHA-256 of the traditional serialization, without witness data, and defines the wtxid over the serialization with it.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 141,
+          "lines": [
+            43,
+            45
+          ],
+          "quote": "Definition of <code>txid</code> remains unchanged: the double SHA256 of the traditional serialization format: [nVersion][txins][txouts][nLockTime]"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            47,
+            49
+          ],
+          "quote": "A new <code>wtxid</code> is defined: the double SHA256 of the new serialization with witness data: [nVersion][marker][flag][txins][txouts][witness][nLockTime]"
+        }
+      ]
+    },
+    {
+      "id": "example",
+      "statement": "In the model, BIP 143's signed native P2WPKH example carries two ECDSA signatures: input 0's, spending a P2PK output, in its scriptSig (72 bytes, R padded to 33 bytes), and input 1's, spending a P2WPKH output, in its witness (71 bytes). Both are strict DER with low S and verify, input 1's against the published digest and input 0's against the legacy digest the model computes.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 143,
+          "lines": [
+            151,
+            152
+          ],
+          "quote": "The first input comes from an ordinary P2PK: scriptPubKey : 2103c9f4836b9a4f77fc0d81f7bcb01b7f1b35916864b9476c241ce9fc198bd25432ac value: 6.25"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            155,
+            156
+          ],
+          "quote": "The second input comes from a P2WPKH witness program:"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            187,
+            188
+          ],
+          "quote": "sigHash:      c37af31116d1b27caf68aae9e3ac82f1477929014d5b917657d0eb49478cb670"
+        },
+        {
+          "bip": 143,
+          "lines": [
+            190,
+            190
+          ],
+          "quote": "The serialized signed transaction is:"
+        }
+      ]
+    },
+    {
+      "id": "changes",
+      "statement": "In the model, three changes to input 0's signature write the same digits of R and S in different bytes and fail BIP 66: without its zero pad R's bytes read as a negative number (line 84), an extra zero in front of S fails line 101, and a total length one too large fails line 62.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 66,
+          "lines": [
+            83,
+            84
+          ],
+          "quote": "// Negative numbers are not allowed for R. if (sig[4] & 0x80) return false;"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            99,
+            101
+          ],
+          "quote": "// Null bytes at the start of S are not allowed"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            61,
+            62
+          ],
+          "quote": "// Make sure the length covers the entire signature."
+        }
+      ]
+    },
+    {
+      "id": "flip-valid",
+      "statement": "In the model, replacing S by n − S gives a strict DER signature that still verifies (ECDSA with low-S checking off) but fails LOW_S; for input 0 it is 73 bytes, BIP 66's maximum, because n − S needs a zero pad. Exactly one of S and n − S is in the lower half.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "A high S value in signature could be trivially replaced by"
+        },
+        {
+          "bip": 66,
+          "lines": [
+            56,
+            56
+          ],
+          "quote": "if (sig.size() > 73) return false;"
+        }
+      ]
+    },
+    {
+      "id": "flip-ids",
+      "statement": "In the model, flipping input 0's S changes both the txid and the wtxid of BIP 143's example; flipping input 1's leaves the txid and changes the wtxid. The flipped transactions still verify.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            20,
+            20
+          ],
+          "quote": "For non-segregated witness transactions, signature malleability will change the <code>txid</code>"
+        },
+        {
+          "bip": 141,
+          "lines": [
+            43,
+            43
+          ],
+          "quote": "Definition of <code>txid</code> remains unchanged: the double SHA256 of the traditional serialization format:"
+        }
+      ]
+    },
+    {
+      "id": "not-consensus",
+      "statement": "By these texts, BIP 146 did not make LOW_S or NULLFAIL consensus rules: the BIP is Closed, its deployment was never specified, and it records both as relay policy of the reference client. A high-S signature is not made invalid by BIP 146.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 146,
+          "lines": [
+            7,
+            7
+          ],
+          "quote": "Status: Closed"
+        },
+        {
+          "bip": 146,
+          "lines": [
+            98,
+            98
+          ],
+          "quote": "Details TBD."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            107,
+            107
+          ],
+          "quote": "the LOW_S rule has been enforced as relay policy by the reference client since v0.11.1."
+        },
+        {
+          "bip": 146,
+          "lines": [
+            109,
+            109
+          ],
+          "quote": "The NULLFAIL rule has been enforced as relay policy by the reference client since v0.13.1."
+        }
+      ]
+    }
+  ]
+}

@@ -10,9 +10,11 @@ import { deriveP2sh } from "./p2sh";
 import { deriveBip321 } from "./payment-links";
 import { deriveBip48, deriveBip67 } from "./sorted-multisig";
 import { derivePsbtCombine, derivePsbtTrace } from "./psbt";
+import { deriveBip370 } from "./psbt-v2";
 import { deriveSchnorr } from "./schnorr";
 import { deriveTransaction } from "./segwit";
 import { deriveSp, deriveSpEligibility } from "./silent-payments";
+import { deriveDer } from "./strict-signatures";
 import { deriveTaprootKeyspend, deriveTaprootTree } from "./taproot";
 import { deriveTapscript } from "./tapscript";
 import { deriveTimelockBipTx, deriveTimelockCase, deriveTimelockEncoding } from "./timelocks";
@@ -31,6 +33,7 @@ const DERIVE: Record<string, (f: any, group: any[]) => unknown> = {
   transaction: deriveTransaction,
   "psbt-trace": derivePsbtTrace,
   "psbt-combine": derivePsbtCombine,
+  "psbtv2-vector": deriveBip370,
   "schnorr-vector": (f, group) => deriveSchnorr(f, group.filter((g) => g.kind === "schnorr-vector")),
   "taproot-tree": deriveTaprootTree,
   "taproot-keyspend": deriveTaprootKeyspend,
@@ -38,6 +41,7 @@ const DERIVE: Record<string, (f: any, group: any[]) => unknown> = {
   "p2sh-spend": deriveP2sh,
   "bip67-vector": deriveBip67,
   "bip48-example": deriveBip48,
+  "der-signature": deriveDer,
   "timelock-case": deriveTimelockCase,
   "timelock-bip-tx": deriveTimelockBipTx,
   "timelock-encoding": deriveTimelockEncoding,

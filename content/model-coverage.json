@@ -121,8 +121,20 @@
   },
   "payment-links": {
     "name": "BIPs 321 and 21",
-    "published": "All 21 of BIP 321's example URIs, valid and invalid, read as the BIP labels them, and its four proof-of-payment examples, including both published callbacks.",
+    "published": "The 21 URIs in BIP 321's URIs and Invalid URIs lists, read as the BIP labels them, and its five proof-of-payment examples, including all four published callbacks.",
     "additional": "Percent-decoding, case-insensitive keys, the empty-body rule, the amount format, keys under the wrong HRP, and three illustrative wallets that implement different keys.",
     "limits": "Reads addresses and invoices by form only, as BIP 321's examples are deliberately invalid; it never validates checksums, resolves payments or opens callbacks."
+  },
+  "psbt-v2": {
+    "name": "BIP 370",
+    "published": "All 24 invalid and 14 valid BIP 370 PSBTs, each invalid one rejected for the field its case names, and all ten lock-time vectors, including the one printed without a case line.",
+    "additional": "Hex and Base64 forms agree; the unsigned transaction and unique ID built from the version 2 fields (sequences and flags do not change the ID); value sizes of the new fields; Constructor and Signer flag rules for each sighash type.",
+    "limits": "Reads PSBT versions 0 and 2 only and builds unsigned transactions; it does not add inputs, sign, finalize or extract, and checks only the BIP 174 value formats its PSBT model knows."
+  },
+  "strict-signatures": {
+    "name": "BIPs 66 and 146",
+    "published": "Both ECDSA signatures in BIP 143's signed native P2WPKH example: strict DER, low S, and verified, input 1's against the published digest and input 0's against the computed legacy digest.",
+    "additional": "BIP 66's fourteen checks in order, with computed changes (R's pad removed, a zero added to S, a wrong length byte) failing at lines 84, 101 and 62; S replaced by n − S still verifying but failing LOW_S; txid and wtxid after each flip.",
+    "limits": "Encoding and LOW_S checks on single signatures in reviewed spend shapes (P2PK scriptSig, P2WPKH witness); NULLFAIL is described, not executed, and the site never signs."
   }
 }

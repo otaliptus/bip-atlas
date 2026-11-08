@@ -32,7 +32,8 @@ export interface Psbt {
 
 export class PsbtError extends Error {}
 
-class Reader {
+/** Byte reader over a PSBT, shared with the BIP 370 model. */
+export class Reader {
   offset = 0;
   constructor(readonly bytes: Uint8Array) {}
   get done() {
@@ -55,7 +56,7 @@ class Reader {
   }
 }
 
-function readCompactSizeFrom(bytes: Uint8Array): { value: number; length: number } {
+export function readCompactSizeFrom(bytes: Uint8Array): { value: number; length: number } {
   const r = new Reader(bytes);
   const value = r.compactSize();
   const minimal = value < 0xfd ? 1 : value <= 0xffff ? 3 : value <= 0xffffffff ? 5 : 9;
@@ -63,7 +64,8 @@ function readCompactSizeFrom(bytes: Uint8Array): { value: number; length: number
   return { value, length: r.offset };
 }
 
-function readMap(r: Reader, scope: string): PsbtRecord[] {
+/** One key-value map up to its 0x00 separator; duplicate keys are invalid. */
+export function readMap(r: Reader, scope: string): PsbtRecord[] {
   const records: PsbtRecord[] = [];
   const seen = new Set<string>();
   for (;;) {
@@ -127,6 +129,12 @@ function checkKey(scope: MapScope, r: PsbtRecord): void {
   if (pubkeyKeyData[scope].includes(r.keyType) && !isPubkey(r.keyDataHex)) {
     throw new PsbtError(`Key type 0x${r.keyType.toString(16).padStart(2, "0")} in the ${scope} map needs a public key as key data.`);
   }
+}
+
+/** BIP 174's key-data and value-format rules for one record (the types this model knows). */
+export function checkRecord(scope: MapScope, r: PsbtRecord): void {
+  checkKey(scope, r);
+  checkValue(scope, r);
 }
 
 /** Parse and validate a version 0 PSBT. Errors are always PsbtError. */

@@ -6,13 +6,13 @@
   "title": "How do cosigners end up with the same multisig address?",
   "dek": "A 2-of-3 script lists three keys in some order, and each order gives a different address. BIP 67 sorts the keys by their bytes first, so every cosigner builds the same script.",
   "authorship": "hand-authored",
-  "reviewState": "draft-unreviewed",
+  "reviewState": "in-review",
   "sourceSnapshot": "sources/research-2026-11-08-phase4",
   "opening": {
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A multisignature script lists its public keys in an order, and the order is part of the script. Change the order and the script's hash changes, and with it the P2SH address. BIP 16 sets no order or encoding, so one set of keys and one threshold allow as many as 2(n!) standard scripts, each with its own address.",
+        "text": "A multisignature script lists its public keys in an order, and the order is part of the script. Change the order and the script's hash changes, and with it the P2SH address. The redeem script requires no particular order or encoding, and BIP 67's authors count as many as 2(n!) standard scripts for one set of keys and one threshold, each with its own address.",
         "claims": ["many-scripts"]
       },
       {
@@ -85,7 +85,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The authors' aim is that compliant wallets always produce the same address for the same keys, which also makes the account's transactions easier to recognize. For an HD multisig wallet, the cosigners then only need to share the threshold and their master public keys.",
+          "text": "The authors' aim is that compliant wallets always produce the same address for the same keys, which also makes the account's transactions easier to recognize. For an HD multisig wallet, they add, the cosigners then only need to share the threshold and their master public keys.",
           "claims": ["canonical"]
         }
       ]
@@ -96,13 +96,13 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 48 names the paths multisig wallets derive those keys at: `m / purpose' / coin_type' / account' / script_type' / change / address_index`, with purpose `48'`. The first four levels are hardened; change and index are not. BIP 48 writes down a practice wallets already followed.",
-          "claims": ["bip48-levels", "bip48-change-index", "bip48-practice"]
+          "text": "BIP 48 names the paths multisig wallets derive those keys at: `m / purpose' / coin_type' / account' / script_type' / change / address_index`, with purpose `48'`. The first four levels are hardened; change and index are not. A master public key cannot reach past hardened levels, so under BIP 48 each cosigner shares the extended public key at the script-type level instead. BIP 48 writes down a practice wallets already followed.",
+          "claims": ["bip48-levels", "bip48-change-index", "bip48-xpub", "bip48-practice"]
         },
         {
           "type": "paragraph",
-          "text": "It covers two script types: P2WSH at script type `2'`, the recommended default, and P2SH-wrapped P2WSH at `1'`. Each cosigner derives a key at the same path from their own seed, and BIP 48 wallets sort the keys as BIP 67 describes.",
-          "claims": ["bip48-scripts", "bip48-sorting"]
+          "text": "As written, it covers two script types: P2WSH at script type `2'`, the recommended default, and P2SH-wrapped P2WSH at `1'`. Each cosigner derives keys under this hierarchy from their own seed. For each address, BIP 48 wallets sort the cosigners' keys at that change and index as BIP 67 describes, so a cosigner's place in the script can differ from one address to the next.",
+          "claims": ["bip48-scripts", "bip48-sorting", "bip48-per-address"]
         },
         {
           "type": "figure",
@@ -122,7 +122,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A P2SH output shows only a hash, so the network cannot tell whether the keys were sorted, and BIP 67 cannot be a network rule. It works only when every cosigner's wallet follows it. A participant whose wallet does not may derive an address the others do not recognize as part of their account.",
+          "text": "A P2SH address shows only a hash, so nothing about the keys is visible when coins are paid to it, and the authors conclude that BIP 67 cannot be a network rule. It works only when every cosigner's wallet follows it. A participant whose wallet does not may derive an address the others do not recognize as part of their account.",
           "claims": ["not-enforceable", "mixed-group"]
         },
         {

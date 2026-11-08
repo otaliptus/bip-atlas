@@ -26,7 +26,8 @@ try {
     // Use the first illustration, choosing its wide/narrow composition to fit
     // the thumbnail. Do not squeeze a long address strip into a tiny line.
     const id = await page.locator(".atlas-chapter-hero").evaluate((hero) => {
-      const drawings = [...hero.querySelectorAll(".k-drawing")];
+      // Pre-rendered heroes keep every state in the page; only the shown one counts.
+      const drawings = [...hero.querySelectorAll(".k-drawing")].filter((svg) => !svg.closest("[data-state][hidden]"));
       const first = drawings.find((svg) => svg.getBoundingClientRect().width > 0);
       if (!first) throw new Error("Opening figure has no visible SVG");
       const title = first.querySelector("title")?.textContent;

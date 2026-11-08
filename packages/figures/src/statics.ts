@@ -21,6 +21,9 @@ import { Bip67ScriptStory } from "./bip67/Bip67ScriptStory";
 import { Bip85Path } from "./bip85/Bip85Path";
 import { Bip85Story } from "./bip85/Bip85Story";
 import { Bip85Uses } from "./bip85/Bip85Uses";
+import { DerAnatomy } from "./der/DerAnatomy";
+import { DerLowS } from "./der/DerLowS";
+import { DerTxidFlip } from "./der/DerTxidFlip";
 import { Bip322Formats } from "./bip322/Bip322Formats";
 import { Bip322Hash } from "./bip322/Bip322Hash";
 import { Bip322Limits } from "./bip322/Bip322Limits";
@@ -63,6 +66,9 @@ import { PsbtLayout } from "./psbt/PsbtLayout";
 import { PsbtCombine, PsbtFinalize, UnknownFields } from "./psbt/PsbtMerge";
 import { PsbtRecords } from "./psbt/PsbtRecords";
 import { SignerDisplay, UtxoCheck } from "./psbt/PsbtSigner";
+import { PsbtV2Invalid } from "./psbtv2/PsbtV2Invalid";
+import { PsbtV2Maps } from "./psbtv2/PsbtV2Maps";
+import { PsbtV2Modifiable } from "./psbtv2/PsbtV2Modifiable";
 import { ByteSizes } from "./schnorr/ByteSizes";
 import { ChallengePreimage } from "./schnorr/ChallengePreimage";
 import { Equation } from "./schnorr/Equation";
@@ -181,6 +187,11 @@ export const STATIC_FIGURES: Record<string, StaticFigure> = {
   "bip67-script-story.v1": one(Bip67ScriptStory),
   "bip48-paths.v1": all(Bip48Paths),
 
+  // strict-signatures
+  "der-anatomy.v1": all(DerAnatomy),
+  "der-low-s.v1": all(DerLowS),
+  "der-txid-flip.v1": all(DerTxidFlip),
+
   // segwit
   "two-serializations.v1": one(TwoSerializations),
   "witness-field.v1": one(WitnessField),
@@ -206,6 +217,11 @@ export const STATIC_FIGURES: Record<string, StaticFigure> = {
   "psbt-utxo-check.v1": one(UtxoCheck),
   "psbt-combine.v1": one(PsbtCombine),
   "psbt-finalize.v1": one(PsbtFinalize),
+
+  // psbt-v2
+  "psbt-v2-maps.v1": one(PsbtV2Maps),
+  "psbt-v2-modifiable.v1": all(PsbtV2Modifiable),
+  "psbt-v2-invalid.v1": all(PsbtV2Invalid),
   "unknown-fields.v1": one(UnknownFields),
 
   // schnorr
