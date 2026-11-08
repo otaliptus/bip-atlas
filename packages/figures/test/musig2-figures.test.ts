@@ -8,13 +8,11 @@ import {
   nonceAgg, partialSigAgg, partialSigVerify, pointHex, sessionValues, xonlyPk,
 } from "@bip-atlas/models/musig2";
 import { ChainView } from "../src/musig2/ChainView";
-import { Coefficients } from "../src/musig2/Coefficients";
 import { Musig2KeyAgg } from "../src/musig2/Musig2KeyAgg";
 import { Musig2PsigChecks } from "../src/musig2/Musig2PsigChecks";
 import { Musig2Rounds } from "../src/musig2/Musig2Rounds";
 import { NonceOnce } from "../src/musig2/NonceOnce";
-import { RoundStory } from "../src/musig2/RoundStory";
-import { short } from "../src/musig2/scene";
+import { short } from "../src/kit";
 import type { DerivedMusig2KeyaggFixture, DerivedMusig2PsigChecksFixture, DerivedMusig2SessionFixture } from "../src/types";
 
 const root = new URL("../../../", import.meta.url);
@@ -115,15 +113,6 @@ describe("A14.2 key aggregation", () => {
   });
 });
 
-describe("A14.3 coefficients", () => {
-  it("hashes L and one coefficient and gives the second key 1", () => {
-    const s = html(el(Coefficients, { fixture: s0 }));
-    expect(s).toContain(`>${s0.derived.keyListHash}</code>`);
-    expect(s).toContain("a2 = 1");
-    expect(s.split('class="k-story__frame"').length - 1).toBe(4);
-  });
-});
-
 describe("A14.4 hero (no-JS)", () => {
   const fx = ["sig-agg-0", "sig-agg-1", "sig-agg-2", "sig-agg-3"].map(session);
   it("renders the whole first session with every lamp lit and no secret", () => {
@@ -137,15 +126,6 @@ describe("A14.4 hero (no-JS)", () => {
   it("vector 3 carries three tweaks, all drawn", () => {
     const s = html(el(Musig2Rounds, { fixtures: [fx[3]], figureId: "x" }));
     for (const t of fx[3].derived.tweaks) expect(s).toContain(short(t.resultXonly));
-  });
-});
-
-describe("A14.5 round storyboard", () => {
-  it("has one frame per stage and draws secrets without values", () => {
-    const s = html(el(RoundStory, { fixture: s0 }));
-    expect(s.split('class="k-story__frame"').length - 1).toBe(5);
-    expect(s).toContain("secret key, nonce");
-    expect(s).toContain("nonce used");
   });
 });
 

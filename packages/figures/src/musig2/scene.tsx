@@ -1,9 +1,7 @@
-import { Computer, Lamp, Value, type DrawingIds } from "../kit";
+import { Computer, Lamp, Value, short, type DrawingIds } from "../kit";
 import type { Role } from "../kit";
 import type { Musig2SessionDerived } from "../types";
 
-/** First 8 hex digits and an ellipsis; figures using it also list the exact value. */
-export const short = (hex: string) => `${hex.slice(0, 8)}…`;
 export const ONE = "1".padStart(64, "0");
 
 export type StageId = "keys" | "tweaks" | "round1" | "session" | "round2" | "aggregate";

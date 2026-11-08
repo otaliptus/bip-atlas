@@ -1,6 +1,5 @@
-import { Drawing, Responsive, Value, idsFor } from "../kit";
+import { Drawing, Responsive, Value, idsFor, short } from "../kit";
 import type { DerivedMusig2SessionFixture } from "../types";
-import { short } from "./scene";
 
 /** The private collaboration and its public footprint, with no individual key values. */
 export function ChainView({ fixture }: { fixture: DerivedMusig2SessionFixture }) {

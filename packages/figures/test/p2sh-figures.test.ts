@@ -2,7 +2,7 @@ import { h, type VNode } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { P2shCommitment } from "../src/p2sh/P2shCommitment";
-import { P2shFailures, P2shShape, P2shStackStory } from "../src/p2sh/P2shStatics";
+import { P2shFailures, P2shShape } from "../src/p2sh/P2shStatics";
 import { P2shTwoStage, p2shHeroSpec } from "../src/p2sh/P2shTwoStage";
 import { P2shLimit, P2shWrapped } from "../src/p2sh/P2shWrapped";
 import type { DerivedP2shFixture } from "../src/types";
@@ -74,11 +74,6 @@ describe("Static P2SH drawings", () => {
     expect(all.map((f) => f.derived.redeemScriptHex.length / 2)).toEqual([71, 34, 22]);
     for (const f of all) expect(f.derived.scriptPubKeyHex.length / 2).toBe(23);
     expect((s.match(/>23 B</g) ?? []).length).toBe(3);
-  });
-  it("A09.3: five frames from the recorded trace", () => {
-    const s = html(h(P2shStackStory, { fixture: legacy }));
-    expect(s.split('class="k-story__frame"').length - 1).toBe(5);
-    expect(s).toContain("SIG 1 → KEY 1 ✓");
   });
   it("A09.5: three failures, the altered hash in full", () => {
     const s = html(h(P2shFailures, { fixture: legacy }));

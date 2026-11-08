@@ -1,6 +1,6 @@
-import { Arrow, Drawing, KeyGlyph, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, KeyGlyph, Machine, Value, idsFor, short } from "../kit";
 import type { DerivedMusig2KeyaggFixture } from "../types";
-import { ONE, short } from "./scene";
+import { ONE } from "./scene";
 
 /**
  * musig2-keyagg.v1 — static. Three published keys go into a KeyAgg machine

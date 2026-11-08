@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "bip-atlas.publication.v1",
+  "chapterId": "derived-seeds",
+  "primaryBips": [85],
+  "specimenLabel": "BIP 0085",
+  "title": "How can one backup create separate seeds for other wallets?",
+  "dek": "BIP 85 turns one BIP 32 root key into separate entropy for each wallet, key or password. A hardened path names each use, and HMAC-SHA512 keeps an output from leading back to the root.",
+  "authorship": "hand-authored",
+  "reviewState": "draft-unreviewed",
+  "sourceSnapshot": "sources/research-2026-11-08-phase4",
+  "opening": {
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Someone with several wallets faces a problem that BIP 85 starts from. One mnemonic cannot serve every wallet, because wallets follow incompatible standards. Sharing one seed between wallets is undesirable for security, and keeping many separate backups safe is hard.",
+        "claims": ["one-backup"]
+      },
+      {
+        "type": "paragraph",
+        "text": "With BIP 85 the user keeps a single backup, a BIP 32 root key, and each application derives its own entropy from it. The receiving wallet uses that entropy the way it would use freshly generated randomness: as a BIP 39 mnemonic, a private key, an extended key or a password.",
+        "claims": ["entropy-for-wallets", "one-root"]
+      }
+    ],
+    "figure": {
+      "type": "figure",
+      "figure": "A19.1",
+      "recipe": "bip85-applications.v1",
+      "title": "One root, a separate output for each application",
+      "fixtures": ["bip85-bip39-12", "bip85-bip39-24", "bip85-wif", "bip85-xprv", "bip85-hex", "bip85-pwd", "bip85-dice"],
+      "caption": "Choose an application. Its path leads to a child key k; HMAC-SHA512 turns k into 64 bytes, and the application reads only the bytes it needs. Every value is one of BIP 85's published vectors, recomputed by the model. The toggle hatches what someone holding only the output cannot know.",
+      "claims": ["k-hmac", "truncate", "vectors", "hmac-rationale"],
+      "layout": "wide"
+    }
+  },
+  "sections": [
+    {
+      "id": "paths",
+      "heading": "One path per application",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every BIP 85 path starts at the purpose 83696968'. The next level is the application number, then that application's own parameters, and last an index. Application numbers are meant to be meaningful, such as a BIP number or ASCII codes: 39' makes BIP 39 mnemonics, 32' extended keys. Read two digits at a time as ASCII codes, 83696968 itself spells SEED.",
+          "claims": ["path-format", "semantic-numbers", "seed-ascii"]
+        },
+        {
+          "type": "paragraph",
+          "text": "For a mnemonic, the parameters are a language and a word count. Twelve English words at the first index sit at `m/83696968'/39'/0'/12'/0'`; the next twelve sit at index `1'`. Each level is hardened, as the apostrophes show.",
+          "claims": ["bip39-app", "k-hmac"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.2",
+          "recipe": "bip85-path.v1",
+          "title": "Two paths, level by level",
+          "fixtures": ["bip85-bip39-12", "bip85-wif"],
+          "caption": "The paths of two published vectors: twelve English words, and a WIF key. Each level selects something, and every level is hardened. The ASCII reading of the purpose number is ours; BIP 85 does not state it.",
+          "claims": ["path-format", "bip39-app", "wif-app", "seed-ascii"],
+          "layout": "prose"
+        }
+      ]
+    },
+    {
+      "id": "hmac",
+      "heading": "From a child key to entropy",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Ordinary hardened BIP 32 derivation along the path gives a child private key, k. BIP 85 does not hand k to the application. It computes HMAC-SHA512 with the text `bip-entropy-from-k` as the key and k as the message, which gives 512 bits.",
+          "claims": ["k-hmac", "truncate"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The authors give two reasons for the extra step. If k were ever compromised, the HMAC keeps the rest of the key tree from leaking; the specification requires hardened derivation, but software cannot enforce that, and the HMAC makes the derived entropy hardened either way. And the application wants entropy, not a key, so the child key should be transformed first.",
+          "claims": ["hmac-rationale"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Each application SHOULD use only the bits it needs and drop the rest. Twelve words take the first 128 bits; twenty-four take the first 256.",
+          "claims": ["truncate", "bip39-app"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.3",
+          "recipe": "bip85-story.v1",
+          "title": "From root key to twelve words",
+          "fixtures": ["bip85-bip39-12"],
+          "caption": "BIP 85's 12-word vector, step by step. The vector does not publish k for this path; the model computes it, and the build checks the kept bytes and the words against the vector.",
+          "claims": ["vectors", "k-hmac", "bip39-app"],
+          "layout": "wide"
+        }
+      ]
+    },
+    {
+      "id": "applications",
+      "heading": "Different uses for 64 bytes",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Applications differ only in what they do with the 64 bytes. The HD-seed WIF uses the first 256 bits as a private key, encoded as a compressed WIF for Bitcoin Core wallets. An extended private key takes the first 32 bytes as its chain code and the second 32 as its key, with depth, parent fingerprint and child number set to zero. BIP 85 warns that this reverses BIP 32's order.",
+          "claims": ["wif-app", "xprv-app"]
+        },
+        {
+          "type": "paragraph",
+          "text": "Some applications serve uses beyond wallets. HEX outputs 16 to 64 bytes. A password Base64-encodes all 64 bytes and keeps the first 20 to 86 characters. Dice rolls, for PINs and other numeric secrets, read from BIP85-DRNG: a SHAKE256 stream seeded with the 64 bytes, for uses that need more input than that.",
+          "claims": ["hex-app", "pwd-app", "drng", "dice-app"]
+        },
+        {
+          "type": "figure",
+          "figure": "A19.4",
+          "recipe": "bip85-uses.v1",
+          "title": "What each application reads",
+          "fixtures": ["bip85-bip39-12", "bip85-bip39-24", "bip85-wif", "bip85-xprv", "bip85-hex", "bip85-pwd", "bip85-dice"],
+          "caption": "Each published application's own 64 bytes, filled where the application reads them. Every application has its own path, so each row is different entropy; the figure compares which bytes are read, not their values.",
+          "claims": ["vectors", "wif-app", "xprv-app", "hex-app", "pwd-app", "dice-app"],
+          "layout": "prose"
+        },
+        {
+          "type": "details",
+          "summary": "When a derived key is invalid, and how dice avoid bias",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "A private key made from the bytes can, with probability below 1 in 2^127, be zero or not below the curve order. Software should then fail, and the user moves on to the next index.",
+              "claims": ["invalid-key"]
+            },
+            {
+              "type": "paragraph",
+              "text": "A die with N sides reads just enough bits from the DRNG to cover N values, ceil(log2 N) of them. A trial that comes out N or more is skipped, and the next one read. BIP 85's six-sided vector rolls `1,0,0,2,0,1,5,5,2,4`, zero-indexed.",
+              "claims": ["dice-app", "vectors"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "heading": "What the root still controls",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Every output is computed from the root key and its path alone. Whoever holds the root can recompute every output, which is what makes one backup enough. One output does not reveal k, the root, or the output of another path.",
+          "claims": ["root-recomputes", "hmac-rationale"]
+        },
+        {
+          "type": "paragraph",
+          "text": "The receiving wallet sees an ordinary mnemonic, key or password; nothing in it marks it as derived. BIP 85 does not care how the root itself was made, whether from a BIP 39 mnemonic or another scheme, and records that it is not backwards compatible with any other specification.",
+          "claims": ["ordinary-output", "one-root", "no-compat"]
+        },
+        {
+          "type": "callout",
+          "label": "Caveat",
+          "text": "Every output in these figures comes from BIP 85's published root key. It is public test material: never use it, or anything derived from it, for funds or passwords.",
+          "claims": ["vectors"]
+        },
+        {
+          "type": "details",
+          "summary": "Why one shared mnemonic is not enough",
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "The authors point out that some wallets are inherently less secure, such as hot wallets on phones or Lightning nodes. A wallet that shares the main mnemonic exposes everything the mnemonic controls; a wallet with a derived mnemonic exposes only its own.",
+              "claims": ["hot-wallets", "root-recomputes"]
+            },
+            {
+              "type": "paragraph",
+              "text": "BIP 85 (Ethan Kosakovsky and Aneesh Karve) was assigned in 2020 and is recorded as Deployed and Informational. The pinned text is version 2.1.0.",
+              "claims": ["preamble"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

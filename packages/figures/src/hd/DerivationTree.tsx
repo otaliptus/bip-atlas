@@ -1,10 +1,9 @@
-import { Drawing, KeyGlyph, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import { Drawing, KeyGlyph, Machine, Responsive, Value, idsFor, short, type DrawingIds } from "../kit";
 import type { Bip32NodeDerived, DerivedBip32Fixture } from "../types";
 import { allStates, layer, matches, stateKey, type HeroSpec, type HeroState } from "../heroLayers";
 
 type View = "private" | "public";
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 /** BIP 32 writes the public-key view with a capital M; never change the case of paths otherwise. */
 const shown = (path: string, view: View, reachable: boolean) => (view === "public" && reachable ? path.replace(/^m/, "M") : path);
 

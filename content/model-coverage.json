@@ -106,5 +106,23 @@
     "published": "BIP 322 basic and generated vectors: message and virtual-transaction hashes, every simple and full signature case, and published error cases.",
     "additional": "Reviewed interpreter rules, changed messages and addresses, commitment checks and unsupported spend shapes.",
     "limits": "A partial verifier: committed scripts or spend shapes outside its reviewed set and proof-of-funds PSBTs can be inconclusive; earlier invalidity still takes precedence."
+  },
+  "derived-seeds": {
+    "name": "BIP 85",
+    "published": "BIP 85's vectors from its published root key: test cases 1 and 2, the DRNG bytes, 12, 18 and 24 English words, the HD-seed WIF, XPRV, HEX, Base64 password and dice outputs.",
+    "additional": "Path rules (BIP 85 purpose, every level hardened), each application's parameter ranges, and different outputs for different indexes and word counts.",
+    "limits": "English word lists only; the Base85 password, RSA, RSA-GPG and Nostr applications are not modelled. Public test vectors only: it never handles a real root key."
+  },
+  "sorted-multisig": {
+    "name": "BIPs 67 and 48",
+    "published": "All four BIP 67 vectors (sorted keys, redeem script, P2SH address) and every path in BIP 48's examples table.",
+    "additional": "All six orders of a three-key set built without sorting (six different addresses), byte-by-byte comparison of neighbouring keys, refusal of uncompressed keys, and BIP 48's hardened and normal levels.",
+    "limits": "Builds scripts and addresses from public keys only: no key derivation for BIP 48 paths, no witness-script (P2WSH) addresses, and no signing."
+  },
+  "payment-links": {
+    "name": "BIPs 321 and 21",
+    "published": "All 21 of BIP 321's example URIs, valid and invalid, read as the BIP labels them, and its four proof-of-payment examples, including both published callbacks.",
+    "additional": "Percent-decoding, case-insensitive keys, the empty-body rule, the amount format, keys under the wrong HRP, and three illustrative wallets that implement different keys.",
+    "limits": "Reads addresses and invoices by form only, as BIP 321's examples are deliberately invalid; it never validates checksums, resolves payments or opens callbacks."
   }
 }

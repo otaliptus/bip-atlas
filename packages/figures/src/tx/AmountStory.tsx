@@ -1,6 +1,6 @@
-import { Arrow, Cells, Computer, Machine, Storyboard, Value, type DrawingIds, type Frame } from "../kit";
+import { Arrow, Cells, Computer, Machine, Storyboard, Value, short, type DrawingIds, type Frame } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
-import { preimageRole, shortHex, txFields } from "./fields";
+import { preimageRole, txFields } from "./fields";
 
 /**
  * amount-storyboard.v1 — static storyboard. Why BIP 143 signs the amount: an
@@ -32,7 +32,7 @@ export function AmountStory({ fixture }: { fixture: DerivedTransactionFixture })
         <>
           <Computer at={[30, 30]} label="offline signer" />
           <rect class="k-cell k-fill--hash" x="96" y="34" width="120" height="20" />
-          <Value at={[101, 47.5]} text={`prev txid ${shortHex(txid.hex, 8)}`} size={9} />
+          <Value at={[101, 47.5]} text={`prev txid ${short(txid.hex, 8)}`} size={9} />
           <rect class="k-cell k-fill--plain" x="216" y="34" width="28" height="20" />
           <Value at={[221, 47.5]} text="idx" size={9} />
           <rect class="k-cell" x="96" y="78" width="72" height="20" style={`fill:${ids.hatch}`} />
@@ -54,7 +54,7 @@ export function AmountStory({ fixture }: { fixture: DerivedTransactionFixture })
           <Arrow d="M170 84 V96" ids={ids} />
           <Machine at={[160, 126]} w={44} d={24} h={18} label="" role="hash" />
           <Value at={[214, 112]} text="SIGHASH" size={9} cls="k-value--label" />
-          <Value at={[214, 125]} text={shortHex(d.digest.sighashHex, 10)} size={9} cls="k-value--hash" />
+          <Value at={[214, 125]} text={short(d.digest.sighashHex, 10)} size={9} cls="k-value--hash" />
         </>
       ),
     },
@@ -71,7 +71,7 @@ export function AmountStory({ fixture }: { fixture: DerivedTransactionFixture })
           <Arrow d="M170 84 V96" ids={ids} />
           <Machine at={[160, 126]} w={44} d={24} h={18} label="" role="hash" />
           <Value at={[214, 112]} text="DIGEST" size={9} cls="k-value--label" />
-          <Value at={[214, 125]} text={`≠ ${shortHex(d.digest.sighashHex, 8)}`} size={9} cls="k-value--fail" />
+          <Value at={[214, 125]} text={`≠ ${short(d.digest.sighashHex, 8)}`} size={9} cls="k-value--fail" />
           <Value at={[214, 138]} text="✗ SIGNATURE" size={9} cls="k-value--fail" /><Value at={[214, 150]} text="FAILS" size={9} cls="k-value--fail" />
         </>
       ),

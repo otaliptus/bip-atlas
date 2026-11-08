@@ -1,6 +1,6 @@
-import { Arrow, Bracket, Cells, Drawing, KeyGlyph, Lamp, Machine, Value, idsFor } from "../kit";
+import { Arrow, Bracket, Cells, Drawing, KeyGlyph, Lamp, Machine, Value, idsFor, short } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
-import { ownTrace, short } from "./stages";
+import { ownTrace } from "./stages";
 
 const PK_BYTES = 32;
 const SIG_BYTES = 64;

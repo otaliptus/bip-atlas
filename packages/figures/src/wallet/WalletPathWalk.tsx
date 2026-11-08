@@ -1,8 +1,7 @@
-import { COS30, Drawing, IsoBox, KeyGlyph, Responsive, Tag, Value, idsFor, iso, onTop, type DrawingIds } from "../kit";
+import { COS30, Drawing, IsoBox, KeyGlyph, Responsive, Tag, Value, idsFor, iso, onTop, short, type DrawingIds } from "../kit";
 import type { DerivedWalletPathFixture, WalletAddressView, WalletNodeView } from "../types";
 import { allStates, layer, matches, stateKey, type HeroSpec, type HeroState } from "../heroLayers";
 
-const short = (s: string, n = 8) => `${s.slice(0, n)}…`;
 /** BIP 44 writes hardened levels with an apostrophe; this book prints a prime. */
 const seg = (n: WalletNodeView) => (n.index === null ? "m" : `${n.index}${n.hardened ? "′" : ""}`);
 

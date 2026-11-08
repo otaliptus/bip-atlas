@@ -3,7 +3,6 @@ import type { DerivedTransactionFixture } from "../types";
 import { PartsRow, placeParts } from "./PartsRow";
 import { KeyCheck, WitnessLabels, witnessParts } from "./WitnessField";
 
-
 /**
  * nested-input.v1 — static. One P2SH-wrapped P2WPKH input: a scriptSig that
  * pushes a 22-byte redeem script (witness version 0, then a push of the 20-byte witness program, a key hash), and a

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import { holdFocus } from "../focus";
-import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Responsive, Value, idsFor, type DrawingIds } from "../kit";
+import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Responsive, Value, idsFor, short, type DrawingIds } from "../kit";
 import type { DerivedTaprootTreeFixture, TaprootLeafView } from "../types";
 import { layoutTree, pruneForView, seenMap, type Seen } from "./treeLayout";
 
@@ -14,7 +14,6 @@ interface Props {
   initial?: { path: Path; leafId: number; view: View };
 }
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 const leafName = (id: number) => `Leaf ${String.fromCharCode(65 + id)}`;
 
 /**

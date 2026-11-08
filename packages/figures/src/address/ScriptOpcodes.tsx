@@ -1,8 +1,6 @@
 import { CHARSET, analyzeSegwitAddress } from "@bip-atlas/models/bech32";
-import { Arrow, Drawing, Value, idsFor } from "../kit";
+import { Arrow, Drawing, Value, idsFor, short } from "../kit";
 import type { AddressFixture } from "../types";
-
-const short = (s: string, n: number) => `${s.slice(0, n)}…`;
 
 /**
  * address-script.v1 — static. From address to output script for a v0 and a

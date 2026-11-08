@@ -1,7 +1,6 @@
-import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Value, idsFor, short } from "../kit";
 import type { DerivedTaprootTreeFixture } from "../types";
 
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 const ROW = 150;
 
 /**

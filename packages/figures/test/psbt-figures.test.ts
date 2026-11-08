@@ -5,7 +5,6 @@ import { PsbtEnvelope, psbtHeroSpec } from "../src/psbt/PsbtEnvelope";
 import { PsbtLayout, psbtBytes } from "../src/psbt/PsbtLayout";
 import { PsbtCombine, PsbtFinalize, UnknownFields } from "../src/psbt/PsbtMerge";
 import { PsbtRecords } from "../src/psbt/PsbtRecords";
-import { PsbtRoleStory } from "../src/psbt/PsbtRoleStory";
 import { SignerDisplay, UtxoCheck } from "../src/psbt/PsbtSigner";
 import type { DerivedPsbtCombineFixture, DerivedPsbtTraceFixture } from "../src/types";
 import { deriveChapter } from "./derived";
@@ -72,12 +71,6 @@ describe("Static PSBT drawings", () => {
     expect(s).toContain("FROM SIGNER A");
     expect(s).toContain("FROM SIGNER B");
     expect(s).toContain("TYPE + KEY DATA");
-  });
-  it("A05.4 storyboard: one frame per state plus the extractor", () => {
-    const s = html(h(PsbtRoleStory, { fixture: trace }));
-    expect(s.split('class="k-story__frame"').length - 1).toBe(trace.derived.states.length + 1);
-    expect(s).toContain(trace.derived.extracted.txidDisplayHex);
-    expect(trace.derived.extracted.txidDisplayHex).toBe(trace.derived.extracted.txidHex.match(/../g)!.reverse().join(""));
   });
   it("A05.5: amounts and fee from the model", () => {
     const a = trace.derived.amounts;

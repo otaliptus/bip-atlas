@@ -7,14 +7,11 @@ interface Props {
   figure: Figure;
   numbers: Map<string, number>;
   interactive?: boolean;
-  /** Illustration-kit figure: no card, no tabs (decision D3). */
-  drawing?: boolean;
   path: string;
 }
-const { figure, numbers, interactive = false, drawing = false, path } = Astro.props;
+const { figure, numbers, interactive = false, path } = Astro.props;
 const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
 ---
-{drawing ? (
 <figure class:list={["atlas-fig", `atlas-fig--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`} data-interactive={interactive ? "true" : undefined}>
   <span class="atlas-fig__code" aria-hidden="true">FIG. {figure.figure}</span>
   <p class="atlas-fig__title" id={`${id}-title`}><span class="atlas-fig__num">{`Fig. ${figure.figure} `}</span>{figure.title}</p>
@@ -23,20 +20,3 @@ const id = `fig-${figure.figure.replace(".", "-").toLowerCase()}`;
     <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
   </figcaption>
 </figure>
-) : (
-<figure class:list={["manual-plate", "atlas-plate", `atlas-plate--${figure.layout}`]} id={id} aria-labelledby={`${id}-title`}>
-  <div class="atlas-plate__head">
-    <span class="manual-plate-code">FIG. {figure.figure}</span>
-    <span class="atlas-plate__title" id={`${id}-title`}>{figure.title}</span>
-    {interactive && <span class="atlas-plate__kind">Interactive</span>}
-  </div>
-  <div class="manual-plate-stage">
-    <span class="atlas-plate__code" aria-hidden="true">FIG. {figure.figure}</span>
-    <slot />
-  </div>
-  <figcaption class="manual-plate-caption">
-    <Inline text={figure.caption} /><ClaimRefs claims={figure.claims} numbers={numbers} at={path} />
-  </figcaption>
-</figure>
-)}
-

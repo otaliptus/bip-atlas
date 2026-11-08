@@ -1,6 +1,6 @@
-import { Arrow, Bracket, Machine, Storyboard, Value, type DrawingIds, type Frame } from "../kit";
+import { Arrow, Bracket, Machine, Storyboard, Value, short, type DrawingIds, type Frame } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
-import { shortHex, txGroups } from "./fields";
+import { txGroups } from "./fields";
 
 /**
  * two-serializations.v1 — static storyboard (replaces the retired worked
@@ -54,7 +54,7 @@ export function TwoSerializations({ fixture }: { fixture: DerivedTransactionFixt
       <Arrow d={`M${from} ${tapeY + tapeH + 4} V${tapeY + tapeH + 22}`} ids={ids} />
       <Machine at={[from - 20, 128]} w={64} d={30} h={26} label="SHA-256" sub="twice" role="hash" />
       <Value at={[from + 62, 130]} text={name} size={9} cls="k-value--label" />
-      <Value at={[from + 62, 143]} text={shortHex(hex, 12)} size={9.5} cls="k-value--hash" />
+      <Value at={[from + 62, 143]} text={short(hex, 12)} size={9.5} cls="k-value--hash" />
     </>
   );
   /** Leaders to the tiny fields at either end of the tape. */

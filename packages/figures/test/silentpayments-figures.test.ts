@@ -4,7 +4,6 @@ import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { hexToBytes } from "@bip-atlas/models/hex";
 import { createOutputs, decodeAddress, parseWitness, readInput, receiverAddresses, scan } from "@bip-atlas/models/silentpayments";
-import { DeriveStory } from "../src/silentpayments/DeriveStory";
 import { EcdhStory } from "../src/silentpayments/EcdhStory";
 import { ScanLoop } from "../src/silentpayments/ScanLoop";
 import { SpAddress } from "../src/silentpayments/SpAddress";
@@ -100,16 +99,6 @@ describe("A15.2 ECDH storyboard", () => {
     const s = html(h(EcdhStory, {}));
     expect(s.split('class="k-story__frame"').length - 1).toBe(5);
     expect(s).not.toMatch(/[0-9a-f]{16}/);
-  });
-});
-
-describe("A15.3 derive storyboard", () => {
-  it("shows the same shared secret from both sides and the scan stopping", () => {
-    const s = html(h(DeriveStory, { fixture: s0 }));
-    expect(s0.derived.senderSecret).toBe(s0.derived.sharedSecret);
-    expect(s).toContain(`>${s0.derived.sharedSecret}</code>`);
-    expect(s).toContain("NOT FOUND: STOP");
-    expect(s.split('class="k-story__frame"').length - 1).toBe(6);
   });
 });
 

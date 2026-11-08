@@ -1,0 +1,1092 @@
+{
+  "schemaVersion": "bip-atlas.research-declared-relations.v1",
+  "direction": "source depends on / replaces / names a proposed replacement target; do not reverse these kinds indiscriminately.",
+  "edges": [
+    {
+      "source": 1,
+      "target": 2,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0001.mediawiki",
+        "line": 8,
+        "text": "Proposed-Replacement: 2",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0001.mediawiki#L8"
+      }
+    },
+    {
+      "source": 2,
+      "target": 1,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0002.mediawiki",
+        "line": 9,
+        "text": "Replaces: 1",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0002.mediawiki#L9"
+      }
+    },
+    {
+      "source": 2,
+      "target": 3,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0002.mediawiki",
+        "line": 10,
+        "text": "Proposed-Replacement: 3",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0002.mediawiki#L10"
+      }
+    },
+    {
+      "source": 3,
+      "target": 123,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0003.md",
+        "line": 12,
+        "text": "Requires: 123",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md#L12"
+      }
+    },
+    {
+      "source": 3,
+      "target": 2,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0003.md",
+        "line": 13,
+        "text": "Replaces: 2",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0003.md#L13"
+      }
+    },
+    {
+      "source": 20,
+      "target": 21,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0020.mediawiki",
+        "line": 10,
+        "text": "Proposed-Replacement: 21",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0020.mediawiki#L10"
+      }
+    },
+    {
+      "source": 21,
+      "target": 20,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0021.mediawiki",
+        "line": 10,
+        "text": "Replaces: 20",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0021.mediawiki#L10"
+      }
+    },
+    {
+      "source": 21,
+      "target": 321,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0021.mediawiki",
+        "line": 11,
+        "text": "Proposed-Replacement: 321",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0021.mediawiki#L11"
+      }
+    },
+    {
+      "source": 44,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0044.mediawiki",
+        "line": 12,
+        "text": "Requires: 32, 43",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0044.mediawiki#L12"
+      }
+    },
+    {
+      "source": 44,
+      "target": 43,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0044.mediawiki",
+        "line": 12,
+        "text": "Requires: 32, 43",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0044.mediawiki#L12"
+      }
+    },
+    {
+      "source": 77,
+      "target": 21,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0077.md",
+        "line": 16,
+        "text": "Requires: 21, 78, 173, 174",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L16"
+      }
+    },
+    {
+      "source": 77,
+      "target": 78,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0077.md",
+        "line": 16,
+        "text": "Requires: 21, 78, 173, 174",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L16"
+      }
+    },
+    {
+      "source": 77,
+      "target": 173,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0077.md",
+        "line": 16,
+        "text": "Requires: 21, 78, 173, 174",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L16"
+      }
+    },
+    {
+      "source": 77,
+      "target": 174,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0077.md",
+        "line": 16,
+        "text": "Requires: 21, 78, 173, 174",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L16"
+      }
+    },
+    {
+      "source": 78,
+      "target": 79,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0078.mediawiki",
+        "line": 10,
+        "text": "Replaces: 79",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0078.mediawiki#L10"
+      }
+    },
+    {
+      "source": 79,
+      "target": 78,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0079.mediawiki",
+        "line": 10,
+        "text": "Proposed-Replacement: 78",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0079.mediawiki#L10"
+      }
+    },
+    {
+      "source": 89,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0089.mediawiki",
+        "line": 15,
+        "text": "Requires: 32, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0089.mediawiki#L15"
+      }
+    },
+    {
+      "source": 89,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0089.mediawiki",
+        "line": 15,
+        "text": "Requires: 32, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0089.mediawiki#L15"
+      }
+    },
+    {
+      "source": 89,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0089.mediawiki",
+        "line": 15,
+        "text": "Requires: 32, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0089.mediawiki#L15"
+      }
+    },
+    {
+      "source": 95,
+      "target": 54,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0095.md",
+        "line": 13,
+        "text": "Requires: 54",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0095.md#L13"
+      }
+    },
+    {
+      "source": 95,
+      "target": 94,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0095.md",
+        "line": 14,
+        "text": "Replaces: 94",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0095.md#L14"
+      }
+    },
+    {
+      "source": 118,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0118.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0118.mediawiki#L13"
+      }
+    },
+    {
+      "source": 118,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0118.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0118.mediawiki#L13"
+      }
+    },
+    {
+      "source": 118,
+      "target": 342,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0118.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0118.mediawiki#L13"
+      }
+    },
+    {
+      "source": 129,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 174,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 322,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 381,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 382,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 129,
+      "target": 383,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0129.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 174, 322, 380, 381, 382, 383",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0129.mediawiki#L14"
+      }
+    },
+    {
+      "source": 135,
+      "target": 9,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0135.mediawiki",
+        "line": 11,
+        "text": "Replaces: 9",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0135.mediawiki#L11"
+      }
+    },
+    {
+      "source": 138,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 138,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 138,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 138,
+      "target": 388,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 138,
+      "target": 389,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 138,
+      "target": 390,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0138.md",
+        "line": 14,
+        "text": "Requires: 32, 340, 380, 388, 389, 390",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L14"
+      }
+    },
+    {
+      "source": 151,
+      "target": 324,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0151.mediawiki",
+        "line": 12,
+        "text": "Proposed-Replacement: 324",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0151.mediawiki#L12"
+      }
+    },
+    {
+      "source": 157,
+      "target": 158,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0157.mediawiki",
+        "line": 12,
+        "text": "Requires: 158",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0157.mediawiki#L12"
+      }
+    },
+    {
+      "source": 158,
+      "target": 157,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0158.mediawiki",
+        "line": 11,
+        "text": "Requires: 157",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0158.mediawiki#L11"
+      }
+    },
+    {
+      "source": 173,
+      "target": 142,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0173.mediawiki",
+        "line": 13,
+        "text": "Replaces: 142",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0173.mediawiki#L13"
+      }
+    },
+    {
+      "source": 173,
+      "target": 350,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0173.mediawiki",
+        "line": 14,
+        "text": "Proposed-Replacement: 350",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0173.mediawiki#L14"
+      }
+    },
+    {
+      "source": 320,
+      "target": 323,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0320.mediawiki",
+        "line": 9,
+        "text": "Proposed-Replacement: 323",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0320.mediawiki#L9"
+      }
+    },
+    {
+      "source": 321,
+      "target": 21,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0321.mediawiki",
+        "line": 10,
+        "text": "Replaces: 21",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0321.mediawiki#L10"
+      }
+    },
+    {
+      "source": 322,
+      "target": 174,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0322.mediawiki",
+        "line": 19,
+        "text": "Requires: 174, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0322.mediawiki#L19"
+      }
+    },
+    {
+      "source": 322,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0322.mediawiki",
+        "line": 19,
+        "text": "Requires: 174, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0322.mediawiki#L19"
+      }
+    },
+    {
+      "source": 322,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0322.mediawiki",
+        "line": 19,
+        "text": "Requires: 174, 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0322.mediawiki#L19"
+      }
+    },
+    {
+      "source": 323,
+      "target": 320,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0323.mediawiki",
+        "line": 10,
+        "text": "Replaces: 320",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0323.mediawiki#L10"
+      }
+    },
+    {
+      "source": 324,
+      "target": 151,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0324.mediawiki",
+        "line": 14,
+        "text": "Replaces: 151",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0324.mediawiki#L14"
+      }
+    },
+    {
+      "source": 332,
+      "target": 434,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0332.md",
+        "line": 14,
+        "text": "Requires: 434",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0332.md#L14"
+      }
+    },
+    {
+      "source": 341,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0341.mediawiki",
+        "line": 16,
+        "text": "Requires: 340",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki#L16"
+      }
+    },
+    {
+      "source": 342,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0342.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0342.mediawiki#L13"
+      }
+    },
+    {
+      "source": 342,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0342.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0342.mediawiki#L13"
+      }
+    },
+    {
+      "source": 345,
+      "target": 443,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0345.mediawiki",
+        "line": 13,
+        "text": "Proposed-Replacement: 443",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0345.mediawiki#L13"
+      }
+    },
+    {
+      "source": 347,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0347.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0347.mediawiki#L13"
+      }
+    },
+    {
+      "source": 347,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0347.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0347.mediawiki#L13"
+      }
+    },
+    {
+      "source": 347,
+      "target": 342,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0347.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0347.mediawiki#L13"
+      }
+    },
+    {
+      "source": 350,
+      "target": 173,
+      "kind": "declared-replaces",
+      "evidence": {
+        "path": "bip-0350.mediawiki",
+        "line": 11,
+        "text": "Replaces: 173",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0350.mediawiki#L11"
+      }
+    },
+    {
+      "source": 352,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0352.mediawiki",
+        "line": 17,
+        "text": "Requires: 340, 341, 350",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0352.mediawiki#L17"
+      }
+    },
+    {
+      "source": 352,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0352.mediawiki",
+        "line": 17,
+        "text": "Requires: 340, 341, 350",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0352.mediawiki#L17"
+      }
+    },
+    {
+      "source": 352,
+      "target": 350,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0352.mediawiki",
+        "line": 17,
+        "text": "Requires: 340, 341, 350",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0352.mediawiki#L17"
+      }
+    },
+    {
+      "source": 360,
+      "target": 340,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0360.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0360.mediawiki#L13"
+      }
+    },
+    {
+      "source": 360,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0360.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0360.mediawiki#L13"
+      }
+    },
+    {
+      "source": 360,
+      "target": 342,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0360.mediawiki",
+        "line": 13,
+        "text": "Requires: 340, 341, 342",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0360.mediawiki#L13"
+      }
+    },
+    {
+      "source": 372,
+      "target": 174,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0372.mediawiki",
+        "line": 10,
+        "text": "Requires: BIP-174",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0372.mediawiki#L10"
+      }
+    },
+    {
+      "source": 373,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0373.mediawiki",
+        "line": 10,
+        "text": "Requires: 32, 174, 327, 328, 370",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L10"
+      }
+    },
+    {
+      "source": 373,
+      "target": 174,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0373.mediawiki",
+        "line": 10,
+        "text": "Requires: 32, 174, 327, 328, 370",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L10"
+      }
+    },
+    {
+      "source": 373,
+      "target": 327,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0373.mediawiki",
+        "line": 10,
+        "text": "Requires: 32, 174, 327, 328, 370",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L10"
+      }
+    },
+    {
+      "source": 373,
+      "target": 328,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0373.mediawiki",
+        "line": 10,
+        "text": "Requires: 32, 174, 327, 328, 370",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L10"
+      }
+    },
+    {
+      "source": 373,
+      "target": 370,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0373.mediawiki",
+        "line": 10,
+        "text": "Requires: 32, 174, 327, 328, 370",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L10"
+      }
+    },
+    {
+      "source": 375,
+      "target": 352,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0375.mediawiki",
+        "line": 14,
+        "text": "Requires: 352, 370, 374",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0375.mediawiki#L14"
+      }
+    },
+    {
+      "source": 375,
+      "target": 370,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0375.mediawiki",
+        "line": 14,
+        "text": "Requires: 352, 370, 374",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0375.mediawiki#L14"
+      }
+    },
+    {
+      "source": 375,
+      "target": 374,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0375.mediawiki",
+        "line": 14,
+        "text": "Requires: 352, 370, 374",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0375.mediawiki#L14"
+      }
+    },
+    {
+      "source": 376,
+      "target": 352,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0376.mediawiki",
+        "line": 13,
+        "text": "Requires: 352, 370, 371",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0376.mediawiki#L13"
+      }
+    },
+    {
+      "source": 376,
+      "target": 370,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0376.mediawiki",
+        "line": 13,
+        "text": "Requires: 352, 370, 371",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0376.mediawiki#L13"
+      }
+    },
+    {
+      "source": 376,
+      "target": 371,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0376.mediawiki",
+        "line": 13,
+        "text": "Requires: 352, 370, 371",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0376.mediawiki#L13"
+      }
+    },
+    {
+      "source": 379,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0379.md",
+        "line": 14,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0379.md#L14"
+      }
+    },
+    {
+      "source": 381,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0381.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0381.mediawiki#L11"
+      }
+    },
+    {
+      "source": 382,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0382.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0382.mediawiki#L11"
+      }
+    },
+    {
+      "source": 383,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0383.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0383.mediawiki#L11"
+      }
+    },
+    {
+      "source": 384,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0384.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0384.mediawiki#L11"
+      }
+    },
+    {
+      "source": 385,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0385.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0385.mediawiki#L11"
+      }
+    },
+    {
+      "source": 386,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0386.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0386.mediawiki#L11"
+      }
+    },
+    {
+      "source": 387,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0387.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0387.mediawiki#L11"
+      }
+    },
+    {
+      "source": 389,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0389.mediawiki",
+        "line": 10,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0389.mediawiki#L10"
+      }
+    },
+    {
+      "source": 390,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0390.mediawiki",
+        "line": 11,
+        "text": "Requires: 380, 328",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0390.mediawiki#L11"
+      }
+    },
+    {
+      "source": 390,
+      "target": 328,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0390.mediawiki",
+        "line": 11,
+        "text": "Requires: 380, 328",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0390.mediawiki#L11"
+      }
+    },
+    {
+      "source": 391,
+      "target": 393,
+      "kind": "declared-proposed-replacement",
+      "evidence": {
+        "path": "bip-0391.mediawiki",
+        "line": 10,
+        "text": "Proposed-Replacement: 393",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0391.mediawiki#L10"
+      }
+    },
+    {
+      "source": 392,
+      "target": 341,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0392.mediawiki",
+        "line": 11,
+        "text": "Requires: 341, 350, 352, 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0392.mediawiki#L11"
+      }
+    },
+    {
+      "source": 392,
+      "target": 350,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0392.mediawiki",
+        "line": 11,
+        "text": "Requires: 341, 350, 352, 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0392.mediawiki#L11"
+      }
+    },
+    {
+      "source": 392,
+      "target": 352,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0392.mediawiki",
+        "line": 11,
+        "text": "Requires: 341, 350, 352, 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0392.mediawiki#L11"
+      }
+    },
+    {
+      "source": 392,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0392.mediawiki",
+        "line": 11,
+        "text": "Requires: 341, 350, 352, 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0392.mediawiki#L11"
+      }
+    },
+    {
+      "source": 393,
+      "target": 380,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0393.mediawiki",
+        "line": 11,
+        "text": "Requires: 380",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0393.mediawiki#L11"
+      }
+    },
+    {
+      "source": 441,
+      "target": 440,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0441.mediawiki",
+        "line": 13,
+        "text": "Requires: 440",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0441.mediawiki#L13"
+      }
+    },
+    {
+      "source": 450,
+      "target": 32,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0450.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 39",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0450.mediawiki#L14"
+      }
+    },
+    {
+      "source": 450,
+      "target": 39,
+      "kind": "declared-requires",
+      "evidence": {
+        "path": "bip-0450.mediawiki",
+        "line": 14,
+        "text": "Requires: 32, 39",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0450.mediawiki#L14"
+      }
+    }
+  ],
+  "unresolvedDeclarations": [
+    {
+      "source": 361,
+      "field": "Requires",
+      "raw": "TBD Post Quantum Signature BIP",
+      "evidence": {
+        "path": "bip-0361.mediawiki",
+        "line": 15,
+        "text": "Requires: TBD Post Quantum Signature BIP",
+        "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0361.mediawiki#L15"
+      }
+    }
+  ],
+  "requiresCycles": [
+    [
+      157,
+      158
+    ]
+  ]
+}

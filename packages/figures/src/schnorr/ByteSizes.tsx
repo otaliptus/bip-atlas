@@ -1,6 +1,5 @@
-import { Drawing, Packet, Value } from "../kit";
+import { Drawing, Packet, Value, short } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
-import { short } from "./stages";
 
 /** BIP 340's rationale: DER signatures are "up to 72 bytes" (bip-0340.mediawiki, line 43). */
 export const DER_MAX_BYTES = 72;

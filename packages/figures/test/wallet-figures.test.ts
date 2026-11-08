@@ -7,8 +7,6 @@ import { mnemonicToSeed } from "@bip-atlas/models/bip39";
 import { bytesToHex } from "@bip-atlas/models/hex";
 import { BIP84_VERSIONS, fromAccountXpub, p2trKeyPath, p2wpkh, parseWalletPath, serializeWithVersion, walkPath } from "@bip-atlas/models/walletpaths";
 import { WalletDiscovery } from "../src/wallet/WalletDiscovery";
-import { WalletExamples } from "../src/wallet/WalletExamples";
-import { WalletP2trStory } from "../src/wallet/WalletP2trStory";
 import { WalletPathLevels } from "../src/wallet/WalletPathLevels";
 import { WalletPathSchemes } from "../src/wallet/WalletPathSchemes";
 import { WalletPathValues, WalletPathWalk, walletWalkSpec } from "../src/wallet/WalletPathWalk";
@@ -107,16 +105,6 @@ describe("WalletDiscovery", () => {
   });
 });
 
-describe("WalletExamples", () => {
-  const s = html(h(WalletExamples, { fixture: d44 }));
-  it("draws one leaf per example path and names both coins from the table", () => {
-    expect(s.split('class="k-cell ').length - 1).toBe(16);
-    expect(s).toContain("16 PATHS IN BIP 44’S TABLE");
-    expect(s).toContain("COIN 0′ = BITCOIN, 1′ = BITCOIN TESTNET");
-    expect(s.split("k-cell--em").length - 1).toBe(2);
-  });
-});
-
 describe("WalletPathWalk (hero)", () => {
   const all = [d84, d86, d44];
   /** What a reader sees in one state: the no-JS render with only that state's layers. */
@@ -170,19 +158,6 @@ describe("WalletXpubReach", () => {
     }
     expect(s).toContain("= LINE 80");
     expect(s).toContain("= LINE 90");
-  });
-});
-
-describe("WalletP2trStory", () => {
-  const s = html(h(WalletP2trStory, { fixture: d86 }));
-  it("drops the parity byte and ends at the published address", () => {
-    const a = d86.derived.addresses[0];
-    const o = a.output!;
-    if (o.kind !== "p2tr") throw new Error("expected p2tr");
-    expect(a.publicKeyHex.slice(2)).toBe(o.internalKeyHex);
-    expect(disclosure(s)).toContain(o.address);
-    expect(s).toContain("MATCHES BIP 86 LINE 100");
-    expect(s.split('class="k-story__frame"').length - 1).toBe(4);
   });
 });
 

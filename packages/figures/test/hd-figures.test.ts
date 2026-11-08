@@ -5,13 +5,11 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { ckdPriv, ckdPub, derivePath, fingerprint, formatIndex, hash160, masterFromSeed, neuter, parsePath, recoverParentPrivateKey, serialize, serializeRaw } from "@bip-atlas/models/bip32";
 import { bytesToHex, hexToBytes } from "@bip-atlas/models/hex";
-import { ChildStory } from "../src/hd/ChildStory";
 import { DerivationTree, DerivationTreeValues, derivationTreeSpec, layoutHdTree, visibleNodes } from "../src/hd/DerivationTree";
 import { StateHero } from "../src/StateHero";
 import { matches, nextState, stateKey } from "../src/heroLayers";
 import { ExtendedKeyLayout, splitXkey } from "../src/hd/ExtendedKeyLayout";
 import { ExtendedKeyPlates } from "../src/hd/ExtendedKeyPlates";
-import { Fingerprint } from "../src/hd/Fingerprint";
 import { HdSharing } from "../src/hd/HdSharing";
 import { HmacInputs, hmacParts } from "../src/hd/HmacInputs";
 import { MasterKeySplit } from "../src/hd/MasterKeySplit";
@@ -133,16 +131,6 @@ describe("HmacInputs", () => {
   });
 });
 
-describe("ChildStory", () => {
-  const s = html(h(ChildStory, { fixture: d }));
-  it("has four frames, the 64 HMAC bytes and the published child", () => {
-    expect(s.split('class="k-story__frame"').length - 1).toBe(4);
-    for (const b of node("m/0H/1").hmacOutHex!.match(/../g)!) expect(s).toContain(`>${b}<`);
-    expect(disclosure(s)).toContain(fixture.vectorChains.find((c) => c.path === "m/0H/1")!.xprv);
-    expect(s).toContain("MATCHES BIP 32 LINE 229");
-  });
-});
-
 describe("TwoRoutes", () => {
   const s = html(h(TwoRoutes, { fixture: d }));
   it("meets at the child's public key", () => {
@@ -179,14 +167,6 @@ describe("ExtendedKeyLayout", () => {
     for (const f of splitXkey(prv.rawHex, prv.checksumHex)) expect(disclosure(s)).toContain(f.hex);
     expect(disclosure(s)).toContain(pub.base58);
     expect(pub.base58.length).toBe(111);
-  });
-});
-
-describe("Fingerprint", () => {
-  const s = html(h(Fingerprint, { fixture: d }));
-  it("shows the identifier and the fingerprint m/0H carries", () => {
-    for (const b of node("m").identifierHex.match(/../g)!) expect(s).toContain(`>${b}<`);
-    expect(node("m/0H").parentFingerprintHex).toBe(node("m").identifierHex.slice(0, 8));
   });
 });
 

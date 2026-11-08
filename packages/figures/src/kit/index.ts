@@ -12,3 +12,4 @@ export * from "./Packet";
 export * from "./Lamp";
 export * from "./Controls";
 export * from "./Tag";
+export * from "./text";

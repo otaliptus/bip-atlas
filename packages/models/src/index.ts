@@ -18,3 +18,7 @@ export * from "./silentpayments";
 export * from "./blockfilter";
 export * from "./v2transport";
 export * from "./bip322";
+export * from "./bip85";
+export * from "./bip67";
+export * from "./bip48";
+export * from "./bip321";

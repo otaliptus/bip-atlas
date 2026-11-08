@@ -8,13 +8,9 @@ import { bytesToHex } from "@bip-atlas/models/hex";
 import { DescriptorAnatomy, DescriptorValues, descriptorSpec } from "../src/descriptors/DescriptorAnatomy";
 import { StateHero } from "../src/StateHero";
 import { nextState, stateKey } from "../src/heroLayers";
-import { DescriptorChecksum } from "../src/descriptors/DescriptorChecksum";
 import { DescriptorIndex } from "../src/descriptors/DescriptorIndex";
-import { DescriptorNesting } from "../src/descriptors/DescriptorNesting";
-import { DescriptorReadStory } from "../src/descriptors/DescriptorReadStory";
 import { DescriptorSentence } from "../src/descriptors/DescriptorSentence";
 import { DescriptorOutputs } from "../src/descriptors/DescriptorOutputs";
-import { DescriptorSpellings } from "../src/descriptors/DescriptorSpellings";
 import { DescriptorTemplate } from "../src/descriptors/DescriptorTemplate";
 import { DescriptorTypo } from "../src/descriptors/DescriptorTypo";
 import { descTree } from "../src/descriptors/descTree";
@@ -148,18 +144,6 @@ describe("DescriptorSentence", () => {
   });
 });
 
-describe("DescriptorNesting", () => {
-  const d = derived("bip382-sh-wpkh-xprv");
-  const s = html(h(DescriptorNesting, { fixture: d }));
-  it("draws sh around wpkh around an xprv, and the published child-0 script", () => {
-    expect(s).toContain(">sh( )<");
-    expect(s).toContain(">wpkh( )<");
-    expect(s).toContain("HOLDS AN XPRV: A SPENDING SECRET");
-    expect(disclosure(s)).toContain(d.derived.scripts[0][0]);
-    expect(d.derived.scripts[0][0]).toBe([...bip(382)[71].matchAll(/<tt>(.*?)<\/tt>/g)][0][1]);
-  });
-});
-
 describe("DescriptorTemplate", () => {
   const d = derived("bip381-pkh-origin");
   const s = html(h(DescriptorTemplate, { fixture: d }));
@@ -168,20 +152,6 @@ describe("DescriptorTemplate", () => {
     expect(script).toBe("76a9149a1c78a507689f6f54b847ad1cef1e614ee23f1e88ac");
     for (const part of ["OP_DUP", "OP_HASH160", "&lt;KEY_hash160>", "OP_EQUALVERIFY", "OP_CHECKSIG"]) expect(s).toContain(part);
     expect(disclosure(s)).toContain(script.slice(6, 46));
-  });
-});
-
-describe("DescriptorSpellings", () => {
-  const ds = ["bip381-pkh-origin-wif", "bip381-pkh-origin", "bip381-pkh-origin-h"].map(derived);
-  it("gives one script for three spellings, as written", () => {
-    expect(new Set(ds.map((d) => d.derived.scripts[0][0])).size).toBe(1);
-    const s = html(h(DescriptorSpellings, { fixtures: ds }));
-    expect(s).toContain(">[deadbeef/1/2'/3/4']<");
-    expect(s).toContain(">[deadbeef/1/2h/3/4h]<");
-    expect(s).toContain("WIF PRIVATE KEY");
-  });
-  it("refuses spellings that give different scripts", () => {
-    expect(() => html(h(DescriptorSpellings, { fixtures: [ds[0], derived("bip382-wpkh-ranged")] }))).toThrow();
   });
 });
 
@@ -222,27 +192,6 @@ describe("DescriptorAnatomy (hero)", () => {
     const s = at({ fixtureId: "bip380-raw-typo", key: 0, checked: true });
     expect(s).toContain("DOES NOT MATCH: REJECTED");
     expect(s).toContain("NONE: THE DESCRIPTOR IS REJECTED");
-  });
-});
-
-describe("DescriptorReadStory", () => {
-  const d = derived("bip382-wpkh-ranged");
-  const s = html(h(DescriptorReadStory, { fixture: d }));
-  it("expands three children to the scripts BIP 382 lists", () => {
-    expect(s.split('class="k-story__frame"').length - 1).toBe(4);
-    for (const k of d.derived.keys[0].publicKeys) expect(disclosure(s)).toContain(k);
-    for (const [i, line] of d.scriptLines.entries()) expect(d.derived.scripts[i][0]).toBe([...bip(382)[line - 1].matchAll(/<tt>(.*?)<\/tt>/g)][0][1]);
-  });
-});
-
-describe("DescriptorChecksum", () => {
-  const d = derived("bip380-raw-valid");
-  const s = html(h(DescriptorChecksum, { fixture: d }));
-  it("draws every symbol and the published checksum", () => {
-    expect(d.derived.symbols.length).toBe(18);
-    expect(d.derived.checksumComputed).toBe("89f8spxm");
-    expect(s).toContain("#89f8spxm");
-    expect(s.split("k-cell--em").length - 1).toBe(d.derived.symbols.filter((x) => x.char === null).length);
   });
 });
 

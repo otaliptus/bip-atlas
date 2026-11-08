@@ -1,8 +1,6 @@
-import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Storyboard, Value, type Frame } from "../kit";
+import { Arrow, Drawing, IsoBox, KeyGlyph, Machine, Storyboard, Value, short, type Frame } from "../kit";
 import type { DerivedTaprootTreeFixture } from "../types";
 import { storyLeaf } from "./treeLayout";
-
-const short = (hex: string) => `${hex.slice(0, 8)}…`;
 
 /** A small hash cube with its value beside it. */
 function HashCube({ x, y, label, value }: { x: number; y: number; label: string; value: string }) {
@@ -140,5 +138,3 @@ export function VerifierStory({ fixture }: { fixture: DerivedTaprootTreeFixture 
     </>
   );
 }
-
-export const VERIFIER_FRAME_IDS = ["length", "leaf-hash", "branch", "tweak", "output-key"];

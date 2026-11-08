@@ -1,10 +1,13 @@
 # Handoff: where things stand and what to do next
 
-Last updated: 17 October 2026, after the first-read editorial pass and BIP 322 address-validation fix. Deployment status is tracked by the latest `main` run in [GitHub Actions](https://github.com/otaliptus/bip-atlas/actions/workflows/deploy.yml). If you were asked to **"continue"**, work through **Next steps** in order. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
+Last updated: 8 November 2026, after a simplification pass and three of five phase-four chapters (work in the working tree, not committed). Deployment status is tracked by the latest `main` run in [GitHub Actions](https://github.com/otaliptus/bip-atlas/actions/workflows/deploy.yml). If you were asked to **"continue"**, work through **Next steps** in order, subject to the user's latest task. Read `CLAUDE.md` for commands, layout and the rules the tests enforce.
 
 ## State
 
+- **Simplification (8 November 2026):** 29 registered figures that no chapter used were removed (components, tests, registry entries, two dead fixture kinds), along with 70 CSS classes that nothing rendered and the unused framed-plate branch. `registry.ts` is a compact table (1,565 → about 200 lines). Static figures draw through `packages/figures/src/statics.ts` and pre-rendered heroes through `heroes.ts`, so `Figure.astro` lists only its islands. `apps/site/src/lib/derive.ts` became `lib/derive/` (one module per chapter, a `DERIVE` table that throws on unknown fixture kinds), and `pnpm check` now typechecks it. Islands are imported by subpath, so each page loads only its own hero: island JS fell from 43 KB to 9–15 KB gzipped per chapter (about 58 KB summed across all files). Built pages were byte-compared against the pre-change build and are identical apart from whitespace and script URLs.
+- **Phase four (in progress):** five new chapters chosen from the curriculum research; three are done (`derived-seeds` BIP 85, `sorted-multisig` BIPs 67/48, `payment-links` BIPs 321/21), and `psbt-v2` (BIP 370) and `strict-signatures` (BIPs 66/146) are designed but not started. Sources: `sources/research-2026-11-08-phase4` (kit snapshot script, same commit). Catalog: `catalog-phase4.json`. Record, findings and the remaining designs: `review/phase-four.md`. The site now has 21 chapters; the three new ones are `draft-unreviewed` and have not had an independent review (this session used no subagents, at the user's request).
 - **Reader goal:** the user wants a proper, engaging illustrated explainer, kept simple. Favor concise prose and static drawings with a few purposeful interactions. Do not add controls, modes or animations for their own sake. Focused teaching examples are intentional; complete BIP implementations and exhaustive test-case coverage are not the product goal.
+- **Curriculum redesign:** [the revised plan](docs/research/2026-10-bip-map/README.md) separates a [13-stop core route](docs/research/2026-10-bip-map/curriculum.md), seven optional paths and a complete BIP reference. All 18 existing lesson scopes stay intact; two conceptual primers fill the payment and node-agreement gaps. Companions and historical comparisons have separate ownership instead of expanding the core lessons. The 73 editorial units are explanations/subsections, not a promised page count. Three initial batches each add two units; everything else is unscheduled. The pinned inventory still accounts for 213 published documents plus allocated-only 40/41/63. The live site remains 18 chapters / 33 primary BIPs; this curriculum is not implemented. Validate with `python3 tools/research-bip-catalog.py --check`; source regeneration additionally takes `--upstream PATH` at commit `927b6de…`. Before authoring new content, source the primers and allow static-only heroes/budgets in the publication contracts. Existing chapter snapshots stay unchanged.
 - **First-read pass:** all eighteen chapters give a specific action for the existing main demonstration. Several openings and endings are clearer; historical and algorithm details remain in disclosures. Extra example controls in Schnorr and MuSig2, and the example/calculation controls in Silent Payments, now sit in optional disclosures. Silent Payments starts with the result rather than every intermediate step. No new interactive figures, scenarios or illustrations were added. `chapterOrder` in `content/reading-policy.json` brings related chapters together; the contents and previous/next links use it. Figure IDs stay stable. See `review/first-read.md` for checks and screenshots.
 - **BIP 322 address validation:** `addressScript` now uses the address chapter's shared SegWit checks. Mixed-case addresses, invalid witness versions and invalid program lengths are rejected; valid all-uppercase addresses still work. Base58Check addresses must carry a version byte and a 20-byte hash. Three regression tests reproduced the old failures before the fix.
 - **Eighteen chapters are drafted.**
@@ -41,7 +44,7 @@ Last updated: 17 October 2026, after the first-read editorial pass and BIP 322 a
 - **Visual checks:**
   - Desktop 1440 and mobile 375 screenshots of every phase-three chapter and its key figure states are in `review/screenshots/phase3/`, with no horizontal overflow.
   - axe-core (WCAG 2.1 A/AA + best practice) is clean at 1440, 375, no-JS, the worked tab and interactive states.
-  - Client JS is about 44.6 KB gzipped across `apps/site/dist/_astro/*.js`, under the 60 KB budget.
+  - Client JS: each chapter page loads 9–15 KB gzipped of island code (0 for pre-rendered heroes); about 58 KB summed across all `apps/site/dist/_astro/*.js`.
   - Per-batch screenshots of the redrawn figures are in `review/screenshots/` (`pilot/`, `batch1/` … `batch4/`). They were taken on each batch branch, not retaken on the merged `main`.
 - **Illustration redesign (done):** every chapter is drawn in the Making Software-style kit. Spec: `docs/superpowers/specs/2026-10-02-illustration-redesign-design.md`. Decisions D1–D5: `review/decisions.md`.
   - The kit is `packages/figures/src/kit/`; its placement CSS and palette tokens are in `atlas.css`. All 153 recipes are `drawing: true`.
@@ -53,13 +56,12 @@ Last updated: 17 October 2026, after the first-read editorial pass and BIP 322 a
 
 ## Next steps
 
-1. **The user reviews the redrawn chapters** on the live site (or a branch preview) and signs off the look. No human has approved any figure beyond the two pilots.
-2. **Optional: fold the two layered-hero patterns into one.** `StateHero.tsx`/`heroLayers.ts` (batch 1) and `heroStates.ts`/`HeroStates.astro` (batch 2) solve the same problem; the pre-rendered one costs no island JS. Moving batch 1's heroes onto it would remove an island chunk. Keep every hero's states, accessible names, `aria-live` status and no-JS state identical, and retake that batch's screenshots.
-3. **Retake screenshots on `main`** (1440 / 768 / 375, no-JS heroes) and re-run `tools/a11y-tablet-audit.mjs`; the batch screenshots predate the merges.
-4. **Open items:**
-   - a live VoiceOver/NVDA session;
-   - BIP 324 ElligatorSwift, still blocked: `@noble/curves` 2.4.0 has none;
-   - milestone 3 (generation from the ledger), only after sign-off.
+1. **Finish phase four:** build `psbt-v2` and `strict-signatures` from the designs in `review/phase-four.md` (model, fixtures, derive, figures A22/A23, ledger, prose, catalog entry, reading order, coverage, figure tests, screenshots at 1440 and 375).
+2. **Independent technical review** of the five phase-four chapters (a fresh subagent with each ledger, model and pinned text), then record it in `review/phase-four.md`.
+3. **Commit** the work on a branch when the user asks (nothing from 8 November is committed). The user's untracked `docs/research/` and `tools/research-bip-catalog.py` are separate work; leave them as they are.
+4. **The user reviews the redrawn chapters** on the live site (or a branch preview) and signs off the look. No human has approved any figure beyond the two pilots.
+5. **Optional: fold the two hero patterns into one.** Three heroes still use the `StateHero` island with `data-when` layers; the other seven (four older chapters and the three new ones) are pre-rendered by `HeroStates`. Pre-rendering every state is too large for the wallet-paths hero (about 63 states), so a merge means teaching the `HeroStates` script the layered (`data-when`) model, keeping every hero's states, accessible names, `aria-live` status and no-JS state identical.
+6. **Open items:** a live VoiceOver/NVDA session; BIP 324 ElligatorSwift, still blocked (no audited JS implementation); milestone 3 (generation from the ledger), only after sign-off.
 
 ## Things a cloud session should know
 

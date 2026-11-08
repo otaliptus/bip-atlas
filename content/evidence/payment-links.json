@@ -1,0 +1,545 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "payment-links",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-11-08-phase4",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-four snapshot.",
+  "claims": [
+    {
+      "id": "preamble321",
+      "statement": "BIP 321 (Corallo), URI Scheme, was assigned in 2024, is recorded as Complete, and replaces BIP 21.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            4,
+            10
+          ],
+          "quote": "Title: URI Scheme Authors: Matt Corallo <bip21@bluematt.me> Status: Complete Type: Specification Assigned: 2024-11-15 License: BSD-2-Clause Replaces: 21"
+        }
+      ]
+    },
+    {
+      "id": "preamble21",
+      "statement": "BIP 21 (Schneider, Corallo), assigned in 2012, is recorded as Closed and superseded by BIP 321; it had itself replaced BIP 20.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 21,
+          "lines": [
+            4,
+            11
+          ],
+          "quote": "Title: URI Scheme Authors: Nils Schneider <nils.schneider@gmail.com> Matt Corallo <bip21@bluematt.me> Status: Closed Type: Specification Assigned: 2012-01-29 Replaces: 20 Proposed-Replacement: 321"
+        },
+        {
+          "bip": 21,
+          "lines": [
+            16,
+            16
+          ],
+          "quote": "This BIP has been superseded and replaced with BIP 321."
+        }
+      ]
+    },
+    {
+      "id": "purpose",
+      "statement": "The scheme exists so that users can pay by clicking a link on a web page or scanning a QR code.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "The purpose of this URI scheme is to enable users to easily make payments by simply clicking links on webpages or scanning QR Codes."
+        }
+      ]
+    },
+    {
+      "id": "replacement",
+      "statement": "BIP 321 modifies and replaces BIP 21, documenting modern query parameters and address types and how to add new payment instructions.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            25,
+            25
+          ],
+          "quote": "This BIP is a modification and intended replacement of [[bip-0021.mediawiki|BIP 0021]] to add information about the modern usage of bitcoin: URIs (including standard query parameters and modern address types) as well as provide forward-looking guidance on how to incorporate new payment instructions."
+        }
+      ]
+    },
+    {
+      "id": "user-approval",
+      "statement": "Clients MUST NOT act on a URI without the user's authorization, and SHOULD ask the user to approve each payment individually, though they MAY let the user automate the decision in some cases.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            31,
+            32
+          ],
+          "quote": "Bitcoin clients MUST NOT act on URIs without getting the user's authorization. They SHOULD require the user to manually approve each payment individually, though in some cases they MAY allow the user to automatically make this decision."
+        }
+      ]
+    },
+    {
+      "id": "grammar",
+      "statement": "A URI is bitcoin:, an optional address body, and optional parameters after a question mark; the body MUST be a base58 P2SH or P2PKH address, a bech32 or bech32m SegWit address, or empty.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            46,
+            47
+          ],
+          "quote": "bitcoinurn = \"bitcoin:\" [ bitcoinaddress ] [ \"?\" bitcoinparams ] bitcoinaddress = *base58 / *bech32 / *bech32m"
+        },
+        {
+          "bip": 321,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "The bitcoinaddress body MUST be either a base58 P2SH or P2PKH address, bech32 Segwit version 0 address, bech32m Segwit address, or empty."
+        }
+      ]
+    },
+    {
+      "id": "case",
+      "statement": "The scheme and the parameter keys are case-insensitive; values and addresses may be case-sensitive.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            59,
+            59
+          ],
+          "quote": "The scheme component (\"bitcoin:\") is case-insensitive, and implementations must accept any combination of uppercase and lowercase letters. The query parameter keys are also case-insensitive. Query parameter values and bitcoin address fields may be case-sensitive depending on their content."
+        }
+      ]
+    },
+    {
+      "id": "percent",
+      "statement": "Characters outside the valid range are encoded as UTF-8 and then percent-encoded.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            42,
+            42
+          ],
+          "quote": "These must first be encoded according to UTF-8, and then each octet of the corresponding UTF-8 sequence must be percent-encoded as described in RFC 3986."
+        }
+      ]
+    },
+    {
+      "id": "keys-general",
+      "statement": "Every URI may carry a label for the recipient, a message describing the transaction, and pop, a URI for proof of payment.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            71,
+            73
+          ],
+          "quote": "*label: Label for the recipient (e.g. name of receiver) *message: message that describes the transaction to the user ([[#examples|see examples below]]) *pop: a URI which the Bitcoin Wallet may return to in order to provide the application which initiated the payment with proof that a payment was completed."
+        }
+      ]
+    },
+    {
+      "id": "keys-instructions",
+      "statement": "Payment instructions use the keys lightning (BOLT 11 invoices), lno (BOLT 12 offers), pay (BIP 351) and sp (BIP 352 Silent Payments).",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            77,
+            80
+          ],
+          "quote": "*lightning: Lightning BOLT 11 invoices *lno: Lightning BOLT12 offers *pay: [[bip-0351.mediawiki|BIP 351 Private Payment addresses]] *sp: [[bip-0352.mediawiki|BIP 352 Silent Payment addresses]]"
+        }
+      ]
+    },
+    {
+      "id": "hrp-keys",
+      "statement": "New bech32 or bech32m payment instructions SHOULD use their human-readable part as the key, which is why SegWit addresses appear under bc and tb in the examples.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            82,
+            82
+          ],
+          "quote": "New payment instructions using bech32 or bech32m encodings SHOULD reuse their address format's Human Readable Part as the parameter key."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            185,
+            186
+          ],
+          "quote": "Multiple segwit addresses may be included for various versions of segwit, note that the human-readable part for all of them is `bc`"
+        }
+      ]
+    },
+    {
+      "id": "duplicates",
+      "statement": "A payment-instruction key MAY repeat, but label, message and pop MUST NOT; BIP 321's invalid examples also reject a repeated amount and a pop given as both pop and req-pop.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            61,
+            61
+          ],
+          "quote": "Multiple query parameters with the same key MAY be included for query parameters representing payment instructions. Multiple query parameters with the same key MUST NOT be included for keys \"label\", \"message\", or \"pop\"."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            202,
+            203
+          ],
+          "quote": "Amounts must not appear twice:"
+        },
+        {
+          "bip": 321,
+          "lines": [
+            208,
+            208
+          ],
+          "quote": "Multiple proof of payment URIs must not appear, even if they are sometimes prefixed with req-:"
+        }
+      ]
+    },
+    {
+      "id": "amount",
+      "statement": "An amount MUST be decimal BTC with a period and no commas: amount=50 and amount=50.00 both mean 50 BTC, and amount=50,000.00 is invalid.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            86,
+            88
+          ],
+          "quote": "If an amount is provided, it MUST be specified in decimal BTC. All amounts MUST contain no commas and use a period (.) as the separating character to separate whole numbers and decimal fractions. I.e. amount=50.00 or amount=50 is treated as 50 BTC, and amount=50,000.00 is invalid."
+        }
+      ]
+    },
+    {
+      "id": "empty-body",
+      "statement": "The address body MAY be empty when at least one payment instruction is given as a parameter, for recipients who want no on-chain fallback.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "The bitcoinaddress part of the URI MAY be left empty if there is at least one payment instruction provided in a query parameter, allowing for recipients wishing to avoid a standard on-chain fallback."
+        }
+      ]
+    },
+    {
+      "id": "future-in-query",
+      "statement": "Future address formats SHOULD go into parameters rather than the body, so that a sender who only understands the body can still pay a recipient offering newer formats.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            65,
+            65
+          ],
+          "quote": "Future address formats SHOULD instead be placed in query keys as optional payment instructions to provide backwards compatibility during upgrade cycles."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            131,
+            131
+          ],
+          "quote": "This allows old senders to pay newer recipients which offer more modern payment instruction formats."
+        }
+      ]
+    },
+    {
+      "id": "req",
+      "statement": "A key prefixed with req- is required: a client that does not implement it MUST treat the whole URI as invalid. Other keys it does not implement can be safely ignored.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            129,
+            129
+          ],
+          "quote": "Query parameter keys which are prefixed with a req- are considered required. If a client does not implement handling a query parameter which has a key prefixed with req-, it MUST consider the entire URI invalid. Any other query parameters which are not implemented, but which are not prefixed with a req-, can be safely ignored."
+        }
+      ]
+    },
+    {
+      "id": "pop-build",
+      "statement": "A pop value is a percent-encoded URI prefix. After paying, a wallet that supports it SHOULD decode the prefix once, append the key the instructions came from (onchain for the body), an equals sign and the payment information, and open the result.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            94,
+            94
+          ],
+          "quote": "The value of a \"pop\" (or \"req-pop\") parameter shall be a percent-encoded (per RFC 3986 section 2.1) URI prefix. The wallet application, if it supports providing payment information SHOULD percent-decode the provided URI once, append the query parameter key from which the payment instructions used were read, append a single =, and finally append the Payment Information to the resulting URI and open it with the default system handler for the URI. For payment instructions read from the body of the URI, \"onchain\" SHALL be used in place of the key."
+        }
+      ]
+    },
+    {
+      "id": "pop-info",
+      "statement": "The payment information is the full transaction in hex for an on-chain payment, and the payment preimage in hex for a BOLT 11 invoice.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            100,
+            100
+          ],
+          "quote": "For payments made using an on-chain transaction, the Payment Information shall be the full (including witness data) Bitcoin transaction as it was broadcasted to the Bitcoin network, encoded in hex."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            102,
+            102
+          ],
+          "quote": "For payments made using a BOLT 11 invoice (communicated via the `lightning` parameter), the Payment Information shall be the hex-encoded payment preimage."
+        }
+      ]
+    },
+    {
+      "id": "pop-safety",
+      "statement": "A wallet MUST NOT open a pop URI whose scheme is http, https, file, javascript, mailto or anything else that opens a web browser; if it will not open a pop given as req-pop, it MUST NOT pay.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            96,
+            96
+          ],
+          "quote": "A wallet MUST validate that the provided URI's scheme is not (case-insensitive) \"http\", \"https\", \"file\", \"javascript\", \"mailto\" or any other scheme which will open in a web browser prior to opening it."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            98,
+            98
+          ],
+          "quote": "If a wallet will not open the pop scheme (either because it does not support returning payment information for the selected payment method or because it uses a URI scheme which should not be opened) and the parameter was passed as a \"req-pop\" parameter, the wallet MUST NOT initiate payment."
+        }
+      ]
+    },
+    {
+      "id": "pop-rationale",
+      "statement": "The author's reason: opening a callback only to switch to another local application avoids revealing the sender's IP address or other information to the recipient.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            119,
+            119
+          ],
+          "quote": "In order to avoid inadvertently revealing the sender's IP address or other information to the recipient, proof URIs must only be opened when they will simply switch to another locally-installed application (i.e. the application which initiated the payment)."
+        }
+      ]
+    },
+    {
+      "id": "one-time",
+      "statement": "A URI that contains an on-chain address MUST NOT stand for personal information but for a one-time payment instruction; one that carries only reusable instructions, such as BOLT 12 offers or Silent Payments, MAY be reused.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            110,
+            111
+          ],
+          "quote": "Best practices are that a unique address should be used for every transaction on-chain. Therefore, a URI which contains an on-chain payment address MUST NOT represent an exchange of personal information, but a one-time payment instruction. URIs which represent only reusable non-address-reusing payment instructions (like Lightning BOLT12 offers or Silent Payments) MAY be reused as a wallet sees fit."
+        }
+      ]
+    },
+    {
+      "id": "bip21-changes",
+      "statement": "Compared with BIP 21, BIP 321 adds standard payment-instruction parameters, makes parameter keys case-insensitive, allows bech32 and bech32m addresses in the body, and allows an empty body.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            135,
+            135
+          ],
+          "quote": "Compared to BIP 21, this document describes standard query parameters containing payment instructions, makes query parameters case-insensitive, allows bech32 and bech32m addresses in the `bitcoinaddress` field, and allows for URIs with an empty `bitcoinaddress` field."
+        }
+      ]
+    },
+    {
+      "id": "bip21-original",
+      "statement": "BIP 21's grammar required a base58 address in the body, and made everything after the scheme case-sensitive, parameter keys included.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 21,
+          "lines": [
+            48,
+            49
+          ],
+          "quote": "bitcoinurn = \"bitcoin:\" bitcoinaddress [ \"?\" bitcoinparams ] bitcoinaddress = *base58"
+        },
+        {
+          "bip": 21,
+          "lines": [
+            60,
+            60
+          ],
+          "quote": "The rest of the URI is case-sensitive, including the query parameter keys."
+        }
+      ]
+    },
+    {
+      "id": "qr-uppercase",
+      "statement": "Treating keys as case-insensitive was already common practice because QR codes mostly use uppercase URIs, and BIP 321 notes that uppercase URIs should be handled fine.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            139,
+            139
+          ],
+          "quote": "Note, however, that treating query parameters as case-insensitive is already common practice due to the use of mostly-uppercase URIs in QR codes."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            188,
+            188
+          ],
+          "quote": "Many QR codes utilize all-uppercase URIs, which should be handled fine"
+        }
+      ]
+    },
+    {
+      "id": "examples-invalid-addresses",
+      "statement": "The addresses in BIP 321's examples are intentionally invalid, to prevent accidental transactions.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            145,
+            145
+          ],
+          "quote": "Note: The addresses used in these examples are intentionally invalid to prevent accidental transactions."
+        }
+      ]
+    },
+    {
+      "id": "examples-model",
+      "statement": "The model reads all 21 of BIP 321's example URIs as the BIP labels them, valid or invalid, and builds its four published proof-of-payment callbacks.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            147,
+            147
+          ],
+          "quote": "==== URIs ===="
+        },
+        {
+          "bip": 321,
+          "lines": [
+            197,
+            197
+          ],
+          "quote": "==== Invalid URIs ===="
+        },
+        {
+          "bip": 321,
+          "lines": [
+            219,
+            219
+          ],
+          "quote": "initiatingapp:onchain=$HEX_ENCODED_TRANSACTION"
+        }
+      ]
+    },
+    {
+      "id": "wallets-illustrative",
+      "statement": "The three wallets in the figures are our illustrations, not part of BIP 321: one implements only BIP 21's keys, one adds Lightning and proof of payment, one implements every key BIP 321 defines. Their readings apply BIP 321's rules to those key sets.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 321,
+          "lines": [
+            129,
+            129
+          ],
+          "quote": "Any other query parameters which are not implemented, but which are not prefixed with a req-, can be safely ignored."
+        },
+        {
+          "bip": 321,
+          "lines": [
+            131,
+            131
+          ],
+          "quote": "URIs seamlessly support various payment instructions while senders only need to support legacy instructions."
+        }
+      ]
+    }
+  ]
+}

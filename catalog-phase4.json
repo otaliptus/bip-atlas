@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "bip-atlas.catalog.v1",
+  "projectName": "BIP Atlas (working name)",
+  "sourceRepository": "bitcoin/bips",
+  "observedResearchCommit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "observedResearchCommitDate": "2026-09-28T15:24:34Z",
+  "researchedAt": "2026-11-08",
+  "researchNote": "Phase four extension to the kit catalog, kept separate because catalog.json is a kit original. Same contract and fields as catalog-phase3.json and the same bitcoin/bips commit. The five briefs follow the curriculum research in docs/research/2026-10-bip-map (entropy derivation, multisig wallet setup, payment instructions, PSBT extensions, ECDSA encoding rules); they are proposed, not reviewed publications.",
+  "supportingBips": [
+    16,
+    32,
+    39,
+    62,
+    141,
+    143,
+    174
+  ],
+  "supportingNote": "Supporting BIPs whose text or published examples the phase-four chapters cite: the P2SH hash (16), BIP 32 derivation and BIP 39 word lists used by BIP 85, BIP 62's malleability background, the witness identifier (141), the signed BIP 143 examples whose signatures are checked, and the BIP 174 version 0 format that BIP 370 extends.",
+  "chapters": [
+    {
+      "id": "derived-seeds",
+      "primaryBips": [
+        85
+      ],
+      "phase": 4,
+      "readingOrder": 19,
+      "buildOrder": 19,
+      "questionTitle": "How can one backup create separate seeds for other wallets?",
+      "heroRecipe": "bip85-applications.v1",
+      "primitiveFamilies": [
+        "key-tree",
+        "byte-ribbon",
+        "reveal-mask"
+      ],
+      "allowedControls": [
+        "Choose an application",
+        "Show what one leaked output reveals"
+      ],
+      "misconceptionChecklist": [
+        "A derived seed is not a second backup of the root",
+        "Leaking one derived output does not reveal the root or the other outputs",
+        "Whoever holds the root can recreate every derived output"
+      ],
+      "requiredTestFamilies": [
+        "BIP 85 test vectors",
+        "Application encodings",
+        "Hardened path rules"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 450,
+        "max": 1100
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 3,
+        "supportingMax": 5
+      },
+      "sourceLinks": [
+        "https://bips.dev/85/"
+      ]
+    },
+    {
+      "id": "sorted-multisig",
+      "primaryBips": [
+        67,
+        48
+      ],
+      "phase": 4,
+      "readingOrder": 20,
+      "buildOrder": 20,
+      "questionTitle": "How do cosigners end up with the same multisig address?",
+      "heroRecipe": "bip67-key-order.v1",
+      "primitiveFamilies": [
+        "byte-ribbon",
+        "stage-pipeline",
+        "permutation"
+      ],
+      "allowedControls": [
+        "Choose the order the keys arrive in",
+        "Sort the keys first"
+      ],
+      "misconceptionChecklist": [
+        "Sorting changes which address is derived, not who can spend",
+        "The network cannot enforce BIP 67: a P2SH output shows only a hash",
+        "Uncompressed keys are not silently compressed"
+      ],
+      "requiredTestFamilies": [
+        "BIP 67 test vectors",
+        "Redeem script and P2SH address checks",
+        "BIP 48 path examples"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 450,
+        "max": 1100
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 3,
+        "supportingMax": 5
+      },
+      "sourceLinks": [
+        "https://bips.dev/67/",
+        "https://bips.dev/48/"
+      ]
+    },
+    {
+      "id": "payment-links",
+      "primaryBips": [
+        321,
+        21
+      ],
+      "phase": 4,
+      "readingOrder": 21,
+      "buildOrder": 21,
+      "questionTitle": "What can a bitcoin: link ask a wallet to do?",
+      "heroRecipe": "bip321-link-reader.v1",
+      "primitiveFamilies": [
+        "character-ribbon",
+        "stage-pipeline",
+        "comparison"
+      ],
+      "allowedControls": [
+        "Choose a published example link"
+      ],
+      "misconceptionChecklist": [
+        "A link is a payment request, not a payment; the wallet must ask the user",
+        "Unknown parameters are ignored unless they start with req-",
+        "The published example addresses are deliberately invalid"
+      ],
+      "requiredTestFamilies": [
+        "BIP 321 valid and invalid examples",
+        "Proof-of-payment examples",
+        "Parameter rules"
+      ],
+      "briefStatus": "proposed-editorial-brief",
+      "releaseState": "not-generated",
+      "targetWords": {
+        "min": 450,
+        "max": 1100
+      },
+      "figureBudget": {
+        "hero": 1,
+        "supportingMin": 3,
+        "supportingMax": 5
+      },
+      "sourceLinks": [
+        "https://bips.dev/321/",
+        "https://bips.dev/21/"
+      ]
+    }
+  ]
+}

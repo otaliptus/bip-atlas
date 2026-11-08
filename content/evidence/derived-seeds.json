@@ -1,0 +1,553 @@
+{
+  "schemaVersion": "bip-atlas.evidence.v1",
+  "chapterId": "derived-seeds",
+  "commit": "3a10b5b5f0a7586df8928d580a3009744ebb2079",
+  "snapshot": "sources/research-2026-11-08-phase4",
+  "note": "Hand-built ledger for a hand-authored chapter. Quotes are verbatim (MediaWiki markup kept); lines refer to the phase-four snapshot.",
+  "claims": [
+    {
+      "id": "preamble",
+      "statement": "BIP 85 (Kosakovsky, Karve), Deterministic Entropy From BIP32 Keychains, was assigned in 2020 and is recorded as Deployed and Informational, at version 2.1.0.",
+      "scope": "history",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            4,
+            9
+          ],
+          "quote": "Title: Deterministic Entropy From BIP32 Keychains Authors: Ethan Kosakovsky <ethankosakovsky@protonmail.com> Aneesh Karve <dowsing.seaport0d@icloud.com> Status: Deployed Type: Informational Assigned: 2020-03-20"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            11,
+            11
+          ],
+          "quote": "Version: 2.1.0"
+        }
+      ]
+    },
+    {
+      "id": "one-backup",
+      "statement": "The authors' starting point: one mnemonic backup cannot serve every wallet because standards are incompatible, sharing one seed across wallets is undesirable for security, and physically storing many seeds is difficult.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            21,
+            21
+          ],
+          "quote": "It is not possible to maintain one single (mnemonic) seed backup for all keychains used across various wallets because there are a variety of incompatible standards. Sharing of seeds across multiple wallets is not desirable for security reasons. Physical storage of multiple seeds is difficult depending on the security and redundancy required."
+        }
+      ]
+    },
+    {
+      "id": "hot-wallets",
+      "statement": "The authors note that some wallets are inherently less secure, such as hot wallets on smartphones or Lightning Network nodes, so sharing one mnemonic with them is unsatisfactory.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            46,
+            46
+          ],
+          "quote": "Neither scenario is particularly satisfactory for security reasons. For example, some wallets may be inherently less secure, like hot wallets on smartphones, JoinMarket servers, or Lightning Network nodes."
+        }
+      ]
+    },
+    {
+      "id": "entropy-for-wallets",
+      "statement": "BIP 85 derives entropy from a BIP 32 keychain, to be fed into whatever method a target wallet uses to make its own mnemonic or root key.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "this proposal provides a way to derive entropy from the keychain which can be fed into whatever method a wallet uses to derive the initial mnemonic seed or root key."
+        }
+      ]
+    },
+    {
+      "id": "one-root",
+      "statement": "BIP 85 starts from a single BIP 32 master root key and does not care how that root was made, for example from a BIP 39 mnemonic or an Electrum-style mnemonic.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            54,
+            54
+          ],
+          "quote": "We assume a single BIP32 master root key. This specification is not concerned with how this was derived (e.g. directly or via a mnemonic scheme such as BIP39)."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            480,
+            480
+          ],
+          "quote": "This specification relies on BIP32 but is agnostic to how the BIP32 root key is derived. As such, this standard is able to derive wallets with initialization schemes like BIP39 or Electrum wallet style mnemonics."
+        }
+      ]
+    },
+    {
+      "id": "k-hmac",
+      "statement": "Each application gets a unique private key k, derived from the root along a fully hardened path; k then goes through HMAC-SHA512 with the key bip-entropy-from-k and k as the message.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            56,
+            56
+          ],
+          "quote": "For each application that requires its own wallet, a unique private key is derived from the BIP32 master root key using a fully hardened derivation path. The resulting private key (k) is then processed with HMAC-SHA512, where the key is \"bip-entropy-from-k\", and the message payload is the private key k:"
+        }
+      ]
+    },
+    {
+      "id": "hmac-rationale",
+      "statement": "The authors' reason for HMAC-SHA512: to prevent leakage of the parent tree should k be compromised. Hardened derivation is required but cannot be enforced, so the HMAC makes the entropy hardened regardless, and the purpose is entropy, not a key.",
+      "scope": "author-rationale",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "The reason for running the derived key through HMAC-SHA512 and truncating the result as necessary is to prevent leakage of the parent tree should the derived key (''k'') be compromised. While the specification requires the use of hardened key derivation which would prevent this, we cannot enforce hardened derivation, so this method ensures the derived entropy is hardened. Also, from a semantic point of view, since the purpose is to derive entropy and not a private key, we are required to transform the child key."
+        }
+      ]
+    },
+    {
+      "id": "truncate",
+      "statement": "The HMAC gives 512 bits; each application SHOULD use only the bits it needs and truncate the rest.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            60,
+            60
+          ],
+          "quote": "The result produces 512 bits of entropy. Each application SHOULD use up to the required number of bits necessary for their operation, and truncate the rest."
+        }
+      ]
+    },
+    {
+      "id": "path-format",
+      "statement": "BIP 85 paths have the form m/83696968'/{app_no}'/{index}', with the application's number after the purpose and an index last.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            108,
+            108
+          ],
+          "quote": "Derivation paths follow the format <code>m/83696968'/{app_no}'/{index}'</code>, where ''{app_no}'' is the path for the application, and ''{index}'' is the index."
+        }
+      ]
+    },
+    {
+      "id": "semantic-numbers",
+      "statement": "Application numbers should be semantic, such as a BIP number or a sequence of ASCII character codes.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            110,
+            110
+          ],
+          "quote": "Application numbers should be semantic in some way, such as a BIP number or ASCII character code sequence."
+        }
+      ]
+    },
+    {
+      "id": "seed-ascii",
+      "statement": "Read two digits at a time as ASCII codes, the purpose number 83696968 spells SEED (83 S, 69 E, 69 E, 68 D). BIP 85 does not say so; this is our reading, checked by a test.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            108,
+            108
+          ],
+          "quote": "m/83696968'/{app_no}'/{index}'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            110,
+            110
+          ],
+          "quote": "such as a BIP number or ASCII character code sequence."
+        }
+      ]
+    },
+    {
+      "id": "bip39-app",
+      "statement": "Application 39' makes BIP 39 mnemonics on the path m/83696968'/39'/{language}'/{words}'/{index}', keeping 128 bits for 12 words and 256 bits for 24; the next twelve words for the same language sit at index 1'.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            113,
+            113
+          ],
+          "quote": "Application number: 39'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            115,
+            115
+          ],
+          "quote": "Truncate trailing (least significant) bytes of the entropy to the number of bits required to map to the relevant word length: 128 bits for 12 words, 256 bits for 24 words."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            117,
+            117
+          ],
+          "quote": "The derivation path format is: <code>m/83696968'/39'/{language}'/{words}'/{index}'</code>"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            119,
+            119
+          ],
+          "quote": "a BIP39 mnemonic with 12 English words (first index) would have the path <code>m/83696968'/39'/0'/12'/0'</code>, the next key would be <code>m/83696968'/39'/0'/12'/1'</code> etc."
+        }
+      ]
+    },
+    {
+      "id": "wif-app",
+      "statement": "Application 2' uses the most significant 256 bits as a private key, encoded as a compressed WIF for use as the hdseed of Bitcoin Core wallets.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            227,
+            227
+          ],
+          "quote": "Application number: 2'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            229,
+            229
+          ],
+          "quote": "Uses the most significant 256 bits"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            237,
+            238
+          ],
+          "quote": "of entropy as the secret exponent to derive a private key and encode as a compressed WIF that will be used as the hdseed for Bitcoin Core wallets."
+        }
+      ]
+    },
+    {
+      "id": "invalid-key",
+      "statement": "A derived key can, with probability below 1 in 2^127, be zero or not below the curve order; software should then fail hard, and the user moves to the next index.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            232,
+            232
+          ],
+          "quote": "should hard fail (forcing users to iterate to the next index)."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            234,
+            234
+          ],
+          "quote": "(Note: this has probability lower than 1 in 2<sup>127</sup>.)"
+        }
+      ]
+    },
+    {
+      "id": "xprv-app",
+      "statement": "Application 32' makes an extended private key: the first 32 bytes are the chain code and the second 32 the private key, with child number, depth and parent fingerprint zero. BIP 85 warns that this reverses BIP 32's order.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            251,
+            251
+          ],
+          "quote": "Application number: 32'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            253,
+            253
+          ],
+          "quote": "the first 32 bytes are the chain code, and the second 32 bytes<ref name=\"curve-order\" /> are the private key for the BIP32 XPRV value. Child number, depth, and parent fingerprint are forced to zero."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            255,
+            255
+          ],
+          "quote": "''Warning'': The above order reverses the order of BIP32, which takes the first 32 bytes as the private key, and the second 32 bytes as the chain code."
+        }
+      ]
+    },
+    {
+      "id": "hex-app",
+      "statement": "Application 128169' outputs 16 to 64 bytes as hex, the rest truncated.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            270,
+            270
+          ],
+          "quote": "Application number: 128169'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            274,
+            276
+          ],
+          "quote": "`16 <= num_bytes <= 64` Truncate trailing (least significant) bytes of the entropy after `num_bytes`."
+        }
+      ]
+    },
+    {
+      "id": "pwd-app",
+      "statement": "Application 707764' Base64-encodes all 64 bytes and keeps the first 20 to 86 characters as a password.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            286,
+            286
+          ],
+          "quote": "Application number: 707764'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            290,
+            294
+          ],
+          "quote": "`20 <= pwd_len <= 86` [https://datatracker.ietf.org/doc/html/rfc4648 Base64] encode all 64 bytes of entropy. Remove any spaces or new lines inserted by Base64 encoding process. Slice Base64 result string on index 0 to `pwd_len`. This slice is the password."
+        }
+      ]
+    },
+    {
+      "id": "drng",
+      "statement": "BIP85-DRNG seeds a SHAKE256 stream with exactly the 64 bytes, for uses that need more than 64 bytes of input.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            86,
+            86
+          ],
+          "quote": "BIP85-DRNG-SHAKE256 is a deterministic random number generator for cryptographic functions that require deterministic outputs, but where the input to that function requires more than the 64 bytes provided by BIP85's HMAC output. BIP85-DRNG-SHAKE256 uses BIP85 to seed a SHAKE256 stream (from the SHA-3 standard). The input must be exactly 64 bytes long (from the BIP85 HMAC output)."
+        }
+      ]
+    },
+    {
+      "id": "dice-app",
+      "statement": "Application 89101' rolls an N-sided die for PINs and other numeric secrets: rolls are zero-indexed and read from the DRNG, and a trial that is not below N is skipped.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            393,
+            393
+          ],
+          "quote": "Application number: 89101'"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            400,
+            400
+          ],
+          "quote": "Use this application to generate PIN numbers, numeric secrets, and secrets over custom alphabets."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            403,
+            404
+          ],
+          "quote": "Roll values are zero-indexed, such that an N-sided die produces values in the range <code>[0, N-1]</code>, inclusive."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            406,
+            406
+          ],
+          "quote": "Create a BIP85 DRNG whose seed is the derived entropy."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            410,
+            415
+          ],
+          "quote": "bits_per_roll = ceil(log_2(sides)) bytes_per_roll = ceil(bits_per_roll / 8) Read <code>bytes_per_roll</code> bytes from the DRNG. Trim any bits in excess of <code>bits_per_roll</code> (retain the most significant bits). The resulting integer represents a single roll or trial."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            416,
+            417
+          ],
+          "quote": "If the trial is greater than or equal to the number of sides, skip it and move on to the next one."
+        }
+      ]
+    },
+    {
+      "id": "vectors",
+      "statement": "The model reproduces BIP 85's published vectors from the published root key: test cases 1 and 2, the DRNG bytes, 12, 18 and 24 words, the WIF, XPRV, HEX, Base64 password and dice outputs; the build checks every vector it draws.",
+      "scope": "computed-fixture",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            64,
+            64
+          ],
+          "quote": "===Test vectors==="
+        },
+        {
+          "bip": 85,
+          "lines": [
+            198,
+            198
+          ],
+          "quote": "DERIVED BIP39 MNEMONIC=girl mad pet galaxy egg matter matrix prison refuse sense ordinary nose"
+        },
+        {
+          "bip": 85,
+          "lines": [
+            424,
+            424
+          ],
+          "quote": "DERIVED ROLLS=1,0,0,2,0,1,5,5,2,4"
+        }
+      ]
+    },
+    {
+      "id": "no-compat",
+      "statement": "BIP 85 records that it is not backwards compatible with any other existing specification.",
+      "scope": "normative-rule",
+      "support": "explicit",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            478,
+            478
+          ],
+          "quote": "This specification is not backwards compatible with any other existing specification."
+        }
+      ]
+    },
+    {
+      "id": "root-recomputes",
+      "statement": "Every output is computed from the root key and its path alone, so whoever holds the root can recompute every output, while one output does not give k, the root or another path's output. This follows from the derivation and the authors' rationale; BIP 85 does not state it in these words.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            56,
+            56
+          ],
+          "quote": "a unique private key is derived from the BIP32 master root key using a fully hardened derivation path."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            58,
+            58
+          ],
+          "quote": "to prevent leakage of the parent tree should the derived key (''k'') be compromised."
+        }
+      ]
+    },
+    {
+      "id": "ordinary-output",
+      "statement": "A derived mnemonic, WIF key or extended key is an ordinary one: the receiving wallet uses it as it would any other, and nothing in it records that it was derived. This follows from BIP 85's outputs being standard encodings; BIP 85 does not say it in these words.",
+      "scope": "editorial-analysis",
+      "support": "inference",
+      "evidence": [
+        {
+          "bip": 85,
+          "lines": [
+            23,
+            23
+          ],
+          "quote": "can be fed into whatever method a wallet uses to derive the initial mnemonic seed or root key."
+        },
+        {
+          "bip": 85,
+          "lines": [
+            237,
+            238
+          ],
+          "quote": "encode as a compressed WIF that will be used as the hdseed for Bitcoin Core wallets."
+        }
+      ]
+    }
+  ]
+}

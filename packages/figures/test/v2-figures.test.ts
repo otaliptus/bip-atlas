@@ -9,10 +9,8 @@ import { V2Eavesdropper } from "../src/v2/V2Eavesdropper";
 import { V2Ellswift } from "../src/v2/V2Ellswift";
 import { V2Framing } from "../src/v2/V2Framing";
 import { V2Handshake } from "../src/v2/V2Handshake";
-import { V2KeyStory } from "../src/v2/V2KeyStory";
 import { V2PacketBytes } from "../src/v2/V2PacketBytes";
 import { V2Rekey } from "../src/v2/V2Rekey";
-import { V2Terminator } from "../src/v2/V2Terminator";
 import type { DerivedV2Fixture, DerivedV2FramingFixture, DerivedV2RekeyFixture } from "../src/types";
 
 const root = new URL("../../../", import.meta.url);
@@ -105,18 +103,6 @@ describe("v2 figures", () => {
     expect(V1_PREFIX).toBe("f9beb4d976657273696f6e0000000000");
     expect(s).toContain(">v<");
     expect(s.slice(s.indexOf("<details"))).toContain(p1.derived.ellOurs.slice(0, 32));
-  });
-  it("A17.5 walks packet 0's key schedule with every value disclosed", () => {
-    const s = html(h(V2KeyStory, { fixture: p0 }));
-    const d = p0.derived;
-    expect(d.packet.aadLen).toBe(4095);
-    expect(s).toContain("GARBAGE 4,095 B");
-    const details = s.slice(s.indexOf("<details"));
-    for (const v of [d.xShared, d.sharedSecret, d.sessionId, ...Object.values(d.keys), d.sendTerminator, d.packet.tag]) expect(details).toContain(v);
-  });
-  it("A17.7 reads at most 4,095 + 16 bytes", () => {
-    const s = html(h(V2Terminator, { fixture: p0 }));
-    expect(s).toContain("AT MOST 4,095 + 16 = 4,111 B READ");
   });
   it("A17.8 draws all 21 bytes of packet 1", () => {
     const s = html(h(V2PacketBytes, { fixture: p1 }));

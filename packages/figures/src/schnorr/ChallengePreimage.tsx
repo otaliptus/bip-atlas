@@ -1,7 +1,6 @@
-import { Arrow, Drawing, IsoBox, Machine, Value, idsFor } from "../kit";
+import { Arrow, Drawing, IsoBox, Machine, Value, idsFor, short } from "../kit";
 import type { Role } from "../kit";
 import type { DerivedSchnorrFixture } from "../types";
-import { short } from "./stages";
 
 /** The fixed part of the challenge input: SHA256(tag) twice, r and P, 32 bytes each. */
 const FIXED = [

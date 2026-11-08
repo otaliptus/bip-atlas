@@ -1,0 +1,1716 @@
+{
+  "schemaVersion": "bip-atlas.research-editorial-relations.v2",
+  "note": "Editorial interpretations, distinct from declared requirements and reader prerequisites. Evidence excerpts are checked against pinned source bytes; that check does not establish the interpretation. Editorial comparisons may cite both endpoints without a direct source-body cross-reference.",
+  "edges": [
+    {
+      "source": 39,
+      "target": 32,
+      "kind": "feeds",
+      "interpretation": "Mnemonic seed derivation can supply seed material to an HD key tree; the word format is not the tree algorithm.",
+      "evidence": [
+        {
+          "path": "bip-0039.mediawiki",
+          "line": 22,
+          "excerpt": "BIP-0032 or similar methods.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0039.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 43,
+      "target": 32,
+      "kind": "convention-over",
+      "interpretation": "The purpose field namespaces applications of BIP32 derivation.",
+      "evidence": [
+        {
+          "path": "bip-0043.mediawiki",
+          "line": 15,
+          "excerpt": "based on algorithm described in BIP-0032 (BIP32 from now on).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0043.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 45,
+      "target": 44,
+      "kind": "compares-with",
+      "interpretation": "The older cosigner hierarchy adapts account/change conventions for a shared multisig wallet.",
+      "evidence": [
+        {
+          "path": "bip-0045.mediawiki",
+          "line": 178,
+          "excerpt": "Opposite to BIP44, each cosigner branch needs to be checked,",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0045.mediawiki#L178"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 48,
+      "target": 67,
+      "kind": "uses",
+      "interpretation": "The multiscript multisig hierarchy uses deterministic public-key ordering.",
+      "evidence": [
+        {
+          "path": "bip-0048.mediawiki",
+          "line": 15,
+          "excerpt": "described in BIP-0067 (BIP67 from now on), BIP-0032 (BIP32 from now on), purpose scheme described in",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0048.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 49,
+      "target": 141,
+      "kind": "application-of",
+      "interpretation": "The derivation convention selects P2SH-wrapped witness outputs rather than changing SegWit validation.",
+      "evidence": [
+        {
+          "path": "bip-0049.mediawiki",
+          "line": 16,
+          "excerpt": "This BIP defines the derivation scheme for HD wallets using the P2WPKH-nested-in-P2SH ([[bip-0141.mediawiki|BIP 141]]) serialization format for segregated witness transactions.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0049.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 49,
+      "target": 16,
+      "kind": "uses",
+      "interpretation": "Nested SegWit uses the P2SH envelope as well as witness spending rules.",
+      "evidence": [
+        {
+          "path": "bip-0049.mediawiki",
+          "line": 20,
+          "excerpt": "With the usage of P2WPKH-nested-in-P2SH ([[bip-0141.mediawiki#p2wpkh-nested-in-bip16-p2sh|BIP 141]]) transactions it is necessary to have a common derivation scheme.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0049.mediawiki#L20"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 67,
+      "target": 16,
+      "kind": "application-of",
+      "interpretation": "Sorting keys before constructing a multisig redeem script makes cosigners agree on the same script hash.",
+      "evidence": [
+        {
+          "path": "bip-0067.mediawiki",
+          "line": 22,
+          "excerpt": "Multi-signature pay-to-script-hash transactions are defined in BIP-0016<ref>[https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki BIP-0016]</ref>. The redeem script does not require a particular ordering or encoding for public keys.  This means that for a given set of keys and number of required signatures, there are as many as 2(n!) possible standard redeem scripts, each with its separate P2SH address.  Adhering to an ordering and key encoding would ensure that a multi-signature “acco",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0067.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 85,
+      "target": 32,
+      "kind": "derives-from",
+      "interpretation": "Hardened children are transformed into application-specific entropy.",
+      "evidence": [
+        {
+          "path": "bip-0085.mediawiki",
+          "line": 56,
+          "excerpt": "For each application that requires its own wallet, a unique private key is derived from the BIP32 master root key using a fully hardened derivation path. The resulting private key (k) is then processed with HMAC-SHA512, where the key is \"bip-entropy-from-k\", and the message payload is the private key k: <code>HMAC-SHA512(key=\"bip-entropy-from-k\", msg=k)</code>",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0085.mediawiki#L56"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 87,
+      "target": 174,
+      "kind": "complements",
+      "interpretation": "The multisig hierarchy is motivated by interoperable descriptor/PSBT-era wallets.",
+      "evidence": [
+        {
+          "path": "bip-0087.mediawiki",
+          "line": 24,
+          "excerpt": "With the increase of more user friendly (offline) multisignature wallets, and adoption of new technologies such as [https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md the descriptor language] and [https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki BIP-0174 (Partially Signed Bitcoin Transactions)], it is necessary to create a common derivation scheme that makes use of all new technologies.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0087.mediawiki#L24"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 88,
+      "target": 32,
+      "kind": "describes",
+      "interpretation": "Path templates constrain derivation paths without supplying a new derivation algorithm.",
+      "evidence": [
+        {
+          "path": "bip-0088.mediawiki",
+          "line": 15,
+          "excerpt": "the constraints that can be imposed on BIP32 derivation paths.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0088.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 93,
+      "target": 32,
+      "kind": "encodes",
+      "interpretation": "The seed backup/share format protects master-seed material used by BIP32.",
+      "evidence": [
+        {
+          "path": "bip-0093.mediawiki",
+          "line": 30,
+          "excerpt": "BIP-0032 master seed data is the source entropy used to derive all private keys in an HD wallet.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0093.mediawiki#L30"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 93,
+      "target": 39,
+      "kind": "compares-with",
+      "interpretation": "The backup design is distinct from BIP39 mnemonic encoding and passphrase-derived seeds.",
+      "evidence": [
+        {
+          "path": "bip-0093.mediawiki",
+          "line": 57,
+          "excerpt": "However, BIP-0039 has no error-correcting ability, cannot sensibly be extended to support secret sharing, has no support for versioning or other metadata, and has many technical design decisions that make implementation and interoperability difficult (for example, the use of SHA-512 to derive seeds, or the use of 11-bit words).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0093.mediawiki#L57"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 124,
+      "target": 32,
+      "kind": "application-of",
+      "interpretation": "The closed script-template proposal combines deterministic key derivation with spending policies.",
+      "evidence": [
+        {
+          "path": "bip-0124.mediawiki",
+          "line": 16,
+          "excerpt": "This BIP defines a script template format that can be used by wallets to deterministically generate scripts with specific authorization policies using the key derivation mechanism defined in BIP32.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0124.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 124,
+      "target": 65,
+      "kind": "uses",
+      "interpretation": "Timelocks motivate wallet descriptions that go beyond single-key or simple multisig scripts.",
+      "evidence": [
+        {
+          "path": "bip-0124.mediawiki",
+          "line": 20,
+          "excerpt": "widely used formats. The most popular formats are pay-to-pubkey-hash and m-of-n pay-to-script-hash (BIP16). However, different wallets tend to use mutually incompatible derivation schemes to generate signing keys and construct scripts from them. Moreover, with the advent of hashlocked and timelocked contracts (BIP65, BIP112), it is necessary for different wallets to be able to cooperatively generate even more sophisticated scripts.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0124.mediawiki#L20"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 128,
+      "target": 65,
+      "kind": "uses",
+      "interpretation": "Recovery plans use locktime mechanisms rather than adding a new opcode.",
+      "evidence": [
+        {
+          "path": "bip-0128.mediawiki",
+          "line": 23,
+          "excerpt": "future date, as explained in [[bip-0065.mediawiki|BIP-65]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0128.mediawiki#L23"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 128,
+      "target": 433,
+      "kind": "uses",
+      "interpretation": "Recovery plans can use anchor outputs for fee-bumping alert transactions.",
+      "evidence": [
+        {
+          "path": "bip-0128.mediawiki",
+          "line": 89,
+          "excerpt": "be P2A addresses (described in [[bip-0433.mediawiki|BIP-433]]), or other addresses under the",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0128.mediawiki#L89"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 138,
+      "target": 329,
+      "kind": "encodes",
+      "interpretation": "Labels are an example non-secret payload for the proposed encrypted metadata backup.",
+      "evidence": [
+        {
+          "path": "bip-0138.md",
+          "line": 88,
+          "excerpt": "scheme also works for labels (BIP-0329) and other wallet metadata like",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L88"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 138,
+      "target": 324,
+      "kind": "reuses-construction",
+      "interpretation": "The backup proposal uses ChaCha20-Poly1305, also used by v2 transport; this is shared cryptographic machinery, not a peer-network runtime dependency.",
+      "evidence": [
+        {
+          "path": "bip-0138.md",
+          "line": 207,
+          "excerpt": "ChaCha20-Poly1305 is already used in Bitcoin Core (e.g., BIP324) and is widely",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0138.md#L207"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 388,
+      "target": 380,
+      "kind": "represents",
+      "interpretation": "Wallet policies describe accounts compactly and instantiate output descriptors.",
+      "evidence": [
+        {
+          "path": "bip-0388.mediawiki",
+          "line": 33,
+          "excerpt": "''[[bip-0380.mediawiki|Output Script Descriptors]]'' were introduced in Bitcoin Core as a way to represent collections of output scripts. It is a general and flexible language, designed to catch all the possible use-cases of bitcoin wallets (that is, if you know the script and you have the necessary keys, it will be possible to sign transactions with any descriptor-based software wallet).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0388.mediawiki#L33"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 388,
+      "target": 379,
+      "kind": "uses",
+      "interpretation": "Miniscript supplies structured spending conditions inside supported wallet policy templates.",
+      "evidence": [
+        {
+          "path": "bip-0388.mediawiki",
+          "line": 140,
+          "excerpt": "* any valid miniscript template (inside <tt>wsh</tt> or <tt>tr</tt> only).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0388.mediawiki#L140"
+        },
+        {
+          "path": "bip-0388.mediawiki",
+          "line": 142,
+          "excerpt": "See [[bip-0379.md|BIP-379]] for a precise specification of all the valid miniscript <tt>SCRIPT</tt> expressions.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0388.mediawiki#L142"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 388,
+      "target": 129,
+      "kind": "complements",
+      "interpretation": "Registered account policies and secure multisig setup address related signer/coordinator agreement problems.",
+      "evidence": [
+        {
+          "path": "bip-0388.mediawiki",
+          "line": 82,
+          "excerpt": "Designing a secure protocol for the coordination of a descriptor wallet among distant parties is also a challenging problem that is out of the scope of this document. See [[bip-0129.mediawiki|BIP-129 (Bitcoin Secure Multisig Setup)]] for an approach designed for multisig wallets. Regardless of the approach, the ability for the user to carefully verify all the details of the spending policies using the hardware signer's screen is a prerequisite for security in adversarial environments.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0388.mediawiki#L82"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 389,
+      "target": 88,
+      "kind": "compares-with",
+      "interpretation": "Multipath descriptors and path templates express related derivation constraints in different contexts.",
+      "evidence": [
+        {
+          "path": "bip-0389.mediawiki",
+          "line": 104,
+          "excerpt": "This proposal is in contrast to similar proposals such as BIP 88 which allow for multiple derivation indexes in a single element.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0389.mediawiki#L104"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 390,
+      "target": 327,
+      "kind": "uses",
+      "interpretation": "The descriptor key expression aggregates participant keys with MuSig2.",
+      "evidence": [
+        {
+          "path": "bip-0390.mediawiki",
+          "line": 17,
+          "excerpt": "<tt>musig()</tt> expressions take multiple keys and produce an aggregate public key using [[bip-0327.mediawiki|BIP-327]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0390.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 391,
+      "target": 174,
+      "kind": "reuses-format",
+      "interpretation": "The closed binary descriptor container adopts key-value map ideas from PSBT; it is not a PSBT transaction.",
+      "evidence": [
+        {
+          "path": "bip-0391.mediawiki",
+          "line": 19,
+          "excerpt": "Based on key-value maps as defined by [[bip-0174.mediawiki|BIP 174]], the",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0391.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 393,
+      "target": 352,
+      "kind": "application-context",
+      "interpretation": "Silent Payment recovery motivates carrying operational scan information alongside a descriptor.",
+      "evidence": [
+        {
+          "path": "bip-0393.mediawiki",
+          "line": 28,
+          "excerpt": "When restoring from a backup, a wallet may need to know where to begin scanning the blockchain, how many consecutive unused addresses to tolerate before stopping (the gap limit), or the maximum label index to scan for in the case of [[bip-0352.mediawiki|BIP 352]] silent payment wallets.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0393.mediawiki#L28"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 13,
+      "target": 16,
+      "kind": "complements",
+      "interpretation": "A script-hash recipient address and script-hash spending validation solve different halves of the payment.",
+      "evidence": [
+        {
+          "path": "bip-0013.mediawiki",
+          "line": 15,
+          "excerpt": "In essence, an address encoded under this proposal represents the encoded hash of a [https://en.bitcoin.it/wiki/Script script], rather than the encoded hash of an ECDSA public key.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0013.mediawiki#L15"
+        },
+        {
+          "path": "bip-0016.mediawiki",
+          "line": 39,
+          "excerpt": "# {serialized script} is popped off the initial stack, and the transaction is validated again using the popped stack and the deserialized script as the scriptPubKey.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0016.mediawiki#L39"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 16,
+      "target": 12,
+      "kind": "compares-with",
+      "interpretation": "P2SH addresses the complex-script funding problem with different evaluation rules from OP_EVAL.",
+      "evidence": [
+        {
+          "path": "bip-0016.mediawiki",
+          "line": 64,
+          "excerpt": "This BIP replaces BIP 12, which proposed a new Script opcode (\"OP_EVAL\") to accomplish everything in this BIP and more.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0016.mediawiki#L64"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 17,
+      "target": 16,
+      "kind": "compares-with",
+      "interpretation": "CHV and P2SH are competing script-hash designs, not consecutive activation stages.",
+      "evidence": [
+        {
+          "path": "bip-0017.mediawiki",
+          "line": 63,
+          "excerpt": "This BIP replaces BIP 12 and BIP 16, which propose evaluating a Script from the stack after verifying its hash.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0017.mediawiki#L63"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 18,
+      "target": 16,
+      "kind": "compares-with",
+      "interpretation": "The alternative scriptCheck transaction layout addresses script-hash funding with a different representation.",
+      "evidence": [
+        {
+          "path": "bip-0018.mediawiki",
+          "line": 84,
+          "excerpt": "It also replaces BIP 16, which is identical in terms of protocol, but suggests a specific implementation and does not deprecate scriptPubKey to maintain protocol consistency.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0018.mediawiki#L84"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 19,
+      "target": 11,
+      "kind": "compares-with",
+      "interpretation": "The low-sigop proposal uses different multisig script patterns from bare CHECKMULTISIG.",
+      "evidence": [
+        {
+          "path": "bip-0019.mediawiki",
+          "line": 67,
+          "excerpt": "This is already specified in [[bip-0011.mediawiki|BIP 0011]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0019.mediawiki#L67"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 66,
+      "target": 62,
+      "kind": "narrows",
+      "interpretation": "Strict DER is a narrower signature-encoding restriction related to the earlier malleability collection.",
+      "evidence": [
+        {
+          "path": "bip-0066.mediawiki",
+          "line": 133,
+          "excerpt": "The requirement to have signatures that comply strictly with DER has been enforced as a relay policy by the reference client since v0.8.0, and very few transactions violating it are being added to the chain as of January 2015. In addition, every non-compliant signature can trivially be converted into a compliant one, so there is no loss of functionality by this requirement. This proposal has the added benefit of reducing transaction malleability (see BIP 62).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0066.mediawiki#L133"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 146,
+      "target": 66,
+      "kind": "extends-proposal",
+      "interpretation": "LOW_S and NULLFAIL propose further consensus restrictions beyond strict DER.",
+      "evidence": [
+        {
+          "path": "bip-0146.mediawiki",
+          "line": 22,
+          "excerpt": "Since the enforcement of Strict DER signatures ([https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki BIP66]), there are 2 remaining known sources of malleability in ECDSA signatures:",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0146.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 147,
+      "target": 141,
+      "kind": "complements",
+      "interpretation": "NULLDUMMY removes a witness-malleability vector as well as affecting applicable pre-witness scripts.",
+      "evidence": [
+        {
+          "path": "bip-0147.mediawiki",
+          "line": 19,
+          "excerpt": "ild transactions. Although the <code>txid</code> of segregated witness ([https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141]) transactions is not third party malleable, this malleability vector will change the <code>wtxid</code> and may reduce the efficiency of compact block relay ([https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki BIP152]).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0147.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 147,
+      "target": 152,
+      "kind": "motivates",
+      "interpretation": "Changing witness data can harm compact-block reconstruction even when base transaction identity stays stable.",
+      "evidence": [
+        {
+          "path": "bip-0147.mediawiki",
+          "line": 19,
+          "excerpt": "ild transactions. Although the <code>txid</code> of segregated witness ([https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141]) transactions is not third party malleable, this malleability vector will change the <code>wtxid</code> and may reduce the efficiency of compact block relay ([https://github.com/bitcoin/bips/blob/master/bip-0152.mediawiki BIP152]).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0147.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 461,
+      "target": 66,
+      "kind": "respects",
+      "interpretation": "Deterministic signing produces ordinary DER-encoded signatures; it does not itself tighten consensus validity.",
+      "evidence": [
+        {
+          "path": "bip-0461.md",
+          "line": 179,
+          "excerpt": "l 1-byte sighash flag, which serializes *r* and *s* as arbitrary-length big-endian signed integers[^bip66]. Their encoding being signed means that even though every value of *r* and *s* can be encoded in 32 bytes or less as an unsigned integer, a null byte must be prepended if the most significant bit is set, raising the maximum size to 33 bytes each. The maximum size of a DER encoded ECDSA signature is 72 bytes, or 73 with the sighash flag.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0461.md#L179"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 143,
+      "target": 141,
+      "kind": "signature-message-for",
+      "interpretation": "The witness-v0 signature digest accompanies SegWit spending rules.",
+      "evidence": [
+        {
+          "path": "bip-0143.mediawiki",
+          "line": 24,
+          "excerpt": "output is spendable by arbitrary signature or no signature at all. <ref>[https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141: Segregated Witness (Consensus layer)]</ref>",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0143.mediawiki#L24"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 144,
+      "target": 141,
+      "kind": "peer-support-for",
+      "interpretation": "Witness-aware relay and serialization support the consensus-layer witness structure.",
+      "evidence": [
+        {
+          "path": "bip-0144.mediawiki",
+          "line": 17,
+          "excerpt": "In addition to defining witness structures and requiring commitments in future blocks ([https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki BIP141] - Consensus segwit BIP), new mechanisms must be defined to allow peers to advertise support for segregated witness and to relay the witness structures and request them from other peers without breaking compatibility with older nodes.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0144.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 145,
+      "target": 22,
+      "kind": "extends",
+      "interpretation": "SegWit block-template fields extend the node-to-miner template interface.",
+      "evidence": [
+        {
+          "path": "bip-0145.mediawiki",
+          "line": 14,
+          "excerpt": "This BIP describes modifications to the getblocktemplate JSON-RPC call ([[bip-0022.mediawiki|BIP 22]]) to support segregated witness as defined by [[bip-0141.mediawiki|BIP 141]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0145.mediawiki#L14"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 145,
+      "target": 141,
+      "kind": "mining-support-for",
+      "interpretation": "Witness commitments and new resource accounting must be represented when assembling blocks.",
+      "evidence": [
+        {
+          "path": "bip-0145.mediawiki",
+          "line": 14,
+          "excerpt": "This BIP describes modifications to the getblocktemplate JSON-RPC call ([[bip-0022.mediawiki|BIP 22]]) to support segregated witness as defined by [[bip-0141.mediawiki|BIP 141]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0145.mediawiki#L14"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 112,
+      "target": 68,
+      "kind": "checks",
+      "interpretation": "The Script opcode constrains a relative lock carried by input sequence semantics.",
+      "evidence": [
+        {
+          "path": "bip-0112.mediawiki",
+          "line": 17,
+          "excerpt": "scripting system that in combination with BIP 68 allows execution",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0112.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 113,
+      "target": 68,
+      "kind": "complements",
+      "interpretation": "Median-time-past supplies the time basis used by relative time locks.",
+      "evidence": [
+        {
+          "path": "bip-0113.mediawiki",
+          "line": 41,
+          "excerpt": "BIP68 (sequence numbers) and BIP112 (CHECKSEQUENCEVERIFY).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0113.mediawiki#L41"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 125,
+      "target": 68,
+      "kind": "shares-field-with",
+      "interpretation": "Replacement signaling and relative timelocks use sequence bits for different purposes and must not be conflated.",
+      "evidence": [
+        {
+          "path": "bip-0125.mediawiki",
+          "line": 154,
+          "excerpt": "implementation, BIP68 (Relative lock-time using consensus-enforced",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0125.mediawiki#L154"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 431,
+      "target": 125,
+      "kind": "policy-related",
+      "interpretation": "Topology restrictions address pinning and replacement incentives alongside replacement policy.",
+      "evidence": [
+        {
+          "path": "bip-0431.mediawiki",
+          "line": 97,
+          "excerpt": "1. A TRUC transaction signals replaceability, even if it does not signal BIP125 replaceability.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0431.mediawiki#L97"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 433,
+      "target": 431,
+      "kind": "complements",
+      "interpretation": "Keyless anchors serve fee-bumping use cases in restricted transaction topologies.",
+      "evidence": [
+        {
+          "path": "bip-0433.mediawiki",
+          "line": 29,
+          "excerpt": "with the drawback that selection of this output type could result in griefing if anti-pinning measures are not taken. If unsure, use in conjunction with [https://github.com/bitcoin/bips/blob/master/bip-0431.mediawiki TRUC transactions].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0433.mediawiki#L29"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 331,
+      "target": 339,
+      "kind": "builds-on",
+      "interpretation": "Package relay aims to resolve orphan ancestors without falling back to txid-based relay between wtxid peers.",
+      "evidence": [
+        {
+          "path": "bip-0331.mediawiki",
+          "line": 91,
+          "excerpt": "or validated. Ideally, two nodes that both support BIP339 wtxid-based transaction relay shouldn't",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0331.mediawiki#L91"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 326,
+      "target": 68,
+      "kind": "application-of",
+      "interpretation": "Relative sequence values can provide anti-fee-sniping behavior and cover traffic for off-chain settlement patterns.",
+      "evidence": [
+        {
+          "path": "bip-0326.mediawiki",
+          "line": 24,
+          "excerpt": "This BIP proposes to improve the privacy and fungibility of off-chain protocols by having on-chain wallets like Bitcoin Core also set the nSequence field in their taproot transactions as in BIP68[5]. This would be in place of their regular nLockTime anti-fee-sniping protection. The end result is that, if an observer of the blockchain sees a taproot spend with an nSequence value, then that could be either: a regular spend from a wallet, or an off-chain settlement transaction spent with a timelock",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0326.mediawiki#L24"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 451,
+      "target": 125,
+      "kind": "interacts-with",
+      "interpretation": "The disposal proposal chooses sequence/signature conventions within the existing relay-policy setting.",
+      "evidence": [
+        {
+          "path": "bip-0451.md",
+          "line": 72,
+          "excerpt": "1. All inputs MUST set the nSequence to 0xFFFFFFFF (do not signal for BIP 125 RBF).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0451.md#L72"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 370,
+      "target": 174,
+      "kind": "new-version-of",
+      "interpretation": "PSBTv2 changes construction representation while retaining the PSBT container model.",
+      "evidence": [
+        {
+          "path": "bip-0370.mediawiki",
+          "line": 17,
+          "excerpt": "described in BIP 174 which allows for inputs and outputs to be added to the PSBT after creation.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0370.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 371,
+      "target": 174,
+      "kind": "extends",
+      "interpretation": "Taproot fields can be carried in version-zero PSBTs.",
+      "evidence": [
+        {
+          "path": "bip-0371.mediawiki",
+          "line": 16,
+          "excerpt": "This document proposes additional fields for BIP 174 PSBTv0 and BIP 370 PSBTv2 that allow for",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0371.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 371,
+      "target": 370,
+      "kind": "extends",
+      "interpretation": "The same Taproot field family can be carried in version-two PSBTs.",
+      "evidence": [
+        {
+          "path": "bip-0371.mediawiki",
+          "line": 16,
+          "excerpt": "This document proposes additional fields for BIP 174 PSBTv0 and BIP 370 PSBTv2 that allow for",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0371.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 372,
+      "target": 370,
+      "kind": "extends",
+      "interpretation": "Pay-to-contract tweak metadata is not restricted to the original PSBT version.",
+      "evidence": [
+        {
+          "path": "bip-0372.mediawiki",
+          "line": 17,
+          "excerpt": "This document proposes additional fields for BIP 174 PSBTv0 and BIP 370 PSBTv2",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0372.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 327,
+      "target": 340,
+      "kind": "produces",
+      "interpretation": "MuSig2 produces BIP340-compatible aggregate public keys and signatures.",
+      "evidence": [
+        {
+          "path": "bip-0327.mediawiki",
+          "line": 21,
+          "excerpt": "The standard is compatible with [https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki BIP340] public keys and signatures.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki#L21"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 327,
+      "target": 341,
+      "kind": "supports-tweaks-for",
+      "interpretation": "Aggregate-key tweaking supports Taproot key and script paths.",
+      "evidence": [
+        {
+          "path": "bip-0327.mediawiki",
+          "line": 22,
+          "excerpt": "It supports ''tweaking'', which allows deriving [https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki BIP32] child keys from aggregate public keys and creating [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP341] Taproot outputs with key and script paths.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0327.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 328,
+      "target": 327,
+      "kind": "derivation-over",
+      "interpretation": "Synthetic extended keys allow deriving from aggregate public keys rather than reaggregating children each time.",
+      "evidence": [
+        {
+          "path": "bip-0328.mediawiki",
+          "line": 14,
+          "excerpt": "This document specifies how BIP 32 extended public keys can be constructed from a BIP 327 MuSig2",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0328.mediawiki#L14"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 374,
+      "target": 352,
+      "kind": "supports",
+      "interpretation": "DLEQ can establish correctness of ECDH shares used in Silent Payment output generation.",
+      "evidence": [
+        {
+          "path": "bip-0374.mediawiki",
+          "line": 29,
+          "excerpt": "[https://github.com/bitcoin/bips/blob/master/bip-0352.mediawiki#specification BIP352] requires senders to compute output scripts using ECDH shared secrets from the same secret keys used to sign the inputs. Generating an incorrect signature will produce an invalid transaction that will be rejected by consensus. An incorrectly generated output script can still be consensus-valid, meaning funds may be lost if it gets broadcast.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0374.mediawiki#L29"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 373,
+      "target": 370,
+      "kind": "extends",
+      "interpretation": "MuSig2 PSBT fields support version two as well as version zero; the header dependency does not mean v2-only.",
+      "evidence": [
+        {
+          "path": "bip-0373.mediawiki",
+          "line": 17,
+          "excerpt": "This document proposes additional fields for [[bip-0174.mediawiki|BIP 174]] PSBTv0 and [[bip-0370.mediawiki|BIP 370]] PSBTv2 that allow for",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0373.mediawiki#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 376,
+      "target": 375,
+      "kind": "complements",
+      "interpretation": "Spending already-created Silent Payment outputs is a separate workflow from sending to them.",
+      "evidence": [
+        {
+          "path": "bip-0376.mediawiki",
+          "line": 28,
+          "excerpt": "BIP 375 and complementary BIP 374 specify how to create outputs locked with Silent Payment keys using PSBTs. But they don't specify how to unlock these outputs in a transaction.<ref name=\"why_not_adding_this_field_in_bip_375\">''' Why not including this new field in BIP 375?''' Historically, Silent Payment has been categorized from the perspective of the user of the protocol: receiver or sender. BIP 375 has followed this convention, as stated in its title: Sending Silent Payments with PSBTs. Give",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0376.mediawiki#L28"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 21,
+      "target": 20,
+      "kind": "evolves",
+      "interpretation": "The later payment URI specification revises the earlier URI design.",
+      "evidence": [
+        {
+          "path": "bip-0021.mediawiki",
+          "line": 20,
+          "excerpt": "This BIP is a modification of an earlier [[bip-0020.mediawiki|BIP 0020]] by Luke Dashjr. BIP 0020 was based off an earlier document by Nils Schneider. The alternative payment amounts in BIP 0020 have been removed.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0021.mediawiki#L20"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 321,
+      "target": 352,
+      "kind": "carries-instructions-for",
+      "interpretation": "A payment URI can carry a Silent Payment method without replacing the output-generation protocol.",
+      "evidence": [
+        {
+          "path": "bip-0321.mediawiki",
+          "line": 80,
+          "excerpt": "*sp: [[bip-0352.mediawiki|BIP 352 Silent Payment addresses]]",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0321.mediawiki#L80"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 353,
+      "target": 321,
+      "kind": "resolves-to",
+      "interpretation": "DNS Payment Instructions resolve a name to bitcoin: instructions; lookup and payment construction are different layers.",
+      "evidence": [
+        {
+          "path": "bip-0353.mediawiki",
+          "line": 193,
+          "excerpt": "* Reference implementations for parsing the URI contents can be found in [[bip-0321.mediawiki|BIP 321]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0353.mediawiki#L193"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 353,
+      "target": 352,
+      "kind": "carries-instructions-for",
+      "interpretation": "DNS records can publish reusable Silent Payment instructions.",
+      "evidence": [
+        {
+          "path": "bip-0353.mediawiki",
+          "line": 118,
+          "excerpt": "On-chain addresses which are re-used (i.e. not including schemes like [[bip-0352.mediawiki|Silent Payments]]) need to be rotated to avoid contributing substantially to address reuse. However, rotating them on a timer or any time a transaction enters the mempool could lead to substantial overhead from excess address generation. Instead, rotating addresses any time a transaction is confirmed on-chain ensures address rotation happens often while bounding the maximum number of addresses needed to on",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0353.mediawiki#L118"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 72,
+      "target": 70,
+      "kind": "discovery-for",
+      "interpretation": "The URI extension points to a merchant PaymentRequest instead of encoding the full exchange.",
+      "evidence": [
+        {
+          "path": "bip-0072.mediawiki",
+          "line": 14,
+          "excerpt": "support the payment protocol (BIP 70).",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0072.mediawiki#L14"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 73,
+      "target": 70,
+      "kind": "negotiates",
+      "interpretation": "HTTP content negotiation can select a PaymentRequest or URI without requiring full support for both.",
+      "evidence": [
+        {
+          "path": "bip-0073.mediawiki",
+          "line": 13,
+          "excerpt": "This BIP describes an enhancement to the payment protocol ([[bip-0070.mediawiki|BIP 70]])",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0073.mediawiki#L13"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 75,
+      "target": 70,
+      "kind": "extends",
+      "interpretation": "Encrypted address exchange adds privacy/security features to the merchant request protocol.",
+      "evidence": [
+        {
+          "path": "bip-0075.mediawiki",
+          "line": 19,
+          "excerpt": "This BIP is an extension to BIP 70 that provides two enhancements to the existing Payment Protocol.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0075.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 77,
+      "target": 78,
+      "kind": "extends",
+      "interpretation": "The asynchronous directory protocol preserves Payjoin negotiation while removing the receiver public-endpoint requirement.",
+      "evidence": [
+        {
+          "path": "bip-0077.md",
+          "line": 29,
+          "excerpt": "the Payjoin protocol (\"Version 2\") relative to and described in [BIP 78](bip-0078.mediawiki) (\"Version 1\"). An untrusted",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L29"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 77,
+      "target": 174,
+      "kind": "uses",
+      "interpretation": "Payjoin exchanges unfinished transaction data using PSBT.",
+      "evidence": [
+        {
+          "path": "bip-0077.md",
+          "line": 269,
+          "excerpt": "This transaction is serialized as a BIP 174 PSBTv0, satisfying",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L269"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 77,
+      "target": 324,
+      "kind": "reuses-construction",
+      "interpretation": "Async Payjoin borrows an ElligatorSwift-based cryptographic construction; it is not an encrypted Bitcoin peer connection.",
+      "evidence": [
+        {
+          "path": "bip-0077.md",
+          "line": 697,
+          "excerpt": "BIP 324 Encrypted",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0077.md#L697"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 47,
+      "target": 43,
+      "kind": "convention-over",
+      "interpretation": "Reusable payment-code derivation is a purpose-namespaced HD wallet application.",
+      "evidence": [
+        {
+          "path": "bip-0047.mediawiki",
+          "line": 21,
+          "excerpt": "This BIP is a particular application of BIP43 and is intended to supplement HD wallets which implement BIP44.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0047.mediawiki#L21"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 351,
+      "target": 47,
+      "kind": "compares-with",
+      "interpretation": "Private Payments and BIP47 use different on-chain notification/payment-code approaches.",
+      "evidence": [
+        {
+          "path": "bip-0351.mediawiki",
+          "line": 29,
+          "excerpt": "'''Sharing a BIP47 payment code''' addresses most of the above shortcomings. However, it introduces the following problems:",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0351.mediawiki#L29"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 352,
+      "target": 47,
+      "kind": "compares-with",
+      "interpretation": "Silent Payments trades notification-free receipt for receiver scanning; BIP47 describes a notification transaction and also permits alternate notification methods.",
+      "evidence": [
+        {
+          "path": "bip-0352.mediawiki",
+          "line": 36,
+          "excerpt": "These benefits come at the cost of requiring wallets to scan the blockchain in order to detect payments.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0352.mediawiki#L36"
+        },
+        {
+          "path": "bip-0047.mediawiki",
+          "line": 154,
+          "excerpt": "# Alice constructs a transaction which sends a small quantity of bitcoins to Bob's notification address (notification transaction)",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0047.mediawiki#L154"
+        },
+        {
+          "path": "bip-0047.mediawiki",
+          "line": 306,
+          "excerpt": "A recipient MAY choose to designate alternate notification methods which the sender may use in addition to a notification transaction.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0047.mediawiki#L306"
+        }
+      ],
+      "basis": "editorial-comparison"
+    },
+    {
+      "source": 352,
+      "target": 158,
+      "kind": "application-context",
+      "interpretation": "The specification discusses compact-filter interaction and scanning constraints, not automatic ordinary address-filter matching.",
+      "evidence": [
+        {
+          "path": "bip-0352.mediawiki",
+          "line": 99,
+          "excerpt": "e public key per transaction and only does one ECC multiplication per transaction. Bob can then use BIP158 block filters to determine if any of the outputs exist in a block and thus avoids downloading transactions which don't belong to him. It is still an open question as to how Bob can source the 33 bytes per transaction in a trustless manner, see [[#appendix-a-light-client-support|Appendix A: Light Client Support]] for more details.</ref>, and protects Alice's privacy in collaborative transact",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0352.mediawiki#L99"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 137,
+      "target": 322,
+      "kind": "compares-with",
+      "interpretation": "Compact recoverable signatures are contrasted with generic Script-based message proofs.",
+      "evidence": [
+        {
+          "path": "bip-0137.mediawiki",
+          "line": 16,
+          "excerpt": "The specification is intended to describe the standard for signatures of messages that can be signed and verified between different clients that exist in the field today. Note: that a new signature format has been defined which has a number of advantages over this BIP, but to be backwards compatible with existing implementations this BIP will be useful. See BIP 322 [1] for full details on the new signature scheme.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0137.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 127,
+      "target": 174,
+      "kind": "uses",
+      "interpretation": "Proof-of-reserves transaction construction includes PSBT coordination and an extension field.",
+      "evidence": [
+        {
+          "path": "bip-0127.mediawiki",
+          "line": 21,
+          "excerpt": "Bitcoin transaction serialization/validation and the BIP 174 PSBT format.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0127.mediawiki#L21"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 121,
+      "target": 120,
+      "kind": "discovery-for",
+      "interpretation": "The URI proposal carries requests into the Proof of Payment workflow.",
+      "evidence": [
+        {
+          "path": "bip-0121.mediawiki",
+          "line": 144,
+          "excerpt": "[https://github.com/bitcoin/bips/blob/master/bip-0120.mediawiki BIP0120]: Proof of Payment",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0121.mediawiki#L144"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 197,
+      "target": 199,
+      "kind": "application-of",
+      "interpretation": "The collateral-contract proposal builds on hash/time-locked transaction branches.",
+      "evidence": [
+        {
+          "path": "bip-0197.mediawiki",
+          "line": 15,
+          "excerpt": "This BIP describes a script for generalized debt agreement contract based on Hashed Time-Lock Contract (BIP 199) transactions according to the Atomic Loans specification (https://arxiv.org/pdf/1901.05117.pdf). For more details visit https://atomicloans.io.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0197.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 60,
+      "target": 37,
+      "kind": "proposes-change-to",
+      "interpretation": "The fixed-length relay-flag proposal responds to BIP37 optional version-message behavior.",
+      "evidence": [
+        {
+          "path": "bip-0060.mediawiki",
+          "line": 18,
+          "excerpt": "The protocol version was upgraded to 70001, and the (now accepted) BIP 0037 became implemented.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0060.mediawiki#L18"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 111,
+      "target": 37,
+      "kind": "gates-service",
+      "interpretation": "A service bit advertises opt-in Bloom-filter serving capability.",
+      "evidence": [
+        {
+          "path": "bip-0111.mediawiki",
+          "line": 15,
+          "excerpt": "This BIP extends BIP 37, Connection Bloom filtering, by defining a",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0111.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 157,
+      "target": 37,
+      "kind": "compares-with",
+      "interpretation": "Client-side matching shifts query disclosure away from server-side wallet Bloom filters.",
+      "evidence": [
+        {
+          "path": "bip-0157.mediawiki",
+          "line": 21,
+          "excerpt": "37<ref>https://github.com/bitcoin/bips/blob/master/bip-0037.mediawiki</ref>, has",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0157.mediawiki#L21"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 158,
+      "target": 37,
+      "kind": "compares-with",
+      "interpretation": "Golomb-Rice compact filters and server-side Bloom filters use different constructions and information flows.",
+      "evidence": [
+        {
+          "path": "bip-0158.mediawiki",
+          "line": 19,
+          "excerpt": "construction proposed is an alternative to Bloom filters, as used in BIP 37,",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0158.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 339,
+      "target": 144,
+      "kind": "extends",
+      "interpretation": "Witness-ID relay builds on witness-aware inventory and serialization support.",
+      "evidence": [
+        {
+          "path": "bip-0339.mediawiki",
+          "line": 43,
+          "excerpt": "# A new inv type MSG_WTX (0x00000005) is added, for use in both inv messages and getdata requests, indicating that the hash being referenced is a transaction's wtxid. In the case of getdata requests, MSG_WTX implies that the transaction being requested should be serialized with witness as well, as described in BIP 144.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0339.mediawiki#L43"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 330,
+      "target": 339,
+      "kind": "uses",
+      "interpretation": "Transaction reconciliation operates on witness transaction identities when reconciling announcements.",
+      "evidence": [
+        {
+          "path": "bip-0330.mediawiki",
+          "line": 112,
+          "excerpt": "Since sketches are based on the WTXIDs, the negotiation and support of Erlay should be enabled only if both peers signal [https://github.com/bitcoin/bips/blob/master/bip-0339.mediawiki BIP-339] support.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0330.mediawiki#L112"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 332,
+      "target": 434,
+      "kind": "negotiates-with",
+      "interpretation": "Stale-tip announcements use the feature negotiation mechanism.",
+      "evidence": [
+        {
+          "path": "bip-0332.md",
+          "line": 139,
+          "excerpt": "This BIP defines a new [BIP 434][BIP434] feature id (\"the `staletip` feature\"):",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0332.md#L139"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 150,
+      "target": 151,
+      "kind": "layered-over",
+      "interpretation": "The earlier peer identity authentication scheme assumes the earlier encrypted channel.",
+      "evidence": [
+        {
+          "path": "bip-0150.mediawiki",
+          "line": 34,
+          "excerpt": "'''Authentication initialization must only happen if encrypted channels have been established (according to BIP-151 [1]).'''",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0150.mediawiki#L34"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 324,
+      "target": 340,
+      "kind": "reuses-construction",
+      "interpretation": "Transport uses cryptographic conventions associated with BIP340; this reference does not mean peer transport signs messages with Schnorr.",
+      "evidence": [
+        {
+          "path": "bip-0324.mediawiki",
+          "line": 224,
+          "excerpt": "Here, <code>sha256_tagged(tag, x)</code> returns a tagged hash value <code>SHA256(SHA256(tag) || SHA256(tag) || x)</code> as in [https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#specification BIP340].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0324.mediawiki#L224"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 90,
+      "target": 34,
+      "kind": "buries-activation-of",
+      "interpretation": "A historical activation height can replace replaying old version-majority trigger logic.",
+      "evidence": [
+        {
+          "path": "bip-0090.mediawiki",
+          "line": 16,
+          "excerpt": "Prior soft forks (BIP 34, BIP 65, and BIP 66) were activated via miner signaling in block version numbers.  Now that the chain has long since passed the blocks at which those consensus rules have triggered, we can (as a simplification) replace the trigger mechanism by caching the block heights at which those consensus rules became enforced.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0090.mediawiki#L16"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 91,
+      "target": 9,
+      "kind": "coordinates-deployment",
+      "interpretation": "A reduced-threshold signaling mechanism coordinates the existing SegWit versionbits deployment.",
+      "evidence": [
+        {
+          "path": "bip-0091.mediawiki",
+          "line": 14,
+          "excerpt": "This document specifies a method to activate the existing BIP9 segwit deployment with a majority hashpower less than 95%.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0091.mediawiki#L14"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 148,
+      "target": 141,
+      "kind": "deployment-of",
+      "interpretation": "Mandatory signaling is an activation mechanism for SegWit, not an additional witness spending format.",
+      "evidence": [
+        {
+          "path": "bip-0148.mediawiki",
+          "line": 18,
+          "excerpt": "\"existing segwit deployment\" refer to the BIP9 \"segwit\" deployment using bit 1, between November 15th 2016 and November 15th 2017 to activate BIP141, BIP143 and BIP147.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0148.mediawiki#L18"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 149,
+      "target": 8,
+      "kind": "uses-deployment-design",
+      "interpretation": "The unused second SegWit deployment proposal uses guaranteed-lock-in versionbits design.",
+      "evidence": [
+        {
+          "path": "bip-0149.mediawiki",
+          "line": 34,
+          "excerpt": "This BIP will be deployed by BIP8 with the name \"segwit\" and using bit 1.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0149.mediawiki#L34"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 343,
+      "target": 8,
+      "kind": "uses-deployment-design",
+      "interpretation": "The closed mandatory Taproot deployment proposal uses BIP8 with lock-in on timeout.",
+      "evidence": [
+        {
+          "path": "bip-0343.mediawiki",
+          "line": 15,
+          "excerpt": "This document specifies a BIP8 (LOT=true) deployment to activate taproot.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0343.mediawiki#L15"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 54,
+      "target": 30,
+      "kind": "proposes-change-to",
+      "interpretation": "Consensus cleanup addresses the eventual removal of duplicate-transaction checks under specified uniqueness assumptions.",
+      "evidence": [
+        {
+          "path": "bip-0054.md",
+          "line": 47,
+          "excerpt": "Since [bip-0034][BIP34] activation, explicit [bip-0030][BIP30] validation is not necessary until",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0054.md#L47"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 95,
+      "target": 54,
+      "kind": "test-network-rules",
+      "interpretation": "Draft Testnet5 enforces the cleanup rules from its first block, rather than proposing their mainnet activation.",
+      "evidence": [
+        {
+          "path": "bip-0095.md",
+          "line": 22,
+          "excerpt": "rules specified in [BIP 54][BIP54] from block 1.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0095.md#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 23,
+      "target": 22,
+      "kind": "extends",
+      "interpretation": "Pooled-mining fields augment getblocktemplate fundamentals.",
+      "evidence": [
+        {
+          "path": "bip-0023.mediawiki",
+          "line": 22,
+          "excerpt": "Note that all sections of this specification are optional extensions on top of [[bip-0022.mediawiki|BIP 22]].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0023.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 323,
+      "target": 320,
+      "kind": "compares-with",
+      "interpretation": "The later version-bit space proposal reserves a different number of bits for mining use.",
+      "evidence": [
+        {
+          "path": "bip-0323.mediawiki",
+          "line": 20,
+          "excerpt": "BIP 320 defined 16 bits of nVersion as nonce space for additional nonce space. It turns out that",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0323.mediawiki#L20"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 301,
+      "target": 300,
+      "kind": "complements",
+      "interpretation": "Blind merged mining and hashrate-escrow withdrawals address distinct parts of the drivechain design.",
+      "evidence": [
+        {
+          "path": "bip-0301.mediawiki",
+          "line": 16,
+          "excerpt": "Blind Merged Mining (BMM) allows SHA-256d miners to collect transaction fee revenue from other blockchains, without running any new software (i.e., without \"looking\" at those alt-chains, hence \"blind\").",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0301.mediawiki#L16"
+        },
+        {
+          "path": "bip-0300.mediawiki",
+          "line": 16,
+          "excerpt": "BIP-300 enables a new type of L2, where \"withdrawals\" (the L2-to-L1 txns) are governed by proof-of-work -- instead of a federation or fixed set of pubkeys.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0300.mediawiki#L16"
+        }
+      ],
+      "basis": "editorial-comparison"
+    },
+    {
+      "source": 341,
+      "target": 98,
+      "kind": "compares-with",
+      "interpretation": "Taproot discusses but does not adopt the Fast Merkle Tree construction.",
+      "evidence": [
+        {
+          "path": "bip-0341.mediawiki",
+          "line": 75,
+          "excerpt": "e two invocations of the SHA256 compression functions, one of which can be avoided in theory (see [[bip-0098.mediawiki|BIP98]]). However, it seems preferable to stick to constructions that can be implemented using standard cryptographic primitives, both for implementation simplicity and analyzability. If necessary, a significant part of the second compression function can be optimized out by [https://github.com/bitcoin/bitcoin/pull/13191 specialization] for 64-byte inputs.</ref>.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki#L75"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 341,
+      "target": 114,
+      "kind": "compares-with",
+      "interpretation": "Taproot script-tree spending differs from the older MAST witness-program proposal.",
+      "evidence": [
+        {
+          "path": "bip-0341.mediawiki",
+          "line": 35,
+          "excerpt": "for improving Bitcoin's scripting capabilities have been previously proposed: Schnorr signatures ([[bip-0340.mediawiki|BIP340]]), Merkle branches (\"MAST\", [[bip-0114.mediawiki|BIP114]], [[bip-0117.mediawiki|BIP117]]), new sighash modes ([[bip-0118.mediawiki|BIP118]]), new opcodes like CHECKSIGFROMSTACK, [https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-January/015614.html Taproot], [https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-February/015700.html Graftroot], [https:/",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki#L35"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 341,
+      "target": 117,
+      "kind": "compares-with",
+      "interpretation": "Taproot discusses earlier tail-call/script-tree designs without activating tail-call execution.",
+      "evidence": [
+        {
+          "path": "bip-0341.mediawiki",
+          "line": 35,
+          "excerpt": "for improving Bitcoin's scripting capabilities have been previously proposed: Schnorr signatures ([[bip-0340.mediawiki|BIP340]]), Merkle branches (\"MAST\", [[bip-0114.mediawiki|BIP114]], [[bip-0117.mediawiki|BIP117]]), new sighash modes ([[bip-0118.mediawiki|BIP118]]), new opcodes like CHECKSIGFROMSTACK, [https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-January/015614.html Taproot], [https://lists.linuxfoundation.org/pipermail/bitcoin-dev/2018-February/015700.html Graftroot], [https:/",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0341.mediawiki#L35"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 116,
+      "target": 98,
+      "kind": "uses",
+      "interpretation": "The branch-verification proposal specifies proofs for the Fast Merkle Tree design.",
+      "evidence": [
+        {
+          "path": "bip-0116.mediawiki",
+          "line": 39,
+          "excerpt": "# the third item on the stack is not a serialized Merkle tree inclusion proof as specified by BIP98[1] and requiring exactly <code>floor(N/2)</code> VERIFY hashes; or",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0116.mediawiki#L39"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 117,
+      "target": 116,
+      "kind": "composes-with",
+      "interpretation": "Tail-call execution combines with inclusion verification to reveal only selected code.",
+      "evidence": [
+        {
+          "path": "bip-0117.mediawiki",
+          "line": 21,
+          "excerpt": "This BIP, in conjunction with BIP116 (MERKLEBRANCHVERIFY)[3] allows for a script to commit to a practically unbounded number of code pathways, and then reveal the actual code pathway used at spend time.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0117.mediawiki#L21"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 346,
+      "target": 348,
+      "kind": "composes-with",
+      "interpretation": "A configurable transaction hash plus stack-message signatures can express flexible signing commitments.",
+      "evidence": [
+        {
+          "path": "bip-0346.md",
+          "line": 312,
+          "excerpt": "(see [BIP-348](bip-0348.md)) to effectively create an",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0346.md#L312"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 346,
+      "target": 118,
+      "kind": "compares-with",
+      "interpretation": "Configurable transaction hashing is compared with specialized ANYPREVOUT signature commitments.",
+      "evidence": [
+        {
+          "path": "bip-0346.md",
+          "line": 91,
+          "excerpt": "signature hashing modes and those defined in [BIP-118](bip-0118.mediawiki):",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0346.md#L91"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 345,
+      "target": 119,
+      "kind": "uses-proposal",
+      "interpretation": "The specialized vault design relies on template commitments as well as delayed recovery paths.",
+      "evidence": [
+        {
+          "path": "bip-0345.mediawiki",
+          "line": 22,
+          "excerpt": "([https://github.com/bitcoin/bips/blob/master/bip-0119.mediawiki BIP-0119]),",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0345.mediawiki#L22"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 443,
+      "target": 345,
+      "kind": "compares-with",
+      "interpretation": "General contract verification is presented as a successor direction for specialized vault operations.",
+      "evidence": [
+        {
+          "path": "bip-0443.mediawiki",
+          "line": 41,
+          "excerpt": "* <code>OP_VAULT</code><ref>[[bip-0345.mediawiki|BIP-345]]</ref> is a proposed opcode to implement a 2-step withdrawal process, enabling on-chain reactive security.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0443.mediawiki#L41"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 446,
+      "target": 119,
+      "kind": "compares-with",
+      "interpretation": "Pushing a template hash differs from checking it directly with CTV, despite related commitments.",
+      "evidence": [
+        {
+          "path": "bip-0446.md",
+          "line": 82,
+          "excerpt": "The design of `OP_TEMPLATEHASH` was inspired by the design of [BIP119][ctv-bip] `OP_CHECKTEMPLATEVERIFY` but differs in",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0446.md#L82"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 448,
+      "target": 446,
+      "kind": "bundles",
+      "interpretation": "The deployment package includes TEMPLATEHASH.",
+      "evidence": [
+        {
+          "path": "bip-0448.md",
+          "line": 49,
+          "excerpt": "the specification of [BIP 446][templatehash-bip]. `OP_CHECKSIGFROMSTACK` redefines `OP_SUCCESS204` (0xcc) as per the",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0448.md#L49"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 448,
+      "target": 348,
+      "kind": "bundles",
+      "interpretation": "The deployment package includes CHECKSIGFROMSTACK.",
+      "evidence": [
+        {
+          "path": "bip-0448.md",
+          "line": 50,
+          "excerpt": "specification of [BIP 348][csfs-bip]. `OP_INTERNALKEY` redefines `OP_SUCCESS203` (0xcb) as per the specification of [BIP",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0448.md#L50"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 448,
+      "target": 349,
+      "kind": "bundles",
+      "interpretation": "The deployment package includes INTERNALKEY.",
+      "evidence": [
+        {
+          "path": "bip-0448.md",
+          "line": 17,
+          "excerpt": "[BIP 446 `OP_TEMPLATEHASH`][templatehash-bip], [BIP 348 `OP_CHECKSIGFROMSTACK`][csfs-bip], and [BIP 349 `OP_INTERNALKEY`][internalkey-bip].",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0448.md#L17"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 442,
+      "target": 443,
+      "kind": "related-reference",
+      "interpretation": "BIP442 lists BIP443 among related proposals. The reference alone does not establish a concrete contract-verification composition.",
+      "evidence": [
+        {
+          "path": "bip-0442.md",
+          "line": 220,
+          "excerpt": "6. OP_CHECKCONTRACTVERIFY: [BIP-443]",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0442.md#L220"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 449,
+      "target": 341,
+      "kind": "reuses-primitive",
+      "interpretation": "The proposed opcode makes x-only key tweak addition available inside script.",
+      "evidence": [
+        {
+          "path": "bip-0449.md",
+          "line": 89,
+          "excerpt": "The opcode accepts a raw 32-byte scalar instead of internally hashing the input or computing a Taproot-specific tweak. This keeps the consensus rule minimal. Constructions that require a hashed tweak can apply `OP_SHA256` before `OP_TWEAKADD`. Constructions that require a BIP341 tweak to be computed entirely on-chain would require additional general-purpose opcodes that expose tapleaf hashes or taptree commitments to script.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0449.md#L89"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 440,
+      "target": 342,
+      "kind": "generalizes-proposal",
+      "interpretation": "The proposed resource model extends signature-focused budgeting to other script work.",
+      "evidence": [
+        {
+          "path": "bip-0440.mediawiki",
+          "line": 20,
+          "excerpt": "This BIP defines a \"varops budget\", which generalizes the \"sigops budget\" introduced in [[bip-0342.mediawiki|BIP342]] to non-signature operations.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0440.mediawiki#L20"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 360,
+      "target": 341,
+      "kind": "proposes-change-to",
+      "interpretation": "P2MR removes the key path and tweak from Taproot-style tree commitments; it is not a deployed Taproot option.",
+      "evidence": [
+        {
+          "path": "bip-0360.mediawiki",
+          "line": 127,
+          "excerpt": "Since P2MR outputs have no key path spend, they omit the Taproot internal key. Instead, a P2MR output includes the 32-byte root of the script tree as defined in [[bip-0341.mediawiki|BIP 341]] hashed with the tag \"TapBranch\" as shown below.",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0360.mediawiki#L127"
+        }
+      ],
+      "basis": "source-reference"
+    },
+    {
+      "source": 450,
+      "target": 39,
+      "kind": "alternative-encoding",
+      "interpretation": "Themed sentence encodings are mapped back through BIP39 for seed derivation.",
+      "evidence": [
+        {
+          "path": "bip-0450.mediawiki",
+          "line": 19,
+          "excerpt": "This BIP describes Formosa, an expansion of BIP-0039 for the generation of",
+          "url": "https://github.com/bitcoin/bips/blob/927b6de9915c9262615a6399de51b200f81e5aa4/bip-0450.mediawiki#L19"
+        }
+      ],
+      "basis": "source-reference"
+    }
+  ]
+}

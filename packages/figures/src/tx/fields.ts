@@ -103,4 +103,3 @@ export function sighashName(hex: string): "SIGHASH_ALL" {
   return "SIGHASH_ALL";
 }
 
-export const shortHex = (hex: string, n = 8) => `${hex.slice(0, n)}…`;

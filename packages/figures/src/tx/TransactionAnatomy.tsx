@@ -1,9 +1,8 @@
 import { checkSpec, type HeroSpec } from "../heroStates";
-import { Arrow, Cells, Drawing, Machine, Magnifier, Responsive, Value, idsFor } from "../kit";
+import { Arrow, Cells, Drawing, Machine, Magnifier, Responsive, Value, idsFor, short } from "../kit";
 import type { DerivedTransactionFixture } from "../types";
 import { BytePacket, bytesHeight, layoutBytes, type ByteField } from "./BytePacket";
-
-import { preimageRole, shortHex, txFields } from "./fields";
+import { preimageRole, txFields } from "./fields";
 
 type Lens = "txid" | "wtxid" | "bip143";
 export interface TxHeroState { fixtureId: string; lens: Lens }
@@ -166,7 +165,7 @@ export function TransactionAnatomy({ fixtures, figureId, initial }: Props) {
         )}
         <Machine at={[mx, my]} w={70} d={36} h={30} label="SHA-256" sub="twice" role="hash" />
         <Value at={[resX, resY]} text={lens === "bip143" ? "SIGHASH" : hashName.toUpperCase()} size={9} cls="k-value--label" />
-        <Value at={[resX, resY + 13]} text={shortHex(lens === "bip143" ? d.digest.sighashHex : hashHex, 16)} size={9.5} cls="k-value--hash" />
+        <Value at={[resX, resY + 13]} text={short(lens === "bip143" ? d.digest.sighashHex : hashHex, 16)} size={9.5} cls="k-value--hash" />
         <Value
           at={[resX, resY + 26]}
           text={lens === "bip143" ? `= BIP 143 LINE ${fixture.sighash.sighashLine}` : lens === "txid" ? `${m.baseSize} OF ${m.totalSize} BYTES` : `ALL ${m.totalSize} BYTES`}

@@ -1,0 +1,255 @@
+{
+  "schemaVersion": "bip-atlas.fixtures.v1",
+  "chapterId": "payment-links",
+  "warning": "BIP 321's published example URIs. Their addresses and invoices are intentionally invalid, as the BIP notes; never treat them as payment requests.",
+  "fixtures": [
+    {
+      "id": "bip321-address",
+      "kind": "bip321-uri",
+      "label": "Just the address",
+      "shortLabel": "Address only",
+      "source": {
+        "bip": 321,
+        "line": 150,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W",
+      "group": "example",
+      "expect": "valid",
+      "note": "Just the address",
+      "noteLine": 149
+    },
+    {
+      "id": "bip321-amount-message",
+      "kind": "bip321-uri",
+      "label": "Amount, label and message",
+      "shortLabel": "Amount and message",
+      "source": {
+        "bip": 321,
+        "line": 159,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz",
+      "group": "example",
+      "expect": "valid",
+      "note": "Request 50 BTC with message",
+      "noteLine": 158
+    },
+    {
+      "id": "bip321-lightning-fallback",
+      "kind": "bip321-uri",
+      "label": "Lightning invoice with an on-chain fallback",
+      "shortLabel": "Lightning + fallback",
+      "source": {
+        "bip": 321,
+        "line": 162,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?lightning=lnbc420bogusinvoice",
+      "group": "example",
+      "expect": "valid",
+      "note": "Request funds to be paid over lightning to a BOLT 11 invoice with a fallback to on-chain payments",
+      "noteLine": 161
+    },
+    {
+      "id": "bip321-lightning-only",
+      "kind": "bip321-uri",
+      "label": "Lightning invoice, no fallback",
+      "shortLabel": "Lightning only",
+      "source": {
+        "bip": 321,
+        "line": 165,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:?lightning=lnbc420bogusinvoice"
+      },
+      "uri": "bitcoin:?lightning=lnbc420bogusinvoice",
+      "group": "example",
+      "expect": "valid",
+      "note": "Request funds to be paid over lightning to a BOLT 11 invoice with no fallback",
+      "noteLine": 164
+    },
+    {
+      "id": "bip321-sp-only",
+      "kind": "bip321-uri",
+      "label": "Silent Payments address, no fallback",
+      "shortLabel": "Silent Payments",
+      "source": {
+        "bip": 321,
+        "line": 174,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:?sp=sp1qsilentpayment"
+      },
+      "uri": "bitcoin:?sp=sp1qsilentpayment",
+      "group": "example",
+      "expect": "valid",
+      "note": "Request funds to be paid to a silent payments address with no fallback",
+      "noteLine": 173
+    },
+    {
+      "id": "bip321-optional-unknown",
+      "kind": "bip321-uri",
+      "label": "Unknown parameters, not required",
+      "shortLabel": "Unknown, optional",
+      "source": {
+        "bip": 321,
+        "line": 183,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?somethingyoudontunderstand=50&somethingelseyoudontget=999"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?somethingyoudontunderstand=50&somethingelseyoudontget=999",
+      "group": "example",
+      "expect": "valid",
+      "note": "Some future version that has variables which are (currently) not understood but not required and thus valid",
+      "noteLine": 182
+    },
+    {
+      "id": "bip321-required-unknown",
+      "kind": "bip321-uri",
+      "label": "Unknown parameters marked req-",
+      "shortLabel": "Unknown, req-",
+      "source": {
+        "bip": 321,
+        "line": 180,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999",
+      "group": "example",
+      "expect": "invalid",
+      "note": "Some future version that has variables which are (currently) not understood and required and thus invalid",
+      "noteLine": 179
+    },
+    {
+      "id": "bip321-label-twice",
+      "kind": "bip321-uri",
+      "label": "A label given twice",
+      "shortLabel": "Label twice",
+      "source": {
+        "bip": 321,
+        "line": 200,
+        "section": "Examples: Invalid URIs",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr&label=Matt"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr&label=Matt",
+      "group": "invalid",
+      "expect": "invalid",
+      "note": "Labels must not appear twice",
+      "noteLine": 199
+    },
+    {
+      "id": "bip321-bc-pair",
+      "kind": "bip321-uri",
+      "label": "Two SegWit addresses under bc, lowercase",
+      "shortLabel": "Two bc keys",
+      "source": {
+        "bip": 321,
+        "line": 186,
+        "section": "Examples: URIs",
+        "quote": "bitcoin:?bc=bc1qufgy354j3kmvuch987xe4s40836x3h0lg8f5nq&bc=bc1p5swkugezn97763tl0yty6556856uug0q6jflljvep9m4p7339x5qzyrh4q"
+      },
+      "uri": "bitcoin:?bc=bc1qufgy354j3kmvuch987xe4s40836x3h0lg8f5nq&bc=bc1p5swkugezn97763tl0yty6556856uug0q6jflljvep9m4p7339x5qzyrh4q",
+      "group": "example",
+      "expect": "valid",
+      "note": "Multiple segwit addresses may be included for various versions of segwit, note that the human-readable part for all of them is `bc`",
+      "noteLine": 185
+    },
+    {
+      "id": "bip321-bc-pair-upper",
+      "kind": "bip321-uri",
+      "label": "The same two addresses, uppercase",
+      "shortLabel": "Uppercase",
+      "source": {
+        "bip": 321,
+        "line": 190,
+        "section": "Examples: URIs",
+        "quote": "BITCOIN:?BC=BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ&BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q"
+      },
+      "uri": "BITCOIN:?BC=BC1QUFGY354J3KMVUCH987XE4S40836X3H0LG8F5NQ&BC=BC1P5SWKUGEZN97763TL0YTY6556856UUG0Q6JFLLJVEP9M4P7339X5QZYRH4Q",
+      "group": "example",
+      "expect": "valid",
+      "note": "Many QR codes utilize all-uppercase URIs, which should be handled fine",
+      "noteLine": 188
+    },
+    {
+      "id": "bip321-pop-app",
+      "kind": "bip321-uri",
+      "label": "Callback to the app that started the payment",
+      "shortLabel": "pop → app",
+      "source": {
+        "bip": 321,
+        "line": 217,
+        "section": "Examples: Proof of Payment",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=initiatingapp%3a",
+      "group": "pop",
+      "expect": "valid",
+      "note": "If the original URI is",
+      "noteLine": 216,
+      "callback": "initiatingapp:onchain=$HEX_ENCODED_TRANSACTION",
+      "callbackLine": 219,
+      "paidWith": "onchain"
+    },
+    {
+      "id": "bip321-pop-lightning",
+      "kind": "bip321-uri",
+      "label": "Callback after a Lightning payment",
+      "shortLabel": "pop after Lightning",
+      "source": {
+        "bip": 321,
+        "line": 222,
+        "section": "Examples: Proof of Payment",
+        "quote": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop="
+      },
+      "uri": "bitcoin:?lightning=lnbc420bogusinvoice&pop=callbackuri%3abody%3fpop=",
+      "group": "pop",
+      "expect": "valid",
+      "note": "If the original URI is",
+      "noteLine": 221,
+      "callback": "callbackuri:body?pop=lightning=$HEX_ENCODED_PAYMENT_PREIMAGE",
+      "callbackLine": 224,
+      "paidWith": "lightning"
+    },
+    {
+      "id": "bip321-pop-https",
+      "kind": "bip321-uri",
+      "label": "An https callback: pay, but never open it",
+      "shortLabel": "pop to https",
+      "source": {
+        "bip": 321,
+        "line": 234,
+        "section": "Examples: Proof of Payment",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?pop=https%3aiwantyouripaddress.com",
+      "group": "pop",
+      "expect": "valid",
+      "note": "If the original URI is",
+      "noteLine": 233,
+      "rule": "the wallet should make a payment as it normally would but MUST NOT interact with iwantyouripaddress.com",
+      "ruleLine": 235
+    },
+    {
+      "id": "bip321-req-pop-https",
+      "kind": "bip321-uri",
+      "label": "A required https callback: do not pay",
+      "shortLabel": "req-pop to https",
+      "source": {
+        "bip": 321,
+        "line": 238,
+        "section": "Examples: Proof of Payment",
+        "quote": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com"
+      },
+      "uri": "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-pop=https%3aevilwebsite.com",
+      "group": "pop",
+      "expect": "valid",
+      "note": "If the original URI is",
+      "noteLine": 237,
+      "rule": "the wallet MUST NOT make a payment",
+      "ruleLine": 239
+    }
+  ]
+}

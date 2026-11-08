@@ -3,15 +3,11 @@ import { h, type VNode } from "preact";
 import { render } from "preact-render-to-string";
 import { describe, expect, it } from "vitest";
 import { MESSAGE_TAG, addressScript, decodeSignature, messageHash, verify } from "@bip-atlas/models/bip322";
-import { REVIEWED, reviewedOpName } from "@bip-atlas/models/interpreter";
 import { parseTransaction } from "@bip-atlas/models/tx";
-import { Bip322Choice } from "../src/bip322/Bip322Choice";
 import { Bip322Formats, wrap } from "../src/bip322/Bip322Formats";
 import { Bip322Hash, TAG } from "../src/bip322/Bip322Hash";
 import { Bip322Limits } from "../src/bip322/Bip322Limits";
-import { Bip322Rack } from "../src/bip322/Bip322Rack";
 import { Bip322Verdicts } from "../src/bip322/Bip322Verdicts";
-import { Bip322VerifyStory } from "../src/bip322/Bip322VerifyStory";
 import { Bip322VirtualTx } from "../src/bip322/Bip322VirtualTx";
 import { Bip322Witness } from "../src/bip322/Bip322Witness";
 import type { DerivedBip322Fixture, DerivedBip322VerdictsFixture } from "../src/types";
@@ -51,8 +47,7 @@ function verdicts(): DerivedBip322VerdictsFixture {
     const d = vec(id).derived;
     return { label: fixtures.find((x: { id: string }) => x.id === id).label, message: d.message, address: d.address, state: d.verdict.state, detail: d.verdict.state === "valid" ? `valid at time T = ${d.verdict.time} and age S = ${d.verdict.age}` : d.verdict.reason! };
   });
-  const reviewed = Object.entries(REVIEWED).map(([version, set]) => ({ version, ops: [...set].sort((a, b) => a - b).map((op) => reviewedOpName(op).slice(3)) }));
-  return { ...f, derived: { rows, reviewed } };
+  return { ...f, derived: { rows } };
 }
 const html = (n: VNode<any>) => render(n);
 
@@ -86,29 +81,13 @@ describe("message-signing figures", () => {
     expect(s).toContain("EMPTY ITEM");
     expect(s).toContain("THE 3-OF-3 SCRIPT");
   });
-  it("A18.5 and A18.9 are schematic", () => {
-    for (const s of [html(h(Bip322Choice, {})), html(h(Bip322Limits, {}))]) expect(s).not.toMatch(/[0-9a-f]{16}/);
-    expect(html(h(Bip322Choice, {}))).toContain("must · PSBT");
-  });
-  it("A18.6 follows a valid full vector to T and S", () => {
-    const f = vec("b322-p2wpkh-full");
-    const s = html(h(Bip322VerifyStory, { fixture: f }));
-    expect(s).toContain("VALID · T 2016 · S 2016");
-    expect(s.slice(s.indexOf("<details"))).toContain(f.derived.toSign.txid);
+  it("A18.9 is schematic", () => {
+    expect(html(h(Bip322Limits, {}))).not.toMatch(/[0-9a-f]{16}/);
   });
   it("A18.7 stamps the three verdicts from the model", () => {
     const s = html(h(Bip322Verdicts, { fixture: verdicts() }));
     for (const st of ["VALID", "INVALID", "INCONCLUSIVE"]) expect(s).toContain(`>${st}<`);
     expect(s).toContain("NULLFAIL");
-  });
-  it("A18.8 hangs the model's reviewed opcodes, tapscript adding CHECKSIGADD", () => {
-    const v = verdicts();
-    const s = html(h(Bip322Rack, { fixture: v }));
-    expect(s).toContain(">CHECKSIG<");
-    expect(s).toContain(">CHECKMULTISIG<");
-    expect(s).toContain("TAPSCRIPT ALSO: CHECKSIGADD");
-    expect(s).toContain(">NOP1, NOP4–10<");
-    expect(s).toContain(">CODESEPARATOR → INVALID<");
   });
 });
 

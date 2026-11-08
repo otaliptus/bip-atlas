@@ -159,9 +159,6 @@ export function decPacket(r: Sender, packet: Uint8Array, aad: Uint8Array = new U
   return { length, header: pt[0], contents: pt.slice(1) };
 }
 
-/** v2 contents for an application message: a 1-byte short ID, or 0x00 plus a 12-byte ASCII type. */
-export const v2MessageTypeBytes = (shortId: boolean) => (shortId ? 1 : 13);
-
 /** A v1 message header: magic ‖ 12-byte command ‖ 4-byte LE length ‖ first 4 bytes of dSHA256(payload). */
 export function v1Header(command: string, payload: Uint8Array, magicHex = MAINNET_MAGIC): Uint8Array {
   if (command.length > 12) throw new V2Error("Command longer than 12 bytes.");
