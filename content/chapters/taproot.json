@@ -235,7 +235,7 @@
       },
       {
        "type": "paragraph",
-       "text": "When there are no scripts, BIP 341 recommends that wallets still tweak the internal key, hashing P alone. Its authors explain why: if the output key is an aggregate of several parties’ keys, a malicious party could add a script path the others do not notice, bypass the shared policy and steal the coin. MuSig aggregation avoids that particular problem because it already randomizes the internal key. The no-script example above follows the wallet recommendation.",
+       "text": "When there are no scripts, BIP 341 recommends that wallets still tweak the internal key, hashing P alone. Its authors explain why. If the output key is an aggregate of several parties’ keys, a malicious party could add a script path the others do not notice, bypass the shared policy and steal the coin. MuSig aggregation avoids that particular problem because it already randomizes the internal key. The no-script example above follows the wallet recommendation.",
        "claims": [
         "no-script-commit",
         "vector0"
@@ -331,7 +331,7 @@
      "blocks": [
       {
        "type": "paragraph",
-       "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex, a field reserved for future extensions that users SHOULD NOT include until a soft fork defines it. One remaining element means a key path spend; two or more mean a script path spend.",
+       "text": "A verifier decides which path is being used by counting witness elements. None at all fails. If the last of two or more elements begins with the byte 0x50, it is set aside as the annex. That field is reserved for future extensions, and users SHOULD NOT include it until a soft fork defines it. One remaining element means a key path spend; two or more mean a script path spend.",
        "claims": [
         "path-choice",
         "annex"
@@ -356,7 +356,7 @@
       },
       {
        "type": "paragraph",
-       "text": "This page’s model reproduces every value the vectors publish: leaf hashes, roots, tweaks, output keys, scriptPubKeys and control blocks for all 7 trees, and the keys, tweaks, signature message, signature hash and signature for all 7 key-path inputs.",
+       "text": "This page’s model reproduces every value the vectors publish. That covers leaf hashes, roots, tweaks, output keys, scriptPubKeys and control blocks for all 7 trees. It also covers the keys, tweaks, signature message, signature hash and signature for all 7 key-path inputs.",
        "claims": [
         "vectors-reproduced"
        ]

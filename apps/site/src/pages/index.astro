@@ -1,52 +1,50 @@
 ---
 import Base from "../layouts/Base.astro";
-import { listChapterIds, loadCatalog, loadChapter, shortCommit } from "../lib/content";
+import { loadCatalog, loadChapter } from "../lib/content";
 
-const catalog = loadCatalog();
-const available = new Map(listChapterIds().map((id) => [id, loadChapter(id)]));
-const chapters = [...catalog.chapters].sort((a, b) => a.readingOrder - b.readingOrder);
+const { chapters } = loadCatalog();
+const parts = new Map<string, typeof chapters>();
+for (const c of chapters) parts.set(c.part, [...(parts.get(c.part) ?? []), c]);
+const bipCount = new Set(chapters.flatMap((c) => c.primaryBips)).size;
 ---
 <Base title="BIP Atlas" description="An illustrated field guide to selected Bitcoin Improvement Proposals." current="contents">
-  <div class="manual-page atlas-cover">
-    <div class="atlas-cover__intro">
+  <div class="manual-page">
+    <header class="atlas-cover">
+      <h1>Bitcoin Improvement Proposals, illustrated</h1>
       <p class="atlas-lede">
-        A field guide to a few Bitcoin Improvement Proposals: what each one changes, why, and where its explanation
-        deliberately stops. Read the idea, try the mechanism, inspect the evidence.
-        Follow the chapters from wallet backups to spending and network upgrades, or pick a question below.
-        Heavily inspired by <a href="https://makingsoftware.com">makingsoftware.com</a>.
+        {chapters.length} chapters explain {bipCount} proposals. Each one answers a single question: what changed, and why.
       </p>
       <p class="atlas-small">
-        Explanations are written independently from the proposals, pinned to an exact revision of
-        <code>bitcoin/bips</code>, and checked against the proposals’ own test vectors. This is an early draft:
-        {available.size} of {chapters.length} chapters exist.
+        Every statement is checked against the proposals’ own text and test vectors. See the
+        <a href="/methodology/">methodology</a>. Inspired by <a href="https://makingsoftware.com">makingsoftware.com</a>.
       </p>
-    </div>
-    <ol class="atlas-contents" aria-label="Chapters, in reading order">
-      {chapters.map((ch, index) => {
-        const loaded = available.get(ch.id);
-        return (
-          <li class="atlas-contents__item" data-available={loaded ? "true" : "false"}>
-            <a class="atlas-contents__link" href={loaded ? `/learn/${ch.id}/` : undefined} aria-labelledby={`chapter-${ch.id}-title`}>
-              {loaded && <img
-                class="atlas-contents__thumbnail"
-                src={`/thumbnails/${ch.id}.png`}
-                alt=""
-                width="352"
-                height="264"
-                loading={index < 4 ? "eager" : "lazy"}
-                decoding="async"
-              />}
-              <span class="atlas-contents__heading">
-                <span class="atlas-contents__bips">BIP {ch.primaryBips.map((n) => String(n).padStart(4, "0")).join(" + ")}</span>
-                <span class="atlas-contents__title" id={`chapter-${ch.id}-title`}>{ch.questionTitle}</span>
-                <span class="atlas-contents__state">
-                  {loaded ? `Draft · source ${shortCommit(loaded.lock.commit)} · ${loaded.publication.reviewState === "in-review" ? "technical review applied" : loaded.publication.reviewState === "approved" ? "signed off" : "not yet reviewed"}` : `Not yet written · phase ${ch.phase}`}
+    </header>
+    {[...parts].map(([title, list], i) => (
+      <section class="atlas-part" aria-labelledby={`part-${i + 1}`}>
+        <h2 class="atlas-part__title" id={`part-${i + 1}`}>{title}</h2>
+        <ol class="atlas-cards" start={list[0].readingOrder}>
+          {list.map((c) => (
+            <li>
+              <a class="atlas-card" href={`/learn/${c.id}/`}>
+                <img
+                  class="atlas-card__thumbnail"
+                  src={`/thumbnails/${c.id}.png`}
+                  alt=""
+                  width="352"
+                  height="264"
+                  loading={c.readingOrder <= 4 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+                <span class="atlas-card__label">
+                  {loadChapter(c.id).publication.specimenLabel}
+                  <span class="manual-meta" aria-hidden="true">{String(c.readingOrder).padStart(2, "0")}</span>
                 </span>
-              </span>
-            </a>
-          </li>
-        );
-      })}
-    </ol>
+                <span class="atlas-card__title">{c.questionTitle}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
   </div>
 </Base>

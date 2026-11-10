@@ -24,8 +24,8 @@ const citedLabel: Record<string, string> = {
     <p>
       Every chapter is built from a pinned revision of the <code>bitcoin/bips</code> repository. The current source is
       commit <a href={`https://github.com/bitcoin/bips/commit/${lock.commit}`}><code>{shortCommit(lock.commit)}</code></a>,
-      read on {formatDate(lock.retrievedAt)}. File hashes are recorded in a lock file, and links in each chapter open
-      the exact lines that support a statement.
+      read on {formatDate(lock.retrievedAt)}. A lock file records each file’s hash. Links in each chapter open the
+      exact lines that support a statement.
     </p>
     <p>
       Some BIPs publish their test vectors in other repositories. Those files are fetched at an explicit commit and
@@ -41,14 +41,13 @@ const citedLabel: Record<string, string> = {
     </ul>
     <h2>What has been checked</h2>
     <p>
-      Each chapter’s figures draw only reviewed recipes, and every exact value they show comes from a tested model,
-      computed at build time or in your browser. The models use <code>@noble</code> libraries for hashing,
-      elliptic-curve arithmetic and ciphers; the block-filter model uses the <code>siphash</code> package for SipHash.
+      Every exact value in a figure comes from a tested model, computed at build time or in your browser. The
+      models use <code>@noble</code> libraries for hashing, elliptic-curve arithmetic and ciphers. The block-filter
+      model uses the <code>siphash</code> package for SipHash.
       The <a href="https://github.com/otaliptus/bip-atlas/tree/main/packages/models/test">model tests</a>
       and <a href="https://github.com/otaliptus/bip-atlas/tree/main/packages/figures/test">figure tests</a>
-      compare published material with the implementation and add selected edge cases. The table separates reference
-      vectors and replayed traces from synthetic checks, unsupported cases and values supplied externally.
-      Passing these checks is narrower than full protocol conformance.
+      compare published material with the implementation and add selected edge cases. The table lists what each
+      model checks and where it stops. Passing these checks is narrower than full protocol conformance.
     </p>
     <div class="atlas-table-wrap atlas-coverage" tabindex="0" role="region" aria-label="Model coverage by chapter">
       <table class="manual-table">
@@ -68,24 +67,24 @@ const citedLabel: Record<string, string> = {
       </table>
     </div>
     <p>
-      All {claimCount} evidence claims across {chapters.length} chapters have their supporting quotes checked
-      verbatim at the cited source lines. Validation also checks citation presence, agreement between ledger and
-      source-snapshot commits, fixture provenance and external-vector file hashes. Quotation fidelity establishes
-      what the pinned source says; it does not prove that an editorial inference follows from it. Inferences are
-      identified in the evidence ledger and still require review.
+      The {chapters.length} chapters make {claimCount} evidence claims. The build checks each supporting quote
+      word for word at its cited source lines. It also checks that every paragraph cites a claim, that fixtures
+      name their source, and that file hashes match. A matching quote shows what the source says. It does not
+      prove that our own inference follows from it. Inferences are labelled in each chapter’s evidence list and
+      still need review.
     </p>
     <h2>What has not</h2>
     <ul>
-      <li>Every chapter is hand-authored. Each had one independent technical review before later editorial revisions; {awaitingReview} revised {awaitingReview === 1 ? "chapter awaits" : "chapters await"} a fresh review. None has formal sign-off; all are marked as drafts.</li>
+      <li>Every chapter is hand-authored and has had one independent technical review. {awaitingReview} {awaitingReview === 1 ? "chapter was" : "chapters were"} revised afterwards and {awaitingReview === 1 ? "awaits" : "await"} a fresh review. None has formal sign-off yet.</li>
       <li>No automated writing pipeline is connected yet.</li>
-      <li>The models are teaching models. They check structure and encodings against published vectors; they are not wallets, signers or full conformance suites, and they say nothing about ownership, balance, or whether a payment is safe.</li>
+      <li>The models are teaching models. They check structure and encodings against published vectors. They are not wallets, signers or full conformance suites. They say nothing about ownership, balance, or whether a payment is safe.</li>
       <li>No screen-reader session or accessibility audit has been performed beyond the checks recorded in the project.</li>
     </ul>
     <h2>Privacy</h2>
     <p>
-      Pages load no third-party scripts, fonts or analytics. Figures run entirely in your browser, accept no
-      free-text addresses, keys, recovery phrases or PSBTs, and never send what you do in them anywhere. Nothing on
-      this site signs or broadcasts a transaction.
+      Pages load no third-party scripts, fonts or analytics. Figures run entirely in your browser and never send
+      what you do in them anywhere. They accept no typed addresses, keys, recovery phrases or PSBTs. Nothing on this
+      site signs or broadcasts a transaction.
     </p>
   </div>
 </Base>

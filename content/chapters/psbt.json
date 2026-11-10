@@ -119,7 +119,7 @@
     },
     {
      "type": "paragraph",
-     "text": "The example follows one route through those jobs. BIP 174 also describes arrangements such as manual CoinJoin and multisignature wallets. A PSBT can travel as a binary file or as Base64 text; the participants need to agree on the transaction and the format, rather than on a particular way of sending it.",
+     "text": "The example follows one route through those jobs. BIP 174 also describes arrangements such as manual CoinJoin and multisignature wallets. A PSBT can travel as a binary file or as Base64 text. The participants need to agree on the transaction and the format, rather than on a particular way of sending it.",
      "claims": [
       "examples-workflows",
       "encoding",
@@ -334,7 +334,7 @@
       },
       {
        "type": "paragraph",
-       "text": "The decoder behind this page rejects all twenty invalid PSBTs that BIP 174 lists, from a missing output map to a duplicated key, and accepts the ten valid ones, keeping every record when it writes them back out. Each invalid case is a rule made concrete: a duplicated key, a filled scriptSig in the unsigned transaction, an unsigned transaction written with witness serialization, and, in twelve of the twenty, a key or value that does not match its type’s format.",
+       "text": "The decoder behind this page rejects all twenty invalid PSBTs that BIP 174 lists, from a missing output map to a duplicated key. It accepts the ten valid ones and keeps every record when it writes them back out. Each invalid case is a rule made concrete. Examples are a duplicated key, a filled scriptSig in the unsigned transaction, and an unsigned transaction written with witness serialization. In twelve of the twenty, a key or value does not match its type’s format.",
        "claims": [
         "vectors-invalid",
         "no-duplicates",

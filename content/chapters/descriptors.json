@@ -233,7 +233,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A descriptor can also contain an xprv or a WIF private key. Those keys remain spending secrets when wrapped in a descriptor. Two lines that produce the same script may therefore have very different consequences if shared: one may expose a public key, while the other exposes its private counterpart.",
+          "text": "A descriptor can also contain an xprv or a WIF private key. Those keys remain spending secrets when wrapped in a descriptor. Two lines that produce the same script may therefore have very different consequences if shared. One may expose a public key, while the other exposes its private counterpart.",
           "claims": [
             "secret-or-not",
             "origin-no-effect"

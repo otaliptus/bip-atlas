@@ -67,7 +67,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The purpose is a constant, 44′, which tells software that everything below follows this specification. The coin type gives each coin its own subtree, avoiding address reuse across coins: 0′ for Bitcoin and 1′ for Bitcoin testnet, with a longer list kept outside the BIP in SLIP-0044.",
+          "text": "The purpose is a constant, 44′, which tells software that everything below follows this specification. The coin type gives each coin its own subtree, avoiding address reuse across coins. It is 0′ for Bitcoin and 1′ for Bitcoin testnet, with a longer list kept outside the BIP in SLIP-0044.",
           "claims": [
             "purpose",
             "coin-type"
@@ -251,7 +251,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths in Fig. A12.3 above. Every value is derived by this site’s tested BIP 32 code; the account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
+              "text": "BIP 84 and BIP 86 each publish test vectors from the same well-known mnemonic: the root keys, the first account’s keys, and three addresses, two receiving and one change. Step down their paths in Fig. A12.3 above. Every value is derived by this site’s tested BIP 32 code. The account keys and every published leaf value are checked against the vectors when the site is built, and the intermediate values are implied by them.",
               "claims": [
                 "vectors"
               ]

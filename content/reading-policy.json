@@ -1,5 +1,5 @@
 {
-  "reason": "The October 2026 editorial revisions prioritize a clear first reading, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum. The reading order follows keys and addresses, spending and signatures, then privacy and network mechanisms; the original kit catalog stays frozen.",
+  "reason": "The October 2026 editorial revisions prioritize a clear first reading, with exact rules retained in disclosures. Do not pad prose to the original catalog minimum. The reading order runs through the contents sections named in `parts` (each part starts at its `from` chapter and runs to the next part's); the original kit catalog stays frozen.",
   "chapterOrder": [
     "mnemonics",
     "hd-wallets",
@@ -24,6 +24,14 @@
     "block-filters",
     "v2-transport",
     "version-bits"
+  ],
+  "parts": [
+    { "title": "Keys and backups", "from": "mnemonics" },
+    { "title": "Addresses and payments", "from": "addresses" },
+    { "title": "Transactions", "from": "strict-signatures" },
+    { "title": "Taproot", "from": "schnorr" },
+    { "title": "Wallet tools", "from": "descriptors" },
+    { "title": "Network", "from": "block-filters" }
   ],
   "chapterRanges": {
     "psbt": {

@@ -15,7 +15,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "Copy an address by hand and sooner or later you will get a character wrong. Older Bitcoin addresses made that easy. They mix upper- and lowercase letters, which are awkward to write down, type on a phone or read aloud, and their checksum gave no guarantee about which mistakes it would catch.",
+        "text": "Copy an address by hand and sooner or later you will get a character wrong. Older Bitcoin addresses made that easy. They mix upper- and lowercase letters, which are awkward to write down, type on a phone or read aloud. Their checksum also gave no guarantee about which mistakes it would catch.",
         "claims": [
           "base58-mixed-case"
         ]
@@ -39,7 +39,7 @@
       "fixtures": [
         "v0-p2wpkh"
       ],
-      "caption": "Forty-two characters, five jobs. Only the version and the program describe the destination; the prefix names the network, the 1 marks where data begins, and the last six characters exist only to be checked.",
+      "caption": "Forty-two characters, five jobs. Only the version and the program describe the destination. The prefix names the network, the 1 marks where data begins, and the last six characters exist only to be checked.",
       "claims": [
         "string-shape",
         "segwit-hrp",
@@ -432,7 +432,7 @@
             "v0-p2wpkh",
             "v1-32byte"
           ],
-          "caption": "The same bits, cut two ways. Byte boundaries and character boundaries line up only every 40 bits, so half the characters in each complete 40-bit block straddle two bytes, and a 32-byte program needs padding to fill its final character.",
+          "caption": "The same bits, cut two ways. Byte boundaries and character boundaries line up only every 40 bits. Half the characters in each complete 40-bit block therefore straddle two bytes, and a 32-byte program needs padding to fill its final character.",
           "claims": [
             "program-regrouping",
             "padding-rule",
@@ -482,7 +482,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Version numbers make this concrete. The format accepts every version from 0 to 16, and BIP 350 asks senders to recognise all of them as valid recipients, so that future upgrades work with existing wallets. The same paragraph says versions not defined on the network should never be created or handed to a sender.",
+          "text": "Version numbers make this concrete. The format accepts every version from 0 to 16. BIP 350 asks senders to recognise all of them as valid recipients, so that future upgrades work with existing wallets. The same paragraph says versions not defined on the network should never be created or handed to a sender.",
           "claims": [
             "higher-versions"
           ]
@@ -523,7 +523,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Bech32m changed a single constant to close a gap that the original guarantee never covered, and it tied each witness version to the checksum that must protect it.",
+          "text": "Bech32m changed a single constant to close a gap that the original guarantee never covered. It also tied each witness version to the checksum that must protect it.",
           "claims": [
             "bech32m-constant",
             "q-weakness",

@@ -398,7 +398,7 @@
             },
             {
               "type": "paragraph",
-              "text": "BIP 342 says that BIP 341’s test vectors contain tapscript examples. The wallet vector file pinned for this site contains tapscript leaves but no script path spends, so there is nothing there to execute. BIP 341 also links Bitcoin Core’s validation test vectors, on the main branch of Core’s test-asset repository; this site chose one commit of that file, and this chapter uses six cases from it, copied and checked by hash.",
+              "text": "BIP 342 says that BIP 341’s test vectors contain tapscript examples. The wallet vector file pinned for this site contains tapscript leaves but no script path spends, so there is nothing there to execute. BIP 341 also links Bitcoin Core’s validation test vectors, on the main branch of Core’s test-asset repository. This site chose one commit of that file, and this chapter uses six cases from it, copied and checked by hash.",
               "claims": [
                 "examples-note",
                 "wallet-vectors-no-spends"

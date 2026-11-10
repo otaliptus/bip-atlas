@@ -17,7 +17,7 @@
       },
       {
         "type": "paragraph",
-        "text": "BIP 21, from 2012, set out the scheme. BIP 321 replaces it and describes how links were used by 2024: several ways to pay in one link, keys in any letter case, and room for new payment methods that older wallets can safely skip.",
+        "text": "BIP 21, from 2012, set out the scheme. BIP 321 replaces it and describes how links were used by 2024. A link can carry several ways to pay, keys can be in any letter case, and there is room for new payment methods that older wallets can safely skip.",
         "claims": ["preamble21", "preamble321", "replacement", "future-in-query", "req"]
       }
     ],
@@ -90,7 +90,7 @@
         },
         {
           "type": "paragraph",
-          "text": "One rule makes this safe. A wallet can safely ignore any parameter it does not implement, unless the key starts with `req-`: if it does not implement a required key, it MUST consider the whole link invalid. The hero's first wallet shows both sides. It pays a Lightning link's on-chain fallback, and it refuses a link with a `req-` key it does not know.",
+          "text": "One rule makes this safe. A wallet can safely ignore any parameter it does not implement, unless the key starts with `req-`. If it does not implement a required key, it MUST consider the whole link invalid. The hero's first wallet shows both sides. It pays a Lightning link's on-chain fallback, and it refuses a link with a `req-` key it does not know.",
           "claims": ["req", "wallets-illustrative"]
         },
         {
@@ -115,13 +115,13 @@
           "recipe": "bip321-pop.v1",
           "title": "Proof of payment",
           "fixtures": ["bip321-pop-app", "bip321-pop-lightning", "bip321-pop-https", "bip321-req-pop-https"],
-          "caption": "Four of BIP 321's five proof-of-payment examples. The model builds the two published callbacks shown here (its tests build all four the BIP publishes), and follows the rules for the two that point at a web page.",
+          "caption": "Four of BIP 321's five proof-of-payment examples. The model builds the two published callbacks shown here, and its tests build all four the BIP publishes. The model follows the rules for the two that point at a web page.",
           "claims": ["pop-build", "pop-safety", "examples-model"],
           "layout": "wide"
         },
         {
           "type": "paragraph",
-          "text": "A wallet MUST NOT open a callback that would open a web browser, such as an `https` one. The author's reason is privacy: proof URIs must only be opened when they will simply switch back to the local app that started the payment, without revealing the sender's IP address to the recipient. If the parameter was `req-pop` and the wallet will not open it, because the scheme is unsafe or it cannot return payment information for the method it used, the wallet MUST NOT pay at all.",
+          "text": "A wallet MUST NOT open a callback that would open a web browser, such as an `https` one. The author's reason is privacy. Proof URIs must only be opened when they will simply switch back to the local app that started the payment, without revealing the sender's IP address to the recipient. Suppose the parameter was `req-pop` and the wallet will not open it, because the scheme is unsafe or it cannot return payment information for the method it used. Then the wallet MUST NOT pay at all.",
           "claims": ["pop-safety", "pop-rationale"]
         }
       ]

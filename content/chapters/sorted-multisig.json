@@ -12,7 +12,7 @@
     "blocks": [
       {
         "type": "paragraph",
-        "text": "A multisignature script lists its public keys in an order, and the order is part of the script. Change the order and the script's hash changes, and with it the P2SH address. The redeem script requires no particular order or encoding, and BIP 67's authors count as many as 2(n!) standard scripts for one set of keys and one threshold, each with its own address.",
+        "text": "A multisignature script lists its public keys in an order, and the order is part of the script. Change the order and the script's hash changes, and with it the P2SH address. The redeem script requires no particular order or encoding. BIP 67's authors count as many as 2(n!) standard scripts for one set of keys and one threshold, each with its own address.",
         "claims": ["many-scripts"]
       },
       {
@@ -101,7 +101,7 @@
         },
         {
           "type": "paragraph",
-          "text": "As written, it covers two script types: P2WSH at script type `2'`, the recommended default, and P2SH-wrapped P2WSH at `1'`. Each cosigner derives keys under this hierarchy from their own seed. For each address, BIP 48 wallets sort the cosigners' keys at that change and index as BIP 67 describes, so a cosigner's place in the script can differ from one address to the next.",
+          "text": "As written, it covers two script types: P2WSH at script type `2'`, the recommended default, and P2SH-wrapped P2WSH at `1'`. Each cosigner derives keys under this hierarchy from their own seed. For each address, BIP 48 wallets sort the cosigners' keys at that change and index as BIP 67 describes. A cosigner's place in the script can therefore differ from one address to the next.",
           "claims": ["bip48-scripts", "bip48-sorting", "bip48-per-address"]
         },
         {
@@ -122,7 +122,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "A P2SH address shows only a hash, so nothing about the keys is visible when coins are paid to it, and the authors conclude that BIP 67 cannot be a network rule. It works only when every cosigner's wallet follows it. A participant whose wallet does not may derive an address the others do not recognize as part of their account.",
+          "text": "A P2SH address shows only a hash, so nothing about the keys is visible when coins are paid to it. The authors conclude that BIP 67 cannot be a network rule. It works only when every cosigner's wallet follows it. A participant whose wallet does not may derive an address the others do not recognize as part of their account.",
           "claims": ["not-enforceable", "mixed-group"]
         },
         {

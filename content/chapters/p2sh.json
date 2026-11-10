@@ -118,7 +118,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 16 gives the rules as three steps. First, the scriptSig may contain nothing but push operations; anything else fails. Second, normal validation runs: the pushed items become the stack, the output’s script hashes the top item, and validation fails at once if that hash differs from the one in the output.",
+          "text": "BIP 16 gives the rules as three steps. First, the scriptSig may contain nothing but push operations; anything else fails. Second, normal validation runs. The pushed items become the stack and the output’s script hashes the top item. Validation fails at once if that hash differs from the one in the output.",
           "claims": [
             "rules"
           ]
@@ -242,7 +242,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "When SegWit arrived, BIP 141 reused this envelope. If the redeem script is exactly a witness version and a witness program, the output is a P2SH witness program: the scriptSig must hold nothing but that one push, and the real conditions move into the witness.",
+              "text": "When SegWit arrived, BIP 141 reused this envelope. If the redeem script is exactly a witness version and a witness program, the output is a P2SH witness program. The scriptSig must hold nothing but that one push, and the real conditions move into the witness.",
               "claims": [
                 "p2sh-witness"
               ]
@@ -312,7 +312,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Signature operations inside the redeem script still count toward the block’s limit, by scanning rather than running: one per CHECKSIG, the key count for a CHECKMULTISIG preceded by OP_1 to OP_16, and 20 otherwise. The BIP’s examples come to 3 and 22. The author explains that the counting is meant to be quick, and that the per-block limit protects miners from blocks crafted to be slow to validate.",
+          "text": "Signature operations inside the redeem script still count toward the block’s limit, by scanning rather than running. A CHECKSIG counts as one. A CHECKMULTISIG counts as its key count when preceded by OP_1 to OP_16, and as 20 otherwise. The BIP’s examples come to 3 and 22. The author explains that the counting is meant to be quick, and that the per-block limit protects miners from blocks crafted to be slow to validate.",
           "claims": [
             "sigops",
             "sigops-why"

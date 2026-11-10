@@ -235,7 +235,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Hardened children are different. Their HMAC input contains the parent’s private key, so public derivation is simply not defined for them, and there is no way at all from a public parent to a private child. An extended public key reaches the public keys of descendants that are linked to it by normal steps only, and nothing else.",
+          "text": "Hardened children are different. Their HMAC input contains the parent’s private key, so public derivation is simply not defined for them. There is also no way at all from a public parent to a private child. An extended public key reaches the public keys of descendants that are linked to it by normal steps only, and nothing else.",
           "claims": [
             "ckdpub",
             "pub-to-priv",
@@ -370,7 +370,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "BIP 32 asks for a seed of 128 to 512 bits from a random number generator, and advises 256. The 64-byte seed that BIP 39 produces, described in the previous chapter, fits. The BIP 39 test vector file referenced by BIP 39 also lists the master extended key for each of its 24 English seeds, and the tests behind this page reproduce all of them.",
+          "text": "BIP 32 asks for a seed of 128 to 512 bits from a random number generator, and advises 256. The 64-byte seed that BIP 39 produces, described in the previous chapter, fits. The test vector file referenced by BIP 39 also lists the master extended key for each of its 24 English seeds. The tests behind this page reproduce all of them.",
           "claims": [
             "master",
             "bip39-handoff"
