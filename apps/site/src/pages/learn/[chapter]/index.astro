@@ -4,6 +4,7 @@ import Blocks from "../../../components/Blocks.astro";
 import Inline from "../../../components/Inline.astro";
 import ClaimRefs from "../../../components/ClaimRefs.astro";
 import Figure from "../../../components/Figure.astro";
+import { REVIEW_STATE_LABEL } from "@bip-atlas/publication";
 import { formatDate, listChapterIds, loadCatalog, loadChapter, shortCommit, sourceLineUrl } from "../../../lib/content";
 
 export function getStaticPaths() {
@@ -27,11 +28,6 @@ const quoteParts = (q: string) => q.split(/(<sup(?:er)?>[^<]*<\/sup(?:er)?>)/).f
   const m = /^<sup(?:er)?>([^<]*)<\/sup(?:er)?>$/.exec(t);
   return m ? { sup: true, text: m[1] } : { sup: false, text: t };
 });
-const reviewLabel = {
-  "draft-unreviewed": "Draft — hand-authored, not yet reviewed",
-  "in-review": "Draft — independent technical review applied; awaiting human sign-off",
-  approved: "Reviewed",
-}[pub.reviewState];
 const scopeLabel: Record<string, string> = {
   "normative-rule": "Rule",
   "author-rationale": "Author’s rationale",
@@ -57,15 +53,15 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
         <dl class="manual-meta atlas-meta">
           <div><dt>Source revision</dt><dd><a href={commitUrl}>bitcoin/bips @ {shortCommit(lock.commit)}</a></dd></div>
           <div><dt>Source checked</dt><dd>{formatDate(lock.retrievedAt)}</dd></div>
-          <div><dt>Review state</dt><dd>{reviewLabel}</dd></div>
+          <div><dt>Review state</dt><dd>{REVIEW_STATE_LABEL[pub.reviewState]}</dd></div>
         </dl>
         <details class="atlas-details atlas-source-details">
           <summary>Source details</summary>
           <div class="atlas-details__body">
             <p class="atlas-small">
-              This chapter is an independent explanation, not the proposals themselves. Preamble fields are shown as recorded
-              in the pinned files, with author e-mail addresses omitted. Status is the proposal’s own field, not an
-              endorsement or a sign of consensus.
+              This chapter is an independent explanation, not the proposal itself. Preamble fields are shown as the
+              pinned files record them, without author e-mail addresses. Status is the proposal’s own field. It is not
+              an endorsement or a sign of consensus.
             </p>
             {primarySources.map(({ entry, file }) => (
               <section class="atlas-preamble" aria-label={`BIP ${entry.number} preamble`}>
@@ -111,10 +107,10 @@ const commitUrl = `https://github.com/bitcoin/bips/commit/${lock.commit}`;
         <section id="evidence" class="atlas-flow atlas-evidence" aria-labelledby="evidence-h">
           <h2 id="evidence-h">Evidence</h2>
           <p class="atlas-small">
-            Each numbered marker in the text points here, and the ↩ links lead back to every place that cites an entry. Quotes are verbatim from the BIP files at commit
-            <a href={commitUrl}><code>{shortCommit(lock.commit)}</code></a>, including their wiki markup; links open
-            the exact lines; the quoted text sits under each entry. Labels say what kind of statement each is: a rule, the author’s rationale, history,
-            a test vector, or our own inference.
+            Each numbered marker in the text points here, and the ↩ links lead back to the text. Quotes are verbatim
+            from the BIP files at commit <a href={commitUrl}><code>{shortCommit(lock.commit)}</code></a>, wiki markup
+            included. Links open the exact lines. Labels say what kind of statement each entry is: a rule, the
+            author’s rationale, history, a test vector, or our own inference.
           </p>
           <ol class="atlas-evidence__list">
             {citedClaims.map((claim) => (

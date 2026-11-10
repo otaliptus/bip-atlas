@@ -88,6 +88,30 @@ export interface Publication {
   sections: Section[];
 }
 
+/** Reader-facing wording for each review state, for every page that shows one. */
+export const REVIEW_STATE_LABEL: Record<Publication["reviewState"], string> = {
+  "draft-unreviewed": "Awaiting review",
+  "in-review": "Technical review applied, awaiting sign-off",
+  approved: "Reviewed",
+};
+
+export interface ReadingPolicy {
+  chapterOrder: string[];
+  /** Contents sections. Each part runs from its `from` chapter to the next part's, so the order is written once. */
+  parts: Array<{ title: string; from: string }>;
+}
+
+/** Return a list of problems with the reading order and its parts, given the chapters it must cover. */
+export function validateReadingPolicy({ chapterOrder, parts }: ReadingPolicy, chapterIds: string[]): string[] {
+  const problems: string[] = [];
+  const distinct = (values: string[]) => new Set(values).size === values.length;
+  if ([...chapterOrder].sort().join() !== [...chapterIds].sort().join()) problems.push("chapterOrder must name every chapter exactly once");
+  if (!distinct(parts.map((p) => p.title)) || !distinct(parts.map((p) => p.from))) problems.push("parts need distinct titles and starting chapters");
+  if (parts.some((p) => !chapterOrder.includes(p.from))) problems.push("every part must start at a chapter in chapterOrder");
+  if (!parts.some((p) => p.from === chapterOrder[0])) problems.push("a part must start at the first chapter");
+  return problems;
+}
+
 export type InlineSegment = { kind: "text" | "code" | "em"; value: string };
 
 /** Split text into plain, `code` and *em* segments. Never produces markup. */

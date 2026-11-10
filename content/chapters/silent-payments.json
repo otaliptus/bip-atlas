@@ -192,7 +192,7 @@
       },
       {
        "type": "paragraph",
-       "text": "If P_0 is there, he checks for P_1, and so on; at the first one not found, he stops. These extra checks happen only after a match, so the authors call the added cost negligible. Since version 1.1.0 the search is also capped: a sender fails if any group of recipient addresses sharing one scan key is larger than K_max = 2323, and a receiver stops at k = 2323, which the changelog says mitigates quadratic scanning on adversarial transactions.",
+       "text": "If P_0 is there, he checks for P_1, and so on; at the first one not found, he stops. These extra checks happen only after a match, so the authors call the added cost negligible. Since version 1.1.0 the search is also capped. A sender fails if any group of recipient addresses sharing one scan key is larger than K_max = 2323, and a receiver stops at k = 2323. The changelog says this mitigates quadratic scanning on adversarial transactions.",
        "claims": [
         "multi-output",
         "kmax",
@@ -263,7 +263,7 @@
      "blocks": [
       {
        "type": "paragraph",
-       "text": "Labels let Bob tell payments apart without scanning for several addresses. He publishes (B_scan, B_m), where B_m = B_spend + hash(b_scan ‖ m)·G. When an output does not match P_k directly, he subtracts P_k and checks whether the difference is one of his label points; if not, he negates the output and tries again, because an x-only output does not say which y it had. Label m = 0 is reserved for change: the BIP stresses that a wallet never hands it out, and says every receiving wallet should at least scan for it when recovering from backup.",
+       "text": "Labels let Bob tell payments apart without scanning for several addresses. He publishes (B_scan, B_m), where B_m = B_spend + hash(b_scan ‖ m)·G. When an output does not match P_k directly, he subtracts P_k and checks whether the difference is one of his label points. If not, he negates the output and tries again, because an x-only output does not say which y it had. Label m = 0 is reserved for change: the BIP stresses that a wallet never hands it out, and says every receiving wallet should at least scan for it when recovering from backup.",
        "claims": [
         "labels",
         "negate-output",
@@ -298,7 +298,7 @@
     },
     {
      "type": "paragraph",
-     "text": "Only certain input types provide the needed keys in a suitable form. BIP 352 excludes inputs with several keys or conditional branches from the shared-secret calculation: they would let a sender re-sign with a different set of public keys after the output was derived, a problem in collaborative transactions. It also requires at least one eligible input. Funding a payment and contributing a key to its calculation are distinct jobs.",
+     "text": "Only certain input types provide the needed keys in a suitable form. BIP 352 excludes inputs with several keys or conditional branches from the shared-secret calculation. They would let a sender re-sign with a different set of public keys after the output was derived, a problem in collaborative transactions. It also requires at least one eligible input. Funding a payment and contributing a key to its calculation are distinct jobs.",
      "claims": [
       "excluded-multi",
       "input-list",
@@ -363,7 +363,7 @@
      "blocks": [
       {
        "type": "paragraph",
-       "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G (B_m in place of B_spend for a labeled address), starting with k = 0 and adding one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
+       "text": "The shared secret is input_hash·a·B_scan on Alice’s side and input_hash·b_scan·A on Bob’s; they are the same point. From it Alice derives t_k, a tagged hash of the secret and a counter k, and pays to P_k = B_spend + t_k·G (B_m in place of B_spend for a labeled address). She starts with k = 0 and adds one for each further output to the same receiver. To spend, Bob uses b_spend + t_k (plus the label tweak, for a labeled output), mod n, as the private key.",
        "claims": [
         "derive",
         "multi-output",
@@ -378,7 +378,7 @@
      "blocks": [
       {
        "type": "paragraph",
-       "text": "Not every input contributes to the secret. Any UTXO with a known output script can fund the transaction (though the sender leaves out outputs with a SegWit version above 1), but sender and receiver MUST derive the shared secret only from inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH. For each, the receiver has to find the public key in what the transaction reveals: the last witness item for the two P2WPKH forms, the scriptSig for P2PKH, and the taproot output key itself for P2TR.",
+       "text": "Not every input contributes to the secret. Any UTXO with a known output script can fund the transaction, though the sender leaves out outputs with a SegWit version above 1. Sender and receiver MUST, however, derive the shared secret only from inputs of four types: P2TR, P2WPKH, P2SH-P2WPKH and P2PKH. For each, the receiver has to find the public key in what the transaction reveals: the last witness item for the two P2WPKH forms, the scriptSig for P2PKH, and the taproot output key itself for P2TR.",
        "claims": [
         "input-list",
         "where-keys",
@@ -387,7 +387,7 @@
       },
       {
        "type": "paragraph",
-       "text": "Inputs with conditional branches or several keys, such as CHECKMULTISIG, are left out; the BIP explains that they would let a participant in a collaborative transaction re-sign with different keys after the output was derived. Only compressed and x-only keys count, so an input that reveals an uncompressed key is skipped. A taproot script-path spend still counts, through its output key: the sender MUST hold that key’s private key or leave the input out, unless the internal key is the NUMS point H from BIP 341, in which case the input is skipped.",
+       "text": "Inputs with conditional branches or several keys, such as CHECKMULTISIG, are left out; the BIP explains that they would let a participant in a collaborative transaction re-sign with different keys after the output was derived. Only compressed and x-only keys count, so an input that reveals an uncompressed key is skipped. A taproot script-path spend still counts, through its output key. The sender MUST hold that key’s private key or leave the input out. The exception is a script-path spend whose internal key is the NUMS point H from BIP 341: that input is skipped.",
        "claims": [
         "excluded-multi",
         "compressed-only",
@@ -429,7 +429,7 @@
    "blocks": [
     {
      "type": "paragraph",
-     "text": "Reusing the public address removes one source of on-chain links. It does not make every surrounding choice private. Labeled addresses can still be grouped together, and the authors advise that a transaction’s inputs belong to one entity: they do not claim a formal security proof for collaborative use.",
+     "text": "Reusing the public address removes one source of on-chain links. It does not make every surrounding choice private. Labeled addresses can still be grouped together. The authors also advise that a transaction’s inputs belong to one entity: they do not claim a formal security proof for collaborative use.",
      "claims": [
       "labels-linkable",
       "collaborative",

@@ -69,7 +69,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Reading the field as bits lets separate deployments signal side by side. A signalling block must have 001 as its top three bits, which gives versions from 0x20000000 to 0x3FFFFFFF; a block whose top bits are anything else counts as signalling nothing. That leaves 29 bits for deployments, and two other top-bit patterns for future mechanisms.",
+          "text": "Reading the field as bits lets separate deployments signal side by side. A signalling block must have 001 as its top three bits, which gives versions from 0x20000000 to 0x3FFFFFFF. A block whose top bits are anything else counts as signalling nothing. That leaves 29 bits for deployments, and two other top-bit patterns for future mechanisms.",
           "claims": [
             "top-bits",
             "29-bits"
@@ -351,7 +351,7 @@
             },
             {
               "type": "paragraph",
-              "text": "The new part is lockinontimeout. Without it, a deployment that never reaches the threshold fails at the timeout. With it, the last period before the timeout becomes MUST_SIGNAL: once 2,016 minus the threshold blocks in it have failed to signal, any further block that fails to signal is invalid, and the deployment locks in regardless.",
+              "text": "The new part is lockinontimeout. Without it, a deployment that never reaches the threshold fails at the timeout. With it, the last period before the timeout becomes MUST_SIGNAL. Once 2,016 minus the threshold blocks in it have failed to signal, any further block that fails to signal is invalid, and the deployment locks in regardless.",
               "claims": [
                 "bip8-must-signal",
                 "bip8-fail"

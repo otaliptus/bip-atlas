@@ -96,7 +96,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Before any words appear, the entropy gets a short checksum. Hash the entropy with SHA-256 and keep the first ENT / 32 bits of the result, where ENT is the number of entropy bits: 4 checksum bits for 128 bits of entropy, 8 for 256. Append them to the end.",
+          "text": "Before any words appear, the entropy gets a short checksum. Hash the entropy with SHA-256 and keep the first ENT / 32 bits of the result, where ENT is the number of entropy bits. That gives 4 checksum bits for 128 bits of entropy, 8 for 256. Append them to the end.",
           "claims": [
             "checksum-def",
             "length-table"

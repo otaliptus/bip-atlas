@@ -27,7 +27,7 @@
       "recipe": "bip85-applications.v1",
       "title": "One root, a separate output for each application",
       "fixtures": ["bip85-bip39-12", "bip85-bip39-24", "bip85-wif", "bip85-xprv", "bip85-hex", "bip85-pwd", "bip85-dice"],
-      "caption": "Choose an application. Its path leads to a child key k; HMAC-SHA512 turns k into 64 bytes, and the application reads only the bytes it needs. Every output, and every byte BIP 85 prints, is a published vector the model recomputes; k and the bytes the vectors do not print are computed by the same model. The toggle hatches what someone holding only the output cannot know.",
+      "caption": "Choose an application. Its path leads to a child key k; HMAC-SHA512 turns k into 64 bytes, and the application reads only the bytes it needs. Every output, and every byte BIP 85 prints, is a published vector the model recomputes. The same model computes k and the bytes the vectors do not print. The toggle hatches what someone holding only the output cannot know.",
       "claims": ["k-hmac", "truncate", "vectors", "hmac-rationale", "root-recomputes"],
       "layout": "wide"
     }
@@ -70,7 +70,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The authors give three reasons for the extra step. It prevents leakage of the parent tree should k be compromised: the specification requires hardened derivation, which would do that, but the authors cannot enforce it on implementations, so the HMAC makes the derived entropy hardened either way. The application wants entropy, not a key, so the child key has to be transformed. And it guards against side effects should k also be used for another purpose, such as a nonce. The application only ever sees the HMAC's output, never k.",
+          "text": "The authors give three reasons for the extra step. It prevents leakage of the parent tree should k be compromised. Hardened derivation would prevent that, and the specification requires it. The authors cannot enforce it on implementations, so the HMAC makes the derived entropy hardened either way. The application wants entropy, not a key, so the child key has to be transformed. And it guards against side effects should k also be used for another purpose, such as a nonce. The application only ever sees the HMAC's output, never k.",
           "claims": ["hmac-rationale", "k-hmac"]
         },
         {
@@ -84,7 +84,7 @@
           "recipe": "bip85-story.v1",
           "title": "From root key to twelve words",
           "fixtures": ["bip85-bip39-12"],
-          "caption": "BIP 85's 12-word vector, step by step. The vector does not publish k for this path, or the 48 bytes it drops; the model computes it, and the build checks the kept bytes and the words against the vector.",
+          "caption": "BIP 85's 12-word vector, step by step. The vector does not publish k for this path, or the 48 bytes it drops. The model computes both, and the build checks the kept bytes and the words against the vector.",
           "claims": ["vectors", "k-hmac", "bip39-app"],
           "layout": "wide"
         }
@@ -96,7 +96,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Apart from their paths, applications differ only in what they do with their 64 bytes. The HD-seed WIF uses the first 256 bits as a private key, encoded as a compressed WIF, which BIP 85 intends as the hdseed of Bitcoin Core wallets. An extended private key takes the first 32 bytes as its chain code and the second 32 as its key, with depth, parent fingerprint and child number set to zero. BIP 85 warns that this reverses BIP 32's order.",
+          "text": "Apart from their paths, applications differ only in what they do with their 64 bytes. The HD-seed WIF uses the first 256 bits as a private key, encoded as a compressed WIF. BIP 85 intends it as the hdseed of Bitcoin Core wallets. An extended private key takes the first 32 bytes as its chain code and the second 32 as its key. Depth, parent fingerprint and child number are set to zero. BIP 85 warns that this reverses BIP 32's order.",
           "claims": ["wif-app", "xprv-app"]
         },
         {
@@ -138,12 +138,12 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Every output is computed from the root key and its path alone. Whoever holds the root can recompute every output, which is what makes one backup enough, as long as the user also knows which application, index and length each wallet used. One output does not reveal k, the root, or the output of another path.",
+          "text": "Every output is computed from the root key and its path alone. Whoever holds the root can recompute every output, which is what makes one backup enough, provided the user also knows which application, index and length each wallet used. One output does not reveal k, the root, or the output of another path.",
           "claims": ["root-recomputes", "hmac-rationale"]
         },
         {
           "type": "paragraph",
-          "text": "The receiving wallet sees an ordinary mnemonic, key or password; nothing in it marks it as derived. BIP 85 does not care how the root itself was made, whether from a BIP 39 mnemonic or another scheme, and records that it is not backwards compatible with any other specification.",
+          "text": "The receiving wallet sees an ordinary mnemonic, key or password; nothing in it marks it as derived. BIP 85 does not care how the root itself was made, whether from a BIP 39 mnemonic or another scheme. It records that it is not backwards compatible with any other specification.",
           "claims": ["ordinary-output", "one-root", "no-compat"]
         },
         {

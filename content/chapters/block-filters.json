@@ -144,7 +144,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Filters do not hide what the client does next. The authors argue that privacy improves because blocks can be fetched from any source, so no single peer learns everything a client needs. Still, whoever serves a block sees that it was requested, so a client fetching blocks from the network SHOULD pick outbound peers at random, to limit what intersection analysis can learn; the most cautious clients may use private information retrieval.",
+          "text": "Filters do not hide what the client does next. The authors argue that privacy improves because blocks can be fetched from any source, so no single peer learns everything a client needs. Still, whoever serves a block sees that it was requested. A client fetching blocks from the network SHOULD therefore pick outbound peers at random, to limit what intersection analysis can learn. The most cautious clients may use private information retrieval.",
           "claims": [
             "privacy-any-source",
             "random-peers"
@@ -158,7 +158,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The one filter type BIP 158 defines, basic, is meant to hold everything a regular wallet needs. For each transaction in the block it MUST contain exactly two kinds of item: the script being spent by each input, except in the coinbase transaction, and the scriptPubKey of each output, except outputs that start with OP_RETURN. “Nil” (empty) items MUST NOT be included, and each script goes in once: the BIP calls the result a set.",
+          "text": "The one filter type BIP 158 defines, basic, is meant to hold everything a regular wallet needs. For each transaction in the block it MUST contain exactly two kinds of item. One is the script being spent by each input, except in the coinbase transaction. The other is the scriptPubKey of each output, except outputs that start with OP_RETURN. “Nil” (empty) items MUST NOT be included, and each script goes in once: the BIP calls the result a set.",
           "claims": [
             "contents",
             "dedup"
@@ -194,14 +194,14 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "OP_RETURN outputs are left out for a reason the authors give: so that a future soft fork could commit to the filters, probably in an OP_RETURN output of the coinbase, without the commitment having to contain itself.",
+              "text": "The authors give a reason for leaving OP_RETURN outputs out. A future soft fork could then commit to the filters, probably in an OP_RETURN output of the coinbase, without the commitment having to contain itself.",
               "claims": [
                 "opreturn-why"
               ]
             },
             {
               "type": "paragraph",
-              "text": "BIP 158’s test vectors exercise these rules on real testnet blocks: one whose transaction pays to an empty script, one that spends from an empty script, one whose scripts repeat and whose coinbase carries an OP_RETURN witness commitment, which is left out, and one with nothing to put in the filter at all, whose filter is the single byte 00.",
+              "text": "BIP 158’s test vectors exercise these rules on real testnet blocks. One has a transaction that pays to an empty script, and one spends from an empty script. In another, scripts repeat and the coinbase carries an OP_RETURN witness commitment, which is left out. One more is a block with nothing to put in the filter at all, whose filter is the single byte 00.",
               "claims": [
                 "vectors",
                 "contents",
@@ -284,7 +284,7 @@
             },
             {
               "type": "paragraph",
-              "text": "The hashed values are sorted, and only the gaps between neighbours are written. Because the values are spread uniformly at random, the gaps follow roughly a geometric distribution, with small gaps common and large ones rarer, and Golomb-Rice coding is built for exactly that: the gap divided by 2^P goes in unary, as that many ones and a zero, and the remainder follows in P bits. The bit stream is padded with zeros to a whole byte and prefixed with N as a CompactSize. A filter with no items MUST be a single zero byte.",
+              "text": "The hashed values are sorted, and only the gaps between neighbours are written. Because the values are spread uniformly at random, the gaps follow roughly a geometric distribution, with small gaps common and large ones rarer. Golomb-Rice coding is built for exactly that. The gap divided by 2^P goes in unary, as that many ones and a zero, and the remainder follows in P bits. The bit stream is padded with zeros to a whole byte and prefixed with N as a CompactSize. A filter with no items MUST be a single zero byte.",
               "claims": [
                 "gcs-steps",
                 "gr-coding",
@@ -302,7 +302,7 @@
             },
             {
               "type": "paragraph",
-              "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25: about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width, and hundreds of bits for the scripts themselves.",
+              "text": "The coding is tight. Each code needs at least P + 1 bits, so a filter of N items takes at least N·(P + 1) bits, 20 per item for the basic filter. In the published vectors, block 180,480’s filter holds 13 scripts in 35 bytes and block 926,485’s holds 9 in 25. That is about 21 bits per item, close to that floor, against 24 and 23 bits to write each hashed value at fixed width. The scripts themselves take hundreds of bits.",
               "claims": [
                 "min-size",
                 "size-computed"

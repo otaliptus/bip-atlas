@@ -83,7 +83,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Because to_sign looks like a transaction, signing devices need care. When a signer recognises a BIP 322 request it must show the user the message and the address, and the BIP asks that the screens resemble signing a message, not spending 0 satoshis.",
+          "text": "Because to_sign looks like a transaction, signing devices need care. When a signer recognises a BIP 322 request it must show the user the message and the address. The BIP asks that the screens resemble signing a message, not spending 0 satoshis.",
           "claims": [
             "signer-display"
           ]
@@ -309,7 +309,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "Exchanges, auditors and counterparties sometimes ask: can you show that this address is yours? The old answer, the legacy signmessage format, was specified only for P2PKH addresses, the ones starting with 1, as the BIP’s authors note. Its signatures also have a flaw the BIP’s authors spell out: they are ECDSA signatures that do not commit to the public key, so they do not actually prove knowledge of a secret key, and third parties can tweak a valid one into a valid signature for certain related keys.",
+              "text": "Exchanges, auditors and counterparties sometimes ask: can you show that this address is yours? The old answer, the legacy signmessage format, was specified only for P2PKH addresses, the ones starting with 1, as the BIP’s authors note. Its signatures also have a flaw the BIP’s authors spell out. They are ECDSA signatures that do not commit to the public key, so they do not actually prove knowledge of a secret key. Third parties can also tweak a valid one into a valid signature for certain related keys.",
               "claims": [
                 "legacy-limits",
                 "ecdsa-no-commit"
@@ -345,7 +345,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The outcome is one of three states, not two. Invalid means some check failed. Inconclusive means the verifier could not check the scripts: a verifier without a full script interpreter should stop there for any script it does not understand, and the BIP’s upgradeable rules also end in inconclusive. Valid comes with two numbers, “valid at time T and age S”, where T is to_sign’s lock time and S is its first input’s sequence, so a signature that relies on a time lock says so.",
+          "text": "The outcome is one of three states, not two. Invalid means some check failed. Inconclusive means the verifier could not check the scripts. A verifier without a full script interpreter should stop there for any script it does not understand. The BIP’s upgradeable rules also end in inconclusive. Valid comes with two numbers, “valid at time T and age S”. T is to_sign’s lock time and S is its first input’s sequence, so a signature that relies on a time lock says so.",
           "claims": [
             "verdicts",
             "interpreter",
@@ -372,7 +372,7 @@
         },
         {
           "type": "paragraph",
-          "text": "A verifier that does not understand a script should not turn that gap into an assurance that the proof passed; the BIP says it should stop and answer inconclusive. This page’s verifier covers the published simple and full examples; proof-of-funds PSBTs and committed scripts outside its supported set remain inconclusive unless an earlier check has failed.",
+          "text": "A verifier that does not understand a script should not turn that gap into an assurance that the proof passed. The BIP says it should stop and answer inconclusive. This page’s verifier covers the published simple and full examples; proof-of-funds PSBTs and committed scripts outside its supported set remain inconclusive unless an earlier check has failed.",
           "claims": [
             "interpreter",
             "upgradeable-rules",
@@ -386,14 +386,14 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "A verifier is given an address, a message and a signature. It computes to_spend from the message and address, decodes to_sign from the signature, checks that to_sign’s first input spends to_spend’s output and that it has exactly one output, and then checks that the pair satisfies the consensus rules, except that to_sign’s lock time and first sequence are not enforced but reported. (A simple signature has no to_sign to check; the verifier builds it.)",
+              "text": "A verifier is given an address, a message and a signature. It computes to_spend from the message and address, and decodes to_sign from the signature. It checks that to_sign’s first input spends to_spend’s output and that it has exactly one output. Then it checks that the pair satisfies the consensus rules, except that to_sign’s lock time and first sequence are not enforced but reported. (A simple signature has no to_sign to check; the verifier builds it.)",
               "claims": [
                 "basic-validation"
               ]
             },
             {
               "type": "paragraph",
-              "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it; CODESEPARATOR and FindAndDelete are forbidden; ECDSA signatures must be strictly DER-encoded with a low S value, and a failing one must be empty; pushes must be minimal; IF arguments must be exactly 0x01 or empty; and only a single stack element may remain. Breaking any of these makes the signature invalid.",
+              "text": "On top of consensus the BIP adds required rules. Every signature MUST use SIGHASH_ALL, or SIGHASH_DEFAULT where the output type supports it. CODESEPARATOR and FindAndDelete are forbidden. ECDSA signatures must be strictly DER-encoded with a low S value, and a failing one must be empty. Pushes must be minimal, IF arguments must be exactly 0x01 or empty, and only a single stack element may remain. Breaking any of these makes the signature invalid.",
               "claims": [
                 "required-rules"
               ]
@@ -406,7 +406,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "This site’s model is such a partial verifier. Its script interpreter runs only a reviewed set of opcodes, enough for every published simple and full vector: P2PKH, P2SH, nested and native SegWit, multisig, Taproot key and script paths, and time locks. It applies the required rules in all of them, answers inconclusive for proof-of-funds signatures and for any committed script or spend shape outside what it covers, unless an earlier check has already failed, and rejects every published error vector. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
+              "text": "This site’s model is such a partial verifier. Its script interpreter runs only a reviewed set of opcodes, enough for every published simple and full vector: P2PKH, P2SH, nested and native SegWit, multisig, Taproot key and script paths, and time locks. It applies the required rules in all of them and rejects every published error vector. It answers inconclusive for proof-of-funds signatures and for any committed script or spend shape outside what it covers, unless an earlier check has already failed. For a full signature, a wrong message or a wrong address fails before any script is run: it changes to_spend’s ID, so the transmitted to_sign no longer spends it. For a simple signature the verifier rebuilds to_sign around the new to_spend, and the signature no longer verifies.",
               "claims": [
                 "vectors",
                 "basic-validation"

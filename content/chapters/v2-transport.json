@@ -97,7 +97,7 @@
       },
       {
        "type": "paragraph",
-       "text": "Why not use TLS or Noise? The authors’ answer is that neither treats authentication as a separate, optional layer, neither produces a pseudorandom byte stream that can be shaped to resemble other traffic, neither supports secp256k1 natively, and both hand the application a stream where Bitcoin wants packets. Fixing all of that would forfeit the benefit of reusing them.",
+       "text": "Why not use TLS or Noise? The authors’ answer has several parts. Neither treats authentication as a separate, optional layer. Neither produces a pseudorandom byte stream that can be shaped to resemble other traffic. Neither supports secp256k1 natively, and both hand the application a stream where Bitcoin wants packets. Fixing all of that would forfeit the benefit of reusing them.",
        "claims": [
         "not-tls"
        ]
@@ -378,7 +378,7 @@
      "blocks": [
       {
        "type": "paragraph",
-       "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch; after the 224th packet its new key is the first 32 bytes of encrypting 32 zero bytes under the old key, with the nonce’s packet field set to 0xffffffff. The length cipher replaces its key with the next 32 bytes of its own stream and moves to the next nonce.",
+       "text": "Both ciphers change their keys every 224 packets. The payload cipher’s nonce counts packets within the current epoch and numbers the epoch. The key changes after the 224th packet: the new key is the first 32 bytes of encrypting 32 zero bytes under the old key, with the nonce’s packet field set to 0xffffffff. The length cipher replaces its key with the next 32 bytes of its own stream and moves to the next nonce.",
        "claims": [
         "rekey"
        ]

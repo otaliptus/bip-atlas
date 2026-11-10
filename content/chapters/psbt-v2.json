@@ -65,7 +65,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "In version 2 the Creator starts with no inputs and no outputs. A new role, the Constructor, adds them, but only while `PSBT_GLOBAL_TX_MODIFIABLE` allows it: bit 0 permits adding or removing inputs, bit 1 outputs. A Creator who passes the PSBT on for others to fill must include that field with the inputs and outputs flags set as appropriate, and must set the transaction version to at least 2.",
+          "text": "In version 2 the Creator starts with no inputs and no outputs. A new role, the Constructor, adds them, but only while `PSBT_GLOBAL_TX_MODIFIABLE` allows it: bit 0 permits adding or removing inputs, bit 1 outputs. A Creator who passes the PSBT on for others to fill must include that field, with the inputs and outputs flags set as appropriate. Such a Creator must also set the transaction version to at least 2.",
           "claims": ["creator", "constructor", "modifiable-bits"]
         },
         {

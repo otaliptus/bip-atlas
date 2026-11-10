@@ -6,10 +6,12 @@ import { readFileSync, readdirSync } from "node:fs";
 import { RECIPE_MAP, type BaseFixture } from "@bip-atlas/figures";
 import {
   validatePublication,
+  validateReadingPolicy,
   walkBlocks,
   type Claim,
   type EvidenceLedger,
   type Publication,
+  type ReadingPolicy,
 } from "@bip-atlas/publication";
 
 import { ROOT } from "./root";
@@ -39,10 +41,11 @@ export interface ExternalLock {
 export interface CatalogChapter {
   id: string;
   primaryBips: number[];
-  phase: number;
   readingOrder: number;
   questionTitle: string;
   releaseState: string;
+  /** The contents section this chapter sits in (`parts` in the reading policy). */
+  part: string;
 }
 export interface Catalog {
   projectName: string;
@@ -56,15 +59,18 @@ export const CATALOG_FILES = ["catalog.json", "catalog-phase3.json", "catalog-ph
 export function loadCatalog(): Catalog {
   const [base, ...extensions] = CATALOG_FILES.map((f) => readJson<Catalog>(f));
   const { chapterTitles } = readJson<{ chapterTitles: Record<string, string> }>("content/title-policy.json");
-  const { chapterOrder } = readJson<{ chapterOrder: string[] }>("content/reading-policy.json");
+  const policy = readJson<ReadingPolicy>("content/reading-policy.json");
   const chapters = [...base.chapters, ...extensions.flatMap((e) => e.chapters)];
   const byId = new Map(chapters.map((c) => [c.id, c]));
-  if (chapterOrder.length !== chapters.length || new Set(chapterOrder).size !== chapterOrder.length || chapterOrder.some((id) => !byId.has(id))) {
-    throw new Error("The reading order must name every catalog chapter exactly once");
-  }
+  const problems = validateReadingPolicy(policy, [...byId.keys()]);
+  if (problems.length) throw new Error(`The reading policy failed validation:\n- ${problems.join("\n- ")}`);
+  const { chapterOrder } = policy;
+  const partStarts = new Map(policy.parts.map((p) => [p.from, p.title]));
+  let part = "";
   return { ...base, chapters: chapterOrder.map((id, i) => {
     const chapter = byId.get(id)!;
-    return { ...chapter, readingOrder: i + 1, questionTitle: chapterTitles[id] ?? chapter.questionTitle };
+    part = partStarts.get(id) ?? part;
+    return { ...chapter, readingOrder: i + 1, questionTitle: chapterTitles[id] ?? chapter.questionTitle, part };
   }) };
 }
 

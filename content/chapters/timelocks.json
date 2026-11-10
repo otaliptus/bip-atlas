@@ -78,7 +78,7 @@
           "recipe": "timelock-not-a-lock.v1",
           "title": "A field that does not lock a coin",
           "fixtures": [],
-          "caption": "Schematic. A future nLockTime proves a spend is possible later, but another spend of the same coin may already exist; a condition in the coin’s own script closes that gap.",
+          "caption": "Schematic. A future nLockTime proves a spend is possible later, but another spend of the same coin may already exist. A condition in the coin’s own script closes that gap.",
           "claims": [
             "not-a-lock",
             "nlocktime",

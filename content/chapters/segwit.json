@@ -85,7 +85,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "The txid is defined exactly as before: the double SHA-256 of nVersion, the inputs, the outputs and nLockTime. The wtxid is the double SHA-256 of a longer serialization: the same fields plus a marker byte `0x00` and a flag byte `0x01` after the version, and the witness data just before nLockTime.",
+          "text": "The txid is defined exactly as before: the double SHA-256 of nVersion, the inputs, the outputs and nLockTime. The wtxid is the double SHA-256 of a longer serialization. It has the same fields, plus a marker byte `0x00` and a flag byte `0x01` after the version, and the witness data just before nLockTime.",
           "claims": [
             "two-ids",
             "marker-flag"
@@ -178,7 +178,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "Because the signature data of SegWit inputs is no longer part of the txid, changing how such an input was signed no longer changes the transaction’s identifier. BIP 141 presents this as the end of nonintentional malleability, under conditions: every input must be a witness input signed with at least one CHECKSIG or CHECKMULTISIG, and a multisig spend can still be changed if enough of its key holders agree.",
+          "text": "Because the signature data of SegWit inputs is no longer part of the txid, changing how such an input was signed no longer changes the transaction’s identifier. BIP 141 presents this as the end of nonintentional malleability, under conditions. Every input must be a witness input signed with at least one CHECKSIG or CHECKMULTISIG. A multisig spend can still be changed if enough of its key holders agree.",
           "claims": [
             "malleability"
           ]
@@ -359,7 +359,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The sixth item matters most to small signing devices: the amount of the output being spent. That amount is not in the transaction at all. Without it, an offline signer cannot work out how much is being spent or what fee is being paid. BIP 143 makes each signature commit to its own input’s amount, so if a device is told a wrong amount for that input, the signature is invalid and, in the BIP’s words, no funding might be lost. That protects only the input being signed: knowing the fee needs a trustworthy amount for every input.",
+          "text": "The sixth item matters most to small signing devices: the amount of the output being spent. That amount is not in the transaction at all. Without it, an offline signer cannot work out how much is being spent or what fee is being paid. BIP 143 makes each signature commit to its own input’s amount. If a device is told a wrong amount for that input, the signature is therefore invalid and, in the BIP’s words, no funding might be lost. That protects only the input being signed: knowing the fee needs a trustworthy amount for every input.",
           "claims": [
             "amount",
             "cold-wallet"

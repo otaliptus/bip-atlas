@@ -59,7 +59,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The rule only adds failures, so it could be deployed as a soft fork. It reused BIP 34's mechanism with block version 3: enforced in version 3 blocks once 750 of the previous 1,000 had version 3, and with version 2 blocks invalid once 950 did. The reference client had already refused to relay non-DER signatures since version 0.8.0, and any such signature could be rewritten in strict form.",
+          "text": "The rule only adds failures, so it could be deployed as a soft fork. It reused BIP 34's mechanism with block version 3. The rule was enforced in version 3 blocks once 750 of the previous 1,000 had version 3, and version 2 blocks became invalid once 950 did. The reference client had already refused to relay non-DER signatures since version 0.8.0, and any such signature could be rewritten in strict form.",
           "claims": ["soft-fork", "deployment66", "compat66"]
         }
       ]
@@ -75,7 +75,7 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 146's LOW_S rule keeps only the lower half: S must lie between 1 and n / 2, and under the rule a signature outside it makes the script fail at once. Of S and its twin, exactly one is in that half, so for the script types in actual use a signer can always provide a compliant signature.",
+          "text": "BIP 146's LOW_S rule keeps only the lower half: S must lie between 1 and n / 2. Under the rule, a signature outside that range makes the script fail at once. Of S and its twin, exactly one is in that half, so for the script types in actual use a signer can always provide a compliant signature.",
           "claims": ["low-s", "flip-valid", "compat146"]
         },
         {
@@ -90,7 +90,7 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 146's NULLFAIL rule addresses the other gap. A failing signature check leaves `FALSE` on the stack and lets the script continue, so, as BIP 146 points out, the failing signature can be any bytes that pass BIP 66. Under NULLFAIL, a check that returns false must have been given an empty signature (for `OP_CHECKMULTISIG`, every signature); otherwise the script fails.",
+          "text": "BIP 146's NULLFAIL rule addresses the other gap. A failing signature check leaves `FALSE` on the stack and lets the script continue. As BIP 146 points out, the failing signature can therefore be any bytes that pass BIP 66. Under NULLFAIL, a check that returns false must have been given an empty signature (for `OP_CHECKMULTISIG`, every signature); otherwise the script fails.",
           "claims": ["two-sources", "nullfail"]
         }
       ]
@@ -116,7 +116,7 @@
         },
         {
           "type": "paragraph",
-          "text": "BIP 66 is recorded as Deployed. BIP 146 is recorded as Closed, and its deployment section was left as \"Details TBD\". Its rules cover legacy and SegWit scripts alike. It records LOW_S and NULLFAIL as relay policy in the reference client as of 2016, so it did not make either one a consensus rule: a high-S signature is not made invalid by BIP 146. It also says users MUST pay extra attention to these rules when designing exotic scripts.",
+          "text": "BIP 66 is recorded as Deployed. BIP 146 is recorded as Closed, and its deployment section was left as \"Details TBD\". Its rules cover legacy and SegWit scripts alike. It records LOW_S and NULLFAIL as relay policy in the reference client as of 2016, so it did not make either one a consensus rule. A high-S signature is not made invalid by BIP 146. It also says users MUST pay extra attention to these rules when designing exotic scripts.",
           "claims": ["preamble66", "preamble146", "deployment146", "compat146", "not-consensus", "abstract146", "exotic"]
         },
         {

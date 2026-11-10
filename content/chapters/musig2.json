@@ -188,7 +188,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message; the final nonce is R = R₁ + b·R₂, where R₁ and R₂ are the two points of the aggregate nonce; and e is the usual BIP 340 challenge for R, the key and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest signer or aggregator, the BIP uses the generator G instead: signing can then continue, and the culprit is caught when partial signatures are verified. One of its signing vectors exercises exactly that case.",
+              "text": "Every signer then computes the same session values. A nonce coefficient b is hashed from the aggregate nonce, the aggregate key and the message. The final nonce is R = R₁ + b·R₂, where R₁ and R₂ are the two points of the aggregate nonce. The challenge e is the usual BIP 340 challenge for R, the key and the message. If R₁ + b·R₂ is the point at infinity, which signals a dishonest signer or aggregator, the BIP uses the generator G instead. Signing can then continue, and the culprit is caught when partial signatures are verified. One of its signing vectors exercises exactly that case.",
               "claims": [
                 "session",
                 "vectors"
@@ -196,7 +196,7 @@
             },
             {
               "type": "paragraph",
-              "text": "In the second round each signer sends a partial signature: a single number, s = k₁ + b·k₂ + e·a·d, built from its two secret nonces, its coefficient and its secret key, with signs adjusted so the final nonce and key have even y. The BIP recommends that a signer verify its own result before sending it.",
+              "text": "In the second round each signer sends a partial signature. It is a single number, s = k₁ + b·k₂ + e·a·d, built from its two secret nonces, its coefficient and its secret key. Signs are adjusted so the final nonce and key have even y. The BIP recommends that a signer verify its own result before sending it.",
               "claims": [
                 "sign"
               ]
@@ -209,7 +209,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "The aggregate key can be tweaked along the way. A plain tweak derives child keys in the manner of BIP 32; an x-only tweak adds a Taproot commitment, so the same output can be spent either with the group’s signature or through a script path. Two of the vectors in Fig. A14.3 carry tweaks.",
+              "text": "The aggregate key can be tweaked along the way. A plain tweak derives child keys in the manner of BIP 32. An x-only tweak adds a Taproot commitment, so the same output can be spent either with the group’s signature or through a script path. Two of the vectors in Fig. A14.3 carry tweaks.",
               "claims": [
                 "tweaks"
               ]
@@ -224,7 +224,7 @@
       "blocks": [
         {
           "type": "paragraph",
-          "text": "MuSig2 has a requirement that single-signer BIP 340 signing does not. The secret nonces must come from a good random generator, and they must not be derived deterministically from the session, because an active adversary could then trick a signer into reusing one.",
+          "text": "MuSig2 has a requirement that single-signer BIP 340 signing does not. The secret nonces must come from a good random generator. They must not be derived deterministically from the session, because an active adversary could then trick a signer into reusing one.",
           "claims": [
             "nonce-random"
           ]
@@ -252,7 +252,7 @@
           "fixtures": [
             "sig-agg-0"
           ],
-          "caption": "Schematic, with no values: BIP 327 allows Sign to overwrite the secret nonce with zeros after reading it, and this site’s model does, so a second Sign with that nonce is refused.",
+          "caption": "Schematic, with no values. BIP 327 allows Sign to overwrite the secret nonce with zeros after reading it. This site’s model does, so a second Sign with that nonce is refused.",
           "claims": [
             "nonce-reuse"
           ],
@@ -271,7 +271,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "Keeping a secret nonce between rounds is state, and state is where mistakes happen. The BIP allows one exception: a single signer may be stateless, waiting until it has everyone else’s nonces and the full session before generating its own and signing at once, and that signer may sign deterministically. The published deterministic-signing vectors are among those this site’s model reproduces.",
+              "text": "Keeping a secret nonce between rounds is state, and state is where mistakes happen. The BIP allows one exception. A single signer may be stateless, waiting until it has everyone else’s nonces and the full session before generating its own and signing at once. That signer may sign deterministically. The published deterministic-signing vectors are among those this site’s model reproduces.",
               "claims": [
                 "stateless",
                 "vectors"
@@ -301,7 +301,7 @@
             },
             {
               "type": "paragraph",
-              "text": "The result is an ordinary BIP 340 key and an ordinary BIP 340 signature. The authors’ primary motivation is letting people using different software jointly control a Taproot output and spend it through its key path; they argue this is more compact, cheaper to verify and more private than an n-of-n script that checks every signer. The standard also supports tweaking the aggregate key, for BIP 32 child keys and for BIP 341 Taproot commitments.",
+              "text": "The result is an ordinary BIP 340 key and an ordinary BIP 340 signature. The authors’ primary motivation is letting people using different software jointly control a Taproot output and spend it through its key path. They argue this is more compact, cheaper to verify and more private than an n-of-n script that checks every signer. The standard also supports tweaking the aggregate key, for BIP 32 child keys and for BIP 341 Taproot commitments.",
               "claims": [
                 "why-taproot",
                 "bip340-compat",

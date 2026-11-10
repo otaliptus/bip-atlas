@@ -335,7 +335,7 @@
         },
         {
           "type": "paragraph",
-          "text": "The figure below shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security: breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
+          "text": "The figure below shows the consequence in two places. The verifier lifts the key to its even-y point before anything else, and it rejects any R whose y turns out odd. The authors argue that, although it halves the set of valid public keys, it is not a reduction in security. In their argument, breaking an x-only key is at most a small constant faster than breaking a full one. One side effect is stated outright: every public key has two matching secret keys, sk and n − sk.",
           "claims": [
             "no-security-loss",
             "two-secret-keys",
@@ -392,7 +392,7 @@
         },
         {
           "type": "paragraph",
-          "text": "Nor does BIP 340 by itself provide a multisignature protocol. The key may belong to one person or be an aggregate of several. Schemes such as MuSig2, specified separately in BIP 327, let several parties build one key and one signature through an interactive protocol; to a verifier the result looks like any other signature. BIP 340 warns that multisignature schemes are generally insecure with the nonce generation of its default signing algorithm, or with any other deterministic method.",
+          "text": "Nor does BIP 340 by itself provide a multisignature protocol. The key may belong to one person or be an aggregate of several. Schemes such as MuSig2, specified separately in BIP 327, let several parties build one key and one signature through an interactive protocol. To a verifier the result looks like any other signature. BIP 340 warns that multisignature schemes are generally insecure with the nonce generation of its default signing algorithm, or with any other deterministic method.",
           "claims": [
             "multisig-scope",
             "verifier-view"
@@ -404,7 +404,7 @@
           "blocks": [
             {
               "type": "paragraph",
-              "text": "BIP 340 was assigned in 2020 and is recorded as deployed. This page explains the signing handoff but does not implement a signer. The BIP specifies a default signer, but signatures are not unique: other ways of generating its random value produce different, equally valid signatures, and however that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
+              "text": "BIP 340 was assigned in 2020 and is recorded as deployed. This page explains the signing handoff but does not implement a signer. The BIP specifies a default signer, but signatures are not unique. Other ways of generating its random value produce different, equally valid signatures. However that value is generated, it must be uniformly random and not even partially predictable to an attacker. Verification is guaranteed to accept what a correct signer produces. The BIP’s own Python code is labelled for demonstration only; the values here come from the audited @noble/curves library, checked against all 19 vectors in the CSV.",
               "claims": [
                 "not-unique",
                 "correctness",
